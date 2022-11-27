@@ -35,5 +35,11 @@ public class TsonInt extends TsonPrimitive{
 
 
     @Override
+    public float getFloat() {
+        return value;
+    }
+
+
+    @Override
     public boolean isNumber(){return true;}
 }
