@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "   ",
+    "LLL",
+    "   "
+  ],
+  "key": {
+    "L": {"item": "te4_spships:mefril_ingot"}
+  },
+  "result": {
+    "item": "te4_spships:plate_mefril",
+    "count": 1
+  }
+}

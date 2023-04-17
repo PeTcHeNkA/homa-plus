@@ -1,6 +1,7 @@
 # User-specific stuff
 .idea/
-
+.run/
+.src/generated/
 *.iml
 *.ipr
 *.iws
@@ -23,7 +24,6 @@ atlassian-ide-plugin.xml
 *.ctxt
 
 # Package Files #
-*.jar
 *.war
 *.nar
 *.ear

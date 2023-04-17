@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ETE",
+    "PMP",
+    "ITI"
+  ],
+  "key": {
+    "M": {"item": "te4_spships:sp_machine_module"},
+    "T": {"item": "minecraft:piston"},
+    "P": {"item": "te4_spships:plate_machine"},
+    "I": {"item": "te4_spships:plate_iron"},
+    "E": {"item": "te4_spships:copper_coil"}
+  },
+  "result": {
+    "item": "te4_spships:sp_press",
+    "count": 1
+  }
+}

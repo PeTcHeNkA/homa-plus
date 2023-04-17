@@ -1,0 +1,14 @@
+{"parent": "minecraft:recipes/root",
+  "requirements": [["has_item"]],
+  "rewards": {"recipes": [
+    "te4_spships:o_mefril_block",
+    "te4_spships:i_mefril_block",
+    "te4_spships:plate_mefril"
+  ]},
+  "criteria": {
+    "has_item": {"trigger": "minecraft:inventory_changed",
+      "conditions": {"items": [{
+        "item": "te4_spships:mefril_ingot"
+      }]}
+    }
+}}

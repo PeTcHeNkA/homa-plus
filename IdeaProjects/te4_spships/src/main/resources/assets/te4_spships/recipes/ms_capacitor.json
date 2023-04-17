@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "AEA",
+    "ASA",
+    "AMA"
+  ],
+  "key": {
+    "E": {"item": "te4_spships:circuit"},
+    "A": {"item": "te4_spships:plate_alumine"},
+    "S": {"item": "te4_spships:massive_frame_l1"},
+    "M": {"item": "te4_spships:plate_mefril"}
+  },
+  "result": {
+    "item": "te4_spships:sp_react",
+    "count": 1
+  }
+}

@@ -1,0 +1,18 @@
+ {
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+      "AMA",
+      "PCP",
+      "AMA"
+    ],
+    "key": {
+      "A": {"item": "te4_spships:alumine_ingot"},
+      "P": {"item": "te4_spships:plate_iron"},
+      "C": {"item": "te4_spships:sp_machine_module"},
+      "M": {"item": "te4_spships:iron_gear"}
+    },
+    "result": {
+      "item": "te4_spships:massive_frame_l1",
+      "count": 1
+    }
+}

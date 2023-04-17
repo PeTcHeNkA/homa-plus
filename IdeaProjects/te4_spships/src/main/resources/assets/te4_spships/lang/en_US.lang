@@ -1,0 +1,91 @@
+itemGroup.sp_tab=Техношмотик
+
+item.battery_l1.name=§bКонденсатор
+item.battery_l2.name=§aКонденсатор
+item.battery_l3.name=§3Конденсатор
+item.battery_l4.name=§dКонденсатор
+item.massive_l1.name=§bЭнергетический массив
+item.massive_l2.name=§aЭнергетический массив
+item.massive_l3.name=§3Энергетический массив
+item.massive_l4.name=§dЭнергетический массив
+item.react_core_l1.name=§bЯдро эфирного реактора
+item.react_core_l2.name=§aЯдро эфирного реактора
+item.react_core_l3.name=§3Ядро эфирного реактора
+item.react_core_l4.name=§dЯдро эфирного реактора
+item.react_boost_l1.name=§bРеакторный ускоритель
+item.react_boost_l2.name=§aРеакторный ускоритель
+item.massive_frame_l1.name=§bРамка эн. массива
+item.massive_frame_l2.name=§bУл. рамка эн. массива
+item.react_energy_l1.name=§bСтержень эфирного реактора
+item.react_energy_l2.name=§aСтержень эфирного реактора
+item.react_energy_l3.name=§3Стержень эфирного реактора
+item.react_energy_l4.name=§dСтержень эфирного реактора
+
+tile.copper_ore.name=§bМедная руда
+tile.aether_ore.name=§dЭфирная руда
+tile.mefril_ore.name=§dМефриловая руда
+tile.alumine_ore.name=§bАлюминиевая руда
+
+tile.copper_block.name=§bМедный блок
+tile.mefril_block.name=§dМефриловый блок
+tile.alumine_block.name=§bАлюминиевый блок
+
+item.copper_ingot.name=§bМедный слиток
+item.mefril_ingot.name=§dМефриловый слиток
+item.alumine_ingot.name=§bАлюминиевый слиток
+item.aether_crystal.name=§bЭфирный кристалл
+
+
+item.plate_iron.name=§bЖелезная пластина
+item.plate_gold.name=§bЗолотая пластина
+item.plate_alumine.name=§bАлюминиевая пластина
+item.plate_copper.name=§bМедная пластина
+item.plate_mefril.name=§dМефриловая пластина
+item.plate_machine.name=§aУкрепленная пластина
+
+item.circuit.name=§aЭлектросхема
+item.iron_gear.name=§bЖелезная шестерня
+item.copper_coil.name=§bКатушка
+item.circuit_cpu.name=§aВычислитель
+item.circuit_addon.name=§aПлата расширения
+
+
+sp_lore.more_inf=§eБольше информации...
+sp_lore.teh_prc=Техпроцесс: §c%s
+sp_lore.teh_pow=Мощность:   §c%s
+sp_lore.sp_dur=Прочность:  §c%s/%s
+sp_lore.teh_lvl=Уровень:    §c%s
+sp_lore.teh_cur_cap=Заряд: §c%s/%s
+sp_lore.teh_dur_per=Износ: §c%s%%
+sp_lore.teh_dur_max=Долговечность: §c%s
+
+sp_lore.a_color=Цвет: %s
+
+
+tile.sp_machine_module.name=§bМашинный корпус
+tile.sp_machine_module.lore_1=Основа сложной машины
+tile.sp_machine_module.lore_2=Поставьте рядом для повышения техпроцесса
+
+tile.sp_capacitor.name=§aБлок конденсатора
+tile.sp_capacitor.lore_1=Позволяет накапливать
+tile.sp_capacitor.lore_2=и высвобождать энергию
+
+tile.sp_press.name=§aКомпрессор
+tile.sp_press.lore_1=Использует электричество
+tile.sp_press.lore_2=для сжатия предметов
+
+tile.sp_react.name=§aЭфирный реактор
+tile.sp_react.lore_1=Использует эфир для
+tile.sp_react.lore_2=генерации электричества
+
+tile.sp_furnace.name=§aПлавильня
+tile.sp_furnace.lore_1=Использует электричество
+tile.sp_furnace.lore_2=для переплавки предметов
+
+tile.sp_craft_table.name=§aСборщик
+tile.sp_craft_table.lore_1=Рабочий стол для
+tile.sp_craft_table.lore_2=создания сложных компонентов
+
+
+
+
