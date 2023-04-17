@@ -1,0 +1,15 @@
+{"parent": "minecraft:recipes/root",
+  "requirements": [["has_item"]],
+  "rewards": {"recipes": [
+    "te4_spships:o_alumine_block",
+    "te4_spships:i_alumine_block",
+    "te4_spships:alumine_plate",
+    "te4_spships:plate_machine"
+  ]},
+  "criteria": {
+    "has_item": {"trigger": "minecraft:inventory_changed",
+      "conditions": {"items": [{
+        "item": "te4_spships:alumine_ingot"
+      }]}
+    }
+}}

@@ -1,0 +1,11 @@
+{
+  "parent":"te4_spships:armor/sp_armor_base",
+  "overrides": [
+    { "predicate": { "cmd": 2 }, "model": "te4_spships:armor/a_2" },
+    { "predicate": { "cmd": 3 }, "model": "te4_spships:armor/a_3" },
+    { "predicate": { "cmd": 4 }, "model": "te4_spships:armor/a_4" },
+    { "predicate": { "cmd": 5 }, "model": "te4_spships:armor/a_5" },
+    { "predicate": { "cmd": 6 }, "model": "te4_spships:armor/a_6" },
+    { "predicate": { "cmd": 7 }, "model": "te4_spships:armor/a_7" }
+  ]
+}

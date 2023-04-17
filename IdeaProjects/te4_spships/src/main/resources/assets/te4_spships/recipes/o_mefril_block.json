@@ -1,0 +1,10 @@
+ {
+    "type": "minecraft:crafting_shapeless",
+    "ingredients": [
+      {"item": "te4_spships:mefril_block"}
+    ],
+    "result": {
+      "item": "te4_spships:mefril_ingot",
+      "count": 9
+    }
+}

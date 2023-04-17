@@ -1,0 +1,15 @@
+{"parent": "minecraft:recipes/root",
+"requirements": [["has_item"]],
+"rewards": {"recipes": [
+    "te4_spships:o_copper",
+    "te4_spships:i_copper",
+    "te4_spships:copper_plate",
+    "te4_spships:copper_coil"
+]},
+"criteria": {
+    "has_item": {"trigger": "minecraft:inventory_changed",
+        "conditions": {"items": [{
+                "item": "te4_spships:copper_ingot"
+        }]}
+    }
+}}

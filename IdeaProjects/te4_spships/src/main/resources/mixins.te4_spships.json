@@ -1,0 +1,23 @@
+{
+  "required": true,
+  "minVersion": "0.7.11",
+  "compatibilityLevel": "JAVA_8",
+  "package": "plus.mixins",
+  "refmap": "mixins.te4_spships.refmap.json",
+  "mixins": [
+    "MixinCommand",
+    "MixinContainerPlayer",
+    "MixinEntityTracker",
+    "MixinInventoryPlayer",
+    "MixinItem",
+    "MixinPlayer"
+  ],
+  "server": [],
+  "client": [
+    "MixinAbcClientPlayer",
+    "MixinGuiInventory",
+    "MixinInput",
+    "MixinRenderPlayer",
+    "MixinSelfPlayer"
+  ]
+}
