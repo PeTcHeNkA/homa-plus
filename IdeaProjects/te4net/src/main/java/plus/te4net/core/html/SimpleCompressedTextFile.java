@@ -75,7 +75,7 @@ public class SimpleCompressedTextFile implements IRequestProcessor{
         byte[] data0 = new byte[brData.length+hs.length];
         System.arraycopy(hs, 0, data0, 0, hs.length);
         System.arraycopy(brData, 0, data0, hs.length, brData.length);
-        worker.saveToCache(name, data0);
+        worker.saveToCache(data0, name);
     }
 
 

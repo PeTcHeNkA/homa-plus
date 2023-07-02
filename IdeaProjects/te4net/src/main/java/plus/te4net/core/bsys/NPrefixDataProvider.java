@@ -4,26 +4,40 @@ package plus.te4net.core.bsys;
 public class NPrefixDataProvider implements IDataProvider {
     private final IDataProvider parent;
     private final String prefix;
+
     public NPrefixDataProvider(IDataProvider parent, String prefix) {
         this.parent = parent;
+        if(prefix.charAt(0)=='/'){
+            prefix = prefix.substring(1);
+        }
+        if(prefix.charAt(prefix.length()-1)=='/'){
+            prefix = prefix.substring(0, prefix.length()-1);
+        }
         this.prefix = prefix;
     }
 
-
-    @Override
-    public byte[] getRaw(String name, String table) {
-        return parent.getRaw(name, prefix+table);
+    private String[] expand(String[] prev){
+        String[] result = new String[prev.length+1];
+        System.arraycopy(prev, 0, result, 1, prev.length);
+        result[0] = prefix;
+        return result;
     }
 
 
     @Override
-    public void saveRaw(String name, String table, byte[] data) {
-        parent.saveRaw(name, prefix+table, data);
+    public byte[] getRaw(String... path) {
+        return parent.getRaw(expand(path));
     }
 
 
     @Override
-    public boolean containsRaw(String name, String table) {
-        return parent.containsRaw(name, prefix+table);
+    public void saveRaw(byte[] data, String... path) {
+        parent.saveRaw(data, expand(path));
+    }
+
+
+    @Override
+    public boolean containsRaw(String... path) {
+        return parent.containsRaw(expand(path));
     }
 }

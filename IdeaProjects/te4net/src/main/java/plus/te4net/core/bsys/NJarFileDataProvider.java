@@ -8,32 +8,44 @@ import java.util.HashMap;
 
 public class NJarFileDataProvider extends HashMap<String, NJarFileDataProvider.JarItem> implements IDataProvider{
     public void include(String name, String jarPath, ClassLoader src){
-        if(name.charAt(0)!='/'){
-            name = '/'+name;
+        if(name.charAt(0)=='/'){
+            name = name.substring(1);
+        }
+        if(jarPath.charAt(0)=='/'){
+            jarPath = jarPath.substring(1);
         }
         put(name, new JarItem(src, jarPath));
     }
 
 
+    private String getPath(String[] path){
+        if(path.length==2)return path[1];
+        StringBuilder path01 = new StringBuilder(path[1]);
+        for(int i=2;i<path.length;i++){
+            path01.append('/').append(path[i]);
+        }
+        return path01.toString();
+    }
+
+
     @Override
-    public byte[] getRaw(String name, String table) {
-        String path = NFileDataProvider.getPAth("", table, name);
-        JarItem val = get(path);
+    public byte[] getRaw(String... path) {
+        JarItem val = get(getPath(path));
         if(val==null)return null;
         return val.get();
     }
 
 
     @Override
-    public void saveRaw(String name, String table, byte[] data) {
-        Logger.get().info("Attempt to save ["+table+"]:["+name+"] to JAR! Ignored.");
+    public void saveRaw(byte[] data, String... path) {
+        String path0 = getPath(path);
+        Logger.get().info("Attempt to save ["+path0+"] to JAR! Ignored.");
     }
 
 
     @Override
-    public boolean containsRaw(String name, String table) {
-        String path = NFileDataProvider.getPAth("", table, name);
-        return containsKey(path);
+    public boolean containsRaw(String... path) {
+        return containsKey(getPath(path));
     }
 
 

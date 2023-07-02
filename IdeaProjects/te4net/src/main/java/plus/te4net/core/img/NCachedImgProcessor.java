@@ -22,17 +22,17 @@ public class NCachedImgProcessor extends Te4HashMap<NCachedImgProcessor.Key, NCa
 
     @Override
     public void handle(IRequestSession session) {
-        String splatKey = getImgName(session.splat());
-        String key = session.worker().getMainDomain()+"/"+splatKey;
         ImgSize size = getOptimalSize(session);
+        String key = session.routeKey().afterRoute();
         Key realKey = new Key(key, size);
+
         Node<Key, Img> val = getNode(realKey);
         if(val!=null){
             val.getKey().use();
             Img img = val.getValue();
             handleImg(session, img.bytes, img.hs);
         } else {
-            byte[] result = getStd(session.worker(), provider, splatKey, size);
+            byte[] result = getStd(session, provider, size);
             if(result==null){
                 session.notFound();
                 return;

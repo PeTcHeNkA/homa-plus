@@ -20,7 +20,7 @@ public class BImgCheckArgs implements PluginFunction {
         if(splat[0]==null)return null;
         HWorker worker = session.worker();
         if(worker.getImgLib().containsRaw(
-                getImgName(splat), worker.getMainDomain()+"/"+ImgSize.ORIG.suffix()
+                worker.getMainDomain(), ImgSize.ORIG.suffix(), getImgName(splat)
         ))return null;
         throw new RouteTextFormatter.Redirect("/img-build/");
     }

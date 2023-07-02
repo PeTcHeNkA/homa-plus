@@ -1,12 +1,11 @@
 package plus.te4net.core.bsys;
 
-import plus.tson.utl.Tuple;
 import java.util.HashSet;
 import static plus.te4net.core.node.HWorkerRepository.pool;
 
 
 public class NDubleProvider implements IDataProvider {
-    private final HashSet<Tuple<String,String>> blocked = new HashSet<>();
+    private final HashSet<String[]> blocked = new HashSet<>();
     private final IDataProvider fastProvider;
     private final IDataProvider defProvider;
 
@@ -17,17 +16,16 @@ public class NDubleProvider implements IDataProvider {
 
 
     @Override
-    public byte[] getRaw(String name, String table) {
-        byte[] result = fastProvider.getRaw(name, table);
+    public byte[] getRaw(String... path) {
+        byte[] result = fastProvider.getRaw(path);
         if(result != null)return result;
-        result = defProvider.getRaw(name, table);
+        result = defProvider.getRaw(path);
         if(result==null)return null;
-        Tuple<String, String> key = new Tuple<>(name, table);
-        if(blocked.add(key)) {
+        if(blocked.add(path)) {
             byte[] finalResult = result;
             pool.put(() -> {
-                fastProvider.saveRaw(name, table, finalResult);
-                blocked.remove(key);
+                fastProvider.saveRaw(finalResult, path);
+                blocked.remove(path);
             });
         }
         return result;
@@ -35,7 +33,7 @@ public class NDubleProvider implements IDataProvider {
 
 
     @Override
-    public void saveRaw(String name, String table, byte[] data) {
-        fastProvider.saveRaw(name, table, data);
+    public void saveRaw(byte[] data, String... path) {
+        fastProvider.saveRaw(data, path);
     }
 }

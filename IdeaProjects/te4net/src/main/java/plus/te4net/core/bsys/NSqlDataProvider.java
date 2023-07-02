@@ -30,20 +30,33 @@ public class NSqlDataProvider implements SqliteUtils, IDataProvider {
     }
 
 
-    @Override
-    public void saveRaw(String name, String table, byte[] data) {
-        if(table.isBlank())table = "root";
-        checkTable(table);
-        String realTableName = table + suffix;
-        if(data==null) removeData(name,realTableName);
-        else saveData(name, realTableName, data);
+    private String getTable(String[] path){
+        if(path.length==2)return path[0];
+        int len = path.length-1;
+        StringBuilder path01 = new StringBuilder(path[0]);
+        for(int i=1;i<len;i++){
+            path01.append('/').append(path[i]);
+        }
+        return path01.toString();
     }
 
 
     @Override
-    public byte[] getRaw(String name, String table){
+    public void saveRaw(byte[] data, String[] path) {
+        String table = getTable(path);
+        if(table.isBlank())table = "root";
         checkTable(table);
-        return getData(name, table + suffix);
+        String realTableName = table + suffix;
+        if(data==null) removeData(path[path.length-1],realTableName);
+        else saveData(path[path.length-1], realTableName, data);
+    }
+
+
+    @Override
+    public byte[] getRaw(String[] path){
+        String table = getTable(path);
+        checkTable(table);
+        return getData(path[path.length-1], table + suffix);
     }
 
 

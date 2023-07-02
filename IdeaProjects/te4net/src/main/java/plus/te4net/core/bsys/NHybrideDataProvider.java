@@ -31,47 +31,40 @@ public class NHybrideDataProvider extends IntObjectHashMap<IDataProvider> implem
     }
 
     //TODO НЕ ПРОВЕРЕНО
-    private byte[] process(String name, String table, byte[] data, boolean save){
-        String[] path = table.split("/");
+    private byte[] process(String[] path, byte[] data, boolean save){
         int lastCtnI = -1;
         int key = 0;
-        int lastKey = 0;
-        for(int i=0;i<path.length;i++){
-            String cur = path[i];
-            key = key*31 + cur.hashCode();
-            if(containsKey(key)){
+        IDataProvider provider = defaultProvider;
+        for(int i=0;i<path.length-1;i++){
+            key = key * 31 + path[i].hashCode();
+            IDataProvider prv;
+            if((prv = get(key))!=null){
+                provider = prv;
                 lastCtnI = i;
-                lastKey = key;
             }
         }
-        IDataProvider provider;
-        if(lastCtnI > -1){
-            StringBuilder newTable = new StringBuilder(path[lastCtnI]);
-            for (int i=lastCtnI+1;i<path.length;i++){
-                newTable.append("/").append(path[i]);
-            }
-            table = newTable.toString();
-            provider = getOrDefault(lastKey, defaultProvider);
-        } else {
-            provider = defaultProvider;
+        if(provider != defaultProvider){
+            String[] nwPath = new String[path.length-lastCtnI];
+            System.arraycopy(path, lastCtnI, nwPath, 0, nwPath.length);
+            path = nwPath;
         }
         if(save){
-            provider.saveRaw(name, table, data);
+            provider.saveRaw(data, path);
             return null;
         } else {
-            return provider.getRaw(name, table);
+            return provider.getRaw(path);
         }
     }
 
 
     @Override
-    public byte[] getRaw(String name, String table) {
-        return process(name,table,null,false);
+    public byte[] getRaw(String... path) {
+        return process(path,null,false);
     }
 
 
     @Override
-    public void saveRaw(String name, String table, byte[] data) {
-        process(name, table, data, true);
+    public void saveRaw(byte[] data, String... path) {
+        process(path, data, true);
     }
 }

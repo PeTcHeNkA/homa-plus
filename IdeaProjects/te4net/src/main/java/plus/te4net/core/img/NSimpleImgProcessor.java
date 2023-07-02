@@ -17,10 +17,7 @@ public class NSimpleImgProcessor implements IRequestProcessor {
 
     @Override
     public void handle(IRequestSession session) {
-        String splatKey = getImgName(session.splat());
-//        String key = session.worker().getDomain()+"/"+splatKey;
-        ImgSize size = getOptimalSize(session);
-        byte[] result = getStd(session.worker(), provider, splatKey, size);
+        byte[] result = getStd(session, provider, getOptimalSize(session));
         if(result==null){
             session.notFound();
         } else {
@@ -28,13 +25,19 @@ public class NSimpleImgProcessor implements IRequestProcessor {
         }
     }
 
-    static String getImgName(String[] splat){
-        StringBuilder b = new StringBuilder(splat[0]);
-        for(int i=1;i<splat.length;i++){
-            if(splat[i]==null)break;
-            b.append("/").append(splat[i]);
+
+    private static String[] getImgName(String[] splat){
+        int size = 1;
+        for(;size<splat.length;size++){
+            if(splat[size]==null)break;
         }
-        return b.toString();
+        String[] st = new String[2+size];
+        if(size==1){
+            st[2] = splat[0];
+        } else {
+            System.arraycopy(splat, 0, st, 2, st.length-2);
+        }
+        return st;
     }
 
 
@@ -59,14 +62,23 @@ public class NSimpleImgProcessor implements IRequestProcessor {
     }
 
 
-    static byte[] getStd(HWorker worker, IDataProvider provider, String key, ImgSize size){
-        String tPrefix = worker.getMainDomain()+"/";
-        byte[] result = provider.getRaw(key, tPrefix+size.suffix());
+    static byte[] getStd(IRequestSession session, IDataProvider provider, ImgSize size){
+        String[] key = getImgName(session.splat());
+        key[0] = session.worker().getMainDomain();
+        key[1] = size.suffix();
+
+        byte[] result = provider.getRaw(key);
         if(result!=null || size == ImgSize.ORIG)return result;
-        byte[] orig = provider.getRaw(key, tPrefix+ImgSize.ORIG.suffix());
+
+        key[1] = ImgSize.ORIG.suffix();
+
+        byte[] orig = provider.getRaw(key);
         if(orig==null)return null;
-        result = Compressor.press(worker.getCompressorSettings(), key, orig, size);
-        provider.saveRaw(key, tPrefix+size.suffix(), result);
+        result = Compressor.press(session.worker().getCompressorSettings(), key[key.length-1], orig, size);
+
+        key[1] = size.suffix();
+
+        provider.saveRaw(result, key);
         return result;
     }
 

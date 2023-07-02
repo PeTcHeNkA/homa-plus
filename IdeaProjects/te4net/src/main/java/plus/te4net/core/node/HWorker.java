@@ -186,13 +186,21 @@ public final class HWorker implements IVarProvider<IRequestSession>, IAuthProvid
     }
 
 
-    public byte[] getFromCache(String key){
-        return cacheProvider.getRaw(key, mainDomain);
+    public byte[] getFromCache(String... path){
+        return cacheProvider.getRaw(expand(path));
     }
 
 
-    public void saveToCache(String key, byte[] data){
-        cacheProvider.saveRaw(key, mainDomain, data);
+    public void saveToCache(byte[] data, String... path){
+        cacheProvider.saveRaw(data, expand(path));
+    }
+
+
+    private String[] expand(String[] prev){
+        String[] result = new String[prev.length+1];
+        System.arraycopy(prev, 0, result, 1, prev.length);
+        result[0] = mainDomain;
+        return result;
     }
 
 
