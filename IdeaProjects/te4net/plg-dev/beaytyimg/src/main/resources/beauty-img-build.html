@@ -1,0 +1,213 @@
+<html>
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <style>
+            :root{
+                --sh-col: rgba(25, 27, 30, 0.7);
+                --wh-col: rgba(255, 255, 255, 0.572);
+            }
+            body {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+                height: 100%;
+            }
+            input{
+                all: unset;
+            }
+            .page{
+                width: 100vw;
+                height: 100vh;
+                background: linear-gradient(0deg, rgb(219, 130, 210) 0%, rgb(181, 209, 212) 51%, rgb(133, 249, 255) 100%);
+            }
+            .b_im{
+                background-repeat: no-repeat;
+                background-size: cover;
+                background-position: 50%;
+            }
+            .ca_env{
+                position: absolute;
+                box-shadow: 0px 0px 70px 0px var(--sh-col) inset;
+                background-image: url(/assets/img/inc/get_url_bg.png);
+                width: 100%;
+                height: 100%;
+                overflow: auto;
+            }
+
+            .c_all{
+                margin: 0 auto;
+                display: table;
+                width: 72%;
+                margin-top: min(40px, 8vh);
+                margin-bottom: min(40px, 8vh);
+            }
+
+            .wa{
+                backdrop-filter: blur(4px);
+                background-color: var(--wh-col);
+                box-shadow: 0px 0px 20px 0px var(--wh-col);
+                border-radius: 4px;
+            }
+
+            .ns{
+                user-select: none;
+            }
+
+            .c_info{
+                text-align: center;
+                padding: 10px;
+                padding-left: 27px;
+                padding-right: 27px;
+                font-size: min(55px, 4.5vw);
+                margin-top: min(40px, 8vh);
+                margin-bottom: min(20px, 4vh);
+            }
+
+            .lin{
+                margin-top: min(20px, 5vh);
+                text-align: center;
+                font-size: min(27px, 4vw);
+                width: 100%;
+            }
+
+            .gr{
+                --wh-col: rgba(126, 126, 126, 0.426);
+            }
+
+            .lin:focus, .rglink:active, .rlink:active{
+                --wh-col: rgba(91, 186, 94, 0.426);
+            }
+
+            .rlink{
+                /*TODO*/
+            }
+
+            .rglink{
+                /*TODO*/
+            }
+
+            .viimg{
+                visibility:hidden;
+            }
+
+            @media screen and (max-width: 1000px) and (min-height: 1500px) {
+                .c_all{
+                    width: 95%;
+                    margin-bottom: 120px;
+                }
+                .c_info{
+                    margin-top: 170px;
+                    margin-bottom: 70px;
+                    font-size: 95px
+                }
+                .lin{
+                    font-size: 57px;
+                    margin-top: 35px;
+                }
+            }
+
+            @media screen and (max-width: 700px) {
+                .c_all{
+                    width: 95%;
+                }
+            }
+        </style>
+        <script>
+            function $T(i){return document.getElementById(i)};
+
+            var url = "";
+            var copyed = false;
+            var error = false;
+
+            function onGen(){
+                let img = $T("img").value.trim();
+                if(img==""){
+                    onError("Заполните поле ,,Изображение,,");
+                    return;
+                }
+                let ytr = $T("yt").value.trim();
+                if(ytr!=""){
+                    if(ytr.startsWith("https://www.youtube.com/watch?v=")){
+                        ytr = "E"+ytr.substring(32, 32+11);
+                    } else if(ytr.startsWith("https://youtu.be/")){
+                        ytr = "E"+ytr.substring(18, 18+11);
+                    } else if(ytr.startsWith("https://www.youtube.com/shorts/")){
+                        ytr = "E"+ytr.substring(31, 31+11);
+                    } else if(ytr.startsWith("https://") && ytr.indexOf("youtube")>-1){
+                        ytr = "H"+ytr.substring(8)
+                            .replaceAll("//","->")
+                            .replaceAll("=","-e>")
+                            .replaceAll("&","-n>")
+                            .replaceAll("?","-q>")
+                    } else{
+                        onError("Ссылка не действительна");
+                        return;
+                    }
+                    url = "http://te4hno.ddns.net/img/"+img+"?vid="+ytr;
+                } else{
+                    url = "http://te4hno.ddns.net/img/"+img;
+                }
+                $T("res").textContent = url;
+                let vi = $T("vi");
+                vi.style.visibility = "visible";
+                vi.src = "/assets/img/"+img;
+            }
+
+
+            function onError(msg){
+                if(error)return;
+                error = true;
+                $T("btn").textContent = msg;
+                
+                setTimeout(()=>{
+                    $T("btn").textContent = "Получить";
+                    error = false;
+                },1000);
+            }
+            
+            
+            function copyUrl(){
+                if(copyed)return;
+                copy(url);
+                $T("res").textContent = "Скопировано!";
+                copyed = true;
+
+                setTimeout(()=>{
+                    $T("res").textContent = url;
+                    setTimeout(()=>{
+                        copyed=false;
+                    },9000)
+                },1000);
+            }
+            
+            
+            function copy(data){
+                let el = document.createElement('textarea');
+                el.value = data;
+                el.setAttribute('readonly', '');
+                el.style.position = 'absolute';
+                el.style.left = '-9999wv';
+                document.body.appendChild(el);
+                el.select();
+                document.execCommand('copy');
+                document.body.removeChild(el);
+            }
+        </script>
+    </head>
+    <body>
+    <reactive>
+        <div class="page">
+            <div class="ca_env b_im">
+                <div class="c_all">
+                    <div class="c_info wa ns">Сгенерировать ссылку</div>
+                    <input id="yt" class="lin wa gr" placeholder="Ссылка на видео YouTube..."></input>
+                    <input id="img" class="lin wa gr" placeholder="Имя изображения..."></input>
+                    <div id="btn" class="lin wa rlink ns" onclick="onGen()">Получить</div>
+                    <div id="res" class="lin wa rglink" onclick="copyUrl()"></div>
+                    <img src="" id="vi", class="lin viimg wa"></img>
+                </div>
+            </div>
+        </div>
+    </reactive>
+    </body>
+</html>

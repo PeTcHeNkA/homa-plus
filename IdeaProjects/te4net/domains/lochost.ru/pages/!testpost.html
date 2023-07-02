@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TestPost</title>
+</head>
+<body>
+    <script>
+        const $D=document;
+        function $T(i){return $D.getElementById(i)}
+        function $NW(n){return $D.createElement(n)}
+        function send(m,u,d,f,a=1){let x=new XMLHttpRequest();x.open(m,u,a);x.send(d);x.onload=()=>{f(x.responseText)}}
+        function get(url,func){send('GET',url,null,func)}
+        function syncGet(url){
+            let x=new XMLHttpRequest();x.open('GET',url,false);x.send();
+            return x.responseText;
+        }
+        function post(url,data,func){send('POST',url,data,func)}
+
+        var stop0 = false;
+        function send0(){
+            if(stop0)return;
+            post("https://lochost.ru/testpost","data".repeat(10_000), (a)=>{send0()})
+        }
+        
+        function test0(g=10){
+            for(let a=0;a<g;a++){
+                send0()
+            }
+        }
+    </script>
+    TEST_POST
+</body>
+</html>

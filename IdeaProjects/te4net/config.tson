@@ -1,0 +1,6 @@
+{domains={
+	lochost.ru={
+	    use-std-auth=(true),
+		domains=["te4hno.ddns.net"]
+	},
+}}

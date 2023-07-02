@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About</title>
+
+    <script>
+        function $T(i){return document.getElementById(i)}
+        function $NW(n){return document.createElement(n)}
+        function send(m,u,d,f,a=1){let x=new XMLHttpRequest();x.open(m,u,a);x.send(d);x.onload=()=>{f(x.responseText)}}
+        function get(url,func){send('GET',url,null,func)}
+        function syncGet(url){
+            let x=new XMLHttpRequest();x.open('GET',url,false);x.send();
+            return x.responseText;
+        }
+        function post(url,data,func){send('POST',url,data,func)}
+    </script>
+
+    <style>
+        :root{
+            --color1: rgba(255, 255, 255, 0.496);
+            --color2: rgba(0, 0, 0, 0.456);
+            --light: rgba(0,0,0,0);
+            --pink-how: rgb(255, 152, 238);
+            --green-act: rgb(105, 239, 98);
+        }
+        body{
+            margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+			height: 100%;
+            overflow: hidden;
+        }
+        .page{
+            background-repeat: no-repeat;
+			background-size: cover;
+			background-position: 50%;
+			width: 100vw;
+			height: 100vh;
+			/* box-shadow: 0px 0px 70px 0px var(--sh-col) inset; */
+            background-image: url('assets/img/pages/about-bg.jpg');
+        }
+        .page-inn{
+            width: 100%;
+			height: 100%;
+			background-color: rgba(172, 172, 172, 0.371);
+            overflow: auto;
+            min-width: 390px;
+        }
+        .page-inn::-webkit-scrollbar {
+            width: 14px;
+            height: 14px;
+        }
+        .page-inn::-webkit-scrollbar-thumb {
+            background: #999;
+        }
+        .page-inn::-webkit-scrollbar-track {
+            background: #333;
+        }
+
+        .ns{
+            user-select: none;
+        }
+        .header, .mini-header{
+            background-color: rgba(0, 0, 0, 0.456);
+            position: sticky;
+            color: wheat;
+            display: flex;
+            transition: 0.3s;
+        }
+        .header{
+            font-size: 220%;
+            top: 12%;
+            height: 100px;
+        }
+        .mini-header{
+            font-size: 150%;
+            top: 0;
+            height: 50px;
+            opacity: 0;
+            z-index: 100;
+        }
+        .header-item{
+            margin: 0 10px 0 10px;
+            width: 250px;
+            background-color: var(--color2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+        }
+        .sector{
+            height: 100vh;
+            background-color: var(--color1)
+        }
+        .s-info{
+            background-color: unset;
+            height: max-content;
+        }
+        .s-content{
+            margin: 5%;
+            width: 90%;
+            background-color: var(--color1);
+            padding: 30px 0;
+        }
+        .s-content-inn{
+            margin: auto;
+            width: 95%;
+            min-height: 100vh;
+        }
+        .sector-last{
+            border-top: 6px solid rgba(28,110,164,0.68);
+            background-color: rgba(0, 0, 0, 0.566);
+            height: max-content;
+        }
+        .sector-last-up, .sector-last-dn{
+            display: flex;
+            justify-content: center;
+        }
+        .sector-last-up{
+            margin-top: 20px;
+            height: 40px;
+            justify-content: space-evenly;
+            align-items: baseline;
+        }
+        .sec-last-item{
+            white-space: nowrap;
+            padding: 5px;
+            width: 130px;
+            text-align: center;
+            color: rgb(34, 44, 52);
+            font-size: 130%;
+            text-decoration: unset;
+        }
+        .sector-last-dn{
+            height: 40px;
+            text-align: center;
+            padding: 5px;
+        }
+        .sec-dn-item{
+            width: 170px;
+        }
+        .blur-bg{
+            backdrop-filter: blur(2px);
+        }
+
+        .main-scrool-btn{
+            margin: 63vh auto;
+            padding: 9px 41px;
+            background-color: rgba(13, 63, 68, 0.676);
+            font-size: 220%;
+            cursor: pointer;
+            width: fit-content;
+            border-radius: 3px;
+        }
+        .be-elm{
+            transition: 0.2s;
+            border-bottom: 6px solid var(--light);
+        }
+        .be-elm:hover{
+            --light: rgb(255, 152, 238);
+            color: var(--light);
+        }
+        .be-elm:active{
+            --light: var(--green-act);
+        }
+        /* .item{
+            background-color: aliceblue;
+            padding: 3px;
+            border: 1px solid rgba(49, 49, 49, 0.68);
+            border-radius: 3px;
+        } */
+        .bt-ha{
+            display: block;
+        }
+        @media (max-width: 521px) {
+            .bt-ha{
+                display: none;
+            }
+        }
+        @media (max-width: 390px){
+            .page{
+                overflow-x: scroll;
+            }
+        }
+    </style>
+</head>
+<body>
+    <reactive>
+    <div class="page">
+        <div id="page" class="page-inn" id="page">
+            <div id="sector-1" class="sector blur-bg">
+                <div id="norm_hd" class="header">
+                    <div class="header-item be-elm">
+                        a1
+                    </div>
+                    <div class="header-item be-elm">
+                        a1
+                    </div>
+                </div>
+                <div class="main-scrool-btn be-elm" onclick='scroll0("sector-2", "page", 210);'>
+                    click here
+                </div>
+            </div>
+            <div id="sector-2" class="sector s-info">
+                <div id="min_hd" class="mini-header"></div>
+                <div id="tx" class="s-content blur-bg">
+                    <div class="s-content-inn">
+                        tetx
+                        txt
+                    </div>
+                </div>
+            </div>
+
+            <div id="sector-last" class="sector-last blur-bg">
+                <div class="sector-last-up">
+                    <a class="sec-last-item be-elm" href="/about">О проекте</a>
+                    <a class="sec-last-item be-elm" href="/info">Информация</a>
+                    <a class="sec-last-item be-elm" href="https://vk.com/te4hnoplus">Контакты</a>
+                    <a class="sec-last-item be-elm bt-ha" href="https://vk.com/te4hnoplus">Техподдержка</a>
+                </div>
+                <div class="sector-last-dn">
+                    <a class="sec-last-item sec-dn-item be-elm" href="/">iristeh.ru 2022-2023</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function handleScrool(elemId, onChange){
+            let prevFlag, flag;
+            let elem = $T(elemId);
+            cf=()=>{
+                prevFlag = flag;
+                return flag = elem.getBoundingClientRect().top+elem.offsetHeight<=0
+            };
+            flag = cf();
+            prevFlag = flag;
+            onChange(!flag);
+            $T("page").addEventListener("scroll", ()=>{
+                if(cf()!=prevFlag)onChange(prevFlag);
+            });
+        }
+        handleScrool("sector-1",(visible)=>{
+            if(visible){
+                $T("min_hd").style.opacity = '0';
+                $T("norm_hd").style.opacity = '1';
+            } else {
+                $T("min_hd").style.opacity = '1';
+                $T("norm_hd").style.opacity = '0';
+            }
+        });
+        $T("min_hd").innerHTML = $T("norm_hd").innerHTML;
+
+        function scroll0(elem, marker, duration) {
+            let item = $T(marker);
+            let goTo = $T(elem).getBoundingClientRect().top;
+            let from = item.scrollTop;
+            let start;
+            window.requestAnimationFrame(function step(time) {
+                if (!start) start = time;
+                time = time - start;
+                item.scrollTo(0, from + goTo * Math.min(time / duration, 1));
+                if (time < duration)window.requestAnimationFrame(step);
+            })
+        }
+        function testp(){
+            post("https://lochost.ru/path/", "data", (e)=>{})
+        }
+    </script>
+
+    </reactive>
+
+</body>
+</html>
+
+
+
