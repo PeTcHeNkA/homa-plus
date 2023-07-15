@@ -25,7 +25,7 @@ public abstract class MixinAbcClientPlayer extends EntityPlayer implements ISpMe
 
     @Override
     public void setActive(boolean b) {
-        active = false;
+        active = b;
     }
 
 

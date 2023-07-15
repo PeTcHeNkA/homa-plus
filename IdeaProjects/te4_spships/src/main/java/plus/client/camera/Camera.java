@@ -49,11 +49,13 @@ public class Camera {
 
     private static float prevPith = 0;
 
+    public static boolean stabilePos = true;
+
     private static void setPith(EntityViewRenderEvent.CameraSetup e, float pith){
-        pith = (float) MathUtils.interpolateRotation(prevPith, pith, 0.5f);
+        //pith = (float) MathUtils.interpolateRotation(prevPith, pith, 0.5f);
         e.getEntity().rotationPitch = pith;
         e.setPitch(pith);
-        prevPith = pith;
+        //prevPith = pith;
     }
 
     private static double prevSpeed = 0;
@@ -84,6 +86,8 @@ public class Camera {
     //private static float prevPith = 0;
     //private static boolean stabilePos = true;
 
+    private static float c = 1;
+
     @SubscribeEvent
     public static void onCam(EntityViewRenderEvent.CameraSetup e){
         if(isSelfSpshipActive){
@@ -104,9 +108,6 @@ public class Camera {
                 result.B.render(e);
             } else {
                 float pitch = e.getPitch();
-//                if(!stabilePos){
-//                    pitch = prevPith;
-//                }
 
                 float rY;
                 if(settings.thirdPersonView==1) {
@@ -121,34 +122,38 @@ public class Camera {
                 }
                 long cur = System.currentTimeMillis();
 
-//                double rpith = MathUtils.range(prevPith, pitch);
-//                if(rpith<0){
-//                    rpith = -rpith;
-//                }
-//                boolean ignore = rpith>1 + 0.01*Minecraft.getDebugFPS();
-                boolean ignore = false;
-                //float anim = (float) ssinF(2,(cur-lastNormTime)/3000f);
-                float anim = 1;
+                double rpith = MathUtils.range(prevPith, pitch);
+                if(rpith<0){
+                    rpith = -rpith;
+                }
+                boolean ignore = rpith>1 + 0.01*Minecraft.getDebugFPS();
+                float anim = (float) ssinF(2,(cur-lastNormTime)/3000f);
+
+                stabilePos = false;
 
                 if (rY + deviation < -0.001) {
                     if(ignore){
                         lastNormTime = cur;
+                        stabilePos = true;
                     } else {
                         setPith(e, pitch + MathUtils.range(rY, -deviation) * anim);
                     }
                 } else if (-rY + deviation < -0.001) {
                     if(ignore){
                         lastNormTime = cur;
+                        stabilePos = true;
                     } else {
                         setPith(e, pitch + MathUtils.range(rY, deviation) * anim);
                     }
                 } else if(deviation == 0){
                     if(ignore){
                         lastNormTime = cur;
+                        stabilePos = true;
                     } else {
                         setPith(e, pitch + rY * anim);
                     }
                 } else {
+                    stabilePos = true;
                     if(cur-lastNormTime>500) {
                         lastNormTime = cur;
                     }

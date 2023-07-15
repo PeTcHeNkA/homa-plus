@@ -1,5 +1,6 @@
 package plus.mixins;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.renderer.GlStateManager;
@@ -16,6 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import plus.client.entity.ISpMemory;
 import plus.client.entity.LivingBlockRenderer;
 import plus.client.camera.Camera;
+import plus.client.mem.Memory;
 import plus.common.player.PlayerSpship;
 import plus.client.entity.SpModelManager;
 import plus.utls.MathUtils;
@@ -54,14 +56,14 @@ public abstract class MixinRenderPlayer extends RenderLivingBase<AbstractClientP
             if(!mem.isActive()){
                 mem.setActive(true);
                 mem.setFreezeTimes(0);
-                //mem.freezeTimes = 0;
-                //mem.prevXZrot = 180-player.rotationYaw;
 
-//                player.prevPosX = player.posX;
-//                player.prevPosY = player.posY;
-//                player.prevPosZ = player.posZ;
+                mem.setPrevXZRot(180-player.rotationYaw);
 
-                //mem.prevYrot = (float) MathUtls.calcYrot(player);
+                player.prevPosX = player.posX;
+                player.prevPosY = player.posY;
+                player.prevPosZ = player.posZ;
+
+                mem.setPrevYRot((float) calcYrot(player));
                 if(!isSelfModel){
 
                     ((PlayerSpship)player).setSpHitbox();
@@ -106,7 +108,7 @@ public abstract class MixinRenderPlayer extends RenderLivingBase<AbstractClientP
     private static double calcXZrot0(Entity player, float partialTicks, ISpMemory mem){
         double speed = calcEntitySpeed(player);
 
-        if(speed<0.02){
+        if(speed<0.05){
             return mem.getPrevXZRot();
         }
 
@@ -131,13 +133,13 @@ public abstract class MixinRenderPlayer extends RenderLivingBase<AbstractClientP
         float rotXZ;
         float rotY;
 
-        if(false && mem.getFreezeTimes() < 20){
+        if(mem.getFreezeTimes() < Minecraft.getDebugFPS()){
             rotXZ = (float) 180-player.rotationYaw;
             rotY  = 0;
-            mem.setFreezeTimes(mem.getFreezeTimes()+1);
+            mem.setFreezeTimes(mem.getFreezeTimes()+2);
         } else {
-            rotXZ = (float) calcXZrot0(player, partialTicks, mem);
-            rotY  = 0;//calcYrot(player, partialTicks, mem);
+            rotXZ = (float) calcXZrot(player, partialTicks, mem);
+            rotY  = calcYrot(player, partialTicks, mem);
         }
 
         if(isSelfModel){

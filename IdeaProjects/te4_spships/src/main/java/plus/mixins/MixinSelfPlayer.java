@@ -7,6 +7,7 @@ import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.network.NetHandlerPlayClient;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.IJumpingMount;
 import net.minecraft.init.Items;
 import net.minecraft.init.MobEffects;
@@ -21,6 +22,8 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.IInteractionObject;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -311,5 +314,27 @@ public abstract class MixinSelfPlayer extends AbstractClientPlayer implements Pl
                     break;
             }
         }
+    }
+
+
+    @Override
+    public void turn(float yaw, float pitch) {
+        if(isSpshipMode() && !Camera.stabilePos){
+            pitch = pitch*0.1f;
+        }
+        super.turn(yaw, pitch);
+//        float f = this.rotationPitch;
+//        float f1 = this.rotationYaw;
+//        this.rotationYaw = (float)((double)this.rotationYaw + (double)yaw * 0.15D);
+//        this.rotationPitch = (float)((double)this.rotationPitch - (double)pitch * 0.15D);
+//        this.rotationPitch = MathHelper.clamp(this.rotationPitch, -90.0F, 90.0F);
+//        this.prevRotationPitch += this.rotationPitch - f;
+//        this.prevRotationYaw += this.rotationYaw - f1;
+//
+//        Entity re = getRidingEntity();
+//
+//        if (re != null) {
+//            re.applyOrientationToEntity(this);
+//        }
     }
 }
