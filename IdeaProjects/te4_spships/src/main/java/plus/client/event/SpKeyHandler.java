@@ -3,6 +3,7 @@ package plus.client.event;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.settings.GameSettings;
+import net.minecraft.entity.Entity;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
@@ -10,6 +11,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.input.Keyboard;
 import plus.asyutl.thread.PopThreadedPool;
+import plus.client.ISpREntity;
 import plus.client.camera.Camera;
 import plus.common.network.spship.SpShootPacket;
 
@@ -28,6 +30,9 @@ public class SpKeyHandler extends KeyHandler {
 
     private static SpShootPacket build(){
         if(settings.thirdPersonView == 1){
+//            Entity entity = Minecraft.getMinecraft().getRenderViewEntity();
+//            ISpREntity ispr = (ISpREntity) entity;
+
             return new SpShootPacket(
                     wrapDegrees360(-Camera.spshipRotXZ),
                     wrapDegrees180(Camera.spshipRotY-90) + 90

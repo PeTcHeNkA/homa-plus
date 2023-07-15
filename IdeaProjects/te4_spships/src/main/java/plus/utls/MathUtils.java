@@ -94,12 +94,18 @@ public class MathUtils {
     }
 
 
+    public static float interpolateRotation(float prev, float val, float partialTicks) {
+        float f;
+        for (f = val - prev; f < -180.0F; f += 360.0F);
+        while (f >= 180.0F) f -= 360.0F;
+        return prev + partialTicks * f;
+    }
+
+
     public static double interpolateRotation(double prev, double val, float partialTicks) {
         double f;
-        for (f = val - prev; f < -180.0F; f += 360.0F) {}
-        while (f >= 180.0F) {
-            f -= 360.0F;
-        }
+        for (f = val - prev; f < -180.0F; f += 360.0F);
+        while (f >= 180.0F) f -= 360.0F;
         return prev + partialTicks * f;
     }
 

@@ -14,6 +14,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import plus.client.ISpREntity;
 import plus.client.entity.ISpMemory;
 import plus.client.entity.LivingBlockRenderer;
 import plus.client.camera.Camera;
@@ -42,30 +43,22 @@ public abstract class MixinRenderPlayer extends RenderLivingBase<AbstractClientP
         boolean isSelfModel = player.isUser();
         boolean isSpshipMode;
 
-        ISpMemory mem = (ISpMemory) player;
-
-        //Memory mem = memoryCache.getOrDef(player);
-        //if(isSelfModel){
+        ISpREntity spEnt = (ISpREntity) player;
+        if(isSelfModel){
             isSpshipMode = ((PlayerSpship)player).isSpshipMode();
-        //} else {
-        //    isSpshipMode = ((PlayerSpship)player).getSpModelId()!=-1;
-        //}
+        } else {
+            isSpshipMode = ((PlayerSpship)player).getSpModelId()!=-1;
+        }
 
         if(isSpshipMode) {
             ci.cancel();
-            if(!mem.isActive()){
-                mem.setActive(true);
-                mem.setFreezeTimes(0);
-
-                mem.setPrevXZRot(180-player.rotationYaw);
-
+            if(!spEnt.isActive()){
+                spEnt.setActive(true);
+                spEnt.clearSpRot();
                 player.prevPosX = player.posX;
                 player.prevPosY = player.posY;
                 player.prevPosZ = player.posZ;
-
-                mem.setPrevYRot((float) calcYrot(player));
                 if(!isSelfModel){
-
                     ((PlayerSpship)player).setSpHitbox();
                 }
             }
@@ -73,14 +66,14 @@ public abstract class MixinRenderPlayer extends RenderLivingBase<AbstractClientP
             if(!isSelfModel){
                 GlStateManager.translate((float)x, (float)y, (float)z);
             }
-            renderSpship(player, partialTicks, isSelfModel, mem);
+            renderSpship(player, partialTicks, isSelfModel, spEnt);
             GlStateManager.popMatrix();
         } else {
             if(isSelfModel && Camera.isSelfSpshipActive){
                 ci.cancel();
             }
-            if(mem.isActive()) {
-                mem.setActive(false);
+            if(spEnt.isActive()) {
+                spEnt.setActive(false);
                 if(!isSelfModel){
                     ((PlayerSpship)player).setSpHitbox();
                 }
@@ -88,64 +81,21 @@ public abstract class MixinRenderPlayer extends RenderLivingBase<AbstractClientP
         }
     }
 
-    //private boolean ignore = false;
-
     float scale = 1.85f;
 
 
+    private void renderSpship(AbstractClientPlayer player, float partialTicks, boolean isSelfModel, ISpREntity e){
+        float rotXZ = (float) MathUtils.interpolateRotation(
+                e.getPrevSpXZRot(),e.getSpXZRot(), partialTicks
+        );
+        float rotY = (float) MathUtils.interpolateRotation(
+                e.getPrevSpYRot(), e.getSpYRot(), partialTicks
+        );
 
-//    private static double calcXZrot0(Entity entity, ISpMemory mem){
-//        return Math.toDegrees(
-//                Math.atan2(
-//                        MathUtils.range(entity.prevPosX, mem.getPrevXZRot()),
-//                        MathUtils.range(entity.prevPosZ, mem.getPrevYRot())
-//                )
-//        );
-//    }
-
-    //private long lastFrame = 0;
-
-    private static double calcXZrot0(Entity player, float partialTicks, ISpMemory mem){
-        double speed = calcEntitySpeed(player);
-
-        if(speed<0.05){
-            return mem.getPrevXZRot();
-        }
-
-        //long ctm = System.currentTimeMillis();
-
-        double rot = calcXZrot(player);
-        double prev = mem.getPrevXZRot();
-
-        double res = MathUtils.interpolateRotation(prev, rot, 0.5f);
-
-        mem.setPrevXZRot(res);
-
-//        if(!MathUtils.isNear(rot, mem.getCurXZRot())){
-//            mem.setCurXZRot(rot);
+//        if(isSelfModel){
+//            Camera.spshipRotY = rotY;
+//            Camera.spshipRotXZ = rotXZ;
 //        }
-
-        return res;
-    }
-
-
-    private void renderSpship(AbstractClientPlayer player, float partialTicks, boolean isSelfModel, ISpMemory mem){
-        float rotXZ;
-        float rotY;
-
-        if(mem.getFreezeTimes() < Minecraft.getDebugFPS()){
-            rotXZ = (float) 180-player.rotationYaw;
-            rotY  = 0;
-            mem.setFreezeTimes(mem.getFreezeTimes()+2);
-        } else {
-            rotXZ = (float) calcXZrot(player, partialTicks, mem);
-            rotY  = calcYrot(player, partialTicks, mem);
-        }
-
-        if(isSelfModel){
-            Camera.spshipRotY = rotY;
-            Camera.spshipRotXZ = rotXZ;
-        }
 
         GlStateManager.pushMatrix();
         GlStateManager.disableCull();

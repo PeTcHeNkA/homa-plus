@@ -14,6 +14,8 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.SpMain;
+import plus.client.ISpREntity;
+import plus.client.ISpRSelf;
 import plus.client.camera.animation.ABCPoint;
 import plus.client.camera.animation.Animation;
 import plus.client.SpGui;
@@ -39,44 +41,31 @@ public class Camera {
     private static boolean nextReset = false;
     public static float spshipRotXZ = 0;
     public static float spshipRotY = 0;
-
-    private static double prevDeviation = 0;
     private static boolean isActive;
+    public static boolean stabilePos = true;
+
 
     public static PlayerSpship getSelfSp(){
         return ((PlayerSpship)Minecraft.getMinecraft().player);
     }
 
-    private static float prevPith = 0;
-
-    public static boolean stabilePos = true;
 
     private static void setPith(EntityViewRenderEvent.CameraSetup e, float pith){
-        //pith = (float) MathUtils.interpolateRotation(prevPith, pith, 0.5f);
         e.getEntity().rotationPitch = pith;
         e.setPitch(pith);
-        //prevPith = pith;
+        //System.out.println(pith);
     }
 
-    private static double prevSpeed = 0;
-    private static double getDeviation(Entity entity, float partialTicks){
-        double speed = MathUtils.calcEntitySpeed(entity);
-        double deviation = speed;
-        //prevSpeed = deviation;
-        //System.out.printf("|>%s%n",deviation);
+
+    private static double getDeviation(ISpRSelf sp, float partialTicks){
+        double deviation = sp.getSpeed() + MathUtils.range(
+                sp.getSpeed(), sp.getPrevSpeed()
+        )*partialTicks;
+
         if(deviation<0){
             deviation = -deviation;
         }
         deviation = 40 - 17*deviation;
-
-        deviation = prevDeviation + MathUtils.range(prevDeviation, deviation) * partialTicks;
-
-        double rs = speed-prevSpeed;
-        if(rs>0.01 || rs<-0.01) {
-            prevDeviation = deviation;
-            prevSpeed = speed;
-        }
-
         return deviation;
     }
 
@@ -86,14 +75,23 @@ public class Camera {
     //private static float prevPith = 0;
     //private static boolean stabilePos = true;
 
-    private static float c = 1;
+    //private static float c = 1;
 
     @SubscribeEvent
     public static void onCam(EntityViewRenderEvent.CameraSetup e){
         if(isSelfSpshipActive){
             Entity entity = Minecraft.getMinecraft().getRenderViewEntity();
-            if(entity==null)return;
+            if(entity==null || !(entity instanceof ISpRSelf))return;
             float partialTicks = (float) e.getRenderPartialTicks();
+
+            ISpRSelf ispr = (ISpRSelf) entity;
+            spshipRotXZ = (float) MathUtils.interpolateRotation(
+                    ispr.getPrevSpXZRot(), ispr.getSpXZRot(), partialTicks
+            );
+            spshipRotY = (float) MathUtils.interpolateRotation(
+                    ispr.getPrevSpYRot(), ispr.getSpYRot(), partialTicks
+            );
+
 
             if(!isActive){
                 isActive = true;
@@ -108,69 +106,51 @@ public class Camera {
                 result.B.render(e);
             } else {
                 float pitch = e.getPitch();
+                float rY = settings.thirdPersonView==1?
+                        MathUtils.range(-spshipRotY, pitch):
+                        MathUtils.range(-MathUtils.calcYrot(entity), pitch);
 
-                float rY;
-                if(settings.thirdPersonView==1) {
-                    rY = MathUtils.range(-spshipRotY, pitch);
-                } else {
-                    rY = MathUtils.range(-MathUtils.calcYrot(entity), pitch);
-                }
-                double deviation = getDeviation(entity, partialTicks);
-
+                double deviation = getDeviation(ispr, partialTicks);
                 if(deviation<0){
                     deviation = 0;
                 }
                 long cur = System.currentTimeMillis();
-
-                double rpith = MathUtils.range(prevPith, pitch);
-                if(rpith<0){
-                    rpith = -rpith;
-                }
-                boolean ignore = rpith>1 + 0.01*Minecraft.getDebugFPS();
-                float anim = (float) ssinF(2,(cur-lastNormTime)/3000f);
-
                 stabilePos = false;
 
                 if (rY + deviation < -0.001) {
-                    if(ignore){
-                        lastNormTime = cur;
-                        stabilePos = true;
-                    } else {
-                        setPith(e, pitch + MathUtils.range(rY, -deviation) * anim);
-                    }
+                    setPith(e, pitch + MathUtils.range(rY, -deviation) * anim(cur));
                 } else if (-rY + deviation < -0.001) {
-                    if(ignore){
-                        lastNormTime = cur;
-                        stabilePos = true;
-                    } else {
-                        setPith(e, pitch + MathUtils.range(rY, deviation) * anim);
-                    }
+                    setPith(e, pitch + MathUtils.range(rY, deviation) * anim(cur));
                 } else if(deviation == 0){
-                    if(ignore){
-                        lastNormTime = cur;
-                        stabilePos = true;
-                    } else {
-                        setPith(e, pitch + rY * anim);
-                    }
+                    setPith(e, pitch + rY * anim(cur));
                 } else {
                     stabilePos = true;
                     if(cur-lastNormTime>500) {
                         lastNormTime = cur;
                     }
                 }
-                prevPith = e.getPitch();
             }
         } else {
             isActive = false;
             if(nextReset){
                 nextReset = false;
                 if(settings.thirdPersonView==1) {
-                    e.setPitch(spshipRotXZ);
-                    e.setYaw(spshipRotY);
+                    Entity entity = Minecraft.getMinecraft().getRenderViewEntity();
+                    if(entity==null || !(entity instanceof ISpREntity))return;
+                    ISpREntity ispr = (ISpREntity) entity;
+                    e.setPitch((float) ispr.getSpXZRot());
+                    e.setYaw((float) ispr.getSpYRot());
                 }
             }
         }
     }
+
+
+    private static float anim(long cur){
+        System.out.println((cur-lastNormTime)/6000f);
+        return (cur-lastNormTime)/6000f;
+    }
+
 
     private static double ssinF(double max, double time){
         return sin(PI/(max*2) * time)*time;

@@ -30,16 +30,19 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import plus.client.ISpREntity;
+import plus.client.ISpRSelf;
 import plus.client.camera.Camera;
 import plus.client.mashine.*;
 import plus.common.player.PlayerSpship;
+import plus.utls.MathUtils;
 
 import static plus.client.camera.Camera.onEndSelfSpship;
 import static plus.client.camera.Camera.onStartSelfSpship;
 
 
 @Mixin(EntityPlayerSP.class)
-public abstract class MixinSelfPlayer extends AbstractClientPlayer implements PlayerSpship {
+public abstract class MixinSelfPlayer extends AbstractClientPlayer implements PlayerSpship, ISpRSelf {
     @Final
     @Shadow
     public NetHandlerPlayClient connection;
@@ -73,6 +76,9 @@ public abstract class MixinSelfPlayer extends AbstractClientPlayer implements Pl
     @Shadow
     protected abstract void sendHorseJump();
 
+    private double speed = 0;
+    private double prevSpeed = 0;
+    private float realPith = 0;
 
     public MixinSelfPlayer(World worldIn, GameProfile playerProfile) {
         super(worldIn, playerProfile);
@@ -88,6 +94,7 @@ public abstract class MixinSelfPlayer extends AbstractClientPlayer implements Pl
 //            //onEndSelfSpship(this);
 //        }
     }
+
 
     private boolean prevMode;
     @Inject(method = "onLivingUpdate", at = @At("HEAD"), cancellable = true)
@@ -278,6 +285,9 @@ public abstract class MixinSelfPlayer extends AbstractClientPlayer implements Pl
         }
 
         super.onLivingUpdate();
+        prevSpeed = speed;
+        speed = MathUtils.calcEntitySpeed(this);
+        realPith = rotationPitch;
 
         if (this.onGround && this.capabilities.isFlying &&
                 !this.mc.playerController.isSpectatorMode() && !spMode) {
@@ -336,5 +346,23 @@ public abstract class MixinSelfPlayer extends AbstractClientPlayer implements Pl
 //        if (re != null) {
 //            re.applyOrientationToEntity(this);
 //        }
+    }
+
+
+    @Override
+    public double getSpeed() {
+        return speed;
+    }
+
+
+    @Override
+    public double getPrevSpeed() {
+        return prevSpeed;
+    }
+
+
+    @Override
+    public float getRealPith() {
+        return realPith;
     }
 }
