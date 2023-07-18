@@ -92,11 +92,6 @@ public abstract class MixinRenderPlayer extends RenderLivingBase<AbstractClientP
                 e.getPrevSpYRot(), e.getSpYRot(), partialTicks
         );
 
-//        if(isSelfModel){
-//            Camera.spshipRotY = rotY;
-//            Camera.spshipRotXZ = rotXZ;
-//        }
-
         GlStateManager.pushMatrix();
         GlStateManager.disableCull();
 

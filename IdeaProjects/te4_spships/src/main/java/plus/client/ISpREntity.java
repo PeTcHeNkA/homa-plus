@@ -12,4 +12,6 @@ public interface ISpREntity {
 
     boolean isActive();
     void setActive(boolean b);
+
+
 }

@@ -51,9 +51,8 @@ public class Camera {
 
 
     private static void setPith(EntityViewRenderEvent.CameraSetup e, float pith){
-        e.getEntity().rotationPitch = pith;
+        e.getEntity().rotationPitch = (e.getEntity().rotationPitch + pith)/2;
         e.setPitch(pith);
-        //System.out.println(pith);
     }
 
 
@@ -72,10 +71,6 @@ public class Camera {
 
     private static long lastNormTime = System.currentTimeMillis();
 
-    //private static float prevPith = 0;
-    //private static boolean stabilePos = true;
-
-    //private static float c = 1;
 
     @SubscribeEvent
     public static void onCam(EntityViewRenderEvent.CameraSetup e){
@@ -147,7 +142,6 @@ public class Camera {
 
 
     private static float anim(long cur){
-        System.out.println((cur-lastNormTime)/6000f);
         return (cur-lastNormTime)/6000f;
     }
 

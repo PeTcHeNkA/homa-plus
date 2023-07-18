@@ -102,6 +102,8 @@ public class MathUtils {
     }
 
 
+
+
     public static double interpolateRotation(double prev, double val, float partialTicks) {
         double f;
         for (f = val - prev; f < -180.0F; f += 360.0F);
