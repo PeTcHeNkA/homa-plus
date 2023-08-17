@@ -7,8 +7,11 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.Entity;
 import net.minecraftforge.client.GuiIngameForge;
+import net.minecraftforge.client.event.DrawBlockHighlightEvent;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -26,12 +29,13 @@ import plus.utls.MathUtils;
 
 import static java.lang.Math.PI;
 import static java.lang.Math.sin;
+import static plus.client.SpGui.mc;
 
 
 @SideOnly(Side.CLIENT)
-@Mod.EventBusSubscriber(modid = SpMain.MOD_ID)
+//@Mod.EventBusSubscriber(modid = SpMain.MOD_ID)
 public class Camera {
-    private static final GameSettings settings = Minecraft.getMinecraft().gameSettings;
+    static final GameSettings settings = Minecraft.getMinecraft().gameSettings;
     public static final MemoryFolder memoryCache = new MemoryFolder();
     public static boolean isSelfSpshipActive = false;
     public static boolean ignoreOverridePlayerRender = false;
@@ -43,6 +47,7 @@ public class Camera {
     public static float spshipRotY = 0;
     private static boolean isActive;
     public static boolean stabilePos = true;
+    private static int prevDir = 0;
 
 
     public static PlayerSpship getSelfSp(){
@@ -50,7 +55,7 @@ public class Camera {
     }
 
 
-    private static void setPith(EntityViewRenderEvent.CameraSetup e, float pith){
+    protected static void setPith(EntityViewRenderEvent.CameraSetup e, float pith){
         e.getEntity().rotationPitch = (e.getEntity().rotationPitch + pith)/2;
         e.setPitch(pith);
     }
@@ -72,8 +77,25 @@ public class Camera {
     private static long lastNormTime = System.currentTimeMillis();
 
 
+    public static void initEventHandlers(){
+        MinecraftForge.EVENT_BUS.register(new Camera());
+    }
+
+
     @SubscribeEvent
-    public static void onCam(EntityViewRenderEvent.CameraSetup e){
+    public void interact(PlayerInteractEvent e){
+        if(isSelfSpshipActive && e.isCancelable())e.setCanceled(true);
+    }
+
+
+    @SubscribeEvent
+    public void onBlock(DrawBlockHighlightEvent e){
+        if(isSelfSpshipActive)e.setCanceled(true);
+    }
+
+
+    @SubscribeEvent
+    public void onCam(EntityViewRenderEvent.CameraSetup e){
         if(isSelfSpshipActive){
             Entity entity = Minecraft.getMinecraft().getRenderViewEntity();
             if(entity==null || !(entity instanceof ISpRSelf))return;
@@ -112,17 +134,23 @@ public class Camera {
                 long cur = System.currentTimeMillis();
                 stabilePos = false;
 
+                //float anim = anim(cur);
+
                 if (rY + deviation < -0.001) {
-                    setPith(e, pitch + MathUtils.range(rY, -deviation) * anim(cur));
-                } else if (-rY + deviation < -0.001) {
-                    setPith(e, pitch + MathUtils.range(rY, deviation) * anim(cur));
-                } else if(deviation == 0){
-                    setPith(e, pitch + rY * anim(cur));
-                } else {
-                    stabilePos = true;
-                    if(cur-lastNormTime>500) {
+                    if(prevDir != 1){
                         lastNormTime = cur;
                     }
+                    setPith(e, pitch + MathUtils.range(rY, -deviation) * anim(cur));
+                    prevDir = 1;
+                } else if (-rY + deviation <= -0.001) {
+                    if(prevDir != -1){
+                        lastNormTime = cur;
+                    }
+                    setPith(e, pitch + MathUtils.range(rY, deviation) * anim(cur));
+                    prevDir = -1;
+                } else {
+                    stabilePos = true;
+                    prevDir = 0;
                 }
             }
         } else {
@@ -142,7 +170,10 @@ public class Camera {
 
 
     private static float anim(long cur){
-        return (cur-lastNormTime)/6000f;
+        if(cur==lastNormTime)return 0f;
+        long l = cur-lastNormTime;
+        if(l>1000)return 0.2f;
+        return l/5000f;
     }
 
 
@@ -179,7 +210,8 @@ public class Camera {
         GuiIngameForge.renderHotbar = mode;
         GuiIngameForge.renderHealth = mode;
         GuiIngameForge.renderExperiance = mode;
-        //GuiIngameForge.renderFood = mode;
+        mc.gameSettings.heldItemTooltips = mode;
+
         GuiIngameForge.renderArmor = mode;
     }
 
@@ -189,12 +221,15 @@ public class Camera {
 //
 //    }
 
+    public static final SpOverlay overlay = new SpOverlay();
+
 
     @SubscribeEvent
-    public static void onRenderOverlayPart(RenderGameOverlayEvent e){
+    public void onRenderOverlayPart(RenderGameOverlayEvent e){
         if(isSelfSpshipActive){
             if(e.getType() == RenderGameOverlayEvent.ElementType.FOOD){
                 e.setCanceled(true);
+                overlay.render();
             }
         }
     }

@@ -1,9 +1,10 @@
 package plus.mixins;
 
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.*;
+import net.minecraft.inventory.ClickType;
+import net.minecraft.inventory.Container;
+import net.minecraft.inventory.ContainerPlayer;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -11,8 +12,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import plus.common.etc.DSlot;
 import plus.common.player.PlayerSpship;
-
-import javax.annotation.Nullable;
 
 
 @Mixin(ContainerPlayer.class)

@@ -24,9 +24,6 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
-//import net.minecraft.entity.player.InventoryPlayer;
-//import net.minecraft.util.DamageSource;
-//import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -34,7 +31,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import plus.common.player.PlayerSpship;
 import plus.common.spship.SpShip;
-
 import java.util.Random;
 
 
@@ -45,6 +41,8 @@ public abstract class MixinPlayer extends EntityLivingBase implements PlayerSpsh
             EntityDataManager.createKey(EntityPlayer.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> SPSHIP_ACTIVE =
             EntityDataManager.createKey(EntityPlayer.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Float> SPSHIP_SHIELD =
+            EntityDataManager.createKey(EntityPlayer.class, DataSerializers.FLOAT);
 
     @Shadow
     public PlayerCapabilities capabilities;
@@ -91,6 +89,17 @@ public abstract class MixinPlayer extends EntityLivingBase implements PlayerSpsh
 
 
     @Override
+    public float getSpShield() {
+        return this.getDataManager().get(SPSHIP_SHIELD);
+    }
+
+
+    public void setSpShield(float shield){
+        this.getDataManager().set(SPSHIP_SHIELD, shield);
+    }
+
+
+    @Override
     public int getSpModelId(){
         return this.getDataManager().get(SPSHIP_ID);
     }
@@ -99,7 +108,6 @@ public abstract class MixinPlayer extends EntityLivingBase implements PlayerSpsh
     @Override
     public void setSpModelId(int id){
         this.getDataManager().set(SPSHIP_ID, id);
-        //System.out.println(getSpModelId());
     }
 
 
@@ -113,6 +121,7 @@ public abstract class MixinPlayer extends EntityLivingBase implements PlayerSpsh
     protected void entityInit(CallbackInfo ci) {
         this.getDataManager().register(SPSHIP_ID, -1);
         this.getDataManager().register(SPSHIP_ACTIVE, false);
+        this.getDataManager().register(SPSHIP_SHIELD, 100f);
     }
 
 
@@ -180,11 +189,11 @@ public abstract class MixinPlayer extends EntityLivingBase implements PlayerSpsh
         if (!(amount < 0.0f) && !this.capabilities.disableDamage && !this.isEntityInvulnerable(source)) {
             this.idleTime = 0;
             if (this.getHealth() > 0.0F) {
-
                 if(world.isRemote) {
                     return false;
                 }
-                if(isSpshipMode()){//может быть медленно
+                if(isSpshipMode()){//TODO может быть медленно
+                    //onSpAttack(source, amount);
                     spShip.onDamage(source, amount);
                     return false;
                 }

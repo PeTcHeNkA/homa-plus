@@ -15,7 +15,7 @@ import java.util.List;
 
 
 public class EItemBlock extends ItemBlock{
-    @SideOnly(Side.CLIENT)
+    //@SideOnly(Side.CLIENT)
     private int countLore = 3;
 
     public EItemBlock(Block block) {

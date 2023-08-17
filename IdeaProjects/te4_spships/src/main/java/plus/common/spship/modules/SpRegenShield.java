@@ -1,5 +1,6 @@
 package plus.common.spship.modules;
 
+import plus.common.player.PlayerSpship;
 import plus.common.spship.SpShip;
 
 
@@ -22,7 +23,10 @@ public class SpRegenShield implements ITickModule{
         float energyPerc = calcEnrgPercent(sp);
         if(energyPerc>reqEnergy){
             if(sp.takeEnergy(energyCast)){
-                sp.shield += regenAmount;
+                PlayerSpship sp0 = (PlayerSpship) sp.owner;
+                float ns = sp0.getSpShield() + reqEnergy;
+                if(ns<sp.maxShield)ns = sp.maxShield;
+                sp0.setSpShield(ns);
             }
         }
     }

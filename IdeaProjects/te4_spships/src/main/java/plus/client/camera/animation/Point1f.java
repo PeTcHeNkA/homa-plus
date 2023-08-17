@@ -1,6 +1,5 @@
 package plus.client.camera.animation;
 
-
 import plus.utls.MathUtils;
 
 
@@ -13,25 +12,30 @@ public class Point1f<T> extends ABCPoint<Point1f<T>, T>{
 
     @Override
     public Point1f<T> range(Point1f<T> p) {
-        return new Point1f<>((float) MathUtils.range(value, p.value));
+        return newPoint(MathUtils.range(value, p.value));
     }
 
 
     @Override
     public Point1f<T> copy() {
-        return new Point1f<>(value);
+        return newPoint(value);
+    }
+
+
+    protected Point1f<T> newPoint(float f){
+        return new Point1f<>(f);
     }
 
 
     @Override
     public Point1f<T> add(Point1f<T> p) {
-        return new Point1f<>(value +p.value);
+        return newPoint(value +p.value);
     }
 
 
     @Override
     public Point1f<T> pow(float f) {
-        return new Point1f<>(this.value *f);
+        return newPoint(this.value *f);
     }
 
 

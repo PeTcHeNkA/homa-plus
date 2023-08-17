@@ -17,6 +17,7 @@
     "MixinAbcClientPlayer",
     "MixinGuiInventory",
     "MixinInput",
+    "MixinPlayerController",
     "MixinRenderPlayer",
     "MixinSelfPlayer"
   ]

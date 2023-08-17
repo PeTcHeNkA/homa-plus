@@ -27,8 +27,8 @@ public class SpShip {
 
     public int modelId = 0;
 
-    public float shield;
-    public float maxShield;
+    //public float shield;
+    public int maxShield;
     public float speed;
     public float damage;
     public float critRate;
@@ -70,31 +70,35 @@ public class SpShip {
         SPM.C sum = raw.compile();
 
 
-        maxShield = sum.MAX_SHIELD * (1 + sum.MAX_SHIELD_PR);
-        damage    = sum.DAMAGE     * (1 + sum.DAMAGE_PR    );
-        speed     = sum.SPEED      * (1 + sum.SPEED_PR     );
+        maxShield = (int) (100 + sum.MAX_SHIELD * (1 + sum.MAX_SHIELD_PR));
+        damage    = 1   + sum.DAMAGE     * (1 + sum.DAMAGE_PR    );
 
+        speed     = sum.SPEED            * (1 + sum.SPEED_PR     );
         regen     = sum.REGEN_SHIELD;
         critRate  = sum.CRIT_RATE;
         critDmg   = sum.CRIT_DMG;
         maxEnergy = sum.ENERGY;
         enegryGen = sum.ENERGY_GEN;
 
-        if(shield>maxShield){
-            shield = maxShield;
-        }
+        PlayerSpship sp = (PlayerSpship) player;
 
+        //if(sp.getSpShield()>maxShield){
+        sp.setSpShield(maxShield);
+        //}
 
         tickModules.trimToSize();
     }
 
 
     public void onDamage(DamageSource src, float amount){
+        PlayerSpship sp = (PlayerSpship) owner;
+        float shield = sp.getSpShield();
         shield = shield - protectGen.onDamage(this, src, amount);
         if(shield<0){
             ((PlayerSpship) owner).setSpMode(false);
             owner.onKillCommand();
-            shield = maxShield/10;
+        } else {
+            sp.setSpShield(shield);
         }
     }
 
@@ -113,7 +117,7 @@ public class SpShip {
 
 
     public boolean takeEnergy(float amount){
-        if(1==1){
+        if(1==1){//TODO
             return true;
         }
         if(energy>=amount){

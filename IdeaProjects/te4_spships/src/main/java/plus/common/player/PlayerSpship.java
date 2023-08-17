@@ -2,6 +2,7 @@ package plus.common.player;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderItem;
+import net.minecraft.util.DamageSource;
 import plus.common.spship.SpShip;
 
 
@@ -22,5 +23,10 @@ public interface PlayerSpship {
 
     void setSpMode(boolean mode);
 
+    //default void onSpAttack(DamageSource src, float amount){}
+
     SpShip getSp();
+
+    void setSpShield(float shield);
+    float getSpShield();
 }

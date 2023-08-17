@@ -7,7 +7,6 @@ import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.network.NetHandlerPlayClient;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.IJumpingMount;
 import net.minecraft.init.Items;
 import net.minecraft.init.MobEffects;
@@ -22,15 +21,12 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.IInteractionObject;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import plus.client.ISpREntity;
 import plus.client.ISpRSelf;
 import plus.client.camera.Camera;
 import plus.client.mashine.*;
@@ -88,6 +84,7 @@ public abstract class MixinSelfPlayer extends AbstractClientPlayer implements Pl
     @Inject(method = "<init>", at = @At("TAIL"))
     public void onInit(CallbackInfo ci){
         Camera.onEndSelfSpship(this);
+        prevSpShield = getSpShield();
 //        if(isSpshipMode()){
 //            onStartSelfSpship(this);
 //        } else {
@@ -97,6 +94,7 @@ public abstract class MixinSelfPlayer extends AbstractClientPlayer implements Pl
 
 
     private boolean prevMode;
+    private float prevSpShield = 0;
     @Inject(method = "onLivingUpdate", at = @At("HEAD"), cancellable = true)
     public void onLivingUpdate(CallbackInfo ci) {
         ci.cancel();
@@ -107,6 +105,13 @@ public abstract class MixinSelfPlayer extends AbstractClientPlayer implements Pl
                 onStartSelfSpship(this);
             } else {
                 onEndSelfSpship(this);
+            }
+        }
+        if(spMode){
+            float curShieldSp = getSpShield();
+            if(prevSpShield != curShieldSp) {
+                prevSpShield = curShieldSp;
+                Camera.overlay.onPostDamage(curShieldSp);
             }
         }
 
@@ -365,4 +370,11 @@ public abstract class MixinSelfPlayer extends AbstractClientPlayer implements Pl
     public float getRealPith() {
         return realPith;
     }
+
+
+    //@Inject(method = "attackEntityFrom", at = @At("HEAD"))
+//    @Override
+//    public void onSpAttack(DamageSource source, float amount){
+//        Camera.overlay.onPostDamage();
+//    }
 }

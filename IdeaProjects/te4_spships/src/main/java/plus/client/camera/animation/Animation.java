@@ -28,6 +28,12 @@ public class Animation<T extends ABCPoint<T, P>, P>{
     }
 
 
+    public void preStart(T point){
+        current = point;
+        target = point;
+    }
+
+
     public void setTarget(T point){
         current = get();
         target = point;

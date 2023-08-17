@@ -1,10 +1,8 @@
 package plus.mixins;
 
-import com.google.common.collect.Sets;
 import io.netty.util.internal.ConcurrentSet;
 import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.EntityTrackerEntry;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

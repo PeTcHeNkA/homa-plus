@@ -9,6 +9,8 @@ import net.minecraftforge.fml.common.registry.EntityEntry;
 import net.minecraftforge.fml.relauncher.Side;
 import org.lwjgl.input.Keyboard;
 
+import plus.client.camera.Camera;
+import plus.client.event.Handler;
 import plus.client.event.SpKeyHandler;
 import plus.client.entity.LivingBlockRenderer;
 import plus.common.network.spship.SpModePacket;
@@ -24,6 +26,9 @@ public class ClientProxy extends ServerProxy{
                 SpModePacket.ClientHandler.class,  SpModePacket.class, 2, Side.CLIENT);
         network.registerMessage(
                 EnableSpFromEntity.ClientHandler.class,  EnableSpFromEntity.class, 3, Side.CLIENT);
+
+        Camera.initEventHandlers();
+        Handler.initEventHandlers();
     }
 
 

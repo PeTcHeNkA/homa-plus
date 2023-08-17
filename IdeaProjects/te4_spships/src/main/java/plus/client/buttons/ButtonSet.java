@@ -1,8 +1,5 @@
 package plus.client.buttons;
 
-import scala.actors.threadpool.Arrays;
-import java.util.ArrayList;
-import java.util.List;
 import static plus.utls.MathUtils.isBetween;
 
 
@@ -11,9 +8,14 @@ public class ButtonSet {
     private int activeIndex = 0;
 
     public void add(Button b) {
-        List<Button> nl = new ArrayList<>(Arrays.asList(buttons));
-        nl.add(b);
-        buttons = nl.toArray(new Button[0]);
+        if(buttons.length==0){
+            buttons = new Button[]{b};
+        } else {
+            Button[] btnsNew = new Button[buttons.length+1];
+            System.arraycopy(buttons, 0, btnsNew, 0, buttons.length);
+            btnsNew[buttons.length] = b;
+            buttons = btnsNew;
+        }
     }
 
     public void renderAll(int x, int y) {

@@ -85,7 +85,7 @@ public class SpGui extends Gui {
         if (visible) {
             GlStateManager.pushMatrix();
             //GlStateManager.translate(0.0F, 0.0F, 10.0F);
-            Minecraft.getMinecraft().getTextureManager().bindTexture(SP_BG);
+            mc.getTextureManager().bindTexture(SP_BG);
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             int lX = (this.width - 147) / 2 - this.xOffset;
             int lY = (this.height - 166) / 2;

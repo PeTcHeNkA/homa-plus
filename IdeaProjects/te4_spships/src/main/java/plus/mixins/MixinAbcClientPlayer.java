@@ -67,8 +67,7 @@ public abstract class MixinAbcClientPlayer extends EntityPlayer implements ISpRE
 
     @Override
     public void clearSpRot() {
-        prevXZ = 180-rotationYaw;
-        curZX = prevXZ;
+        prevXZ = curZX = 180-rotationYaw;
     }
 
 
@@ -82,4 +81,20 @@ public abstract class MixinAbcClientPlayer extends EntityPlayer implements ISpRE
     public void setActive(boolean active) {
         this.active = active;
     }
+
+//    float prevRXZ, prevRY;
+//    @Override
+//    public void setRPrev(float xz, float y) {
+//        prevRY = y;
+//        prevRXZ = xz;
+//    }
+//    @Override
+//    public float prevRXZ() {
+//        return prevRXZ;
+//    }
+//
+//    @Override
+//    public float prevRY() {
+//        return prevRY;
+//    }
 }

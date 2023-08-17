@@ -20,19 +20,23 @@ public class SpFurnaceTileEntity extends EnergyDeviceTileEntity {
     private static final SimpleCraftMap furnaceCrafts = new SimpleCraftMap() {
         @Override
         public void onInit() {
-            add( Blocks.COBBLESTONE,   Blocks.STONE                        );
-            add( Blocks.SAND,          Blocks.GLASS                ,2);
-            add( Blocks.IRON_ORE,      Items.IRON_INGOT            ,2);
-            add( Blocks.GOLD_ORE,      Items.GOLD_INGOT            ,2);
-            add( Blocks.CLAY,          Blocks.HARDENED_CLAY                );
-            add( Items.CLAY_BALL,      Items.BRICK                         );
-            add( Blocks.DIAMOND_ORE  , Items.DIAMOND               ,2);
-            add( Blocks.DIAMOND_ORE  , Items.DIAMOND               ,2);
-            add( Blocks.HARDENED_CLAY, Blocks.STAINED_HARDENED_CLAY        );
-            add( SimpleOre.COPPER_ORE, BasicItem.COPPER_INGOT      ,2);
-            add( SimpleOre.ALUMINE_ORE,BasicItem.ALUMINE_INGOT     ,2);
-            add( SimpleOre.MEFRIL_ORE, BasicItem.MEFRIL_INGOT              );
-            add( SimpleOre.AETHER_ORE, BasicItem.AETHER_CRYSTAL    ,4);
+            add( Blocks.COBBLESTONE,       Blocks.STONE                        );
+            add( Blocks.SAND,              Blocks.GLASS                ,2);
+            add( Blocks.IRON_ORE,          Items.IRON_INGOT            ,2);
+            add( Blocks.GOLD_ORE,          Items.GOLD_INGOT            ,2);
+            add( Blocks.CLAY,              Blocks.HARDENED_CLAY                );
+            add( Items.CLAY_BALL,          Items.BRICK                         );
+            add( Blocks.DIAMOND_ORE  ,     Items.DIAMOND               ,2);
+            add( Blocks.DIAMOND_ORE  ,     Items.DIAMOND               ,2);
+            add( Blocks.HARDENED_CLAY,     Blocks.STAINED_HARDENED_CLAY        );
+            add( SimpleOre.COPPER_ORE,     BasicItem.COPPER_INGOT      ,2);
+            add( SimpleOre.ALUMINE_ORE,    BasicItem.ALUMINE_INGOT     ,2);
+            add( SimpleOre.MEFRIL_ORE,     BasicItem.MEFRIL_INGOT              );
+            add( SimpleOre.AETHER_ORE,     BasicItem.AETHER_CRYSTAL    ,4);
+
+            add( SimpleOre.COPPER_ORE_MET, BasicItem.COPPER_INGOT      ,3);
+            add( SimpleOre.ALUMINE_ORE_MET,BasicItem.ALUMINE_INGOT     ,3);
+            add( SimpleOre.MEFRIL_ORE_MET, BasicItem.MEFRIL_INGOT      ,2);
         }
     };
 

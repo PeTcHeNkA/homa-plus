@@ -1,20 +1,23 @@
 package plus.client.event;
 
-import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import plus.SpMain;
+import plus.client.camera.Camera;
 
 import static plus.client.CTaskShoulder.INST;
 
 
 @SideOnly(Side.CLIENT)
-@Mod.EventBusSubscriber(modid = SpMain.MOD_ID)
 public class Handler {
+    public static void initEventHandlers(){
+        MinecraftForge.EVENT_BUS.register(new Handler());
+    }
+
     @SubscribeEvent
-    public static void tick(TickEvent.ClientTickEvent e){
+    public void tick(TickEvent.ClientTickEvent e){
         INST.tick();
     }
 }

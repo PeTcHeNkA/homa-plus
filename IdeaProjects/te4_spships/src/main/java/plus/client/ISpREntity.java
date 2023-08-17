@@ -13,5 +13,7 @@ public interface ISpREntity {
     boolean isActive();
     void setActive(boolean b);
 
-
+//    void setRPrev(float xz, float y);
+//    float prevRXZ();
+//    float prevRY();
 }
