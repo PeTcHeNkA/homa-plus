@@ -3,7 +3,6 @@ package plus.common.spship.modules;
 import net.minecraft.entity.EntityLivingBase;
 import plus.common.amm.SpBullet;
 import plus.common.spship.SpShip;
-
 import java.util.Random;
 
 
@@ -21,17 +20,17 @@ public class SpGun implements ISpGun{
         }
     }
 
-    public final AmmType type;
-    public final int modelId;
-    public final float power;
-    public final float energyCast;
+    private final AmmType type;
+    private final int modelId;
+    private final float power;
+    private final int energyCast;
+
 
     public SpGun(AmmType type, float power, float damage, float energyCastCoef, int modelId) {
         this.modelId = modelId;
-
         this.type = type;
         this.power = power;
-        this.energyCast = power*damage*energyCastCoef;
+        this.energyCast = (int) (power*damage*energyCastCoef);
     }
 
 

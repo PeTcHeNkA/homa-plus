@@ -31,5 +31,8 @@
   {"predicate":{"cmd":29},"model":"te4_spships:vars/___raven_model/v12"},
   {"predicate":{"cmd":30},"model":"te4_spships:vars/___raven_model/v13"},
   {"predicate":{"cmd":31},"model":"te4_spships:vars/___raven_model/v14"},
-  {"predicate":{"cmd":32},"model":"te4_spships:vars/___raven_model/v15"}
+  {"predicate":{"cmd":32},"model":"te4_spships:vars/___raven_model/v15"},
+
+
+  {"predicate":{"cmd":20001},"model":"te4_spships:bullet/bullet_base"}
 ]}

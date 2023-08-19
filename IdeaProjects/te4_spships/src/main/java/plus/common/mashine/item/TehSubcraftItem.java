@@ -6,6 +6,8 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.common.Strings;
+
 import java.util.List;
 
 
@@ -32,8 +34,8 @@ public class TehSubcraftItem extends TehBasicItem {
         if(isMoreInfo()){
             NBTTagCompound tags = item.getTagCompound();
             if(tags==null)return;
-            addLore(lore, "teh_prc", tags.getInteger("teh-prc"));
-            addLore(lore, "teh_pow", round(tags.getFloat("power")));
+            addLore(lore, "teh_prc", tags.getInteger(Strings.TEH_PROC));
+            addLore(lore, "teh_pow", round(tags.getFloat(Strings.POWER)));
             addLore(lore, "sp_dur", getMaxDamage()-item.getItemDamage(), getMaxDamage());
         } else {
             addLore(lore, "more_inf");

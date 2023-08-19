@@ -1,5 +1,7 @@
 package plus.client;
 
+import net.minecraft.item.ItemStack;
+
 
 public interface ISpREntity {
     double getSpXZRot();
@@ -13,7 +15,10 @@ public interface ISpREntity {
     boolean isActive();
     void setActive(boolean b);
 
-//    void setRPrev(float xz, float y);
-//    float prevRXZ();
-//    float prevRY();
+    void setDCache(double[] cache);
+    double[] getDCache();
+
+    float getScale();
+    default ItemStack getSpModel(){throw new UnsupportedOperationException();};
+    default boolean needRender(){return true;}
 }

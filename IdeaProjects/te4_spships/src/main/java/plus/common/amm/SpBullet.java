@@ -3,6 +3,7 @@ package plus.common.amm;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.datasync.DataParameter;
@@ -13,6 +14,7 @@ import net.minecraft.util.math.*;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.client.entity.SpModelManager;
 import plus.common.spship.entity.LivingBlock;
 import plus.common.spship.modules.SpGun;
 import java.util.List;
@@ -39,7 +41,6 @@ public class SpBullet extends LivingBlock {
     }
 
 
-    @Override
     public int getModelId() {
         return dataManager.get(SPSHIP_ID);
     }
@@ -163,6 +164,7 @@ public class SpBullet extends LivingBlock {
     public void onUpdate() {
         if( isLive() && (this.world.isRemote || (shooter == null ||
                 !this.shooter.isDead) && this.world.isBlockLoaded(new BlockPos(this))) ){
+            onClientUpdate();
             super.onUpdate();
             calcImpact();
             this.setPosition(
@@ -229,4 +231,34 @@ public class SpBullet extends LivingBlock {
     }
 
 
+    @Override
+    public float getScale() {
+        return 0.5f;
+    }
+
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    public ItemStack getSpModel() {
+        return SpModelManager.getSpModelByID(getModelId());
+    }
+
+
+    @SideOnly(Side.CLIENT)
+    private boolean first = false;
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void onClientUpdate() {
+        super.onClientUpdate();
+        if(first)return;
+        first = true;
+        clearSpRot();
+    }
+
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    public boolean needRender() {
+        return first;
+    }
 }

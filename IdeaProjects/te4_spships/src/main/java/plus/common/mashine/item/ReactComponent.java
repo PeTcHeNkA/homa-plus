@@ -7,6 +7,8 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.common.Strings;
+
 import java.util.List;
 
 
@@ -32,6 +34,24 @@ public class ReactComponent extends TehBasicItem {
     }
 
 
+    public static boolean isReactCore(ItemStack item){
+        if(ReactComponent.isReactComponent(item)){
+            ReactComponent rc = (ReactComponent) item.getItem();
+            return rc.getType() == ReactComponent.TYPE.CORE;
+        }
+        return false;
+    }
+
+
+    public static boolean isReactNoCore(ItemStack item){
+        if(ReactComponent.isReactComponent(item)){
+            ReactComponent rc = (ReactComponent) item.getItem();
+            return rc.getType() != ReactComponent.TYPE.CORE;
+        }
+        return false;
+    }
+
+
     public static boolean isReactComponent(ItemStack item){
         return item.getItem() instanceof ReactComponent;
     }
@@ -49,8 +69,8 @@ public class ReactComponent extends TehBasicItem {
         if(isMoreInfo()){
             NBTTagCompound tags = item.getTagCompound();
             if(tags==null)return;
-            addLore(lore, "teh_prc", tags.getInteger("teh-prc"));
-            addLore(lore, "teh_pow", round(tags.getFloat("power")+level/2f));
+            addLore(lore, "teh_prc", tags.getInteger(Strings.TEH_PROC));
+            addLore(lore, "teh_pow", round(tags.getFloat(Strings.POWER)+level/2f));
             addLore(lore, "sp_dur", getMaxDamage()-item.getItemDamage(), getMaxDamage());
         } else {
             addLore(lore, "more_inf");

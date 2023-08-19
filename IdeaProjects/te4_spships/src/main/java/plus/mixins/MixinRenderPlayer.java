@@ -6,17 +6,15 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.RenderLivingBase;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.entity.RenderPlayer;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import plus.client.ISpREntity;
-import plus.client.entity.LivingBlockRenderer;
+import plus.client.ISprRenderer;
 import plus.client.camera.Camera;
 import plus.common.player.PlayerSpship;
-import plus.client.entity.SpModelManager;
 import plus.utls.MathUtils;
 
 
@@ -55,7 +53,9 @@ public abstract class MixinRenderPlayer extends RenderLivingBase<AbstractClientP
                 if(!isSelfModel){
                     ((PlayerSpship)player).setSpHitbox();
                 }
-                pRotXZ = pRotXZ2 = MathUtils.interpolateRotation(
+                double[] dc = new double[2];
+                spEnt.setDCache(dc);
+                dc[0] = dc[1] = MathUtils.interpolateRotation(
                         spEnt.getPrevSpXZRot(),spEnt.getSpXZRot(), partialTicks
                 );
             }
@@ -63,7 +63,9 @@ public abstract class MixinRenderPlayer extends RenderLivingBase<AbstractClientP
             if(!isSelfModel){
                 GlStateManager.translate((float)x, (float)y, (float)z);
             }
-            renderSpship(player, partialTicks, isSelfModel, spEnt);
+            //TODO во время посадки в корабль идет поворот к старому углу
+            ISprRenderer.render(spEnt, partialTicks);
+
             GlStateManager.popMatrix();
         } else {
             if(isSelfModel && Camera.isSelfSpshipActive){
@@ -71,56 +73,11 @@ public abstract class MixinRenderPlayer extends RenderLivingBase<AbstractClientP
             }
             if(spEnt.isActive()) {
                 spEnt.setActive(false);
+                spEnt.setDCache(null);
                 if(!isSelfModel){
                     ((PlayerSpship)player).setSpHitbox();
                 }
             }
         }
-    }
-
-    float scale = 1.85f;
-
-    private double pRotXZ, pRotXZ2;
-    //TODO во время посадки в корабль идет поворот к старому углу
-    private void renderSpship(AbstractClientPlayer player, float partialTicks, boolean isSelfModel, ISpREntity e){
-        double rotXZ = MathUtils.interpolateRotation(
-                e.getPrevSpXZRot(),e.getSpXZRot(), partialTicks
-        );
-        double rotY = (float) MathUtils.interpolateRotation(
-                e.getPrevSpYRot(), e.getSpYRot(), partialTicks
-        );
-        if(isSelfModel){
-            //TODO переписать на математику с углами
-            if(rotXZ>0 && pRotXZ>0 && pRotXZ2>0 || rotXZ<0 && pRotXZ<0 && pRotXZ2<0)
-                rotXZ = (rotXZ+pRotXZ+pRotXZ2)/3;
-            pRotXZ2 = pRotXZ;
-            pRotXZ = rotXZ;
-        }
-
-        GlStateManager.pushMatrix();
-        GlStateManager.disableCull();
-
-        GlStateManager.scale(scale, scale, scale);
-        GlStateManager.translate(0,0.5,0);
-        GlStateManager.rotate((float) rotXZ, 0, 1, 0);
-        GlStateManager.rotate((float) rotY, 1, 0, 0);
-
-        //e.setRPrev(rotXZ, rotY);
-
-        ItemStack stack = SpModelManager.getSpModelByID(((PlayerSpship) player).getSpModelId());
-
-        LivingBlockRenderer.renderItemModel(stack);
-
-        GlStateManager.enableCull();
-        GlStateManager.popMatrix();
-
-//        renderItem.renderItem(stack,
-//                renderItem.getItemModelWithOverrides(stack, null, null));
-
-//        Minecraft.getMinecraft().getItemRenderer().renderItemSide(
-//                player, SpModelManager.getSpModelByID(((PlayerSpship)player).getSpModelId()),
-//                ItemCameraTransforms.TransformType.FIXED, false);
-
-        //GlStateManager.enableCull();
     }
 }

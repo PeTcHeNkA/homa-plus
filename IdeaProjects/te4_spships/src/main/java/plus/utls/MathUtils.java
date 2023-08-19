@@ -1,8 +1,6 @@
 package plus.utls;
 
 import net.minecraft.entity.Entity;
-import plus.client.entity.ISpMemory;
-import plus.client.mem.Memory;
 import java.util.Arrays;
 import static java.lang.Math.*;
 
@@ -56,13 +54,13 @@ public class MathUtils {
     }
 
 
-    public static double calcXZrot(Entity player, float partialTicks, ISpMemory mem){
-        if(isNear(player.posX, player.prevPosX) && isNear(player.posZ,player.prevPosZ)){
-            return (float) mem.getPrevXZRot();
-        }
-        mem.setPrevXZRot(MathUtils.interpolateRotation(mem.getPrevXZRot(), MathUtils.calcXZrot(player), partialTicks));
-        return mem.getPrevXZRot();
-    }
+//    public static double calcXZrot(Entity player, float partialTicks, ISpMemory mem){
+//        if(isNear(player.posX, player.prevPosX) && isNear(player.posZ,player.prevPosZ)){
+//            return (float) mem.getPrevXZRot();
+//        }
+//        mem.setPrevXZRot(MathUtils.interpolateRotation(mem.getPrevXZRot(), MathUtils.calcXZrot(player), partialTicks));
+//        return mem.getPrevXZRot();
+//    }
 
 
 
@@ -134,10 +132,10 @@ public class MathUtils {
     }
 
 
-    public static float calcYrot(Entity player, float partialTicks, ISpMemory mem){
-        mem.setPrevYRot((float) MathUtils.interpolateRotation(mem.getPrevYRot(), MathUtils.calcYrot(player), partialTicks));
-        return (float) mem.getPrevYRot();
-    }
+//    public static float calcYrot(Entity player, float partialTicks, ISpMemory mem){
+//        mem.setPrevYRot((float) MathUtils.interpolateRotation(mem.getPrevYRot(), MathUtils.calcYrot(player), partialTicks));
+//        return (float) mem.getPrevYRot();
+//    }
 
 
     public static double calcYrot(Entity entity){

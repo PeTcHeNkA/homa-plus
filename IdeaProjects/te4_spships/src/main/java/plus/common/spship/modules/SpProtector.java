@@ -6,15 +6,13 @@ import plus.common.spship.SpShip;
 
 
 public class SpProtector implements ISpProtector {
-
     private final float physicDmgCoef;
-    private final float physicEnrgCoef;
-
+    private final int physicEnrgCoef;
     private final float energyDmgCoef;
-    private final float energyEnrgCoef;
+    private final int energyEnrgCoef;
 
 
-    public SpProtector(float physicDmgCoef, float physicEnrgCoef, float energyDmgCoef, float energyEnrgCoef) {
+    public SpProtector(float physicDmgCoef, int physicEnrgCoef, float energyDmgCoef, int energyEnrgCoef) {
         this.physicDmgCoef = physicDmgCoef;
         this.physicEnrgCoef = physicEnrgCoef;
         this.energyDmgCoef = energyDmgCoef;
@@ -43,13 +41,10 @@ public class SpProtector implements ISpProtector {
                     return damage*energyDmgCoef;
                 }
             case COMBINED:
-                if(sp.takeEnergy((energyEnrgCoef + physicEnrgCoef)/2f)){
+                if(sp.takeEnergy((energyEnrgCoef + physicEnrgCoef)>>1)){
                     return damage*((physicDmgCoef+energyDmgCoef)/2f);
                 }
         }
         return damage;
     }
-
-
-
 }

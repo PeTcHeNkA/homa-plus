@@ -1,6 +1,5 @@
 package plus.client.camera;
 
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.renderer.GlStateManager;
@@ -10,33 +9,28 @@ import net.minecraftforge.client.GuiIngameForge;
 import net.minecraftforge.client.event.DrawBlockHighlightEvent;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderHandEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import plus.SpMain;
 import plus.client.ISpREntity;
 import plus.client.ISpRSelf;
 import plus.client.camera.animation.ABCPoint;
 import plus.client.camera.animation.Animation;
 import plus.client.SpGui;
-import plus.client.mem.MemoryFolder;
 import plus.common.player.PlayerSpship;
 import plus.tson.utl.Tuple;
 import plus.utls.MathUtils;
-
 import static java.lang.Math.PI;
 import static java.lang.Math.sin;
 import static plus.client.SpGui.mc;
 
 
 @SideOnly(Side.CLIENT)
-//@Mod.EventBusSubscriber(modid = SpMain.MOD_ID)
 public class Camera {
     static final GameSettings settings = Minecraft.getMinecraft().gameSettings;
-    public static final MemoryFolder memoryCache = new MemoryFolder();
     public static boolean isSelfSpshipActive = false;
     public static boolean ignoreOverridePlayerRender = false;
     public static Animation<Point3f, EntityViewRenderEvent.CameraSetup> animation =
@@ -61,7 +55,7 @@ public class Camera {
     }
 
 
-    private static double getDeviation(ISpRSelf sp, float partialTicks){
+    public static double getDeviation(ISpRSelf sp, float partialTicks){
         double deviation = sp.getSpeed() + MathUtils.range(
                 sp.getSpeed(), sp.getPrevSpeed()
         )*partialTicks;
@@ -90,7 +84,14 @@ public class Camera {
 
     @SubscribeEvent
     public void onBlock(DrawBlockHighlightEvent e){
-        if(isSelfSpshipActive)e.setCanceled(true);
+        if(isSelfSpshipActive)
+            e.setCanceled(true);
+    }
+
+
+    @SubscribeEvent
+    public void onRenderHand(RenderHandEvent e){
+        if(isSelfSpshipActive) e.setCanceled(true);
     }
 
 
@@ -102,9 +103,9 @@ public class Camera {
             float partialTicks = (float) e.getRenderPartialTicks();
 
             ISpRSelf ispr = (ISpRSelf) entity;
-            spshipRotXZ = (float) MathUtils.interpolateRotation(
-                    ispr.getPrevSpXZRot(), ispr.getSpXZRot(), partialTicks
-            );
+//            spshipRotXZ = (float) MathUtils.interpolateRotation(
+//                    ispr.getPrevSpXZRot(), ispr.getSpXZRot(), partialTicks
+//            );
             spshipRotY = (float) MathUtils.interpolateRotation(
                     ispr.getPrevSpYRot(), ispr.getSpYRot(), partialTicks
             );
@@ -231,6 +232,9 @@ public class Camera {
                 e.setCanceled(true);
                 overlay.render();
             }
+//            if(e.getType() == RenderGameOverlayEvent.ElementType.){
+//                e.setCanceled(true);
+//            }
         }
     }
 

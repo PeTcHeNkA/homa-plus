@@ -23,7 +23,8 @@ import plus.common.network.spship.SpModePacket;
 import plus.common.etc.DSlot;
 import plus.common.player.PlayerSpship;
 
-import static plus.client.entity.LivingBlockRenderer.renderItemModel;
+
+import static plus.client.ISprRenderer.renderItemModel;
 import static plus.utls.MathUtils.*;
 
 

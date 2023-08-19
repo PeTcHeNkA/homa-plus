@@ -151,7 +151,7 @@ public enum SPM {
     }
 
 
-    public static class C{
+    public static final class C{
         public final float
         DAMAGE,
         DAMAGE_PR,

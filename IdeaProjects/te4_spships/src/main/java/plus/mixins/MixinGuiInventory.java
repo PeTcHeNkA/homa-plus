@@ -27,8 +27,6 @@ import static plus.client.SpGui.SP_BG;
 
 @Mixin(GuiInventory.class)
 public abstract class MixinGuiInventory extends InventoryEffectRenderer {
-
-
     @Shadow
     private float oldMouseX;
     @Shadow

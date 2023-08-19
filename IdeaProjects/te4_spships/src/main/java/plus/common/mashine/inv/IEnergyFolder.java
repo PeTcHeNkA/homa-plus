@@ -25,6 +25,9 @@ public interface IEnergyFolder {
     }
 
 
+    default void damage(int amount){}
+
+
     default int moveEnergy(IEnergyFolder to, int max){
         return moveEnergy(to, this, max);
     }
@@ -159,6 +162,19 @@ public interface IEnergyFolder {
 
 
         @Override
+        public void damage(int amount) {
+            if(amount<group.length){
+                group[0].damage(amount);
+            } else {
+                int all = amount/group.length;
+                group[0].damage(amount%group.length);
+                for(IEnergyFolder folder:group)
+                    folder.damage(all);
+            }
+        }
+
+
+        @Override
         public boolean putEnergy(int amount) {
             return putMulti(group, amount);
         }
@@ -203,6 +219,7 @@ public interface IEnergyFolder {
         public boolean takeEnergy(int amount) {
             if(cur>=amount){
                 cur = cur - amount;
+                damage(amount);
                 return true;
             }
             return false;

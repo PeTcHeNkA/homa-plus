@@ -11,6 +11,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import plus.client.camera.Camera;
 
+
 @Mixin(MovementInputFromOptions.class)
 public class MixinInput extends MovementInput {
     @Final

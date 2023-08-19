@@ -25,7 +25,7 @@ public class SpReactContainer extends PlayerExtendedBlockContainer {
 
         addSlotToContainer(
                 new FESlot(spReactInv, 8, 80, 34,
-                this::isCore, this::onContentChanged)
+                ReactComponent::isReactCore, this::onContentChanged)
         );
 
         addPlayerSlots(playerInv);
@@ -33,25 +33,7 @@ public class SpReactContainer extends PlayerExtendedBlockContainer {
 
 
     private void addESlot(IInventory spReactInv, int i, int x, int y){
-        addSlotToContainer(new FESlot(spReactInv, i, x, y, this::validComponent, this::onContentChanged));
-    }
-
-
-    private boolean isCore(ItemStack item){
-        if(ReactComponent.isReactComponent(item)){
-            ReactComponent rc = (ReactComponent) item.getItem();
-            return rc.getType() == ReactComponent.TYPE.CORE;
-        }
-        return false;
-    }
-
-
-    private boolean validComponent(ItemStack item){
-        if(ReactComponent.isReactComponent(item)){
-            ReactComponent rc = (ReactComponent) item.getItem();
-            return rc.getType() != ReactComponent.TYPE.CORE;
-        }
-        return false;
+        addSlotToContainer(new FESlot(spReactInv, i, x, y, ReactComponent::isReactNoCore, this::onContentChanged));
     }
 
 

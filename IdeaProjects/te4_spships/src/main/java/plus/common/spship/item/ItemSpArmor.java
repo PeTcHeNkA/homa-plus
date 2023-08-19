@@ -6,6 +6,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.common.Strings;
 import plus.common.mashine.item.TehBasicItem;
 import plus.utls.MathUtils;
 import java.util.List;
@@ -40,8 +41,8 @@ public class ItemSpArmor extends TehBasicItem {
     public ItemStack create(float power, float damage, int tehProcess, int color) {
         ItemStack stack = new ItemStack(this);
         NBTTagCompound tag = new NBTTagCompound();
-        tag.setInteger("teh-prc", tehProcess);
-        tag.setFloat("power",
+        tag.setInteger(Strings.TEH_PROC, tehProcess);
+        tag.setFloat(Strings.POWER,
                 (float) (calcPowerComponent(power)* MathUtils.calcBigStructCoef(tehProcess)/2)
         );
         stack.setTagCompound(tag);

@@ -6,6 +6,7 @@ import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ITickable;
+import plus.common.Strings;
 import plus.common.mashine.inv.IEnergyFolder;
 import plus.common.mashine.inv.InvTileEntity;
 import plus.common.mashine.item.ReactComponent;
@@ -55,7 +56,7 @@ public class SpReactTileEntity extends InvTileEntity implements ITickable, IEner
 
             if(rc.getType() == ReactComponent.TYPE.COMPONENT){
                 //summTeh = summTeh + tags.getInteger(("teh-prc"));
-                summPow = summPow + (tags.getFloat("power")+(rc.level/2f));
+                summPow = summPow + (tags.getFloat(Strings.POWER)+(rc.level/2f));
             } else {
                 ++boostFlag;
             }
@@ -69,7 +70,7 @@ public class SpReactTileEntity extends InvTileEntity implements ITickable, IEner
                 return;
             }
             ReactComponent rc = (ReactComponent) core.getItem();
-            summPow += (tags.getFloat("power")+(rc.level/2f));
+            summPow += (tags.getFloat(Strings.POWER)+(rc.level/2f));
 
             genSpeed = coreLvl * summPow*20;
             maxPower = genSpeed*2;
@@ -127,14 +128,14 @@ public class SpReactTileEntity extends InvTileEntity implements ITickable, IEner
     @Override
     public void readFromNBT(NBTTagCompound compound) {
         super.readFromNBT(compound);
-        energy = compound.getFloat("energy");
+        energy = compound.getFloat(Strings.ENERGY);
         checkItems();
     }
 
 
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound compound) {
-        compound.setFloat("energy", energy);
+        compound.setFloat(Strings.ENERGY, energy);
         return super.writeToNBT(compound);
     }
 

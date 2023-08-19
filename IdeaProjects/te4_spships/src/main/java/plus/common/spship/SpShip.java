@@ -11,6 +11,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import plus.asyutl.shoulder.IBasicTask;
 import plus.common.etc.ASTaskShoulder;
+import plus.common.mashine.inv.IEnergyFolder;
 import plus.common.player.PlayerSpship;
 import plus.common.spship.item.ItemCorpus;
 import plus.common.spship.modules.ISpProtector;
@@ -22,25 +23,26 @@ import java.util.ArrayList;
 
 
 public class SpShip {
-    private static final int[] SLOTS = {41,42,43,44,45,46,47,48,49,50,51};
+    public static final int[] SLOTS = {41,42,43,44,45,46,47,48,49,50,51};
     public final EntityPlayer owner;
 
     public int modelId = 0;
 
     //public float shield;
     public int maxShield;
-    public float speed;
+    //public float speed;
     public float damage;
     public float critRate;
     public float critDmg;
     public float regen;
 
-    public float energy;
-    public float maxEnergy;
-    public float enegryGen;
+//    public float energy;
+//    public float maxEnergy;
+//    public float enegryGen;
 
     private ISpGun gun = ISpGun.EMPTY;
     private ISpProtector protectGen = ISpProtector.EMPTY;
+    private IEnergyFolder folder;
     private final ArrayList<ITickModule> tickModules = new ArrayList<>();
 
 
@@ -73,12 +75,12 @@ public class SpShip {
         maxShield = (int) (100 + sum.MAX_SHIELD * (1 + sum.MAX_SHIELD_PR));
         damage    = 1   + sum.DAMAGE     * (1 + sum.DAMAGE_PR    );
 
-        speed     = sum.SPEED            * (1 + sum.SPEED_PR     );
+        //speed     = sum.SPEED            * (1 + sum.SPEED_PR     );
         regen     = sum.REGEN_SHIELD;
         critRate  = sum.CRIT_RATE;
         critDmg   = sum.CRIT_DMG;
-        maxEnergy = sum.ENERGY;
-        enegryGen = sum.ENERGY_GEN;
+//        maxEnergy = sum.ENERGY;
+//        enegryGen = sum.ENERGY_GEN;
 
         PlayerSpship sp = (PlayerSpship) player;
 
@@ -104,31 +106,26 @@ public class SpShip {
 
 
     public void onTick(){
-        if(energy<maxEnergy){
-            energy+=enegryGen;
-            if(energy>maxEnergy){
-                energy=maxEnergy;
-            }
-        }
         for(ITickModule module:tickModules){
             module.onTick(this);
         }
     }
 
 
-    public boolean takeEnergy(float amount){
-        if(1==1){//TODO
-            return true;
-        }
-        if(energy>=amount){
-            energy-=amount;
-            return true;
-        }
-        return false;
+    public IEnergyFolder getFolder(){
+        return folder;
     }
 
 
-    private static ISpGun g2 = new SpGun(SpGun.AmmType.COMBINED,2,10,0,0);
+    public boolean takeEnergy(int amount){
+        if(1==1){
+            return true;
+        }
+        return folder.takeEnergy(amount);
+    }
+
+
+    private static ISpGun g2 = new SpGun(SpGun.AmmType.COMBINED,2,10,0,20001);
     public void shoot(EntityLivingBase shooter, float yaw, float pith) {
         //gun.shoot(this, shooter, yaw, pith);
         g2.shoot(this, shooter, yaw, pith);

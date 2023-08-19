@@ -14,6 +14,7 @@ import plus.asyutl.thread.PopThreadedPool;
 import plus.client.ISpREntity;
 import plus.client.camera.Camera;
 import plus.common.network.spship.SpShootPacket;
+import plus.utls.MathUtils;
 
 import static plus.utls.MathUtils.wrapDegrees180;
 import static plus.utls.MathUtils.wrapDegrees360;
@@ -30,11 +31,10 @@ public class SpKeyHandler extends KeyHandler {
 
     private static SpShootPacket build(){
         if(settings.thirdPersonView == 1){
-//            Entity entity = Minecraft.getMinecraft().getRenderViewEntity();
-//            ISpREntity ispr = (ISpREntity) entity;
-
+            Entity entity = Minecraft.getMinecraft().getRenderViewEntity();
+            ISpREntity ispr = (ISpREntity) entity;
             return new SpShootPacket(
-                    wrapDegrees360(-Camera.spshipRotXZ),
+                    wrapDegrees360((float) -ispr.getDCache()[0]),
                     wrapDegrees180(Camera.spshipRotY-90) + 90
             );
         } else {

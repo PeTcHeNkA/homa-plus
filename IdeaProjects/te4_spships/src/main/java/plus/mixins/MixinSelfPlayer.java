@@ -27,6 +27,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import plus.client.ISpRSelf;
 import plus.client.camera.Camera;
 import plus.client.mashine.*;
@@ -72,6 +73,7 @@ public abstract class MixinSelfPlayer extends AbstractClientPlayer implements Pl
     @Shadow
     protected abstract void sendHorseJump();
 
+    @Shadow private boolean handActive;
     private double speed = 0;
     private double prevSpeed = 0;
     private float realPith = 0;
@@ -337,21 +339,26 @@ public abstract class MixinSelfPlayer extends AbstractClientPlayer implements Pl
         if(isSpshipMode() && !Camera.stabilePos){
             pitch = pitch*0.1f;
         }
-        super.turn(yaw, pitch);
-//        float f = this.rotationPitch;
-//        float f1 = this.rotationYaw;
-//        this.rotationYaw = (float)((double)this.rotationYaw + (double)yaw * 0.15D);
-//        this.rotationPitch = (float)((double)this.rotationPitch - (double)pitch * 0.15D);
-//        this.rotationPitch = MathHelper.clamp(this.rotationPitch, -90.0F, 90.0F);
-//        this.prevRotationPitch += this.rotationPitch - f;
-//        this.prevRotationYaw += this.rotationYaw - f1;
-//
-//        Entity re = getRidingEntity();
-//
-//        if (re != null) {
-//            re.applyOrientationToEntity(this);
-//        }
+
+        float f = this.rotationPitch;
+        float f1 = this.rotationYaw;
+        this.rotationYaw = (float)((double)this.rotationYaw + (double)yaw * 0.15D);
+        this.rotationPitch = (float)((double)this.rotationPitch - (double)pitch * 0.15D);
+        this.rotationPitch = MathHelper.clamp(this.rotationPitch, -90.0F, 90.0F);
+        this.prevRotationPitch += this.rotationPitch - f;
+        this.prevRotationYaw += this.rotationYaw - f1;
+
+        if (this.getRidingEntity() != null) {
+            this.getRidingEntity().applyOrientationToEntity(this);
+        }
     }
+
+
+//    @Inject(method = "isHandActive", at = @At("HEAD"), cancellable = true)
+//    public void isHandActive(CallbackInfoReturnable<Boolean> cir) {
+//        cir.setReturnValue(this.handActive && ! prevMode);
+//    }
+
 
 
     @Override

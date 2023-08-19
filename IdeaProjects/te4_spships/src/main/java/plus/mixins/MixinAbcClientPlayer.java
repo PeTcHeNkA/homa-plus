@@ -3,9 +3,11 @@ package plus.mixins;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import plus.client.ISpREntity;
+import plus.client.entity.SpModelManager;
 import plus.common.player.PlayerSpship;
 import plus.utls.MathUtils;
 
@@ -53,6 +55,7 @@ public abstract class MixinAbcClientPlayer extends EntityPlayer implements ISpRE
         return prevXZ;
     }
 
+
     @Override
     public double getPrevSpYRot() {
         return prevY;
@@ -82,19 +85,32 @@ public abstract class MixinAbcClientPlayer extends EntityPlayer implements ISpRE
         this.active = active;
     }
 
-//    float prevRXZ, prevRY;
-//    @Override
-//    public void setRPrev(float xz, float y) {
-//        prevRY = y;
-//        prevRXZ = xz;
-//    }
-//    @Override
-//    public float prevRXZ() {
-//        return prevRXZ;
-//    }
-//
-//    @Override
-//    public float prevRY() {
-//        return prevRY;
-//    }
+
+    private double[] cache0d;
+    @Override
+    public void setDCache(double[] cache) {
+        this.cache0d = cache;
+    }
+
+
+    @Override
+    public double[] getDCache() {
+        return cache0d;
+    }
+
+
+    @Override
+    public float getScale() {
+        return 1.85f;
+    }
+
+
+    private int prevID = -1;
+    private ItemStack prevModel;
+    @Override
+    public ItemStack getSpModel() {
+        int id = getSpModelId();
+        if(id==prevID) return prevModel;
+        return prevModel = SpModelManager.getSpModelByID(prevID = id);
+    }
 }

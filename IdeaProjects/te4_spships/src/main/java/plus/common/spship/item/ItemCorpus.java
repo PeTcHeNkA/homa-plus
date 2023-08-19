@@ -2,6 +2,7 @@ package plus.common.spship.item;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import plus.common.Strings;
 import plus.common.mashine.item.TehBasicItem;
 import plus.utls.bin.BinNum;
 
@@ -20,7 +21,7 @@ public class ItemCorpus extends TehBasicItem {// 1, 16
     public ItemStack createSimple(int modelId){
         ItemStack item = new ItemStack(this);
         NBTTagCompound tag = new NBTTagCompound();
-        tag.setInteger("cmd", modelId);
+        tag.setInteger(Strings.CMD, modelId);
         item.setTagCompound(tag);
         return item;
     }
@@ -35,12 +36,11 @@ public class ItemCorpus extends TehBasicItem {// 1, 16
 
     public static int getColor(ItemStack item){
         NBTTagCompound tag = item.getTagCompound();
-        if(tag==null || !tag.hasKey("cmd"))return 0;
-        return tag.getInteger("cmd");
+        if(tag==null || !tag.hasKey(Strings.CMD))return 0;
+        return tag.getInteger(Strings.CMD);
     }
 
 
-    private static final String key = "cmd";
     public static final class Provider extends BinNum.Provider{
         private ItemStack item = ItemStack.EMPTY;
         private NBTTagCompound tag = null;
@@ -77,13 +77,13 @@ public class ItemCorpus extends TehBasicItem {// 1, 16
 
         @Override
         protected int getV() {
-            return tag.getInteger(key)-shift;
+            return tag.getInteger(Strings.CMD)-shift;
         }
 
 
         @Override
         protected void setV(int v) {
-            tag.setInteger(key, v+shift);
+            tag.setInteger(Strings.CMD, v+shift);
         }
 
 

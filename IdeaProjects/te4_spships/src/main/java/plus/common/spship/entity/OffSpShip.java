@@ -4,6 +4,7 @@ package plus.common.spship.entity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumActionResult;
@@ -13,7 +14,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import plus.client.mem.Memory;
+import plus.client.entity.SpModelManager;
 import plus.common.network.spship.SpModePacket;
 import plus.common.network.entity.EnableSpFromEntity;
 import plus.common.player.PlayerSpship;
@@ -25,21 +26,6 @@ public class OffSpShip extends LivingBlock{
 
     public OffSpShip(World worldIn) {
         super(worldIn);
-    }
-
-
-    @Override
-    protected void setRotation(float yaw, float pitch) {
-        super.setRotation(yaw, pitch);
-        if(world.isRemote){
-            mem.prevXZrot = 180-yaw;
-        }
-    }
-
-
-    @SideOnly(Side.CLIENT)
-    protected Memory buildDef(){
-        return new NedMem();
     }
 
 
@@ -103,14 +89,8 @@ public class OffSpShip extends LivingBlock{
 
 
     @Override
-    public int getModelId() {
-        return modelId;
-    }
-
-    @Override
     protected void entityInit() {
         setSize(2,2);
-        //dataManager.register(PARENT_ID, -1);
     }
 
 
@@ -139,5 +119,18 @@ public class OffSpShip extends LivingBlock{
 
         modelId = compound.getShort("m");
         parent = compound.getInteger("p");
+    }
+
+
+    @Override
+    public float getScale() {
+        return 1.85f;
+    }
+
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    public ItemStack getSpModel() {
+        return SpModelManager.getSpModelByID(modelId);
     }
 }

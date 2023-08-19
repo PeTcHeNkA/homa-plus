@@ -6,7 +6,9 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.common.Strings;
 import plus.common.mashine.inv.IEnergyFolder;
+import plus.common.mashine.inv.IItemLink;
 import plus.utls.MathUtils;
 import java.util.List;
 
@@ -31,19 +33,24 @@ public class ItemCapacitor extends TehBasicItem {
     }
 
 
+    public static boolean isCapacitor(ItemStack itemStack) {
+        return itemStack.getItem() instanceof ItemCapacitor;
+    }
+
+
     @Override
     public ItemStack create(float damage, float power, int tehProcess) {
         ItemStack stack = new ItemStack(this);
         NBTTagCompound tag = new NBTTagCompound();
-        tag.setInteger("teh-prc", tehProcess);
+        tag.setInteger(Strings.TEH_PROC, tehProcess);
 
         int cap = (int) ((calcPowerComponent(power)* MathUtils.calcBigStructCoef(tehProcess)/2)*basicCap);
         int usages = 100*level + (int) (getMaxDur()*(1-damage));
 
-        tag.setInteger("basic-cap", cap);
-        tag.setInteger("max-usage", usages*cap);
-        tag.setInteger("max-st-usg", usages*cap);
-        tag.setInteger("cur-cap", 0);
+        tag.setInteger(Strings.BASIC_CAP, cap);
+        tag.setInteger(Strings.MAX_USAGE, usages*cap);
+        tag.setInteger(Strings.MAX_ST_USAGE, usages*cap);
+        tag.setInteger(Strings.CUR_CAP, 0);
 
         stack.setTagCompound(tag);
         stack.setItemDamage(100);
@@ -65,13 +72,13 @@ public class ItemCapacitor extends TehBasicItem {
         if(isMoreInfo()){
             NBTTagCompound tags = item.getTagCompound();
             if(tags==null)return;
-            int mxUsg = tags.getInteger("max-st-usg");
-            int bsCap = tags.getInteger("basic-cap");
-            addLore(lore, "teh_prc", tags.getInteger("teh-prc"));
+            int mxUsg = tags.getInteger(Strings.MAX_ST_USAGE);
+            int bsCap = tags.getInteger(Strings.BASIC_CAP);
+            addLore(lore, "teh_prc", tags.getInteger(Strings.TEH_PROC));
             addLore(lore, "teh_dur_per", calcPer(
-                    tags.getInteger("max-usage"), mxUsg)
+                    tags.getInteger(Strings.MAX_USAGE), mxUsg)
             );
-            addLore(lore, "teh_cur_cap", tags.getInteger("cur-cap"),bsCap);
+            addLore(lore, "teh_cur_cap", tags.getInteger(Strings.CUR_CAP),bsCap);
             addLore(lore, "teh_dur_max", mxUsg/bsCap);
         } else {
             addLore(lore, "more_inf");
@@ -80,9 +87,8 @@ public class ItemCapacitor extends TehBasicItem {
     }
 
 
-    public static class Provider implements IEnergyFolder{
+    public static class Provider extends ProviderBase{
         private ItemStack item = ItemStack.EMPTY;
-        private NBTTagCompound tag = null;
 
         public ItemStack getItem() {
             return item;
@@ -90,20 +96,41 @@ public class ItemCapacitor extends TehBasicItem {
 
         public void setItem(ItemStack item) {
             this.item = item;
-            tag = item.getTagCompound();
+        }
+    }
+
+
+    public static class LinkedProvider extends ProviderBase{
+        private final IItemLink link;
+
+        public LinkedProvider(IItemLink link) {
+            this.link = link;
         }
 
+        @Override
+        public ItemStack getItem() {
+            return link.getItem();
+        }
 
+        @Override
+        public void setItem(ItemStack item) {
+            link.setItem(item);
+        }
+    }
+
+
+    public static abstract class ProviderBase implements IEnergyFolder, IItemLink {
         @Override
         public boolean takeEnergy(int amount) {
             int cur = getCurEnergy();
             if(cur>0 && cur>=amount){
-                int usages = tag.getInteger("max-usage") - amount;
+                NBTTagCompound tag = getItem().getTagCompound();
+                int usages = tag.getInteger(Strings.MAX_USAGE) - amount;
                 if(usages<0){
                     setItem(ItemStack.EMPTY);
                     return false;
                 } else {
-                    tag.setInteger("max-usage", usages);
+                    tag.setInteger(Strings.MAX_USAGE, usages);
                     usages = cur-amount;
                     setEnergy(usages);
                     updateEnergy(usages, getMaxEnergy());
@@ -115,13 +142,22 @@ public class ItemCapacitor extends TehBasicItem {
         }
 
 
+        @Override
+        public void damage(int amount) {
+            NBTTagCompound tag = getItem().getTagCompound();
+            int usages = tag.getInteger(Strings.MAX_USAGE) - amount;
+            if(usages<0) setItem(ItemStack.EMPTY);
+            else tag.setInteger(Strings.MAX_USAGE, usages);
+        }
+
+
         protected void setEnergy(int amount){
-            tag.setInteger("cur-cap", amount);
+            getItem().getTagCompound().setInteger(Strings.CUR_CAP, amount);
         }
 
 
         protected void updateEnergy(float cur, float max){
-            item.setItemDamage(100-(int) ((99*cur)/max));
+            getItem().setItemDamage(100-(int) ((99*cur)/max));
         }
 
 
@@ -133,7 +169,7 @@ public class ItemCapacitor extends TehBasicItem {
                 int cAmm = cur+amount;
                 if(cAmm>=max){
                     setEnergy(max);
-                    item.setItemDamage(1);
+                    getItem().setItemDamage(1);
                 } else {
                     setEnergy(cAmm);
                     updateEnergy(cAmm, max);
@@ -146,8 +182,9 @@ public class ItemCapacitor extends TehBasicItem {
 
         @Override
         public int getCurEnergy() {
+            NBTTagCompound tag = getItem().getTagCompound();
             if(tag != null){
-                return tag.getInteger("cur-cap");
+                return tag.getInteger(Strings.CUR_CAP);
             }
             return 0;
         }
@@ -155,8 +192,9 @@ public class ItemCapacitor extends TehBasicItem {
 
         @Override
         public int getMaxEnergy() {
+            NBTTagCompound tag = getItem().getTagCompound();
             if(tag != null){
-                return tag.getInteger("basic-cap");
+                return tag.getInteger(Strings.BASIC_CAP);
             }
             return 0;
         }
