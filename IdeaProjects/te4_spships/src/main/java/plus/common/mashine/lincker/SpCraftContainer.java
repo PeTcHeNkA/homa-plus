@@ -76,6 +76,19 @@ public class SpCraftContainer extends PlayerExtendedBlockContainer implements IC
     }
 
 
+    private void sendOnCraftChg(){
+        ItemStack edited = craftResult.getItem();
+        onContentChanged();
+        if(edited == craftResult.getItem())return;
+        edited = craftResult.getItem();
+        if(!edited.isEmpty()) {
+            for (int j = 0; j < this.listeners.size(); ++j) {
+                this.listeners.get(j).sendSlotContents(this, 5, edited);
+            }
+        }
+    }
+
+
     private void onInit(){
         craftResult.setItem(SpReceptBook.INST.craftPreview(this, 50, power));
     }
@@ -97,14 +110,19 @@ public class SpCraftContainer extends PlayerExtendedBlockContainer implements IC
         if(slotId == 5){
             if(SpReceptBook.INST.isValidCraft(this)){
                 SpReceptBook.INST.spendItems(this);
+                ItemStack result = super.slotClick(slotId, dragType, clickTypeIn, player);
+                sendOnCraftChg();
+                return result;
+            } else {
+                return super.slotClick(slotId, dragType, clickTypeIn, player);
             }
-            return super.slotClick(slotId, dragType, clickTypeIn, player);
         } else if(slotId < 5){
             return super.slotClick(slotId, dragType, clickTypeIn, player);
         } else if(clickTypeIn == ClickType.PICKUP_ALL){
             if(SpReceptBook.INST.isValidCraft(this)){
                 if(getInnStack(5).getItem() == player.inventory.getItemStack().getItem()) {
                     SpReceptBook.INST.spendItems(this);
+                    sendOnCraftChg();
                 } else {
                     clickTypeIn = ClickType.PICKUP;
                 }
@@ -143,6 +161,16 @@ public class SpCraftContainer extends PlayerExtendedBlockContainer implements IC
         item.setCount(item.getCount() - count);
         inventory.setInventorySlotContents(index, item.isEmpty()?ItemStack.EMPTY:item);
     }
+
+
+    @Override
+    public ItemStack getCurResult() {
+        return craftResult.getItem();
+    }
+
+
+    @Override
+    public void editResult(ItemStack result) {
+        craftResult.setItem(result);
+    }
 }
-
-

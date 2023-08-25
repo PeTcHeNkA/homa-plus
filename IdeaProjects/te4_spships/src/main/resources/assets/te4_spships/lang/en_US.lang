@@ -48,6 +48,40 @@ item.iron_gear.name=§bЖелезная шестерня
 item.copper_coil.name=§bКатушка
 item.circuit_cpu.name=§aВычислитель
 item.circuit_addon.name=§aПлата расширения
+item.sp_armor.name=§aКорабельная обшивка
+item.oxy_ballon_l1.name=§bКислородные баллоны
+item.oxy_ballon_l2.name=§aКислородные баллоны
+
+item.sp_module_shield_l1.name=§bГенератор щита
+item.sp_module_shield_l2.name=§aГенератор щита
+item.sp_module_shield_l3.name=§3Генератор щита
+item.sp_module_shield_l4.name=§dГенератор щита
+
+item.sp_module_accelerator_l1.name=§bУскоритель
+item.sp_module_accelerator_l2.name=§aУскоритель
+item.sp_module_accelerator_l3.name=§3Ускоритель
+item.sp_module_accelerator_l4.name=§dУскоритель
+
+item.sp_module_protect_l1.name=§bКомпенсатор щита
+item.sp_module_protect_l2.name=§aКомпенсатор щита
+item.sp_module_protect_l3.name=§3Компенсатор щита
+item.sp_module_protect_l4.name=§dКомпенсатор щита
+
+item.spship_model.name=§dЛичный корабль
+
+sp_lore.module_help_a0=Универсальная плата
+sp_lore.module_help_b0=расширения корабля
+sp_lore.module_help_a2=Восстанавливает прочность
+sp_lore.module_help_b2=щита корабля расходуя энергию
+sp_lore.module_help_a3=Придает ускарение кораблю
+sp_lore.module_help_b3=расходуя энергию
+
+sp_lore.module_help_a4=Поглощает часть
+sp_lore.module_help_b4=входящего урона
+
+sp_lore.protector_phys=Поглощение физ: §c%s%%/%sE
+sp_lore.protector_enrg=Поглощение эн: §c%s%%/%sE
+sp_lore.cur_oxy=Запас кислорода: §c%s/%sC
 
 
 sp_lore.more_inf=§eБольше информации...
@@ -58,9 +92,25 @@ sp_lore.teh_lvl=Уровень:    §c%s
 sp_lore.teh_cur_cap=Заряд: §c%s/%s
 sp_lore.teh_dur_per=Износ: §c%s%%
 sp_lore.teh_dur_max=Долговечность: §c%s
-
+sp_lore.damage=Урон §c+%s
+sp_lore.damage_pr=Урон §c+%s%%
+sp_lore.max_shield=Макс. щит §c+%s
+sp_lore.max_shield_pr=Макс. щит §c+%s%%
+sp_lore.speed=Бонус ускорения: §c+%s
+sp_lore.speed_pr=Бонус ускорения: §c+%s%%
+sp_lore.crit_rate=Крит. шанс: §c+%s%%
+sp_lore.crit_dmg=Крит. урон: §c+%s%%
+sp_lore.regen_shield=Бонус реген. щит: §c+%s%%
+sp_lore.mass=Вес: §c+%s
 sp_lore.a_color=Цвет: %s
+sp_lore.accelerator_speed=Ускорение: §c+%s%%
+sp_lore.energy_cast=Расход энергии: §c%s/t
+sp_lore.shield_gen_speed=Регенерация щита: §c%s/t
 
+sp_lore.spship_model_a0=Облегченный истребитель
+sp_lore.spship_model_b0=2-го поколения
+sp_lore.spship_model_a1=Тяжелый истребитель
+sp_lore.spship_model_b1=2-го поколения
 
 tile.sp_machine_module.name=§bМашинный корпус
 tile.sp_machine_module.lore_1=Основа сложной машины
@@ -86,6 +136,7 @@ tile.sp_craft_table.name=§aСборщик
 tile.sp_craft_table.lore_1=Рабочий стол для
 tile.sp_craft_table.lore_2=создания сложных компонентов
 
-
-
+tile.sp_oxy_charger.name=§aОчиститель
+tile.sp_oxy_charger.lore_1=Использует электричество
+tile.sp_oxy_charger.lore_2=для очистки и сжатия кислорода
 

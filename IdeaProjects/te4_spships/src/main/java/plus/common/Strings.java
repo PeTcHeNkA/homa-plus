@@ -13,4 +13,7 @@ public final class Strings {
     public static final String MAX_USAGE = "max-usage";
     public static final String MAX_ST_USAGE = "max-st-usg";
     public static final String CUR_CAP = "cur-cap";
+    public static final String SP_TICK_MODULE = "stm";
+    public static final String SP_REACT_LVL = "rsp";
+    public static final String SP_MODULE_INTS = "spg";
 }

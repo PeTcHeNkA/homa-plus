@@ -27,8 +27,16 @@ public abstract class ReceptProcessor implements IReseptValidator{
 
 
     public void spendItems(ReseptKey key, ICraftMatrix matrix){
-        for(int i=0;i<checkers.length;i++){
-            matrix.takeItem(i, checkers[i].getCount());
+        for(int i=0;i<checkers.length;i++) matrix.takeItem(i, checkers[i].getCount());
+        ItemStack result = matrix.getCurResult();
+        ItemStack resultNew = onPostCraft(result);
+        if(result != resultNew){
+            matrix.editResult(resultNew);
         }
+    }
+
+
+    public ItemStack onPostCraft(ItemStack src){
+        return src;
     }
 }

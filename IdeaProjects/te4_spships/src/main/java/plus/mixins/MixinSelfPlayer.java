@@ -5,6 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.entity.IJumpingMount;
@@ -305,28 +306,32 @@ public abstract class MixinSelfPlayer extends AbstractClientPlayer implements Pl
 
 
     @Inject(method = "displayGUIChest", at = @At("HEAD"), cancellable = true)
-    public void displayGUIChest(IInventory chestInventory, CallbackInfo ci){
-        if(chestInventory instanceof IInteractionObject) {
-            String s = ((IInteractionObject) chestInventory).getGuiID();
+    public void displayGUIChest(IInventory otherInv, CallbackInfo ci){
+        if(otherInv instanceof IInteractionObject) {
+            String s = ((IInteractionObject) otherInv).getGuiID();
             switch (s) {
                 case "minecraft:sp_craft_gui":
-                    this.mc.displayGuiScreen(new GuiSpCraft(this.inventory, chestInventory));
+                    this.mc.displayGuiScreen(new GuiSpCraft(this.inventory, otherInv));
                     ci.cancel();
                     break;
                 case "minecraft:sp_furnace_gui":
-                    this.mc.displayGuiScreen(new GuiSpFurnace(this.inventory, chestInventory));
+                    this.mc.displayGuiScreen(new GuiSpFurnace(this.inventory, otherInv));
                     ci.cancel();
                     break;
                 case "minecraft:aether_react":
-                    this.mc.displayGuiScreen(new GuiSpReact(this.inventory, chestInventory));
+                    this.mc.displayGuiScreen(new GuiSpReact(this.inventory, otherInv));
                     ci.cancel();
                     break;
                 case "minecraft:sp_press_gui":
-                    this.mc.displayGuiScreen(new GuiSpPress(this.inventory, chestInventory));
+                    this.mc.displayGuiScreen(new GuiSpPress(this.inventory, otherInv));
                     ci.cancel();
                     break;
                 case "minecraft:sp_eng_cap":
-                    this.mc.displayGuiScreen(new GuiSpCapacitor(this.inventory, chestInventory));
+                    this.mc.displayGuiScreen(new GuiSpCapacitor(this.inventory, otherInv));
+                    ci.cancel();
+                    break;
+                case "minecraft:sp_oxy_charger_gui":
+                    this.mc.displayGuiScreen(new GuiSpOxyCharger(this.inventory, otherInv));
                     ci.cancel();
                     break;
             }

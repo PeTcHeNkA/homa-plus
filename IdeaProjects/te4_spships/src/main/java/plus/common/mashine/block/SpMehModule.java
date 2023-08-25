@@ -19,6 +19,7 @@ public class SpMehModule extends SimpleIronBlock {
     public static final SpReact       SP_REACT        = new SpReact();
     public static final SpPress       SP_PRESS        = new SpPress();
     public static final SpCapacitor   SP_CAPACITOR    = new SpCapacitor();
+    public static final SpOxyCharger  SP_OXY_CHARGER  = new SpOxyCharger();
 
 
     protected SpMehModule() {

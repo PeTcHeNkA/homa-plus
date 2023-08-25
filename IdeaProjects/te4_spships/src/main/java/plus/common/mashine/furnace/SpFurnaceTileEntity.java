@@ -152,7 +152,7 @@ public class SpFurnaceTileEntity extends EnergyDeviceTileEntity {
 
     @Override
     public String getName() {
-        return this.hasCustomName() ? this.customName : "sp_craft_gui";
+        return this.hasCustomName() ? this.customName : "sp_furnace_gui";
     }
 
 

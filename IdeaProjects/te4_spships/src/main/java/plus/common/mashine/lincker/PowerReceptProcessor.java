@@ -20,7 +20,7 @@ public abstract class PowerReceptProcessor extends ReceptProcessor {
 
 
     public ItemStack calcResult(ReseptKey key, int shift, int power){
-        byte count = 1;
+        int count = 1;
         for(ItemStack item: key.getItems()){
             int proc = TehBasicItem.getTehProcess(item);
             if(proc>0){
@@ -35,5 +35,5 @@ public abstract class PowerReceptProcessor extends ReceptProcessor {
     }
 
 
-    public abstract ItemStack onCalcResult(ReseptKey key, int shift, int power);
+    protected abstract ItemStack onCalcResult(ReseptKey key, int shift, int power);
 }

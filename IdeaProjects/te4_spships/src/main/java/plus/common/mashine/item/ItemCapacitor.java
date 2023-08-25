@@ -11,11 +11,10 @@ import plus.common.mashine.inv.IEnergyFolder;
 import plus.common.mashine.inv.IItemLink;
 import plus.utls.MathUtils;
 import java.util.List;
-
 import static plus.utls.MathUtils.calcPowerComponent;
 
 
-public class ItemCapacitor extends TehBasicItem {
+public class ItemCapacitor extends TehBasicItem implements IItemCapacitor{
     public final int level;
     public final int basicCap;
 
@@ -33,13 +32,8 @@ public class ItemCapacitor extends TehBasicItem {
     }
 
 
-    public static boolean isCapacitor(ItemStack itemStack) {
-        return itemStack.getItem() instanceof ItemCapacitor;
-    }
-
-
     @Override
-    public ItemStack create(float damage, float power, int tehProcess) {
+    public ItemStack create(int shift, float damage, float power, int tehProcess) {
         ItemStack stack = new ItemStack(this);
         NBTTagCompound tag = new NBTTagCompound();
         tag.setInteger(Strings.TEH_PROC, tehProcess);

@@ -7,17 +7,20 @@ import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.registry.EntityEntry;
 import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.input.Keyboard;
-
 import plus.client.camera.Camera;
 import plus.client.event.Handler;
 import plus.client.event.SpKeyHandler;
 import plus.client.entity.LivingBlockRenderer;
+import plus.client.invlib.BodyASlotRenderer;
+import plus.common.network.PacketSyncRenderItem;
 import plus.common.network.spship.SpModePacket;
 import plus.common.network.entity.EnableSpFromEntity;
 import plus.common.spship.entity.LivingBlock;
 
 
+@SideOnly(Side.CLIENT)
 public class ClientProxy extends ServerProxy{
     @Override
     public void preInit(){
@@ -26,6 +29,8 @@ public class ClientProxy extends ServerProxy{
                 SpModePacket.ClientHandler.class,  SpModePacket.class, 2, Side.CLIENT);
         network.registerMessage(
                 EnableSpFromEntity.ClientHandler.class,  EnableSpFromEntity.class, 3, Side.CLIENT);
+        network.registerMessage(PacketSyncRenderItem.ClientHandler.class,
+                PacketSyncRenderItem.class, 1, Side.CLIENT);
 
         Camera.initEventHandlers();
         Handler.initEventHandlers();
@@ -36,6 +41,8 @@ public class ClientProxy extends ServerProxy{
     public void init() {
         super.init();
         new SpKeyHandler(network, "Space","Shoot", Keyboard.KEY_N, false);
+        new BodyASlotRenderer(0.72f, 180f,0f,0f,20f,
+                0, 0, 0.2f, 52);
     }
 
 

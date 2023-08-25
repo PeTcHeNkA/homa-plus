@@ -3,6 +3,7 @@ package plus.mixins;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.entity.*;
+import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -11,6 +12,7 @@ import net.minecraft.entity.player.PlayerCapabilities;
 import net.minecraft.init.MobEffects;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
@@ -22,6 +24,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -31,6 +34,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import plus.common.player.PlayerSpship;
 import plus.common.spship.SpShip;
+
+import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Random;
 
 
@@ -65,6 +71,24 @@ public abstract class MixinPlayer extends EntityLivingBase implements PlayerSpsh
 
 
     @Shadow public abstract void onDeath(DamageSource cause);
+
+    @Shadow protected int flyToggleTimer;
+
+    @Shadow public float prevCameraYaw;
+
+    @Shadow public float cameraYaw;
+
+    @Shadow protected float speedInAir;
+
+    @Shadow public abstract void onLivingUpdate();
+
+    @Shadow protected abstract void collideWithPlayer(Entity entityIn);
+
+    @Shadow protected abstract void playShoulderEntityAmbientSound(@Nullable NBTTagCompound p_192028_1_);
+
+    @Shadow public abstract NBTTagCompound getLeftShoulderEntity();
+
+    @Shadow public abstract NBTTagCompound getRightShoulderEntity();
 
     public MixinPlayer(World worldIn) {
         super(worldIn);
@@ -173,7 +197,107 @@ public abstract class MixinPlayer extends EntityLivingBase implements PlayerSpsh
     @Override
     public void shoot(float yaw, float pith) {
         if(isSpshipMode()) {
-            spShip.shoot(this, yaw, pith);
+            spShip.shoot(yaw, pith);
+        }
+    }
+
+
+    @Inject(method = "onLivingUpdate", at = @At("HEAD"), cancellable = true)
+    public void onLivingUpdate0(CallbackInfo ci) {
+        ci.cancel();
+        onLivingUpdate0();
+    }
+
+    private float spSpeed = 0.0f;
+    @Override
+    public float getSpSpeed() {
+        return spSpeed;
+    }
+
+
+    public void onLivingUpdate0(){
+        if (this.flyToggleTimer > 0) {
+            --this.flyToggleTimer;
+        }
+
+        this.inventory.decrementAnimations();
+        this.prevCameraYaw = this.cameraYaw;
+        super.onLivingUpdate();
+        IAttributeInstance iattributeinstance = this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED);
+
+        if (!this.world.isRemote) {
+            iattributeinstance.setBaseValue(this.capabilities.getWalkSpeed());
+        }
+
+        this.jumpMovementFactor = this.speedInAir;
+
+        boolean isSprinting = this.isSprinting();
+        if(isSpshipMode()){
+            if(isSprinting){
+                spSpeed = getSp().accelerate(spSpeed);
+                capabilities.setFlySpeed(0.05f * spSpeed);
+            }
+            spShip.onTick();
+        } else {
+            if(spSpeed > 1.0f){
+                capabilities.setFlySpeed(0.05f);
+            }
+            spSpeed = 1.0f;
+        }
+
+        if (isSprinting) {
+            this.jumpMovementFactor = (float)((double)this.jumpMovementFactor
+                    + (double)this.speedInAir * 0.3D);
+        }
+
+        this.setAIMoveSpeed((float)iattributeinstance.getAttributeValue());
+        float f, f1;
+
+        if(isDead){
+            f = f1 = 0.0f;
+        } else {
+            if (this.onGround) {
+                f1 = 0.0f;
+                f = MathHelper.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
+                if (f > 0.1F) {
+                    f = 0.1F;
+                }
+            } else {
+                f = 0.0f;
+                f1 = (float)(Math.atan(-this.motionY * 0.20000000298023224D) * 15.0D);
+            }
+        }
+
+        this.cameraYaw += (f - this.cameraYaw) * 0.4F;
+        this.cameraPitch += (f1 - this.cameraPitch) * 0.8F;
+
+        if (!isDead && !this.isSpectator()) {
+            AxisAlignedBB axisalignedbb;
+
+            if (this.isRiding() && !this.getRidingEntity().isDead) {
+                axisalignedbb = this.getEntityBoundingBox().union(this.getRidingEntity().getEntityBoundingBox()).grow(1.0D, 0.0D, 1.0D);
+            } else {
+                axisalignedbb = this.getEntityBoundingBox().grow(1.0D, 0.5D, 1.0D);
+            }
+
+            List<Entity> list = this.world.getEntitiesWithinAABBExcludingEntity(
+                    this, axisalignedbb);
+
+            for (int i = 0; i < list.size(); ++i) {
+                Entity entity = list.get(i);
+
+                if (!entity.isDead) {
+                    this.collideWithPlayer(entity);
+                }
+            }
+        }
+
+        this.playShoulderEntityAmbientSound(this.getLeftShoulderEntity());
+        this.playShoulderEntityAmbientSound(this.getRightShoulderEntity());
+
+        if (!this.world.isRemote && (this.fallDistance > 0.5F ||
+                this.isInWater() || this.isRiding()) || this.capabilities.isFlying) {
+            this.spawnShoulderEntities();
         }
     }
 

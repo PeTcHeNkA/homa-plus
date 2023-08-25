@@ -1,13 +1,14 @@
 package plus.common.mashine.item;
 
-import net.minecraft.item.ItemStack;
-
 
 public class ItemMssCapacitor extends ItemCapacitor {
     public static ItemCapacitor BATTERY_L1 = new ItemCapacitor("battery_l1", 1, 2000);
     public static ItemCapacitor BATTERY_L2 = new ItemCapacitor("battery_l2", 2, 3500);
     public static ItemCapacitor BATTERY_L3 = new ItemCapacitor("battery_l3", 3, 5700);
     public static ItemCapacitor BATTERY_L4 = new ItemCapacitor("battery_l4", 4, 7200);
+    public static ItemOxyBallon BALLON_L1 = new ItemOxyBallon(1, 800);
+    public static ItemOxyBallon BALLON_L2 = new ItemOxyBallon(2, 1400);
+
 
     public static ItemMssCapacitor MASSIVE_L1
             = new ItemMssCapacitor("massive_l1", 1, 12500);
@@ -33,8 +34,8 @@ public class ItemMssCapacitor extends ItemCapacitor {
     }
 
 
-    @Override
-    public ItemStack create(float damage, float power, int tehProcess) {
-        return super.create(damage, power, tehProcess);
-    }
+//    @Override
+//    public ItemStack create(float damage, float power, int tehProcess) {
+//        return super.create(damage, power, tehProcess);
+//    }
 }

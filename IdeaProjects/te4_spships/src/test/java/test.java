@@ -3,21 +3,28 @@ import plus.utls.ArrayBuilder;
 import plus.utls.bin.BinNum;
 import plus.utls.bin.BinNumImp;
 
+import java.util.Arrays;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
+
 public class test {
     private final Object a = null;
     private final boolean b = false;
 
     public static void main(String... args){
-        for(Object o:test.class.getDeclaredFields()){
-            System.out.println(o);
+        System.out.println(Arrays.toString(createRandomSPM(200)));
+    }
+
+    public static int[] createRandomSPM(int power){
+        ++power;
+        int[] params = new int[10];
+        Random random = ThreadLocalRandom.current();
+        while (power>1){
+            int cast = random.nextInt(power);
+            power -= cast;
+            params[random.nextInt(10)] += cast;
         }
-//        try {
-//            //long start = System.currentTimeMillis();
-//            test();
-//            //System.out.printf("END: %s %sms%n", list.getClass(), System.currentTimeMillis()-start);
-//        }catch (Exception e){
-//            e.printStackTrace();
-//        }
+        return params;
     }
 
 

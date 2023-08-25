@@ -22,13 +22,14 @@ import plus.common.mashine.furnace.SpFurnaceTileEntity;
 import plus.common.mashine.item.*;
 import plus.common.mashine.item.recept.ISimpleSmeling;
 import plus.common.mashine.lincker.SpCraftTileEntity;
+import plus.common.mashine.oxy.SpOxyChargerTileEntity;
 import plus.common.mashine.press.SpPressTileEntity;
 import plus.common.mashine.react.SpReactTileEntity;
+import plus.common.network.PacketSyncRenderItem;
 import plus.common.network.spship.SpModePacket;
 import plus.common.network.spship.SpShootPacket;
 import plus.common.spship.entity.OffSpShip;
-import plus.common.spship.item.ItemCorpus;
-import plus.common.spship.item.ItemSpArmor;
+import plus.common.spship.item.*;
 
 import java.util.HashSet;
 
@@ -40,14 +41,18 @@ public class ServerProxy {
 
     public void preInit() {
         preLoadClasses(
-                BasicItem.class,
+                //BasicItem.class,
                 ReactCore.class,
                 SpMehModule.class,
                 ItemMssCapacitor.class,
                 SimpleOre.class,
                 TehSubcraftItem.class,
                 ItemCorpus.class,
-                ItemSpArmor.class
+                ItemSpArmor.class,
+                //ItemModule.class,
+                ItemAccelerator.class,
+                ItemRegenShield.class,
+                ItemProtector.class
         );
         network = NetworkRegistry.INSTANCE.newSimpleChannel(SpMain.MOD_ID);
         network.registerMessage(
@@ -112,6 +117,7 @@ public class ServerProxy {
         regTile(SpReactTileEntity.class, "sp_react");
         regTile(SpPressTileEntity.class, "sp_press");
         regTile(SpCapacitorTileEntity.class, "sp_capacitor");
+        regTile(SpOxyChargerTileEntity.class, "sp_oxy_charger");
     }
 
 

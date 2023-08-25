@@ -38,7 +38,7 @@ public abstract class MixinInventoryPlayer implements IInventory {
     public final NonNullList<ItemStack> offHandInventory = NonNullList.<ItemStack>withSize(1, ItemStack.EMPTY);
 
     public final NonNullList<ItemStack> spInventory =
-            NonNullList.withSize(11, ItemStack.EMPTY);
+            NonNullList.withSize(12, ItemStack.EMPTY);
 
 
     @Inject(method = "<init>", at = @At("TAIL"))
@@ -52,24 +52,25 @@ public abstract class MixinInventoryPlayer implements IInventory {
     }
 
 
-    @Inject(method = "dropAllItems", at = @At("HEAD"),cancellable = true)
-    public void dropAllItems(CallbackInfo ci) {
-        ci.cancel();
-        dropAllFor(mainInventory);
-        dropAllFor(armorInventory);
-        dropAllFor(offHandInventory);
-    }
-
-
-    private void dropAllFor(List<ItemStack> list){
-        for (int i = 0; i < list.size(); ++i) {
-            ItemStack itemstack = list.get(i);
-            if (!itemstack.isEmpty()) {
-                this.player.dropItem(itemstack, true, false);
-                list.set(i, ItemStack.EMPTY);
-            }
-        }
-    }
+//    @Inject(method = "dropAllItems", at = @At("HEAD"),cancellable = true)
+//    public void dropAllItems(CallbackInfo ci) {
+//        ci.cancel();
+//        dropAllFor(mainInventory);
+//        dropAllFor(armorInventory);
+//        dropAllFor(offHandInventory);
+//        dropAllFor(spInventory);
+//    }
+//
+//
+//    private void dropAllFor(List<ItemStack> list){
+//        for (int i = 0; i < list.size(); ++i) {
+//            ItemStack itemstack = list.get(i);
+//            if (!itemstack.isEmpty()) {
+//                this.player.dropItem(itemstack, true, false);
+//                list.set(i, ItemStack.EMPTY);
+//            }
+//        }
+//    }
 
 
     @Inject(method = "writeToNBT", at = @At("HEAD"), cancellable = true)

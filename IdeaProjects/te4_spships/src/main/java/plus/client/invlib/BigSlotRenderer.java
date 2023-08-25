@@ -1,24 +1,22 @@
 package plus.client.invlib;
 
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.InventoryEffectRenderer;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.inventory.ClickType;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.common.etc.DSlot;
-
 import static plus.utls.MathUtils.isBetween;
-//import plus.inv.AInventoryClientRenderer;
-//import plus.invlib.render.RItemFrame;
-//import plus.invlib.render.RString;
 
 
+@SideOnly(Side.CLIENT)
 public class BigSlotRenderer {
     protected static final Minecraft mc = Minecraft.getMinecraft();
-    public final DSlot slot;
     private final InventoryEffectRenderer gui;
+    public final DSlot slot;
 
     public BigSlotRenderer(InventoryEffectRenderer gui, DSlot slot) {
         this.gui = gui;
@@ -120,13 +118,11 @@ public class BigSlotRenderer {
         RenderUtls.drawGradientRect(0, 0, 16, 16, -2130706433, -2130706433, 0);
 
         GlStateManager.colorMask(true, true, true, true);
-        //GlStateManager.enableLighting();
-        //GlStateManager.enableDepth();
     }
 
 
     protected void onNormal(int x, int y) {
-        //System.out.println("NOTMA");
+
     }
 
 

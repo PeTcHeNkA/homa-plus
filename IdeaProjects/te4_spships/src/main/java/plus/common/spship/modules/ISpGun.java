@@ -22,7 +22,7 @@ public interface ISpGun {
                 SPM.getIOf(ints, 1),
                 SPM.getIOf(ints, 2),
                 SPM.getIOf(ints, 3),
-                SPM.getIOfI(ints, 4)
-        );
+                SPM.getIOfI(ints, 4),
+                SPM.getIOfI(ints, 5));
     }
 }

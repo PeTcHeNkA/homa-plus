@@ -1,11 +1,19 @@
 package plus.common.spship.item.craft;
 
+import net.minecraft.item.ItemStack;
 import plus.common.mashine.item.recept.IItemValidator;
+import plus.common.spship.item.ItemCorpus;
 
 
 public class CraftCRavenProcessor extends CraftCHunterProcessor{
     public CraftCRavenProcessor(IItemValidator... validators) {
         super(validators);
+    }
+
+
+    @Override
+    ItemCorpus.Provider newProvider(ItemStack item) {
+        return new ItemCorpus.Provider(item, 0, 2, 2);
     }
 
 

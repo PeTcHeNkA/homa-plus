@@ -1,0 +1,16 @@
+ {
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+      "GPG",
+      "P P",
+      "PPP"
+    ],
+    "key": {
+      "P": {"item": "te4_spships:plate_machine"},
+      "G": {"item": "te4_spships:iron_gear"}
+    },
+    "result": {
+      "item": "te4_spships:oxy_ballon_l1",
+      "count": 1
+    }
+}

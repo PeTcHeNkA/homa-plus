@@ -3,26 +3,28 @@ package plus.common.spship;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagIntArray;
-
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import static plus.common.spship.item.ItemModule.SP_MODULE;
 
 
 public enum SPM {
-    DAMAGE,
-    DAMAGE_PR,
-    MAX_SHIELD,
-    MAX_SHIELD_PR,
-    SPEED,
-    SPEED_PR,
-    CRIT_RATE,
-    CRIT_DMG,
-    REGEN_SHIELD,
-    MASS,
-    ENERGY,
-    ENERGY_GEN,
-    POTENTIAL
+    DAMAGE,        //24
+    DAMAGE_PR,     //12
+    MAX_SHIELD,    //42
+    MAX_SHIELD_PR, //14
+    SPEED,         //20
+    SPEED_PR,      //10
+    CRIT_RATE,     //30
+    CRIT_DMG,      //42
+    REGEN_SHIELD,  //14
+    MASS,          //3
+    ENERGY,        //72
+    ENERGY_GEN,    //10
+    POTENTIAL      //12
     ;
     public static final int SIZE = SPM.values().length;
+    private static final int[] COEFS = {24,12,42,14,20,10,30,42,14,3,72,10,12};
 
     public static int[] create(){
         return new int[SPM.SIZE];
@@ -41,6 +43,22 @@ public enum SPM {
         System.arraycopy(spm, 0, copy, 0, lastNotNull);
 
         return new NBTTagIntArray(copy);
+    }
+
+
+    public static int[] createRandomSPM(int power){
+        ++power;
+        int[] params = new int[SIZE];
+        Random random = ThreadLocalRandom.current();
+        while (power>1){
+            int cast = random.nextInt(power);
+            power -= cast;
+            params[random.nextInt(SIZE)] += cast;
+        }
+        for(int i=0;i<SIZE;i++){
+            params[i] = params[i] * COEFS[i];
+        }
+        return params;
     }
 
 

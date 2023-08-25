@@ -24,12 +24,14 @@ public class SpGun implements ISpGun{
     private final int modelId;
     private final float power;
     private final int energyCast;
+    private final int cd;
 
 
-    public SpGun(AmmType type, float power, float damage, float energyCastCoef, int modelId) {
+    public SpGun(AmmType type, float power, float damage, float energyCastCoef, int modelId, int cd) {
         this.modelId = modelId;
         this.type = type;
         this.power = power;
+        this.cd = cd;
         this.energyCast = (int) (power*damage*energyCastCoef);
     }
 
@@ -41,6 +43,11 @@ public class SpGun implements ISpGun{
                     shooter, yaw, pith, power, 0
             ));
         }
+    }
+
+
+    public int getCoolDown() {
+        return cd;
     }
 
 

@@ -1,7 +1,5 @@
 package plus.common.spship.modules;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import plus.common.Strings;
@@ -20,39 +18,43 @@ public class SpReactor implements IEnergyFolder, ITickModule {
     private byte ignoreTicks = 0;
     private final IItemLink[] links;
     private final int coreLvl;
+    private final float baseSpeed;
 
 
-    private SpReactor(IItemLink[] links, int coreLvl) {
+    private SpReactor(IItemLink[] links, int coreLvl, float baseSpeed) {
         this.links = links;
         this.coreLvl = coreLvl;
+        this.baseSpeed = baseSpeed;
         checkItems();
     }
 
 
-    public static SpReactor build(SpShip spShip, EntityPlayer player, int coreLvl){
-        IItemLink[] links = scanReact(player.inventory);
-        if(links == null)return null;
-        return new SpReactor(links, coreLvl);
-    }
+    public static final class Builder{
+        private IItemLink[] links = new IItemLink[SLOTS.length];
+        private int count = 0;
 
-
-    private static IItemLink[] scanReact(IInventory inv){
-        IItemLink[] links = new IItemLink[SLOTS.length];
-        int count = 0;
-        for(int slot:SLOTS){
-            ItemStack item = inv.getStackInSlot(slot);
-            if(ReactComponent.isReactNoCore(item)){
-                links[count] = new FInvItemLink(inv, slot, item);
+        public void feed(SpInvProxy proxy, int slot){
+            if(ReactComponent.isReactNoCore(proxy.getItem(slot))){
+                links[count] = proxy.link(slot);
                 ++count;
             }
         }
-        if(count==0)return null;
-        if(links.length != count){
-            IItemLink[] links0 = new IItemLink[count];
-            System.arraycopy(links, 0, links0, 0, count);
-            return links0;
+
+
+        public boolean canBuild(){
+            return count>0;
         }
-        return links;
+
+
+        public SpReactor complete(int coreLvl, float baseSpeed){
+            if(count==0)links = new IItemLink[0];
+            else if(links.length != count){
+                IItemLink[] links0 = new IItemLink[count];
+                System.arraycopy(links, 0, links0, 0, count);
+                links = links0;
+            }
+            return new SpReactor(links, coreLvl, baseSpeed);
+        }
     }
 
 
@@ -70,12 +72,12 @@ public class SpReactor implements IEnergyFolder, ITickModule {
                 }
                 energy += genSpeed;
             }
-            int cur = sp.getFolder().getCurEnergy();
-            int max = sp.getFolder().getMaxEnergy();
+            int cur = sp.getPowerSystem().getCurEnergy();
+            int max = sp.getPowerSystem().getMaxEnergy();
             int maxTake = max-cur;
-            if(cur>0){
+            if(cur<max){
                 if(maxTake>energy)maxTake = (int) energy;
-                sp.getFolder().putEnergy(maxTake);
+                sp.getPowerSystem().putEnergy(maxTake);
                 energy -= maxTake;
             }
             ignoreTicks = 0;
@@ -99,9 +101,9 @@ public class SpReactor implements IEnergyFolder, ITickModule {
             }
         }
         if (summPow == 0) {
-            genSpeed = 0;
+            genSpeed = baseSpeed;
         } else {
-            genSpeed = coreLvl * summPow * 20;
+            genSpeed = baseSpeed + (coreLvl * summPow * 20);
             maxPower = genSpeed * 2;
         }
     }

@@ -18,15 +18,17 @@ public class TehBasicItem extends BasicItem implements ISimplePowerCraftable {
     @Override
     public ItemStack create(int shift, int tehProcess){
         float sd = normal(shift);
-        return create(
-                sd,
-                1f - sd, tehProcess
-        );
+        return create(shift, sd, 1f - sd, tehProcess);
     }
 
 
     protected static float normal(int shift){
         return shift/104f + 0.03f;
+    }
+
+
+    public static float getPower(ItemStack item){
+        return item.getTagCompound().getFloat(Strings.POWER);
     }
 
 
@@ -38,7 +40,13 @@ public class TehBasicItem extends BasicItem implements ISimplePowerCraftable {
     }
 
 
-    public ItemStack create(float power, float damage, int tehProcess){
+    public static float calcDamageCoef(ItemStack item){
+        return ((float) item.getItemDamage()) / item.getMaxDamage();
+    }
+
+
+    @Override
+    public ItemStack create(int shift, float power, float damage, int tehProcess){
         ItemStack stack = new ItemStack(this);
         NBTTagCompound tag = new NBTTagCompound();
         tag.setInteger(Strings.TEH_PROC, tehProcess);
@@ -47,7 +55,10 @@ public class TehBasicItem extends BasicItem implements ISimplePowerCraftable {
         );
         stack.setTagCompound(tag);
         if(damage<1) {
-            stack.setItemDamage((int) (getMaxDamage() * damage));
+            int maxDmg = getMaxDamage();
+            int dmg = (int) (maxDmg * damage);
+            if(dmg>=maxDmg)dmg = maxDmg;
+            stack.setItemDamage(dmg);
         }
         return stack;
     }

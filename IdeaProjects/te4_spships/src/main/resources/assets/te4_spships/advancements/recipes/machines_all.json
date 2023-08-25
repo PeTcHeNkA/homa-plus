@@ -7,7 +7,8 @@
     "te4_spships:ms_react",
     "te4_spships:ms_capacitor",
     "te4_spships:massive_frame_l1",
-    "te4_spships:massive_frame_l2"
+    "te4_spships:massive_frame_l2",
+    "te4_spships:sp_oxy_charger"
   ]},
   "criteria": {
     "has_item": {"trigger": "minecraft:inventory_changed",

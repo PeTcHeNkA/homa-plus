@@ -33,7 +33,7 @@ public class ItemSpArmor extends TehBasicItem {
 
 
     @Override
-    public ItemStack create(float power, float damage, int tehProcess) {
+    public ItemStack create(int shift, float power, float damage, int tehProcess) {
         return create(power, damage, tehProcess, -1);
     }
 
@@ -42,13 +42,13 @@ public class ItemSpArmor extends TehBasicItem {
         ItemStack stack = new ItemStack(this);
         NBTTagCompound tag = new NBTTagCompound();
         tag.setInteger(Strings.TEH_PROC, tehProcess);
-        tag.setFloat(Strings.POWER,
-                (float) (calcPowerComponent(power)* MathUtils.calcBigStructCoef(tehProcess)/2)
-        );
+//        tag.setFloat(Strings.POWER,
+//                (float) (calcPowerComponent(power)* MathUtils.calcBigStructCoef(tehProcess)/2)
+//        );
         stack.setTagCompound(tag);
-        if(damage<1) {
-            stack.setItemDamage((int) (getMaxDamage() * damage));
-        }
+//        if(damage<1) {
+//            stack.setItemDamage((int) (getMaxDamage() * damage));
+//        }
         tag.setInteger("cmd", color);
         return stack;
     }
@@ -62,8 +62,8 @@ public class ItemSpArmor extends TehBasicItem {
             NBTTagCompound tags = item.getTagCompound();
             if(tags==null)return;
             addLore(lore, "teh_prc", tags.getInteger("teh-prc"));
-            addLore(lore, "teh_pow", round(tags.getFloat("power")));
-            addLore(lore, "sp_dur", getMaxDamage()-item.getItemDamage(), getMaxDamage());
+            //addLore(lore, "teh_pow", round(tags.getFloat("power")));
+            //addLore(lore, "sp_dur", getMaxDamage()-item.getItemDamage(), getMaxDamage());
         } else {
             addLore(lore, "more_inf");
         }

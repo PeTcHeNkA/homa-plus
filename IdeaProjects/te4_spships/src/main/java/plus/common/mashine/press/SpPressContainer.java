@@ -42,9 +42,6 @@ public class SpPressContainer extends PlayerExtendedBlockContainer {
     public void detectAndSendChanges() {
         super.detectAndSendChanges();
         int curPrg = inventory.getField(0);
-        if(progress != curPrg){
-            progress = curPrg;
-            syncFirstField(progress);
-        }
+        if(progress != curPrg) syncFirstField(progress = curPrg);
     }
 }

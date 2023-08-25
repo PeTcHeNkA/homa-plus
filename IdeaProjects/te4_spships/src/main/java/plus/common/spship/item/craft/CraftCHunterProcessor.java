@@ -13,6 +13,12 @@ public class CraftCHunterProcessor extends AbcCraftCorpusProcessor{
 
 
     @Override
+    ItemCorpus.Provider newProvider(ItemStack item) {
+        return new ItemCorpus.Provider(item, 16, 2, 2);
+    }
+
+
+    @Override
     void onPostCraft(ReseptKey key, ItemCorpus.Provider item) {
         ItemStack[] items = key.getItems();
         int wingColor = getArmorColor(items[1]);

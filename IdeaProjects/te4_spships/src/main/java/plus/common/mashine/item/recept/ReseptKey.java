@@ -19,8 +19,8 @@ public class ReseptKey {
         return result;
     }
 
-    public static int calcItemHash(ItemStack item){
-        return item.getItem().getRegistryName().hashCode()+31*item.getCount();
+    public static int calcItemHash(ItemStack item){//TODO проверить
+        return item.getItem().getRegistryName().hashCode();//+31*item.getCount();
     }
 
     public static boolean eqItemArray(ItemStack[] arr1, ItemStack[] arr2){
@@ -37,21 +37,22 @@ public class ReseptKey {
     }
 
 
-    public static boolean eqItemStack(ItemStack item, ItemStack other){
-        if(item == other || item.isEmpty() == other.isEmpty())return true;
-        if(item.getItem() == other.getItem()) {
-            if (item.getCount() == other.getCount()){
-                NBTTagCompound tag = item.getTagCompound();
-                NBTTagCompound tag2 = other.getTagCompound();
-                if(tag == null){
-                    return tag2 == null;
-                } else if(tag2 == null){
-                    return false;
-                }
-                return tag.equals(tag2);
-            }
-        }
-        return false;
+    public static boolean eqItemStack(ItemStack item, ItemStack other){//TODO ?
+        return item.getItem() == other.getItem();
+//        if(item == other || item.isEmpty() == other.isEmpty())return true;
+//        if(item.getItem() == other.getItem()) {
+//            //if (item.getCount() == other.getCount()){
+//                NBTTagCompound tag = item.getTagCompound();
+//                NBTTagCompound tag2 = other.getTagCompound();
+//                if(tag == null){
+//                    return tag2 == null;
+//                } else if(tag2 == null){
+//                    return false;
+//                }
+//                return tag.equals(tag2);
+//            //}
+//        }
+//        return false;
     }
 
 

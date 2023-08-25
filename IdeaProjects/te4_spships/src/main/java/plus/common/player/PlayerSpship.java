@@ -29,4 +29,5 @@ public interface PlayerSpship {
 
     void setSpShield(float shield);
     float getSpShield();
+    float getSpSpeed();
 }

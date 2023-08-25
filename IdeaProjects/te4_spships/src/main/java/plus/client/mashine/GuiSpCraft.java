@@ -10,6 +10,7 @@ import net.minecraft.init.Items;
 import net.minecraft.inventory.ClickType;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
@@ -26,6 +27,7 @@ import plus.common.mashine.item.recept.ReseptKey;
 import plus.common.mashine.lincker.SpCraftContainer;
 import plus.common.mashine.lincker.SpReceptBook;
 import plus.common.spship.item.ItemCorpus;
+import plus.common.spship.item.ItemModule;
 import plus.utls.MathUtils;
 import java.io.IOException;
 
@@ -40,10 +42,12 @@ public class GuiSpCraft extends GuiContainer {
 
     private final ButtonSet buttons = new ButtonSet();
     private final VisualRCPage[] pages = new VisualRCPage[]{
-            new VisualRCPage(new ItemStack(TehSubcraftItem.MICRO_NRM),1, 2, 3, 18),
-            new VisualRCPage(new ItemStack(ItemMssCapacitor.BATTERY_L2),new int[][]{{4},{5},{6,7},{8,9}}),
-            new VisualRCPage(new ItemStack(ReactCore.CORE_L2), new int[][]{{10,11},{12,13}, {14,15,16,17}}),
-            new VisualRCPage(ItemCorpus.SP_MODEL.createSimple(17), new int[][]{{20},{19}})
+            new VisualRCPage(TehSubcraftItem.MICRO_NRM,1, 2, 3, 18),
+            new VisualRCPage(ItemMssCapacitor.BATTERY_L2,new int[][]{{4},{5},{6,7},{8,9}}),
+            new VisualRCPage(ReactCore.CORE_L2, new int[][]{{10,11},{12,13}, {14,15,16,17},{27,28}}),
+            new VisualRCPage(ItemCorpus.SP_MODEL.createSimple(17),
+                    new int[][]{{20,19},{21,22},{23,24,25,26},{29,30,31,32}})
+            //new VisualRCPage(ItemModule.SP_ACCELERATOR_L1, new int[][]{{21, 22}})
     };
 
     private ItemStack hovRecepieItem = ItemStack.EMPTY;
@@ -117,7 +121,7 @@ public class GuiSpCraft extends GuiContainer {
 
     class VisualRCPage {
         private final ReceptCont[] recepts;
-
+        VisualRCPage(Item ico, int... ids){this(new ItemStack(ico), ids);}
         VisualRCPage(ItemStack ico, int... ids){
             buttons.add(new Button(ico));
             recepts = new ReceptCont[ids.length];
@@ -125,6 +129,7 @@ public class GuiSpCraft extends GuiContainer {
                 recepts[i] = new ReceptPreview(ids[i]);
             }
         }
+        VisualRCPage(Item ico, int[]... ids){this(new ItemStack(ico), ids);}
         VisualRCPage(ItemStack ico, int[]... ids){
             buttons.add(new Button(ico));
             recepts = new ReceptCont[ids.length];

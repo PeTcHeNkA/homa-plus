@@ -11,28 +11,30 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import plus.common.etc.DSlot;
+import plus.common.etc.SyncRenderSlot;
 import plus.common.player.PlayerSpship;
 
 
 @Mixin(ContainerPlayer.class)
 public abstract class MixinContainerPlayer extends Container {
     @Inject(method = "<init>", at = @At("TAIL"))
-    public void init(InventoryPlayer playerInventory, boolean localWorld,
-                     EntityPlayer playerIn, CallbackInfo ci){
+    public void init(InventoryPlayer plInv, boolean localWorld,
+                     EntityPlayer player, CallbackInfo ci){
 
-        this.addSlotToContainer(new DSlot(playerInventory, 41, 9,   98));
-        this.addSlotToContainer(new DSlot(playerInventory, 42, 35,  98));
-        this.addSlotToContainer(new DSlot(playerInventory, 43, 61,  98));
-        this.addSlotToContainer(new DSlot(playerInventory, 44, 87,  98));
-        this.addSlotToContainer(new DSlot(playerInventory, 45, 113, 98));
+        this.addSlotToContainer(new DSlot(plInv, 41, 9,   98));
+        this.addSlotToContainer(new DSlot(plInv, 42, 35,  98));
+        this.addSlotToContainer(new DSlot(plInv, 43, 61,  98));
+        this.addSlotToContainer(new DSlot(plInv, 44, 87,  98));
+        this.addSlotToContainer(new DSlot(plInv, 45, 113, 98));
 
-        this.addSlotToContainer(new DSlot(playerInventory, 46, 9,  124));
-        this.addSlotToContainer(new DSlot(playerInventory, 47, 35, 124));
-        this.addSlotToContainer(new DSlot(playerInventory, 48, 61, 124));
-        this.addSlotToContainer(new DSlot(playerInventory, 49, 87, 124));
-        this.addSlotToContainer(new DSlot(playerInventory, 50, 113,124));
+        this.addSlotToContainer(new DSlot(plInv, 46, 9,  124));
+        this.addSlotToContainer(new DSlot(plInv, 47, 35, 124));
+        this.addSlotToContainer(new DSlot(plInv, 48, 61, 124));
+        this.addSlotToContainer(new DSlot(plInv, 49, 87, 124));
+        this.addSlotToContainer(new DSlot(plInv, 50, 113,124));
 
-        this.addSlotToContainer(new DSlot(playerInventory, 51, 0,0));
+        this.addSlotToContainer(new DSlot(plInv, 51, 0,0));
+        this.addSlotToContainer(SyncRenderSlot.build(plInv, 52, 77, 8, player));
     }
 
 
@@ -41,7 +43,7 @@ public abstract class MixinContainerPlayer extends Container {
         if(slotId>45 && slotId < 57){//46 <-> 55 and 56
             ItemStack result = super.slotClick(slotId, dragType, clickTypeIn, player);
             PlayerSpship sp = (PlayerSpship) player;
-            sp.getSp().calcParams(player);
+            sp.getSp().calcParams();
             return result;
         } else {
             return super.slotClick(slotId, dragType, clickTypeIn, player);
