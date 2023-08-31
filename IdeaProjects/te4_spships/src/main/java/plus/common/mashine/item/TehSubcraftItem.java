@@ -34,7 +34,7 @@ public class TehSubcraftItem extends TehBasicItem {
         if(isMoreInfo()){
             NBTTagCompound tags = item.getTagCompound();
             if(tags==null)return;
-            addLore(lore, "teh_prc", tags.getInteger(Strings.TEH_PROC));
+            addLore(lore, "teh_prc", tags.getShort(Strings.TEH_PROC));
             addLore(lore, "teh_pow", round(tags.getFloat(Strings.POWER)));
             addLore(lore, "sp_dur", getMaxDamage()-item.getItemDamage(), getMaxDamage());
         } else {

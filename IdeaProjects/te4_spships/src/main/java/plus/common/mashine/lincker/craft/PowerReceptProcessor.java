@@ -1,4 +1,4 @@
-package plus.common.mashine.lincker;
+package plus.common.mashine.lincker.craft;
 
 import net.minecraft.item.ItemStack;
 import plus.common.mashine.item.TehBasicItem;

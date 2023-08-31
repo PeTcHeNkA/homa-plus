@@ -5,10 +5,8 @@ import net.minecraft.util.MovementInput;
 import net.minecraft.util.MovementInputFromOptions;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import plus.client.camera.Camera;
 
 
@@ -18,9 +16,13 @@ public class MixinInput extends MovementInput {
     @Shadow
     private GameSettings gameSettings;
 
-    @Inject(method = "updatePlayerMoveState", at = @At("HEAD"), cancellable = true)
-    public void updatePlayerMoveState(CallbackInfo ci) {
-        ci.cancel();
+
+    /**
+     * @author Te4hno
+     * @reason add Sp
+     */
+    @Overwrite
+    public void updatePlayerMoveState() {
         this.moveStrafe = 0.0F;
         this.moveForward = 0.0F;
 

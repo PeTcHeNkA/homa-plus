@@ -7,14 +7,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.NonNullList;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.Arrays;
 import java.util.List;
 
@@ -52,30 +48,37 @@ public abstract class MixinInventoryPlayer implements IInventory {
     }
 
 
-//    @Inject(method = "dropAllItems", at = @At("HEAD"),cancellable = true)
-//    public void dropAllItems(CallbackInfo ci) {
-//        ci.cancel();
-//        dropAllFor(mainInventory);
-//        dropAllFor(armorInventory);
-//        dropAllFor(offHandInventory);
-//        dropAllFor(spInventory);
-//    }
-//
-//
-//    private void dropAllFor(List<ItemStack> list){
-//        for (int i = 0; i < list.size(); ++i) {
-//            ItemStack itemstack = list.get(i);
-//            if (!itemstack.isEmpty()) {
-//                this.player.dropItem(itemstack, true, false);
-//                list.set(i, ItemStack.EMPTY);
-//            }
-//        }
-//    }
+
+    /**
+     * @author
+     * @reason
+     */
+    @Overwrite
+    public void dropAllItems() {
+        dropAllFor(mainInventory);
+        dropAllFor(armorInventory);
+        dropAllFor(offHandInventory);
+        dropAllFor(spInventory);
+    }
 
 
-    @Inject(method = "writeToNBT", at = @At("HEAD"), cancellable = true)
-    public void writeToNBT(NBTTagList nbtTagListIn, CallbackInfoReturnable<NBTTagList> cir) {
-        cir.cancel();
+    private void dropAllFor(List<ItemStack> list){
+        for (int i = 0; i < list.size(); ++i) {
+            ItemStack itemstack = list.get(i);
+            if (!itemstack.isEmpty()) {
+                this.player.dropItem(itemstack, true, false);
+                list.set(i, ItemStack.EMPTY);
+            }
+        }
+    }
+
+
+    /**
+     * @author Te4hno
+     * @reason patch
+     */
+    @Overwrite
+    public NBTTagList writeToNBT(NBTTagList nbtTagListIn) {
         ItemStack item;
         for (int i = 0; i < this.mainInventory.size(); ++i) {
             item = mainInventory.get(i);
@@ -97,15 +100,13 @@ public abstract class MixinInventoryPlayer implements IInventory {
             }
         }
 
-        //for (int k = 0; k < this.offHandInventory.size(); ++k) {
-            item = offHandInventory.get(0);
-            if (!item.isEmpty()) {
-                NBTTagCompound tag = new NBTTagCompound();
-                tag.setByte("Slot", (byte) 59);
-                item.writeToNBT(tag);
-                nbtTagListIn.appendTag(tag);
-            }
-        //}
+        item = offHandInventory.get(0);
+        if (!item.isEmpty()) {
+            NBTTagCompound tag = new NBTTagCompound();
+            tag.setByte("Slot", (byte) 59);
+            item.writeToNBT(tag);
+            nbtTagListIn.appendTag(tag);
+        }
 
         for(int l = 0; l < this.spInventory.size(); ++l){
             item = spInventory.get(l);
@@ -116,13 +117,16 @@ public abstract class MixinInventoryPlayer implements IInventory {
                 nbtTagListIn.appendTag(tag);
             }
         }
-        cir.setReturnValue(nbtTagListIn);
+        return nbtTagListIn;
     }
 
 
-    @Inject(method = "readFromNBT", at = @At("HEAD"), cancellable = true)
-    public void readFromNBT(NBTTagList nbtTagListIn, CallbackInfo ci) {
-        ci.cancel();
+    /**
+     * @author Te4hno
+     * @reason patch
+     */
+    @Overwrite
+    public void readFromNBT(NBTTagList nbtTagListIn) {
         this.mainInventory.clear();
         this.armorInventory.clear();
         this.offHandInventory.clear();
@@ -136,7 +140,7 @@ public abstract class MixinInventoryPlayer implements IInventory {
             if (!itemstack.isEmpty()) {
                 if (j < this.mainInventory.size()) {
                     this.mainInventory.set(j, itemstack);
-                } else if (j >= 50 && j < 54) {
+                } else if (j >= 50 && j < 59) {
                     this.armorInventory.set(j - 50, itemstack);
                 } else if (j == 59) {
                     this.offHandInventory.set(0, itemstack);

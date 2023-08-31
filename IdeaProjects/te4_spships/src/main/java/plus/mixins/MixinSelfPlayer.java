@@ -74,7 +74,6 @@ public abstract class MixinSelfPlayer extends AbstractClientPlayer implements Pl
     @Shadow
     protected abstract void sendHorseJump();
 
-    @Shadow private boolean handActive;
     private double speed = 0;
     private double prevSpeed = 0;
     private float realPith = 0;
@@ -88,13 +87,7 @@ public abstract class MixinSelfPlayer extends AbstractClientPlayer implements Pl
     public void onInit(CallbackInfo ci){
         Camera.onEndSelfSpship(this);
         prevSpShield = getSpShield();
-//        if(isSpshipMode()){
-//            onStartSelfSpship(this);
-//        } else {
-//            //onEndSelfSpship(this);
-//        }
     }
-
 
     private boolean prevMode;
     private float prevSpShield = 0;
@@ -242,7 +235,7 @@ public abstract class MixinSelfPlayer extends AbstractClientPlayer implements Pl
 
         if (this.capabilities.isFlying && this.isCurrentViewEntity()) {
             if(spMode){
-                float boost = this.isSprinting() ? 4.5f:3f;
+                float boost = this.isSprinting() ? 4.2f:2.7f;
                 if(this.movementInput.sneak){
                     this.motionY -= this.capabilities.getFlySpeed() * boost;
                 }

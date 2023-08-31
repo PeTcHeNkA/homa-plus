@@ -33,7 +33,7 @@ public class ItemProtector extends ItemModule{
     public ItemStack create(int shift, float power, float damage, int tehProcess){
         ItemStack stack = new ItemStack(this);
         NBTTagCompound tag = new NBTTagCompound();
-        tag.setInteger(Strings.TEH_PROC, tehProcess);
+        tag.setShort(Strings.TEH_PROC, (short) tehProcess);
 
         float finPower = (float) (calcPowerComponent(power)* MathUtils.calcBigStructCoef(tehProcess)/2);
         switch (lvl){
@@ -63,8 +63,8 @@ public class ItemProtector extends ItemModule{
 
     @Override
     @SideOnly(Side.CLIENT)
-    void addMoreInf(NBTTagCompound tags, List<String> lore) {
-        int[] ints = tags.getIntArray(Strings.SP_MODULE_INTS);
+    void addMoreInf(ItemStack item, List<String> lore) {
+        int[] ints = item.getTagCompound().getIntArray(Strings.SP_MODULE_INTS);
         if(ints.length<4)return;
         int physEnrgCoef = ints[0];
         int enrgEnrgCoef = ints[1];

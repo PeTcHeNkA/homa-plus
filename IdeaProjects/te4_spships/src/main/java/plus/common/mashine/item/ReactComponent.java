@@ -13,10 +13,10 @@ import java.util.List;
 
 
 public class ReactComponent extends TehBasicItem {
-    public static ReactComponent ENERGY_L1 = RC("react_energy", 1, 12500);
-    public static ReactComponent ENERGY_L2 = RC("react_energy", 2, 18000);
-    public static ReactComponent ENERGY_L3 = RC("react_energy", 3, 24500);
-    public static ReactComponent ENERGY_L4 = RC("react_energy", 4, 31500);
+    public static final ReactComponent ENERGY_L1 = RC("react_energy", 1, 8750);
+    public static final ReactComponent ENERGY_L2 = RC("react_energy", 2, 14400);
+    public static final ReactComponent ENERGY_L3 = RC("react_energy", 3, 19600);
+    public static final ReactComponent ENERGY_L4 = RC("react_energy", 4, 25200);
 
     public enum TYPE{CORE, COMPONENT, BOOSTER}
     public final int level;
@@ -69,7 +69,7 @@ public class ReactComponent extends TehBasicItem {
         if(isMoreInfo()){
             NBTTagCompound tags = item.getTagCompound();
             if(tags==null)return;
-            addLore(lore, "teh_prc", tags.getInteger(Strings.TEH_PROC));
+            addLore(lore, "teh_prc", tags.getShort(Strings.TEH_PROC));
             addLore(lore, "teh_pow", round(tags.getFloat(Strings.POWER)+level/2f));
             addLore(lore, "sp_dur", getMaxDamage()-item.getItemDamage(), getMaxDamage());
         } else {

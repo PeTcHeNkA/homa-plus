@@ -1,5 +1,4 @@
-package plus.common.mashine.lincker;
-
+package plus.common.mashine.lincker.craft;
 
 import net.minecraft.item.ItemStack;
 import plus.common.mashine.item.TehBasicItem;
@@ -8,11 +7,11 @@ import plus.common.mashine.item.recept.ISimplePowerCraftable;
 import plus.common.mashine.item.recept.ReseptKey;
 
 
-public class DmgPowerReceptProcessor extends PowerReceptProcessor{
-    private final ISimplePowerCraftable powerCraftable;
-    public DmgPowerReceptProcessor(ISimplePowerCraftable item, IItemValidator... items) {
+public class DmgPowerProcessor extends PowerReceptProcessor{
+    protected final ISimplePowerCraftable result;
+    public DmgPowerProcessor(ISimplePowerCraftable item, IItemValidator... items) {
         super(items);
-        this.powerCraftable = item;
+        this.result = item;
     }
 
 
@@ -45,6 +44,6 @@ public class DmgPowerReceptProcessor extends PowerReceptProcessor{
 
 
     protected ItemStack onCalcResult(ReseptKey key, int shift, int tehProc, float power, float damage) {
-        return powerCraftable.create(shift, power, damage, tehProc);
+        return result.create(shift, power, damage, tehProc);
     }
 }

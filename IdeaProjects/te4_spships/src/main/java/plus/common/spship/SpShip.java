@@ -7,6 +7,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import plus.common.mashine.inv.IEnergyFolder;
+import plus.common.mashine.inv.IItemLink;
 import plus.common.mashine.item.IItemCapacitor;
 import plus.common.mashine.item.ReactComponent;
 import plus.common.player.PlayerSpship;
@@ -19,32 +20,21 @@ import java.util.ArrayList;
 public class SpShip {
     public static final int[] SLOTS = {41,42,43,44,45,46,47,48,49,50,51};
     public final EntityPlayer owner;
-
+    private int accTick = 0;
     public int modelId = 0;
-
     public int maxShield;
-    //public float speed;
-    public float damage;
-    public float critRate;
-    public float critDmg;
-    public float regen;
-
-//    public float energy;
-//    public float maxEnergy;
-//    public float enegryGen;
 
     //TODO Переделать расчет SPM
     //TODO асинхронность кораблей синхронно относительно мира
-    private ISpGun gun = ISpGun.EMPTY;
-    private SpProtector protectGen = new SpProtector(0,0,0,0);
-    private IEnergyFolder powerSystem;
-    private ITickModule[] tickModules;
+    public ISpGun gun = ISpGun.EMPTY;
+    public SpProtector protectGen = new SpProtector(0,0,0,0, new IItemLink[0]);
+    public IEnergyFolder powerSystem;
+    public ITickModule[] tickModules;
     public SpAccelerator accelerator;
 
 
     public SpShip(Entity owner) {
         this.owner = (EntityPlayer) owner;
-        calcParams();
     }
 
 
@@ -73,38 +63,28 @@ public class SpShip {
         SpReactor.Builder reactBuilder = new SpReactor.Builder();
         SpPowerSystem.Builder powerSysBuilder = new SpPowerSystem.Builder();
         SpProtector.Builder spProtectBuilder = new SpProtector.Builder();
-
+        SpGun.Builder gunBuilder = new SpGun.Builder();
 
         for(int slot = 0;slot<proxy.size();slot++){
             ItemStack item = proxy.initItem(slot, SLOTS[slot]);
             raw.add(SPM.getSimpleSpm(item));
             switch (scanItem(item)){
-                case 2:
-                    regShieldBuilder.feed(item);break;
-                case 3:
-                    accBuilder.feed(proxy, slot);break;
-                case 4:
-                    spProtectBuilder.feed(proxy, slot);break;
-                case 5:
-                    reactBuilder.feed(proxy, slot);break;
-                case 6:
-                    powerSysBuilder.feed(proxy, slot);break;
+                case 1: gunBuilder.feed(proxy, slot);break;
+                case 2: regShieldBuilder.feed(proxy, slot);break;
+                case 3: accBuilder.feed(proxy, slot);break;
+                case 4: spProtectBuilder.feed(proxy, slot);break;
+                case 5: reactBuilder.feed(proxy, slot);break;
+                case 6: powerSysBuilder.feed(proxy, slot);break;
             }
         }
 
         SPM.C sum = raw.compile();
 
-
         maxShield = (int) (100 + sum.MAX_SHIELD * (1 + sum.MAX_SHIELD_PR));
-        damage    = 1   + sum.DAMAGE     * (1 + sum.DAMAGE_PR    );
-        regen     = sum.REGEN_SHIELD;
-        critRate  = sum.CRIT_RATE;
-        critDmg   = sum.CRIT_DMG;
-
-
         powerSystem = powerSysBuilder.complete((int) (sum.ENERGY + 100));
+
         if(accBuilder.canBuild()) {
-            accelerator = accBuilder.complete(sum.SPEED, sum.SPEED_PR);
+            accelerator = accBuilder.complete(sum.SPEED_PR);
         } else {
             accelerator = null;
         }
@@ -114,17 +94,18 @@ public class SpShip {
         if(regShieldBuilder.canBuild()) {
             tickModules0.add(regShieldBuilder.complete(sum.REGEN_SHIELD));
         }
-
-        gun = ISpGun.ofItemStack(inv.getStackInSlot(SLOTS[0]));
+        if(gunBuilder.canBuild()) {
+            gun = gunBuilder.complete(sum.DAMAGE, sum.DAMAGE_PR, sum.CRIT_DMG, sum.CRIT_RATE);
+        } else {
+            gun = ISpGun.EMPTY;
+        }
         protectGen = spProtectBuilder.complete();
         modelId = ItemCorpus.getColor(inv.getStackInSlot(SLOTS[10]));
-        ((PlayerSpship)owner).setSpModelId(modelId);
 
-
-        PlayerSpship sp = (PlayerSpship) owner;
+        //PlayerSpship sp = (PlayerSpship) owner;
 
         //if(sp.getSpShield()>maxShield){
-        sp.setSpShield(maxShield);
+        //sp.setSpShield(maxShield);TODO проверить
         //}
 
         tickModules = tickModules0.toArray(new ITickModule[0]);
@@ -161,64 +142,14 @@ public class SpShip {
     }
 
 
-    private static ISpGun g2 = new SpGun(SpGun.AmmType.COMBINED,2,10,0,20001, 1);
-
-
     public void shoot(float yaw, float pith) {
-        g2.shoot(this, owner, yaw, pith);
+        gun.shoot(this, owner, yaw, pith);
     }
 
-    private int accTick = 0;
 
     public float accelerate(float speed){
         if(accelerator==null)return speed;
         if(++accTick==10)accTick = 0;
         return accelerator.onBoost(this, accTick==1, speed);
     }
-
-
-//    static {
-//        init();
-//    }
-
-//    private static Ticker ticker;
-//    public static void init() {
-//        MinecraftServer server = FMLCommonHandler.instance().getSidedDelegate().getServer();
-//        if(ticker != null){
-//            ticker.disable();
-//        }
-//        if(server==null){
-//            ticker = null;
-//        } else {
-//            ticker = new Ticker(server.getPlayerList());
-//            ASTaskShoulder.INST.addTask(ticker);
-//        }
-//    }
 }
-
-
-//final class Ticker implements IBasicTask{
-//    private final PlayerList plList;
-//    boolean enabled = true;
-//
-//    Ticker(PlayerList plList) {
-//        this.plList = plList;
-//    }
-//
-//    @Override
-//    public boolean needRun() {
-//        for(EntityPlayer player:plList.getPlayers()){
-//            PlayerSpship sp = (PlayerSpship) player;
-//            if(sp.isSpshipMode()){
-//                sp.getSp().onTick();
-//            }
-//        }
-//        return !enabled;
-//    }
-//    public void disable(){
-//        enabled = false;
-//    }
-//
-//    @Override
-//    public void run() {}
-//}

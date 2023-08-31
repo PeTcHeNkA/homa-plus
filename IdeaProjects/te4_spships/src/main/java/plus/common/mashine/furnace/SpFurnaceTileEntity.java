@@ -8,6 +8,7 @@ import net.minecraft.inventory.Container;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
+import plus.common.block.CrystalOre;
 import plus.common.block.SimpleOre;
 import plus.common.mashine.inv.EnergyDeviceTileEntity;
 import plus.common.mashine.inv.SimpleCraftMap;
@@ -20,23 +21,29 @@ public class SpFurnaceTileEntity extends EnergyDeviceTileEntity {
     private static final SimpleCraftMap furnaceCrafts = new SimpleCraftMap() {
         @Override
         public void onInit() {
-            add( Blocks.COBBLESTONE,       Blocks.STONE                        );
-            add( Blocks.SAND,              Blocks.GLASS                ,2);
-            add( Blocks.IRON_ORE,          Items.IRON_INGOT            ,2);
-            add( Blocks.GOLD_ORE,          Items.GOLD_INGOT            ,2);
-            add( Blocks.CLAY,              Blocks.HARDENED_CLAY                );
-            add( Items.CLAY_BALL,          Items.BRICK                         );
-            add( Blocks.DIAMOND_ORE  ,     Items.DIAMOND               ,2);
-            add( Blocks.DIAMOND_ORE  ,     Items.DIAMOND               ,2);
-            add( Blocks.HARDENED_CLAY,     Blocks.STAINED_HARDENED_CLAY        );
-            add( SimpleOre.COPPER_ORE,     BasicItem.COPPER_INGOT      ,2);
-            add( SimpleOre.ALUMINE_ORE,    BasicItem.ALUMINE_INGOT     ,2);
-            add( SimpleOre.MEFRIL_ORE,     BasicItem.MEFRIL_INGOT              );
-            add( SimpleOre.AETHER_ORE,     BasicItem.AETHER_CRYSTAL    ,4);
+            add( Blocks.COBBLESTONE,        Blocks.STONE                        );
+            add( Blocks.SAND,               Blocks.GLASS                ,2);
+            add( Blocks.IRON_ORE,           Items.IRON_INGOT            ,2);
+            add( Blocks.GOLD_ORE,           Items.GOLD_INGOT            ,2);
+            add( Blocks.CLAY,               Blocks.HARDENED_CLAY                );
+            add( Items.CLAY_BALL,           Items.BRICK                         );
+            add( Blocks.DIAMOND_ORE  ,      Items.DIAMOND               ,2);
+            add( Blocks.EMERALD_ORE  ,      Items.EMERALD               ,2);
+            add( Blocks.HARDENED_CLAY,      Blocks.STAINED_HARDENED_CLAY        );
+            add( SimpleOre.COPPER_ORE,      BasicItem.COPPER_INGOT      ,2);
+            add( SimpleOre.ALUMINE_ORE,     BasicItem.ALUMINE_INGOT     ,2);
+            add( SimpleOre.MEFRIL_ORE,      BasicItem.MEFRIL_INGOT              );
+            add( CrystalOre.AETHER_ORE,     BasicItem.AETHER_CRYSTAL    ,4);
 
-            add( SimpleOre.COPPER_ORE_MET, BasicItem.COPPER_INGOT      ,3);
-            add( SimpleOre.ALUMINE_ORE_MET,BasicItem.ALUMINE_INGOT     ,3);
-            add( SimpleOre.MEFRIL_ORE_MET, BasicItem.MEFRIL_INGOT      ,2);
+            add( SimpleOre.COPPER_ORE_MET,  BasicItem.COPPER_INGOT      ,3);
+            add( SimpleOre.ALUMINE_ORE_MET, BasicItem.ALUMINE_INGOT     ,3);
+            add( SimpleOre.MEFRIL_ORE_MET,  BasicItem.MEFRIL_INGOT      ,2);
+
+            add( SimpleOre.IRON_ORE_MET,    Items.IRON_INGOT            ,3);
+            add( SimpleOre.GOLD_ORE_MET,    Items.GOLD_INGOT            ,3);
+
+            add( CrystalOre.DIAMOND_ORE_MET,Items.DIAMOND               ,3);
+            add( CrystalOre.EMERALD_ORE_MET,Items.EMERALD               ,3);
         }
     };
 

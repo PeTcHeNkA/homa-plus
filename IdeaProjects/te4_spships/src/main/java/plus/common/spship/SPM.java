@@ -9,22 +9,22 @@ import static plus.common.spship.item.ItemModule.SP_MODULE;
 
 
 public enum SPM {
-    DAMAGE,        //24
+    DAMAGE,        //9
     DAMAGE_PR,     //12
     MAX_SHIELD,    //42
     MAX_SHIELD_PR, //14
-    SPEED,         //20
-    SPEED_PR,      //10
+    //SPEED,       //22
+    SPEED_PR,      //12
     CRIT_RATE,     //30
     CRIT_DMG,      //42
     REGEN_SHIELD,  //14
-    MASS,          //3
+    //MASS,        //3
     ENERGY,        //72
     ENERGY_GEN,    //10
     POTENTIAL      //12
     ;
     public static final int SIZE = SPM.values().length;
-    private static final int[] COEFS = {24,12,42,14,20,10,30,42,14,3,72,10,12};
+    private static final int[] COEFS = {9,12,42,14,/*22,*/12,30,42,14/*,3*/,72,10,12};
 
     public static int[] create(){
         return new int[SPM.SIZE];
@@ -175,12 +175,12 @@ public enum SPM {
         DAMAGE_PR,
         MAX_SHIELD,
         MAX_SHIELD_PR,
-        SPEED,
+        //SPEED,
         SPEED_PR,
         CRIT_RATE,
         CRIT_DMG,
         REGEN_SHIELD,
-        MASS,
+        //MASS,
         ENERGY,
         ENERGY_GEN,
         POTENTIAL
@@ -191,12 +191,12 @@ public enum SPM {
             DAMAGE_PR     = getIOf(ints, i++);
             MAX_SHIELD    = getIOf(ints, i++);
             MAX_SHIELD_PR = getIOf(ints, i++);
-            SPEED         = getIOf(ints, i++);
+            //SPEED         = getIOf(ints, i++);
             SPEED_PR      = getIOf(ints, i++);
             CRIT_RATE     = getIOf(ints, i++);
             CRIT_DMG      = getIOf(ints, i++);
             REGEN_SHIELD  = getIOf(ints, i++);
-            MASS          = getIOf(ints, i++);
+            //MASS          = getIOf(ints, i++);
             ENERGY        = getIOf(ints, i++);
             ENERGY_GEN    = getIOf(ints, i++);
             POTENTIAL     = getIOf(ints, i++);

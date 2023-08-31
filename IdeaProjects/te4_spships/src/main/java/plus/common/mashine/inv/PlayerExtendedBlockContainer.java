@@ -17,6 +17,14 @@ public abstract class PlayerExtendedBlockContainer extends PlayerExtendedContain
     }
 
 
+    public void syncAllFields(){
+        for(IContainerListener l:listeners){
+            for(int id=0;id<inventory.getFieldCount();id++)
+                l.sendWindowProperty(this, id, inventory.getField(id));
+        }
+    }
+
+
     public void syncFirstField(int val){
         for(IContainerListener l:listeners){
             l.sendWindowProperty(this, 0, val);

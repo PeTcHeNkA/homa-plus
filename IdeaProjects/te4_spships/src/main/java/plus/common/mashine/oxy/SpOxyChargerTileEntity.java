@@ -19,7 +19,6 @@ public class SpOxyChargerTileEntity extends EnergyDeviceTileEntity {
     }
 
 
-
     @Override
     public void update() {
         if (skip++>4) {

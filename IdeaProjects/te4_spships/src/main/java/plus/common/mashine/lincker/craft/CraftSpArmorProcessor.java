@@ -1,10 +1,9 @@
-package plus.common.spship.item.craft;
+package plus.common.mashine.lincker.craft;
 
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import plus.common.mashine.item.recept.IItemValidator;
 import plus.common.mashine.item.recept.ReseptKey;
-import plus.common.mashine.lincker.PowerReceptProcessor;
 import plus.common.spship.item.ItemSpArmor;
 
 

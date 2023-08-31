@@ -12,15 +12,14 @@ import net.minecraft.inventory.ContainerPlayer;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import plus.client.camera.Camera;
 import plus.client.SpGui;
-
 import java.io.IOException;
-
 import static net.minecraft.client.gui.inventory.GuiInventory.drawEntityOnScreen;
 import static plus.client.SpGui.SP_BG;
 
@@ -49,9 +48,14 @@ public abstract class MixinGuiInventory extends InventoryEffectRenderer {
         super(inventorySlotsIn);
     }
 
-    @Inject(method = "initGui", at = @At("TAIL"),cancellable = true)
-    public void initGui(CallbackInfo ci) {
-        ci.cancel();
+
+    /**
+     * @author Te4hno
+     * @reason add Sp gui
+     */
+    @Overwrite
+    public void initGui() {
+
         buttonList.clear();
         if (mc.playerController.isInCreativeMode()) {
             mc.displayGuiScreen(new GuiContainerCreative(this.mc.player));
@@ -60,7 +64,6 @@ public abstract class MixinGuiInventory extends InventoryEffectRenderer {
         super.initGui();
 
         widthTooNarrow = false;
-        //widthTooNarrow = width < 379;
         if(!recipeBookInit) {
             recipeBookGui.func_194303_a(width, height, mc, widthTooNarrow,
                     ((ContainerPlayer) inventorySlots).craftMatrix);
@@ -68,7 +71,6 @@ public abstract class MixinGuiInventory extends InventoryEffectRenderer {
         }
 
         spGui.onParentInit(width,height,widthTooNarrow);
-
 
         if(recipeBookGui.isVisible() && !SpGui.isVisible()) {
             guiLeft = recipeBookGui.updateScreenPosition(widthTooNarrow, width, xSize);
@@ -94,13 +96,15 @@ public abstract class MixinGuiInventory extends InventoryEffectRenderer {
 
         buttonList.add(spButton);
         buttonList.add(recipeButton);
-        //inventorySlots.getSlot(46).isEnabled()
     }
 
 
-    @Inject(method = "actionPerformed", at = @At("HEAD"), cancellable = true)
-    protected void actionPerformed(GuiButton button, CallbackInfo ci){
-        ci.cancel();
+    /**
+     * @author Te4hno
+     * @reason add Sp gui
+     */
+    @Overwrite
+    protected void actionPerformed(GuiButton button){
         if(button.id == 10){
             this.recipeBookGui.initVisuals(this.widthTooNarrow, ((ContainerPlayer)this.inventorySlots).craftMatrix);
             this.recipeBookGui.toggleVisibility();
@@ -126,9 +130,12 @@ public abstract class MixinGuiInventory extends InventoryEffectRenderer {
     }
 
 
-    @Inject(method = "drawScreen", at = @At("HEAD"), cancellable = true)
-    public void drawScreen(int mouseX, int mouseY, float partialTicks, CallbackInfo ci) {
-        ci.cancel();
+    /**
+     * @author Te4hno
+     * @reason add Sp gui
+     */
+    @Overwrite
+    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         this.drawDefaultBackground();
         this.hasActivePotionEffects = !this.recipeBookGui.isVisible();
 
@@ -158,16 +165,20 @@ public abstract class MixinGuiInventory extends InventoryEffectRenderer {
     }
 
 
-    @Inject(method = "drawGuiContainerForegroundLayer", at = @At("HEAD"), cancellable = true)
-    protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY, CallbackInfo ci) {
-        ci.cancel();
-    }
+    /**
+     * @author Te4hno
+     * @reason remove method
+     */
+    @Overwrite
+    protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {}
 
 
-    @Inject(method = "drawGuiContainerBackgroundLayer", at = @At("HEAD"), cancellable = true)
-    protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY,
-                                                   CallbackInfo ci) {
-        ci.cancel();
+    /**
+     * @author Te4hno
+     * @reason add Sp gui
+     */
+    @Overwrite
+    protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         this.mc.getTextureManager().bindTexture(INVENTORY_BACKGROUND);
         int i = this.guiLeft;
@@ -178,6 +189,7 @@ public abstract class MixinGuiInventory extends InventoryEffectRenderer {
                 this.oldMouseX, (float)(j + 75 - 50) - this.oldMouseY, this.mc.player);
         Camera.ignoreOverridePlayerRender = false;
     }
+
 
     @Override
     protected boolean hasClickedOutside(int n1, int n2,
@@ -198,9 +210,6 @@ public abstract class MixinGuiInventory extends InventoryEffectRenderer {
                 if (!this.widthTooNarrow || !this.recipeBookGui.isVisible()) {
                     super.mouseClicked(mouseX, mouseY, mouseButton);
                 }
-//            if(SpGui.isVisible()){
-//                spGui.mouseClicked(mouseX,mouseY,mouseButton);
-//            }
             }
         }
     }

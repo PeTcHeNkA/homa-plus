@@ -2,12 +2,13 @@ package plus.common.mashine.item;
 
 
 public class ItemMssCapacitor extends ItemCapacitor {
-    public static ItemCapacitor BATTERY_L1 = new ItemCapacitor("battery_l1", 1, 2000);
-    public static ItemCapacitor BATTERY_L2 = new ItemCapacitor("battery_l2", 2, 3500);
-    public static ItemCapacitor BATTERY_L3 = new ItemCapacitor("battery_l3", 3, 5700);
-    public static ItemCapacitor BATTERY_L4 = new ItemCapacitor("battery_l4", 4, 7200);
-    public static ItemOxyBallon BALLON_L1 = new ItemOxyBallon(1, 800);
-    public static ItemOxyBallon BALLON_L2 = new ItemOxyBallon(2, 1400);
+    public static final ItemCapacitor BATTERY_L1 = new ItemCapacitor("battery_l1", 1, 2000);
+    public static final ItemCapacitor BATTERY_L2 = new ItemCapacitor("battery_l2", 2, 3500);
+    public static final ItemCapacitor BATTERY_L3 = new ItemCapacitor("battery_l3", 3, 5700);
+    public static final ItemCapacitor BATTERY_L4 = new ItemCapacitor("battery_l4", 4, 7200);
+    public static final QuantificatorItem QUANTIFICATOR = new QuantificatorItem();
+    public static final ItemOxyBallon BALLON_L1 = new ItemOxyBallon(1, 800);
+    public static final ItemOxyBallon BALLON_L2 = new ItemOxyBallon(2, 1400);
 
 
     public static ItemMssCapacitor MASSIVE_L1

@@ -2,21 +2,33 @@ package plus.common.spship.modules;
 
 import net.minecraft.item.ItemStack;
 import plus.common.mashine.inv.IEnergyFolder;
+import plus.common.mashine.inv.IItemLink;
 import plus.common.player.PlayerSpship;
 import plus.common.spship.SpShip;
 import plus.common.spship.item.ItemRegenShield;
+
+import static plus.common.spship.modules.SpAccelerator.coefCount;
+import static plus.common.spship.modules.SpAccelerator.trimTo;
 
 
 public class SpRegenShield implements ITickModule{
     public final int energyCast;
     public final int regenAmount;
+    private final IItemLink[] links;
 
     public static final class Builder{
         private int count = 0, energyCast = 0;
         private float regenAmount = 0;
+        private final IItemLink[] links;
 
-        public void feed(ItemStack item){
-            float pow = ItemRegenShield.getPower(item);
+        public Builder(){
+            links = new IItemLink[SpShip.SLOTS.length];
+        }
+
+
+        public void feed(SpInvProxy proxy, int slot){
+            links[count] = proxy.link(slot);
+            float pow = ItemRegenShield.getPower(links[count].getItem());
             regenAmount += pow;
             energyCast += ItemRegenShield.calcAccEnergyCast(pow);
             ++count;
@@ -29,25 +41,15 @@ public class SpRegenShield implements ITickModule{
 
 
         public SpRegenShield complete(float add){
-            float d;
-            switch (count){
-                case 1:
-                    d = 1f;break;
-                case 2:
-                    d = 0.75f;break;
-                case 3:
-                    d = 0.6f;break;
-                default:
-                    d = 0.5f;break;
-            }
-            return new SpRegenShield(energyCast, (int) (add + (regenAmount*d)));
+            return new SpRegenShield(energyCast, (int) (add + (regenAmount*coefCount(count))), trimTo(links, count));
         }
     }
 
 
-    public SpRegenShield(int energyCast, int regenAmount) {
+    public SpRegenShield(int energyCast, int regenAmount, IItemLink[] links) {
         this.energyCast = energyCast;
         this.regenAmount = regenAmount;
+        this.links = links;
     }
 
 

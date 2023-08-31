@@ -5,18 +5,34 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.item.ItemStack;
 import plus.client.SpGui;
+import plus.common.mashine.inv.IItemLink;
 
 
-public class Button extends Gui {
-    private final ItemStack ico;
+public abstract class Button extends Gui implements IItemLink {
+    public static final class Standart extends Button{
+        private ItemStack ico;
 
-    public Button(ItemStack ico) {
-        this.ico = ico;
+        public Standart(ItemStack ico) {
+            this.ico = ico;
+        }
+
+        @Override
+        public ItemStack getItem() {
+            return ico;
+        }
+
+        @Override
+        public void setItem(ItemStack item) {
+            this.ico = item;
+        }
     }
+
+    @Override
+    public void setItem(ItemStack item) {throw new UnsupportedOperationException();}
 
 
     public void draw(int x, int y, boolean isActive) {
-        draw(x, y, isActive, ico);
+        draw(x, y, isActive, getItem());
     }
 
 

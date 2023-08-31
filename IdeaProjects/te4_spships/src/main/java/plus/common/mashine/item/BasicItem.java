@@ -19,13 +19,14 @@ public class BasicItem extends Item{
     public static final BasicItem PLATE_ALUMINE = new BasicItem("plate_alumine");
     public static final BasicItem PLATE_MEFRIL = new BasicItem("plate_mefril");
     public static final BasicItem PLATE_MACHINE = new BasicItem("plate_machine");
+    public static final BasicItem PLATE_ARMORED = new BasicItem("plate_armored");
 
     public static final BasicItem ALUMINE_INGOT = new BasicItem("alumine_ingot");
     public static final BasicItem COPPER_INGOT = new BasicItem("copper_ingot");
     public static final BasicItem MEFRIL_INGOT = new BasicItem("mefril_ingot");
 
-    public static final BasicItem COPPER_COIL = new BasicItem("copper_coil");
     public static final BasicItem IRON_GEAR = new BasicItem("iron_gear");
+    public static final BasicItem COPPER_COIL = new BasicItem("copper_coil");
     public static final BasicItem AETHER_CRYSTAL = new BasicItem("aether_crystal");
 
 

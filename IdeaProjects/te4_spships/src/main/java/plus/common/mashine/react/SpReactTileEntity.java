@@ -148,6 +148,22 @@ public class SpReactTileEntity extends InvTileEntity implements ITickable, IEner
 
 
     @Override
+    public int getFieldCount() {
+        return 2;
+    }
+
+
+    @Override
+    public int getField(int id) {
+        if(id==0){
+            return (int) (genSpeed*100);
+        } else {
+            return (int) energy;
+        }
+    }
+
+
+    @Override
     public boolean takeEnergy(int amount) {
         if(amount<energy){
             energy-=amount;

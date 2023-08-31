@@ -14,7 +14,6 @@ import java.util.List;
 
 public class ItemModule extends TehBasicItem {
     public static final ItemModule SP_MODULE  = new ItemModule("addon",1,0, 0    );
-    public static final ItemModule SP_GUN     = new ItemModule("gun",  1,1, 4800 );
 
     public final int type;
     public final int lvl;
@@ -39,7 +38,11 @@ public class ItemModule extends TehBasicItem {
 
 
     @SideOnly(Side.CLIENT)
-    void addMoreInf(NBTTagCompound tags, List<String> lore){}
+    void addMoreInf(ItemStack item, List<String> lore){}
+
+
+    @SideOnly(Side.CLIENT)
+    void addBaseInf(ItemStack item, List<String> lore){};
 
 
     @Override
@@ -49,7 +52,7 @@ public class ItemModule extends TehBasicItem {
         NBTTagCompound tags = item.getTagCompound();
         if(tags!=null) {
             if (isMoreInfo()) {
-                addMoreInf(tags, lore);
+                addMoreInf(item, lore);
                 addSPM(item, tags, lore);
                 addLore(lore, "teh_lvl", lvl);
                 if(getMaxDamage()>0)
@@ -57,6 +60,7 @@ public class ItemModule extends TehBasicItem {
             } else {
                 addLore(lore, "module_help_a" + type);
                 addLore(lore, "module_help_b" + type);
+                addBaseInf(item, lore);
                 addLore(lore, "teh_lvl", lvl);
                 if(getMaxDamage()>0)
                     addLore(lore, "sp_dur", getMaxDamage() - item.getItemDamage(), getMaxDamage());
@@ -69,17 +73,17 @@ public class ItemModule extends TehBasicItem {
     public static boolean addSPM(ItemStack item, NBTTagCompound tags, List<String> lore){
         int[] data = SPM.read(item);
         if(!SPM.isEmpty(data)){
-            addLore(lore, "teh_prc", tags.getInteger(Strings.TEH_PROC));
+            addLore(lore, "teh_prc", tags.getShort(Strings.TEH_PROC));
             addInf(lore, data, "damage", SPM.DAMAGE);
             addInf(lore, data, "damage_pr", SPM.DAMAGE_PR);
             addInf(lore, data, "max_shield", SPM.MAX_SHIELD);
             addInf(lore, data, "max_shield_pr", SPM.DAMAGE_PR);
-            addInf(lore, data, "speed", SPM.SPEED);
+            //addInf(lore, data, "speed", SPM.SPEED);
             addInf(lore, data, "speed_pr", SPM.SPEED_PR);
             addInf(lore, data, "crit_rate", SPM.CRIT_RATE);
             addInf(lore, data, "crit_dmg", SPM.CRIT_DMG);
             addInf(lore, data, "regen_shield", SPM.REGEN_SHIELD);
-            addInf(lore, data, "mass", SPM.MASS);
+            //addInf(lore, data, "mass", SPM.MASS);
             return true;
         }
         return false;

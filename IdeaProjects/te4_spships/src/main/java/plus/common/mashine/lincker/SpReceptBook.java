@@ -8,22 +8,13 @@ import plus.common.mashine.item.recept.IItemValidator;
 import plus.common.mashine.item.recept.ISimplePowerCraftable;
 import plus.common.mashine.item.recept.ReceptBook;
 import plus.common.mashine.item.recept.ReseptKey;
+import plus.common.mashine.lincker.craft.*;
 import plus.common.spship.SPM;
 import plus.common.spship.item.*;
-import plus.common.spship.item.craft.CraftCHunterProcessor;
-import plus.common.spship.item.craft.CraftCRavenProcessor;
-import plus.common.spship.item.craft.CraftSpArmorProcessor;
 
 
 public class SpReceptBook extends ReceptBook<SpCraftContainer, PowerReceptProcessor> {
     public static SpReceptBook INST = new SpReceptBook();
-
-    static abstract class SpCraftProc extends PowerReceptProcessor {
-        public SpCraftProc(ItemStack[] items) {
-            super(IItemValidator.buildBasic(items, 5));
-        }
-    }
-
 
     public ItemStack craftPreview(SpCraftContainer matrix, int shift, int pow) {
         ReseptKey key = matrix.toKey(this);
@@ -244,17 +235,41 @@ public class SpReceptBook extends ReceptBook<SpCraftContainer, PowerReceptProces
                 new ItemStack(ItemMssCapacitor.PLATE_MEFRIL, 4), new ItemStack(ItemMssCapacitor.BATTERY_L4),
                 new ItemStack(ReactCore.CORE_L4), new ItemStack(TehSubcraftItem.MICRO_ADDON, 4)
         }, ItemProtector.SP_PROTECTOR_L4);
+
+        //пушки 33, 34
+        items = new ItemStack[]{
+                new ItemStack(ItemModule.PLATE_MACHINE, 4),
+                new ItemStack(TehSubcraftItem.MICRO_ADDON),
+                new ItemStack(ItemMssCapacitor.QUANTIFICATOR),
+                new ItemStack(ReactCore.BOOSTER_L1),
+                new ItemStack(ItemMssCapacitor.PLATE_ARMORED, 5)
+        };
+
+        add(new GunCraftProcessor(ItemGun.SP_GUN_L1, ItemGun.SP_GUN_L2, 50, 40,
+                IItemValidator.buildBasic(items, 5)
+        ), items);
+
+        items = new ItemStack[]{
+                new ItemStack(ItemModule.PLATE_MACHINE, 5),
+                items[1],
+                items[2],
+                new ItemStack(ReactCore.BOOSTER_L2),
+                new ItemStack(ItemMssCapacitor.PLATE_ARMORED, 9)
+        };
+
+        add(new GunCraftProcessor(ItemGun.SP_GUN_L3, ItemGun.SP_GUN_L4, 200, 150,
+                IItemValidator.buildBasic(items, 5)
+        ), items);
     }
 
 
     private void addDmgPow(ItemStack[] items, ISimplePowerCraftable item){
-        add(new DmgPowerReceptProcessor(item, IItemValidator.buildBasic(items, 5)), items);
+        add(new DmgPowerProcessor(item, IItemValidator.buildBasic(items, 5)), items);
     }
 
 
     private void addTwisted(ItemStack[] items, ISimplePowerCraftable item1, ISimplePowerCraftable item2, int limit){
-        add(new SpCraftProc(items) {
-            @Override
+        add(new PowerReceptProcessor(IItemValidator.buildBasic(items, 5)){
             public ItemStack onCalcResult(ReseptKey key, int shift, int power) {
                 if(power<=limit) {
                     return item1.create(shift, power);
@@ -267,7 +282,7 @@ public class SpReceptBook extends ReceptBook<SpCraftContainer, PowerReceptProces
 
 
     private void addTwistedSPM(ItemStack[] items, ISimplePowerCraftable item1, ISimplePowerCraftable item2, int limit) {
-        add(new SpCraftProc(items) {
+        add(new PowerReceptProcessor(IItemValidator.buildBasic(items, 5)) {
             @Override
             public ItemStack onCalcResult(ReseptKey key, int shift, int power) {
                 if(power<=limit) {
@@ -287,7 +302,7 @@ public class SpReceptBook extends ReceptBook<SpCraftContainer, PowerReceptProces
 
 
     private void addSPM(ItemStack[] items, ISimplePowerCraftable item) {
-        add(new SpCraftProc(items) {
+        add(new PowerReceptProcessor(IItemValidator.buildBasic(items, 5)) {
             @Override
             public ItemStack onCalcResult(ReseptKey key, int shift, int power) {
                 return item.create(shift, power);
@@ -301,12 +316,12 @@ public class SpReceptBook extends ReceptBook<SpCraftContainer, PowerReceptProces
     }
 
 
-    private void add(ItemStack[] items, ISimplePowerCraftable item) {
-        add(new SpCraftProc(items) {
-            @Override
-            public ItemStack onCalcResult(ReseptKey key, int shift, int power) {
-                return item.create(shift, power);
-            }
-        }, items);
+    private void add(ItemStack[] items, ISimplePowerCraftable result) {
+        add(new SimplePowerReceptProcessor(result, IItemValidator.buildBasic(items, 5)), items);
     }
+
+
+//    private void addMetaCopy(ItemStack[] items, ISimplePowerCraftable result, int copy){
+//        add(new MetaCopyProcessor(result, copy, IItemValidator.buildBasic(items, 5)), items);
+//    }
 }

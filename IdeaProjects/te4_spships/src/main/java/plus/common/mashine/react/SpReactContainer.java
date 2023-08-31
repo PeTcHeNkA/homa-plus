@@ -1,5 +1,6 @@
 package plus.common.mashine.react;
 
+import net.minecraft.inventory.IContainerListener;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import plus.common.etc.FESlot;
@@ -32,11 +33,25 @@ public class SpReactContainer extends PlayerExtendedBlockContainer {
     }
 
 
+    @Override
+    public void addListener(IContainerListener listener) {
+        super.addListener(listener);
+        listener.sendWindowProperty(this, 0, inventory.getField(0));
+        listener.sendWindowProperty(this, 1, inventory.getField(1));
+    }
+
+
     private void addESlot(IInventory spReactInv, int i, int x, int y){
         addSlotToContainer(new FESlot(spReactInv, i, x, y, ReactComponent::isReactNoCore, this::onContentChanged));
     }
 
 
-    private void onContentChanged() {
+    private void onContentChanged() {}
+
+
+    @Override
+    public void detectAndSendChanges() {
+        super.detectAndSendChanges();
+        syncAllFields();
     }
 }

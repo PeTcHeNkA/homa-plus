@@ -20,7 +20,6 @@ import plus.utls.MathUtils;
 
 @Mixin(RenderPlayer.class)
 public abstract class MixinRenderPlayer extends RenderLivingBase<AbstractClientPlayer>{
-
     @Shadow protected abstract void renderLivingAt(AbstractClientPlayer entityLivingBaseIn, double x, double y, double z);
 
     public MixinRenderPlayer(RenderManager renderManagerIn, ModelBase modelBaseIn, float shadowSizeIn) {
@@ -33,16 +32,10 @@ public abstract class MixinRenderPlayer extends RenderLivingBase<AbstractClientP
                          double z, float entityYaw, float partialTicks, CallbackInfo ci) {
         if(Camera.ignoreOverridePlayerRender)return;
         boolean isSelfModel = player.isUser();
-        boolean isSpshipMode;
 
         ISpREntity spEnt = (ISpREntity) player;
-        if(isSelfModel){
-            isSpshipMode = ((PlayerSpship)player).isSpshipMode();
-        } else {
-            isSpshipMode = ((PlayerSpship)player).getSpModelId()!=-1;
-        }
 
-        if(isSpshipMode) {
+        if(((PlayerSpship)player).isSpshipMode()) {
             ci.cancel();
             if(!spEnt.isActive()){
                 spEnt.setActive(true);
@@ -53,7 +46,7 @@ public abstract class MixinRenderPlayer extends RenderLivingBase<AbstractClientP
                 if(!isSelfModel){
                     ((PlayerSpship)player).setSpHitbox();
                 }
-                double[] dc = new double[2];
+                double[] dc = new double[3];
                 spEnt.setDCache(dc);
                 dc[0] = dc[1] = MathUtils.interpolateRotation(
                         spEnt.getPrevSpXZRot(),spEnt.getSpXZRot(), partialTicks

@@ -11,7 +11,7 @@ public interface PlayerSpship {
     boolean isSpshipMode();
 
     int getSpModelId();
-    void setSpModelId(int id);
+    //void setSpModelId(int id);
 
     void setSpHitbox();
     void restoreSpHitbox();

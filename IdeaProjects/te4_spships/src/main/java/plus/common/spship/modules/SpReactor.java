@@ -109,6 +109,11 @@ public class SpReactor implements IEnergyFolder, ITickModule {
     }
 
 
+    public float getGenSpeed() {
+        return genSpeed;
+    }
+
+
     @Override
     public boolean takeEnergy(int amount) {
         if (amount < energy) {

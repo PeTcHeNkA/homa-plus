@@ -19,9 +19,15 @@ import plus.client.buttons.ButtonSet;
 import plus.client.camera.Camera;
 import plus.client.entity.SpModelManager;
 import plus.client.invlib.BigSlotRenderer;
+import plus.client.invlib.SimpleGuiContainer;
 import plus.common.network.spship.SpModePacket;
 import plus.common.etc.DSlot;
 import plus.common.player.PlayerSpship;
+import plus.common.spship.SpShip;
+import plus.common.spship.modules.ITickModule;
+import plus.common.spship.modules.SpProtector;
+import plus.common.spship.modules.SpReactor;
+import plus.common.spship.modules.SpRegenShield;
 
 
 import static plus.client.ISprRenderer.renderItemModel;
@@ -55,15 +61,23 @@ public class SpGui extends Gui {
 
     private final BigSlotRenderer.Set slotRender;
 
+    private static final int SP_SLOT_ID = 56;
+
     public SpGui(InventoryEffectRenderer inv) {
         INST = this;
         parent = (GuiInventory) inv;
-        buttons.add(new Button(new ItemStack(Blocks.STONE)));
-        buttons.add(new Button(new ItemStack(Blocks.PUMPKIN)));
+        buttons.add(new Button() {
+            @Override
+            public ItemStack getItem() {
+                return getSpStack();
+            }
+        });
+        buttons.add(new Button.Standart(new ItemStack(Blocks.PUMPKIN)));
 
         slotRender = new BigSlotRenderer.Set(inv, getPrnSlotD(46,47,48,49,50,51,52,53,54,55));
 
-        //slotRender = new BigSlotRenderer(inv, (DSlot) inv.inventorySlots.getSlot(46));
+        PlayerSpship sp = (PlayerSpship) Minecraft.getMinecraft().player;
+        sp.getSp().calcParams();
     }
 
     public void onParentInit(int width, int height, boolean widthToNarrow){
@@ -76,7 +90,7 @@ public class SpGui extends Gui {
     public ItemStack getSelfSlotHovered(){
         if(lastOnSp){
             lastOnSp = false;
-            return getPrnSlotD(56).getStack();
+            return getPrnSlotD(SP_SLOT_ID).getStack();
         }
         return slotRender.getHovered();
     }
@@ -133,13 +147,97 @@ public class SpGui extends Gui {
     private void renderMain(int x, int y, int mouseX, int mouseY, boolean clicked){
         this.drawTexturedModalRect(x, y+95, 0, 166, 147, 63);
         toggleSpModeButtonHovered = isBetween(mouseX, x+139, x+6) && isBetween(mouseY, y+158,y+140);
+
         if(toggleSpModeButtonHovered){
             this.drawTexturedModalRect(x+7, y+140, 7, 229, 132, 18);
-//            if(clicked){
-//                sendToggleSp();
-//            }
         }
+
+        PlayerSpship ps = (PlayerSpship) Minecraft.getMinecraft().player;
+        SpShip sp = ps.getSp();
+
+        int curLine = 96;
+        x+=10;
+        GlStateManager.pushMatrix();
+        double coef = 0.86;
+
+        GlStateManager.scale(coef, coef, coef);
+        x = (int) (x / coef)+1;
+        y = (int) (y / coef);
+        curLine = (int) (curLine / coef)+1;
+
+        SpProtector protector = sp.protectGen;
+        SpRegenShield rgSh = getSpTickModule(sp, SpRegenShield.class);
+        if(protector.isActive()){
+            float[] params = protector.getParams();
+            if(rgSh==null){
+                SimpleGuiContainer.drawTranslatedString("sp_shield_с", x, y+curLine,
+                        SimpleGuiContainer.COLOR_WHITE, (int)ps.getSpShield(), sp.maxShield,
+                        params[0], params[2]
+                );
+            } else {
+                SimpleGuiContainer.drawTranslatedString("sp_shield_d", x, y+curLine,
+                        SimpleGuiContainer.COLOR_WHITE, (int)ps.getSpShield(),
+                        sp.maxShield, params[0], params[2], rgSh.regenAmount, rgSh.energyCast
+                );
+            }
+        } else {
+            if(rgSh==null){
+                SimpleGuiContainer.drawTranslatedString(
+                        "sp_shield_a", x, y+curLine, SimpleGuiContainer.COLOR_WHITE,
+                        (int)ps.getSpShield(), sp.maxShield
+                );
+            } else {
+                SimpleGuiContainer.drawTranslatedString(
+                        "sp_shield_b", x, y+curLine, SimpleGuiContainer.COLOR_WHITE,
+                        (int)ps.getSpShield(), sp.maxShield, rgSh.regenAmount, rgSh.energyCast
+                );
+            }
+        }
+
+        curLine+=9;
+
+        SpReactor reactor = getSpTickModule(sp, SpReactor.class);
+        if(reactor==null) {
+            SimpleGuiContainer.drawTranslatedString(
+                    "sp_power_system_a", x, y + curLine, SimpleGuiContainer.COLOR_WHITE,
+                    sp.powerSystem.getMaxEnergy(), sp.powerSystem.getCurEnergy()
+            );
+        } else {
+            int genSpeed = (int) reactor.getGenSpeed();
+            int maxe = sp.powerSystem.getMaxEnergy();
+            if(maxe>99_999){
+                SimpleGuiContainer.drawTranslatedString(
+                        "sp_power_system_c", x, y + curLine, SimpleGuiContainer.COLOR_WHITE,
+                        sp.powerSystem.getCurEnergy(), maxe, genSpeed
+                );
+            } else {
+                SimpleGuiContainer.drawTranslatedString(
+                        "sp_power_system_b", x, y + curLine, SimpleGuiContainer.COLOR_WHITE,
+                        sp.powerSystem.getCurEnergy(), maxe, genSpeed
+                );
+            }
+        }
+        curLine+=9;
+
+        if(sp.accelerator != null) {
+            int max = (int) (sp.accelerator.maxBoost * 10_100);
+            SimpleGuiContainer.drawTranslatedString(
+                    "sp_accelerator", x, y + curLine, SimpleGuiContainer.COLOR_WHITE,
+                    ((float)max)/100, sp.accelerator.energyCast
+            );
+            curLine+=9;
+        }
+        GlStateManager.popMatrix();
     }
+
+
+    private <T> T getSpTickModule(SpShip sp, Class<T> c){
+        for(ITickModule module: sp.tickModules){
+            if(module.getClass() == c)return (T) module;
+        }
+        return null;
+    }
+
 
     private boolean lastOnSp = false;
 
@@ -186,20 +284,20 @@ public class SpGui extends Gui {
         GlStateManager.rotate(angleX, 0, 1, 0);
         GlStateManager.rotate(angleY, 1, 0, 0);
 
-        ItemStack item = getPrnSlotD(56).getStack();
-        if(!item.isEmpty()){
-            renderItemModel(item);
-        } else {//
-            renderItemModel(
-                    SpModelManager.getSpModelByID(
-                            ((PlayerSpship) Minecraft.getMinecraft().player).getSpModelId())
-            );
-        }//
+        renderItemModel(getSpStack());
 
         GlStateManager.disableColorMaterial();
 
         GlStateManager.enableCull();
         GlStateManager.popMatrix();
+    }
+
+
+    private ItemStack getSpStack(){
+        ItemStack item = getPrnSlotD(SP_SLOT_ID).getStack();
+        if(item.isEmpty())return SpModelManager.getSpModelByID(
+                ((PlayerSpship) Minecraft.getMinecraft().player).getSp().modelId);
+        return item;
     }
 
 
@@ -227,9 +325,9 @@ public class SpGui extends Gui {
 
 
     public static void setVisible(boolean visible) {
-        SpGui.visible = visible;
-        if(visible){
-            resetDefaultAngle();
+        if(SpGui.visible != visible){
+            SpGui.visible = visible;
+            if(visible) resetDefaultAngle();
         }
     }
 

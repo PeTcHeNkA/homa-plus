@@ -46,7 +46,7 @@ public class GuiSpCraft extends GuiContainer {
             new VisualRCPage(ItemMssCapacitor.BATTERY_L2,new int[][]{{4},{5},{6,7},{8,9}}),
             new VisualRCPage(ReactCore.CORE_L2, new int[][]{{10,11},{12,13}, {14,15,16,17},{27,28}}),
             new VisualRCPage(ItemCorpus.SP_MODEL.createSimple(17),
-                    new int[][]{{20,19},{21,22},{23,24,25,26},{29,30,31,32}})
+                    new int[][]{{20,19},{21,22},{23,24,25,26},{29,30,31,32}, {33, 34}})
             //new VisualRCPage(ItemModule.SP_ACCELERATOR_L1, new int[][]{{21, 22}})
     };
 
@@ -61,7 +61,7 @@ public class GuiSpCraft extends GuiContainer {
     public GuiSpCraft(InventoryPlayer playerInv, IInventory spCraftInv) {
         super(new SpCraftContainer(playerInv, spCraftInv){
             @Override
-            public void onCallConstruct() {
+            public void onCallConstruct() {//?????
                 ItemStack invb = new ItemStack(Items.APPLE);
                 if(1==1){
                     return;
@@ -98,32 +98,11 @@ public class GuiSpCraft extends GuiContainer {
     }
 
 
-//    VisualRCPage newPage(ItemStack ico, String code){
-//        String[] raw = code.replace(" ","").split(",");
-//        int[][] data = new int[raw.length][];
-//        for(int i=0;i<raw.length;i++){
-//            String elm = raw[i];
-//            if(elm.contains("/")){
-//                String[] raw0 = elm.split("/");
-//                int[] data0 = new int[raw0.length];
-//                for(int i2=0;i2<raw0.length;i2++){
-//                    data0[i2] = Integer.parseInt(raw0[i2]);
-//                }
-//                data[i] = data0;
-//            } else {
-//                data[i] = new int[]{Integer.parseInt(elm)};
-//            }
-//
-//        }
-//        return new VisualRCPage(ico, data);
-//    }
-
-
     class VisualRCPage {
         private final ReceptCont[] recepts;
         VisualRCPage(Item ico, int... ids){this(new ItemStack(ico), ids);}
         VisualRCPage(ItemStack ico, int... ids){
-            buttons.add(new Button(ico));
+            buttons.add(new Button.Standart(ico));
             recepts = new ReceptCont[ids.length];
             for(int i=0;i<ids.length;i++){
                 recepts[i] = new ReceptPreview(ids[i]);
@@ -131,7 +110,7 @@ public class GuiSpCraft extends GuiContainer {
         }
         VisualRCPage(Item ico, int[]... ids){this(new ItemStack(ico), ids);}
         VisualRCPage(ItemStack ico, int[]... ids){
-            buttons.add(new Button(ico));
+            buttons.add(new Button.Standart(ico));
             recepts = new ReceptCont[ids.length];
             for(int i=0;i<ids.length;i++){
                 int[] ids0 = ids[i];

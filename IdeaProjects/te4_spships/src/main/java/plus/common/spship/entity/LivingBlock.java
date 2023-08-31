@@ -29,7 +29,7 @@ public abstract class LivingBlock extends Entity implements ILivingBlock {
         double curY = 0;
         double prevY = 0;
         boolean active = false;
-        double[] cache = new double[2];
+        double[] cache = new double[3];
     }
 
 

@@ -30,8 +30,7 @@ public abstract class MixinItem extends net.minecraftforge.registries.IForgeRegi
     }
 
 
-//    @SideOnly(Side.CLIENT)
-    public float apply(ItemStack stack, World worldIn, EntityLivingBase entityIn) {
+    private float apply(ItemStack stack, World worldIn, EntityLivingBase entityIn) {
         NBTTagCompound nbt = stack.getTagCompound();
         if(nbt==null){
             return 0;

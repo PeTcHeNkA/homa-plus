@@ -39,8 +39,8 @@ public class ItemRegenShield extends ItemModule{
 
     @Override
     @SideOnly(Side.CLIENT)
-    void addMoreInf(NBTTagCompound tags, List<String> lore) {
-        float pow = getPower(tags);
+    void addMoreInf(ItemStack item, List<String> lore) {
+        float pow = getPower(item);
         addLore(lore, "shield_gen_speed", round(pow));
         addLore(lore,"energy_cast", calcAccEnergyCast(pow));
     }

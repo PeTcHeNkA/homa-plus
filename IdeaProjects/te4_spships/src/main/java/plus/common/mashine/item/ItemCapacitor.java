@@ -36,7 +36,7 @@ public class ItemCapacitor extends TehBasicItem implements IItemCapacitor{
     public ItemStack create(int shift, float damage, float power, int tehProcess) {
         ItemStack stack = new ItemStack(this);
         NBTTagCompound tag = new NBTTagCompound();
-        tag.setInteger(Strings.TEH_PROC, tehProcess);
+        tag.setShort(Strings.TEH_PROC, (short) tehProcess);
 
         int cap = (int) ((calcPowerComponent(power)* MathUtils.calcBigStructCoef(tehProcess)/2)*basicCap);
         int usages = 100*level + (int) (getMaxDur()*(1-damage));
@@ -68,7 +68,7 @@ public class ItemCapacitor extends TehBasicItem implements IItemCapacitor{
             if(tags==null)return;
             int mxUsg = tags.getInteger(Strings.MAX_ST_USAGE);
             int bsCap = tags.getInteger(Strings.BASIC_CAP);
-            addLore(lore, "teh_prc", tags.getInteger(Strings.TEH_PROC));
+            addLore(lore, "teh_prc", tags.getShort(Strings.TEH_PROC));
             addLore(lore, "teh_dur_per", calcPer(
                     tags.getInteger(Strings.MAX_USAGE), mxUsg)
             );

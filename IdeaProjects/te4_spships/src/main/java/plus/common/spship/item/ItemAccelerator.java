@@ -25,6 +25,7 @@ public final class ItemAccelerator extends ItemModule {
 
 
     public static float getPower(NBTTagCompound tags){
+        if(tags==null)return 0;
         return 50 + (100 * tags.getFloat(Strings.POWER));
     }
 
@@ -37,8 +38,8 @@ public final class ItemAccelerator extends ItemModule {
 
     @Override
     @SideOnly(Side.CLIENT)
-    void addMoreInf(NBTTagCompound tags, List<String> lore) {
-        float pow = getPower(tags);
+    void addMoreInf(ItemStack item, List<String> lore) {
+        float pow = getPower(item);
         addLore(lore, "accelerator_speed", round(pow));
         addLore(lore,"energy_cast", calcAccEnergyCast(pow));
     }

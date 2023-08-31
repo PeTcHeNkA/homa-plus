@@ -41,7 +41,7 @@ public class ItemSpArmor extends TehBasicItem {
     public ItemStack create(float power, float damage, int tehProcess, int color) {
         ItemStack stack = new ItemStack(this);
         NBTTagCompound tag = new NBTTagCompound();
-        tag.setInteger(Strings.TEH_PROC, tehProcess);
+        tag.setShort(Strings.TEH_PROC, (short) tehProcess);
 //        tag.setFloat(Strings.POWER,
 //                (float) (calcPowerComponent(power)* MathUtils.calcBigStructCoef(tehProcess)/2)
 //        );

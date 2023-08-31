@@ -1,10 +1,12 @@
 package plus.proxy;
 
 import net.minecraft.block.Block;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
@@ -14,6 +16,7 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import plus.SpMain;
 import plus.common.amm.SpBullet;
+import plus.common.block.CrystalOre;
 import plus.common.block.SimpleBlock;
 import plus.common.mashine.block.SpMehModule;
 import plus.common.block.SimpleOre;
@@ -30,9 +33,7 @@ import plus.common.network.spship.SpModePacket;
 import plus.common.network.spship.SpShootPacket;
 import plus.common.spship.entity.OffSpShip;
 import plus.common.spship.item.*;
-
 import java.util.HashSet;
-
 import static plus.SpMain.preLoadClasses;
 
 
@@ -45,14 +46,15 @@ public class ServerProxy {
                 ReactCore.class,
                 SpMehModule.class,
                 ItemMssCapacitor.class,
-                SimpleOre.class,
+                CrystalOre.class,
                 TehSubcraftItem.class,
                 ItemCorpus.class,
                 ItemSpArmor.class,
                 //ItemModule.class,
                 ItemAccelerator.class,
                 ItemRegenShield.class,
-                ItemProtector.class
+                ItemProtector.class,
+                ItemGun.class
         );
         network = NetworkRegistry.INSTANCE.newSimpleChannel(SpMain.MOD_ID);
         network.registerMessage(
@@ -61,6 +63,16 @@ public class ServerProxy {
                 SpModePacket.ServerHandler.class,  SpModePacket.class, 1, Side.SERVER);
 
         MinecraftForge.EVENT_BUS.register(this);
+    }
+
+
+    @SubscribeEvent
+    public void onStartTracking(PlayerEvent.StartTracking event) {
+        if (event.getTarget().world.isRemote) return;
+        if (!(event.getTarget() instanceof EntityPlayerMP)) return;
+        PacketSyncRenderItem.sendPlayerCacheOf(
+                (EntityPlayerMP) event.getEntityPlayer(), event.getTarget().getEntityId()
+        );
     }
 
 
@@ -84,10 +96,7 @@ public class ServerProxy {
     }
 
 
-    public void regItem(Item item){}
-
-
-    private HashSet<Object> toReg = new HashSet<>();
+    protected HashSet<Object> toReg = new HashSet<>();
     public void addToRegObj(Item o){
         toReg.add(o);
     }
@@ -105,11 +114,6 @@ public class ServerProxy {
 
 
     public void init() {
-        for(Object o:toReg){
-            if (o instanceof Item) {
-                regItem((Item) o);
-            }
-        }
         ISimpleSmeling.regAll();
 
         regTile(SpCraftTileEntity.class, "sp_craft_table");

@@ -15,6 +15,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.client.entity.SpModelManager;
+import plus.common.player.PlayerSpship;
 import plus.common.spship.entity.LivingBlock;
 import plus.common.spship.modules.SpGun;
 import java.util.List;
@@ -25,19 +26,21 @@ public class SpBullet extends LivingBlock {
             EntityDataManager.createKey(SpBullet.class, DataSerializers.VARINT);
 
     protected EntityLivingBase shooter;
-    protected float damage = 10;
-    protected SpGun.AmmType type;
+    protected float physDmg, enrgDmg;
+    private final int mark;
 
     public SpBullet(World worldIn) {
         super(worldIn);
         this.setSize(1.0F, 1.0F);
+        mark = 0;
     }
 
-    public SpBullet(World worldIn, int modelId, SpGun.AmmType type, float damage) {
+    public SpBullet(World worldIn, int modelId, float physDmg, float enrgDmg, int mark) {
         super(worldIn);
         setModelId(modelId);
-        this.type = type;
-        this.damage = damage;
+        this.physDmg = physDmg;
+        this.enrgDmg = enrgDmg;
+        this.mark = mark;
     }
 
 
@@ -150,8 +153,16 @@ public class SpBullet extends LivingBlock {
 
 
     private void onImpact(Entity entity){
+        if((mark & 1<<4) == 1<<4){
+            if(entity instanceof PlayerSpship){
+                PlayerSpship ps = (PlayerSpship) entity;
+                if(ps.isSpshipMode()){
+                    ps.getSp().getPowerSystem().damage((int) enrgDmg*3);
+                }
+            }
+        }
         entity.attackEntityFrom(
-                new SpShootDamage(shooter, type), damage);
+                new SpShootDamage(shooter, physDmg, enrgDmg), 10);
     }
 
 
@@ -245,13 +256,13 @@ public class SpBullet extends LivingBlock {
 
 
     @SideOnly(Side.CLIENT)
-    private boolean first = false;
+    private int first = 0;
     @Override
     @SideOnly(Side.CLIENT)
     public void onClientUpdate() {
         super.onClientUpdate();
-        if(first)return;
-        first = true;
+        if(first>3)return;
+        ++first;
         clearSpRot();
     }
 
@@ -259,6 +270,6 @@ public class SpBullet extends LivingBlock {
     @Override
     @SideOnly(Side.CLIENT)
     public boolean needRender() {
-        return first;
+        return first>3;
     }
 }

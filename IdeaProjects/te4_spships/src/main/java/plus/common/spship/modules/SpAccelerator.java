@@ -8,21 +8,18 @@ import plus.common.spship.item.ItemAccelerator;
 
 public final class SpAccelerator{
     private final float add;
-    private final int energyCast;
-    private final float maxBoost;
+    public final int energyCast;
+    public final float maxBoost;
     private final IItemLink[] links;
 
     public static final class Builder{
         private int count = 0;
         private int energyCast = 0;
         private float maxBoost = 0;
-        private IItemLink[] links;
+        private final IItemLink[] links;
 
         public Builder(){
             links = new IItemLink[SpShip.SLOTS.length];
-        }
-        public Builder(int size){
-            links = new IItemLink[size];
         }
 
         public void feed(IItemLink link){
@@ -48,31 +45,47 @@ public final class SpAccelerator{
         }
 
 
-        public SpAccelerator complete(float add, float addPer){
-            float d;
-            switch (count){
-                case 1:
-                    d = 1f;break;
-                case 2:
-                    d = 0.75f;break;
-                case 3:
-                    d = 0.6f;break;
-                default:
-                    d = 0.5f;break;
-            }
+        public SpAccelerator complete(float add){
+            float d = coefCount(count);
             maxBoost *= d;
-            maxBoost = maxBoost * (1+addPer) + add;
-
-            if(count != links.length) {
-                IItemLink[] links0 = new IItemLink[count];
-                System.arraycopy(links, 0, links0, 0, count);
-                links = links0;
-            }
-
+            maxBoost = maxBoost + add;
             maxBoost = 0.01f * maxBoost;
-
-            return new SpAccelerator(maxBoost/10, energyCast, maxBoost, links);
+            return new SpAccelerator(maxBoost/10, energyCast, maxBoost, trimTo(links, count));
         }
+    }
+
+
+    public static float coefCount(int count){
+        switch (count){
+            case 1: return 1f;
+            case 2: return 0.75f;
+            case 3: return 0.6f;
+            default: return 0.5f;
+        }
+    }
+
+
+    public static void damage(IItemLink[] links, SpShip sp, int dmg){
+        for (IItemLink link : links) {
+            ItemStack item = link.getItem();
+            dmg = item.getItemDamage() + dmg;
+            if (dmg > item.getMaxDamage()) {
+                link.setItem(ItemStack.EMPTY);
+                sp.calcParams();
+            } else {
+                item.setItemDamage(dmg);
+            }
+        }
+    }
+
+
+    public static IItemLink[] trimTo(IItemLink[] links, int count){
+        if(count != links.length) {
+            IItemLink[] links0 = new IItemLink[count];
+            System.arraycopy(links, 0, links0, 0, count);
+            return links0;
+        }
+        return links;
     }
 
 
@@ -86,21 +99,7 @@ public final class SpAccelerator{
 
     public float onBoost(SpShip sp, boolean damageC, float curSpeed) {
         if(sp.takeEnergy(energyCast)) {
-            if(damageC) {
-                for (IItemLink link : links) {
-                    ItemStack item = link.getItem();
-                    int dmg = item.getItemDamage() + 1;
-                    if (dmg > item.getMaxDamage()) {
-                        link.setItem(ItemStack.EMPTY);
-                        SpAccelerator.Builder builder = new Builder(links.length - 1);
-                        for (IItemLink link0 : links) {
-                            if (link0 != link) builder.feed(link0);
-                        }
-                    } else {
-                        item.setItemDamage(dmg);
-                    }
-                }
-            }
+            if(damageC) damage(links, sp, 1);
             if ((curSpeed += add) > maxBoost) return maxBoost;
         }
         else if ((curSpeed -= add) < 1)return 1;

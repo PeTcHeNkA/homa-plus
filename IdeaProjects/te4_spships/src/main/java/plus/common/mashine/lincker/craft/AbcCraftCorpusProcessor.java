@@ -1,4 +1,4 @@
-package plus.common.spship.item.craft;
+package plus.common.mashine.lincker.craft;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -6,7 +6,6 @@ import plus.common.Strings;
 import plus.common.mashine.item.ReactComponent;
 import plus.common.mashine.item.recept.IItemValidator;
 import plus.common.mashine.item.recept.ReseptKey;
-import plus.common.mashine.lincker.PowerReceptProcessor;
 import plus.common.spship.SPM;
 import plus.common.spship.item.ItemCorpus;
 

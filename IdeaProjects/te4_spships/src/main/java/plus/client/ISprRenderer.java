@@ -30,6 +30,8 @@ public class ISprRenderer {
         dc[1] = dc[0] = MathUtils.interpolateRotation(dc[1], dc[0],0.2f);
         dc[0] = rotXZ = MathUtils.interpolateRotation(dc[0], rotXZ, 0.2f);
 
+        rotY = dc[2] = MathUtils.interpolateRotation(dc[2], rotY, 0.3f);
+
         GlStateManager.pushMatrix();
         GlStateManager.disableCull();
 

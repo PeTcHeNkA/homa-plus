@@ -46,6 +46,6 @@ public class ItemOxyBallon extends TehBasicItem{
     @SideOnly(Side.CLIENT)
     public void addInformation(ItemStack item, World world, List<String> lore,
                                ITooltipFlag flagIn) {
-        addLore(lore, "cur_oxy", getMaxDamage()-item.getItemDamage(), getMaxDamage());
+        addLore(lore, "cur_oxy", getMaxDamage()-item.getItemDamage(), getMaxDamage()-1);
     }
 }

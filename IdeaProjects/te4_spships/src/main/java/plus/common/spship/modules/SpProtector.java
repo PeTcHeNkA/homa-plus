@@ -2,29 +2,42 @@ package plus.common.spship.modules;
 
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.common.amm.SpShootDamage;
+import plus.common.mashine.inv.IItemLink;
 import plus.common.spship.SPM;
 import plus.common.spship.SpShip;
+import static plus.common.spship.modules.SpAccelerator.*;
 
 
 public final class SpProtector {//TODO ссылки на предметы и урон предметам при попадании
     private final float physicDmgCoef, energyDmgCoef;
     private final int physicEnrgCoef, energyEnrgCoef;
+    private final IItemLink[] links;
 
-    public SpProtector(float physicDmgCoef, float energyDmgCoef, int physicEnrgCoef, int energyEnrgCoef) {
+    public SpProtector(float physicDmgCoef, float energyDmgCoef, int physicEnrgCoef, int energyEnrgCoef, IItemLink[] links) {
         this.physicDmgCoef = physicDmgCoef;
         this.energyDmgCoef = energyDmgCoef;
         this.physicEnrgCoef = physicEnrgCoef;
         this.energyEnrgCoef = energyEnrgCoef;
+        this.links = links;
     }
 
 
     public static class Builder{
         private float physicDmgCoef = 0, energyDmgCoef = 0;
         private int physicEnrgCoef = 0, energyEnrgCoef = 0, count = 0;
+        private final IItemLink[] links;
+
+        public Builder(){
+            links = new IItemLink[SpShip.SLOTS.length];
+        }
 
         public void feed(SpInvProxy proxy, int slot){
-            NBTTagCompound tag = proxy.getItem(slot).getTagCompound();
+            IItemLink link = links[count] = proxy.link(slot);
+
+            NBTTagCompound tag = link.getItem().getTagCompound();
             if (tag == null) return;
             int[] ints = tag.getIntArray("spg");
             if (ints.length == 0) return;
@@ -33,80 +46,54 @@ public final class SpProtector {//TODO ссылки на предметы и у�
             energyEnrgCoef += SPM.getIOf(ints, 2);
             physicDmgCoef += SPM.getIOf(ints, 2);
             energyDmgCoef += SPM.getIOf(ints, 3);
+
+            ++count;
         }
 
 
         public SpProtector complete(){
-            float d;
-            switch (count){
-                case 0:
-                    return new SpProtector(0,0,0,0);
-                case 1:
-                    d = 1f;break;
-                case 2:
-                    d = 0.75f;break;
-                case 3:
-                    d = 0.6f;break;
-                default:
-                    d = 0.5f;break;
-            }
+            float c = coefCount(count);
+
             return new SpProtector(
-                    (1-physicDmgCoef)*d, (1-energyDmgCoef)*d, physicEnrgCoef, energyEnrgCoef
-            );
+                    (1-physicDmgCoef)*c, (1-energyDmgCoef)*c,
+                    physicEnrgCoef, energyEnrgCoef,
+                    trimTo(links, count));
         }
     }
 
 
-//    public SpProtector(SpInvProxy proxy){
-//        int physE = 0;
-//        int engE = 0;
-//        float physD = 0;
-//        float engD = 0;
-//        if(proxy != null) {
-//            for (int slot = 0; slot < proxy.size(); slot++) {
-//                NBTTagCompound tag = proxy.getItem(slot).getTagCompound();
-//                if (tag == null) continue;
-//                int[] ints = tag.getIntArray("spg");
-//                if (ints.length == 0) continue;
-//
-//                physE += SPM.getIOf(ints, 1);
-//                engE += SPM.getIOf(ints, 2);
-//                physD += SPM.getIOf(ints, 2);
-//                engD += SPM.getIOf(ints, 3);
-//            }
-//        }
-//        physicDmgCoef = physD;
-//        energyDmgCoef = engD;
-//        physicEnrgCoef = physE;
-//        energyEnrgCoef = engE;
-//    }
-
-
-    public final float onDamage(SpShip sp, DamageSource src, float amount){
+    public float onDamage(SpShip sp, DamageSource src, float amount){
         if(src instanceof SpShootDamage){
-            return onDamage(sp, (SpShootDamage) src, amount);
+            return onDamage(sp, (SpShootDamage) src);
         } else {
-            if(1==1)return amount;
-            return 0;
+            if(sp.takeEnergy((int) (amount * physicEnrgCoef))){
+                return amount*physicDmgCoef;
+            }
+            return amount;
         }
     }
 
 
-    public float onDamage(SpShip sp, SpShootDamage src, float damage){
-        switch (src.getType()){
-            case PHYSIC:
-                if(sp.takeEnergy(physicEnrgCoef)){
-                    return damage*physicDmgCoef;
-                }
-            case ENERGY:
-                if(sp.takeEnergy(energyEnrgCoef)){
-                    return damage*energyDmgCoef;
-                }
-            case COMBINED:
-                if(sp.takeEnergy((energyEnrgCoef + physicEnrgCoef)>>1)){
-                    return damage*((physicDmgCoef+energyDmgCoef)/2f);
-                }
+    @SideOnly(Side.CLIENT)
+    public boolean isActive(){
+        return links.length>0;
+    }
+
+
+    @SideOnly(Side.CLIENT)
+    public float[] getParams(){
+        return new float[]{physicDmgCoef, physicEnrgCoef, energyDmgCoef, energyEnrgCoef};
+    }
+
+
+    public float onDamage(SpShip sp, SpShootDamage src){
+        if(links.length>0) {
+            int cast = (int) ((src.enrgDmg * energyEnrgCoef) + (src.physDmg * physicEnrgCoef));
+            if (sp.takeEnergy(cast)) {
+                damage(links, sp, 1 + ((cast / links.length) / 4));
+                return (src.enrgDmg * energyDmgCoef) + (src.physDmg * physicDmgCoef);
+            }
         }
-        return damage;
+        return src.enrgDmg + src.physDmg;
     }
 }

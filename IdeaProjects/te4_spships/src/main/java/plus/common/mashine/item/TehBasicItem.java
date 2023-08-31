@@ -22,7 +22,7 @@ public class TehBasicItem extends BasicItem implements ISimplePowerCraftable {
     }
 
 
-    protected static float normal(int shift){
+    public static float normal(int shift){
         return shift/104f + 0.03f;
     }
 
@@ -49,7 +49,7 @@ public class TehBasicItem extends BasicItem implements ISimplePowerCraftable {
     public ItemStack create(int shift, float power, float damage, int tehProcess){
         ItemStack stack = new ItemStack(this);
         NBTTagCompound tag = new NBTTagCompound();
-        tag.setInteger(Strings.TEH_PROC, tehProcess);
+        tag.setShort(Strings.TEH_PROC, (short) tehProcess);
         tag.setFloat(Strings.POWER,
                 (float) (calcPowerComponent(power)* MathUtils.calcBigStructCoef(tehProcess)/2)
         );

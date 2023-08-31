@@ -3,14 +3,10 @@ package plus.mixins;
 import io.netty.util.internal.ConcurrentSet;
 import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.EntityTrackerEntry;
-import net.minecraft.world.WorldServer;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.Set;
 
 
@@ -19,10 +15,10 @@ public class MixinEntityTracker {
     @Final
     @Mutable
     @Shadow
-    private Set<EntityTrackerEntry> entries;
-
-    @Inject(method = "<init>", at = @At("TAIL"))
-    public void init(WorldServer theWorldIn, CallbackInfo ci){
-        entries = new ConcurrentSet<>();
-    }
+    private final Set<EntityTrackerEntry> entries = new ConcurrentSet<>();
+//
+//    @Inject(method = "<init>", at = @At("TAIL"))
+//    public void init(WorldServer theWorldIn, CallbackInfo ci){
+//        entries = new ConcurrentSet<>();
+//    }
 }

@@ -27,9 +27,11 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import plus.common.player.PlayerSpship;
@@ -45,10 +47,12 @@ public abstract class MixinPlayer extends EntityLivingBase implements PlayerSpsh
     private static final Random random = new Random();
     private static final DataParameter<Integer> SPSHIP_ID =
             EntityDataManager.createKey(EntityPlayer.class, DataSerializers.VARINT);
-    private static final DataParameter<Boolean> SPSHIP_ACTIVE =
-            EntityDataManager.createKey(EntityPlayer.class, DataSerializers.BOOLEAN);
+//    private static final DataParameter<Boolean> SPSHIP_ACTIVE =
+//            EntityDataManager.createKey(EntityPlayer.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Float> SPSHIP_SHIELD =
             EntityDataManager.createKey(EntityPlayer.class, DataSerializers.FLOAT);
+
+    //private static final DataParameter<Integer> test;
 
     @Shadow
     public PlayerCapabilities capabilities;
@@ -70,7 +74,7 @@ public abstract class MixinPlayer extends EntityLivingBase implements PlayerSpsh
     protected abstract void spawnShoulderEntities();
 
 
-    @Shadow public abstract void onDeath(DamageSource cause);
+//    @Shadow public abstract void onDeath(DamageSource cause);
 
     @Shadow protected int flyToggleTimer;
 
@@ -80,7 +84,7 @@ public abstract class MixinPlayer extends EntityLivingBase implements PlayerSpsh
 
     @Shadow protected float speedInAir;
 
-    @Shadow public abstract void onLivingUpdate();
+//    @Shadow public abstract void onLivingUpdate();
 
     @Shadow protected abstract void collideWithPlayer(Entity entityIn);
 
@@ -102,7 +106,8 @@ public abstract class MixinPlayer extends EntityLivingBase implements PlayerSpsh
 
     @Override
     public boolean isSpshipMode(){
-        return this.getDataManager().get(SPSHIP_ACTIVE);
+        return this.getDataManager().get(SPSHIP_ID) >= 0;
+        //return this.getDataManager().get(SPSHIP_ACTIVE);
     }
 
 
@@ -129,12 +134,6 @@ public abstract class MixinPlayer extends EntityLivingBase implements PlayerSpsh
     }
 
 
-    @Override
-    public void setSpModelId(int id){
-        this.getDataManager().set(SPSHIP_ID, id);
-    }
-
-
     @Inject(method = "<init>", at = @At("TAIL"))
     public void init(World worldIn, GameProfile gameProfileIn, CallbackInfo ci){
         spShip = new SpShip(this);
@@ -144,23 +143,22 @@ public abstract class MixinPlayer extends EntityLivingBase implements PlayerSpsh
     @Inject(method = "entityInit", at = @At("HEAD"))
     protected void entityInit(CallbackInfo ci) {
         this.getDataManager().register(SPSHIP_ID, -1);
-        this.getDataManager().register(SPSHIP_ACTIVE, false);
         this.getDataManager().register(SPSHIP_SHIELD, 100f);
     }
 
 
     @Override
     public void setSpMode(boolean mode){
-        //isSpship = mode;
         if(mode){
             if(!updated){
-                this.getDataManager().set(SPSHIP_ACTIVE, true);
+                spShip.calcParams();
+                this.getDataManager().set(SPSHIP_ID, spShip.modelId);
                 onEnableSp();
             }
             updated = true;
         } else {
             if(updated){
-                this.getDataManager().set(SPSHIP_ACTIVE, false);
+                this.getDataManager().set(SPSHIP_ID, -1);
                 onDisableSp();
             }
             updated = false;
@@ -202,12 +200,6 @@ public abstract class MixinPlayer extends EntityLivingBase implements PlayerSpsh
     }
 
 
-    @Inject(method = "onLivingUpdate", at = @At("HEAD"), cancellable = true)
-    public void onLivingUpdate0(CallbackInfo ci) {
-        ci.cancel();
-        onLivingUpdate0();
-    }
-
     private float spSpeed = 0.0f;
     @Override
     public float getSpSpeed() {
@@ -215,7 +207,12 @@ public abstract class MixinPlayer extends EntityLivingBase implements PlayerSpsh
     }
 
 
-    public void onLivingUpdate0(){
+    /**
+     * @author Te4hno
+     * @reason add Sp
+     */
+    @Overwrite
+    public void onLivingUpdate(){
         if (this.flyToggleTimer > 0) {
             --this.flyToggleTimer;
         }
@@ -235,13 +232,14 @@ public abstract class MixinPlayer extends EntityLivingBase implements PlayerSpsh
         if(isSpshipMode()){
             if(isSprinting){
                 spSpeed = getSp().accelerate(spSpeed);
-                capabilities.setFlySpeed(0.05f * spSpeed);
+                capabilities.setFlySpeed(0.07f * spSpeed);
+            } else {
+                spSpeed = 1.0f;
+                capabilities.setFlySpeed(0.07f);
             }
             spShip.onTick();
         } else {
-            if(spSpeed > 1.0f){
-                capabilities.setFlySpeed(0.05f);
-            }
+            capabilities.setFlySpeed(0.05f);
             spSpeed = 1.0f;
         }
 
@@ -302,14 +300,12 @@ public abstract class MixinPlayer extends EntityLivingBase implements PlayerSpsh
     }
 
 
-    @Inject(method = "attackEntityFrom", at = @At("HEAD"), cancellable = true)
-    public void attackEntityFrom0(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir){
-        cir.setReturnValue(onAttack(source,amount));
-    }
-
-
-    public boolean onAttack(DamageSource source, float amount) {
-//        if (!net.minecraftforge.common.ForgeHooks.onPlayerAttack(this, source, amount))
+    /**
+     * @author Te4hno
+     * @reason add Sp
+     */
+    @Overwrite
+    public boolean attackEntityFrom(DamageSource source, float amount) {
         if (!(amount < 0.0f) && !this.capabilities.disableDamage && !this.isEntityInvulnerable(source)) {
             this.idleTime = 0;
             if (this.getHealth() > 0.0F) {
@@ -317,7 +313,6 @@ public abstract class MixinPlayer extends EntityLivingBase implements PlayerSpsh
                     return false;
                 }
                 if(isSpshipMode()){//TODO может быть медленно
-                    //onSpAttack(source, amount);
                     spShip.onDamage(source, amount);
                     return false;
                 }
@@ -440,16 +435,13 @@ public abstract class MixinPlayer extends EntityLivingBase implements PlayerSpsh
         }
 
         if (this.getHealth() <= 0.0F) {
-
-            //if (!this.checkTotemDeathProtection(source)) {
             SoundEvent soundevent = this.getDeathSound();
 
             if (flag1 && soundevent != null) {
                 this.playSound(soundevent, this.getSoundVolume(), this.getSoundPitch());
             }
 
-            this.onDeathM(source);
-            //}
+            this.onDeath(source);
         } else if (flag1) {
             this.playHurtSound(source);
         }
@@ -461,7 +453,7 @@ public abstract class MixinPlayer extends EntityLivingBase implements PlayerSpsh
         return !flag;
     }
 
-    //this.damageEntity
+
     private void damagePl(DamageSource src, float damage)    {
         damage = this.applyPotionDamageCalculations(
                 src, this.applyArmorCalculations(src, damage)
@@ -512,9 +504,12 @@ public abstract class MixinPlayer extends EntityLivingBase implements PlayerSpsh
     }
 
 
-    @Inject(method = "updateSize", at = @At("HEAD"), cancellable = true)
-    protected void updateSize(CallbackInfo ci) {
-        ci.cancel();
+    /**
+     * @author Te4hno
+     * @reason add Sp
+     */
+    @Overwrite
+    protected void updateSize() {
         float f;
         float f1;
 
@@ -552,21 +547,17 @@ public abstract class MixinPlayer extends EntityLivingBase implements PlayerSpsh
                     this.move(MoverType.SELF, f - this.width, 0.0D, f - this.width);
                 }
                 this.width = f;
-
-                //setSize();
             }
         }
     }
 
 
-    @Inject(method = "onDeath", at = @At("HEAD"), cancellable = true)
-    public void onDeath(DamageSource cause, CallbackInfo ci) {
-        ci.cancel();
-        onDeathM(cause);
-    }
-
-
-    public void onDeathM(DamageSource cause){
+    /**
+     * @author Te4hno
+     * @reason add Sp
+     */
+    @Overwrite
+    public void onDeath(DamageSource cause){
         super.onDeath(cause);
         this.setSize(0.2F, 0.2F);
         this.setPosition(this.posX, this.posY, this.posZ);

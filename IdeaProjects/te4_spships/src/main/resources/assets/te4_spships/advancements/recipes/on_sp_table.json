@@ -1,0 +1,15 @@
+{"parent": "minecraft:recipes/root",
+  "requirements": [["has_item"]],
+  "rewards": {"recipes": [
+    "te4_spships:quantificator_1",
+    "te4_spships:quantificator_2",
+    "te4_spships:quantificator_3",
+    "te4_spships:quantificator_4"
+  ]},
+  "criteria": {
+    "has_item": {"trigger": "minecraft:inventory_changed",
+      "conditions": {"items": [{
+        "item": "te4_spships:sp_craft_table"
+      }]}
+    }
+  }}

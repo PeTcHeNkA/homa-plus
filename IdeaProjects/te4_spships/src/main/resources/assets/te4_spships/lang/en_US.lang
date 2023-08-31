@@ -26,9 +26,17 @@ tile.aether_ore.name=§dЭфирная руда
 tile.mefril_ore.name=§dМефриловая руда
 tile.alumine_ore.name=§bАлюминиевая руда
 
+tile.stone_met.name=$bМетеоритный камень
+tile.copper_ore_met.name=§bМедная руда
+tile.mefril_ore_met.name=§dМефриловая руда
+tile.alumine_ore_met.name=§bАлюминиевая руда
+tile.gold_ore_met.name=§bЗолотая руда
+tile.iron_ore_met.name=§bЖелезная руда
+
 tile.copper_block.name=§bМедный блок
 tile.mefril_block.name=§dМефриловый блок
 tile.alumine_block.name=§bАлюминиевый блок
+tile.armored_block.name=§3Бронированный блок
 
 item.copper_ingot.name=§bМедный слиток
 item.mefril_ingot.name=§dМефриловый слиток
@@ -42,6 +50,7 @@ item.plate_alumine.name=§bАлюминиевая пластина
 item.plate_copper.name=§bМедная пластина
 item.plate_mefril.name=§dМефриловая пластина
 item.plate_machine.name=§aУкрепленная пластина
+item.plate_armored.name=§3Бронированная пластина
 
 item.circuit.name=§aЭлектросхема
 item.iron_gear.name=§bЖелезная шестерня
@@ -51,6 +60,8 @@ item.circuit_addon.name=§aПлата расширения
 item.sp_armor.name=§aКорабельная обшивка
 item.oxy_ballon_l1.name=§bКислородные баллоны
 item.oxy_ballon_l2.name=§aКислородные баллоны
+
+item.spship_model.name=§dЛичный корабль
 
 item.sp_module_shield_l1.name=§bГенератор щита
 item.sp_module_shield_l2.name=§aГенератор щита
@@ -67,10 +78,54 @@ item.sp_module_protect_l2.name=§aКомпенсатор щита
 item.sp_module_protect_l3.name=§3Компенсатор щита
 item.sp_module_protect_l4.name=§dКомпенсатор щита
 
-item.spship_model.name=§dЛичный корабль
+item.quantificator.shock.name=§aКвантификатор §3Шок
+item.quantificator.physic.name=§aКвантификатор §7Физ
+item.quantificator.plasm.name=§aКвантификатор §dПлазм
+item.quantificator.energy.name=§aКвантификатор §eЭлектрон
+
+item.sp_module_gun_l1.physic.name=§bОсколочный резонатор
+item.sp_module_gun_l2.physic.name=§aОсколочный резонатор
+item.sp_module_gun_l3.physic.name=§3Осколочный резонатор
+item.sp_module_gun_l4.physic.name=§dОсколочный резонатор
+
+item.sp_module_gun_l1.energy.name=§bЛазерный резак
+item.sp_module_gun_l2.energy.name=§aЛазерный резак
+item.sp_module_gun_l3.energy.name=§3Лазерный резак
+item.sp_module_gun_l4.energy.name=§dЛазерный резак
+
+item.sp_module_gun_l1.plasm.name=§bПлазенный ускоритель
+item.sp_module_gun_l2.plasm.name=§aПлазенный ускоритель
+item.sp_module_gun_l3.plasm.name=§3Плазенный ускоритель
+item.sp_module_gun_l4.plasm.name=§dПлазенный ускоритель
+
+item.sp_module_gun_l1.shock.name=§bШоковая установка
+item.sp_module_gun_l2.shock.name=§aШоковая установка
+item.sp_module_gun_l3.shock.name=§3Шоковая установка
+item.sp_module_gun_l4.shock.name=§dШоковая установка
+
+sp_lore.gun_type_physic=Вариация: §7Физ
+sp_lore.gun_type_shock=Вариация: §3Шок
+sp_lore.gun_type_plasm=Вариация: §dПлазм
+sp_lore.gun_type_energy=Вариация: §eЭлектрон
+
+
+sp_lore.quant_lore_base=§eОружейный модификатор
+
+sp_lore.quant_lore_1_shock=Добавляет урон эл. системе
+sp_lore.quant_lore_2_shock=и дает шанс обездвижить противника
+sp_lore.quant_lore_1_energy=Значительно повышает
+sp_lore.quant_lore_2_energy=энергетический урон
+sp_lore.quant_lore_1_physic=Значительно повышает
+sp_lore.quant_lore_2_physic=физический урон
+sp_lore.quant_lore_1_plasm=Умеренно повышает физический
+sp_lore.quant_lore_2_plasm=и энергетический урон
 
 sp_lore.module_help_a0=Универсальная плата
 sp_lore.module_help_b0=расширения корабля
+
+sp_lore.module_help_a1=Оружие для установки
+sp_lore.module_help_b1=на космический корабль
+
 sp_lore.module_help_a2=Восстанавливает прочность
 sp_lore.module_help_b2=щита корабля расходуя энергию
 sp_lore.module_help_a3=Придает ускарение кораблю
@@ -96,7 +151,7 @@ sp_lore.damage=Урон §c+%s
 sp_lore.damage_pr=Урон §c+%s%%
 sp_lore.max_shield=Макс. щит §c+%s
 sp_lore.max_shield_pr=Макс. щит §c+%s%%
-sp_lore.speed=Бонус ускорения: §c+%s
+sp_lore.speed=Бонус ускорения: §c+%sB/S
 sp_lore.speed_pr=Бонус ускорения: §c+%s%%
 sp_lore.crit_rate=Крит. шанс: §c+%s%%
 sp_lore.crit_dmg=Крит. урон: §c+%s%%
@@ -106,6 +161,9 @@ sp_lore.a_color=Цвет: %s
 sp_lore.accelerator_speed=Ускорение: §c+%s%%
 sp_lore.energy_cast=Расход энергии: §c%s/t
 sp_lore.shield_gen_speed=Регенерация щита: §c%s/t
+
+sp_lore.phys_dmg=Физический урон: §c%s
+sp_lore.enrg_dmg=Энергетический урон: §c%s
 
 sp_lore.spship_model_a0=Облегченный истребитель
 sp_lore.spship_model_b0=2-го поколения
@@ -139,4 +197,16 @@ tile.sp_craft_table.lore_2=создания сложных компоненто�
 tile.sp_oxy_charger.name=§aОчиститель
 tile.sp_oxy_charger.lore_1=Использует электричество
 tile.sp_oxy_charger.lore_2=для очистки и сжатия кислорода
+
+gui.sp_shield_a=Прочность щита: §a%s/%s
+gui.sp_shield_b=Щит: §a%s/%s §c+%s/%sE
+
+gui.sp_shield_c=Щит: §a%s/%s&7|§f%sF§7|§e%s
+gui.sp_shield_d=Щит: §a%s/%s&7|§f%sF§7|§e%s §c+%s/%sE
+
+gui.sp_accelerator=Ускоритель: §a+%s%%/%sE
+
+gui.sp_power_system_a=Энергия: §e%s§7/§a%s
+gui.sp_power_system_b=Энергия: §e%s§7/§a%s §c+%s
+gui.sp_power_system_c=Энер: §e%s§7/§a%s §c+%s
 

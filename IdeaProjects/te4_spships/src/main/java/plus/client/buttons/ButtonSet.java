@@ -4,7 +4,7 @@ import static plus.utls.MathUtils.isBetween;
 
 
 public class ButtonSet {
-    private Button[] buttons = new Button[0];
+    public Button[] buttons = new Button[0];
     private int activeIndex = 0;
 
     public void add(Button b) {
