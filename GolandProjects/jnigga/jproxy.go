@@ -5,6 +5,7 @@ package main
 
 #include "jni.h"
 #include <stdlib.h>
+#include <string.h>
 
 jbyteArray NewByteArray(JNIEnv* env, jsize len) {
 	return (*env)->NewByteArray(env, len);
@@ -16,37 +17,48 @@ const char* jx_GetStringUTFChars(JNIEnv *env, jstring str, jboolean *isCopy) {
     return (*env)->GetStringUTFChars(env, str, isCopy);
 }
 
-//jobject GetSystemClassLoader(JNIEnv *env) {
-//    jclass classloaderClass = (*env)->FindClass(env, "java/lang/ClassLoader");
-//    jmethodID getsysloaderMethod = (*env)->GetStaticMethodID(env, classloaderClass, "getSystemClassLoader","()Ljava/lang/ClassLoader;");
-//
-//    jobject loader = (*env)->CallStaticObjectMethod(env, classloaderClass, getsysloaderMethod);
-//	return loader;
-//}
-
 jclass DefClass(JNIEnv *env, const char *name, jobject loader, const jbyte *buf, jsize bufLen){
 	return (*env)->DefineClass(env, name, loader, buf, bufLen);
 }
 
+jobject GetField(JNIEnv *env, char *clazz0, char *var, char *sign){
+    jclass clazz = (*env)->FindClass(env, clazz0);
+    jfieldID fieldID = (*env)->GetStaticFieldID(env, clazz, var, sign);
+    return (*env)->GetStaticObjectField(env, clazz, fieldID);
+}
+
+jmethodID GetStaticMtdID(JNIEnv *env, jclass clazz, const char *name, const char *sig){
+	return (*env)->GetStaticMethodID(env, clazz, name, sig);
+}
+
 jobject GetSelfCL(JNIEnv *env){
-    jclass clazz = (*env)->FindClass(env, "plus/nlaunch/NLaunch");
-    jfieldID fieldID = (*env)->GetStaticFieldID(env, clazz, "inst", "Ljava/lang/ClassLoader;");
-    return (*env)->GetStaticObjectField(env, clazz, fieldID);
+	return GetField(env, "plus/nlaunch/NLaunch", "inst", "Ljava/lang/ClassLoader;");
 }
 
-jobject GetDomain(JNIEnv *env){
-    jclass clazz = (*env)->FindClass(env, "plus/nlaunch/NLaunch");
-    jfieldID fieldID = (*env)->GetStaticFieldID(env, clazz, "inst", "Ljava/lang/ClassLoader;");
-    return (*env)->GetStaticObjectField(env, clazz, fieldID);
+jobject CallStatic(JNIEnv *env, jclass clazz, jmethodID mtdid){
+	return (*env)->CallStaticObjectMethod(env, clazz, mtdid);
 }
 
-//jclass FindJClass(JNIEnv *env, const char *name){
-//	return (*env)->FindClass(env, name);
-//}
-//
-//jmethodID GetStaticMtdID(JNIEnv *env, jclass clazz, const char *name, const char *sig){
-//	return (*env)->GetStaticMethodID(env, clazz, name, sig);
-//}
+int CanWork(JNIEnv *env){
+	jclass fc = (*env)->FindClass(env, "sun/management/ManagementFactoryHelper");//
+	jfieldID fieldID = (*env)->GetStaticFieldID(env, fc, "jvm", "Lsun/management/VMManagement;");//
+	jobject vmInst = (*env)->GetStaticObjectField(env, fc, fieldID);//
+	jclass clazzVMM = (*env)->FindClass(env, "sun/management/VMManagementImpl");//
+	jmethodID mtdid = (*env)->GetMethodID(env, clazzVMM, "getVmArguments0", "()[Ljava/lang/String;");
+
+	jobjectArray args = (jobjectArray)CallStatic(env, clazzVMM, mtdid);
+	jsize argsLen = (*env)->GetArrayLength(env, args);
+	int l2 = argsLen;
+
+	for(int i = 0; i < argsLen; i++ ){
+		jstring str = (*env)->GetObjectArrayElement(env, args, i);
+		const char* str0 = jx_GetStringUTFChars(env, str, 0);
+		if(strstr(str0, "jdwp")){
+			return 1;
+		}
+	}
+	return 0;
+}
 
 #ifndef _Included_plus_nlaunch_NLaunch
 #define _Included_plus_nlaunch_NLaunch
@@ -79,6 +91,10 @@ type (
 	//jbyte      uintptr
 	//jmethodID  uintptr
 )
+
+func canWork(env unsafe.Pointer) bool {
+	return C.CanWork((*C.JNIEnv)(env)) == 0
+}
 
 func newByteArray(env unsafe.Pointer, len int) JbyteArray {
 	return JbyteArray(unsafe.Pointer(C.NewByteArray((*C.JNIEnv)(env), C.jsize(len))))
