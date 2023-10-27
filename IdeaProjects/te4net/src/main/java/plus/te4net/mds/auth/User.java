@@ -7,11 +7,13 @@ import java.nio.charset.StandardCharsets;
 public class User extends TsonMap {
     public final String login;
     public final String password;
+    public final String name;
 
-    public User(String login, String password, byte[] data) {
+    public User(String login, String password, String name, byte[] data) {
         super(new String(data,StandardCharsets.UTF_8));
         this.login = login;
         this.password = password;
+        this.name = name;
     }
 
 

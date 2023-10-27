@@ -1,8 +1,8 @@
 package plus.te4net.core.html;
 
+import plus.te4net.core.bsys.IDataProvider;
 import plus.te4net.core.node.HWorker;
 import plus.te4net.utl.CharNum;
-import plus.tson.TsonFile;
 import java.io.File;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.MatchResult;
@@ -27,7 +27,12 @@ public class CssFile extends SimpleCompressedTextFile {
 
 
     public CssFile(HWorker worker, File file){
-        super(worker, file.getName(),TsonFile.read(file,""));
+        super(worker, file);
+    }
+
+
+    public CssFile(IDataProvider worker, String name, String data) {
+        super(worker, name, data);
     }
 
 
@@ -72,6 +77,6 @@ public class CssFile extends SimpleCompressedTextFile {
 
     @Override
     public String type() {
-        return "text/css";
+        return TYPE_CSS;
     }
 }

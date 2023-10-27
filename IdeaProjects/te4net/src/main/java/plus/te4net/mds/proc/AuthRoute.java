@@ -6,6 +6,7 @@ import io.netty.handler.codec.http.cookie.DefaultCookie;
 import plus.te4net.core.api.IRequestProcessor;
 import plus.te4net.core.api.IRequestSession;
 import plus.te4net.core.node.HWorker;
+import plus.te4net.core.node.HWorkerRepository;
 import plus.te4net.mds.auth.*;
 import plus.te4net.mds.cap4a.Cap4a;
 import plus.te4net.mds.cap4a.Cap4aLib;
@@ -14,20 +15,16 @@ import plus.te4net.core.fm.RouteTextFormatter;
 import plus.te4net.core.fm.TextMapFormatter;
 import plus.te4net.core.html.CssFile;
 import plus.te4net.core.node.HPluginSystem;
-import plus.te4net.utl.Logger;
 import plus.te4net.utl.MailServer;
 import plus.te4net.utl.MiniLink;
 import plus.tson.TsonMap;
+import plus.tson.TsonStr;
 import plus.tson.utl.Tuple;
 import plus.util.SimpleSrcGetter;
-
 import java.nio.charset.StandardCharsets;
-import java.util.regex.Pattern;
 
 
 public class AuthRoute<U extends User> extends AuthService<U> implements SimpleSrcGetter, IRequestProcessor, IAuthProvider {
-    private static final Pattern mailPtr = Pattern.compile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))$");
-    private static final Pattern pswPtr = Pattern.compile("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!#$%?@-_+=^:;.<>*\"])(?=\\S+$).{8,24}$");
     public static final byte[] font = HPluginSystem.getSrc(AuthRoute.class, "Bufcated1.ttf");
     public static final String defCss = CssFile.optimizeCss(
             new String(HPluginSystem.getSrc(AuthRoute.class,"cap4a-template.css"))
@@ -36,15 +33,35 @@ public class AuthRoute<U extends User> extends AuthService<U> implements SimpleS
     private final RouteTextFormatter fmLogin;
     private final HWorker worker;
 
-
-    public AuthRoute(HWorker worker, UserData<U> userData, TsonMap mailAuth){
-        super(new UserMap<>(userData), new Cap4aLib<>(), new MailServer(mailAuth));
-        serMailFormat(new TextMapFormatter(worker, getStrSrc("mail-code-template.html"),'{','}'));
-        fmLogin = RouteTextFormatter.ofHtml(worker, getStrSrc("login-template.html"));
-
-        this.worker = worker;
+    public AuthRoute(HWorker worker, TsonMap config){
+        this(worker, new UserMap<U>((UserData<U>) new DefData(config.getOrDefault(
+                "database", new TsonStr(worker.getWorkDir().getPath() + "/users.db")
+                ).getStr())),
+                config.getOrDefault("mail",new TsonMap("{virtual=(true)}")).getMap()
+        );
     }
 
+    public AuthRoute(HWorker worker, UserMap<U> userMap, TsonMap mailAuth){
+        super(userMap, new Cap4aLib<>(), new MailServer(mailAuth.getMap("mail")));
+        setMailFormat(new TextMapFormatter(worker, getStrSrc("mail-code-template.html"),"{%","%}"));
+        fmLogin = RouteTextFormatter.ofHtml(worker, getStrSrc("mcauth2.html"));
+        this.worker = worker;// mcauth2.html  login-template.html
+        onInit(worker);
+    }
+
+    protected void onInit(HWorker worker){
+        worker.addRoute("auth", this);
+    }
+
+    static class DefData extends UserData<User>{
+        public DefData(String database) {
+            super(database);
+        }
+        @Override
+        public User newUser(String login, String password, String name, byte[] data) {
+            return new User(login, password, name, data);
+        }
+    }
 
     public void post(IRequestSession session) {
         try {
@@ -60,7 +77,7 @@ public class AuthRoute<U extends User> extends AuthService<U> implements SimpleS
                             args[0].toLowerCase(), args[1], AuthService.MailRequest.Type.NEW_USER, args[2], new MailServer.CallBack() {
                                 @Override
                                 public void onSuccess() {
-                                    Logger.get().info("Mail sended to [" + args[0] + "] !");
+                                    HWorkerRepository.getLogger().info("Mail sended to [" + args[0] + "] !");
                                 }
 
                                 @Override
@@ -81,7 +98,7 @@ public class AuthRoute<U extends User> extends AuthService<U> implements SimpleS
                             args[0].toLowerCase(), args[1], AuthService.MailRequest.Type.BREAK_PASSWORD, args[2], new MailServer.CallBack() {
                                 @Override
                                 public void onSuccess() {
-                                    Logger.get().info("Mail sended to [" + args[0] + "] !");
+                                    HWorkerRepository.getLogger().info("Mail sended to [" + args[0] + "] !");
                                 }
 
                                 @Override
@@ -163,14 +180,14 @@ public class AuthRoute<U extends User> extends AuthService<U> implements SimpleS
 
     private void confirmUpdate(IRequestSession session) throws AuthException {
         onPostConfirm(editPsw(
-                getLogin(session), getCryptKey(session), new byte[0], getTokenData(session)
+                getLogin(session), getCryptKey(session), getTokenData(session)
         ), session);
     }
 
 
     private void confirmCreate(IRequestSession session) throws AuthException {
         onPostConfirm(createAccount(
-                getLogin(session), getCryptKey(session), new byte[0], getTokenData(session)
+                getLogin(session), getCryptKey(session), getName(session), new byte[0], getTokenData(session)
         ), session);
     }
 
@@ -210,6 +227,11 @@ public class AuthRoute<U extends User> extends AuthService<U> implements SimpleS
 
     private String getLogin(IRequestSession session){
         return session.queryParams("login");
+    }
+
+
+    private String getName(IRequestSession session){
+        return session.queryParams("name");
     }
 
 
@@ -275,17 +297,5 @@ public class AuthRoute<U extends User> extends AuthService<U> implements SimpleS
     @Override
     public void goToAuth(IRequestSession session) {
         session.redirect("/auth/?goto="+ MiniLink.toMini(session.path()));
-    }
-
-
-    @Override
-    protected boolean validLogin(String login) {
-        return mailPtr.matcher(login).find();
-    }
-
-
-    @Override
-    protected boolean validPassword(String password) {
-        return pswPtr.matcher(password).find();
     }
 }

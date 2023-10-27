@@ -5,7 +5,7 @@ import plus.te4net.core.node.HWorker;
 import plus.util.IPluginProcessor;
 
 
-public class FunctionProcessor implements IPluginProcessor<PluginFunction> {
+public final class FunctionProcessor implements IPluginProcessor<PluginFunction> {
     private final HWorker worker;
     public FunctionProcessor(HWorker worker) {
         this.worker = worker;

@@ -64,4 +64,16 @@ public class NSqlDataProvider implements SqliteUtils, IDataProvider {
     public Connection getConnection() {
         return conn;
     }
+
+
+    @Override
+    public String[] getItems(String... path) {
+        StringBuilder path01 = new StringBuilder(path[0]);
+        for(int i=1;i<path.length;i++){
+            path01.append('/').append(path[i]);
+        }
+        String table = path01.toString();
+        checkTable(table);
+        return SqliteUtils.super.getKeys(table + suffix);
+    }
 }

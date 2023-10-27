@@ -1,6 +1,7 @@
 package plus.te4net.utl.data;
 
 import java.sql.*;
+import java.util.ArrayList;
 
 
 public interface SqliteUtils{
@@ -92,6 +93,24 @@ public interface SqliteUtils{
     }
 
 
+    default String[] getKeys(String table){
+        try {
+            String qw = "SELECT NAME FROM '" + table + "'";
+            PreparedStatement ps = getConnection().prepareStatement(qw);
+            ResultSet result = ps.executeQuery();
+            ArrayList<String> arr = new ArrayList<>();
+            while (result.next()) {
+                arr.add(result.getString(1));
+            }
+            ps.close();
+            return arr.toArray(new String[0]);
+        } catch (Exception e){
+            e.printStackTrace();
+            return new String[0];
+        }
+    }
+
+
     default byte[] getData(String name, String table){
         try {
             String qw = "SELECT DATA FROM '" + table + "' WHERE NAME = '" + name + "'";
@@ -108,6 +127,41 @@ public interface SqliteUtils{
         } catch (Exception e){
             e.printStackTrace();
             return null;
+        }
+    }
+
+
+    default void runSql(String code, SqlCallBack c) throws SQLException {
+        PreparedStatement statement = getConnection().prepareStatement(code);
+        ResultSet result = statement.executeQuery();
+        try {
+            if(result.isBeforeFirst())result.next();
+            c.onResult(result);
+            result.close();
+            statement.close();
+        } catch (Exception e){
+            result.close();
+            statement.close();
+            throw new SQLException(e);
+        }
+    }
+
+
+    default void runSql(String code) throws SQLException {
+        PreparedStatement statement = getConnection().prepareStatement(code);
+        statement.execute();
+        statement.close();
+    }
+
+
+    default void addColumn(String table, String column, SqlType type, boolean index) throws SQLException {
+        runSql(
+                "ALTER TABLE '"+table+"' ADD '"+column+"' "+type+";"
+        );
+        if(index){
+            runSql(
+                    "CREATE INDEX '"+column+"_index' ON '"+table+"' ('"+column+"');"
+            );
         }
     }
 }

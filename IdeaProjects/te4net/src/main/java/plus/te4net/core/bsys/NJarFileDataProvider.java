@@ -1,6 +1,6 @@
 package plus.te4net.core.bsys;
 
-import plus.te4net.utl.Logger;
+import plus.te4net.core.node.HWorkerRepository;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -39,7 +39,7 @@ public class NJarFileDataProvider extends HashMap<String, NJarFileDataProvider.J
     @Override
     public void saveRaw(byte[] data, String... path) {
         String path0 = getPath(path);
-        Logger.get().info("Attempt to save ["+path0+"] to JAR! Ignored.");
+        HWorkerRepository.getLogger().info("Attempt to save ["+path0+"] to JAR! Ignored.");
     }
 
 
@@ -72,5 +72,11 @@ public class NJarFileDataProvider extends HashMap<String, NJarFileDataProvider.J
             stream.close();
             return result;
         }
+    }
+
+
+    @Override
+    public String[] getItems(String... path) {
+        return keySet().toArray(new String[0]);
     }
 }

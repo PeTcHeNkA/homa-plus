@@ -26,9 +26,9 @@ final class H2Proxy extends ApplicationProtocolNegotiationHandler {
         if (ApplicationProtocolNames.HTTP_2.equals(protocol)) {
             ctx.pipeline().addLast(
                     Http2FrameCodecBuilder.forServer().build(),
-                    new Http2MultiplexHandler(new H2Handler(worker, domain)),
-                    new ChunkedWriteHandler()
+                    new Http2MultiplexHandler(new H2Handler(worker, domain))
             );
+
             return;
         }
         if (ApplicationProtocolNames.HTTP_1_1.equals(protocol)) {
@@ -42,4 +42,8 @@ final class H2Proxy extends ApplicationProtocolNegotiationHandler {
         }
         throw new IllegalStateException("unknown protocol: " + protocol);
     }
+
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {}
 }

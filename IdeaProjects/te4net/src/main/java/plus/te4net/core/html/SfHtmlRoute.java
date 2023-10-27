@@ -1,10 +1,11 @@
 package plus.te4net.core.html;
 
 import plus.te4net.core.api.IRequestSession;
+import plus.te4net.core.api.PublicUsage;
 import plus.te4net.core.html.HtmlRoute;
 import plus.te4net.core.node.HWorker;
 
-
+@PublicUsage
 public class SfHtmlRoute extends HtmlRoute {
     private final HWorker worker;
 

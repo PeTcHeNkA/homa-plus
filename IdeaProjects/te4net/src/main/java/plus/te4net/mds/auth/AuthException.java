@@ -10,6 +10,7 @@ public final class AuthException extends Exception {
         NO_MAIL,
         NO_VALID_LOGIN,
         NO_VALID_PASSWORD,
+        NO_VALID_NAME,
         READY_EXIST
     }
     public final Type type;

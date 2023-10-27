@@ -1,6 +1,29 @@
-{domains={
+{
+show404=(true),
+cache="sql:root:cache.cache",
+domains={
 	lochost.ru={
-	    use-std-auth=(true),
-		domains=["te4hno.ddns.net"]
+		use-lets-encrypt=(true),
+	    auth={
+			class="plus.mcapi.McAuth",
+			mail={
+				virtual=(true)
+			}
+		},
+		domains=["te4hno.ddns.net"],
+		clients-plug-data={
+			type='memory',
+			parent='root:clients'
+		},
+		routes={
+			assets/etc={type="svg",  headers={access-control-allow-origin='*'}},
+			assets/tms={type="html", headers={access-control-allow-origin='*'}},
+			launch={type="files", cache=(3600)}
+		}
 	},
+	practic.ru={
+		routes={
+			assets/tms={type="static-html", headers={access-control-allow-origin='practic.ru'}},
+		}
+	}
 }}

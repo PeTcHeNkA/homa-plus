@@ -5,7 +5,7 @@ import plus.util.PluginClassLoader;
 import plus.util.SimpleSrcGetter;
 import java.io.File;
 
-
+@PublicUsage
 public interface PluginBase extends SimpleSrcGetter {
     default TsonMap getTson(String name){
         return new TsonMap(new String(getSrc(name)));

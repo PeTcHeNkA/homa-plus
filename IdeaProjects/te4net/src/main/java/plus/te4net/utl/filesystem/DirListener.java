@@ -1,7 +1,7 @@
 package plus.te4net.utl.filesystem;
 
 import plus.te4net.core.node.HWorker;
-import plus.te4net.utl.Logger;
+import plus.te4net.core.node.HWorkerRepository;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
@@ -12,7 +12,6 @@ import static java.nio.file.StandardWatchEventKinds.*;
 
 
 public class DirListener extends Thread{
-    private static final Logger Log = Logger.get();
     public enum Event{
         CREATE, DELETE, MODIFY
     }
@@ -75,7 +74,7 @@ public class DirListener extends Thread{
 
 
     private void callEvent(Event e, String s){
-        Log.info(String.format("%s %s",e,s));
+        HWorkerRepository.getLogger().info(String.format("%s %s",e,s));
         for(Listener l:listeners){
             l.onCall(worker, e, s);
         }

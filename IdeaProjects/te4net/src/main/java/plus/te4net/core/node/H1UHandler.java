@@ -24,6 +24,10 @@ final class H1UHandler extends AbsH1Handler {
         }
         this.request = (FullHttpRequest) msg;
         domain = request.headers().get("host");
+        if(domain==null){
+            super.requestError("You're a bot right?");
+            return;
+        }
         HWorkerRepository.HWorkerContext ctx0 = repository.getFor(domain);
         if(ctx0==null){
             notFound();
@@ -50,5 +54,11 @@ final class H1UHandler extends AbsH1Handler {
     @Override
     public String getDomain() {
         return domain;
+    }
+
+
+    @Override
+    public String toString() {
+        return "["+worker+"]:HTTP/1.1 "+method()+" "+path();
     }
 }

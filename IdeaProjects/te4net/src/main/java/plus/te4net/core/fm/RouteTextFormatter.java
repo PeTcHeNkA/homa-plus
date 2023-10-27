@@ -2,10 +2,10 @@ package plus.te4net.core.fm;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaderValues;
-import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import plus.te4net.core.api.IRequestProcessor;
 import plus.te4net.core.api.IRequestSession;
+import plus.te4net.core.api.PublicUsage;
 import plus.te4net.core.node.HWorker;
 import plus.te4net.core.html.StaticHtmlFile;
 import plus.te4net.utl.Te4GZIPOutStream;
@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.zip.Deflater;
 
-
+@PublicUsage
 public class RouteTextFormatter extends TextFormatter<IRequestSession> {
     private final boolean needPress;
     private final byte[][] bitems;
@@ -29,7 +29,7 @@ public class RouteTextFormatter extends TextFormatter<IRequestSession> {
 
 
     public RouteTextFormatter(HWorker worker, String format){
-        this(compileFormat(format, worker));
+        this(compileFormat(format, worker, "<%","%>"));
     }
 
 

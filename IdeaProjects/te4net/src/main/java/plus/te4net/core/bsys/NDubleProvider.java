@@ -36,4 +36,10 @@ public class NDubleProvider implements IDataProvider {
     public void saveRaw(byte[] data, String... path) {
         fastProvider.saveRaw(data, path);
     }
+
+
+    @Override
+    public String[] getItems(String... path) {
+        return defProvider.getItems(path);
+    }
 }

@@ -2,6 +2,7 @@ package plus.te4net.utl;
 
 import jakarta.mail.*;
 import jakarta.mail.internet.*;
+import plus.te4net.core.node.HWorkerRepository;
 import plus.tson.TsonBool;
 import plus.tson.TsonMap;
 import plus.util.SimpleSrcGetter;
@@ -19,7 +20,7 @@ public class MailServer implements SimpleSrcGetter {
     private final boolean virtual;
 
     public MailServer(TsonMap map){
-        if(!(this.virtual = map.getOrDefault("virtual", new TsonBool(false)).getBool())) {
+        if(map != null && !(map.getOrDefault("virtual", new TsonBool(false)).getBool())) {
             boolean debug = map.getOrDefault("debug", new TsonBool(false)).getBool();
             this.user = map.getStr("mail-login");
             this.password = map.getStr("mail-password");
@@ -39,17 +40,19 @@ public class MailServer implements SimpleSrcGetter {
                 }
             };
             session = Session.getInstance(props, auth);
+            this.virtual = false;
         } else {
             this.user = null;
             this.session = null;
             this.password = null;
+            this.virtual = true;
         }
     }
 
 
     public void send(String mail, String content, CallBack cl){
         if(virtual){
-            Logger.get().info("EMULATE SEND MAIL TO ["+mail
+            HWorkerRepository.getLogger().info("EMULATE SEND MAIL TO ["+mail
                     +"]:\n---------------\n"+content+"\n---------------");
             pool.put(cl::onSuccess);
         } else {

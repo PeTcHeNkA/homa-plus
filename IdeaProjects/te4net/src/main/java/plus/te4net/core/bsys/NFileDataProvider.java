@@ -42,7 +42,7 @@ public class NFileDataProvider implements IDataProvider{
     }
 
 
-    @Override//TODO
+    @Override
     public void saveRaw(byte[] data, String... path) {
         String path0 = getPath(path);
         File file = new File(dir, path0).getParentFile();
@@ -65,5 +65,16 @@ public class NFileDataProvider implements IDataProvider{
             path01.append('/').append(path[i]);
         }
         return new File(path01.toString()).isFile();
+    }
+
+
+    @Override
+    public String[] getItems(String... path) {
+        String path0 = getPath(path);
+        File file = new File(dir, path0).getParentFile();
+        if(file==null)return new String[0];
+        String[] items = file.list();
+        if(items==null)return new String[0];
+        return items;
     }
 }

@@ -23,9 +23,12 @@ public class NCachedImgProcessor extends Te4HashMap<NCachedImgProcessor.Key, NCa
     @Override
     public void handle(IRequestSession session) {
         ImgSize size = getOptimalSize(session);
+        if(size==null){
+            session.requestError("You're a bot right?");
+            return;
+        }
         String key = session.routeKey().afterRoute();
         Key realKey = new Key(key, size);
-
         Node<Key, Img> val = getNode(realKey);
         if(val!=null){
             val.getKey().use();

@@ -1,9 +1,12 @@
 package plus.te4net.core.node;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.ssl.SslContext;
 import plus.te4net.Args;
+import plus.te4net.core.api.IHttpClient;
 import plus.te4net.core.api.IRequestProcessor;
 import plus.te4net.core.api.IRequestSession;
+import plus.te4net.core.html.*;
 import plus.te4net.core.img.CompressorSettings;
 import plus.te4net.core.img.NCachedImgProcessor;
 import plus.te4net.core.img.NSimpleImgProcessor;
@@ -14,24 +17,19 @@ import plus.te4net.core.bsys.DataProviderBuilder;
 import plus.te4net.core.bsys.IDataProvider;
 import plus.te4net.core.fm.QueryGetter;
 import plus.te4net.core.fm.SplatGetter;
-import plus.te4net.core.html.CGzipRoute;
-import plus.te4net.core.html.HtmlRoute;
 import plus.te4net.mds.auth.UserData;
 import plus.te4net.mds.proc.AuthRoute;
-import plus.te4net.core.html.SfHtmlRoute;
-import plus.te4net.utl.Logger;
-import plus.tson.TsonBool;
-import plus.tson.TsonMap;
-import plus.tson.TsonObj;
-import plus.tson.TsonStr;
+import plus.tson.*;
 import plus.tson.format.ConstVarGetter;
 import plus.tson.format.IVarGetter;
 import plus.tson.format.IVarProvider;
+import plus.util.PCLTask;
+
 import java.io.File;
 import java.util.HashMap;
 
 
-public final class HWorker implements IVarProvider<IRequestSession>, IAuthProvider {
+public final class HWorker implements IVarProvider<IRequestSession>, IAuthProvider, IDataProvider {
     private final HashMap<String, IVarGetter<IRequestSession>> functions = new HashMap<>();
     final CompressorSettings settings = new CompressorSettings();
     private final HRouteMap routes = new HRouteMap();
@@ -46,22 +44,36 @@ public final class HWorker implements IVarProvider<IRequestSession>, IAuthProvid
     private final boolean allowHttp;
     private final boolean hasCert;
 
-
     HWorker(HWorkerRepository.HWorkerContext ctx, HWorkerRepository repository, File workDir, String domain, TsonMap map, boolean allowHttp, boolean hasCert) {
         this.ctx = ctx;
         this.repository = repository;
         this.mainDomain = domain;
         this.allowHttp = allowHttp;
         this.hasCert = hasCert;
-        cssLib = new CGzipRoute(this, new File(workDir, "assets/css"), HWorkerRepository::buildCSs);
-        jsLib = new CGzipRoute(this, new File(workDir, "assets/js"), HWorkerRepository::buildJS);
+
+        cacheProvider = DataProviderBuilder.ofTson(this,
+                map.getOrDefault("cache", new TsonStr("root"))
+        );
+
+        cssLib = CGzipRoute.build(this, new File(workDir, "assets/css"),
+                map.getOrDefault("assets-css",new TsonMap("{type='css'}")).getMap()
+        );
+        jsLib = CGzipRoute.build(this, new File(workDir, "assets/js"),
+                map.getOrDefault("assets-js",new TsonMap("{type='js'}")).getMap()
+        );
+
+        File svgFile = new File(workDir, "assets/svg");
+        if(svgFile.exists()) {
+            CGzipRoute svg = CGzipRoute.build(this, svgFile,
+                    map.getOrDefault("assets-svg", new TsonMap("{type='svg'}")).getMap()
+            );
+            addRoute("assets/svg", svg);
+        }
+
         imageProvider = DataProviderBuilder.ofTson(this,
                 map.getOrDefault("images", new TsonMap(
         "{root='root',"+domain+"/ORIG=['root:lochost.ru/','dir:domains/"+domain+"/assets/img:true']}"
                 ))
-        );
-        cacheProvider = DataProviderBuilder.ofTson(this,
-                map.getOrDefault("cache", new TsonStr("root"))
         );
         addRoute("assets/css", cssLib);
         addRoute("assets/js",jsLib);
@@ -74,27 +86,54 @@ public final class HWorker implements IVarProvider<IRequestSession>, IAuthProvid
             addRoute("assets/img", new NSimpleImgProcessor(imageProvider));
         }
         HPluginSystem loader = loadPlugins(workDir, map);
-        provider = buildAuthProvider(workDir, loader, map);
+        provider = buildAuthProvider(loader, map);
         loadPages(workDir);
+        loadRoutes(workDir, map.getMap("routes"));
     }
 
 
-    private IAuthProvider buildAuthProvider(File workdir, HPluginSystem loader, TsonMap map){
+    public File getWorkDir(){
+        return repository.getWorkDir(this);
+    }
+
+
+    private void loadRoutes(File workdir, TsonMap map){
+        if(map==null)return;
+        for(String key:map.keySet()){
+            addRoute(key, repository.buildRoute(this, workdir, key, map.getMap(key)));
+        }
+    }
+
+
+    private IAuthProvider buildAuthProvider(HPluginSystem loader, TsonMap map){
         if(loader != null && loader.authProvider != null){
             return loader.authProvider;
         }
-        if(map.getOrDefault("use-std-auth",new TsonBool(false)).getBool()) {
-            AuthRoute<User> ar = new AuthRoute<>(this, new UserData<>(workdir.getPath() + "/users.db") {
-                @Override
-                protected User newUser(String login, String password, byte[] data) {
-                    return new User(login, password, data);
-                }
-            }, map.getOrDefault("mail",new TsonMap("{virtual=(true)}")).getMap());
-            addRoute("auth", ar);
-            return ar;
-        } else {
-            return null;
+        TsonObj oauth = map.get("auth");
+        if(oauth==null)return null;
+
+        if(oauth.isCustom()) return (IAuthProvider) oauth.getField();
+
+        if(oauth.isMap()){
+            map = oauth.getMap();
+            oauth = map.get("class");
+            if(oauth==null){
+                oauth = new TsonStr("default");
+            }
         }
+
+        if(oauth.isString()){
+            if(oauth.getStr().equals("default")){
+                return new AuthRoute<>(this, map);
+            }
+            return (IAuthProvider) new HPCLTask(
+                    new TsonClass(loader, oauth.getStr()).getField(),
+                    this,
+                    map
+            ).inst();
+        }
+
+        throw new IllegalArgumentException(String.format("Unsupported constructor for [%s]: <%s>", oauth, map));
     }
 
 
@@ -143,7 +182,7 @@ public final class HWorker implements IVarProvider<IRequestSession>, IAuthProvid
         }
         if(plugins==null && pluginDir.isDirectory() && pluginDir.list().length==0)return null;
         try {
-            HPluginSystem plSys = new HPluginSystem(this);
+            HPluginSystem plSys = new HPluginSystem(this, map);
             plSys.load(pluginDir);
             if(plugins != null) {
                 if (plugins.isString()) {
@@ -168,6 +207,7 @@ public final class HWorker implements IVarProvider<IRequestSession>, IAuthProvid
 
 
     public void addRoute(String path, IRequestProcessor processor){
+        //System.out.printf("register route [%s]: [%s]\n", path, processor);
         routes.put(path, processor);
     }
 
@@ -176,6 +216,10 @@ public final class HWorker implements IVarProvider<IRequestSession>, IAuthProvid
         IRequestProcessor processor = routes.get(session);
         if(processor == null){
             session.notFound();
+            //TODO DEBUG ONLY
+//            if(repository.show404){
+                System.out.println(session);
+//            }
         } else {
             try {
                 processor.handle(session);
@@ -186,12 +230,30 @@ public final class HWorker implements IVarProvider<IRequestSession>, IAuthProvid
     }
 
 
-    public byte[] getFromCache(String... path){
+    public IHttpClient client(){
+        return repository.client();
+    }
+
+
+    public IHttpClient client(SslContext ctx){
+        return repository.client(ctx);
+    }
+
+
+    @Override
+    public String[] getItems(String... path) {
+        return cacheProvider.getItems(path);
+    }
+
+
+    @Override
+    public byte[] getRaw(String... path) {
         return cacheProvider.getRaw(expand(path));
     }
 
 
-    public void saveToCache(byte[] data, String... path){
+    @Override
+    public void saveRaw(byte[] data, String... path) {
         cacheProvider.saveRaw(data, expand(path));
     }
 
@@ -265,7 +327,7 @@ public final class HWorker implements IVarProvider<IRequestSession>, IAuthProvid
                 }
             };
         }
-        Logger.get().info("Var ["+name+"] not exist!");
+        HWorkerRepository.getLogger().info("Var ["+name+"] not exist!");
         return new ConstVarGetter<>(name);
     }
 
@@ -300,6 +362,12 @@ public final class HWorker implements IVarProvider<IRequestSession>, IAuthProvid
     @Override
     public User auth(IRequestSession session) {
         return provider.auth(session);
+    }
+
+
+    @Override
+    public void update(User user) {
+        provider.update(user);
     }
 
 

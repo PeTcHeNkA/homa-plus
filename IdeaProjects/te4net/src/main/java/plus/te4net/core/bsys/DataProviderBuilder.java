@@ -1,14 +1,12 @@
 package plus.te4net.core.bsys;
 
 import plus.asyutl.buf.FastBuffer;
+import plus.te4net.core.api.PublicUsage;
 import plus.te4net.core.node.HWorker;
-import plus.tson.TsonList;
-import plus.tson.TsonMap;
-import plus.tson.TsonObj;
-
+import plus.tson.*;
 import java.sql.Connection;
 
-
+@PublicUsage
 public class DataProviderBuilder {
     enum Type{
         FILE, SQL, JAR, HYBRID, DUBLE,
@@ -107,17 +105,28 @@ public class DataProviderBuilder {
         }
         if(obj.isMap()) {
             TsonMap map = obj.getMap();
-            IDataProvider root = ofTson(worker, map.remove("root"));
-            if(!(root instanceof NHybrideDataProvider)){
-                root = new NHybrideDataProvider(root);
+            String type = map.getOrDefault("type", new TsonStr("hybrid")).getStr();
+            map.remove("type");
+            switch (type){
+                case "hybrid":{
+                    IDataProvider root = ofTson(worker, map.remove("root"));
+                    if(!(root instanceof NHybrideDataProvider)){
+                        root = new NHybrideDataProvider(root);
+                    }
+                    def.put(root);
+                    NHybrideDataProvider hb = (NHybrideDataProvider) root;
+                    for(String key: map.keySet()){
+                        hb.include(key, ofTson(worker, map.get(key), def));
+                    }
+                    def.flush();
+                    return hb;
+                }
+                case "memory":
+                    return new NMemoryCachedProvider(
+                            ofTson(worker, map.get("parent"), def),
+                            map.getOrDefault("time", new TsonInt(180)).getInt()
+                    );
             }
-            def.put(root);
-            NHybrideDataProvider hb = (NHybrideDataProvider) root;
-            for(String key: map.keySet()){
-                hb.include(key, ofTson(worker, map.get(key), def));
-            }
-            def.flush();
-            return hb;
         }
         if (obj.isList()) {
             TsonList lst = obj.getList();

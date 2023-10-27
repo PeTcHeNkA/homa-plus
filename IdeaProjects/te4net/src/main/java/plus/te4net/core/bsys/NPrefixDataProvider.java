@@ -40,4 +40,10 @@ public class NPrefixDataProvider implements IDataProvider {
     public boolean containsRaw(String... path) {
         return parent.containsRaw(expand(path));
     }
+
+
+    @Override
+    public String[] getItems(String... path) {
+        return parent.getItems(expand(path));
+    }
 }

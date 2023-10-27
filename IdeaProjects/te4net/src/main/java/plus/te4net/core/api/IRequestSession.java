@@ -5,11 +5,14 @@ import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.cookie.Cookie;
 import plus.te4net.core.mapping.HRouteMap;
 import plus.te4net.core.node.HWorker;
+import plus.te4net.mds.auth.User;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import static plus.te4net.utl.ByteUtils.EMPTY;
 
 
-public interface IRequestSession {
+@PublicUsage
+public interface IRequestSession extends IResponse{
     default void send(byte[] data){
         send(data, HttpResponseStatus.OK);
     }
@@ -45,9 +48,6 @@ public interface IRequestSession {
     void removeHeader(CharSequence name);
 
 
-    String getRHeader(CharSequence name);
-
-
     String method();
 
 
@@ -72,21 +72,28 @@ public interface IRequestSession {
     void redirect(String goTo);
 
 
-    byte[] encodeBody();
-
-
-    default String encodeBodyAsStr(){
-        return new String(encodeBody(), StandardCharsets.UTF_8);
-    }
-
-
     default void notModified(){
-        send("", HttpResponseStatus.NOT_MODIFIED);
+        send(EMPTY, HttpResponseStatus.NOT_MODIFIED);
     }
 
 
     default void notFound(){
-        send("", HttpResponseStatus.NOT_FOUND);
+        send(EMPTY, HttpResponseStatus.NOT_FOUND);
+    }
+
+
+    default void ok(){
+        send(EMPTY, HttpResponseStatus.OK);
+    }
+
+
+    default void requestError(String cause){
+        send(cause, HttpResponseStatus.NOT_IMPLEMENTED);
+    }
+
+
+    default User auth(){
+        return worker().auth(this);
     }
 
 
@@ -102,4 +109,10 @@ public interface IRequestSession {
 
 
     String getDomain();
+
+
+    @Override
+    default HttpResponseStatus status(){
+        throw new UnsupportedOperationException();
+    }
 }

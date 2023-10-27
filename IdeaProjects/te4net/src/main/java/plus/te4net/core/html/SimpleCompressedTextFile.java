@@ -8,10 +8,14 @@ import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import plus.te4net.core.api.IRequestProcessor;
 import plus.te4net.core.api.IRequestSession;
+import plus.te4net.core.api.PublicUsage;
+import plus.te4net.core.bsys.IDataProvider;
 import plus.te4net.core.node.HWorker;
-import plus.te4net.utl.Logger;
+import plus.te4net.core.node.HWorkerRepository;
 import plus.te4net.utl.Te4GZIPOutStream;
+import plus.tson.TsonFile;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -19,13 +23,23 @@ import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 
 
+@PublicUsage
 public class SimpleCompressedTextFile implements IRequestProcessor{
+    public static final String TYPE_TEXT = "text";
+    public static final String TYPE_JS   = "text/javascript";
+    public static final String TYPE_CSS  = "text/css";
+
     private final byte[] brotli;
     private final byte[] data;
     private final int hs;
 
     public SimpleCompressedTextFile(HWorker worker, String name, String data) {
         this(worker, name, data, true);
+    }
+
+
+    public SimpleCompressedTextFile(HWorker worker, File file){
+        this(worker, file.getName(), TsonFile.read(file,""));
     }
 
 
@@ -44,11 +58,15 @@ public class SimpleCompressedTextFile implements IRequestProcessor{
     }
 
 
-    protected static byte[] createOrCompressBrotli(HWorker worker, String name, int hs, String optimized){
-        if(optimized.length()>2048){
-            return brotli(optimized);
-        }
-        byte[] result = worker.getFromCache(name);
+    public SimpleCompressedTextFile(IDataProvider worker, String name, String data){
+        this.data = gZip(data);
+        hs = Arrays.hashCode(this.data);
+        this.brotli = createOrCompressBrotli(worker, name,hashCode(), data);
+    }
+
+
+    protected static byte[] createOrCompressBrotli(IDataProvider provider, String name, int hs, String optimized){
+        byte[] result = provider.getRaw(name);
         if(result!=null){
             int orHs = bytesToInt(result);
             if(hs==orHs){
@@ -58,24 +76,25 @@ public class SimpleCompressedTextFile implements IRequestProcessor{
             }
         }
         result = brotli(optimized);
-        saveBroil(worker, name, hs, result);
+        saveBroil(provider, name, hs, result);
         return result;
     }
+
 
     public static void printStatistic(HWorker worker, String path, String raw, byte[] pressed){
         String domain = worker.getMainDomain();
         if(domain==null)domain = "*";
-        Logger.get().info(String.format("[%s/%s] (%s) -> %s (%s%%)", domain, path, raw.length(),
+        HWorkerRepository.getLogger().info(String.format("[%s/%s] (%s) -> %s (%s%%)", domain, path, raw.length(),
                 pressed.length, ((int)(((float)pressed.length/raw.length())*100))));
     }
 
 
-    protected static void saveBroil(HWorker worker, String name, int hashCode, byte[] brData){
+    protected static void saveBroil(IDataProvider provider, String name, int hashCode, byte[] brData){
         byte[] hs = intToBytes(hashCode);
         byte[] data0 = new byte[brData.length+hs.length];
         System.arraycopy(hs, 0, data0, 0, hs.length);
         System.arraycopy(brData, 0, data0, hs.length, brData.length);
-        worker.saveToCache(data0, name);
+        provider.saveRaw(data0, name);
     }
 
 
@@ -164,7 +183,7 @@ public class SimpleCompressedTextFile implements IRequestProcessor{
 
 
     public String type() {
-        return "text";
+        return TYPE_TEXT;
     }
 
 

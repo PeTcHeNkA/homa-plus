@@ -1,17 +1,16 @@
 package plus.te4net.core.node;
 
 import io.netty.handler.ssl.*;
+import plus.asyutl.shoulder.IBasicTask;
 import plus.asyutl.shoulder.TaskShoulder;
 import plus.asyutl.thread.PopThreadedPool;
-import plus.te4net.core.api.IRequestSession;
+import plus.te4net.core.api.*;
 import plus.te4net.core.bsys.DataProviderBuilder;
 import plus.te4net.core.bsys.IDataProvider;
-import plus.te4net.core.cons.ConsoleCommand;
-import plus.te4net.core.cons.ConsoleListener;
-import plus.te4net.core.html.CssFile;
-import plus.te4net.core.html.JsFile;
-import plus.te4net.core.html.StaticHtmlFile;
-import plus.te4net.utl.Logger;
+import plus.te4net.core.html.*;
+import plus.util.cons.ConsoleCommand;
+import plus.util.cons.ConsoleListener;
+import plus.util.cons.Logger;
 import plus.te4net.utl.NCHashMap;
 import plus.tson.*;
 import plus.tson.format.IVarGetter;
@@ -21,9 +20,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import static plus.te4net.core.html.CGzipRoute.DEF_CACHE_TIME;
 
 
 public final class HWorkerRepository implements ClassManager {
+    private static Logger logger;
     private final HServer server;
     final HashMap<String, IVarGetter<IRequestSession>> functions = new HashMap<>();
     public static final PopThreadedPool<Runnable> pool = new PopThreadedPool<>(4);
@@ -32,9 +33,19 @@ public final class HWorkerRepository implements ClassManager {
     private final IDataProvider defDataPovider;
     private final TsonFile config;
     final int maxPostMemory;
+    //final boolean show404;
+
+    public static Logger getLogger(){
+        return logger;
+    }
 
 
     HWorkerRepository(TsonMap map, HServer server){
+        if(map.getOrDefault("init-console", new TsonBool(true)).getBool()){
+            initConsole("tehnet");
+        }
+        logger = Logger.get("tehnet");
+
         this.server = server;
         defDataPovider = DataProviderBuilder.ofTson(
                 null, map.getOrDefault("cache",new TsonStr("sql:root:cache.cache"))
@@ -42,18 +53,16 @@ public final class HWorkerRepository implements ClassManager {
         config = new TsonFile(this,
                 map.getOrDefault("config", new TsonStr("config.tson")).getStr()
         );
+        //show404 = config.getOrDefaultBool("show404", false);
         for(String domain:config.getMap("domains").keySet()){
             loadWorker(domain);
         }
         maxPostMemory = config.getOrDefault("max-post-mem",new TsonInt(8*1024*1024*24)).getInt();
-        if(map.getOrDefault("init-console", new TsonBool(true)).getBool()){
-            initConsole();
-        }
     }
 
 
-    private void initConsole(){
-        new ConsoleListener().addCommand(
+    private void initConsole(String name){
+        new ConsoleListener(name).addCommand(
                 new ConsoleCommand("/unload") {
                     @Override
                     public void onCommand(String... args) {
@@ -95,27 +104,31 @@ public final class HWorkerRepository implements ClassManager {
                         if(args != null && args.length>1){
                             switch (args[0]){
                                 case "http":
-                                    switch (args[1]){
-                                        case "on":
+                                    switch (args[1]) {
+                                        case "on" -> {
                                             server.startHttp(HWorkerRepository.this, config);
                                             onComplete(args);
                                             return;
-                                        case "off":
+                                        }
+                                        case "off" -> {
                                             server.stopHttp();
                                             onComplete(args);
                                             return;
+                                        }
                                     }
                                     break;
                                 case "https":
-                                    switch (args[1]){
-                                        case "on":
+                                    switch (args[1]) {
+                                        case "on" -> {
                                             server.startHttps(HWorkerRepository.this, config);
                                             onComplete(args);
                                             return;
-                                        case "off":
+                                        }
+                                        case "off" -> {
                                             server.stopHttps();
                                             onComplete(args);
                                             return;
+                                        }
                                     }
                                     break;
                             }
@@ -130,19 +143,20 @@ public final class HWorkerRepository implements ClassManager {
                         return "[http/https] [on/off]";
                     }
                 }
-        ).start();
+        );
     }
 
 
-    void unloadWorker(String key){
-        if(workers.containsKey(key)){
-            HWorkerContext ctx = workers.get(key);
+    void unloadWorker(String key0){
+        int realKey = key0.hashCode();
+        if(workers.containsKey(realKey)){
+            HWorkerContext ctx = workers.get(realKey);
             for (String domain:ctx.domains){
-                workers.remove(domain);
+                workers.remove(domain.hashCode());
             }
-            Logger.get().info(ctx+" removed.");
+            logger.info(ctx+" removed.");
         } else {
-            Logger.get().info("Worker ["+key+"] not defined!");
+            logger.info("Worker ["+key0+"] not defined!");
         }
     }
 
@@ -170,6 +184,16 @@ public final class HWorkerRepository implements ClassManager {
     }
 
 
+    IHttpClient client(){
+        return server.client();
+    }
+
+
+    IHttpClient client(SslContext ctx){
+        return server.client(ctx);
+    }
+
+
     static JsFile buildJS(HWorker worker, File file){
         return new JsFile(worker, file);
     }
@@ -185,8 +209,96 @@ public final class HWorkerRepository implements ClassManager {
     }
 
 
+    static boolean isTemp(Class<?> processor){
+        return processor.isAssignableFrom(TempRequsetProcessor.class);
+    }
+
+
+    private static class TempContainer implements IRequestProcessor{
+        private int markUse;
+        private int curMark;
+        private int notUsed = 0;
+        private TempRequsetProcessor parent;
+        private final HPCLTask task;
+        private TempContainer(HPCLTask task) {
+            this.task = task;
+        }
+        @Override
+        public void handle(IRequestSession session) {
+            if(parent==null){
+                parent = (TempRequsetProcessor) task.inst();
+            }
+            parent.handle(session);
+            curMark = markUse;
+            notUsed = 0;
+        }
+
+        public void check(int realMark){
+            if(markUse!=realMark){
+                curMark = realMark;
+                if(parent==null)return;
+                if(notUsed++>6){
+                    parent.onRemove(task.worker);
+                    parent = null;
+                    notUsed = 0;
+                }
+            }
+        }
+    }
+
+    private TempContainer[] tempContainers;
+    private int curMark = 0;
+
+    void onAddTempRoute(HPCLTask task){
+        if(tempContainers==null){
+            tempContainers = new TempContainer[]{};
+            shoulder.addTask(new IBasicTask() {
+                private int timer = 0;
+                @Override
+                public boolean needRun() {
+                    if(timer++>30){
+                        timer = 0;
+                        return true;
+                    }
+                    return false;
+                }
+                @Override
+                public void run() {
+                    for (TempContainer ctn:tempContainers){
+                        ctn.check(curMark);
+                    }
+                    curMark++;
+                }
+            });
+        }
+        TempContainer ctn = new TempContainer(task);
+        ctn.curMark = ctn.markUse = curMark;
+        TempContainer[] ntasks = new TempContainer[tempContainers.length + 1];
+        System.arraycopy(tempContainers, 0, ntasks, 0, tempContainers.length);
+        tempContainers = ntasks;
+        ntasks[tempContainers.length-1] = ctn;
+    }
+
+
     public IDataProvider getDefDataPovider() {
         return defDataPovider;
+    }
+
+
+    File getWorkDir(HWorker worker){
+        return getWorkDir(config.getMap(worker.getMainDomain()), worker.getMainDomain());
+    }
+
+
+    private static File getWorkDir(TsonMap map, String domain){
+        File file;
+        if(map.containsKey("wdir")){
+            file = new File(map.getStr("wdir"));
+        } else {
+            file = new File("domains/"+domain);
+        }
+        if(!file.exists())file.mkdirs();
+        return file;
     }
 
 
@@ -195,23 +307,25 @@ public final class HWorkerRepository implements ClassManager {
         final ArrayList<String> domains;
         private final SslContext cert;
 
-        private HWorkerContext(HWorker worker, ArrayList<String> domains, File workDir, String domain){
+        private HWorkerContext(HWorker worker, ArrayList<String> domains, File workDir, String domain, boolean useLetsEncrypt){
             this.worker = worker;
             this.domains = domains;
-            this.cert = readSSL(workDir, domain);
+            this.cert = readSSL(workDir, domain, useLetsEncrypt);
         }
 
 
         private static ArrayList<Tuple<String,HWorkerContext>> build(HWorkerRepository repository, String domain, TsonMap config){
             File wdir = getWorkDir(config, domain);
-            HWorkerContext main = new HWorkerContext(repository,wdir,domain,config);
+            boolean useLetsEncrypt = config.getOrDefault("use-lets-encrypt",new TsonBool(false)).getBool();
+
+            HWorkerContext main = new HWorkerContext(repository, wdir, domain, config, useLetsEncrypt);
             ArrayList<Tuple<String,HWorkerContext>> lst = new ArrayList<>();
             lst.add(new Tuple<>(domain, main));
             if(config.containsKey("domains")){
                 for(TsonObj obj:config.getList("domains")){
                     String newDomain = obj.getStr();
                     main.domains.add(newDomain);
-                    HWorkerContext alt = new HWorkerContext(main.worker, main.domains, wdir, newDomain);
+                    HWorkerContext alt = new HWorkerContext(main.worker, main.domains, wdir, newDomain, useLetsEncrypt);
                     lst.add(new Tuple<>(newDomain, alt));
                 }
             }
@@ -219,10 +333,11 @@ public final class HWorkerRepository implements ClassManager {
         }
 
 
-        private HWorkerContext(HWorkerRepository repository, File wdir, String domain, TsonMap config) {
+        private HWorkerContext(HWorkerRepository repository, File wdir, String domain, TsonMap config, boolean useLetsEncrypt) {
             domains = new ArrayList<>();
             domains.add(domain);
-            this.cert = readSSL(wdir, domain);
+
+            this.cert = readSSL(wdir, domain, useLetsEncrypt);
             boolean alowHttp = (cert == null) || (
                     config.getOrDefault("allow-http",new TsonBool(false)).getBool()
             );
@@ -232,25 +347,26 @@ public final class HWorkerRepository implements ClassManager {
         }
 
 
-        private static File getWorkDir(TsonMap map, String domain){
-            File file;
-            if(map.containsKey("wdir")){
-                file = new File(map.getStr("wdir"));
-            } else {
-                file = new File("domains/"+domain);
-            }
-            if(!file.exists())file.mkdirs();
-            return file;
-        }
-
-
-        private SslContext readSSL(File workDir, String domain){
+        private SslContext readSSL(File workDir, String domain, boolean letsEncrypt){
+            File publicKey = null;
+            File privateKey = null;
             try {
+                boolean flag = false;
+                if(letsEncrypt){
+                    publicKey = new File("/etc/letsencrypt/live/"+domain+"/fullchain.pem");
+                    privateKey = new File("/etc/letsencrypt/live/"+domain+"/privkey.pem");
+                    flag = privateKey.isFile() && publicKey.isFile();
+                    if(!flag){
+                        logger.info("LetsEncrypt certificate for ["+domain+"] not configured. Used STD.");
+                    }
+                }
+                if(!flag){
+                    publicKey = new File(workDir, domain+".ser");
+                    privateKey = new File(workDir, domain+".key");
+                }
                 return SslContextBuilder.forServer(
-                        new FileInputStream(new File(workDir, domain+".ser")),
-                        new FileInputStream(new File(workDir, domain+".key"))
-//                ).sslProvider(
-//                        SslProvider.OPENSSL
+                        new FileInputStream(publicKey),
+                        new FileInputStream(privateKey)
                 ).applicationProtocolConfig(new ApplicationProtocolConfig(
                         ApplicationProtocolConfig.Protocol.ALPN,
                         ApplicationProtocolConfig.SelectorFailureBehavior.NO_ADVERTISE,
@@ -259,9 +375,9 @@ public final class HWorkerRepository implements ClassManager {
                         ApplicationProtocolNames.HTTP_1_1
                 )).build();
             } catch (Exception e){
-                Logger.get().info("SSL not loaded! files [" +
-                        workDir.getPath().replace('\\','/')+"/"+domain+".ser, "
-                        + workDir.getPath().replace('\\','/')+"/"+domain+".key] not readable.");
+                logger.info("SSL not loaded! files [" +
+                        publicKey.getPath().replace('\\','/')+", "+
+                        privateKey.getPath().replace('\\','/')+" not readable.");
                 return null;
             }
         }
@@ -287,4 +403,18 @@ public final class HWorkerRepository implements ClassManager {
         preLoad(com.luciad.imageio.webp.WebPImageReaderSpi.class);
     }
     private static void preLoad(Class<?>... classes){}
+
+
+    IRequestProcessor buildRoute(HWorker worker, File workDir, String patch, TsonMap map){
+        String type = map.getOrDefault("type", new TsonStr("none")).getStr();
+        File root = new File(workDir, map.getOrDefault("dir", new TsonStr(patch)).getStr());
+        switch (type){
+            case "files":
+            case "file-three":
+                return new FileThreeProc(worker, root,
+                        map.getOrDefault("cache",new TsonInt(DEF_CACHE_TIME)).getInt()
+                );
+        }
+        return CGzipRoute.build(worker, root, map);
+    }
 }

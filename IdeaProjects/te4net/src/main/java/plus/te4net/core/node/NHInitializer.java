@@ -1,5 +1,6 @@
 package plus.te4net.core.node;
 
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
@@ -28,4 +29,8 @@ final class NHInitializer extends ChannelInitializer<SocketChannel> {
                 new H1UHandler(repository)
         );
     }
+
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {}
 }

@@ -11,7 +11,6 @@ import plus.te4net.mds.plsys.RouteProcessor;
 import plus.te4net.core.html.CGzipRoute;
 import plus.te4net.core.html.HtmlRoute;
 import plus.te4net.core.html.SfHtmlRoute;
-import plus.te4net.utl.Logger;
 import plus.tson.*;
 import plus.util.AbsPluginSystem;
 import plus.util.IPluginProcessor;
@@ -22,11 +21,13 @@ import static plus.te4net.core.img.CompressorSettings.ofMap;
 
 public class HPluginSystem extends AbsPluginSystem<PluginClassLoader> {
     private final HWorker worker;
+    private final TsonMap config;
     protected IAuthProvider authProvider;
 
-    HPluginSystem(HWorker worker) {
+    HPluginSystem(HWorker worker, TsonMap config) {
         super(true);
         this.worker = worker;
+        this.config = config;
     }
 
 
@@ -35,7 +36,19 @@ public class HPluginSystem extends AbsPluginSystem<PluginClassLoader> {
         return new IPluginProcessor[]{
                 new FunctionProcessor(worker),
                 new RouteProcessor(worker),
+                this
         };
+    }
+
+
+    @Override
+    protected PCLTask newPCLTask(Class<?> clazz) {
+        HPCLTask task = new HPCLTask(clazz, worker, config);
+        if(HWorkerRepository.isTemp(task.getClass())){
+            worker.getRepository().onAddTempRoute(task);
+            return null;
+        }
+        return task;
     }
 
 
@@ -76,7 +89,7 @@ public class HPluginSystem extends AbsPluginSystem<PluginClassLoader> {
             if(data.isMap()){
                 includeCompressSettings(data.getMap());
             } else {
-                Logger.get().info("[imgs-stn] ignored, not TsonMap!");
+                HWorkerRepository.getLogger().info("[imgs-stn] ignored, not TsonMap!");
             }
         }
         super.onLoadConfig(loader, map);
@@ -95,7 +108,7 @@ public class HPluginSystem extends AbsPluginSystem<PluginClassLoader> {
                     worker.settings.addSettings(key, settings);
                 }
             } catch (Exception e){
-                Logger.get().info("Error in read ["+key+"] in [imgs-stn], ignored.");
+                HWorkerRepository.getLogger().info("Error in read ["+key+"] in [imgs-stn], ignored.");
                 e.printStackTrace();
             }
         }

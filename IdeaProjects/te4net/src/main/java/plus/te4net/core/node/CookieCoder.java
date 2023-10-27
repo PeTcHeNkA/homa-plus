@@ -9,7 +9,6 @@ final class CookieCoder {
     static HashMap<String,Cookie> decode(String raw){
         HashMap<String,Cookie> map = new HashMap<>();
         decode(map, raw);
-//        ServerCookieDecoder
         return map;
     }
 

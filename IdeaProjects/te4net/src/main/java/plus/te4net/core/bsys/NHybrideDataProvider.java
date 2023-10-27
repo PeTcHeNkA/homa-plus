@@ -30,10 +30,9 @@ public class NHybrideDataProvider extends IntObjectHashMap<IDataProvider> implem
         return hs;
     }
 
-    //TODO НЕ ПРОВЕРЕНО
+
     private byte[] process(String[] path, byte[] data, boolean save){
-        int lastCtnI = -1;
-        int key = 0;
+        int lastCtnI = -1, key = 0;
         IDataProvider provider = defaultProvider;
         for(int i=0;i<path.length-1;i++){
             key = key * 31 + path[i].hashCode();
@@ -66,5 +65,25 @@ public class NHybrideDataProvider extends IntObjectHashMap<IDataProvider> implem
     @Override
     public void saveRaw(byte[] data, String... path) {
         process(path, data, true);
+    }
+
+
+    @Override
+    public String[] getItems(String... path) {
+        int lastCtnI = -1, key = 0;
+        IDataProvider provider = defaultProvider;
+        for(int i=0;i<path.length-1;i++){
+            key = key * 31 + path[i].hashCode();
+            IDataProvider prv;
+            if((prv = get(key))!=null){
+                provider = prv;
+                lastCtnI = i;
+            }
+        }
+        if(provider != defaultProvider){
+            String[] nwPath = new String[path.length-lastCtnI];
+            System.arraycopy(path, lastCtnI, nwPath, 0, nwPath.length);
+            return provider.getItems(nwPath);
+        } else return provider.getItems(path);
     }
 }

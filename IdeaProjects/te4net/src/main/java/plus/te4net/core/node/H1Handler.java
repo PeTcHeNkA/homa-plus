@@ -43,4 +43,10 @@ final class H1Handler extends AbsH1Handler {
     public HWorker worker() {
         return worker;
     }
+
+
+    @Override
+    public String toString() {
+        return "["+worker+"]:HTTPS/1.1 "+method()+" "+path();
+    }
 }

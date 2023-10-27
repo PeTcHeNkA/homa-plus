@@ -17,7 +17,12 @@ public class NSimpleImgProcessor implements IRequestProcessor {
 
     @Override
     public void handle(IRequestSession session) {
-        byte[] result = getStd(session, provider, getOptimalSize(session));
+        ImgSize size = getOptimalSize(session);
+        if(size==null){
+            session.requestError("You're a bot right?");
+            return;
+        }
+        byte[] result = getStd(session, provider, size);
         if(result==null){
             session.notFound();
         } else {
@@ -43,6 +48,7 @@ public class NSimpleImgProcessor implements IRequestProcessor {
 
     static void handleImg(IRequestSession session, byte[] bytes, int hs) {
         String etagStr = session.getRHeader(HttpHeaderNames.IF_NONE_MATCH);
+        session.setHeader(HttpHeaderNames.CACHE_CONTROL, "max-age=1200");
         boolean isReady = false;
         try {
             isReady = etagStr!=null && (Integer.parseInt(etagStr) == hs);
@@ -93,7 +99,9 @@ public class NSimpleImgProcessor implements IRequestProcessor {
             return ImgSize.P50;
         }
         int i1 = 0;
-        char[] dca = session.getRHeader(HttpHeaderNames.USER_AGENT).toCharArray();
+        String header = session.getRHeader(HttpHeaderNames.USER_AGENT);
+        if(header==null)return null;
+        char[] dca = header.toCharArray();
         for(char c:dca){
             ++i1;
             if(c == '('){

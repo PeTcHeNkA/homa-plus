@@ -1,6 +1,6 @@
 package plus.te4net;
 
-import plus.te4net.utl.Logger;
+import plus.util.cons.Logger;
 import plus.tson.TsonMap;
 
 

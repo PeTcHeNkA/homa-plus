@@ -7,6 +7,9 @@ public interface IAuthProvider {
     User auth(IRequestSession session);
 
 
+    void update(User user);
+
+
     void goToAuth(IRequestSession session);
 
 

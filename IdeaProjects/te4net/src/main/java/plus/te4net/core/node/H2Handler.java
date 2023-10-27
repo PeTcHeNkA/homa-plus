@@ -3,13 +3,10 @@ package plus.te4net.core.node;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.*;
-import io.netty.handler.codec.http.HttpChunkedInput;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.cookie.Cookie;
-import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
 import io.netty.handler.codec.http2.*;
-import io.netty.handler.stream.ChunkedStream;
 import plus.te4net.core.api.IRequestSession;
 import plus.te4net.core.mapping.HRouteMap;
 import java.io.*;
@@ -30,8 +27,7 @@ final class H2Handler extends ChannelDuplexHandler implements IRequestSession {
     private ChannelHandlerContext ctx;
     private HRouteMap.StrKey uriParams;
     private Http2DataFrame data;
-    private Http2Headers resHeaders;
-    private ByteBuf content;
+    private Http2HeadersFrame headersFrame;
 
 
     public H2Handler(HWorker worker, String domain) {
@@ -41,22 +37,22 @@ final class H2Handler extends ChannelDuplexHandler implements IRequestSession {
 
 
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        super.exceptionCaught(ctx, cause);
-        cause.printStackTrace();
-        ctx.close();
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+//        if(!ctx.isRemoved()) ctx.close();
     }
 
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+    public void channelRead(ChannelHandlerContext ctx, Object msg) {
         if (msg instanceof Http2HeadersFrame) {
             this.ctx = ctx;
             onHeadersRead(ctx, (Http2HeadersFrame) msg);
         } else if (msg instanceof Http2DataFrame) {
             onDataRead(ctx, (Http2DataFrame) msg);
         } else {
-            super.channelRead(ctx, msg);
+            try {
+                super.channelRead(ctx, msg);
+            } catch (Exception e){}
         }
     }
 
@@ -70,9 +66,8 @@ final class H2Handler extends ChannelDuplexHandler implements IRequestSession {
     private void onDataRead(ChannelHandlerContext ctx, Http2DataFrame data) {
         if(data.isEndStream()){
             this.data = data;
-            this.content = ctx.alloc().buffer();
             this.cookieHashMap = null;
-            this.headers = new Std2Headers();//TODO
+            this.headers = new Std2Headers();
             this.worker.handle(this);
         } else {
             data.release();
@@ -81,12 +76,11 @@ final class H2Handler extends ChannelDuplexHandler implements IRequestSession {
 
 
     private void onHeadersRead(ChannelHandlerContext ctx, Http2HeadersFrame headers) {
-        this.resHeaders = headers.headers();
-        this.uriParams = new HRouteMap.StrKey(resHeaders.path().toString());
+        this.headersFrame = headers;
+        this.uriParams = new HRouteMap.StrKey(headers.headers().path().toString());
         if (headers.isEndStream()) {
-            this.content = ctx.alloc().buffer();
             this.cookieHashMap = null;
-            this.headers = new Std2Headers();//TODO
+            this.headers = new Std2Headers();
             this.worker.handle(this);
         }
     }
@@ -95,20 +89,42 @@ final class H2Handler extends ChannelDuplexHandler implements IRequestSession {
     @Override
     public void send(byte[] data, HttpResponseStatus status) {
         headers.status(status.codeAsText());
+        ByteBuf content = ctx.alloc().buffer();
         content.writeBytes(data);
-        ctx.write(new DefaultHttp2HeadersFrame(headers));
-        ctx.write(new DefaultHttp2DataFrame(content, true));
+        Http2FrameStream stream = headersFrame.stream();
+        ctx.write(new DefaultHttp2HeadersFrame(headers).stream(stream));
+        ctx.write(new DefaultHttp2DataFrame(content, true).stream(stream));
     }
 
 
-    @Override//TODO
+    @Override
     public void send(InputStream stream, HttpResponseStatus status, int chunkSize) {
         headers.status(status.codeAsText());
-        ctx.write(new DefaultHttp2HeadersFrame(headers));
-        ctx.write(new HttpChunkedInput(new ChunkedStream(stream, chunkSize)));
-//        ctx.writeAndFlush(new Http2DataChunkedInput(
-//                new ChunkedFile(raf, 0, fileLength, 8192), stream)
-//        );
+        ctx.write(new DefaultHttp2HeadersFrame(headers).stream(headersFrame.stream()));
+        try {
+            Http2FrameStream stream0 = headersFrame.stream();
+            ChannelFutureListener listener = new ChannelFutureListener() {
+                byte[] res = stream.readNBytes(chunkSize);
+                @Override
+                public void operationComplete(ChannelFuture future) throws IOException {
+                    byte[] newRes = stream.readNBytes(chunkSize);
+                    ByteBuf content = ctx.alloc().buffer();
+                    content.writeBytes(res);
+                    if(newRes.length>0) {
+                        ctx.writeAndFlush(new DefaultHttp2DataFrame(content).stream(stream0)).addListener(this);
+                        res = newRes;
+                    } else {
+                        ctx.writeAndFlush(new DefaultHttp2DataFrame(content, true).stream(stream0));
+                        stream.close();
+                    }
+                }
+            };
+            listener.operationComplete(null);
+        } catch (Exception e) {
+            try {
+                stream.close();
+            } catch (IOException ignored) {}
+        }
     }
 
 
@@ -152,7 +168,7 @@ final class H2Handler extends ChannelDuplexHandler implements IRequestSession {
 
     @Override//TODO
     public String getRHeader(CharSequence name) {
-        CharSequence result = resHeaders.get(name);
+        CharSequence result = headersFrame.headers().get(name);
         if(result==null)return null;
         return result.toString();
     }
@@ -191,7 +207,7 @@ final class H2Handler extends ChannelDuplexHandler implements IRequestSession {
     @Override//TODO
     public Cookie getCookie(String key) {
         if(cookieHashMap==null) {
-            List<CharSequence> items = resHeaders.getAll("cookie");
+            List<CharSequence> items = headersFrame.headers().getAll("cookie");
             if(items.size()>0) {
                 cookieHashMap = new HashMap<>();
                 for (CharSequence item : items) {
@@ -219,13 +235,13 @@ final class H2Handler extends ChannelDuplexHandler implements IRequestSession {
 
     @Override
     public String path() {
-        return resHeaders.path().toString();
+        return headersFrame.headers().path().toString();
     }
 
 
     @Override
     public String method() {
-        return resHeaders.method().toString();
+        return headersFrame.headers().method().toString();
     }
 
 
@@ -234,5 +250,11 @@ final class H2Handler extends ChannelDuplexHandler implements IRequestSession {
             super(false);
             add(HttpHeaderNames.SERVER, SERVER_NAME);
         }
+    }
+
+
+    @Override
+    public String toString() {
+        return "["+worker+"]:HTTPS/2 "+method()+" "+path();
     }
 }

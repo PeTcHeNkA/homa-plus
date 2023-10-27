@@ -1,10 +1,10 @@
 package plus.te4net.mds.auth;
 
+import plus.te4net.core.node.HWorkerRepository;
 import plus.te4net.mds.cap4a.Cap4a;
 import plus.te4net.mds.cap4a.Cap4aLib;
 import plus.te4net.mds.crypt.CryptoLibSimple;
 import plus.te4net.mds.crypt.WebCryptKey;
-import plus.te4net.utl.Logger;
 import plus.te4net.utl.MailServer;
 import plus.tson.utl.Tuple;
 import plus.tson.utl.Te4HashMap;
@@ -17,7 +17,7 @@ public abstract class AuthService<T extends User> implements IAuthProvider {
     private final SCryptoMap<String> keys = new SCryptoMap<>((short) 180);
     private final SCryptoMap<MailRequest> mails = new SCryptoMap<>((short) 420);
     private TextFormatter<IVarGetter<String>> mailFormat;
-    private final UserMap<T> userMap;
+    protected final UserMap<T> userMap;
     private final MailServer mailServer;
 
     public AuthService(UserMap<T> userMap, Cap4aLib<String> lib, MailServer server) {
@@ -27,13 +27,24 @@ public abstract class AuthService<T extends User> implements IAuthProvider {
     }
 
 
-    protected void serMailFormat(TextFormatter<IVarGetter<String>> mailFormat){
+    protected void setMailFormat(TextFormatter<IVarGetter<String>> mailFormat){
         this.mailFormat = mailFormat;
     }
 
-    protected abstract boolean validLogin(String login);
-    protected abstract boolean validPassword(String password);
 
+    protected boolean validLogin(String login) {
+        return AuthDefValidator.validLogin(login);
+    }
+
+
+    protected boolean validPassword(String password) {
+        return AuthDefValidator.validPassword(password);
+    }
+
+
+    protected boolean validName(String name){
+        return AuthDefValidator.validName(name);
+    }
 
 
     private static class SCryptoMap<T> extends CryptoLibSimple<WebCryptKey,T> {
@@ -50,6 +61,11 @@ public abstract class AuthService<T extends User> implements IAuthProvider {
 
     protected void checkLogin(String login) throws AuthException {
         if(!validLogin(login))throw new AuthException(AuthException.Type.NO_VALID_LOGIN, login);
+    }
+
+    
+    protected void checkName(String name) throws AuthException {
+        if(!validName(name))throw new AuthException(AuthException.Type.NO_VALID_NAME, name);
     }
 
 
@@ -111,6 +127,13 @@ public abstract class AuthService<T extends User> implements IAuthProvider {
     }
 
 
+    public Tuple<T, String> authNoKey(String login, String password, byte[] tokenData) throws AuthException {
+        checkLogin(login);
+        checkPassword(password);
+        return userMap.authUser(login, password, tokenData);
+    }
+
+
     public void createMailConfirm(String login, String password, MailRequest.Type type, String cryptoKey, MailServer.CallBack callBack) throws AuthException {
         checkLogin(login);
         if(password!=null) checkPassword(password);
@@ -143,7 +166,7 @@ public abstract class AuthService<T extends User> implements IAuthProvider {
         private final String login;
         private Model(String login, String code) {
             this.code = code;
-            Logger.get().info("CODE: "+code);
+            HWorkerRepository.getLogger().info("CODE: "+code);
             this.login = login;
         }
         @Override
@@ -158,7 +181,7 @@ public abstract class AuthService<T extends User> implements IAuthProvider {
 
 
     public Tuple<T, String> editPsw(String login, String mailConfirm,
-                                          byte[] userData, byte[] tokenData) throws AuthException {
+                                    byte[] tokenData) throws AuthException {
         checkLogin(login);
         Te4HashMap.Node<WebCryptKey, MailRequest> node = mails.getNode(mailConfirm);
         if(node==null)throw new AuthException(AuthException.Type.NO_MAIL);
@@ -167,8 +190,8 @@ public abstract class AuthService<T extends User> implements IAuthProvider {
             mails.use(mailConfirm);
             T user = userMap.getUserFromLogin(login);
             userMap.removeUserForLogin(login);
-            user = userMap.newUser(login, request.password, user.getData());
-            userMap.createUser(user, tokenData);
+            user = userMap.editPassword(user, request.password);
+            userMap.createUser(user);
             return userMap.authUser(login, request.password, tokenData);
         } else {
             throw new AuthException(AuthException.Type.NO_MAIL);
@@ -176,16 +199,17 @@ public abstract class AuthService<T extends User> implements IAuthProvider {
     }
 
 
-    public Tuple<T, String> createAccount(String login, String mailConfirm,
+    public Tuple<T, String> createAccount(String login, String name, String mailConfirm,
                                           byte[] userData, byte[] tokenData) throws AuthException {
         checkLogin(login);
+        checkName(name);
         Te4HashMap.Node<WebCryptKey, MailRequest> node = mails.getNode(mailConfirm);
         if(node==null)throw new AuthException(AuthException.Type.NO_MAIL);
         MailRequest request = node.getValue();
         if(request != null && request.type == MailRequest.Type.NEW_USER && request.login.equals(login)){
             mails.use(mailConfirm);
-            T user = userMap.newUser(login, request.password, userData);
-            userMap.createUser(user, tokenData);
+            T user = userMap.newUser(login, request.password, name, userData);
+            userMap.createUser(user);
             return userMap.authUser(login, request.password, tokenData);
         } else {
             throw new AuthException(AuthException.Type.NO_MAIL);
@@ -193,10 +217,15 @@ public abstract class AuthService<T extends User> implements IAuthProvider {
     }
 
 
-    public Tuple<T, String> createPerm(String login, String psw, byte[] userData, byte[] tokenData) throws AuthException {
-        T user = userMap.newUser(login, psw, userData);
-        userMap.createUser(user, tokenData);
+    public Tuple<T, String> createPerm(String login, String name, String psw, byte[] userData, byte[] tokenData) throws AuthException {
+        T user = userMap.newUser(login, psw, name, userData);
+        userMap.createUser(user);
         return userMap.authUser(login, psw, tokenData);
+    }
+
+
+    public void update(User user) {
+        userMap.update((T) user);
     }
 
 

@@ -2,11 +2,13 @@ package plus.te4net.core.mapping;
 
 import plus.te4net.core.api.IRequestProcessor;
 import plus.te4net.core.api.IRequestSession;
+import plus.te4net.core.api.PublicUsage;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-
+@PublicUsage
 public final class HRouteMap extends RouteNode {
     public HRouteMap() {
         super(0);
@@ -52,7 +54,7 @@ public final class HRouteMap extends RouteNode {
 
     private RouteNode getNode(StrKey key, RouteNode current, int cursor){
         RouteNode node = current.get(key.code(cursor));
-        if(node==null || cursor==5){
+        if(node==null){
             key.addSplat(cursor);
             return current;
         }
@@ -62,7 +64,7 @@ public final class HRouteMap extends RouteNode {
 
 
     public static final class StrKey extends RouteKey {
-        private final String[] splat = new String[5];
+        private String[] splat = new String[5];
         private final char[] chars;
         private String afterRoute;
         private Map<String,String> queryParams;
@@ -78,11 +80,8 @@ public final class HRouteMap extends RouteNode {
 
         private void addSplat(int shift){
             if(shift==lastQ) {
-                if(queryParams == null) {
-                    for (int lg = 0; lg < splat.length && i < limit;) readNextAdd(++lg);
-                    if(queryParams==null) queryParams = Collections.emptyMap();
-                    else parseQParams();
-                } else parseQParams();
+                if(queryParams == null) readNextAdd();
+                else parseQParams();
             } else {
                 splat[0] = null;
                 if (queryParams == null) queryParams = Collections.emptyMap();
@@ -157,21 +156,34 @@ public final class HRouteMap extends RouteNode {
         }
 
 
-        private void readNextAdd(int shift){
-            int prev = i;
-            for (;i<limit;i++) {
-                char c = chars[i];
-                if(c == '/') break;
-                if(c == '?'){
-                    limit = i;
-                    queryParams = new HashMap<>();
-                    break;
+        private void readNextAdd(){
+            for (int shift = 1; i < limit;) {
+                int prev = i;
+                for (; i < limit; i++) {
+                    char c = chars[i];
+                    if (c == '/') break;
+                    if (c == '?') {
+                        limit = i;
+                        queryParams = new HashMap<>();
+                        break;
+                    }
+                }
+                if (i != prev) {
+                    if (shift == splat.length) {
+                        String[] ns = new String[shift + 3];
+                        System.arraycopy(splat, 0, ns, 0, splat.length);
+                        splat = ns;
+                    }
+                    splat[shift] = new String(chars, prev, i - prev);
+                    i++;
+                    ++shift;
+                }
+                if(queryParams!=null) {
+                    parseQParams();
+                    return;
                 }
             }
-            if(i!=prev) {
-                splat[shift] = new String(chars, prev, i-prev);
-            }
-            i++;
+            queryParams = Collections.emptyMap();
         }
 
 
@@ -187,12 +199,19 @@ public final class HRouteMap extends RouteNode {
 
         public String afterRoute(){
             if(afterRoute==null) {
-                StringBuilder b = new StringBuilder(splat[0]);
-                for (int i = 1; i < splat.length; i++) {
-                    if (splat[i] == null) break;
-                    b.append("/").append(splat[i]);
+                if(splat[1] == null){
+                    afterRoute = splat[0];
+                    if(afterRoute==null){
+                        afterRoute = "";
+                    }
+                } else {
+                    StringBuilder b = new StringBuilder(splat[0]);
+                    for (int i = 1; i < splat.length; i++) {
+                        if (splat[i] == null) break;
+                        b.append("/").append(splat[i]);
+                    }
+                    afterRoute = b.toString();
                 }
-                afterRoute = b.toString();
             }
             return afterRoute;
         }
