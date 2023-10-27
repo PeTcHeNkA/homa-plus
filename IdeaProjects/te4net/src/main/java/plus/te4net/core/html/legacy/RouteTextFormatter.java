@@ -1,13 +1,12 @@
-package plus.te4net.core.fm;
+package plus.te4net.core.html.legacy;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import plus.te4net.core.api.IRequestProcessor;
 import plus.te4net.core.api.IRequestSession;
 import plus.te4net.core.api.PublicUsage;
+import plus.te4net.core.html.vr.VrHtmlFormat;
 import plus.te4net.core.node.HWorker;
-import plus.te4net.core.html.StaticHtmlFile;
 import plus.te4net.utl.Te4GZIPOutStream;
 import plus.tson.format.IVarGetter;
 import plus.tson.format.TextFormatter;
@@ -17,16 +16,11 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.zip.Deflater;
 
+@Deprecated
 @PublicUsage
 public class RouteTextFormatter extends TextFormatter<IRequestSession> {
     private final boolean needPress;
     private final byte[][] bitems;
-
-
-    public static RouteTextFormatter ofHtml(HWorker worker, String str){
-        return new RouteTextFormatter(worker, StaticHtmlFile.optimizeHtml(worker, str));
-    }
-
 
     public RouteTextFormatter(HWorker worker, String format){
         this(compileFormat(format, worker, "<%","%>"));
@@ -78,26 +72,8 @@ public class RouteTextFormatter extends TextFormatter<IRequestSession> {
             session.send(out.toByteArray(), HttpResponseStatus.OK);
         } catch (IOException e) {
             throw new RuntimeException(e);
-        } catch (Redirect ex){
+        } catch (VrHtmlFormat.Redirect ex){
             ex.handle(session);
-        }
-    }
-
-
-    public static final class Redirect extends RuntimeException implements IRequestProcessor {
-        private final String to;
-        public Redirect(String to) {
-            super();
-            this.to = to;
-        }
-        @Override
-        public void handle(IRequestSession session){
-            session.setHeader(HttpHeaderNames.CACHE_CONTROL, "no-cache");
-            session.redirect(to);
-        }
-        @Override
-        public Throwable fillInStackTrace() {
-            return this;
         }
     }
 }

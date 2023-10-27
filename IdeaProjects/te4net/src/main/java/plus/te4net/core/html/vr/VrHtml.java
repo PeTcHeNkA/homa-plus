@@ -2,13 +2,11 @@ package plus.te4net.core.html.vr;
 
 import plus.asyutl.buf.FastBuffer;
 import plus.te4net.utl.CharNum;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicReference;
-
 import static plus.te4net.core.html.vr.VrCss.isEmpty;
 
 
@@ -17,7 +15,7 @@ public class VrHtml extends HtmlNode{
         "area","base","br","col","embed","hr","img","input","link","meta","param","source","track","wbr"
     ));
     private static final HashSet<String> strNode = new HashSet<>(Arrays.asList(
-            "style", "css", "js", "script"
+            "style", "css", "js", "script", "server"
     ));
 
     private static boolean needClose(String tagName){
@@ -32,6 +30,7 @@ public class VrHtml extends HtmlNode{
         public String key;
         private char bound;
         private ICitem value;
+
         @Override
         public void toString(StringBuilder b) {
             if(value==null){
@@ -42,17 +41,39 @@ public class VrHtml extends HtmlNode{
                 b.append(bound);
             }
         }
+
+
+        @Override
+        public void toString(StringBuilder b, ICitem parent, IToStrAgent agent) {
+            if(agent.onAdd(b, parent, this)){
+                if(value != null && agent.onAdd(b, this, value)){
+                    b.append(key).append('=').append(bound);
+                    value.toString(b);
+                    b.append(bound);
+                } else {
+                    b.append(key);
+                }
+            }
+        }
+
+
         public void setValue(ICitem value){
             this.value = value;
         }
+
+
         public void setValue(String value){
             this.value = new SField(value.replace(String.valueOf(bound), "\\"+bound));
         }
+
+
         public String dicValue(){
             StringBuilder b = new StringBuilder();
             value.toString(b);
             return b.toString().replace("\\"+bound, String.valueOf(bound));
         }
+
+
         public ICitem getValue() {
             return value;
         }
@@ -114,6 +135,16 @@ public class VrHtml extends HtmlNode{
         if(cur()=='<'){
             ++cursor;
             boolean isClose = cur()=='/';
+            if(!isClose){
+                if(check('!','-','-')){
+                    while (cursor<chars.length && !check('-','-','>')){
+                        //TODO FIX IN STRING UNCOMMENT
+                        ++cursor;
+                    }
+                    cursor+=3;
+                    return;
+                }
+            }
             String tagName = null;
 
             while (cursor<chars.length){
@@ -269,8 +300,6 @@ public class VrHtml extends HtmlNode{
 
 
     public VrHtml uptCss(){
-        VrCss vrCss = new VrCss();
-        //"_" + CharNum.Default.getCharNumOf(i)
         ArrayList<Style> linkStyles = new ArrayList<>();
 
         forItems((parent, index, cur) -> {
@@ -288,6 +317,7 @@ public class VrHtml extends HtmlNode{
         });
 
         AtomicReference<HtmlNode> first = new AtomicReference<>();
+        VrCss vrCss = new VrCss();
 
         forItems("style", (parent, i, cur) -> {
             HtmlNode node = (HtmlNode) cur;
@@ -299,7 +329,11 @@ public class VrHtml extends HtmlNode{
             vrCss.join(((SField)node.get(0)).value);
         });
 
-        first.get().items.set(0, vrCss);
+        HtmlNode res = first.get();
+        if(res==null)return this;
+
+        res.items.set(0, vrCss);
+
 
         vrCss.unCollide();
 

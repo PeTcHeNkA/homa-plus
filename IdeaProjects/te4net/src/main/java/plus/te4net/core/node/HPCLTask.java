@@ -13,7 +13,11 @@ final class HPCLTask extends PCLTask {
     final HWorker worker;
 
     HPCLTask(Class<?> clazz, HWorker worker, TsonMap config){
-        super(clazz);
+        this(clazz, 0, worker, config);
+    }
+
+    HPCLTask(Class<?> clazz, int priority, HWorker worker, TsonMap config){
+        super(clazz, 500+priority);
         this.worker = worker;
         this.config = config;
     }

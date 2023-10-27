@@ -1,7 +1,6 @@
 package plus.te4net.core.html.legacy;
 
 import plus.te4net.core.html.JsFile;
-import plus.te4net.core.html.StaticHtmlFile;
 import plus.te4net.core.node.HWorker;
 import plus.te4net.core.fm.TextMapFormatter;
 import plus.te4net.utl.CharNum;
@@ -13,7 +12,7 @@ import java.util.HashSet;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-
+@Deprecated
 public final class ReactiveHtml extends Te4HashMap<ReactiveHtml.RKeyStr, String> implements IReplacer {
     private AtomicBoolean currNewKey = new AtomicBoolean(true);
     private AtomicBoolean curHasUsg = new AtomicBoolean(true);
@@ -155,7 +154,7 @@ public final class ReactiveHtml extends Te4HashMap<ReactiveHtml.RKeyStr, String>
 
     private String reactivity(String template) {
         ScriptAgent jsAgent = new ScriptAgent();
-        template = StaticHtmlFile.removeComments(template, "<script", "</script>", jsAgent);
+        template = LegacyHtmlUtils.removeComments(template, "<script", "</script>", jsAgent);
 
         String scriptName;
         String selector;

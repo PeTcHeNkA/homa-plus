@@ -5,15 +5,15 @@ import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
 import plus.te4net.core.api.IRequestProcessor;
 import plus.te4net.core.api.IRequestSession;
+import plus.te4net.core.html.vr.VrCss;
+import plus.te4net.core.html.vr.VrHtmlFormat;
 import plus.te4net.core.node.HWorker;
 import plus.te4net.core.node.HWorkerRepository;
 import plus.te4net.mds.auth.*;
 import plus.te4net.mds.cap4a.Cap4a;
 import plus.te4net.mds.cap4a.Cap4aLib;
 import plus.te4net.mds.crypt.WebCryptKey;
-import plus.te4net.core.fm.RouteTextFormatter;
 import plus.te4net.core.fm.TextMapFormatter;
-import plus.te4net.core.html.CssFile;
 import plus.te4net.core.node.HPluginSystem;
 import plus.te4net.utl.MailServer;
 import plus.te4net.utl.MiniLink;
@@ -26,11 +26,11 @@ import java.nio.charset.StandardCharsets;
 
 public class AuthRoute<U extends User> extends AuthService<U> implements SimpleSrcGetter, IRequestProcessor, IAuthProvider {
     public static final byte[] font = HPluginSystem.getSrc(AuthRoute.class, "Bufcated1.ttf");
-    public static final String defCss = CssFile.optimizeCss(
+    public static final String defCss = new VrCss(
             new String(HPluginSystem.getSrc(AuthRoute.class,"cap4a-template.css"))
-    );
+    ).toString();
 
-    private final RouteTextFormatter fmLogin;
+    private final IRequestProcessor fmLogin;
     private final HWorker worker;
 
     public AuthRoute(HWorker worker, TsonMap config){
@@ -44,7 +44,7 @@ public class AuthRoute<U extends User> extends AuthService<U> implements SimpleS
     public AuthRoute(HWorker worker, UserMap<U> userMap, TsonMap mailAuth){
         super(userMap, new Cap4aLib<>(), new MailServer(mailAuth.getMap("mail")));
         setMailFormat(new TextMapFormatter(worker, getStrSrc("mail-code-template.html"),"{%","%}"));
-        fmLogin = RouteTextFormatter.ofHtml(worker, getStrSrc("mcauth2.html"));
+        fmLogin = VrHtmlFormat.ofHtml(worker, getStrSrc("mcauth2.html"));
         this.worker = worker;// mcauth2.html  login-template.html
         onInit(worker);
     }
@@ -282,7 +282,7 @@ public class AuthRoute<U extends User> extends AuthService<U> implements SimpleS
 
 
     private void login(IRequestSession session){
-        fmLogin.writeFormatted(session);
+        fmLogin.handle(session);
     }
 
 

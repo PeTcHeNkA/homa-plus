@@ -6,16 +6,6 @@ import java.util.ArrayList;
 class HtmlNode extends HtmlObject {
     protected final ArrayList<ICitem> items = new ArrayList<>();
 
-    @Override
-    public void toString(StringBuilder b) {
-        super.toString(b);
-        for (ICitem obj : items) {
-            obj.toString(b);
-        }
-        b.append("</").append(name).append('>');
-    }
-
-
     public ArrayList<HtmlObject> getBy(String tag){
         ArrayList<HtmlObject> list = new ArrayList<>();
         getBy(list, tag);
@@ -67,6 +57,27 @@ class HtmlNode extends HtmlObject {
         StringBuilder builder = new StringBuilder();
         toString(builder);
         return builder.toString();
+    }
+
+
+    @Override
+    public void toString(StringBuilder b) {
+        super.toString(b);
+        for (ICitem obj : items) {
+            obj.toString(b);
+        }
+        b.append("</").append(name).append('>');
+    }
+
+
+    @Override
+    public void toString(StringBuilder b, ICitem parent, IToStrAgent agent) {
+        if(agent.onAdd(b, parent, this)){
+            toString(b);
+            for (ICitem obj : items) {
+                obj.toString(b, this, agent);
+            }
+        }
     }
 
 

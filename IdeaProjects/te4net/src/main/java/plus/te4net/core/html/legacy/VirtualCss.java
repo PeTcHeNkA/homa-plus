@@ -1,7 +1,6 @@
 package plus.te4net.core.html.legacy;
 
 import plus.te4net.core.html.CssFile;
-import plus.te4net.core.html.StaticHtmlFile;
 import plus.te4net.core.node.HWorker;
 import plus.te4net.utl.CharNum;
 import plus.te4net.utl.IReplacer;
@@ -14,6 +13,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
+@Deprecated
 public final class VirtualCss implements IReplacer {
     private final HashMap<String,Te4HashMap<VKeyStr, String>> cssItems = new HashMap<>();
     private final AtomicInteger cssVarUsages = new AtomicInteger(-1);
@@ -25,6 +25,37 @@ public final class VirtualCss implements IReplacer {
 
     public VirtualCss(HWorker worker) {
         this.worker = worker;
+    }
+
+    public static String legacyOptimizeCss(String cssCode){
+        return LegacyHtmlUtils.replaceAll(LegacyHtmlUtils.removeComments(cssCode, "/*","*/",(data1 -> "")), new String[][]{
+                {"  "," "},//{" (","("},
+                {": ",":"},{"( ","("},
+                {"; ",";"},{") ",")"},
+                {", ", ","},{" )",")"},
+                {" ,", ","},{"\r",""},
+                {"{ ", "{"},{"\n",""},
+                {" {", "{"},{"\t",""},
+                {" }","}"},
+                {";}","}"},
+                {"} ","}"}
+        }).trim();
+    }
+
+    public static String optimizeVars(String cssCode, AtomicInteger usages){
+        Pattern pattern = Pattern.compile("--.*?:");
+        Matcher matcher = pattern.matcher(cssCode);
+
+        for(Object obj:matcher.results().toArray()){
+            MatchResult m = (MatchResult) obj;
+            String cssVar = m.group();
+            cssVar = cssVar.substring(0, cssVar.length()-1);
+            if(cssVar.startsWith("---"))continue;
+            String newVar = "--"+CharNum.OnlyChars.getCharNumOf(usages.addAndGet(1));
+            cssCode = cssCode.replace(cssVar+":",newVar+":");
+            cssCode = cssCode.replace("var("+cssVar+")","var("+newVar+")");
+        }
+        return cssCode;
     }
 
 
@@ -291,7 +322,7 @@ public final class VirtualCss implements IReplacer {
 
     public String applyCss(String html) {
         Tuple<String, String> htmlCss = toString(html);
-        String varOptimized = CssFile.optimizeVars(htmlCss.B, cssVarUsages);
+        String varOptimized = optimizeVars(htmlCss.B, cssVarUsages);
         worker.getCssLib().put(cssName, new CssFile(worker, cssName, varOptimized, false));
         return htmlCss.A;
     }
@@ -305,11 +336,11 @@ public final class VirtualCss implements IReplacer {
     @Override
     public String replace(String css) {
         if (cssName == null) {
-            read(CssFile.optimizeCss(css));
-            cssName = StaticHtmlFile.getName("t.css", css);
+            read(legacyOptimizeCss(css));
+            cssName = LegacyHtmlUtils.getName("t.css", css);
             return "<link rel=\"stylesheet\" href=\"/assets/css/" + cssName + "\">";
         } else {
-            read(CssFile.optimizeCss(css));
+            read(legacyOptimizeCss(css));
             return "";
         }
     }

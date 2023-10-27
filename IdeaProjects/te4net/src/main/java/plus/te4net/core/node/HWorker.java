@@ -3,9 +3,12 @@ package plus.te4net.core.node;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.ssl.SslContext;
 import plus.te4net.Args;
+import plus.te4net.core.api.IEventHandler;
 import plus.te4net.core.api.IHttpClient;
 import plus.te4net.core.api.IRequestProcessor;
 import plus.te4net.core.api.IRequestSession;
+import plus.te4net.core.event.EventBus;
+import plus.te4net.core.event.events.VrHtmlEvent;
 import plus.te4net.core.html.*;
 import plus.te4net.core.img.CompressorSettings;
 import plus.te4net.core.img.NCachedImgProcessor;
@@ -47,6 +50,7 @@ public final class HWorker implements IVarProvider<IRequestSession>, IAuthProvid
     HWorker(HWorkerRepository.HWorkerContext ctx, HWorkerRepository repository, File workDir, String domain, TsonMap map, boolean allowHttp, boolean hasCert) {
         this.ctx = ctx;
         this.repository = repository;
+        initEventSystem();
         this.mainDomain = domain;
         this.allowHttp = allowHttp;
         this.hasCert = hasCert;
@@ -89,6 +93,35 @@ public final class HWorker implements IVarProvider<IRequestSession>, IAuthProvid
         provider = buildAuthProvider(loader, map);
         loadPages(workDir);
         loadRoutes(workDir, map.getMap("routes"));
+    }
+
+
+    void initEventSystem(){
+        EventBus bus = new EventBus();
+        repository.objBus.put(EventBus.class, this, bus);
+        bus.addEventType(
+                VrHtmlEvent.class
+        );
+    }
+
+
+    public void addEventType(Class<?> classes){
+        repository.objBus.get(EventBus.class, this).addEventType(classes);
+    }
+
+
+    public void throwEvent(Object obj){
+        repository.objBus.get(EventBus.class, this).throwEvent(obj);
+    }
+
+
+    public <T> void addEventHandler(IEventHandler<T> handler){
+        repository.objBus.get(EventBus.class, this).addEventHandler(handler);
+    }
+
+
+    public <T> void addEventHandler(Class<T> clazz, IEventHandler<T> handler){
+        repository.objBus.get(EventBus.class, this).addEventHandler(clazz, handler);
     }
 
 

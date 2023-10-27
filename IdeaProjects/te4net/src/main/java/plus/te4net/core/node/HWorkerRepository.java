@@ -7,6 +7,9 @@ import plus.asyutl.thread.PopThreadedPool;
 import plus.te4net.core.api.*;
 import plus.te4net.core.bsys.DataProviderBuilder;
 import plus.te4net.core.bsys.IDataProvider;
+import plus.te4net.core.event.EventBus;
+import plus.te4net.core.event.ObjectBus;
+import plus.te4net.core.event.events.VrHtmlEvent;
 import plus.te4net.core.html.*;
 import plus.util.cons.ConsoleCommand;
 import plus.util.cons.ConsoleListener;
@@ -33,7 +36,7 @@ public final class HWorkerRepository implements ClassManager {
     private final IDataProvider defDataPovider;
     private final TsonFile config;
     final int maxPostMemory;
-    //final boolean show404;
+    ObjectBus objBus = new ObjectBus();
 
     public static Logger getLogger(){
         return logger;
@@ -41,25 +44,25 @@ public final class HWorkerRepository implements ClassManager {
 
 
     HWorkerRepository(TsonMap map, HServer server){
+        this.server = server;
+        logger = Logger.get("tehnet");
         if(map.getOrDefault("init-console", new TsonBool(true)).getBool()){
             initConsole("tehnet");
         }
-        logger = Logger.get("tehnet");
-
-        this.server = server;
         defDataPovider = DataProviderBuilder.ofTson(
                 null, map.getOrDefault("cache",new TsonStr("sql:root:cache.cache"))
         );
         config = new TsonFile(this,
                 map.getOrDefault("config", new TsonStr("config.tson")).getStr()
         );
-        //show404 = config.getOrDefaultBool("show404", false);
+        maxPostMemory = config.getOrDefault("max-post-mem",new TsonInt(8*1024*1024*24)).getInt();
+
+        //objBus.put(ObjectBus.class, this, new ObjectBus());
         for(String domain:config.getMap("domains").keySet()){
             loadWorker(domain);
         }
-        maxPostMemory = config.getOrDefault("max-post-mem",new TsonInt(8*1024*1024*24)).getInt();
+        //objBus.remove(ObjectBus.class, this);
     }
-
 
     private void initConsole(String name){
         new ConsoleListener(name).addCommand(

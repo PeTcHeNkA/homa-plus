@@ -187,7 +187,7 @@ public class HPluginSystem extends AbsPluginSystem<PluginClassLoader> {
         private final PluginClassLoader loader;
         private final boolean needAuth;
         public PCLHtml(PluginClassLoader loader, String path, String name, boolean needAuth) {
-            super(PluginRoute.class);
+            super(PluginRoute.class, 10000);
             this.path = path;
             this.name = name;
             this.loader = loader;
