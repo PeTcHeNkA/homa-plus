@@ -1,0 +1,31 @@
+-keep @plus.te4net.core.api.PublicUsage public class * {*;}
+
+-keep class plus.tson.** {*;}
+-keep interface plus.tson.** {*;}
+-keep enum plus.tson.** {*;}
+
+-keep class plus.util.** {*;}
+-keep interface plus.util.** {*;}
+-keep enum plus.util.** {*;}
+
+-keep class plus.asyutil.** {*;}
+-keep interface plus.asyutil.** {*;}
+-keep enum plus.asyutil.** {*;}
+
+
+#-keep class io.netty.** {*;}
+#-keep interface io.netty.** {*;}
+
+-keepclasseswithmembers class io.netty.** {*;}
+-keepnames class io.netty.** {*;}
+
+-keep class org.sejda.** {*;}
+-keep class org.xerial.** {*;}
+-keep class ch.astorm.** {*;}
+-keep class com.sun.mail.** {*;}
+-keep class com.aayushatharva.** {*;}
+-repackageclasses 'plus.te4net.core.node'
+-allowaccessmodification
+-flattenpackagehierarchy
+-keepattributes Signature,InnerClasses,*Annotation*,EnclosingMethod
+-dontwarn
