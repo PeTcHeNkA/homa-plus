@@ -1,10 +1,12 @@
-package plus.te4net.core.html.vr;
+package plus.te4net.core.html.vr.css;
 
+import plus.te4net.core.html.vr.ICitem;
+import plus.te4net.core.html.vr.SField;
 import java.util.*;
 
 
-public class VrCss implements ICitem{
-    private static void last(StringBuilder builder, char c){
+public class VrCss implements ICitem {
+    static void last(StringBuilder builder, char c){
         builder.setCharAt(builder.length()-1, c);
     }
 
@@ -23,79 +25,6 @@ public class VrCss implements ICitem{
             if(header!=null){
                 b.append(header).append('}');
             }
-        }
-    }
-
-
-    private static class Style implements ICitem {
-        private final ArrayList<SName> names = new ArrayList<>();
-        private final ArrayList<SParam> items = new ArrayList<>();
-
-        public String fullName(){
-            StringBuilder b = new StringBuilder();
-            for (SName name:names){
-                name.toString(b);
-                b.append(',');
-            }
-            b.setLength(b.length()-1);
-            return b.toString();
-        }
-
-        @Override
-        public void toString(StringBuilder b) {
-            for (SName name:names){
-                name.toString(b);
-                b.append(',');
-            }
-            last(b, '{');
-            for (SParam param:items){
-                param.toString(b);
-                b.append(';');
-            }
-            last(b, '}');
-        }
-
-        private boolean eqNames(Style etc){
-            return etc.names.equals(names);
-        }
-    }
-
-
-    private static class SName implements ICitem {
-        private String selector;
-        private String name;
-        private String params;
-        private String ender;
-
-        @Override
-        public void toString(StringBuilder b) {
-            b.append(selector).append(name);
-            if(params!=null){
-                b.append('[').append(params).append(']');
-            }
-            if(ender!=null){
-                b.append(':').append(ender);
-            }
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            SName sName = (SName) o;
-            if (!selector.equals(sName.selector)) return false;
-            if (!name.equals(sName.name)) return false;
-            if (!Objects.equals(params, sName.params)) return false;
-            return Objects.equals(ender, sName.ender);
-        }
-
-        @Override
-        public int hashCode() {
-            int result = selector.hashCode();
-            result = 31 * result + name.hashCode();
-            result = 31 * result + (params != null ? params.hashCode() : 0);
-            result = 31 * result + (ender != null ? ender.hashCode() : 0);
-            return result;
         }
     }
 
@@ -124,17 +53,6 @@ public class VrCss implements ICitem{
         public void toString(StringBuilder b) {
             b.setLength(b.length()-1);
             b.append(value);
-        }
-    }
-
-
-    private static class SParam implements ICitem {
-        private String key;
-        private ICitem value;
-        @Override
-        public void toString(StringBuilder b) {
-            b.append(key).append(':');
-            value.toString(b);
         }
     }
 
@@ -176,7 +94,7 @@ public class VrCss implements ICitem{
                         if(mainStyle==addStyle)continue;
                         if(mainStyle.eqNames(addStyle)){
                             add = false;
-                            for (SParam param:addStyle.items){
+                            for (StyleParam param:addStyle.items){
                                 mainStyle.items.add(param);
                             }
                         }
@@ -249,8 +167,19 @@ public class VrCss implements ICitem{
     }
 
 
+    private String getErrorString(){
+        int min = Math.max(0, cursor-50);
+        int max = Math.min(cursor+50,chars.length-1);
+        char[] bytes = new char[max-min];
+        System.arraycopy(chars, min, bytes, 0, bytes.length);
+        return new String(bytes);
+    }
+
+
     private RuntimeException syntaxError(Object... o){
-        return new RuntimeException("Syntax error: "+ Arrays.toString(o));
+        return new RuntimeException("Syntax error: "
+                + Arrays.toString(o)+"\n----------\n"+getErrorString()+"\n----------\n"
+        );
     }
 
 
@@ -267,6 +196,7 @@ public class VrCss implements ICitem{
 
     private boolean readStyle(Group group){
         skipToNext();
+        if(cursor>=chars.length)return false;
         if(cur()=='@')return false;
         Style style = new Style();
         while (cursor<chars.length){
@@ -293,8 +223,8 @@ public class VrCss implements ICitem{
     }
 
 
-    private SParam readSParam(StringBuilder builder){
-        SParam param = new SParam();
+    private StyleParam readSParam(StringBuilder builder){
+        StyleParam param = new StyleParam();
         while (cursor<chars.length){
             char cur = cur();
             ++cursor;
@@ -383,9 +313,10 @@ public class VrCss implements ICitem{
     }
 
 
-    private SName readStyleName(){
+
+    private StyleName readStyleName(){
         skipToNext();
-        SName sName = new SName();
+        StyleName sName = new StyleName();
 
         StringBuilder builder = new StringBuilder();
         if(cur()=='.'){
@@ -509,9 +440,9 @@ public class VrCss implements ICitem{
                 } else {
                     if(main == style)continue;
                     curItr.remove();
-                    for (SParam addParam: style.items){
+                    for (StyleParam addParam: style.items){
                         boolean add = true;
-                        for (SParam srcParam: new ArrayList<>(main.items)){
+                        for (StyleParam srcParam: new ArrayList<>(main.items)){
                             if(addParam.key.equals(srcParam.key)){
                                 add = false;
                                 srcParam.value = addParam.value;
@@ -530,7 +461,7 @@ public class VrCss implements ICitem{
     public void renameStyle(String selector, String from, String to){
         for (Group group:groups){
             for (Style style:group.items){
-                for (SName name:style.names){
+                for (StyleName name:style.names){
                     if(name.selector.equals(selector)){
                         if(name.name.equals(from)){
                             name.name = to;
@@ -546,7 +477,7 @@ public class VrCss implements ICitem{
         HashSet<String> snames = new HashSet<>();
         for (Group group:groups) {
             for (Style style : group.items) {
-                for (SName sn:style.names){
+                for (StyleName sn:style.names){
                     snames.add(sn.selector+sn.name);
                 }
             }
@@ -559,7 +490,7 @@ public class VrCss implements ICitem{
         HashSet<String> cssVars = new HashSet<>();
         for (Group group:groups) {
             for (Style style : group.items) {
-                for (SParam param:style.items){
+                for (StyleParam param:style.items){
                     if(param.key.startsWith("--")){
                         cssVars.add(param.key);
                     }
@@ -588,7 +519,7 @@ public class VrCss implements ICitem{
     public void renameVar(String from, String to){
         for (Group group:groups) {
             for (Style style : group.items) {
-                for (SParam param:style.items){
+                for (StyleParam param:style.items){
                     if(param.key.equals(from)){
                         param.key = to;
                     }
