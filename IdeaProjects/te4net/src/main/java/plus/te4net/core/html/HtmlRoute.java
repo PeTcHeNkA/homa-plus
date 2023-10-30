@@ -30,7 +30,6 @@ public class HtmlRoute implements PluginBase, IRequestProcessor, PluginRoute {
 
     public HtmlRoute(HWorker worker, byte[] data, String routeName) {
         this.routeName = routeName;
-//        this.worker = worker;
         this.formatter = VrHtmlFormat.ofHtml(worker, new String(data, StandardCharsets.UTF_8));
     }
 

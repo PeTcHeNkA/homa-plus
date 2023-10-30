@@ -17,7 +17,6 @@ public abstract class CryptoMap<T extends CryptKey, V> extends Te4HashMap<T, V> 
         long curTime = System.currentTimeMillis();
         short curUsages = getOf(usages);
         T key = newKey(curTime+time, curUsages);
-//        V result = put(key, value);
         Node<T, V> node = putN(key, value);
         while ( !(node==null || curTime>node.getKey().getTime()) ){
             key = newKey(curTime+time, curUsages);

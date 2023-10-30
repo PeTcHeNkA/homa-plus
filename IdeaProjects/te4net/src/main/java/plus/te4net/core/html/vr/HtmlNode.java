@@ -3,8 +3,18 @@ package plus.te4net.core.html.vr;
 import java.util.ArrayList;
 
 
-class HtmlNode extends HtmlObject {
+public class HtmlNode extends HtmlObject {
     protected final ArrayList<ICitem> items = new ArrayList<>();
+
+    public HtmlNode(){}
+
+    public HtmlNode(String name, ArrayList<VrHtml.Attribute> attributes){
+        super(name, attributes);
+    }
+
+    public HtmlNode(String name, String[]... attributes){
+        super(name, attributes);
+    }
 
     public ArrayList<HtmlObject> getBy(String tag){
         ArrayList<HtmlObject> list = new ArrayList<>();
@@ -60,12 +70,24 @@ class HtmlNode extends HtmlObject {
     }
 
 
-    @Override
-    public void toString(StringBuilder b) {
-        super.toString(b);
+    public String innerHtml(){
+        StringBuilder b = new StringBuilder();
+        innerHtml(b);
+        return b.toString();
+    }
+
+
+    public void innerHtml(StringBuilder b){
         for (ICitem obj : items) {
             obj.toString(b);
         }
+    }
+
+
+    @Override
+    public void toString(StringBuilder b) {
+        super.toString(b);
+        innerHtml(b);
         b.append("</").append(name).append('>');
     }
 
@@ -73,10 +95,11 @@ class HtmlNode extends HtmlObject {
     @Override
     public void toString(StringBuilder b, ICitem parent, IToStrAgent agent) {
         if(agent.onAdd(b, parent, this)){
-            toString(b);
+            super.toString(b);
             for (ICitem obj : items) {
                 obj.toString(b, this, agent);
             }
+            b.append("</").append(name).append('>');
         }
     }
 
@@ -98,5 +121,10 @@ class HtmlNode extends HtmlObject {
 
     public ICitem remove(int i){
         return items.remove(i);
+    }
+
+
+    public void clear(){
+        items.clear();
     }
 }

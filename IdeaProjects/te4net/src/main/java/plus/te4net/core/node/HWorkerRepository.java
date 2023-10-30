@@ -36,7 +36,7 @@ public final class HWorkerRepository implements ClassManager {
     private final IDataProvider defDataPovider;
     private final TsonFile config;
     final int maxPostMemory;
-    ObjectBus objBus = new ObjectBus();
+    final ObjectBus objBus = new ObjectBus();
 
     public static Logger getLogger(){
         return logger;
@@ -179,6 +179,11 @@ public final class HWorkerRepository implements ClassManager {
         if(flag){
             this.config.save();
         }
+    }
+
+
+    public ObjectBus objectBus() {
+        return objBus;
     }
 
 

@@ -1,7 +1,5 @@
-package plus.te4net.core.html.vr.css;
+package plus.te4net.core.html.vr;
 
-import plus.te4net.core.html.vr.ICitem;
-import plus.te4net.core.html.vr.SField;
 import java.util.*;
 
 
@@ -31,15 +29,25 @@ public class VrCss implements ICitem {
 
     private static class Var implements ICitem {
         private String header;
-        private final ArrayList<ICitem> items = new ArrayList<>();
+        private ArrayList<ICitem> items;
         @Override
         public void toString(StringBuilder b) {
-            b.append(header).append('(');
-            for (ICitem item:items){
-                item.toString(b);
-                b.append(',');
+            if(items==null){
+                b.append(header);
+            } else {
+                b.append(header).append('(');
+                for (ICitem item : items) {
+                    item.toString(b);
+                    b.append(',');
+                }
+                last(b, ')');
             }
-            last(b, ')');
+        }
+        private void add(ICitem e){
+            if(items==null){
+                items = new ArrayList<>();
+            }
+            items.add(e);
         }
     }
 
@@ -109,7 +117,7 @@ public class VrCss implements ICitem {
     }
 
 
-    static boolean isEmpty(char c){
+    public static boolean isEmpty(char c){
         return c == ' ' || c == '\t' || c == '\n';
     }
 
@@ -215,7 +223,10 @@ public class VrCss implements ICitem {
                 ++cursor;
                 break;
             }
-            style.items.add(readSParam(builder));
+            StyleParam param = readSParam(builder);
+            if(param != null && param.key != null && param.value != null){
+                style.items.add(param);
+            }
             builder.setLength(0);
         }
         group.items.add(style);
@@ -237,80 +248,126 @@ public class VrCss implements ICitem {
             builder.append(cur);
         }
         skipToNext();
-        param.value = readSVal(builder);
+
+        Var var = new Var();
+
+        while (cursor<chars.length){
+            if(cur()==')' || cur()==';' || cur()=='}')break;
+            fillEntry(var, builder);
+        }
+
+        param.value = var;
+
         return param;
     }
 
 
-    private ICitem readSVal(StringBuilder b){
-        boolean isFunc = false;
-
-        while (cursor<chars.length){
-            char cur = cur();
-            ++cursor;
-            if(isEmpty(cur))continue;
-            if(cur == ';' || cur == '}'){
-                break;
-            }
-            if(cur=='('){
-                isFunc = true;
-                break;
-            }
-            b.append(cur);
-        }
-        if(!isFunc){
-            return new SField(b.toString());
-        }
-        String header = b.toString();
+    private void fillEntry(Var e, StringBuilder b){
         b.setLength(0);
-        ICitem item = readVar(header, b);
+        boolean waitEnd0 = false;
         while (cursor<chars.length){
             char cur = cur();
-            if(cur == '}')break;
             ++cursor;
-            if(isEmpty(cur))continue;
-            if(cur == ';'){
+            if(cur=='('){
+                e.header = b.toString();
+                waitEnd0 = true;
                 break;
             }
-        }
-        return item;
-    }
-
-
-    private ICitem readVar(String header, StringBuilder b){
-        Var var = new Var();
-        var.header = header;
-        boolean flag = true;
-        while (cursor<chars.length){
-            char cur = cur();
-            ++cursor;
-            if(isEmpty(cur))continue;
-            if(cur=='(' || cur==','){
-                flag = false;
-                String header0 = b.toString();
-                b.setLength(0);
-                var.items.add(readVar(header0, b));
-                continue;
-            } else if (cur==')') {
-                if(flag){
-                    var.items.add(new SField(b.toString()));
-                } else {
-                    if(!b.isEmpty()) {
-                        String str = b.toString();
-                        if(!var.items.isEmpty()){
-                            var.items.add(new Vp(str));
-                        } else {
-                            var.items.add(new SField(str));
-                        }
-                    }
-                }
-                b.setLength(0);
-                return var;
+            if(cur==')' || cur==';' || cur=='}'||cur==','){
+                e.header = b.toString();
+                return;
             }
             b.append(cur);
         }
-        throw syntaxError();
+        if(waitEnd0){
+            while (cursor<chars.length){
+                int start = cursor;
+                skipToNext();
+                if(cur()==')' || cur()==';' || cur()=='}')return;
+                Var e2 = new Var();
+                fillEntry(e2, b);
+                if(e2.items==null){
+                    e.add(new SField(e2.header));
+                } else {
+                    e.add(e2);
+                }
+                if(start==cursor)throw new RuntimeException("Syntax error");
+            }
+        }
     }
+
+
+
+
+//    private ICitem readSVal(StringBuilder b){
+//        boolean isFunc = false;
+//
+//        while (cursor<chars.length){
+//            char cur = cur();
+//            ++cursor;
+//            if(isEmpty(cur))continue;
+//            if(cur == ';' || cur == '}'){
+//                break;
+//            }
+//            if(cur=='('){
+//                isFunc = true;
+//                break;
+//            }
+//            b.append(cur);
+//        }
+//        if(!isFunc){
+//            return new SField(b.toString());
+//        }
+//        String header = b.toString();
+//        b.setLength(0);
+//        ICitem item = readVar(header, b);
+//        while (cursor<chars.length){
+//            char cur = cur();
+//            if(cur == '}')break;
+//            ++cursor;
+//            if(isEmpty(cur))continue;
+//            if(cur == ';'){
+//                break;
+//            }
+//        }
+//        return item;
+//    }
+
+
+//    private ICitem readVar(String header, StringBuilder b){
+//        Var var = new Var();
+//        var.header = header;
+//        boolean flag = true;
+//        while (cursor<chars.length){
+//            char cur = cur();
+//            ++cursor;
+//            if(isEmpty(cur))continue;
+//            if(cur=='(' || cur==','){
+//                flag = false;
+//                String header0 = b.toString();
+//                b.setLength(0);
+//                var.items.add(readVar(header0, b));
+//                continue;
+//            } else if (cur==')') {
+//                if(flag){
+//                    var.items.add(new SField(b.toString()));
+//                } else {
+//                    if(!b.isEmpty()) {
+//                        String str = b.toString();
+//                        if(!var.items.isEmpty()){
+//                            var.items.add(new Vp(str));
+//                        } else {
+//                            var.items.add(new SField(str));
+//                        }
+//                    }
+//                }
+//                b.setLength(0);
+//                return var;
+//            }
+//            b.append(cur);
+//        }
+//        throw syntaxError();
+//    }
 
 
 

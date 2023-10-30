@@ -5,6 +5,7 @@ import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import plus.te4net.core.api.IRequestProcessor;
 import plus.te4net.core.api.IRequestSession;
+import plus.te4net.core.event.events.VrHtmlEvent;
 import plus.te4net.core.node.HWorker;
 import plus.te4net.utl.Te4GZIPOutStream;
 import plus.tson.format.IVarGetter;
@@ -31,23 +32,23 @@ public class VrHtmlFormat implements IRequestProcessor {
             if(item instanceof SField field){
                 if(parent != null){
                     if(parent instanceof HtmlNode node){
-                        if(node.name.equals("script") || node.name.equals("style"))return false;
+                        if(node.name==null)return true;
+                        if(node.name.equals("script") || node.name.equals("style"))
+                            return false;
                     }
                 }
                 String val = field.value.trim();
-                if(val.charAt(0)=='{' && val.charAt(val.length()-1)=='}'){
-                    if(val.startsWith("{ssr:")){
-                        vars.add(val.substring(5, val.length()-1));
-                        items.add(b.toString());
-                        b.setLength(0);
-                    }
-                    return false;
-                }
+                if(val.isEmpty())return true;
+
+                addFormat(items, vars, val, b);
+
+                return false;
             }
             return true;
         });
 
-        items.add(builder.toString());
+        items.add(items.remove(items.size()-1)+builder.toString());
+
         Tuple<String[], IVarGetter<IRequestSession>[]> res =
                 TextFormatter.buildFormat(worker, items, vars);
 
@@ -63,9 +64,29 @@ public class VrHtmlFormat implements IRequestProcessor {
         this.getters = res.B;
     }
 
-    public static VrHtmlFormat ofHtml(HWorker worker, String str){
-        return new VrHtmlFormat(new VrHtml(str), worker);
-        //return new RouteTextFormatter(worker, StaticHtmlFile.optimizeHtml(worker, str));
+
+    private void addFormat(ArrayList<String> items, ArrayList<String> vars,
+                           String format, StringBuilder b){
+        Tuple<ArrayList<String>, ArrayList<String>> res =
+                TextFormatter.prepare(format, "{%", "%}");
+        String s;
+        if(items.size()>0) {
+            s = items.remove(items.size() - 1)
+                    + b.toString() + res.A.remove(0);
+        } else {
+            s = b.toString() + res.A.remove(0);
+        }
+        b.setLength(0);
+        items.add(s);
+        items.addAll(res.A);
+        vars.addAll(res.B);
+    }
+
+
+    public static VrHtmlFormat ofHtml(HWorker worker, String data){
+        VrHtml vrHtml = new VrHtml(data);
+        worker.throwEvent(new VrHtmlEvent(worker, VrHtmlEvent.Type.HTML, vrHtml));
+        return new VrHtmlFormat(vrHtml, worker);
     }
 
 
@@ -77,7 +98,7 @@ public class VrHtmlFormat implements IRequestProcessor {
                 session.setHeader(HttpHeaderNames.CONTENT_ENCODING, HttpHeaderValues.GZIP);
 
                 Te4GZIPOutStream gzip = new Te4GZIPOutStream(out, 512, Deflater.BEST_SPEED);
-                for (short i = 0; i < getters.length; i++) {
+                for (int i = 0; i < getters.length; i++) {
                     gzip.write(bitems[i]);
                     String result = getters[i].get(session);
                     if (result != null) {
@@ -87,7 +108,7 @@ public class VrHtmlFormat implements IRequestProcessor {
                 gzip.write(bitems[bitems.length-1]);
                 gzip.close();
             } else {
-                for (short i = 0; i < getters.length; i++) {
+                for (int i = 0; i < getters.length; i++) {
                     out.write(bitems[i]);
                     String result = getters[i].get(session);
                     if (result != null) {

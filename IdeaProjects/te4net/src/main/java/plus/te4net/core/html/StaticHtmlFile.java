@@ -28,7 +28,7 @@ public class StaticHtmlFile extends SimpleCompressedTextFile {
 
     public static String optimizeHtml(HWorker worker, String data){
         VrHtml html = new VrHtml(data);
-        worker.throwEvent(new VrHtmlEvent(VrHtmlEvent.Type.HTML, html));
+        worker.throwEvent(new VrHtmlEvent(worker, VrHtmlEvent.Type.HTML, html));
         return html.toString();
     }
 

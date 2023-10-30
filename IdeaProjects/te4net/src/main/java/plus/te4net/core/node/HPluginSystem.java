@@ -6,6 +6,7 @@ import plus.te4net.core.bsys.NJarFileDataProvider;
 import plus.te4net.core.img.CompressorSettings;
 import plus.te4net.core.bsys.IDataProvider;
 import plus.te4net.mds.auth.IAuthProvider;
+import plus.te4net.mds.plsys.EventHandlerProcessor;
 import plus.te4net.mds.plsys.FunctionProcessor;
 import plus.te4net.mds.plsys.RouteProcessor;
 import plus.te4net.core.html.CGzipRoute;
@@ -34,6 +35,7 @@ public class HPluginSystem extends AbsPluginSystem<PluginClassLoader> {
     @Override
     protected IPluginProcessor<?>[] processors() {
         return new IPluginProcessor[]{
+                new EventHandlerProcessor(worker),
                 new FunctionProcessor(worker),
                 new RouteProcessor(worker),
                 this

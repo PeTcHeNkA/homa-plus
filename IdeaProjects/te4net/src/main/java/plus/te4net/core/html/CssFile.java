@@ -36,7 +36,7 @@ public class CssFile extends SimpleCompressedTextFile {
     @Override
     public String replace(HWorker worker, String data) {
         VrCss css = new VrCss(data);
-        worker.throwEvent(new VrHtmlEvent(VrHtmlEvent.Type.CSS, css));
+        worker.throwEvent(new VrHtmlEvent(worker, VrHtmlEvent.Type.CSS, css));
         return css.toString();
     }
 

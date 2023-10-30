@@ -13,7 +13,7 @@ public class EventHandlerProcessor implements IPluginProcessor<IEventHandler<?>>
 
     @Override
     public void onLoad(IEventHandler<?> obj) {
-
+        worker.addEventHandler(obj);
     }
 
 

@@ -2,7 +2,7 @@ package plus.tehnet.bimg;
 
 import plus.te4net.core.api.IRequestSession;
 import plus.te4net.core.api.PluginFunction;
-import plus.te4net.core.fm.RouteTextFormatter;
+import plus.te4net.core.html.vr.VrHtmlFormat;
 import plus.te4net.core.img.ImgSize;
 import plus.te4net.core.node.HWorker;
 
@@ -22,7 +22,7 @@ public class BImgCheckArgs implements PluginFunction {
         if(worker.getImgLib().containsRaw(
                 worker.getMainDomain(), ImgSize.ORIG.suffix(), getImgName(splat)
         ))return null;
-        throw new RouteTextFormatter.Redirect("/img-build/");
+        throw new VrHtmlFormat.Redirect("/img-build/");
     }
 
 

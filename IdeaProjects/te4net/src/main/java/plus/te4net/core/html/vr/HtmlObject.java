@@ -2,9 +2,25 @@ package plus.te4net.core.html.vr;
 import java.util.ArrayList;
 
 
-class HtmlObject implements ICitem {
+public class HtmlObject implements ICitem {
     String name;
     ArrayList<VrHtml.Attribute> attributes;
+
+    public HtmlObject(){}
+
+    public HtmlObject(String name, ArrayList<VrHtml.Attribute> attributes){
+        this.name = name;
+        this.attributes = attributes;
+    }
+
+    public HtmlObject(String name, String[]... attributes){
+        this.name = name;
+        this.attributes = new ArrayList<>();
+        for (String[] s:attributes){
+            this.attributes.add(new VrHtml.Attribute(s[0], new SField(s[1])));
+        }
+    }
+
 
     public ICitem getAttr(String key){
         for(VrHtml.Attribute a:attributes){
@@ -60,10 +76,25 @@ class HtmlObject implements ICitem {
     }
 
 
+    public void clearAttributes(){
+        attributes.clear();
+    }
+
+
+    public void setTag(String name){
+        this.name = name;
+    }
+
+
+    public ArrayList<VrHtml.Attribute> getAttributes(){
+        return new ArrayList<>(attributes);
+    }
+
+
     @Override
     public void toString(StringBuilder b) {
         b.append('<').append(name);
-        if (!attributes.isEmpty()) {
+        if (attributes != null && !attributes.isEmpty()) {
             b.append(' ');
             for (VrHtml.Attribute attr : attributes) {
                 attr.toString(b);

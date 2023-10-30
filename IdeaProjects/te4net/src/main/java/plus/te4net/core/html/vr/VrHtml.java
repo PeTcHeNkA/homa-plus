@@ -1,18 +1,17 @@
 package plus.te4net.core.html.vr;
 
 import plus.asyutl.buf.FastBuffer;
-import plus.te4net.utl.CharNum;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
+import plus.te4net.core.node.HWorker;
+import plus.tson.utl.CharStrBuilder;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import static plus.te4net.core.html.vr.VrCss.isEmpty;
 
 
 public class VrHtml extends HtmlNode{
     private static final HashSet<String> notClose = new HashSet<>(Arrays.asList(
-        "area","base","br","col","embed","hr","img","input","link","meta","param","source","track","wbr"
+        "area","base","br","col","embed","hr","img","input","link","meta","param","source","track","wbr",
+            "!DOCTYPE", "!doctype"
     ));
     private static final HashSet<String> strNode = new HashSet<>(Arrays.asList(
             "style", "css", "js", "script", "server"
@@ -30,6 +29,13 @@ public class VrHtml extends HtmlNode{
         public String key;
         private char bound;
         private ICitem value;
+
+        public Attribute(){}
+        public Attribute(String key, ICitem val){
+            this.key = key;
+            this.value = val;
+            this.bound = '\'';
+        }
 
         @Override
         public void toString(StringBuilder b) {
@@ -131,7 +137,7 @@ public class VrHtml extends HtmlNode{
 
     private void parseNode(FastBuffer<HtmlNode> parent){
         skipToNext();
-        StringBuilder builder = new StringBuilder();
+        CharStrBuilder builder = new CharStrBuilder(16);
         if(cur()=='<'){
             ++cursor;
             boolean isClose = cur()=='/';
@@ -144,6 +150,8 @@ public class VrHtml extends HtmlNode{
                     cursor+=3;
                     return;
                 }
+            } else {
+                ++cursor;
             }
             String tagName = null;
 
@@ -153,11 +161,15 @@ public class VrHtml extends HtmlNode{
                 if(isEmpty(cur)){
                     break;
                 } else if (cur=='>') {
+                    tagName = builder.toString();
                     if(isClose){
-                        parent.flush();
+                        if(needClose(tagName)){
+                            parent.flush();
+                        } else {
+                            System.out.println("WARN: tag ["+tagName+"] closing ignored.");
+                        }
                         return;
                     } else {
-                        tagName = builder.toString();
                         builder.setLength(0);
                         break;
                     }
@@ -227,7 +239,7 @@ public class VrHtml extends HtmlNode{
     }
 
 
-    private Attribute parseAttribute(StringBuilder builder){
+    private Attribute parseAttribute(CharStrBuilder builder){
         int mode = 0;
         Attribute atr = new Attribute();
         while (cursor<chars.length){
@@ -300,6 +312,21 @@ public class VrHtml extends HtmlNode{
 
 
     public VrHtml uptCss(){
+        return uptCss(new VrCssExportTable());
+    }
+
+
+    public VrHtml uptCss(HWorker worker){
+        VrCssExportTable table = worker.getRepository().objectBus().get(VrCssExportTable.class, worker);
+        if(table==null){
+            table = new VrCssExportTable();
+            worker.getRepository().objectBus().put(worker, table);
+        }
+        return uptCss(table);
+    }
+
+
+    public VrHtml uptCss(VrCssExportTable table){
         ArrayList<Style> linkStyles = new ArrayList<>();
 
         forItems((parent, index, cur) -> {
@@ -333,48 +360,43 @@ public class VrHtml extends HtmlNode{
         if(res==null)return this;
 
         res.items.set(0, vrCss);
-
-
         vrCss.unCollide();
-
-        HashMap<String,String> names = new HashMap<>();
-
-        int num = 0;
 
         HashSet<String> styles = vrCss.getAllStyles();
 
         for(Style style:linkStyles){
             for (String orig:style){
                 if(!styles.contains("."+orig))continue;
-                String twName = names.get(orig);
-                if(twName==null){
-                    twName = "_" + CharNum.Default.getCharNumOf(num);
-                    names.put(orig, twName);
-                    ++num;
-                }
+                table.getOrNew(orig);
             }
         }
 
         for(Style style:linkStyles) {
             int index = 0;
             for (String orig : new ArrayList<>(style)) {
-                String tweak = names.get(orig);
-                if(tweak==null)continue;
+                String tweak = table.get(orig);
+                if(tweak==null || Objects.equals(orig, tweak))continue;
                 vrCss.renameStyle(".", orig, tweak);
                 style.set(index, tweak);
                 ++index;
             }
         }
-
-
         return this;
     }
 
 
     @Override
     public void toString(StringBuilder b) {
-        for (ICitem obj : items) {
-            obj.toString(b);
+        super.innerHtml(b);
+    }
+
+
+    @Override
+    public void toString(StringBuilder b, ICitem parent, IToStrAgent agent) {
+        if(agent.onAdd(b, parent, this)){
+            for (ICitem obj : items) {
+                obj.toString(b, this, agent);
+            }
         }
     }
 

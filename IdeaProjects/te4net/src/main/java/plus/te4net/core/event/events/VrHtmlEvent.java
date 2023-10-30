@@ -2,15 +2,18 @@ package plus.te4net.core.event.events;
 
 import plus.te4net.core.html.vr.VrCss;
 import plus.te4net.core.html.vr.VrHtml;
+import plus.te4net.core.node.HWorker;
 
 
 public class VrHtmlEvent {
     private final Object obj;
     private final Type type;
+    private final HWorker worker;
 
-    public VrHtmlEvent(Type type, Object obj) {
+    public VrHtmlEvent(HWorker worker, Type type, Object obj) {
         this.obj = obj;
         this.type = type;
+        this.worker = worker;
     }
 
 
@@ -31,6 +34,11 @@ public class VrHtmlEvent {
 
     public Type type(){
         return type;
+    }
+
+
+    public HWorker getWorker() {
+        return worker;
     }
 
 
