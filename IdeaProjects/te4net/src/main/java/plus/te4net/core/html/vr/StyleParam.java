@@ -1,15 +1,22 @@
 package plus.te4net.core.html.vr;
 
-import plus.te4net.core.html.vr.ICitem;
+import java.util.ArrayList;
 
 
 class StyleParam implements ICitem {
     String key;
-    ICitem value;
+    ArrayList<ICitem> value = new ArrayList<>();
 
     @Override
     public void toString(StringBuilder b) {
         b.append(key).append(':');
-        value.toString(b);
+        boolean flag = false;
+        for (ICitem item:value){
+            if(flag){
+                b.append(' ');
+            }
+            item.toString(b);
+            flag = true;
+        }
     }
 }

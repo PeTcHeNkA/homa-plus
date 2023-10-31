@@ -11,18 +11,25 @@ public class VrCss implements ICitem {
 
     private static class Group implements ICitem {
         private String header;
-        private final ArrayList<Style> items = new ArrayList<>();
+        private final ArrayList<ICitem> items = new ArrayList<>();
         @Override
         public void toString(StringBuilder b) {
             if(header!=null){
                 b.append(header).append('{');
             }
-            for (Style style:items){
+            for (ICitem style:items){
                 style.toString(b);
             }
             if(header!=null){
-                b.append(header).append('}');
+                b.append('}');
             }
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder b = new StringBuilder();
+            toString(b);
+            return b.toString();
         }
     }
 
@@ -96,19 +103,24 @@ public class VrCss implements ICitem {
                 if(toAdd==main)continue;
                 if(!Objects.equals(main.header, toAdd.header))break;
 
-                for (Style addStyle: toAdd.items){
-                    boolean add = true;
-                    for (Style mainStyle: new ArrayList<>(main.items)){
-                        if(mainStyle==addStyle)continue;
-                        if(mainStyle.eqNames(addStyle)){
-                            add = false;
-                            for (StyleParam param:addStyle.items){
-                                mainStyle.items.add(param);
+                for (ICitem item: toAdd.items){
+                    if((item instanceof Style addStyle)) {
+                        boolean add = true;
+                        for (ICitem mainItem : new ArrayList<>(main.items)) {
+                            if (!(mainItem instanceof Style mainStyle)) continue;
+                            if (mainStyle == addStyle) continue;
+                            if (mainStyle.eqNames(addStyle)) {
+                                add = false;
+                                for (StyleParam param : addStyle.items) {
+                                    mainStyle.items.add(param);
+                                }
                             }
                         }
-                    }
-                    if(add){
-                        main.items.add(addStyle);
+                        if (add) {
+                            main.items.add(addStyle);
+                        }
+                    } else {
+                        main.items.add(item);
                     }
                 }
             }
@@ -213,19 +225,24 @@ public class VrCss implements ICitem {
 
     private boolean readStyle(Group group){
         if(cursor>=chars.length)return false;
-        if(cur()=='@')return false;
+//        if(cur()=='@')return false;
         Style style = new Style();
         while (cursor<chars.length){
+            int start = cursor;
+            skipToNext();
+            if(cur()=='}')return false;
             style.names.add(readStyleName());
             if(cur()==','){
                 ++cursor;
             } else if (cur()=='{') {
                 ++cursor;
                 break;
-            } else if(cur()=='}')return false;
+            }
+            if(start==cursor)throw syntaxError("Infinity loop");
         }
         StringBuilder builder = new StringBuilder();
         while (cursor<chars.length){
+            int start = cursor;
             skipToNext();
             if(cur()=='}'){
                 ++cursor;
@@ -236,6 +253,7 @@ public class VrCss implements ICitem {
                 style.items.add(param);
             }
             builder.setLength(0);
+            if(start==cursor)throw syntaxError("Infinity loop");
         }
         group.items.add(style);
         return true;
@@ -257,20 +275,26 @@ public class VrCss implements ICitem {
         }
         skipToNext();
 
-        Var var = new Var();
-
         while (cursor<chars.length){
-            if(cur()==')' || cur()==';' || cur()=='}')break;
-            fillEntry(var, builder);
+            int start = cursor;
+            skipToNext();
+            if(cur()==';' || cur()=='}'){
+                ++cursor;
+                break;
+            }
+            Var var = new Var();
+            if(fillEntry(var, builder, true)!=null){
+                param.value.add(var);
+            }
+            if(start==cursor)throw syntaxError("Infinity loop");
         }
-
-        param.value = var;
 
         return param;
     }
 
 
-    private void fillEntry(Var e, StringBuilder b){
+    private String fillEntry(Var e, StringBuilder b, boolean root){
+        skipToNext();
         b.setLength(0);
         boolean waitEnd0 = false;
         while (cursor<chars.length){
@@ -281,9 +305,27 @@ public class VrCss implements ICitem {
                 waitEnd0 = true;
                 break;
             }
-            if(cur==')' || cur==';' || cur=='}'||cur==','){
-                e.header = b.toString();
-                return;
+            if(root){
+                if(cur==';' || cur=='}'){
+                    --cursor;
+                    return e.header = b.toString();
+                }
+            } else if(cur==',') {
+                if (b.length() == 0) return null;
+                return e.header = b.toString();
+            }
+
+            if(cur==')'){
+                if(!root){
+                    --cursor;
+                }
+                if(b.length()==0)return null;
+                return e.header = b.toString();
+            }
+
+
+            if(isEmpty(cur) && b.length()>0){
+                return e.header = b.toString();
             }
             b.append(cur);
         }
@@ -291,17 +333,23 @@ public class VrCss implements ICitem {
             while (cursor<chars.length){
                 int start = cursor;
                 skipToNext();
-                if(cur()==')' || cur()==';' || cur()=='}')return;
+                char cur = cur();
+                if(cur==')')return e.header;
+                if(root && (cur==';' || cur=='}')){
+                    --cursor;
+                    return e.header;
+                }
                 Var e2 = new Var();
-                fillEntry(e2, b);
+                fillEntry(e2, b, false);
                 if(e2.items==null){
                     e.add(new SField(e2.header));
                 } else {
                     e.add(e2);
                 }
-                if(start==cursor)throw new RuntimeException("Syntax error");
+                if(start==cursor)throw syntaxError("Infinity loop");
             }
         }
+        throw syntaxError();
     }
 
 
@@ -447,27 +495,74 @@ public class VrCss implements ICitem {
     }
 
 
-    private void parseGroup(){
+    private void readGroup0(){
         skipToNext();
-        Group group = new Group();
-        group.header = readGroupName();
-        if(group.header != null){
+        if(cursor>=chars.length)return;
+        char cur = cur();
+        if(cur=='@'){
+            StringBuilder b = new StringBuilder("@");
             ++cursor;
+            int type = 0;
+            char prev = 0;
+            while (cursor<chars.length){
+                cur = cur();
+                ++cursor;
+                if(isEmpty(cur)){
+                    if(isEmpty(prev))continue;
+                    if(prev==':'||prev=='('||prev==')')continue;
+                }
+                if(cur==';'){
+                    type = 2;
+                    break;
+                }
+                if(cur=='{'){
+                    type = 1;
+                    break;
+                }
+                b.append(cur);
+                prev = cur;
+            }
+            if(type==2){
+                root().items.add(new SField(b.toString()));
+                return;
+            }
+            if(type==1){
+                Group group = new Group();
+                group.header = b.toString();
+                b.setLength(0);
+                while (cursor<chars.length){
+                    skipToNext();
+                    if(cursor>=chars.length)throw syntaxError();
+                    if(cur()=='}'){
+                        ++cursor;
+                        break;
+                    }
+                    readStyle(group);
+                }
+                groups.add(group);
+            }
+        } else {
+            readStyle(root());
+            skipToNext();
         }
-        skipToNext();
-        while (cursor<chars.length && readStyle(group)){
+    }
 
+
+    private Group root(){
+        for (Group group:groups){
+            if(group.header==null)return group;
         }
-        if(group.header==null){
-            goTo('}');
-        }
-        groups.add(group);
+        Group g;
+        groups.add(g = new Group());
+        return g;
     }
 
 
     private VrCss parse(){
         while (cursor<chars.length){
-            parseGroup();
+            int start = cursor;
+            readGroup0();
+            if(start==cursor)throw syntaxError("Infinity loop");
         }
         remEmpty();
         chars = null;
@@ -480,9 +575,11 @@ public class VrCss implements ICitem {
         Iterator<Group> e = groups.iterator();
         while (e.hasNext()){
             Group group = e.next();
-            Iterator<Style> st = group.items.iterator();
+            Iterator<ICitem> st = group.items.iterator();
             while (st.hasNext()){
-                Style style = st.next();
+                ICitem item = st.next();
+                if(!(item instanceof Style))continue;
+                Style style = (Style) item;
                 if(style.items.isEmpty()){
                     st.remove();
                 }
@@ -498,9 +595,11 @@ public class VrCss implements ICitem {
         HashMap<String,Style> indexes = new HashMap<>();
         for (Group group: groups) {
             indexes.clear();
-            Iterator<Style> curItr = group.items.iterator();
+            Iterator<ICitem> curItr = group.items.iterator();
             while (curItr.hasNext()) {
-                Style style = curItr.next();
+                ICitem item = curItr.next();
+                if(!(item instanceof Style))continue;
+                Style style = (Style) item;
                 String fn = style.fullName();
                 Style main = indexes.get(fn);
                 if(main==null){
@@ -528,7 +627,8 @@ public class VrCss implements ICitem {
 
     public void renameStyle(String selector, String from, String to){
         for (Group group:groups){
-            for (Style style:group.items){
+            for (ICitem item:group.items){
+                if(!(item instanceof Style style))continue;
                 for (StyleName name:style.names){
                     if(name.selector.equals(selector)){
                         if(name.name.equals(from)){
@@ -542,27 +642,31 @@ public class VrCss implements ICitem {
 
 
     public HashSet<String> getAllStyles(){
-        HashSet<String> snames = new HashSet<>();
+        HashSet<String> sNames = new HashSet<>();
         for (Group group:groups) {
-            for (Style style : group.items) {
+            for (ICitem item : group.items) {
+                if(!(item instanceof Style style))continue;
                 for (StyleName sn:style.names){
-                    snames.add(sn.selector+sn.name);
+                    sNames.add(sn.selector+sn.name);
                 }
             }
         }
-        return snames;
+        return sNames;
     }
 
 
     public HashSet<String> getCssVars(){
         HashSet<String> cssVars = new HashSet<>();
         for (Group group:groups) {
-            for (Style style : group.items) {
+            for (ICitem item : group.items) {
+                if(!(item instanceof Style style))continue;
                 for (StyleParam param:style.items){
                     if(param.key.startsWith("--")){
                         cssVars.add(param.key);
                     }
-                    getCssVarRec(param.value, cssVars);
+                    for (ICitem item0:param.value){
+                        getCssVarRec(item0, cssVars);
+                    }
                 }
             }
         }
@@ -575,8 +679,7 @@ public class VrCss implements ICitem {
             for (ICitem item0:((Var) item).items){
                 getCssVarRec(item0, cssVars);
             }
-        } else if (item instanceof SField) {
-            SField val = (SField) item;
+        } else if (item instanceof SField val) {
             if(val.value.startsWith("--")){
                 cssVars.add(val.value);
             }
@@ -586,12 +689,15 @@ public class VrCss implements ICitem {
 
     public void renameVar(String from, String to){
         for (Group group:groups) {
-            for (Style style : group.items) {
+            for (ICitem item : group.items) {
+                if(!(item instanceof Style style))continue;
                 for (StyleParam param:style.items){
                     if(param.key.equals(from)){
                         param.key = to;
                     }
-                    renVarRec(param.value, from, to);
+                    for (ICitem iCitem:param.value){
+                        renVarRec(iCitem, from, to);
+                    }
                 }
             }
         }
@@ -603,8 +709,7 @@ public class VrCss implements ICitem {
             for (ICitem item0:((Var) item).items){
                 renVarRec(item0, from, to);
             }
-        } else if (item instanceof SField) {
-            SField val = (SField) item;
+        } else if (item instanceof SField val) {
             if(val.value.equals(from)){
                 val.value = to;
             }

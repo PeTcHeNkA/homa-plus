@@ -4,6 +4,7 @@ import plus.asyutl.buf.FastBuffer;
 import plus.te4net.core.node.HWorker;
 import plus.tson.utl.CharStrBuilder;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import static plus.te4net.core.html.vr.VrCss.isEmpty;
 
@@ -334,7 +335,7 @@ public class VrHtml extends HtmlNode{
     public VrHtml uptCss(VrCssExportTable table){
         ArrayList<Style> linkStyles = new ArrayList<>();
 
-        forItems((parent, index, cur) -> {
+        forItems((parent, cur) -> {
             ICitem attr = cur.getAttr("class");
             if(attr!=null) {
                 Style style;
@@ -351,12 +352,12 @@ public class VrHtml extends HtmlNode{
         AtomicReference<HtmlNode> first = new AtomicReference<>();
         VrCss vrCss = new VrCss();
 
-        forItems("style", (parent, i, cur) -> {
-            HtmlNode node = (HtmlNode) cur;
+        forItems("style", (proxy) -> {
+            HtmlNode node = (HtmlNode) proxy.getObj();
             if(first.get()==null){
                 first.set(node);
             } else {
-                parent.remove(i);
+                proxy.remove();
             }
             vrCss.join(((SField)node.get(0)).value);
         });

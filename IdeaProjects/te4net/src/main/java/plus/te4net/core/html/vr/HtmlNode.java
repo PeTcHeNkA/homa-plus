@@ -1,6 +1,7 @@
 package plus.te4net.core.html.vr;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 
 public class HtmlNode extends HtmlObject {
@@ -23,8 +24,32 @@ public class HtmlNode extends HtmlObject {
     }
 
 
-    public interface Proc{
-        void apply(HtmlNode parent, int index, HtmlObject cur);
+    interface Proxy {
+        void apply(Item item);
+    }
+    interface Proc {
+        void apply(HtmlNode parent, HtmlObject item);
+    }
+
+
+    public final class Item{
+        private HtmlObject obj;
+        private HtmlNode parent;
+        private boolean needRem;
+        public void remove(){
+            needRem = true;
+        }
+        public ICitem getObj(){
+            return obj;
+        }
+        public HtmlNode getParent(){
+            return parent;
+        }
+    }
+
+
+    public void forItems(Proxy proc){
+        forItems(null, proc);
     }
 
 
@@ -32,18 +57,31 @@ public class HtmlNode extends HtmlObject {
         forItems(null, proc);
     }
 
+
     public void forItems(String tag, Proc proc){
-        int i = 0;
-        for (ICitem obj : new ArrayList<>(items)) {
-            if(obj instanceof HtmlObject obj0){
+        forItems(tag, item -> proc.apply(item.parent, item.obj));
+    }
+
+
+    public void forItems(String tag, Proxy proc){
+        Iterator<ICitem> itr = items.iterator();
+        Item item = new Item();
+        item.parent = this;
+        while (itr.hasNext()){
+            ICitem item0 = itr.next();
+            if(item0 instanceof HtmlObject obj0){
                 if(tag==null || obj0.name.equals(tag)){
-                    proc.apply(this, i, obj0);
+                    item.obj = obj0;
+                    proc.apply(item);
+                    if(item.needRem){
+                        itr.remove();
+                        continue;
+                    }
                 }
-                if(obj instanceof HtmlNode){
-                    ((HtmlNode) obj).forItems(tag, proc);
+                if(item0 instanceof HtmlNode){
+                    ((HtmlNode) item0).forItems(tag, proc);
                 }
             }
-            ++i;
         }
     }
 

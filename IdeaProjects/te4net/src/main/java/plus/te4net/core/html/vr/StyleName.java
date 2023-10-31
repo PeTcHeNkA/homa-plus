@@ -2,6 +2,7 @@ package plus.te4net.core.html.vr;
 
 import java.util.Objects;
 
+
 class StyleName implements ICitem {
     String selector;
     String name;
@@ -18,6 +19,15 @@ class StyleName implements ICitem {
             b.append(':').append(ender);
         }
     }
+
+
+    @Override
+    public String toString() {
+        StringBuilder b = new StringBuilder();
+        toString(b);
+        return b.toString();
+    }
+
 
     @Override
     public boolean equals(Object o) {
