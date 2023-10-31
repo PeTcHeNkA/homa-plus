@@ -2,6 +2,7 @@ package plus.te4net.core.html.vr;
 
 import java.util.ArrayList;
 
+
 class Style implements ICitem {
     final ArrayList<StyleName> names = new ArrayList<>();
     final ArrayList<StyleParam> items = new ArrayList<>();
@@ -18,6 +19,7 @@ class Style implements ICitem {
 
     @Override
     public void toString(StringBuilder b) {
+        if(items.isEmpty())return;
         for (StyleName name : names) {
             name.toString(b);
             b.append(',');
@@ -29,6 +31,12 @@ class Style implements ICitem {
         }
         VrCss.last(b, '}');
     }
+
+
+    boolean eqNames(ArrayList<StyleName> names){
+        return this.names.equals(names);
+    }
+
 
     boolean eqNames(Style etc) {
         return etc.names.equals(names);

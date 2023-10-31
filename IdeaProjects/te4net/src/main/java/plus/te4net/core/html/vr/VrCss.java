@@ -36,25 +36,30 @@ public class VrCss implements ICitem {
 
     private static class Var implements ICitem {
         private String header;
-        private ArrayList<ICitem> items;
+        private ArrayList<ArrayList<ICitem>> items;
         @Override
         public void toString(StringBuilder b) {
             if(items==null){
                 b.append(header);
             } else {
                 b.append(header).append('(');
-                for (ICitem item : items) {
-                    item.toString(b);
+                for (ArrayList<ICitem> item : items) {
+                    for (ICitem item0:item){
+                        item0.toString(b);
+                    }
                     b.append(',');
                 }
                 last(b, ')');
             }
         }
-        private void add(ICitem e){
+        private ArrayList<ICitem> add(ICitem e){
             if(items==null){
                 items = new ArrayList<>();
             }
-            items.add(e);
+            ArrayList<ICitem> res = new ArrayList<>();
+            res.add(e);
+            items.add(res);
+            return res;
         }
     }
 
@@ -131,6 +136,11 @@ public class VrCss implements ICitem {
 
     public static boolean isEmpty(char c){
         return c == ' ' || c == '\t' || c == '\n' || c == '\r';
+    }
+
+
+    private static boolean isMatchUsed(char c){
+        return c =='+'||c=='*'||c=='-'||c=='/';
     }
 
 
@@ -225,7 +235,6 @@ public class VrCss implements ICitem {
 
     private boolean readStyle(Group group){
         if(cursor>=chars.length)return false;
-//        if(cur()=='@')return false;
         Style style = new Style();
         while (cursor<chars.length){
             int start = cursor;
@@ -278,8 +287,11 @@ public class VrCss implements ICitem {
         while (cursor<chars.length){
             int start = cursor;
             skipToNext();
-            if(cur()==';' || cur()=='}'){
+            if(cur()==';'){
                 ++cursor;
+                break;
+            }
+            if(cur()=='}'){
                 break;
             }
             Var var = new Var();
@@ -295,6 +307,7 @@ public class VrCss implements ICitem {
 
     private String fillEntry(Var e, StringBuilder b, boolean root){
         skipToNext();
+        if(cur()=='}')return null;
         b.setLength(0);
         boolean waitEnd0 = false;
         while (cursor<chars.length){
@@ -308,11 +321,13 @@ public class VrCss implements ICitem {
             if(root){
                 if(cur==';' || cur=='}'){
                     --cursor;
+                    if(b.length()==0)return null;
                     return e.header = b.toString();
                 }
-            } else if(cur==',') {
+            }
+            if(cur==',') {
                 if (b.length() == 0) return null;
-                return e.header = b.toString();
+                return e.header = b.toString().trim();
             }
 
             if(cur==')'){
@@ -323,9 +338,9 @@ public class VrCss implements ICitem {
                 return e.header = b.toString();
             }
 
-
-            if(isEmpty(cur) && b.length()>0){
-                return e.header = b.toString();
+            if(isEmpty(cur)){
+                char prev = chars[cursor-2];
+                if(isEmpty(prev)||isMatchUsed(prev))continue;
             }
             b.append(cur);
         }
@@ -344,87 +359,20 @@ public class VrCss implements ICitem {
                 if(e2.items==null){
                     e.add(new SField(e2.header));
                 } else {
-                    e.add(e2);
+                    ArrayList<ICitem> res = e.add(e2);
+                    ++cursor;
+                    Var i2 = new Var();
+                    while (fillEntry(i2, b, true)!=null){
+                        res.add(i2);
+                        i2 = new Var();
+                    }
                 }
+
                 if(start==cursor)throw syntaxError("Infinity loop");
             }
         }
         throw syntaxError();
     }
-
-
-
-
-//    private ICitem readSVal(StringBuilder b){
-//        boolean isFunc = false;
-//
-//        while (cursor<chars.length){
-//            char cur = cur();
-//            ++cursor;
-//            if(isEmpty(cur))continue;
-//            if(cur == ';' || cur == '}'){
-//                break;
-//            }
-//            if(cur=='('){
-//                isFunc = true;
-//                break;
-//            }
-//            b.append(cur);
-//        }
-//        if(!isFunc){
-//            return new SField(b.toString());
-//        }
-//        String header = b.toString();
-//        b.setLength(0);
-//        ICitem item = readVar(header, b);
-//        while (cursor<chars.length){
-//            char cur = cur();
-//            if(cur == '}')break;
-//            ++cursor;
-//            if(isEmpty(cur))continue;
-//            if(cur == ';'){
-//                break;
-//            }
-//        }
-//        return item;
-//    }
-
-
-//    private ICitem readVar(String header, StringBuilder b){
-//        Var var = new Var();
-//        var.header = header;
-//        boolean flag = true;
-//        while (cursor<chars.length){
-//            char cur = cur();
-//            ++cursor;
-//            if(isEmpty(cur))continue;
-//            if(cur=='(' || cur==','){
-//                flag = false;
-//                String header0 = b.toString();
-//                b.setLength(0);
-//                var.items.add(readVar(header0, b));
-//                continue;
-//            } else if (cur==')') {
-//                if(flag){
-//                    var.items.add(new SField(b.toString()));
-//                } else {
-//                    if(!b.isEmpty()) {
-//                        String str = b.toString();
-//                        if(!var.items.isEmpty()){
-//                            var.items.add(new Vp(str));
-//                        } else {
-//                            var.items.add(new SField(str));
-//                        }
-//                    }
-//                }
-//                b.setLength(0);
-//                return var;
-//            }
-//            b.append(cur);
-//        }
-//        throw syntaxError();
-//    }
-
 
 
     private StyleName readStyleName(){
@@ -676,8 +624,10 @@ public class VrCss implements ICitem {
 
     private void getCssVarRec(ICitem item, HashSet<String> cssVars){
         if(item instanceof Var){
-            for (ICitem item0:((Var) item).items){
-                getCssVarRec(item0, cssVars);
+            for (ArrayList<ICitem> item0:((Var) item).items){
+                for (ICitem iCitem1:item0){
+                    getCssVarRec(iCitem1, cssVars);
+                }
             }
         } else if (item instanceof SField val) {
             if(val.value.startsWith("--")){
@@ -688,15 +638,20 @@ public class VrCss implements ICitem {
 
 
     public void renameVar(String from, String to){
+        renameVar(from, to, to);
+    }
+
+
+    public void renameVar(String from, String keyTo, String varTo){
         for (Group group:groups) {
             for (ICitem item : group.items) {
                 if(!(item instanceof Style style))continue;
                 for (StyleParam param:style.items){
                     if(param.key.equals(from)){
-                        param.key = to;
+                        param.key = keyTo;
                     }
                     for (ICitem iCitem:param.value){
-                        renVarRec(iCitem, from, to);
+                        renVarRec(iCitem, from, varTo);
                     }
                 }
             }
@@ -704,10 +659,27 @@ public class VrCss implements ICitem {
     }
 
 
+    public Style get(ArrayList<StyleName> names){
+        for (Group group:groups) {
+            for (ICitem item : group.items) {
+                if(!(item instanceof Style style))continue;
+                if(style.eqNames(names)){
+                    return style;
+                }
+            }
+        }
+        return null;
+    }
+
+
     private void renVarRec(ICitem item, String from, String to){
         if(item instanceof Var){
-            for (ICitem item0:((Var) item).items){
-                renVarRec(item0, from, to);
+            ArrayList<ArrayList<ICitem>> items1 = ((Var) item).items;
+            if(items1==null)return;
+            for (ArrayList<ICitem> item0: items1){
+                for (ICitem iCitem1:item0){
+                    renVarRec(iCitem1, from, to);
+                }
             }
         } else if (item instanceof SField val) {
             if(val.value.equals(from)){

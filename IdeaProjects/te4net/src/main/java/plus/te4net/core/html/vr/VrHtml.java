@@ -388,6 +388,10 @@ public class VrHtml extends HtmlNode{
                 ++index;
             }
         }
+
+        vrCss.renameVar("background-color", "--b");
+        vrCss.join("div{background-color: var(--b);}");
+
         return this;
     }
 
