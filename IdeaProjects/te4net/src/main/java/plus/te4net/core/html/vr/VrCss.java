@@ -118,7 +118,7 @@ public class VrCss implements ICitem {
 
 
     public static boolean isEmpty(char c){
-        return c == ' ' || c == '\t' || c == '\n';
+        return c == ' ' || c == '\t' || c == '\n' || c == '\r';
     }
 
 
@@ -176,16 +176,25 @@ public class VrCss implements ICitem {
 
 
     private String getErrorString(){
-        int min = Math.max(0, cursor-50);
-        int max = Math.min(cursor+50,chars.length-1);
+        int min = Math.max(0, cursor-70);
+        int max = Math.min(cursor+70,chars.length-1);
         char[] bytes = new char[max-min];
         System.arraycopy(chars, min, bytes, 0, bytes.length);
         return new String(bytes);
     }
 
 
+    private int getStrCode(){
+        int count = 0, cur = 0;
+        while (cur<cursor){
+            if(chars[cur++]=='\n')++count;
+        }
+        return count;
+    }
+
+
     private RuntimeException syntaxError(Object... o){
-        return new RuntimeException("Syntax error: "
+        return new RuntimeException("["+getStrCode()+"] Syntax error: "
                 + Arrays.toString(o)+"\n----------\n"+getErrorString()+"\n----------\n"
         );
     }
@@ -203,7 +212,6 @@ public class VrCss implements ICitem {
 
 
     private boolean readStyle(Group group){
-        skipToNext();
         if(cursor>=chars.length)return false;
         if(cur()=='@')return false;
         Style style = new Style();
@@ -446,7 +454,10 @@ public class VrCss implements ICitem {
         if(group.header != null){
             ++cursor;
         }
-        while (cursor<chars.length && readStyle(group)){}
+        skipToNext();
+        while (cursor<chars.length && readStyle(group)){
+
+        }
         if(group.header==null){
             goTo('}');
         }

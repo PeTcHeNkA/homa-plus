@@ -34,7 +34,7 @@ public class VrHtmlFormat implements IRequestProcessor {
                     if(parent instanceof HtmlNode node){
                         if(node.name==null)return true;
                         if(node.name.equals("script") || node.name.equals("style"))
-                            return false;
+                            return true;
                     }
                 }
                 String val = field.value.trim();
@@ -84,7 +84,7 @@ public class VrHtmlFormat implements IRequestProcessor {
 
 
     public static VrHtmlFormat ofHtml(HWorker worker, String data){
-        VrHtml vrHtml = new VrHtml(data);
+        VrHtml vrHtml = new VrHtml(data).uptCss(worker);
         worker.throwEvent(new VrHtmlEvent(worker, VrHtmlEvent.Type.HTML, vrHtml));
         return new VrHtmlFormat(vrHtml, worker);
     }

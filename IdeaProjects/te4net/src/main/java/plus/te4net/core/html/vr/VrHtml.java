@@ -247,6 +247,11 @@ public class VrHtml extends HtmlNode{
             ++cursor;
             if(mode==0) {
                 if(isEmpty(cur)){
+                    if(builder.length()>0){
+                        atr.key = builder.toString();
+                        builder.setLength(0);
+                        return atr;
+                    }
                     continue;
                 }
                 if (cur == '=') {
@@ -312,7 +317,7 @@ public class VrHtml extends HtmlNode{
 
 
     public VrHtml uptCss(){
-        return uptCss(new VrCssExportTable());
+        return uptCss((VrCssExportTable) null);
     }
 
 
@@ -361,6 +366,7 @@ public class VrHtml extends HtmlNode{
 
         res.items.set(0, vrCss);
         vrCss.unCollide();
+        if(table==null)return this;
 
         HashSet<String> styles = vrCss.getAllStyles();
 

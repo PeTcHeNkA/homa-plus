@@ -96,8 +96,13 @@ public class HtmlObject implements ICitem {
         b.append('<').append(name);
         if (attributes != null && !attributes.isEmpty()) {
             b.append(' ');
-            for (VrHtml.Attribute attr : attributes) {
+            for (int i=0;i<attributes.size();) {
+                VrHtml.Attribute attr = attributes.get(i);
                 attr.toString(b);
+                ++i;
+                if(attr.getValue()==null && i<attributes.size()){
+                    b.append(' ');
+                }
             }
         }
         b.append('>');
