@@ -382,13 +382,15 @@ public class VrHtml extends HtmlNode{
             int index = 0;
             for (String orig : new ArrayList<>(style)) {
                 String tweak = table.get(orig);
-                if(tweak==null || Objects.equals(orig, tweak))continue;
+                if(tweak==null || Objects.equals(orig, tweak)){
+                    ++index;
+                    continue;
+                }
                 vrCss.renameStyle(".", orig, tweak);
                 style.set(index, tweak);
                 ++index;
             }
         }
-
 //        vrCss.renameVar("background-color", "--b");
 //        vrCss.renameVar("width",            "--w");
 //        vrCss.renameVar("242",         "var(--a)");
@@ -405,7 +407,6 @@ public class VrHtml extends HtmlNode{
 //                            --n: none;
 //                        }
 //                        """);
-
         return this;
     }
 
