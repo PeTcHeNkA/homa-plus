@@ -4,6 +4,10 @@ import java.util.*;
 
 
 public class VrCss implements ICitem {
+    private static final HashSet<String> groupNames = new HashSet<>(Arrays.asList(
+            "@media", "@layer", "@keyframes", "@document", "@container"
+    ));
+
     static void last(StringBuilder builder, char c){
         builder.setCharAt(builder.length()-1, c);
     }
@@ -448,7 +452,10 @@ public class VrCss implements ICitem {
         if(cursor>=chars.length)return;
         char cur = cur();
         if(cur=='@'){
+            int start = cursor;
             StringBuilder b = new StringBuilder("@");
+            boolean first = true;
+            boolean flag = false;
             ++cursor;
             int type = 0;
             char prev = 0;
@@ -458,13 +465,25 @@ public class VrCss implements ICitem {
                 if(isEmpty(cur)){
                     if(isEmpty(prev))continue;
                     if(prev==':'||prev=='('||prev==')')continue;
+                    if(first){
+                        first = false;
+                        flag = groupNames.contains(b.toString());
+                    }
                 }
                 if(cur==';'){
                     type = 2;
                     break;
                 }
                 if(cur=='{'){
-                    type = 1;
+                    if(first){
+                        flag = groupNames.contains(b.toString());
+                    }
+                    if(flag){
+                        type = 1;
+                    } else {
+                        type = 3;
+                        cursor = start;
+                    }
                     break;
                 }
                 b.append(cur);
@@ -488,6 +507,10 @@ public class VrCss implements ICitem {
                     readStyle(group);
                 }
                 groups.add(group);
+                return;
+            }
+            if(type==3){
+                readStyle(root());
             }
         } else {
             readStyle(root());

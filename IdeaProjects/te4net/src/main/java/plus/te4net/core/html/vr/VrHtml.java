@@ -389,8 +389,22 @@ public class VrHtml extends HtmlNode{
             }
         }
 
-        vrCss.renameVar("background-color", "--b");
-        vrCss.join("div{background-color: var(--b);}");
+//        vrCss.renameVar("background-color", "--b");
+//        vrCss.renameVar("width",            "--w");
+//        vrCss.renameVar("242",         "var(--a)");
+//        vrCss.renameVar("transition",       "--t");
+//        vrCss.renameVar("user-select",      "--u");
+//        vrCss.renameVar("none",             "--n");
+//        vrCss.join("""
+//                        div{
+//                            background-color: var(--b);
+//                            transition:       var(--t);
+//                            width:            var(--w);
+//                            user-select:      var(--u);
+//                            --a: 242;
+//                            --n: none;
+//                        }
+//                        """);
 
         return this;
     }

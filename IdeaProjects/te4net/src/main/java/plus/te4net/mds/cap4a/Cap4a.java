@@ -54,8 +54,9 @@ public class Cap4a extends CryptKey {
 
         String selfCode = super.toString();
 
+        //TODO FIX
         htmlCode = elms.toString(styles) +"<script id=\"cap4aid\">"+selfCode
-                +"</script><link href=\"css?cap4a-id=" +selfCode+"&cap4a-mtd=css\" rel=\"stylesheet\">";
+                +"</script><link href=\"/auth/css?cap4a-id=" +selfCode+"&cap4a-mtd=css\" rel=\"stylesheet\">";
         cssCode = styles.toString();
         keyWord = CharLib.INST.code(new String(code));
     }

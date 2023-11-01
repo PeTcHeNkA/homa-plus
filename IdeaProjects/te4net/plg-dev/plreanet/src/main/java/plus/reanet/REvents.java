@@ -31,14 +31,14 @@ public class REvents implements IEventHandler<VrHtmlEvent>{
     public boolean onHtml(HWorker worker, VrHtml html){
         final boolean[] flag = {true};
 
-        html.forItems("reactive", (htmlNode, i, htmlObject) -> {
+        html.forItems("reactive", (htmlNode, htmlObject) -> {
             flag[0] = false;
             export(worker, (HtmlNode) htmlObject);
         });
 
         if(flag[0]) {
             flag[0] = false;
-            html.forItems("script", (htmlNode, i, htmlObject) -> {
+            html.forItems("script", (htmlNode, htmlObject) -> {
                 if (flag[0]) return;
                 ICitem src = htmlObject.getAttr("src");
                 if (src == null) return;
@@ -47,7 +47,7 @@ public class REvents implements IEventHandler<VrHtmlEvent>{
                 }
             });
             if (!flag[0]) {
-                html.forItems("head", (htmlNode, i, htmlObject) -> {
+                html.forItems("head", (htmlNode, htmlObject) -> {
                     if (!flag[0]) return;
                     htmlNode.add(new HtmlNode("script", new String[]{"src", "./reanet-min.js"}));
                 });

@@ -24,10 +24,12 @@ public class HtmlNode extends HtmlObject {
     }
 
 
-    interface Proxy {
+    public interface Proxy {
         void apply(Item item);
     }
-    interface Proc {
+
+
+    public interface Proc {
         void apply(HtmlNode parent, HtmlObject item);
     }
 
