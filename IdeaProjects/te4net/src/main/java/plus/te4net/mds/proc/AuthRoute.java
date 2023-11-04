@@ -74,7 +74,7 @@ public class AuthRoute<U extends User> extends AuthService<U> implements SimpleS
             switch (splat[1]) {
                 case "mail-newuser":
                     createMailConfirm(
-                            args[0].toLowerCase(), args[1], AuthService.MailRequest.Type.NEW_USER, args[2], new MailServer.CallBack() {
+                            args[0], args[1], args[2], AuthService.MailRequest.Type.NEW_USER, args[3], new MailServer.CallBack() {
                                 @Override
                                 public void onSuccess() {
                                     HWorkerRepository.getLogger().info("Mail sended to [" + args[0] + "] !");
@@ -95,7 +95,7 @@ public class AuthRoute<U extends User> extends AuthService<U> implements SimpleS
                     break;
                 case "mail-restore":
                     createMailConfirm(
-                            args[0].toLowerCase(), args[1], AuthService.MailRequest.Type.BREAK_PASSWORD, args[2], new MailServer.CallBack() {
+                            args[0].toLowerCase(), args[1], args[2], AuthService.MailRequest.Type.BREAK_PASSWORD, args[3], new MailServer.CallBack() {
                                 @Override
                                 public void onSuccess() {
                                     HWorkerRepository.getLogger().info("Mail sended to [" + args[0] + "] !");
@@ -187,7 +187,7 @@ public class AuthRoute<U extends User> extends AuthService<U> implements SimpleS
 
     private void confirmCreate(IRequestSession session) throws AuthException {
         onPostConfirm(createAccount(
-                getLogin(session), getCryptKey(session), getName(session), new byte[0], getTokenData(session)
+                getLogin(session), getName(session), getCryptKey(session), new byte[0], getTokenData(session)
         ), session);
     }
 

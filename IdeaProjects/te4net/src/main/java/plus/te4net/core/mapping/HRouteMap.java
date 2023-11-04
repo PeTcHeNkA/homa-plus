@@ -98,35 +98,36 @@ public final class HRouteMap extends RouteNode {
                 char c = chars[i];
                 if(c=='&'){
                     if(prev != i){
-                        if(sep == -1){
+                        if(i == sep){
                             queryParams.put(new String(chars, prev, i-prev),"");
                         } else {
                             int delta = sep-prev;
                             queryParams.put(
                                     new String(chars, prev, delta),
-                                    new String(chars, prev+delta+1, i-sep-1)
+                                    new String(chars, prev+delta, i-sep)
                             );
                         }
                     }
                     prev = ++i;
-                    sep = -1;
+                    sep = i;
                     continue;
                 }
                 if(c=='='){
-                    sep = i++;
+                    sep = i+1;
                 }
             }
-            if(prev != i){
-                if(sep == -1){
+            if(prev != i && prev != sep){
+                if(sep == i){
                     queryParams.put(new String(chars, prev, i-prev),"");
                 } else {
                     int delta = sep-prev;
                     queryParams.put(
                             new String(chars, prev, delta),
-                            new String(chars, prev+delta+1, i-sep-1)
+                            new String(chars, prev+delta, i-sep)
                     );
                 }
             }
+            //System.out.println("NEN");
         }
 
 

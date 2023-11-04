@@ -11,6 +11,8 @@ import plus.tson.utl.Te4HashMap;
 import plus.tson.format.IVarGetter;
 import plus.tson.format.TextFormatter;
 
+import java.util.Objects;
+
 
 public abstract class AuthService<T extends User> implements IAuthProvider {
     private final Cap4aLib<String> lib;
@@ -65,7 +67,7 @@ public abstract class AuthService<T extends User> implements IAuthProvider {
 
     
     protected void checkName(String name) throws AuthException {
-        if(!validName(name))throw new AuthException(AuthException.Type.NO_VALID_NAME, name);
+        if(name == null || !validName(name))throw new AuthException(AuthException.Type.NO_VALID_NAME, name);
     }
 
 
@@ -76,7 +78,7 @@ public abstract class AuthService<T extends User> implements IAuthProvider {
 
     public Cap4a createAuthCap4a(String login) throws AuthException {
         checkLogin(login);
-        return lib.createKey(90000, 1, login);
+        return lib.createKey(90000, 5, login);
     }
 
 
@@ -134,7 +136,7 @@ public abstract class AuthService<T extends User> implements IAuthProvider {
     }
 
 
-    public void createMailConfirm(String login, String password, MailRequest.Type type, String cryptoKey, MailServer.CallBack callBack) throws AuthException {
+    public void createMailConfirm(String login, String name, String password, MailRequest.Type type, String cryptoKey, MailServer.CallBack callBack) throws AuthException {
         checkLogin(login);
         if(password!=null) checkPassword(password);
         String loginCreator = keys.use(cryptoKey);
@@ -142,9 +144,9 @@ public abstract class AuthService<T extends User> implements IAuthProvider {
             if(type == MailRequest.Type.NEW_USER){
                 if(userMap.hasUser(login))throw new AuthException(AuthException.Type.READY_EXIST);
             } else if(type == MailRequest.Type.BREAK_PASSWORD){
-                if(!userMap.hasUser(login))throw new AuthException(AuthException.Type.NULL_USER);
+                if(!userMap.hasUser(login, name))throw new AuthException(AuthException.Type.NULL_USER);
             }
-            WebCryptKey mailKey = mails.createKey(90000, 1, new MailRequest(login,password,type));
+            WebCryptKey mailKey = mails.createKey(90000, 1, new MailRequest(login, password, name, type));
             mailServer.send(
                     login,
                     mailFormat.get(new Model(login, mailKey.toString())),
@@ -202,12 +204,19 @@ public abstract class AuthService<T extends User> implements IAuthProvider {
     public Tuple<T, String> createAccount(String login, String name, String mailConfirm,
                                           byte[] userData, byte[] tokenData) throws AuthException {
         checkLogin(login);
-        checkName(name);
         Te4HashMap.Node<WebCryptKey, MailRequest> node = mails.getNode(mailConfirm);
         if(node==null)throw new AuthException(AuthException.Type.NO_MAIL);
         MailRequest request = node.getValue();
         if(request != null && request.type == MailRequest.Type.NEW_USER && request.login.equals(login)){
             mails.use(mailConfirm);
+
+            if(name==null){
+                name = request.name;
+                if(name==null) throw new AuthException(AuthException.Type.NO_VALID_NAME);
+            } else if(!Objects.equals(name, request.name))
+                throw new AuthException(AuthException.Type.NO_VALID_NAME);
+            checkName(name);
+
             T user = userMap.newUser(login, request.password, name, userData);
             userMap.createUser(user);
             return userMap.authUser(login, request.password, tokenData);
@@ -230,11 +239,12 @@ public abstract class AuthService<T extends User> implements IAuthProvider {
 
 
     public static final class MailRequest{
-        final String login, password;
+        final String login, password, name;
         final Type type;
-        MailRequest(String login, String password, Type type) {
+        MailRequest(String login, String password, String name, Type type) {
             this.login = login;
             this.password = password;
+            this.name = name;
             this.type = type;
         }
         public enum Type{

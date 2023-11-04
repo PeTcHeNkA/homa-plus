@@ -78,22 +78,31 @@
     </style>
 
 <script inc>
-    let prevLogin, prevResult, cfmMode, cryptokey = "", flag = false;
+    let prevLogin, prevResult, cryptokey = "", flag = false;
     let _V=(a,e)=>{getEl(a).style.display=e?"none":"block"};
+
+    function inputMailCode(){
+        //console.log("NEN1");
+        //cfmMode = true;
+        //_V("login_btn_code",false);
+        reanet.lock().set("_lgcfm",true).unlock().set("_loginBtn", reanet.model["_loginmode"]==2?"Обновить":"Создать аккаунт")
+    }
 
     function sendMail(){
         let exist = reanet.model["_loginmode"] == 2
-
         let login = getLoginM(exist);
         if(!login)return;
         let password = _validPsw();
-        if(!password)return;                    
-        post("/auth/api/mail-"+(exist?"restore":"newuser"), login+";"+password+";"+cryptokey,(answ)=>{
+        if(!password)return;
+        let nick = _isValidNick();
+        if(!nick)return
+        
+        post("/auth/api/mail-"+(exist?"restore":"newuser"), login+";"+nick+";"+password+";"+cryptokey,(answ)=>{
             if(answ.startsWith("ERROR")){
                 let code = answ.split(" ")[1];
                 if(code == "NO_CAP4A"){
                     cryptokey = "";
-                    showCap4a();
+                    _showCap4a();
                 }
                 console.log(code);
             } else{
@@ -176,7 +185,7 @@
         if(psw.length<8){
             setMsg("Минимальная длина - 8 символов!");
         } else if(psw.length>24){
-            setMsg("Минимальная длина - 24 символа!");
+            setMsg("Максимальная длина - 24 символа!");
         } else if(!/(?=.*[0-9])/.test(psw)){
             setMsg("Пароль должен содержать не менее 1 цифры!");
         } else if(!/(?=.*[a-z])/.test(psw)){
@@ -253,7 +262,6 @@
         }
     }
     window._existLogin = (login)=>{
-        return false
         if(prevLogin==login && prevResult){
             return prevResult;
         }
@@ -264,13 +272,17 @@
         else{ 
             prevResult = null;
             console.log(res);
+            let code = data.split(" ")[1];
+            if(code=="NO_CAP4A"){
+                _getCap4a();
+            }
         }
         return prevResult;
     }
     window._checkCap4a =()=>{
         let answer = getEl("_cap4a_answer").value;
         let cap4aid = getEl("cap4aid").innerHTML;
-        get("/auth/?cap4a-mtd=answer&login="+getEl("login").value+"&cap4a-id="+cap4aid+"&cap4a-answer="+answer,(data)=>{
+        get("/auth/?cap4a-mtd=answer&login="+getEl("_lg-mail").value+"&cap4a-id="+cap4aid+"&cap4a-answer="+answer,(data)=>{
             if(data.startsWith("ERROR")){
                 let code = data.split(" ")[1];
                 if(code=="NO_CAP4A"){
@@ -281,21 +293,33 @@
             cryptokey = data;
             console.log("KEY: "+cryptokey);
             _V("_cap4a_view",true);_V("_cap4a_view_success",false);
-            if(curMode==2){
-                getEl("password").style.display="inline-block";
+            if(reanet.model["_loginmode"]==2){
+                getEl("_lg-psw").style.display="inline-block";
             }
         });
     }
     window._onLoginClick =()=>{
         let curMode = reanet.model["_loginmode"]
-        if(cfmMode){
-            if(curMode==0 || curMode==2){
-                let login = getLogin();
-                let key = $T("login_btn_code").value;
-                get("/auth/confirm_"+(curMode==0?"create":"update")+"?api=1&login="+login+"&crypt-key="+key,(res)=>{
+        console.log(curMode);
+        if(reanet.model["_lgcfm"]){
+            if(curMode==1 || curMode==2){
+                let login = getEl("_lg-mail").value
+                let key = getEl("_lg-cfm").value;
+                get("/auth/confirm_"+(curMode==1?"create":"update")+"?api=1&login="+login+"&crypt-key="+key,(res)=>{
                     if(res.startsWith("SUCCESS")){
                         window.location = getGoTo();
+                    } else {
+                        reanet.model["_lgcfm"] = false
+
+                        return
+                        // let code = data.split(" ")[1];
+                        // if(code=="NO_CAP4A"){
+                        //     _getCap4a();
+                        //     return
+                        // }
+                        // //TODO
                     }
+                    console.log(res);
                 })
             }
         } else {
@@ -308,10 +332,10 @@
                 }
                 return;
             } else{
-                if(curMode==0 || curMode==2){
+                if(curMode==1 || curMode==2){
                     sendMail();
                 }
-                if(curMode==1){
+                if(curMode==0){
                     auth();
                 }
             }
@@ -396,6 +420,16 @@
                 </div>
                 <div id="_cap4a_view_success" class="flex p2 noselect" style="display: none">Проверка пройдена</div>
             </div>
+            
+            <div if='reanet.model["_lgcfm"]' class="flex-cm m2">
+                <input id="_lg-cfm" class="p2 login-form-inp" type="text" 
+                    placeholder="код подтверждения из почты" autocomplete="off" onblur="_updateLoginForm()">
+                <div if='!_isValidNick()'>
+                    <div class="login-form-i-line"></div>
+                    <div class="login-form-i-msg flex-start m1 f1">{_lgcfmmsg}</div>
+                </div>
+            </div>
+
             <div class="flex-around f1 m1 noselect">
                 <div onclick="_toggleMode(true)" class="p2 br2 login-form-tgb">{_loginBf1}</div>
                 <div onclick="_toggleMode(false)" class="p2 br2 login-form-tgb">{_loginBf2}</div>

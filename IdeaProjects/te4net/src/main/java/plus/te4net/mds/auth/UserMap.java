@@ -1,6 +1,8 @@
 package plus.te4net.mds.auth;
 
 import java.util.ArrayList;
+import java.util.Objects;
+
 import plus.asyutl.shoulder.IBasicTask;
 import plus.te4net.core.node.HWorkerRepository;
 import plus.tson.utl.Tuple;
@@ -57,6 +59,13 @@ public class UserMap<T extends User> extends Te4HashMap<TokenInfo, T> implements
 
     boolean hasUser(String login){
         return users.getUserFromLogin(login) != null;
+    }
+
+
+    boolean hasUser(String login, String name){
+        T usr = users.getUserFromLogin(login);
+        if(usr==null)return false;
+        return Objects.equals(usr.name, name);
     }
 
 
