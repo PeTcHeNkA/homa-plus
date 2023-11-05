@@ -99,11 +99,11 @@ public final class HRouteMap extends RouteNode {
                 if(c=='&'){
                     if(prev != i){
                         if(i == sep){
-                            queryParams.put(new String(chars, prev, i-prev),"");
+                            queryParams.put(new String(chars, prev, i-prev-1),"");
                         } else {
                             int delta = sep-prev;
                             queryParams.put(
-                                    new String(chars, prev, delta),
+                                    new String(chars, prev, delta-1),
                                     new String(chars, prev+delta, i-sep)
                             );
                         }
@@ -118,11 +118,11 @@ public final class HRouteMap extends RouteNode {
             }
             if(prev != i && prev != sep){
                 if(sep == i){
-                    queryParams.put(new String(chars, prev, i-prev),"");
+                    queryParams.put(new String(chars, prev, i-prev-1),"");
                 } else {
                     int delta = sep-prev;
                     queryParams.put(
-                            new String(chars, prev, delta),
+                            new String(chars, prev, delta-1),
                             new String(chars, prev+delta, i-sep)
                     );
                 }

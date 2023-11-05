@@ -29,6 +29,7 @@ public class REvents implements IEventHandler<VrHtmlEvent>{
 
 
     public boolean onHtml(HWorker worker, VrHtml html){
+        if(1==1)return false;
         final boolean[] flag = {true};
 
         html.forItems("reactive", (htmlNode, htmlObject) -> {

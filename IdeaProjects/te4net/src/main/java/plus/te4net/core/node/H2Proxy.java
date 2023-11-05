@@ -13,6 +13,7 @@ import io.netty.handler.stream.ChunkedWriteHandler;
 final class H2Proxy extends ApplicationProtocolNegotiationHandler {
     private final HWorker worker;
     private final String domain;
+
     H2Proxy(HWorker worker, String domain) {
         super(ApplicationProtocolNames.HTTP_1_1);
         this.worker = worker;
@@ -22,7 +23,6 @@ final class H2Proxy extends ApplicationProtocolNegotiationHandler {
 
     @Override
     protected void configurePipeline(ChannelHandlerContext ctx, String protocol) {
-        HWorkerRepository repository = worker.getRepository();
         if (ApplicationProtocolNames.HTTP_2.equals(protocol)) {
             ctx.pipeline().addLast(
                     Http2FrameCodecBuilder.forServer().build(),
@@ -34,7 +34,7 @@ final class H2Proxy extends ApplicationProtocolNegotiationHandler {
         if (ApplicationProtocolNames.HTTP_1_1.equals(protocol)) {
             ctx.pipeline().addLast(
                     new HttpServerCodec(),
-                    new HttpObjectAggregator(repository.maxPostMemory),
+                    new HttpObjectAggregator(worker.repository.maxPostMemory),
                     new ChunkedWriteHandler(),
                     new H1Handler(worker, domain)
             );

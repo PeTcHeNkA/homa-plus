@@ -13,14 +13,14 @@ import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import plus.te4net.core.api.IHttpClient;
 import plus.util.cons.Logger;
-import plus.tson.TsonInt;
 import plus.tson.TsonMap;
 import javax.net.ssl.SSLException;
 import java.util.concurrent.ThreadFactory;
 
 
-public final class HServer implements ThreadFactory, Thread.UncaughtExceptionHandler, ChannelFactory<ServerChannel> {
+public class HServer implements ThreadFactory, Thread.UncaughtExceptionHandler, ChannelFactory<ServerChannel> {
     static final String SERVER_NAME = "tehnet-v2.1";
+    private static Logger logger;
     private final EventLoopGroup bossGroup;
     private final EventLoopGroup workerGroup;
     private final boolean useNative;
@@ -31,7 +31,21 @@ public final class HServer implements ThreadFactory, Thread.UncaughtExceptionHan
     private H1Client defClient;
 
     public HServer(TsonMap config){
-        HWorkerRepository repository = new HWorkerRepository(config, this);
+        this(config.getOrDefaultInt("threads", 18));
+        startRepo(config, new HEWorkerRepository(config, this));
+    }
+
+
+    public HServer(){
+        this(18);
+    }
+
+
+    public HServer(int threads){
+        if(threads<6){
+            threads = 6;
+        }
+        logger = Logger.get("tehnet");
         useNative = Epoll.isAvailable();
         Logger logger = Logger.get();
         if(useNative){
@@ -44,44 +58,50 @@ public final class HServer implements ThreadFactory, Thread.UncaughtExceptionHan
         } else {
             logger.info("Used [JDK SSL provider]");
         }
-        bossGroup = build(6);
-        workerGroup = build(18);
+        bossGroup = build(Math.round(threads/3f));
+        workerGroup = build(threads);
+    }
+
+    public static void preLoad(Class<?>... classes){}
+
+
+    final void startRepo(TsonMap config, HWorkerRepositoryBase repository){
         startHttp(repository, config);
         startHttps(repository, config);
     }
 
 
-    void stopHttp(){
+    final void stopHttp(){
         PHTTP.channel().close();
     }
 
 
-    void stopHttps(){
+    final void stopHttps(){
         PHTTPS.channel().close();
     }
 
 
-    void startHttp(HWorkerRepository repository, TsonMap config){
+    final void startHttp(HWorkerRepositoryBase repository, TsonMap config){
         start(repository,
-                config.getOrDefault("https-port",new TsonInt(443)).getInt(),true
+                config.getOrDefaultInt("https-port",443),true
         );
     }
 
 
-    void startHttps(HWorkerRepository repository, TsonMap config){
+    final void startHttps(HWorkerRepositoryBase repository, TsonMap config){
         start(repository,
-                config.getOrDefault("http-port",new TsonInt(80)).getInt(),false
+                config.getOrDefaultInt("http-port",80),false
         );
     }
 
 
-    IHttpClient client(){
+    public final IHttpClient client(){
         if(defClient != null)return defClient;
         return defClient = new H1Client(defCliCtx(), workerGroup, useNative);
     }
 
 
-    IHttpClient client(SslContext ctx){
+    public final IHttpClient client(SslContext ctx){
         return new H1Client(ctx, workerGroup, useNative);
     }
 
@@ -102,14 +122,14 @@ public final class HServer implements ThreadFactory, Thread.UncaughtExceptionHan
     }
 
 
-    private void start(HWorkerRepository repository, int port, boolean safe){
+    final void start(HWorkerRepositoryBase repository, int port, boolean safe){
         newThread(()->{
         try {
             ServerBootstrap bootstrap = new ServerBootstrap();
             bootstrap.group(bossGroup, workerGroup).channelFactory(this)
                     .option(ChannelOption.SO_BACKLOG, 2048)
                     .childHandler(safe?new HSInitializer(repository):new NHInitializer(repository));
-            System.out.println("Server at ["+port+"] started.");
+            Logger.get().info("Server at ["+port+"] started.");
             ChannelFuture future = bootstrap.bind(port).sync();
 
             if(safe){
@@ -118,7 +138,8 @@ public final class HServer implements ThreadFactory, Thread.UncaughtExceptionHan
                 PHTTP = future;
             }
             future.channel().closeFuture().sync();
-            System.out.println("Server at ["+port+"] closed.");
+            Logger.get().info("Server at ["+port+"] closed.");
+            Thread.currentThread().stop();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -130,7 +151,7 @@ public final class HServer implements ThreadFactory, Thread.UncaughtExceptionHan
 
 
     @Override
-    public Thread newThread(Runnable r) {
+    public final Thread newThread(Runnable r) {
         Thread thread = new Thread(r, "hnet-"+(threadNum++));
         thread.setDaemon(true);
         thread.setUncaughtExceptionHandler(this);
@@ -140,13 +161,18 @@ public final class HServer implements ThreadFactory, Thread.UncaughtExceptionHan
 
     @Override
     public void uncaughtException(Thread t, Throwable e) {
-        System.out.println("Error in ["+t+"]: "+e.getClass());
+        Logger.get().info("Error in ["+t+"]: "+e.getClass());
     }
 
 
     @Override
-    public ServerChannel newChannel() {
+    public final ServerChannel newChannel() {
         if(useNative) return new EpollServerSocketChannel();
         return new NioServerSocketChannel();
+    }
+
+
+    public static Logger getLogger(){
+        return HServer.logger;
     }
 }

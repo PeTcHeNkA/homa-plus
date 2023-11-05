@@ -1,7 +1,7 @@
 package plus.te4net.mds.crypt;
 
 import plus.asyutl.shoulder.IBasicTask;
-import static plus.te4net.core.node.HWorkerRepository.shoulder;
+import static plus.te4net.core.node.HEWorker.shoulder;
 
 
 public abstract class CryptoLibBase<T extends CryptKey,V> extends CryptoMap<T,V> implements IBasicTask {

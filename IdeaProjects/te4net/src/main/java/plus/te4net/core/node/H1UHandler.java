@@ -6,11 +6,11 @@ import plus.te4net.core.mapping.HRouteMap;
 
 
 final class H1UHandler extends AbsH1Handler {
-    private final HWorkerRepository repository;
+    private final HWorkerRepositoryBase repository;
     private HWorker worker;
     private String domain;
 
-    H1UHandler(HWorkerRepository repository) {
+    H1UHandler(HWorkerRepositoryBase repository) {
         this.repository = repository;
     }
 
@@ -28,7 +28,7 @@ final class H1UHandler extends AbsH1Handler {
             super.requestError("You're a bot right?");
             return;
         }
-        HWorkerRepository.HWorkerContext ctx0 = repository.getFor(domain);
+        HEWorkerRepository.HWorkerContext ctx0 = repository.getFor(domain);
         if(ctx0==null){
             notFound();
             return;

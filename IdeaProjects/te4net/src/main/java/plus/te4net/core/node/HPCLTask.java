@@ -1,5 +1,6 @@
 package plus.te4net.core.node;
 
+import plus.te4net.core.api.IDataProvider;
 import plus.te4net.core.api.IHttpClient;
 import plus.tson.TsonMap;
 import plus.util.PCLTask;
@@ -10,13 +11,13 @@ import java.lang.reflect.Type;
 
 final class HPCLTask extends PCLTask {
     private final TsonMap config;
-    final HWorker worker;
+    final HEWorker worker;
 
-    HPCLTask(Class<?> clazz, HWorker worker, TsonMap config){
+    HPCLTask(Class<?> clazz, HEWorker worker, TsonMap config){
         this(clazz, 0, worker, config);
     }
 
-    HPCLTask(Class<?> clazz, int priority, HWorker worker, TsonMap config){
+    HPCLTask(Class<?> clazz, int priority, HEWorker worker, TsonMap config){
         super(clazz, 500+priority);
         this.worker = worker;
         this.config = config;
@@ -65,10 +66,10 @@ final class HPCLTask extends PCLTask {
 
 
     private Object getArg(Type type){
-        if(type==TsonMap.class)return config;
-        if(type==HWorker.class)return worker;
-        if(type==HWorkerRepository.class)return worker.getRepository();
-        if(type==IHttpClient.class)return worker.client();
+        if(type == TsonMap.class)return config;
+        if(type == HEWorker.class || type == IDataProvider.class||
+                type == HWorker.class)return worker;
+        if(type == IHttpClient.class)return worker.client();
         return new HPCLTask(type.getClass(), worker, config).inst();
     }
 }

@@ -11,9 +11,9 @@ import io.netty.handler.stream.ChunkedWriteHandler;
 
 
 final class NHInitializer extends ChannelInitializer<SocketChannel> {
-    private final HWorkerRepository repository;
+    private final HWorkerRepositoryBase repository;
 
-    NHInitializer(HWorkerRepository repository) {
+    NHInitializer(HWorkerRepositoryBase repository) {
         this.repository = repository;
     }
 

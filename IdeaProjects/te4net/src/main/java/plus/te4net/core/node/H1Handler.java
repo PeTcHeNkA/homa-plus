@@ -14,6 +14,7 @@ final class H1Handler extends AbsH1Handler {
         this.domain = domain;
     }
 
+
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         this.ctx = ctx;

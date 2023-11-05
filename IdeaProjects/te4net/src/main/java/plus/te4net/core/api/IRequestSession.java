@@ -5,10 +5,10 @@ import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.cookie.Cookie;
 import plus.te4net.core.mapping.HRouteMap;
 import plus.te4net.core.node.HWorker;
-import plus.te4net.mds.auth.User;
+import plus.te4net.core.auth.User;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import static plus.te4net.utl.ByteUtils.EMPTY;
+import static plus.te4net.mds.util.ByteUtils.EMPTY;
 
 
 @PublicUsage
@@ -93,7 +93,9 @@ public interface IRequestSession extends IResponse{
 
 
     default User auth(){
-        return worker().auth(this);
+        IAuthProvider sys = worker().getAuthSystem();
+        if(sys==null)return null;
+        return sys.auth(this);
     }
 
 

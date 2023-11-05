@@ -1,6 +1,7 @@
 package plus.te4net.core.bsys;
 
 import io.netty.util.collection.IntObjectHashMap;
+import plus.te4net.core.api.IDataProvider;
 
 
 public class NHybrideDataProvider extends IntObjectHashMap<IDataProvider> implements IDataProvider{

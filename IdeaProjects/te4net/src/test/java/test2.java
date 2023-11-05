@@ -10,15 +10,9 @@ public class test2 {
     public static void main(String[] args) {
         try {
             HRouteMap mp = new HRouteMap();
-            mp.put("a1/a2/a3/a4", new Ex("k1"));
-            mp.put("a1/a2/",new Ex("k2"));
-            mp.put("a1/a2/a3",new Ex("k3"));
-            mp.put("a1/a2/a4",new Ex("k3"));
+            mp.put("auth", new Ex("k1"));
 
-            //System.out.println(mp.get("/data1/data2/data3"));
-
-            //System.out.println(mp.get("/a1/a2/data1/data2/data3/data4"));
-            System.out.println(mp.get("/a1/a2/data1/data2?k&v&d"));
+            System.out.println(mp.get("/auth/check_mail?login=Te4hnoPublic@yandex.ru&crypt-key=&e2=&et=22&"));
 
         } catch (Exception e){
             e.printStackTrace();

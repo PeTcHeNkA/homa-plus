@@ -1,13 +1,13 @@
 package plus.te4net.mds.plsys;
 
 import plus.te4net.core.api.PluginFunction;
-import plus.te4net.core.node.HWorker;
+import plus.te4net.core.node.HEWorker;
 import plus.util.IPluginProcessor;
 
 
 public final class FunctionProcessor implements IPluginProcessor<PluginFunction> {
-    private final HWorker worker;
-    public FunctionProcessor(HWorker worker) {
+    private final HEWorker worker;
+    public FunctionProcessor(HEWorker worker) {
         this.worker = worker;
     }
 

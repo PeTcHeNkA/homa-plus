@@ -18,6 +18,7 @@ final class H1ClientInitializer extends ChannelInitializer<SocketChannel> {
         this.processor = processor;
     }
 
+
     @Override
     public void initChannel(SocketChannel ch) {
         ChannelPipeline p = ch.pipeline();

@@ -1,12 +1,13 @@
 package plus.te4net.core.bsys;
 
+import plus.te4net.core.api.IDataProvider;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 
 
-public class NFileDataProvider implements IDataProvider{
+public class NFileDataProvider implements IDataProvider {
     private final String dir;
     private final boolean trimTable;
     public NFileDataProvider(String dir) {

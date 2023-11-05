@@ -9,8 +9,6 @@ import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.stream.ChunkedStream;
 import plus.te4net.core.api.IRequestSession;
 import plus.te4net.core.mapping.HRouteMap;
-
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;

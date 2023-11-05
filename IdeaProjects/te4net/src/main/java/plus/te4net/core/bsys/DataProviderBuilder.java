@@ -1,10 +1,12 @@
 package plus.te4net.core.bsys;
 
 import plus.asyutl.buf.FastBuffer;
+import plus.te4net.core.api.IDataProvider;
 import plus.te4net.core.api.PublicUsage;
-import plus.te4net.core.node.HWorker;
+import plus.te4net.core.node.HEWorker;
 import plus.tson.*;
 import java.sql.Connection;
+
 
 @PublicUsage
 public class DataProviderBuilder {
@@ -73,12 +75,12 @@ public class DataProviderBuilder {
     }
 
 
-    public static IDataProvider ofTson(HWorker worker, TsonObj obj){
+    public static IDataProvider ofTson(HEWorker worker, TsonObj obj){
         return ofTson(worker, obj, new FastBuffer<>());
     }
 
     //{root='dir:domains/lochost.ru/img',lochost.ru='dir:domains/lochost.ru/img'}
-    private static IDataProvider ofTson(HWorker worker, TsonObj obj, FastBuffer<IDataProvider> def){
+    private static IDataProvider ofTson(HEWorker worker, TsonObj obj, FastBuffer<IDataProvider> def){
         if(obj.isString()){
             String str = obj.getStr();
             String[] items = str.split(":");
@@ -90,9 +92,9 @@ public class DataProviderBuilder {
                     return new NSqlDataProvider(items[1], items[2]);
                 case "root":
                     if(items.length==1) {
-                        return worker.getRepository().getDefDataPovider();
+                        return worker.getDefDataPovider();
                     } else {
-                        return new NPrefixDataProvider(worker.getRepository().getDefDataPovider(),items[1]);
+                        return new NPrefixDataProvider(worker.getDefDataPovider(),items[1]);
                     }
                 case "def":
                     if (items.length == 2) {

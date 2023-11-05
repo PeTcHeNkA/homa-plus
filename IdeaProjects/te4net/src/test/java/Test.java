@@ -1,5 +1,5 @@
 
-import plus.te4net.core.html.vr.FastJsOptimizer;
+import plus.te4net.mds.html.vr.FastJsOptimizer;
 
 
 public class Test {

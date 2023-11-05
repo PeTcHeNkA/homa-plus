@@ -3,20 +3,21 @@ package plus.te4net.mds.proc;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
+import plus.te4net.core.api.IAuthProvider;
 import plus.te4net.core.api.IRequestProcessor;
 import plus.te4net.core.api.IRequestSession;
-import plus.te4net.core.html.vr.VrCss;
-import plus.te4net.core.html.vr.VrHtmlFormat;
-import plus.te4net.core.node.HWorker;
-import plus.te4net.core.node.HWorkerRepository;
-import plus.te4net.mds.auth.*;
+import plus.te4net.core.auth.*;
+import plus.te4net.mds.html.vr.VrCss;
+import plus.te4net.mds.html.vr.VrHtmlFormat;
+import plus.te4net.core.node.HEWorker;
 import plus.te4net.mds.cap4a.Cap4a;
 import plus.te4net.mds.cap4a.Cap4aLib;
+import plus.te4net.mds.crypt.CryptException;
 import plus.te4net.mds.crypt.WebCryptKey;
-import plus.te4net.core.fm.TextMapFormatter;
-import plus.te4net.core.node.HPluginSystem;
-import plus.te4net.utl.MailServer;
-import plus.te4net.utl.MiniLink;
+import plus.te4net.mds.util.TextMapFormatter;
+import plus.te4net.core.node.HEPluginSystem;
+import plus.te4net.mds.util.MailServer;
+import plus.te4net.mds.util.MiniLink;
 import plus.tson.TsonMap;
 import plus.tson.TsonStr;
 import plus.tson.utl.Tuple;
@@ -25,31 +26,31 @@ import java.nio.charset.StandardCharsets;
 
 
 public class AuthRoute<U extends User> extends AuthService<U> implements SimpleSrcGetter, IRequestProcessor, IAuthProvider {
-    public static final byte[] font = HPluginSystem.getSrc(AuthRoute.class, "Bufcated1.ttf");
+    public static final byte[] font = HEPluginSystem.getSrc(AuthRoute.class, "Bufcated1.ttf");
     public static final String defCss = new VrCss(
-            new String(HPluginSystem.getSrc(AuthRoute.class,"cap4a-template.css"))
+            new String(HEPluginSystem.getSrc(AuthRoute.class,"cap4a-template.css"))
     ).toString();
 
     private final IRequestProcessor fmLogin;
-    private final HWorker worker;
+    private final HEWorker worker;
 
-    public AuthRoute(HWorker worker, TsonMap config){
-        this(worker, new UserMap<U>((UserData<U>) new DefData(config.getOrDefault(
-                "database", new TsonStr(worker.getWorkDir().getPath() + "/users.db")
+    public AuthRoute(HEWorker worker, TsonMap config){
+        this(worker, new UserMap<>((UserData<U>) new DefData(config.getOrDefault(
+                        "database", new TsonStr(worker.getWorkDir().getPath() + "/users.db")
                 ).getStr())),
                 config.getOrDefault("mail",new TsonMap("{virtual=(true)}")).getMap()
         );
     }
 
-    public AuthRoute(HWorker worker, UserMap<U> userMap, TsonMap mailAuth){
+    public AuthRoute(HEWorker worker, UserMap<U> userMap, TsonMap mailAuth){
         super(userMap, new Cap4aLib<>(), new MailServer(mailAuth.getMap("mail")));
-        setMailFormat(new TextMapFormatter(worker, getStrSrc("mail-code-template.html"),"{%","%}"));
+        setMailFormat(new TextMapFormatter(getStrSrc("mail-code-template.html"),"{%","%}"));
         fmLogin = VrHtmlFormat.ofHtml(worker, getStrSrc("mcauth2.html"));
         this.worker = worker;// mcauth2.html  login-template.html
         onInit(worker);
     }
 
-    protected void onInit(HWorker worker){
+    protected void onInit(HEWorker worker){
         worker.addRoute("auth", this);
     }
 
@@ -77,7 +78,7 @@ public class AuthRoute<U extends User> extends AuthService<U> implements SimpleS
                             args[0], args[1], args[2], AuthService.MailRequest.Type.NEW_USER, args[3], new MailServer.CallBack() {
                                 @Override
                                 public void onSuccess() {
-                                    HWorkerRepository.getLogger().info("Mail sended to [" + args[0] + "] !");
+                                    HEWorker.getLogger().info("Mail sended to [" + args[0] + "] !");
                                 }
 
                                 @Override
@@ -89,16 +90,16 @@ public class AuthRoute<U extends User> extends AuthService<U> implements SimpleS
                     break;
                 case "login":
                     Tuple<U, String> result = auth(
-                            args[0].toLowerCase(), args[1], args[2], getTokenData(session)
+                            args[0], args[1], args[2], getTokenData(session)
                     );
                     setToken(result.B, session);
                     break;
                 case "mail-restore":
                     createMailConfirm(
-                            args[0].toLowerCase(), args[1], args[2], AuthService.MailRequest.Type.BREAK_PASSWORD, args[3], new MailServer.CallBack() {
+                            args[0], args[1], args[2], AuthService.MailRequest.Type.BREAK_PASSWORD, args[3], new MailServer.CallBack() {
                                 @Override
                                 public void onSuccess() {
-                                    HWorkerRepository.getLogger().info("Mail sended to [" + args[0] + "] !");
+                                    HEWorker.getLogger().info("Mail sended to [" + args[0] + "] !");
                                 }
 
                                 @Override
@@ -157,18 +158,24 @@ public class AuthRoute<U extends User> extends AuthService<U> implements SimpleS
                 case "confirm_create": confirmCreate(session);return;
                 case "confirm_update": confirmUpdate(session);return;
                 case "check_mail": hasMail(session);return;
+                case "chick_name": hasName(session);return;
             }
             session.redirect("/auth/");
         //} catch (RouteTextFormatter.Exception e){
 
-        } catch (AuthException e){
+        } catch (AuthException | CryptException e){
             session.send(e.toString(), HttpResponseStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
 
     private void hasMail(IRequestSession session) throws AuthException {
-        session.send(hasUser(getLogin(session).toLowerCase(), getCryptKey(session))?"TRUE":"FALSE");
+        session.send(hasUser(getLogin(session), getCryptKey(session))?"TRUE":"FALSE");
+    }
+
+
+    private void hasName(IRequestSession session) throws AuthException {
+        session.send(hasName(getName(session), getCryptKey(session))?"TRUE":"FALSE");
     }
 
 

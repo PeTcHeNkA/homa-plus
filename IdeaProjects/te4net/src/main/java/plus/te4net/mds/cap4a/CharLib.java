@@ -1,6 +1,6 @@
 package plus.te4net.mds.cap4a;
 
-import plus.te4net.utl.FastRandom;
+import plus.te4net.mds.util.FastRandom;
 
 
 public class CharLib {

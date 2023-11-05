@@ -1,7 +1,7 @@
 package plus.te4net.mds.crypt;
 
-import plus.te4net.utl.FastRandom;
-import plus.te4net.utl.data.SqliteUtils;
+import plus.te4net.mds.util.FastRandom;
+import plus.te4net.mds.data.SqliteUtils;
 import java.sql.Connection;
 import java.util.HashSet;
 import java.util.Set;

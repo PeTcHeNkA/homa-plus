@@ -10,13 +10,11 @@ import io.netty.handler.ssl.SslHandler;
 import io.netty.util.Mapping;
 import io.netty.util.ReferenceCountUtil;
 
-import java.io.IOException;
-
 
 final class HSInitializer extends ChannelInitializer<SocketChannel> {
-    private final HWorkerRepository repository;
+    private final HWorkerRepositoryBase repository;
 
-    HSInitializer(HWorkerRepository repository) {
+    HSInitializer(HWorkerRepositoryBase repository) {
         this.repository = repository;
     }
 
@@ -33,7 +31,7 @@ final class HSInitializer extends ChannelInitializer<SocketChannel> {
 
     private final class SSLMap implements Mapping<String, SslContext> {
         private final ChannelPipeline ph;
-        HWorkerRepository.HWorkerContext ctx;
+        HEWorkerRepository.HWorkerContext ctx;
         public SSLMap(ChannelPipeline ph) {
             this.ph = ph;
             ph.addLast(new Sni2Handler(this));

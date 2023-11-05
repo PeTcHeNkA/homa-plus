@@ -1,6 +1,6 @@
 package plus.te4net.mds.crypt;
 
-import plus.te4net.utl.FastRandom;
+import plus.te4net.mds.util.FastRandom;
 
 import java.util.Arrays;
 
@@ -10,10 +10,11 @@ public class CryptKey {
     protected final long time;
     public short usages;
 
-
     public CryptKey(String key) {
+        if(key==null)throw new CryptException(CryptException.Type.NULL_KEY);
         time = 0;
         byte[] bytes = key.getBytes();
+        if(bytes.length != 14)throw new CryptException(CryptException.Type.INVALID_KEY);
         System.arraycopy(bytes, 0, this.key, 0, 14);
     }
 

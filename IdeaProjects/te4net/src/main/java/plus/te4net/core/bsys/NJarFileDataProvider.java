@@ -1,12 +1,13 @@
 package plus.te4net.core.bsys;
 
-import plus.te4net.core.node.HWorkerRepository;
+import plus.te4net.core.api.IDataProvider;
+import plus.te4net.core.node.HEWorker;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 
 
-public class NJarFileDataProvider extends HashMap<String, NJarFileDataProvider.JarItem> implements IDataProvider{
+public class NJarFileDataProvider extends HashMap<String, NJarFileDataProvider.JarItem> implements IDataProvider {
     public void include(String name, String jarPath, ClassLoader src){
         if(name.charAt(0)=='/'){
             name = name.substring(1);
@@ -39,7 +40,7 @@ public class NJarFileDataProvider extends HashMap<String, NJarFileDataProvider.J
     @Override
     public void saveRaw(byte[] data, String... path) {
         String path0 = getPath(path);
-        HWorkerRepository.getLogger().info("Attempt to save ["+path0+"] to JAR! Ignored.");
+        HEWorker.getLogger().info("Attempt to save ["+path0+"] to JAR! Ignored.");
     }
 
 

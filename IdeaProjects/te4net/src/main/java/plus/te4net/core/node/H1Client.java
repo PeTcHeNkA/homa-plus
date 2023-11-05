@@ -11,9 +11,6 @@ import io.netty.handler.ssl.SslContext;
 import plus.te4net.core.api.IHttpClient;
 import plus.te4net.core.api.IResponse;
 import plus.te4net.core.api.IResponseProcessor;
-import javax.net.ssl.SSLException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import static plus.te4net.core.node.HServer.SERVER_NAME;
 
 

@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <script src="./reanet.js"></script>
+    <script src="/reanet.js"></script>
     <link rel="stylesheet" href="./stdboost.css">
 </head>
 
@@ -78,14 +78,34 @@
     </style>
 
 <script inc>
-    let prevLogin, prevResult, cryptokey = "", flag = false;
+    let prevLogin, prevResult, cryptokey = "", flag = false, prvN, prvR;
+    const _nickMsg = "_nickMsg", _mlMsg = "_mlMsg"
     let _V=(a,e)=>{getEl(a).style.display=e?"none":"block"};
 
     function inputMailCode(){
-        //console.log("NEN1");
-        //cfmMode = true;
-        //_V("login_btn_code",false);
         reanet.lock().set("_lgcfm",true).unlock().set("_loginBtn", reanet.model["_loginmode"]==2?"Обновить":"Создать аккаунт")
+    }
+
+    function getGoTo(){
+        let urlParams = new URLSearchParams(window.location.search);
+        let goto = urlParams.get('goto');
+        if(goto==""||goto==null)return "/";
+        
+        function ofMini(link){
+            console.log(link);
+            if(link==null || link=="")return null;
+            function ofMin0(raw){
+                return raw.replaceAll("->","/").replaceAll("-e>","=")
+                        .replaceAll("-q>","?").replaceAll("-n>","&");
+            }
+            switch (link.charAt(0)) {
+                case 'H':return "https://" + ofMin0(link.substring(1));
+                case 'S':return "/";
+                case 'I':return '/'+ ofMin0(link.substring(1));
+                default:return "http://" + ofMin0(link);
+            };
+        }
+        return ofMini(goto);
     }
 
     function sendMail(){
@@ -94,7 +114,7 @@
         if(!login)return;
         let password = _validPsw();
         if(!password)return;
-        let nick = _isValidNick();
+        let nick = getNameM(exist)
         if(!nick)return
         
         post("/auth/api/mail-"+(exist?"restore":"newuser"), login+";"+nick+";"+password+";"+cryptokey,(answ)=>{
@@ -103,13 +123,15 @@
                 if(code == "NO_CAP4A"){
                     cryptokey = "";
                     _showCap4a();
+                } else if(code == "READY_EXIST_NAME"){
+                    //TODO
                 }
                 console.log(code);
             } else{
                 inputMailCode();
             }
-            });
-        }
+        });
+    }
     function _isValidLogin0 (login){
         return /[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(login)?login:false;
     }
@@ -122,34 +144,44 @@
 
     function getLoginM(exist=true){
         let valid = _isValidLogin()
-        let setMsg = (msg)=>{
-            reanet.model["_nickMsg"] = msg
-        }
+        if(!valid)return valid
         if(_existLogin(valid)){
             if(!exist){
-                setMsg("Аккаунт не найден")
+                reanet.set(_mlMsg,"Аккаунт уже зарегистрирован")
                 return false
             }
         } else {
             if(exist){
-                setMsg("Аккаунт уже зарегистрирован")
+                reanet.set(_mlMsg,"Аккаунт не найден")
+                return false
+            }
+        }
+        return valid
+    }
+    function getNameM(exist=true){
+        let valid = _isValidNick()
+        if(!valid)return valid
+        if(_existName(valid)){
+            if(!exist){
+                reanet.set(_nickMsg, "Никнейм уже занят")
                 return false
             }
         }
         return valid
     }
 
-    window._fix = (el)=>{
-        el = getEl(el)
-        el.innerHTML = el.innerHTML
-    }
-    window._updateLoginForm = ()=>{
-        reanet.update()
-    }
+    // window._fix = (el)=>{
+    //     el = getEl(el)
+    //     el.innerHTML = el.innerHTML
+    // }
     window._isValidLogin = ()=>{
         let el = getEl("_lg-mail")
         if(!el || !el.value)return true
-        return _isValidLogin0(el.value)
+        let res = _isValidLogin0(el.value)
+        if(!res){
+            reanet.model[_mlMsg] = "Некорректный адрес почты!"
+        }
+        return res
     }
     window._isValidNick = ()=>{
         let el = getEl("_lg-nick")
@@ -158,7 +190,7 @@
         let valid = _validNick0(nick)
 
         let setMsg = (msg)=>{
-            reanet.model["_nickMsg"] = msg
+            reanet.model[_nickMsg] = msg
         }
 
         if(valid){
@@ -209,6 +241,7 @@
         let tg1 = "Восстановление"
         let tg2 = "Регистрация"
         let tg3 = "Авторизация"
+        let th1 = "пароль"
         if(mode==0){
             msg = "Войти"
             hdr = tg3
@@ -220,15 +253,18 @@
             msg = "Сбросить пароль"
             hdr = tg1
             tg1 = tg3
+            th1 = "новый пароль"
         }
         reanet.model["_loginmode"] = mode
         reanet.model["_loginBtn"]  = msg
         reanet.model["_loginHdr"]  = hdr
         reanet.model["_loginBf1"]  = tg1
         reanet.model["_loginBf2"]  = tg2
+        reanet.model["_pswph"]     = th1
     }
     window._toggleMode = (left)=>{
         let mode = reanet.model["_loginmode"]
+        reanet.model["_wgPsw"] = false
         if(mode==0){
             _setLgnMode(left?2:1)
         } else if(mode==1){
@@ -261,7 +297,8 @@
             _V("_cap4a_view",!s);_V("_cap4a_view_success",!s);
         }
     }
-    window._existLogin = (login)=>{
+    
+    function _existLogin(login){
         if(prevLogin==login && prevResult){
             return prevResult;
         }
@@ -270,15 +307,33 @@
         if(res=="TRUE")prevResult = true;
         else if(res=="FALSE")prevResult = false;
         else{ 
-            prevResult = null;
+            prevResult = prevLogin = null;
             console.log(res);
-            let code = data.split(" ")[1];
-            if(code=="NO_CAP4A"){
+            let code = res.split(" ")[1];
+            if(code=="NO_CAP4A" || code=="INVALID_KEY"){
                 _getCap4a();
             }
         }
         return prevResult;
     }
+    
+    function _existName(nick){
+        if(prvN==nick)return prvR
+        prvN = nick
+        let res = syncGet("/auth/chick_name?name="+nick+"&crypt-key="+cryptokey);
+        if(res=="TRUE")prvR = true;
+        else if(res=="FALSE")prvR = false;
+        else{ 
+            prvN = prvR = null;
+            console.log(res);
+            let code = res.split(" ")[1];
+            if(code=="NO_CAP4A" || code=="INVALID_KEY"){
+                _getCap4a();
+            }
+        }
+        return prvR;
+    }
+
     window._checkCap4a =()=>{
         let answer = getEl("_cap4a_answer").value;
         let cap4aid = getEl("cap4aid").innerHTML;
@@ -310,14 +365,11 @@
                         window.location = getGoTo();
                     } else {
                         reanet.model["_lgcfm"] = false
-
-                        return
                         // let code = data.split(" ")[1];
                         // if(code=="NO_CAP4A"){
                         //     _getCap4a();
                         //     return
                         // }
-                        // //TODO
                     }
                     console.log(res);
                 })
@@ -327,7 +379,7 @@
                 if(!flag){
                     _showCap4a();
                 } else{
-                    let login = getLoginM();
+                    let login = getLoginM(curMode==1);
                     if(login)getCap4a(login);
                 }
                 return;
@@ -345,20 +397,22 @@
     function auth(){
         let login = getLoginM(true);
         if(!login)return;
-        let password = getPasswordM();
+        let password = getEl("_lg-psw").value
         if(!password)return; 
         post("/auth/api/login", login+";"+password+";"+cryptokey,(answ)=>{
+            //reanet.model["_pswMsg"] = msg
             if(answ.startsWith("ERROR")){
                 let code = answ.split(" ")[1];
                 if(code == "NO_CAP4A"){
                     cryptokey = "";
                     _showCap4a();
-                } else {
-                    setMsg("Неправильный пароль",false);
+                } else if(code == "WRONG_PASSWORD"){
+                    reanet.lock().set("_wgPsw",true).unlock().set("_pswMsg", "Неправильный пароль")
+                    //setMsg("Неправильный пароль",false);
                 }
                 console.log(answ);
             } else{
-                setTimeout(()=>{window.location = getGoTo();},200);
+                setTimeout(()=>{window.location = getGoTo()},200);
             }
         });
     }
@@ -367,41 +421,41 @@
 </script>
 
     <template name="login">
-        <script inc on="place">
+        <!-- <script inc on="place">
             _fix("_pswc")
-        </script>
+        </script> -->
         <div class="flex-cm login-form overflow-h br3">
             <div class="flex w100 p3 login-form-lbl f3">{_loginHdr}</div>
             <div class="flex-cm m2">
                 <input id="_lg-mail" class="p2 login-form-inp" type="email" 
-                    placeholder="почта" autocomplete="email" onblur="_updateLoginForm()">
-                <div if='!_isValidLogin()'>
+                    placeholder="почта" autocomplete="email" onblur="reanet.model['_mlMsg']='';reanet.update()">
+                <div if='!_isValidLogin()||reanet.model["_mlMsg"]'>
                     <div class="login-form-i-line"></div>
-                    <div class="login-form-i-msg flex-start m1 f1">Некорректный адрес почты!</div>
+                    <div class="login-form-i-msg flex-start m1 f1">{_mlMsg}</div>
                 </div>
             </div>
             <div if='reanet.model["_loginmode"] != 0' class="flex-cm m2">
                 <input id="_lg-nick" class="p2 login-form-inp" type="nickname" 
-                    placeholder="никнейм" autocomplete="nickname" onblur="_updateLoginForm()">
-                <div if='!_isValidNick()'>
+                    placeholder="никнейм" autocomplete="nickname" onblur="reanet.update()">
+                <div if='!_isValidNick()||reanet.model["_nickMsg"]'>
                     <div class="login-form-i-line"></div>
                     <div class="login-form-i-msg flex-start m1 f1">{_nickMsg}</div>
                 </div>
             </div>
-            <div if='reanet.model["_loginmode"] != 2' class="login-form-i flex-cm m2">
+            <div class="login-form-i flex-cm m2">
                 <div id="_pswc" class="flex">
                     <input id="_lg-psw" class="p2 login-form-inp w-100" type="password" 
-                    placeholder="пароль" autocomplete="new-password" onblur="_updateLoginForm()">
+                    placeholder="{_pswph}" autocomplete="new-password" onblur="reanet.update()">
                 </div>
-                <div if="!_validPsw()">
+                <div if='!_validPsw() || reanet.model["_wgPsw"]'>
                     <div class="login-form-i-line"></div>
                     <div class="login-form-i-msg flex-start m1 f1">{_pswMsg}</div>
                 </div>
             </div>
-            <div if='reanet.model["_loginmode"] == 1' class="login-form-i flex-cm m2">
+            <div if='reanet.model["_loginmode"] != 0' class="login-form-i flex-cm m2">
                 <div id="_pswc" class="flex">
                     <input id="_lg-psw-db" class="p2 login-form-inp w-100" type="password" 
-                        placeholder="повторите пароль" autocomplete="new-password" onblur="_updateLoginForm()">
+                        placeholder="повторите пароль" autocomplete="new-password" onblur="reanet.update()">
                 </div>
                 <div if="!_isValidDoublePsw()">
                     <div class="login-form-i-line"></div>

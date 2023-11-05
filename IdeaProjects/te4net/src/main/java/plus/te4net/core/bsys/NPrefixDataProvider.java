@@ -1,5 +1,7 @@
 package plus.te4net.core.bsys;
 
+import plus.te4net.core.api.IDataProvider;
+
 
 public class NPrefixDataProvider implements IDataProvider {
     private final IDataProvider parent;

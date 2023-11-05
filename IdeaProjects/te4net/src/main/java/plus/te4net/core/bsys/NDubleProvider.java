@@ -1,7 +1,8 @@
 package plus.te4net.core.bsys;
 
+import plus.te4net.core.api.IDataProvider;
 import java.util.HashSet;
-import static plus.te4net.core.node.HWorkerRepository.pool;
+import static plus.te4net.core.node.HEWorker.pool;
 
 
 public class NDubleProvider implements IDataProvider {
