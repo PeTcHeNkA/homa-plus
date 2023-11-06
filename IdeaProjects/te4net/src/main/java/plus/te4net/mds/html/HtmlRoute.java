@@ -10,10 +10,10 @@ import plus.tson.TsonFile;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 
+
 @PublicUsage
 public class HtmlRoute implements PluginBase, IRequestProcessor, PluginRoute {
     private final IRequestProcessor formatter;
-//    private final HWorker worker;
     private final String routeName;
 
     public HtmlRoute(HEWorker worker, File file){
@@ -21,11 +21,13 @@ public class HtmlRoute implements PluginBase, IRequestProcessor, PluginRoute {
         this.formatter = VrHtmlFormat.ofHtml(worker, TsonFile.read(file,""));
     }
 
+
     public HtmlRoute(HEWorker worker, String path, String routeName) {
         this.routeName = routeName;
         byte[] data = getSrc(path);
         this.formatter = VrHtmlFormat.ofHtml(worker, data==null?"":new String(data, StandardCharsets.UTF_8));
     }
+
 
     public HtmlRoute(HEWorker worker, byte[] data, String routeName) {
         this.routeName = routeName;
@@ -34,13 +36,13 @@ public class HtmlRoute implements PluginBase, IRequestProcessor, PluginRoute {
 
 
     @Override
-    public void handle(IRequestSession session) {
+    public void handle(RequestSession session) {
         checkIp(session);
         formatter.handle(session);
     }
 
 
-    protected void checkIp(IRequestSession session){
+    protected void checkIp(RequestSession session){
         Cookie rCookie = session.getCookie("uia");
         String rIp = session.context().channel().remoteAddress().toString();
         rIp = rIp.substring(1,rIp.indexOf(':'));

@@ -32,5 +32,7 @@ final class NHInitializer extends ChannelInitializer<SocketChannel> {
 
 
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {}
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+        if(!ctx.isRemoved()) ctx.close();
+    }
 }

@@ -2,7 +2,7 @@ package plus.te4net.mds.proc;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
 import plus.te4net.core.api.IRequestProcessor;
-import plus.te4net.core.api.IRequestSession;
+import plus.te4net.core.api.RequestSession;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -20,7 +20,7 @@ public class SimpleRoute implements IRequestProcessor {
 
 
     @Override
-    public void handle(IRequestSession session) {
+    public void handle(RequestSession session) {
         session.setHeader(HttpHeaderNames.CACHE_CONTROL, cahceStr);
         String name = session.splat()[0];
         File toRead = new File(dir, name);
@@ -37,7 +37,7 @@ public class SimpleRoute implements IRequestProcessor {
     }
 
 
-    protected String mathType(String def, IRequestSession request){
+    protected String mathType(String def, RequestSession request){
         String type = request.queryParams("type");
         if(type!=null){
             return type;

@@ -1,9 +1,11 @@
 package plus.te4net.mds.crypt;
 
+import plus.te4net.core.api.PublicUsage;
 import java.nio.charset.StandardCharsets;
 import static plus.te4net.mds.cap4a.Cap4a.fillRandomId;
 
 
+@PublicUsage
 public class WebCryptKey extends CryptKey{
     public WebCryptKey(long time, short usages) {
         super(time, usages);

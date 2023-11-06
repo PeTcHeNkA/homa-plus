@@ -1,4 +1,4 @@
-package plus.te4net.mds.fastreg;
+package plus.te4net.mds.util;
 
 import java.util.HashMap;
 
@@ -43,10 +43,12 @@ class KeyFirst implements FMather{
     KeyFirst(String key) {
         this.key = key;
     }
+
     @Override
     public final int hashCode() {
         return key.hashCode();
     }
+
 
     @Override
     public final boolean equals(Object obj) {
@@ -56,10 +58,14 @@ class KeyFirst implements FMather{
         }
         return false;
     }
+
+
     public String getRealValue(){
         return key;
     }
 }
+
+
 final class QwFirst extends KeyFirst{
     private final String realValue;
     QwFirst(String key) {
@@ -75,13 +81,18 @@ final class QwFirst extends KeyFirst{
 
 class KeyEnd implements FMather{
     private final String key;
+
     KeyEnd(String key) {
         this.key = key;
     }
+
+
     @Override
     public final int hashCode() {
         return key.hashCode();
     }
+
+
     @Override
     public final boolean equals(Object obj) {
         if(obj instanceof KeyEnd){
@@ -90,17 +101,24 @@ class KeyEnd implements FMather{
         }
         return false;
     }
+
+
     @Override
     public String getRealValue() {
         return key;
     }
 }
+
+
 final class QwEnd extends KeyEnd{
     private final String realValue;
+
     QwEnd(String key) {
         super(toKey(key));
         this.realValue = key;
     }
+
+
     private static String toKey(String k){
         int len = k.length();
         if(len>7){
@@ -109,8 +127,10 @@ final class QwEnd extends KeyEnd{
             return k;
         }
     }
+
+
     @Override
-    public final String getRealValue() {
+    public String getRealValue() {
         return realValue;
     }
 }

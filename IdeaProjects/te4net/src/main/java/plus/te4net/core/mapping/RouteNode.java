@@ -12,6 +12,7 @@ class RouteNode extends IntObjectHashMap<RouteNode> {
         this.hs = hs;
     }
 
+
     public final int size() {
         int size = 0;
         for (RouteNode node : this.values()) {
@@ -19,6 +20,7 @@ class RouteNode extends IntObjectHashMap<RouteNode> {
         }
         return route == null ? size : ++size;
     }
+
 
     @Override
     public final int hashCode() {

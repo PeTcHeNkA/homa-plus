@@ -1,7 +1,7 @@
 package plus.te4net.core.auth;
 
 import plus.te4net.mds.util.CharNum;
-import plus.te4net.mds.data.SqliteUtils;
+import plus.te4net.core.data.SqliteUtils;
 import plus.tson.utl.Tuple;
 import java.sql.*;
 import java.util.ArrayList;
@@ -100,7 +100,7 @@ public abstract class UserData<T extends User> implements SqliteUtils, IUserData
 
 
     @Override
-    public final void addUserInTable(T user) {
+    public void addUserInTable(T user) {
         String sqlCode = "INSERT INTO USERS (LOGIN, PASSWORD, NAME, DATA) VALUES ('"+
                 user.login+"', '"+user.password+"', '"+user.name+"', ?)";
         try {

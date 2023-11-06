@@ -3,9 +3,7 @@ package plus.te4net.mds.crypt;
 import java.util.Random;
 
 
-
 public class CharCrypt extends Random {
-
     public byte[] lib =
             "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890-"
             .getBytes();

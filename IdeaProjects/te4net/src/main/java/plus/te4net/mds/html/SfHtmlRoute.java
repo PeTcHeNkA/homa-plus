@@ -1,8 +1,9 @@
 package plus.te4net.mds.html;
 
-import plus.te4net.core.api.IRequestSession;
+import plus.te4net.core.api.RequestSession;
 import plus.te4net.core.api.PublicUsage;
 import plus.te4net.core.node.HEWorker;
+
 
 @PublicUsage
 public class SfHtmlRoute extends HtmlRoute {
@@ -20,12 +21,12 @@ public class SfHtmlRoute extends HtmlRoute {
 
 
     @Override
-    public void handle(IRequestSession session) {
+    public void handle(RequestSession session) {
         if(!session.isSafe() && worker.maybeSafe()){
             session.redirect("/"+get()+"/"+session.routeKey().afterRoute());
             return;
         }
-        if(worker.checkAuth(session)){
+        if(worker.getAuthSystem().checkAuth(session)){
             super.handle(session);
         }
     }

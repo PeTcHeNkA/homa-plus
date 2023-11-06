@@ -17,6 +17,7 @@ class Style implements ICitem {
         return b.toString();
     }
 
+
     @Override
     public void toString(StringBuilder b) {
         if(items.isEmpty())return;

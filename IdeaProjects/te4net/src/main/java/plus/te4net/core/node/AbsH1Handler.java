@@ -7,7 +7,7 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.stream.ChunkedStream;
-import plus.te4net.core.api.IRequestSession;
+import plus.te4net.core.api.RequestSession;
 import plus.te4net.core.mapping.HRouteMap;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -17,7 +17,7 @@ import static io.netty.buffer.Unpooled.wrappedBuffer;
 import static plus.te4net.core.node.HServer.SERVER_NAME;
 
 
-abstract class AbsH1Handler extends ChannelInboundHandlerAdapter implements IRequestSession {
+abstract class AbsH1Handler extends ChannelInboundHandlerAdapter implements RequestSession {
     protected final AbsH1Handler.StdHeaders headers = new StdHeaders();
     protected HRouteMap.StrKey uriParams = null;
     protected Map<String, Cookie> cookieHashMap;
@@ -152,5 +152,7 @@ abstract class AbsH1Handler extends ChannelInboundHandlerAdapter implements IReq
 
 
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {}
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+        if(!ctx.isRemoved()) ctx.close();
+    }
 }

@@ -2,7 +2,7 @@ package plus.tehnet.bimg;
 
 import plus.te4net.core.api.IRequestSession;
 import plus.te4net.core.api.PluginFunction;
-import plus.te4net.utl.MiniLink;
+import plus.te4net.mds.util.MiniLink;
 
 
 public class BImgIncludeVidFunc implements PluginFunction {

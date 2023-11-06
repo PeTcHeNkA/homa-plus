@@ -7,6 +7,7 @@ import plus.util.IPluginProcessor;
 
 public class EventHandlerProcessor implements IPluginProcessor<IEventHandler<?>> {
     private final HEWorker worker;
+
     public EventHandlerProcessor(HEWorker worker) {
         this.worker = worker;
     }

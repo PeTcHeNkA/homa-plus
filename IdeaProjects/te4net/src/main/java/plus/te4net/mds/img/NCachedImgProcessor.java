@@ -2,11 +2,10 @@ package plus.te4net.mds.img;
 
 import plus.asyutl.shoulder.IBasicTask;
 import plus.te4net.core.api.IRequestProcessor;
-import plus.te4net.core.api.IRequestSession;
+import plus.te4net.core.api.RequestSession;
 import plus.te4net.core.api.IDataProvider;
 import plus.tson.utl.Te4HashMap;
 import java.util.Arrays;
-
 import static plus.te4net.core.node.HEWorker.shoulder;
 
 
@@ -21,7 +20,7 @@ public class NCachedImgProcessor extends Te4HashMap<NCachedImgProcessor.Key, NCa
 
 
     @Override
-    public void handle(IRequestSession session) {
+    public void handle(RequestSession session) {
         ImgSize size = NSimpleImgProcessor.getOptimalSize(session);
         if(size==null){
             session.requestError("You're a bot right?");
@@ -83,11 +82,14 @@ public class NCachedImgProcessor extends Te4HashMap<NCachedImgProcessor.Key, NCa
         final ImgSize size;
         final int hs;
         int usages = 0;
+
         Key(String key, ImgSize size) {
             this.key = key;
             this.size = size;
             hs = 31 * key.hashCode() + size.calcHs();
         }
+
+
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
@@ -95,9 +97,13 @@ public class NCachedImgProcessor extends Te4HashMap<NCachedImgProcessor.Key, NCa
             if (!key.equals(key1.key)) return false;
             return size.calc(1000) == key1.size.calc(1000);
         }
+
+
         void use(){
             ++usages;
         }
+
+
         boolean notUsed(){
             if(usages>30){
                 usages = usages/2;
@@ -109,23 +115,11 @@ public class NCachedImgProcessor extends Te4HashMap<NCachedImgProcessor.Key, NCa
             }
             return usages==0;
         }
+
+
         @Override
         public int hashCode() {
             return hs;
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

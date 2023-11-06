@@ -1,13 +1,14 @@
 package plus.te4net.mds.html;
 
 import plus.te4net.core.api.IRequestProcessor;
-import plus.te4net.core.api.IRequestSession;
+import plus.te4net.core.api.RequestSession;
 import plus.te4net.core.api.PublicUsage;
 import plus.tson.TsonList;
 import plus.tson.TsonMap;
 import plus.tson.TsonObj;
 import java.util.ArrayList;
 import java.util.Locale;
+
 
 @PublicUsage
 public class HeadersProcessor implements IRequestProcessor {
@@ -18,6 +19,7 @@ public class HeadersProcessor implements IRequestProcessor {
         this.keys = keys;
         this.values = values;
     }
+
 
     public static HeadersProcessor build(TsonObj obj){
         ArrayList<String> keys = new ArrayList<>();
@@ -44,7 +46,7 @@ public class HeadersProcessor implements IRequestProcessor {
 
 
     @Override
-    public void handle(IRequestSession session) {
+    public void handle(RequestSession session) {
         for(int i=0;i< keys.length;i++){
             session.setHeader(keys[i], values[i]);
         }

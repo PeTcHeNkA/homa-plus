@@ -1,12 +1,12 @@
 package plus.te4net.core.mapping;
 
 import plus.te4net.core.api.IRequestProcessor;
-import plus.te4net.core.api.IRequestSession;
+import plus.te4net.core.api.RequestSession;
 import plus.te4net.core.api.PublicUsage;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
 
 @PublicUsage
 public final class HRouteMap extends RouteNode {
@@ -14,10 +14,12 @@ public final class HRouteMap extends RouteNode {
         super(0);
     }
 
+
     public void put(String key, IRequestProcessor value){
         if(key.charAt(0)=='/')key = key.substring(1);
         put(new RouteKey(key), value, this, 0);
     }
+
 
     private void put(RouteKey key, IRequestProcessor value, RouteNode current, int cursor){
         if(cursor==6)return;
@@ -38,7 +40,7 @@ public final class HRouteMap extends RouteNode {
     }
 
 
-    public IRequestProcessor get(IRequestSession session){
+    public IRequestProcessor get(RequestSession session){
         StrKey key = session.routeKey();
         key.readNextNoAdd(0);
         return getNode(key, this, 0).route;
@@ -127,7 +129,6 @@ public final class HRouteMap extends RouteNode {
                     );
                 }
             }
-            //System.out.println("NEN");
         }
 
 

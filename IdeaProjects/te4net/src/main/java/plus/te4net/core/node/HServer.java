@@ -11,7 +11,7 @@ import io.netty.handler.ssl.OpenSsl;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
-import plus.te4net.core.api.IHttpClient;
+import plus.te4net.core.api.HttpClient;
 import plus.util.cons.Logger;
 import plus.tson.TsonMap;
 import javax.net.ssl.SSLException;
@@ -62,8 +62,6 @@ public class HServer implements ThreadFactory, Thread.UncaughtExceptionHandler, 
         workerGroup = build(threads);
     }
 
-    public static void preLoad(Class<?>... classes){}
-
 
     final void startRepo(TsonMap config, HWorkerRepositoryBase repository){
         startHttp(repository, config);
@@ -95,13 +93,13 @@ public class HServer implements ThreadFactory, Thread.UncaughtExceptionHandler, 
     }
 
 
-    public final IHttpClient client(){
+    public final HttpClient client(){
         if(defClient != null)return defClient;
         return defClient = new H1Client(defCliCtx(), workerGroup, useNative);
     }
 
 
-    public final IHttpClient client(SslContext ctx){
+    public final HttpClient client(SslContext ctx){
         return new H1Client(ctx, workerGroup, useNative);
     }
 
@@ -175,4 +173,7 @@ public class HServer implements ThreadFactory, Thread.UncaughtExceptionHandler, 
     public static Logger getLogger(){
         return HServer.logger;
     }
+
+
+    public static void preLoad(Class<?>... classes){}
 }

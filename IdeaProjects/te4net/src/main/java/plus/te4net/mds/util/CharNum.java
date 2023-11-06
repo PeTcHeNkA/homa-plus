@@ -1,11 +1,13 @@
 package plus.te4net.mds.util;
 
+import plus.te4net.core.api.PublicUsage;
 
+
+@PublicUsage
 public final class CharNum {
     public static final CharNum OnlyChars = new CharNum("qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM");
     public static final CharNum Default = new CharNum("0123456789qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM");
     private final char[] charLib;
-
 
     public CharNum(String lib){
         charLib = lib.toCharArray();

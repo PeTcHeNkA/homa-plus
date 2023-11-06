@@ -4,10 +4,7 @@ import java.util.Objects;
 
 
 class StyleName implements ICitem {
-    String selector;
-    String name;
-    String params;
-    String ender;
+    String selector, name, params, ender;
 
     @Override
     public void toString(StringBuilder b) {

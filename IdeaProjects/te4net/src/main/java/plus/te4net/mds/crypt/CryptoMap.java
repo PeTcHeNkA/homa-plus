@@ -2,16 +2,10 @@ package plus.te4net.mds.crypt;
 
 import plus.tson.utl.Te4HashMap;
 import java.nio.charset.StandardCharsets;
-import java.util.Random;
 
 
 public abstract class CryptoMap<T extends CryptKey, V> extends Te4HashMap<T, V> {
     private static final int limit = Short.MAX_VALUE*2;
-
-    protected abstract T newKey(long time, short usages);
-    protected abstract T encodeKey(byte[] bytes, int delta);
-    protected abstract V encodeValue(byte[] data, int delta);
-
 
     public T createKey(int time, int usages, V value){
         long curTime = System.currentTimeMillis();
@@ -74,12 +68,6 @@ public abstract class CryptoMap<T extends CryptKey, V> extends Te4HashMap<T, V> 
     }
 
 
-    @Override
-    public final String toString() {
-        return new String(toBytes(), StandardCharsets.UTF_8);
-    }
-
-
     public final byte[] toBytes(){
         final int aSize = additionalSize();
         final int shift = 22+aSize;
@@ -94,11 +82,6 @@ public abstract class CryptoMap<T extends CryptKey, V> extends Te4HashMap<T, V> 
             System.arraycopy(bData, 0, data, delta+22, aSize);
             delta+=shift;
         }
-//        for(CryptKey key:values()){
-//            key.save(data, delta);
-//
-//            delta+=shift;
-//        }
         return data;
     }
 
@@ -118,9 +101,22 @@ public abstract class CryptoMap<T extends CryptKey, V> extends Te4HashMap<T, V> 
     }
 
 
+    @Override
+    public final String toString() {
+        return new String(toBytes(), StandardCharsets.UTF_8);
+    }
+
+
     protected int additionalSize(){
         return 0;
     }
+
+
+    protected abstract T newKey(long time, short usages);
+
+
+    protected abstract T encodeKey(byte[] bytes, int delta);
+
+
+    protected abstract V encodeValue(byte[] data, int delta);
 }
-
-

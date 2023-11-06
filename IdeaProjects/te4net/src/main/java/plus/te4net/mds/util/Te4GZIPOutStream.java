@@ -1,5 +1,6 @@
 package plus.te4net.mds.util;
 
+import plus.te4net.core.api.PublicUsage;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.zip.CRC32;
@@ -7,6 +8,7 @@ import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 
 
+@PublicUsage
 public class Te4GZIPOutStream extends DeflaterOutputStream {
     protected CRC32 crc = new CRC32();
     private static final int GZIP_MAGIC = 0x8b1f;

@@ -2,13 +2,15 @@ package plus.te4net.mds.html;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
 import plus.te4net.core.api.IRequestProcessor;
-import plus.te4net.core.api.IRequestSession;
+import plus.te4net.core.api.PublicUsage;
+import plus.te4net.core.api.RequestSession;
 import plus.te4net.core.node.HEWorker;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
 
+@PublicUsage
 public class FileThreeProc implements IRequestProcessor {
     private final File root;
     private final String cacheStr;
@@ -20,7 +22,7 @@ public class FileThreeProc implements IRequestProcessor {
 
 
     @Override
-    public void handle(IRequestSession session) {
+    public void handle(RequestSession session) {
         try {
             String ae;
             File file = new File(root, ae = session.routeKey().afterRoute());

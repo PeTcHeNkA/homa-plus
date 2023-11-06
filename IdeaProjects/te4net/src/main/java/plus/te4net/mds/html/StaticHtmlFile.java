@@ -4,7 +4,6 @@ import plus.te4net.core.api.PublicUsage;
 import plus.te4net.mds.html.events.VrHtmlEvent;
 import plus.te4net.mds.html.vr.VrHtml;
 import plus.te4net.core.node.HEWorker;
-
 import java.io.File;
 
 
@@ -23,7 +22,6 @@ public class StaticHtmlFile extends SimpleCompressedTextFile {
     @Override
     public String replace(HEWorker worker, String data) {
         return optimizeHtml(worker, data);
-        //return LegacyHtmlUtils.optimizeHtml(worker, data);
     }
 
 
@@ -36,6 +34,6 @@ public class StaticHtmlFile extends SimpleCompressedTextFile {
 
     @Override
     public String type() {
-        return "text/html;charset=utf-8";
+        return TYPE_HTML;
     }
 }

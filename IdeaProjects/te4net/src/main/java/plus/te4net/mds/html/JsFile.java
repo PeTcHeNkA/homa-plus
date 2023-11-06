@@ -1,11 +1,13 @@
 package plus.te4net.mds.html;
 
 import plus.te4net.core.api.IDataProvider;
+import plus.te4net.core.api.PublicUsage;
 import plus.te4net.mds.html.vr.FastJsOptimizer;
 import plus.te4net.core.node.HEWorker;
 import java.io.File;
 
 
+@PublicUsage
 public class JsFile extends SimpleCompressedTextFile {
     public JsFile(HEWorker worker, String name, String code){
         super(worker, name, code);

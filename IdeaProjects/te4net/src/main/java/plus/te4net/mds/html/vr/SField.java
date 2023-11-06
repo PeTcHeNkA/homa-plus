@@ -28,6 +28,7 @@ public class SField implements ICitem {
         return false;
     }
 
+
     @Override
     public int hashCode() {
         return value.hashCode();

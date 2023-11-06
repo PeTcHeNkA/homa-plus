@@ -1,4 +1,4 @@
-package plus.te4net.mds.data;
+package plus.te4net.core.data;
 
 
 @Deprecated

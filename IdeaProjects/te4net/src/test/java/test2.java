@@ -1,8 +1,6 @@
 import plus.te4net.core.api.IRequestProcessor;
-import plus.te4net.core.api.IRequestSession;
+import plus.te4net.core.api.RequestSession;
 import plus.te4net.core.mapping.HRouteMap;
-
-import java.util.Arrays;
 
 public class test2 {
 
@@ -29,7 +27,7 @@ public class test2 {
             return name;
         }
         @Override
-        public void handle(IRequestSession session) {
+        public void handle(RequestSession session) {
 
         }
     }

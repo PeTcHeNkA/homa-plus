@@ -1,13 +1,14 @@
 package plus.te4net.mds.html;
 
 import plus.te4net.core.api.IDataProvider;
+import plus.te4net.core.api.PublicUsage;
 import plus.te4net.mds.html.events.VrHtmlEvent;
 import plus.te4net.mds.html.vr.VrCss;
 import plus.te4net.core.node.HEWorker;
-
 import java.io.File;
 
 
+@PublicUsage
 public class CssFile extends SimpleCompressedTextFile {
     public CssFile(HEWorker worker, String name, String cssCode, boolean compress){
         super(worker, name, cssCode, compress);

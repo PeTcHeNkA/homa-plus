@@ -7,7 +7,7 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http2.*;
-import plus.te4net.core.api.IRequestSession;
+import plus.te4net.core.api.RequestSession;
 import plus.te4net.core.mapping.HRouteMap;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -19,7 +19,7 @@ import static plus.te4net.core.node.HServer.SERVER_NAME;
 
 
 @ChannelHandler.Sharable
-final class H2Handler extends ChannelDuplexHandler implements IRequestSession {
+final class H2Handler extends ChannelDuplexHandler implements RequestSession {
     private Map<String, Cookie> cookieHashMap;
     private Std2Headers headers;
     private final String usedDomain;
@@ -29,7 +29,6 @@ final class H2Handler extends ChannelDuplexHandler implements IRequestSession {
     private Http2DataFrame data;
     private Http2HeadersFrame headersFrame;
 
-
     public H2Handler(HWorker worker, String domain) {
         this.worker = worker;
         this.usedDomain = domain;
@@ -38,7 +37,7 @@ final class H2Handler extends ChannelDuplexHandler implements IRequestSession {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-//        if(!ctx.isRemoved()) ctx.close();
+        if(!ctx.isRemoved()) ctx.close();
     }
 
 

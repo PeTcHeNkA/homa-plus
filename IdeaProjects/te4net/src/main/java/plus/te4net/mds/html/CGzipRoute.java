@@ -2,7 +2,7 @@ package plus.te4net.mds.html;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
 import plus.te4net.core.api.IRequestProcessor;
-import plus.te4net.core.api.IRequestSession;
+import plus.te4net.core.api.RequestSession;
 import plus.te4net.core.api.PublicUsage;
 import plus.te4net.core.node.HEWorker;
 import plus.tson.TsonInt;
@@ -23,6 +23,7 @@ public class CGzipRoute extends HashMap<String, IRequestProcessor> implements Si
     public CGzipRoute(HEWorker worker, File dir, IBuilder builder) {
         this(worker, dir, DEF_CACHE_TIME, builder);
     }
+
 
     public CGzipRoute(int cacheTime){
         cacheStr = "max-age="+cacheTime;
@@ -124,7 +125,7 @@ public class CGzipRoute extends HashMap<String, IRequestProcessor> implements Si
 
 
     @Override
-    public void handle(IRequestSession session) {
+    public void handle(RequestSession session) {
         session.setHeader(HttpHeaderNames.CACHE_CONTROL, cacheStr);
         IRequestProcessor page = get(session.routeKey().afterRoute());
         if(page==null) {

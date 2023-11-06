@@ -4,16 +4,16 @@ import plus.te4net.core.auth.User;
 
 
 public interface IAuthProvider {
-    User auth(IRequestSession session);
+    User auth(RequestSession session);
 
 
     void update(User user);
 
 
-    void goToAuth(IRequestSession session);
+    void goToAuth(RequestSession session);
 
 
-    default boolean checkAuth(IRequestSession session) {
+    default boolean checkAuth(RequestSession session) {
         User user = auth(session);
         if (user == null) {
             goToAuth(session);

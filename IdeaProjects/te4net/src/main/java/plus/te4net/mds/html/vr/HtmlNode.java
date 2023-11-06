@@ -9,13 +9,16 @@ public class HtmlNode extends HtmlObject {
 
     public HtmlNode(){}
 
+
     public HtmlNode(String name, ArrayList<VrHtml.Attribute> attributes){
         super(name, attributes);
     }
 
+
     public HtmlNode(String name, String[]... attributes){
         super(name, attributes);
     }
+
 
     public ArrayList<HtmlObject> getBy(String tag){
         ArrayList<HtmlObject> list = new ArrayList<>();
@@ -38,12 +41,17 @@ public class HtmlNode extends HtmlObject {
         private HtmlObject obj;
         private HtmlNode parent;
         private boolean needRem;
+
         public void remove(){
             needRem = true;
         }
+
+
         public ICitem getObj(){
             return obj;
         }
+
+
         public HtmlNode getParent(){
             return parent;
         }

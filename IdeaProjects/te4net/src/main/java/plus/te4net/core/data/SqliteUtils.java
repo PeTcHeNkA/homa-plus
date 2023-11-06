@@ -1,10 +1,11 @@
-package plus.te4net.mds.data;
+package plus.te4net.core.data;
 
+import plus.te4net.core.api.PublicUsage;
 import java.sql.*;
 import java.util.ArrayList;
-import static plus.te4net.core.node.HServer.preLoad;
 
 
+@PublicUsage
 public interface SqliteUtils{
     static boolean IS_H2 = false;
 

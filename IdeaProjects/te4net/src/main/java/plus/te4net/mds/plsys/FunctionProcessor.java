@@ -7,6 +7,7 @@ import plus.util.IPluginProcessor;
 
 public final class FunctionProcessor implements IPluginProcessor<PluginFunction> {
     private final HEWorker worker;
+
     public FunctionProcessor(HEWorker worker) {
         this.worker = worker;
     }

@@ -1,7 +1,6 @@
 package plus.te4net.core.auth;
 
 import java.util.ArrayList;
-
 import plus.asyutl.shoulder.IBasicTask;
 import plus.te4net.core.node.HEWorker;
 import plus.tson.utl.Tuple;

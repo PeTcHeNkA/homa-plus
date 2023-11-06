@@ -1,6 +1,9 @@
 package plus.te4net.mds.crypt;
 
+import plus.te4net.core.api.PublicUsage;
 
+
+@PublicUsage
 public class CryptException extends RuntimeException{
     enum Type{
         INVALID_KEY,

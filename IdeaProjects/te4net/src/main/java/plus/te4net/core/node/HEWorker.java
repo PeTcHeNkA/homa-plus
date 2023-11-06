@@ -4,7 +4,8 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import plus.asyutl.shoulder.TaskShoulder;
 import plus.asyutl.thread.PopThreadedPool;
 import plus.te4net.core.Args;
-import plus.te4net.core.api.IRequestSession;
+import plus.te4net.core.api.RequestSession;
+import plus.te4net.core.api.PublicUsage;
 import plus.te4net.core.event.ObjectBus;
 import plus.te4net.mds.html.CGzipRoute;
 import plus.te4net.mds.html.HtmlRoute;
@@ -13,7 +14,6 @@ import plus.te4net.mds.img.CompressorSettings;
 import plus.te4net.mds.img.NCachedImgProcessor;
 import plus.te4net.mds.img.NSimpleImgProcessor;
 import plus.te4net.core.api.IAuthProvider;
-import plus.te4net.core.auth.User;
 import plus.te4net.core.bsys.DataProviderBuilder;
 import plus.te4net.core.api.IDataProvider;
 import plus.te4net.core.mapping.QueryGetter;
@@ -27,10 +27,11 @@ import java.io.File;
 import java.util.HashMap;
 
 
-public final class HEWorker extends HWorker implements IVarProvider<IRequestSession>, IAuthProvider, IDataProvider {
+@PublicUsage
+public final class HEWorker extends HWorker implements IVarProvider<RequestSession>, IDataProvider {
     public static final PopThreadedPool<Runnable> pool = new PopThreadedPool<>(4);
     public static final TaskShoulder shoulder = new TaskShoulder(500);
-    private final HashMap<String, IVarGetter<IRequestSession>> functions = new HashMap<>();
+    private final HashMap<String, IVarGetter<RequestSession>> functions = new HashMap<>();
     final CompressorSettings settings = new CompressorSettings();
     private final HEWorkerRepository.HWorkerContext ctx;
     private final CGzipRoute cssLib;
@@ -236,7 +237,7 @@ public final class HEWorker extends HWorker implements IVarProvider<IRequestSess
     }
 
 
-    public void regFunction(String name, IVarGetter<IRequestSession> function, boolean root){
+    public void regFunction(String name, IVarGetter<RequestSession> function, boolean root){
         if(root) {
             ((HEWorkerRepository)repository).functions.put(name, function);
         } else {
@@ -246,7 +247,7 @@ public final class HEWorker extends HWorker implements IVarProvider<IRequestSess
 
 
     @Override
-    public IVarGetter<IRequestSession> getFmGetter(String name){
+    public IVarGetter<RequestSession> getFmGetter(String name){
         if(ctx.domains.size()==1) {
             String domain = ctx.domains.get(0);
             String host = "https://"+domain;
@@ -258,7 +259,7 @@ public final class HEWorker extends HWorker implements IVarProvider<IRequestSess
             if (name.equals("domain")) return new ConstVarGetter<>(domain);
         } else {
             if (name.equals("domain")){
-                return IRequestSession::getDomain;
+                return RequestSession::getDomain;
             }
             if(name.equals("host")){
                 return session -> session.isSafe() ? "https://" + session.getDomain() :
@@ -281,7 +282,7 @@ public final class HEWorker extends HWorker implements IVarProvider<IRequestSess
             return new IVarGetter<>() {
                 final String to = name.substring(9);
                 @Override
-                public String get(IRequestSession request) {
+                public String get(RequestSession request) {
                     request.send(to, HttpResponseStatus.PERMANENT_REDIRECT);
                     throw new RuntimeException();
                 }
@@ -292,8 +293,8 @@ public final class HEWorker extends HWorker implements IVarProvider<IRequestSess
     }
 
 
-    private IVarGetter<IRequestSession> getFunction(String name){
-        IVarGetter<IRequestSession> func = functions.get(name);
+    private IVarGetter<RequestSession> getFunction(String name){
+        IVarGetter<RequestSession> func = functions.get(name);
         if(func==null)return ((HEWorkerRepository)repository).functions.get(name);
         return func;
     }
@@ -320,24 +321,6 @@ public final class HEWorker extends HWorker implements IVarProvider<IRequestSess
 
 
     @Override
-    public User auth(IRequestSession session) {
-        return provider.auth(session);
-    }
-
-
-    @Override
-    public void update(User user) {
-        provider.update(user);
-    }
-
-
-    @Override
-    public void goToAuth(IRequestSession session) {
-        provider.goToAuth(session);
-    }
-
-
-    @Override
     public String toString() {
         return ctx+": r="+routes.size()+", f="+functions.size();
     }
@@ -345,7 +328,7 @@ public final class HEWorker extends HWorker implements IVarProvider<IRequestSess
 
     @Override
     public IAuthProvider getAuthSystem() {
-        return this;
+        return provider;
     }
 
 

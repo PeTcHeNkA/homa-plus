@@ -1,8 +1,10 @@
 package plus.te4net.mds.cap4a;
 
+import plus.te4net.core.api.PublicUsage;
 import plus.te4net.mds.util.FastRandom;
 
 
+@PublicUsage
 public class CharLib {
     public static final CharLib INST = new CharLib();
     private final char[] codeTable;

@@ -7,7 +7,7 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import plus.te4net.core.api.IRequestProcessor;
-import plus.te4net.core.api.IRequestSession;
+import plus.te4net.core.api.RequestSession;
 import plus.te4net.core.api.PublicUsage;
 import plus.te4net.core.api.IDataProvider;
 import plus.te4net.core.node.HEWorker;
@@ -24,12 +24,12 @@ import java.util.zip.DeflaterOutputStream;
 
 @PublicUsage
 public class SimpleCompressedTextFile implements IRequestProcessor{
-    public static final String TYPE_TEXT = "text";
-    public static final String TYPE_JS   = "text/javascript";
-    public static final String TYPE_CSS  = "text/css";
+    public static final String TYPE_HTML = "text/html;charset=utf-8",
+                               TYPE_TEXT = "text",
+                               TYPE_CSS  = "text/css",
+                               TYPE_JS   = "text/javascript";
 
-    private final byte[] brotli;
-    private final byte[] data;
+    private final byte[] brotli, data;
     private final int hs;
 
     public SimpleCompressedTextFile(HEWorker worker, String name, String data) {
@@ -157,7 +157,7 @@ public class SimpleCompressedTextFile implements IRequestProcessor{
 
 
     @Override
-    public void handle(IRequestSession session) {
+    public void handle(RequestSession session) {
         String etag = session.getRHeader(HttpHeaderNames.IF_NONE_MATCH);
         boolean flag = false;
         if(etag!=null){
@@ -186,7 +186,7 @@ public class SimpleCompressedTextFile implements IRequestProcessor{
     }
 
 
-    public static boolean maybeBroil(IRequestSession session){
+    public static boolean maybeBroil(RequestSession session){
         char[] chars = session.getRHeader(HttpHeaderNames.ACCEPT_ENCODING).toCharArray();
         int ct = chars.length;
         for(int i=0;i<ct;i++){

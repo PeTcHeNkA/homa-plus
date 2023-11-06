@@ -1,19 +1,20 @@
 package plus.te4net.core.mapping;
 
-import plus.te4net.core.api.IRequestSession;
+import plus.te4net.core.api.RequestSession;
 import plus.tson.format.IVarGetter;
 import java.util.Objects;
 
 
-public class QueryGetter implements IVarGetter<IRequestSession> {
+public class QueryGetter implements IVarGetter<RequestSession> {
     private final String label;
 
     public QueryGetter(String label) {
         this.label = label;
     }
 
+
     @Override
-    public String get(IRequestSession request) {
+    public String get(RequestSession request) {
         return request.queryParams(label);
     }
 

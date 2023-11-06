@@ -20,6 +20,8 @@ public class VrHtml extends HtmlNode{
     private static boolean needClose(String tagName){
         return !notClose.contains(tagName);
     }
+
+
     private static boolean isNodeStr(String tagName){
         return strNode.contains(tagName);
     }
@@ -31,11 +33,14 @@ public class VrHtml extends HtmlNode{
         private ICitem value;
 
         public Attribute(){}
+
+
         public Attribute(String key, ICitem val){
             this.key = key;
             this.value = val;
             this.bound = '\'';
         }
+
 
         @Override
         public void toString(StringBuilder b) {
@@ -92,6 +97,7 @@ public class VrHtml extends HtmlNode{
         public Style(String src) {
             super(Arrays.asList(src.split(" ")));
         }
+
 
         @Override
         public void toString(StringBuilder b) {

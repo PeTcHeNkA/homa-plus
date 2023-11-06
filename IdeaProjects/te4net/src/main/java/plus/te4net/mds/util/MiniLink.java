@@ -1,6 +1,9 @@
 package plus.te4net.mds.util;
 
+import plus.te4net.core.api.PublicUsage;
 
+
+@PublicUsage
 public final class MiniLink {
     public static String toMini(String link){
         if(link.charAt(0)=='/')return 'I'+ toMin0(link.substring(1));

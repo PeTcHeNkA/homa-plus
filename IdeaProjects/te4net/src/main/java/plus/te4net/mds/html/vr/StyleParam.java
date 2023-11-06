@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 
 class StyleParam implements ICitem {
-    String key;
     ArrayList<ICitem> value = new ArrayList<>();
+    String key;
 
     @Override
     public void toString(StringBuilder b) {

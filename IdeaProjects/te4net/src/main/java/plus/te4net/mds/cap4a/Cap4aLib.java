@@ -14,5 +14,4 @@ public class Cap4aLib<V> extends CryptoLibSimple<Cap4a,V> {
     protected Cap4a newKey(long time, short usages) {
         return new Cap4a(time);
     }
-
 }

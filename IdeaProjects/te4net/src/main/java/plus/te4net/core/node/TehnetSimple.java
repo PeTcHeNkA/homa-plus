@@ -1,7 +1,7 @@
 package plus.te4net.core.node;
 
 import plus.te4net.core.api.IRequestProcessor;
-import plus.te4net.core.api.IRequestSession;
+import plus.te4net.core.api.RequestSession;
 import plus.te4net.core.api.PublicUsage;
 import plus.te4net.core.api.IDataProvider;
 import plus.tson.TsonMap;
@@ -14,7 +14,7 @@ public abstract class TehnetSimple extends HServer{
     private final Repo repo = new Repo();
     private final HWorker worker;
     private HEWorkerRepository.HWorkerContext defCtx;
-    private IRequestProcessor defHandler = IRequestSession::notFound;
+    private IRequestProcessor defHandler = RequestSession::notFound;
 
     private final class Repo extends HWorkerRepositoryBase{
         public Repo() {
@@ -41,7 +41,7 @@ public abstract class TehnetSimple extends HServer{
 
 
         @Override
-        public void handle(IRequestSession session) {
+        public void handle(RequestSession session) {
             IRequestProcessor processor = routes.get(session);
             if(processor == null){
                 defHandler.handle(session);

@@ -32,10 +32,12 @@ final class HSInitializer extends ChannelInitializer<SocketChannel> {
     private final class SSLMap implements Mapping<String, SslContext> {
         private final ChannelPipeline ph;
         HEWorkerRepository.HWorkerContext ctx;
+
         public SSLMap(ChannelPipeline ph) {
             this.ph = ph;
             ph.addLast(new Sni2Handler(this));
         }
+
 
         @Override
         public SslContext map(String input) {
@@ -52,6 +54,8 @@ final class HSInitializer extends ChannelInitializer<SocketChannel> {
         public Sni2Handler(Mapping<? super String, ? extends SslContext> mapping) {
             super(mapping);
         }
+
+
         protected void replaceHandler(ChannelHandlerContext ctx, String hostname, SslContext sslContext) {
             SslHandler sslHandler = null;
             try {
@@ -71,10 +75,14 @@ final class HSInitializer extends ChannelInitializer<SocketChannel> {
 
 
         @Override
-        public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {}
+        public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+            if(!ctx.isRemoved()) ctx.close();
+        }
     }
 
 
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {}
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+        if(!ctx.isRemoved()) ctx.close();
+    }
 }

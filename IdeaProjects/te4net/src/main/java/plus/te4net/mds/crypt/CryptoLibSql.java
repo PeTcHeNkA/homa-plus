@@ -1,7 +1,7 @@
 package plus.te4net.mds.crypt;
 
 import plus.te4net.mds.util.FastRandom;
-import plus.te4net.mds.data.SqliteUtils;
+import plus.te4net.core.data.SqliteUtils;
 import java.sql.Connection;
 import java.util.HashSet;
 import java.util.Set;
@@ -10,11 +10,12 @@ import java.util.Set;
 public class CryptoLibSql<V> extends CryptoMap<CryptoDk,V> implements SqliteUtils {
     private final Connection conn;
     private final Set<Character> usedTables = new HashSet<>();
-    //maybe optimize
+    //todo maybe optimize
 
     protected CryptoLibSql(String cacheFile) {
         conn = createConnection(cacheFile);
     }
+
 
     private void createTableIfNeed(char c){
         if(!usedTables.contains(c)){
@@ -75,6 +76,7 @@ class CryptoDk extends CryptKey{
         super(time, usages);
         FastRandom.INST.nextBytes(key);
     }
+
 
     @Override
     public String toString() {

@@ -8,13 +8,13 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.ssl.SslContext;
-import plus.te4net.core.api.IHttpClient;
+import plus.te4net.core.api.HttpClient;
 import plus.te4net.core.api.IResponse;
 import plus.te4net.core.api.IResponseProcessor;
 import static plus.te4net.core.node.HServer.SERVER_NAME;
 
 
-public final class H1Client implements ChannelFactory<SocketChannel>, IResponseProcessor, IHttpClient {
+final class H1Client implements ChannelFactory<SocketChannel>, IResponseProcessor, HttpClient {
     private final SslContext sslCtx;
     private final EventLoopGroup group;
     private final boolean useNative;

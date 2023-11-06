@@ -1,6 +1,9 @@
 package plus.te4net.mds.util;
 
+import plus.te4net.core.api.PublicUsage;
 
+
+@PublicUsage
 public class IpUtls {
     public static String strIpFromInt(int ip) {
         return ((ip >> 24) & 0xFF) + "."

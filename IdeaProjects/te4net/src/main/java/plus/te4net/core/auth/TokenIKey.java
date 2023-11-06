@@ -7,6 +7,7 @@ public final class TokenIKey extends TokenInfo {
         super(token, data);
     }
 
+
     long getUsages() {
         return lastUsage;
     }

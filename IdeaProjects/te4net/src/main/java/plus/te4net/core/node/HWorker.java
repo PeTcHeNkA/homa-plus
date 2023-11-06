@@ -1,18 +1,15 @@
 package plus.te4net.core.node;
 
 import io.netty.handler.ssl.SslContext;
-import plus.te4net.core.api.IEventHandler;
-import plus.te4net.core.api.IHttpClient;
-import plus.te4net.core.api.IRequestProcessor;
-import plus.te4net.core.api.IRequestSession;
+import plus.te4net.core.api.*;
 import plus.te4net.core.event.EventBus;
 import plus.te4net.mds.html.events.VrHtmlEvent;
 import plus.te4net.core.mapping.HRouteMap;
-import plus.te4net.core.api.IAuthProvider;
 import plus.util.cons.Logger;
 import java.io.File;
 
 
+@PublicUsage
 public abstract class HWorker {
     protected final HRouteMap routes = new HRouteMap();
     final boolean allowHttp, hasCert;
@@ -32,7 +29,7 @@ public abstract class HWorker {
     }
 
 
-    public void handle(IRequestSession session){
+    public void handle(RequestSession session){
         IRequestProcessor processor = routes.get(session);
         if(processor == null){
             session.notFound();
@@ -101,12 +98,12 @@ public abstract class HWorker {
     }
 
 
-    public IHttpClient client(){
+    public HttpClient client(){
         return repository.client();
     }
 
 
-    public IHttpClient client(SslContext ctx){
+    public HttpClient client(SslContext ctx){
         return repository.client(ctx);
     }
 

@@ -1,15 +1,18 @@
-package plus.te4net.mds.data;
+package plus.te4net.core.data;
 
-@Deprecated
+import plus.te4net.core.api.PublicUsage;
+
+
+@PublicUsage
 public abstract class SqlType {
-    public static String NULL     = "NULL";
-    public static SqlType VARCHAR = of("VARCHAR");
-    public static SqlType INT     = of("INT"    );
-    public static SqlType TEXT    = of("TEXT"   );
-    public static SqlType DATE    = of("DATE"   );
-    public static SqlType TIME    = of("TIME"   );
-    public static SqlType FLOAT   = of("FLOAT"  );
-    public static SqlType REAL    = of("REAL"   );
+    public static final String NULL     = "NULL";
+    public static final SqlType VARCHAR = of("VARCHAR");
+    public static final SqlType INT     = of("INT"    );
+    public static final SqlType TEXT    = of("TEXT"   );
+    public static final SqlType DATE    = of("DATE"   );
+    public static final SqlType TIME    = of("TIME"   );
+    public static final SqlType FLOAT   = of("FLOAT"  );
+    public static final SqlType REAL    = of("REAL"   );
 
 
     public static SqlType VARCHAR(int n){
@@ -51,9 +54,11 @@ public abstract class SqlType {
     }
 
 
-    abstract String toStr();
     @Override
     public String toString() {
         return toStr();
     }
+
+
+    abstract String toStr();
 }

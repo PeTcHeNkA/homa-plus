@@ -1,7 +1,6 @@
 package plus.te4net.mds.crypt;
 
 import plus.te4net.mds.util.FastRandom;
-
 import java.util.Arrays;
 
 

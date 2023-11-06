@@ -5,9 +5,11 @@ import plus.te4net.core.api.IDataProvider;
 import plus.te4net.core.node.HEWorker;
 import java.io.File;
 
+
 @PublicUsage
 public class CustomGzipFile extends SimpleCompressedTextFile {
     private final String type;
+
     public CustomGzipFile(String type, HEWorker worker, String name, String data) {
         super(worker, name, data);
         this.type = type;

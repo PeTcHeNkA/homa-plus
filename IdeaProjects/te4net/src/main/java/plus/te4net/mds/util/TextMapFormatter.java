@@ -1,11 +1,13 @@
 package plus.te4net.mds.util;
 
+import plus.te4net.core.api.PublicUsage;
 import plus.tson.TsonMap;
 import plus.tson.TsonStr;
 import plus.tson.format.IVarGetter;
 import plus.tson.format.TextFormatter;
 
 
+@PublicUsage
 public class TextMapFormatter extends TextFormatter<IVarGetter<String>> {
     public TextMapFormatter(String format) {
         this(format, "<%","%>");

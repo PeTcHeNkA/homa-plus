@@ -1,7 +1,7 @@
 package plus.te4net.core.bsys;
 
 import plus.te4net.core.api.IDataProvider;
-import plus.te4net.mds.data.SqliteUtils;
+import plus.te4net.core.data.SqliteUtils;
 import java.sql.Connection;
 import java.util.HashSet;
 

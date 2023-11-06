@@ -1,7 +1,5 @@
 package plus.te4net.core.api;
 
-import plus.te4net.core.api.PublicUsage;
-
 
 @PublicUsage
 public interface IDataProvider {

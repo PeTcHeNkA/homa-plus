@@ -6,6 +6,10 @@ import plus.te4net.core.node.HEWorker;
 
 
 public class VrHtmlEvent {
+    public enum Type{
+        HTML, CSS, JS
+    }
+
     private final Object obj;
     private final Type type;
     private final HEWorker worker;
@@ -39,10 +43,5 @@ public class VrHtmlEvent {
 
     public HEWorker getWorker() {
         return worker;
-    }
-
-
-    public enum Type{
-        HTML, CSS, JS
     }
 }

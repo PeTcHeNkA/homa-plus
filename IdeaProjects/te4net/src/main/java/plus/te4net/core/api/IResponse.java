@@ -8,11 +8,14 @@ import java.nio.charset.StandardCharsets;
 public interface IResponse {
     String getRHeader(CharSequence name);
 
+
     byte[] encodeBody();
+
 
     default String encodeBodyAsStr(){
         return new String(encodeBody(), StandardCharsets.UTF_8);
     }
+
 
     HttpResponseStatus status();
 }

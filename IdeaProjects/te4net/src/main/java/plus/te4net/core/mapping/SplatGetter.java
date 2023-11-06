@@ -1,10 +1,10 @@
 package plus.te4net.core.mapping;
 
-import plus.te4net.core.api.IRequestSession;
+import plus.te4net.core.api.RequestSession;
 import plus.tson.format.IVarGetter;
 
 
-public class SplatGetter implements IVarGetter<IRequestSession> {
+public class SplatGetter implements IVarGetter<RequestSession> {
     private final int index;
 
     public SplatGetter(int index) {
@@ -13,7 +13,7 @@ public class SplatGetter implements IVarGetter<IRequestSession> {
 
 
     @Override
-    public String get(IRequestSession session) {
+    public String get(RequestSession session) {
         String[] data = session.splat();
         if(index>=data.length)return null;
         return data[index];

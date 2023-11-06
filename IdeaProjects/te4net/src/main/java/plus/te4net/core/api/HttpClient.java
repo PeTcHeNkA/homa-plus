@@ -1,13 +1,12 @@
 package plus.te4net.core.api;
 
 import io.netty.handler.codec.http.HttpMethod;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 
 
 @PublicUsage
-public interface IHttpClient {
+public interface HttpClient {
     void send(String host, String patch, int port, boolean safe, HttpMethod mtd,
               IResponseProcessor processor, byte[] data);
 

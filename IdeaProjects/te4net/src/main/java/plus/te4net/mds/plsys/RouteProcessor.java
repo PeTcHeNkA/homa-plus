@@ -7,6 +7,7 @@ import plus.util.IPluginProcessor;
 
 public final class RouteProcessor implements IPluginProcessor<PluginRoute> {
     private final HEWorker worker;
+
     public RouteProcessor(HEWorker worker) {
         this.worker = worker;
     }

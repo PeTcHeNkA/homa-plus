@@ -22,7 +22,7 @@ import static plus.te4net.mds.html.CGzipRoute.DEF_CACHE_TIME;
 
 
 final class HEWorkerRepository extends HWorkerRepositoryBase implements ClassManager {
-    final HashMap<String, IVarGetter<IRequestSession>> functions = new HashMap<>();
+    final HashMap<String, IVarGetter<RequestSession>> functions = new HashMap<>();
     private TempContainer[] tempContainers;
     private final IDataProvider defDataPovider;
     private int curMark = 0;
@@ -185,11 +185,14 @@ final class HEWorkerRepository extends HWorkerRepositoryBase implements ClassMan
         private int notUsed = 0;
         private TempRequsetProcessor parent;
         private final HPCLTask task;
+
         private TempContainer(HPCLTask task) {
             this.task = task;
         }
+
+
         @Override
-        public void handle(IRequestSession session) {
+        public void handle(RequestSession session) {
             if(parent==null){
                 parent = (TempRequsetProcessor) task.inst();
             }
@@ -197,6 +200,7 @@ final class HEWorkerRepository extends HWorkerRepositoryBase implements ClassMan
             curMark = markUse;
             notUsed = 0;
         }
+
 
         public void check(int realMark){
             if(markUse!=realMark){
@@ -292,11 +296,14 @@ final class HEWorkerRepository extends HWorkerRepositoryBase implements ClassMan
             this.domains = domains;
             this.cert = readSSL(workDir, domain, useLetsEncrypt);
         }
+
+
         HWorkerContext(HWorker worker){
             this.worker = worker;
             this.domains = null;
             cert = null;
         }
+
 
         HWorkerContext(HWorker worker, InputStream pubKey, InputStream privKey){
             this.worker = worker;
@@ -373,6 +380,7 @@ final class HEWorkerRepository extends HWorkerRepositoryBase implements ClassMan
                 return domains.get(1)+" and "+(domains.size()-1)+" etc";
             }
         }
+
 
         SslContext getCert() {
             return cert;

@@ -12,7 +12,7 @@ import static plus.te4net.mds.util.ByteUtils.EMPTY;
 
 
 @PublicUsage
-public interface IRequestSession extends IResponse{
+public interface RequestSession extends IResponse{
     default void send(byte[] data){
         send(data, HttpResponseStatus.OK);
     }

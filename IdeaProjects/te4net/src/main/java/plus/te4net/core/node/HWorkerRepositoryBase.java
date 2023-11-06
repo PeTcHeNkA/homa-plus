@@ -4,7 +4,7 @@ import io.netty.handler.ssl.ApplicationProtocolConfig;
 import io.netty.handler.ssl.ApplicationProtocolNames;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
-import plus.te4net.core.api.IHttpClient;
+import plus.te4net.core.api.HttpClient;
 import plus.te4net.core.api.IDataProvider;
 import plus.te4net.core.event.ObjectBus;
 import plus.te4net.core.mapping.NCHashMap;
@@ -32,12 +32,12 @@ abstract class HWorkerRepositoryBase {
     }
 
 
-    IHttpClient client(){
+    HttpClient client(){
         return server.client();
     }
 
 
-    IHttpClient client(SslContext ctx){
+    HttpClient client(SslContext ctx){
         return server.client(ctx);
     }
 

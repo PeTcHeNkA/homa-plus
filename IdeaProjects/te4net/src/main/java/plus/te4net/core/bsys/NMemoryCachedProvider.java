@@ -69,17 +69,22 @@ public class NMemoryCachedProvider extends Te4HashMap<NMemoryCachedProvider.Key,
     static final class Key{
         private int mark = 3;
         private final String[] key;
+
         Key(String[] key) {
             this.key = key;
         }
+
+
         private boolean used(){
             return --mark>0;
         }
+
 
         @Override
         public boolean equals(Object o) {
             return Arrays.equals(key, ((Key) o).key);
         }
+
 
         @Override
         public int hashCode() {

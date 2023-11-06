@@ -18,9 +18,11 @@ public class NHybrideDataProvider extends IntObjectHashMap<IDataProvider> implem
         put(hs, provider);
     }
 
+
     public IDataProvider get(String table){
         return get(calcHs(table));
     }
+
 
     private int calcHs(String table){
         String[] path = table.split("/");

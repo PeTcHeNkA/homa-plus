@@ -2,10 +2,9 @@ package plus.te4net.mds.img;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
 import plus.te4net.core.api.IRequestProcessor;
-import plus.te4net.core.api.IRequestSession;
+import plus.te4net.core.api.RequestSession;
 import plus.te4net.core.api.IDataProvider;
 import plus.te4net.core.node.HEWorker;
-
 import java.util.Arrays;
 
 
@@ -16,8 +15,9 @@ public class NSimpleImgProcessor implements IRequestProcessor {
         this.provider = provider;
     }
 
+
     @Override
-    public void handle(IRequestSession session) {
+    public void handle(RequestSession session) {
         ImgSize size = getOptimalSize(session);
         if(size==null){
             session.requestError("You're a bot right?");
@@ -47,7 +47,7 @@ public class NSimpleImgProcessor implements IRequestProcessor {
     }
 
 
-    static void handleImg(IRequestSession session, byte[] bytes, int hs) {
+    static void handleImg(RequestSession session, byte[] bytes, int hs) {
         String etagStr = session.getRHeader(HttpHeaderNames.IF_NONE_MATCH);
         session.setHeader(HttpHeaderNames.CACHE_CONTROL, "max-age=1200");
         boolean isReady = false;
@@ -69,7 +69,7 @@ public class NSimpleImgProcessor implements IRequestProcessor {
     }
 
 
-    static byte[] getStd(IRequestSession session, IDataProvider provider, ImgSize size){
+    static byte[] getStd(RequestSession session, IDataProvider provider, ImgSize size){
         String[] key = getImgName(session.splat());
         key[0] = session.worker().getMainDomain();
         key[1] = size.suffix();
@@ -90,7 +90,7 @@ public class NSimpleImgProcessor implements IRequestProcessor {
     }
 
 
-    static ImgSize getOptimalSize(IRequestSession session){
+    static ImgSize getOptimalSize(RequestSession session){
         String alt = session.queryParams("size");
         if(alt != null){
             char n = alt.charAt(0);

@@ -12,6 +12,7 @@ public abstract class CryptoLibSimple<T extends CryptKey,V> extends CryptoLibBas
         throw new UnsupportedOperationException();
     }
 
+
     @Override
     protected V encodeValue(byte[] data, int delta) {
         throw new UnsupportedOperationException();

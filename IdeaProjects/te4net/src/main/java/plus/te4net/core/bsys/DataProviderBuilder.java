@@ -11,7 +11,7 @@ import java.sql.Connection;
 @PublicUsage
 public class DataProviderBuilder {
     enum Type{
-        FILE, SQL, JAR, HYBRID, DUBLE,
+        FILE, SQL, JAR, HYBRID, DOUBLE,
     }
     private IDataProvider provider;
     private IDataProvider latest;
@@ -22,10 +22,12 @@ public class DataProviderBuilder {
         return this;
     }
 
+
     public DataProviderBuilder defaultBy(String filePath){
         provider = new NFileDataProvider(filePath);
         return this;
     }
+
 
     public DataProviderBuilder defaultBy(Type type, Object... init){
         switch (type){
@@ -33,7 +35,7 @@ public class DataProviderBuilder {
             case HYBRID: provider = new NHybrideDataProvider((IDataProvider) init[0]);break;
             case FILE: provider = new NFileDataProvider((String) init[0]);break;
             case SQL: provider = new NSqlDataProvider((String) init[0], (Connection) init[1]);break;
-            case DUBLE:provider = new NDubleProvider((IDataProvider) init[0], (IDataProvider) init[1]);
+            case DOUBLE:provider = new NDubleProvider((IDataProvider) init[0], (IDataProvider) init[1]);
         }
         return this;
     }
@@ -46,6 +48,7 @@ public class DataProviderBuilder {
         return this;
     }
 
+
     public DataProviderBuilder mount(String table, Type type, Object... init){
         IDataProvider innner;
         switch (type){
@@ -53,7 +56,7 @@ public class DataProviderBuilder {
             case FILE:  innner = new NFileDataProvider((String) init[0]);break;
             case SQL:   innner = new NSqlDataProvider((String) init[0], (Connection) init[1]);break;
             case JAR:   innner = new NJarFileDataProvider();break;
-            case DUBLE: innner = new NDubleProvider((IDataProvider) init[0], (IDataProvider) init[1]);break;
+            case DOUBLE: innner = new NDubleProvider((IDataProvider) init[0], (IDataProvider) init[1]);break;
             default: throw new RuntimeException();
         }
         if(!(provider instanceof NHybrideDataProvider)){
@@ -65,10 +68,12 @@ public class DataProviderBuilder {
         return this;
     }
 
+
     public DataProviderBuilder up(){
         latest = provider;
         return this;
     }
+
 
     public IDataProvider build(){
         return provider;
@@ -79,7 +84,7 @@ public class DataProviderBuilder {
         return ofTson(worker, obj, new FastBuffer<>());
     }
 
-    //{root='dir:domains/lochost.ru/img',lochost.ru='dir:domains/lochost.ru/img'}
+
     private static IDataProvider ofTson(HEWorker worker, TsonObj obj, FastBuffer<IDataProvider> def){
         if(obj.isString()){
             String str = obj.getStr();

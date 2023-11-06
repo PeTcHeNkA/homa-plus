@@ -2,9 +2,10 @@ package plus.tehnet.bimg;
 
 import plus.te4net.core.api.IRequestSession;
 import plus.te4net.core.api.PluginFunction;
-import plus.te4net.core.html.vr.VrHtmlFormat;
-import plus.te4net.core.img.ImgSize;
+import plus.te4net.core.node.HEWorker;
 import plus.te4net.core.node.HWorker;
+import plus.te4net.mds.html.vr.VrHtmlFormat;
+import plus.te4net.mds.img.ImgSize;
 
 
 public class BImgCheckArgs implements PluginFunction {
@@ -19,7 +20,7 @@ public class BImgCheckArgs implements PluginFunction {
         String[] splat = session.splat();
         if(splat[0]==null)return null;
         HWorker worker = session.worker();
-        if(worker.getImgLib().containsRaw(
+        if(((HEWorker)worker).getImgLib().containsRaw(
                 worker.getMainDomain(), ImgSize.ORIG.suffix(), getImgName(splat)
         ))return null;
         throw new VrHtmlFormat.Redirect("/img-build/");

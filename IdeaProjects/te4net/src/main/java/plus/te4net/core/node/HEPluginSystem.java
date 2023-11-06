@@ -20,7 +20,7 @@ import plus.util.PluginClassLoader;
 import static plus.te4net.mds.img.CompressorSettings.ofMap;
 
 
-public class HEPluginSystem extends AbsPluginSystem<PluginClassLoader> {
+class HEPluginSystem extends AbsPluginSystem<PluginClassLoader> {
     private final HEWorker worker;
     private final TsonMap config;
     protected IAuthProvider authProvider;
@@ -188,6 +188,7 @@ public class HEPluginSystem extends AbsPluginSystem<PluginClassLoader> {
         private final String path, name;
         private final PluginClassLoader loader;
         private final boolean needAuth;
+
         public PCLHtml(PluginClassLoader loader, String path, String name, boolean needAuth) {
             super(PluginRoute.class, 10000);
             this.path = path;
@@ -195,6 +196,8 @@ public class HEPluginSystem extends AbsPluginSystem<PluginClassLoader> {
             this.loader = loader;
             this.needAuth = needAuth;
         }
+
+
         @Override
         public Object inst() {
             byte[] data = getSrc(loader, path);
@@ -203,6 +206,7 @@ public class HEPluginSystem extends AbsPluginSystem<PluginClassLoader> {
                     new SfHtmlRoute(worker, data, name):
                     new HtmlRoute(worker, data, name);
         }
+
 
         @Override
         protected String getName() {

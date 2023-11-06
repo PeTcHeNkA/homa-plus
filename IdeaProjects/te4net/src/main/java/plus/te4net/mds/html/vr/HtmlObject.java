@@ -8,10 +8,12 @@ public class HtmlObject implements ICitem {
 
     public HtmlObject(){}
 
+
     public HtmlObject(String name, ArrayList<VrHtml.Attribute> attributes){
         this.name = name;
         this.attributes = attributes;
     }
+
 
     public HtmlObject(String name, String[]... attributes){
         this.name = name;

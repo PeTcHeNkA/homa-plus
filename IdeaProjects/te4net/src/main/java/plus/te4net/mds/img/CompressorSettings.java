@@ -1,6 +1,6 @@
 package plus.te4net.mds.img;
 
-import plus.te4net.mds.fastreg.FrMap;
+import plus.te4net.mds.util.FrMap;
 import plus.tson.TsonBool;
 import plus.tson.TsonFloat;
 import plus.tson.TsonMap;

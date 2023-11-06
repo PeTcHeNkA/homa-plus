@@ -5,7 +5,7 @@ import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
 import plus.te4net.core.api.IAuthProvider;
 import plus.te4net.core.api.IRequestProcessor;
-import plus.te4net.core.api.IRequestSession;
+import plus.te4net.core.api.RequestSession;
 import plus.te4net.core.auth.*;
 import plus.te4net.mds.html.vr.VrCss;
 import plus.te4net.mds.html.vr.VrHtmlFormat;
@@ -15,7 +15,6 @@ import plus.te4net.mds.cap4a.Cap4aLib;
 import plus.te4net.mds.crypt.CryptException;
 import plus.te4net.mds.crypt.WebCryptKey;
 import plus.te4net.mds.util.TextMapFormatter;
-import plus.te4net.core.node.HEPluginSystem;
 import plus.te4net.mds.util.MailServer;
 import plus.te4net.mds.util.MiniLink;
 import plus.tson.TsonMap;
@@ -26,9 +25,9 @@ import java.nio.charset.StandardCharsets;
 
 
 public class AuthRoute<U extends User> extends AuthService<U> implements SimpleSrcGetter, IRequestProcessor, IAuthProvider {
-    public static final byte[] font = HEPluginSystem.getSrc(AuthRoute.class, "Bufcated1.ttf");
+    public static final byte[] font = SimpleSrcGetter.getSrc(AuthRoute.class, "Bufcated1.ttf");
     public static final String defCss = new VrCss(
-            new String(HEPluginSystem.getSrc(AuthRoute.class,"cap4a-template.css"))
+            new String(SimpleSrcGetter.getSrc(AuthRoute.class,"cap4a-template.css"))
     ).toString();
 
     private final IRequestProcessor fmLogin;
@@ -64,7 +63,7 @@ public class AuthRoute<U extends User> extends AuthService<U> implements SimpleS
         }
     }
 
-    public void post(IRequestSession session) {
+    public void post(RequestSession session) {
         try {
             String[] splat = session.splat();
             if(!splat[0].equals("api") || splat[1]==null){
@@ -123,7 +122,7 @@ public class AuthRoute<U extends User> extends AuthService<U> implements SimpleS
 
 
     @Override
-    public void handle(IRequestSession session) {
+    public void handle(RequestSession session) {
         if(session.method().equals("POST")){
             post(session);
             return;
@@ -169,37 +168,37 @@ public class AuthRoute<U extends User> extends AuthService<U> implements SimpleS
     }
 
 
-    private void hasMail(IRequestSession session) throws AuthException {
+    private void hasMail(RequestSession session) throws AuthException {
         session.send(hasUser(getLogin(session), getCryptKey(session))?"TRUE":"FALSE");
     }
 
 
-    private void hasName(IRequestSession session) throws AuthException {
+    private void hasName(RequestSession session) throws AuthException {
         session.send(hasName(getName(session), getCryptKey(session))?"TRUE":"FALSE");
     }
 
 
-    private String getGoTo(IRequestSession session){
+    private String getGoTo(RequestSession session){
         String goTo = session.queryParams("goto");
         return goTo==null?"/":MiniLink.ofMini(goTo);
     }
 
 
-    private void confirmUpdate(IRequestSession session) throws AuthException {
+    private void confirmUpdate(RequestSession session) throws AuthException {
         onPostConfirm(editPsw(
                 getLogin(session), getCryptKey(session), getTokenData(session)
         ), session);
     }
 
 
-    private void confirmCreate(IRequestSession session) throws AuthException {
+    private void confirmCreate(RequestSession session) throws AuthException {
         onPostConfirm(createAccount(
                 getLogin(session), getName(session), getCryptKey(session), new byte[0], getTokenData(session)
         ), session);
     }
 
 
-    private void onPostConfirm(Tuple<U, String> result, IRequestSession session){
+    private void onPostConfirm(Tuple<U, String> result, RequestSession session){
         setToken(result.B, session);
         String goTo = getGoTo(session);
         if(session.queryParams("api")==null) {
@@ -210,14 +209,14 @@ public class AuthRoute<U extends User> extends AuthService<U> implements SimpleS
     }
 
 
-    public static String getToken(IRequestSession session){
+    public static String getToken(RequestSession session){
         Cookie cookie = session.getCookie("aut");
         if(cookie==null)return null;
         return cookie.value();
     }
 
 
-    public void setToken(String token, IRequestSession session){
+    public void setToken(String token, RequestSession session){
         Cookie cToken = new DefaultCookie("aut", token);
         cToken.setDomain(session.getDomain());
         cToken.setPath("/");
@@ -227,37 +226,37 @@ public class AuthRoute<U extends User> extends AuthService<U> implements SimpleS
     }
 
 
-    public static byte[] getTokenData(IRequestSession session){
+    public static byte[] getTokenData(RequestSession session){
         return new byte[0];
     }
 
 
-    private String getLogin(IRequestSession session){
+    private String getLogin(RequestSession session){
         return session.queryParams("login");
     }
 
 
-    private String getName(IRequestSession session){
+    private String getName(RequestSession session){
         return session.queryParams("name");
     }
 
 
-    private String getCap4aID(IRequestSession session){
+    private String getCap4aID(RequestSession session){
         return session.queryParams("cap4a-id");
     }
 
 
-    private String getCap4aAnswer(IRequestSession session){
+    private String getCap4aAnswer(RequestSession session){
         return session.queryParams("cap4a-answer");
     }
 
 
-    private String getCryptKey(IRequestSession session){
+    private String getCryptKey(RequestSession session){
         return session.queryParams("crypt-key");
     }
 
 
-    private byte[] handleCap4a(IRequestSession session, String part) {
+    private byte[] handleCap4a(RequestSession session, String part) {
         if(part.equals("font"))return font;
         try {
             switch (part) {
@@ -288,13 +287,13 @@ public class AuthRoute<U extends User> extends AuthService<U> implements SimpleS
     }
 
 
-    private void login(IRequestSession session){
+    private void login(RequestSession session){
         fmLogin.handle(session);
     }
 
 
     @Override
-    public User auth(IRequestSession session) {
+    public User auth(RequestSession session) {
         String token = getToken(session);
         if(token==null)return null;
         return auth(token, getTokenData(session));
@@ -302,7 +301,7 @@ public class AuthRoute<U extends User> extends AuthService<U> implements SimpleS
 
 
     @Override
-    public void goToAuth(IRequestSession session) {
+    public void goToAuth(RequestSession session) {
         session.redirect("/auth/?goto="+ MiniLink.toMini(session.path()));
     }
 }

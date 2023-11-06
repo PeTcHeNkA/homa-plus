@@ -29,6 +29,7 @@ public class VrCss implements ICitem {
             }
         }
 
+
         @Override
         public String toString() {
             StringBuilder b = new StringBuilder();
@@ -39,8 +40,9 @@ public class VrCss implements ICitem {
 
 
     private static class Var implements ICitem {
-        private String header;
         private ArrayList<ArrayList<ICitem>> items;
+        private String header;
+
         @Override
         public void toString(StringBuilder b) {
             if(items==null){
@@ -56,6 +58,8 @@ public class VrCss implements ICitem {
                 last(b, ')');
             }
         }
+
+
         private ArrayList<ICitem> add(ICitem e){
             if(items==null){
                 items = new ArrayList<>();
@@ -68,28 +72,17 @@ public class VrCss implements ICitem {
     }
 
 
-    private static class Vp implements ICitem {
-        private final String value;
-        public Vp(String v){
-            this.value = v;
-        }
-        @Override
-        public void toString(StringBuilder b) {
-            b.setLength(b.length()-1);
-            b.append(value);
-        }
-    }
-
-
     private final ArrayList<Group> groups = new ArrayList<>();
     private char[] chars;
     private int cursor;
+
+    public VrCss(){}
+
 
     public VrCss(String code) {
         this.chars = code.toCharArray();
         parse();
     }
-    public VrCss(){}
 
 
     public VrCss join(String code){

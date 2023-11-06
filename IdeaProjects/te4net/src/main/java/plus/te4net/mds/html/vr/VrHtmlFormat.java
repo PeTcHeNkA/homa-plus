@@ -4,7 +4,7 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import plus.te4net.core.api.IRequestProcessor;
-import plus.te4net.core.api.IRequestSession;
+import plus.te4net.core.api.RequestSession;
 import plus.te4net.mds.html.events.VrHtmlEvent;
 import plus.te4net.core.node.HEWorker;
 import plus.te4net.mds.util.Te4GZIPOutStream;
@@ -19,7 +19,7 @@ import java.util.zip.Deflater;
 
 
 public class VrHtmlFormat implements IRequestProcessor {
-    protected final IVarGetter<IRequestSession>[] getters;
+    protected final IVarGetter<RequestSession>[] getters;
     private final boolean needPress;
     private final byte[][] bitems;
 
@@ -49,7 +49,7 @@ public class VrHtmlFormat implements IRequestProcessor {
 
         items.add(items.remove(items.size()-1)+builder.toString());
 
-        Tuple<String[], IVarGetter<IRequestSession>[]> res =
+        Tuple<String[], IVarGetter<RequestSession>[]> res =
                 TextFormatter.buildFormat(worker, items, vars);
 
         bitems = new byte[res.A.length][];
@@ -91,7 +91,7 @@ public class VrHtmlFormat implements IRequestProcessor {
 
 
     @Override
-    public void handle(IRequestSession session) {
+    public void handle(RequestSession session) {
         try {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             if(needPress){
@@ -129,15 +129,20 @@ public class VrHtmlFormat implements IRequestProcessor {
 
     public static final class Redirect extends RuntimeException implements IRequestProcessor {
         private final String to;
+
         public Redirect(String to) {
             super();
             this.to = to;
         }
+
+
         @Override
-        public void handle(IRequestSession session){
+        public void handle(RequestSession session){
             session.setHeader(HttpHeaderNames.CACHE_CONTROL, "no-cache");
             session.redirect(to);
         }
+
+
         @Override
         public Throwable fillInStackTrace() {
             return this;

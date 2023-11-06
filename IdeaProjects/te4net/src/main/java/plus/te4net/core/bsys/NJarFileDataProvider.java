@@ -53,10 +53,12 @@ public class NJarFileDataProvider extends HashMap<String, NJarFileDataProvider.J
     protected static final class JarItem {
         private final ClassLoader loader;
         private final String jarPath;
+
         private JarItem(ClassLoader loader, String jarPath) {
             this.loader = loader;
             this.jarPath = jarPath;
         }
+
 
         private byte[] get(){
             try {
@@ -66,6 +68,8 @@ public class NJarFileDataProvider extends HashMap<String, NJarFileDataProvider.J
                 return null;
             }
         }
+
+
         private byte[] read(String name) throws IOException {
             InputStream stream = loader.getResourceAsStream(name);
             if(stream==null)return null;
