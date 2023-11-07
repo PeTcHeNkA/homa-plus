@@ -1,6 +1,6 @@
 package plus.tehnet.bimg;
 
-import plus.te4net.core.api.IRequestSession;
+import plus.te4net.core.api.RequestSession;
 import plus.te4net.core.api.PluginFunction;
 import plus.te4net.core.node.HEWorker;
 import plus.te4net.core.node.HWorker;
@@ -16,7 +16,7 @@ public class BImgCheckArgs implements PluginFunction {
 
 
     @Override
-    public String onCall(IRequestSession session) {
+    public String onCall(RequestSession session) {
         String[] splat = session.splat();
         if(splat[0]==null)return null;
         HWorker worker = session.worker();

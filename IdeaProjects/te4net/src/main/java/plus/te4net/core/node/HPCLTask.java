@@ -2,18 +2,23 @@ package plus.te4net.core.node;
 
 import plus.te4net.core.api.IDataProvider;
 import plus.te4net.core.api.HttpClient;
+import plus.te4net.core.api.Var;
+import plus.tson.TsonList;
 import plus.tson.TsonMap;
+import plus.tson.TsonObj;
 import plus.util.PCLTask;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 
 
 final class HPCLTask extends PCLTask {
     private final TsonMap config;
-    final HEWorker worker;
+    HEWorker worker;
 
-    HPCLTask(Class<?> clazz, HEWorker worker, TsonMap config){
+    public HPCLTask(Class<?> clazz, HEWorker worker, TsonMap config){
         this(clazz, 0, worker, config);
     }
 
@@ -55,10 +60,10 @@ final class HPCLTask extends PCLTask {
             empty.setAccessible(true);
             return empty.newInstance();
         } else {
-            Type[] types = max.getGenericParameterTypes();
-            Object[] args = new Object[types.length];
+            Parameter[] params = max.getParameters();
+            Object[] args = new Object[params.length];
             for(int i=0;i<args.length;i++){
-                args[i] = getArg(types[i]);
+                args[i] = getArg(params[i]);
             }
             max.setAccessible(true);
             return max.newInstance(args);
@@ -66,11 +71,68 @@ final class HPCLTask extends PCLTask {
     }
 
 
-    private Object getArg(Type type){
-        if(type == TsonMap.class)return config;
-        if(type == HEWorker.class || type == IDataProvider.class||
-                type == HWorker.class)return worker;
-        if(type == HttpClient.class)return worker.client();
-        return new HPCLTask(type.getClass(), worker, config).inst();
+    private Object getArg(Parameter param){
+        Class<?> type = param.getType();
+        Var var = searchVar(param);
+        if(var==null) {
+            if (type == TsonMap.class) return config;
+            if (type == HEWorker.class || type == IDataProvider.class ||
+                    type == HWorker.class) return worker;
+            if (type == HttpClient.class) return worker.client();
+
+            if (type == int.class || type == float.class || type == double.class) return 0;
+            if (type == boolean.class) return false;
+
+            return new HPCLTask(type.getClass(), worker, config).inst();
+        } else {
+            boolean nullDef = var.def() == null || var.def().isEmpty();
+            TsonObj obj = config.get(var.key());
+
+            if(type == int.class){
+                if(obj==null){
+                    if(nullDef) return 0;
+                    return Integer.parseInt(var.def());
+                }
+                return obj.getInt();
+            }
+            if(type == float.class){
+                if(obj==null){
+                    if(nullDef) return 0f;
+                    return Float.parseFloat(var.def());
+                }
+                return obj.getFloat();
+            }
+            if(type == boolean.class){
+                if(obj==null){
+                    if(nullDef) return false;
+                    return var.def().equalsIgnoreCase("true");
+                }
+                return obj.getBool();
+            }
+
+            if(obj==null && nullDef) return null;
+
+            if (type == TsonMap.class){
+                if(obj==null) return new TsonMap(var.def());
+                return obj.getMap();
+            }
+            if(type == TsonList.class){
+                if(obj==null) return new TsonList(var.def());
+                return obj.getList();
+            }
+            if(type == String.class){
+                if(obj==null) return var.def();
+                return obj.getStr();
+            }
+            return null;
+        }
+    }
+
+
+    private Var searchVar(Parameter param){
+        for (Annotation a:param.getAnnotations()){
+            if(a instanceof Var)return (Var) a;
+        }
+        return null;
     }
 }

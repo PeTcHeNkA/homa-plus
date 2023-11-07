@@ -1,3 +1,5 @@
+package test1;
+
 import plus.te4net.core.event.EventBus;
 import plus.te4net.core.api.IEventHandler;
 import plus.te4net.core.event.ObjectBus;

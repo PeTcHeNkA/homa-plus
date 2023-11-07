@@ -20,10 +20,5 @@ domains={
 			assets/tms={type="html", headers={access-control-allow-origin='*'}},
 			launch={type="files", cache=(3600)}
 		}
-	},
-	practic.ru={
-		routes={
-			assets/tms={type="static-html", headers={access-control-allow-origin='practic.ru'}},
-		}
 	}
 }}

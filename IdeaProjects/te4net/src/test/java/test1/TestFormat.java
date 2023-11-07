@@ -1,3 +1,5 @@
+package test1;
+
 import plus.te4net.core.api.PluginBase;
 import plus.te4net.mds.util.TextMapFormatter;
 import plus.tson.TsonMap;

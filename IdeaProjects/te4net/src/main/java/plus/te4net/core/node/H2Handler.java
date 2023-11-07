@@ -254,6 +254,8 @@ final class H2Handler extends ChannelDuplexHandler implements RequestSession {
 
     @Override
     public String toString() {
-        return "["+worker+"]:HTTPS/2 "+method()+" "+path();
+        int bodySize = encodeBody().length;
+        return "["+worker+"]:HTTPS/2 "+method()+" "+path() +
+                (bodySize==0?"":" "+bodySize+" bytes");
     }
 }

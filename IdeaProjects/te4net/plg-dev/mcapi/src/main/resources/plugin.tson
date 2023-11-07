@@ -1,0 +1,11 @@
+{
+    class=[
+        "plus.mcapi.api.McJoin",
+        "plus.mcapi.api.McJoined",
+        "plus.mcapi.api.McProfile",
+        "plus.mcapi.api.McRefresh",
+        "plus.mcapi.api.McSearchProfiles",
+        "plus.mcapi.api.McValidate",
+        "plus.mcapi.api.McSkinLib"
+    ]
+}

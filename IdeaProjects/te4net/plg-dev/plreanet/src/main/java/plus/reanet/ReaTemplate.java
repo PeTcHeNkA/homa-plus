@@ -3,7 +3,7 @@ package plus.reanet;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import plus.te4net.core.api.IDataProvider;
 import plus.te4net.core.api.IRequestProcessor;
-import plus.te4net.core.api.IRequestSession;
+import plus.te4net.core.api.RequestSession;
 import plus.te4net.mds.html.SimpleCompressedTextFile;
 
 
@@ -16,7 +16,7 @@ public class ReaTemplate extends SimpleCompressedTextFile implements IRequestPro
 
 
     @Override
-    public void handle(IRequestSession session) {
+    public void handle(RequestSession session) {
         session.setHeader(HttpHeaderNames.CACHE_CONTROL, cacheTime);
         super.handle(session);
     }

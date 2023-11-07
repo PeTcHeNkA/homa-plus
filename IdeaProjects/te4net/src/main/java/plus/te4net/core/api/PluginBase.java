@@ -4,6 +4,10 @@ import plus.tson.TsonMap;
 import plus.util.PluginClassLoader;
 import plus.util.SimpleSrcGetter;
 import java.io.File;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 
 @PublicUsage
@@ -21,4 +25,6 @@ public interface PluginBase extends SimpleSrcGetter {
     default boolean isRoot(){
         return false;
     }
+
+
 }

@@ -48,6 +48,8 @@ final class H1Handler extends AbsH1Handler {
 
     @Override
     public String toString() {
-        return "["+worker+"]:HTTPS/1.1 "+method()+" "+path();
+        int bodySize = encodeBody().length;
+        return "["+worker+"]:HTTPS/1.1 "+method()+" "+path() +
+                (bodySize==0?"":" "+bodySize+" bytes");
     }
 }

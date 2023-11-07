@@ -1,3 +1,5 @@
+package test1;
+
 import plus.te4net.core.Tehnet;
 import plus.te4net.core.node.TehnetSimple;
 

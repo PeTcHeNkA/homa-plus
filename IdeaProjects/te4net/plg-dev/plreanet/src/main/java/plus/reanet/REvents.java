@@ -19,6 +19,7 @@ public class REvents implements IEventHandler<VrHtmlEvent> {
         cstr = "max-age="+map.getOrDefault("reanet-tm-cahce", new TsonInt(432000)).getStr();
     }
 
+
     @Override
     public boolean handle(VrHtmlEvent vrHtmlEvent) {
         if(vrHtmlEvent.type()== VrHtmlEvent.Type.HTML){

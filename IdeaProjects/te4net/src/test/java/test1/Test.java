@@ -1,3 +1,4 @@
+package test1;
 
 import plus.te4net.mds.html.vr.FastJsOptimizer;
 

@@ -1,6 +1,6 @@
 package plus.tehnet.bimg;
 
-import plus.te4net.core.api.IRequestSession;
+import plus.te4net.core.api.RequestSession;
 import plus.te4net.core.api.PluginFunction;
 import plus.te4net.mds.util.MiniLink;
 
@@ -21,7 +21,7 @@ public class BImgIncludeVidFunc implements PluginFunction {
 
 
     @Override
-    public String onCall(IRequestSession session) {
+    public String onCall(RequestSession session) {
         String result = MiniLink.ofMini(session.queryParams("vid"));
         if(result == null)return null;
         return prefix+result+postfix;
