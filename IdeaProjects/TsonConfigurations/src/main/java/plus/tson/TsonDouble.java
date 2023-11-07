@@ -4,7 +4,6 @@ package plus.tson;
 public final class TsonDouble extends TsonPrimitive{
     private final double value;
 
-
     public TsonDouble(double value) {
         this.value = value;
     }
@@ -31,6 +30,12 @@ public final class TsonDouble extends TsonPrimitive{
     @Override
     public double getDouble() {
         return value;
+    }
+
+
+    @Override
+    public long getLong() {
+        return (long) value;
     }
 
 
