@@ -647,25 +647,24 @@ public class VrCss implements ICitem {
 
 
     void extractStyle(String selector, String from, AnStyle result){
+        AnStyle result0 = null;
         for (Group group:groups){
             for (ICitem item:group.items){
                 if(!(item instanceof Style style))continue;
-                boolean flag = false;
-                for (StyleName name:style.names){
-                    if(name.selector.equals(selector)){
-                        if(Objects.equals(name.name, from)){
-                            name.name = null;
-                            flag = true;
-                            break;
-                        }
-                    }
-                }
-                if(flag){
-                    for (StyleParam param: style.items){
-                        result.addParam(param);
+                if(style.names.size()>1)continue;
+                StyleName name0 = style.names.get(0);
+                if(name0.selector.equals(selector)) {
+                    if (Objects.equals(name0.name, from)) {
+                        name0.name = null;
+                        if(result0 != null)return;
+                        result0 = style;
                     }
                 }
             }
+        }
+        if(result0==null)return;
+        for (StyleParam p:result0.items){
+            result.addParam(p);
         }
     }
 
