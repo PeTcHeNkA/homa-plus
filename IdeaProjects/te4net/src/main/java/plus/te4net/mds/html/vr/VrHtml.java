@@ -11,7 +11,7 @@ import static plus.te4net.mds.html.vr.VrCss.isEmpty;
 public class VrHtml extends HtmlNode{
     private static final HashSet<String> notClose = new HashSet<>(Arrays.asList(
         "area","base","br","col","embed","hr","img","input","link","meta","param","source","track","wbr",
-            "!DOCTYPE", "!doctype"
+            "!DOCTYPE", "!doctype", "path"
     ));
     private static final HashSet<String> strNode = new HashSet<>(Arrays.asList(
             "style", "css", "js", "script", "server"

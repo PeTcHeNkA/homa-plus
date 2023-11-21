@@ -123,6 +123,7 @@ public class VrCss implements ICitem {
             builder.setLength(0);
             if(start==cursor)throw syntaxError("Infinity loop");
         }
+        if(1==1)return;
     }
 
 
@@ -381,6 +382,9 @@ public class VrCss implements ICitem {
                 if(isEmpty(prev)||isMatchUsed(prev))continue;
             }
             b.append(cur);
+        }
+        if(groups==null && cursor==chars.length){
+            return e.header = b.toString();
         }
         if(waitEnd0){
             while (cursor<chars.length){
@@ -647,7 +651,7 @@ public class VrCss implements ICitem {
 
 
     void extractStyle(String selector, String from, AnStyle result){
-        AnStyle result0 = null;
+        Style result0 = null;
         for (Group group:groups){
             for (ICitem item:group.items){
                 if(!(item instanceof Style style))continue;
@@ -655,7 +659,6 @@ public class VrCss implements ICitem {
                 StyleName name0 = style.names.get(0);
                 if(name0.selector.equals(selector)) {
                     if (Objects.equals(name0.name, from)) {
-                        name0.name = null;
                         if(result0 != null)return;
                         result0 = style;
                     }
@@ -663,8 +666,11 @@ public class VrCss implements ICitem {
             }
         }
         if(result0==null)return;
+        result0.names.get(0).name = null;
         for (StyleParam p:result0.items){
-            result.addParam(p);
+            if(result.getParam(p.key)==null){
+                result.items.add(p);
+            }
         }
     }
 
