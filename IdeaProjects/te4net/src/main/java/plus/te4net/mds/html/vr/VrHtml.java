@@ -16,6 +16,9 @@ public class VrHtml extends HtmlNode{
     private static final HashSet<String> strNode = new HashSet<>(Arrays.asList(
             "style", "css", "js", "script", "server"
     ));
+    private static final HashSet<String> remEmpty = new HashSet<>(Arrays.asList(
+            "style", "script", "div"
+    ));
 
     private static boolean needClose(String tagName){
         return !notClose.contains(tagName);
@@ -27,9 +30,14 @@ public class VrHtml extends HtmlNode{
     }
 
 
+    private static boolean isRemEmpty(String tagName){
+        return remEmpty.contains(tagName);
+    }
+
+
     public static class Attribute implements ICitem{
         public String key;
-        private char bound;
+        char bound = '\'';
         private ICitem value;
 
         public Attribute(){}
@@ -38,7 +46,6 @@ public class VrHtml extends HtmlNode{
         public Attribute(String key, ICitem val){
             this.key = key;
             this.value = val;
-            this.bound = '\'';
         }
 
 
@@ -143,6 +150,7 @@ public class VrHtml extends HtmlNode{
 
     private void parseNode(FastBuffer<HtmlNode> parent){
         skipToNext();
+        if(cursor>=chars.length)return;
         CharStrBuilder builder = new CharStrBuilder(16);
         if(cur()=='<'){
             ++cursor;
@@ -203,6 +211,8 @@ public class VrHtml extends HtmlNode{
             HtmlObject obj;
             if (needClose(tagName)) {
                 HtmlNode obj0 = new HtmlNode();
+                obj0.setIgnoreIfEmpty(isRemEmpty(tagName));
+
                 obj = obj0;
                 parent.get().items.add(obj);
                 if(isNodeStr(tagName)){
@@ -293,10 +303,10 @@ public class VrHtml extends HtmlNode{
                         mode = 3;
                     } else if (cur == atr.bound) {
                         String value = builder.toString();
-                        if(atr.key.equals("class")){
-                            atr.value = new Style(value);
-                        } else {
-                            atr.value = new SField(value);
+                        switch (atr.key) {
+                            case "class" -> atr.value = new Style(value);
+                            case "style" -> atr.value = VrCss.readInline(value);
+                            default      -> atr.value = new SField(value);
                         }
                         builder.setLength(0);
                         return atr;
@@ -338,7 +348,7 @@ public class VrHtml extends HtmlNode{
 
 
     public VrHtml uptCss(VrCssExportTable table){
-        ArrayList<Style> linkStyles = new ArrayList<>();
+        ArrayList<HtmlObject> linkStyles = new ArrayList<>();
 
         forItems((parent, cur) -> {
             ICitem attr = cur.getAttr("class");
@@ -347,10 +357,8 @@ public class VrHtml extends HtmlNode{
                 if (attr instanceof SField) {
                     style = new Style(((SField) attr).value);
                     cur.setAttribute("class", style);
-                } else {
-                    style = (Style) attr;
                 }
-                linkStyles.add(style);
+                linkStyles.add(cur);
             }
         });
 
@@ -372,46 +380,69 @@ public class VrHtml extends HtmlNode{
 
         res.items.set(0, vrCss);
         vrCss.unCollide();
-        if(table==null)return this;
 
-        HashSet<String> styles = vrCss.getAllStyles();
+        HashSet<String> styles = new HashSet<>();
+        HashSet<String> singleUsages = new HashSet<>();
 
-        for(Style style:linkStyles){
+        for(HtmlObject object:linkStyles) {
+            Style style = (Style) object.getAttr("class");
+            for (String orig : style) {
+                if(styles.add(orig)){
+                    singleUsages.add(orig);
+                } else {
+                    singleUsages.remove(orig);
+                }
+            }
+        }
+        styles = vrCss.getAllStyles();
+
+        if(table==null){
+            table = new VrCssExportTable();
+        }
+
+        for(HtmlObject object:linkStyles){
+            Style style = (Style) object.getAttr("class");
             for (String orig:style){
                 if(!styles.contains("."+orig))continue;
                 table.getOrNew(orig);
             }
         }
 
-        for(Style style:linkStyles) {
+        for(HtmlObject object:linkStyles) {
+            Style style = (Style) object.getAttr("class");
             int index = 0;
             for (String orig : new ArrayList<>(style)) {
-                String tweak = table.get(orig);
-                if(tweak==null || Objects.equals(orig, tweak)){
-                    ++index;
-                    continue;
+                if(singleUsages.contains(orig)){
+                    ICitem atr = object.getAttr("style");
+                    AnStyle atrStyle;
+                    if(atr==null){
+                        atrStyle = new AnStyle();
+                    } else {
+                        atrStyle = (AnStyle) atr;
+                    }
+                    vrCss.extractStyle(".", orig, atrStyle);
+
+                    if(atr==null && atrStyle.size()>0){
+                        object.setAttribute("style", atrStyle);
+                    }
+                } else {
+                    String tweak = table.get(orig);
+                    if (tweak == null || Objects.equals(orig, tweak)) {
+                        ++index;
+                        continue;
+                    }
+                    vrCss.renameStyle(".", orig, tweak);
+                    style.set(index, tweak);
                 }
-                vrCss.renameStyle(".", orig, tweak);
-                style.set(index, tweak);
                 ++index;
             }
         }
 //        vrCss.renameVar("background-color", "--b");
-//        vrCss.renameVar("width",            "--w");
-//        vrCss.renameVar("242",         "var(--a)");
-//        vrCss.renameVar("transition",       "--t");
-//        vrCss.renameVar("user-select",      "--u");
-//        vrCss.renameVar("none",             "--n");
 //        vrCss.join("""
-//                        div{
-//                            background-color: var(--b);
-//                            transition:       var(--t);
-//                            width:            var(--w);
-//                            user-select:      var(--u);
-//                            --a: 242;
-//                            --n: none;
-//                        }
-//                        """);
+//                div{
+//                    background-color: var(--b);
+//                }
+//                """);
         return this;
     }
 

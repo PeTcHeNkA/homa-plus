@@ -18,6 +18,7 @@ public class VrCss implements ICitem {
         private final ArrayList<ICitem> items = new ArrayList<>();
         @Override
         public void toString(StringBuilder b) {
+            if(items.isEmpty())return;
             if(header!=null){
                 b.append(header).append('{');
             }
@@ -27,6 +28,19 @@ public class VrCss implements ICitem {
             if(header!=null){
                 b.append('}');
             }
+        }
+
+        public boolean isEmpty(){
+            if(items.isEmpty())return true;
+            for (ICitem item:items){
+                if(item instanceof Style style){
+                    if(!style.isEmpty())return false;
+
+                } else {
+                    return false;
+                }
+            }
+            return true;
         }
 
 
@@ -71,17 +85,44 @@ public class VrCss implements ICitem {
         }
     }
 
-
-    private final ArrayList<Group> groups = new ArrayList<>();
+    private final ArrayList<Group> groups;
     private char[] chars;
     private int cursor;
 
-    public VrCss(){}
+    public VrCss(){
+        groups = new ArrayList<>();
+    }
 
 
     public VrCss(String code) {
+        groups = new ArrayList<>();
         this.chars = code.toCharArray();
         parse();
+    }
+
+
+    static AnStyle readInline(String code){
+        AnStyle style = new AnStyle();
+        new VrCss(code, style);
+        return style;
+    }
+
+    //inline
+    private VrCss(String code, AnStyle style){
+        groups = null;
+        this.chars = code.toCharArray();
+
+        StringBuilder builder = new StringBuilder();
+        while (cursor<chars.length){
+            int start = cursor;
+            skipToNext();
+            StyleParam param = readSParam(builder);
+            if(param != null && param.key != null && param.value != null){
+                style.items.add(param);
+            }
+            builder.setLength(0);
+            if(start==cursor)throw syntaxError("Infinity loop");
+        }
     }
 
 
@@ -196,7 +237,7 @@ public class VrCss implements ICitem {
 
     private String getErrorString(){
         int min = Math.max(0, cursor-70);
-        int max = Math.min(cursor+70,chars.length-1);
+        int max = Math.min(cursor+70,chars.length);
         char[] bytes = new char[max-min];
         System.arraycopy(chars, min, bytes, 0, bytes.length);
         return new String(bytes);
@@ -368,6 +409,7 @@ public class VrCss implements ICitem {
                 if(start==cursor)throw syntaxError("Infinity loop");
             }
         }
+        if(groups==null)return e.header;
         throw syntaxError();
     }
 
@@ -544,11 +586,9 @@ public class VrCss implements ICitem {
                 ICitem item = st.next();
                 if(!(item instanceof Style))continue;
                 Style style = (Style) item;
-                if(style.items.isEmpty()){
-                    st.remove();
-                }
+                if(style.isEmpty()) st.remove();
             }
-            if(group.items.isEmpty()){
+            if(group.isEmpty()){
                 e.remove();
             }
         }
@@ -595,9 +635,34 @@ public class VrCss implements ICitem {
                 if(!(item instanceof Style style))continue;
                 for (StyleName name:style.names){
                     if(name.selector.equals(selector)){
-                        if(name.name.equals(from)){
+                        if(Objects.equals(name.name, from)){
                             name.name = to;
+                            break;
                         }
+                    }
+                }
+            }
+        }
+    }
+
+
+    void extractStyle(String selector, String from, AnStyle result){
+        for (Group group:groups){
+            for (ICitem item:group.items){
+                if(!(item instanceof Style style))continue;
+                boolean flag = false;
+                for (StyleName name:style.names){
+                    if(name.selector.equals(selector)){
+                        if(Objects.equals(name.name, from)){
+                            name.name = null;
+                            flag = true;
+                            break;
+                        }
+                    }
+                }
+                if(flag){
+                    for (StyleParam param: style.items){
+                        result.addParam(param);
                     }
                 }
             }
@@ -710,6 +775,15 @@ public class VrCss implements ICitem {
         StringBuilder builder = new StringBuilder();
         toString(builder);
         return builder.toString();
+    }
+
+
+    public boolean isEmpty(){
+        if(groups.isEmpty())return true;
+        for (Group group:groups){
+            if(!group.isEmpty())return false;
+        }
+        return true;
     }
 
 

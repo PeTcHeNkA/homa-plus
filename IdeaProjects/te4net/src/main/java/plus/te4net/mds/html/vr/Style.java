@@ -3,9 +3,8 @@ package plus.te4net.mds.html.vr;
 import java.util.ArrayList;
 
 
-class Style implements ICitem {
+class Style extends AnStyle implements ICitem {
     final ArrayList<StyleName> names = new ArrayList<>();
-    final ArrayList<StyleParam> items = new ArrayList<>();
 
     public String fullName() {
         StringBuilder b = new StringBuilder();
@@ -21,10 +20,15 @@ class Style implements ICitem {
     @Override
     public void toString(StringBuilder b) {
         if(items.isEmpty())return;
+        int countNames = 0;
         for (StyleName name : names) {
-            name.toString(b);
-            b.append(',');
+            if(name.name != null) {
+                name.toString(b);
+                b.append(',');
+                ++countNames;
+            }
         }
+        if(countNames==0)return;
         VrCss.last(b, '{');
         for (StyleParam param : items) {
             param.toString(b);
@@ -41,5 +45,16 @@ class Style implements ICitem {
 
     boolean eqNames(Style etc) {
         return etc.names.equals(names);
+    }
+
+
+    public boolean isEmpty(){
+        int countNames = 0;
+        for (StyleName name : names) {
+            if(name.name != null) {
+                ++countNames;
+            }
+        }
+        return countNames==0;
     }
 }
