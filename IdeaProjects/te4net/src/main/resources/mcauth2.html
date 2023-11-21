@@ -429,15 +429,15 @@
             <div class="flex-cm m2">
                 <input id="_lg-mail" class="p2 login-form-inp" type="email" 
                     placeholder="почта" autocomplete="email" onblur="reanet.model['_mlMsg']='';reanet.update()">
-                <div if='!_isValidLogin()||reanet.model["_mlMsg"]'>
+                <div r:if='!_isValidLogin()||reanet.model["_mlMsg"]'>
                     <div class="login-form-i-line"></div>
                     <div class="login-form-i-msg flex-start m1 f1">{_mlMsg}</div>
                 </div>
             </div>
-            <div if='reanet.model["_loginmode"] != 0' class="flex-cm m2">
+            <div r:if='reanet.model["_loginmode"] != 0' class="flex-cm m2">
                 <input id="_lg-nick" class="p2 login-form-inp" type="nickname" 
                     placeholder="никнейм" autocomplete="nickname" onblur="reanet.update()">
-                <div if='!_isValidNick()||reanet.model["_nickMsg"]'>
+                <div r:if='!_isValidNick()||reanet.model["_nickMsg"]'>
                     <div class="login-form-i-line"></div>
                     <div class="login-form-i-msg flex-start m1 f1">{_nickMsg}</div>
                 </div>
@@ -447,17 +447,17 @@
                     <input id="_lg-psw" class="p2 login-form-inp w-100" type="password" 
                     placeholder="{_pswph}" autocomplete="new-password" onblur="reanet.update()">
                 </div>
-                <div if='!_validPsw() || reanet.model["_wgPsw"]'>
+                <div r:if='!_validPsw() || reanet.model["_wgPsw"]'>
                     <div class="login-form-i-line"></div>
                     <div class="login-form-i-msg flex-start m1 f1">{_pswMsg}</div>
                 </div>
             </div>
-            <div if='reanet.model["_loginmode"] != 0' class="login-form-i flex-cm m2">
+            <div r:if='reanet.model["_loginmode"] != 0' class="login-form-i flex-cm m2">
                 <div id="_pswc" class="flex">
                     <input id="_lg-psw-db" class="p2 login-form-inp w-100" type="password" 
                         placeholder="повторите пароль" autocomplete="new-password" onblur="reanet.update()">
                 </div>
-                <div if="!_isValidDoublePsw()">
+                <div r:if="!_isValidDoublePsw()">
                     <div class="login-form-i-line"></div>
                     <div class="login-form-i-msg flex-start m1 f1">Пароли не совпадают!</div>
                 </div>
@@ -475,10 +475,10 @@
                 <div id="_cap4a_view_success" class="flex p2 noselect" style="display: none">Проверка пройдена</div>
             </div>
             
-            <div if='reanet.model["_lgcfm"]' class="flex-cm m2">
+            <div r:if='reanet.model["_lgcfm"]' class="flex-cm m2">
                 <input id="_lg-cfm" class="p2 login-form-inp" type="text" 
                     placeholder="код подтверждения из почты" autocomplete="off" onblur="_updateLoginForm()">
-                <div if='!_isValidNick()'>
+                <div r:if='!_isValidNick()'>
                     <div class="login-form-i-line"></div>
                     <div class="login-form-i-msg flex-start m1 f1">{_lgcfmmsg}</div>
                 </div>
