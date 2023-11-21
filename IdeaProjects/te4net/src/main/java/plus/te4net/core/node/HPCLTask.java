@@ -3,9 +3,11 @@ package plus.te4net.core.node;
 import plus.te4net.core.api.IDataProvider;
 import plus.te4net.core.api.HttpClient;
 import plus.te4net.core.api.Var;
+import plus.te4net.core.bsys.DataProviderBuilder;
 import plus.tson.TsonList;
 import plus.tson.TsonMap;
 import plus.tson.TsonObj;
+import plus.tson.TsonStr;
 import plus.util.PCLTask;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -116,13 +118,25 @@ final class HPCLTask extends PCLTask {
                 if(obj==null) return new TsonMap(var.def());
                 return obj.getMap();
             }
+            if(type == String.class){
+                if(obj==null) return var.def();
+                return obj.getStr();
+            }
+            if(type == TsonObj.class){
+                if(obj==null) return TsonObj.ofString(var.def());
+                return obj;
+            }
             if(type == TsonList.class){
                 if(obj==null) return new TsonList(var.def());
                 return obj.getList();
             }
-            if(type == String.class){
-                if(obj==null) return var.def();
-                return obj.getStr();
+            if(type == IDataProvider.class){
+                if(obj==null) return DataProviderBuilder.ofTson(worker, TsonObj.ofString(var.def()));
+                return DataProviderBuilder.ofTson(worker, obj);
+            }
+            if(type == TsonStr.class){
+                if(obj==null) return new TsonStr(var.def());
+                return obj.getList();
             }
             return null;
         }

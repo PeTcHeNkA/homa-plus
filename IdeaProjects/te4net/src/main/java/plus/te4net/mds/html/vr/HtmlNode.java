@@ -6,6 +6,7 @@ import java.util.Iterator;
 
 public class HtmlNode extends HtmlObject {
     protected final ArrayList<ICitem> items = new ArrayList<>();
+    private boolean ignoreIfEmpty = false;
 
     public HtmlNode(){}
 
@@ -37,7 +38,7 @@ public class HtmlNode extends HtmlObject {
     }
 
 
-    public final class Item{
+    public static final class Item{
         private HtmlObject obj;
         private HtmlNode parent;
         private boolean needRem;
@@ -134,9 +135,34 @@ public class HtmlNode extends HtmlObject {
 
     @Override
     public void toString(StringBuilder b) {
+        if(isEmptySave())return;
         super.toString(b);
         innerHtml(b);
         b.append("</").append(name).append('>');
+    }
+
+
+    public void setIgnoreIfEmpty(boolean b){
+        ignoreIfEmpty = b;
+    }
+
+
+    boolean isEmptySave(){
+        if(ignoreIfEmpty){
+            if( (attributes==null || attributes.isEmpty()) ){
+                for (ICitem obj : items) {
+                    if(obj instanceof HtmlNode node){
+                        if(!node.isEmptySave())return false;
+                    } else if(obj instanceof VrCss vrCss){
+                        if(!vrCss.isEmpty())return false;
+                    } else {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+        return false;
     }
 
 

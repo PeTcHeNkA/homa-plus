@@ -5,6 +5,8 @@ import plus.te4net.core.api.IRequestProcessor;
 import plus.te4net.core.api.PublicUsage;
 import plus.te4net.core.api.RequestSession;
 import plus.te4net.core.node.HEWorker;
+import plus.tson.utl.CharStrBuilder;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -20,12 +22,30 @@ public class FileThreeProc implements IRequestProcessor {
         cacheStr = "max-age="+cacheTime;
     }
 
+    private String fixSpaces(String raw){
+        return raw.replace("%20"," ");
+//        char[] chars = raw.toCharArray();
+//        CharStrBuilder b = new CharStrBuilder(chars.length);
+//        int num = 0;
+//        for(int i=0;i<chars.length;i++){
+//            char cur = chars[i];
+//            if(cur=='%'){
+//                for (;i<chars.length;i++){
+//                    if(i>=48 && i <= 57){
+//                        num = num * 10 + (i - 48);
+//                    }
+//                }
+//                continue;
+//            }
+//            b.append(cur);
+//        }
+    }
 
     @Override
     public void handle(RequestSession session) {
         try {
             String ae;
-            File file = new File(root, ae = session.routeKey().afterRoute());
+            File file = new File(root, ae = fixSpaces(session.routeKey().afterRoute()));
             if(!file.isFile()){
                 session.notFound();
                 return;

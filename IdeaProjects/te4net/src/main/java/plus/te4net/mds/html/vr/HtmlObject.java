@@ -57,6 +57,7 @@ public class HtmlObject implements ICitem {
             }
         }
         VrHtml.Attribute atr = new VrHtml.Attribute();
+
         atr.key = key;
         atr.setValue(value);
         attributes.add(atr);

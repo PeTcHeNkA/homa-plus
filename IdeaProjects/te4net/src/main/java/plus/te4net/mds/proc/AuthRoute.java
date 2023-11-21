@@ -109,7 +109,7 @@ public class AuthRoute<U extends User> extends AuthService<U> implements SimpleS
                     );
                     break;
                 default:
-                    session.send("ERROR UNKNOWN_MTD");
+                    onNotfoundPost(session);
                     return;
             }
             session.send("SUCCESS");
@@ -142,13 +142,13 @@ public class AuthRoute<U extends User> extends AuthService<U> implements SimpleS
                     return;
                 }
             }
-            String isCap4a = session.queryParams("cap4a-mtd");
-            if(isCap4a!=null){
-                session.send(handleCap4a(session, isCap4a));
+            String var = session.queryParams("cap4a-mtd");
+            if(var != null){
+                session.send(handleCap4a(session, var));
                 return;
             }
 
-            if(splat[0]==null){
+            if(splat[0] == null){
                 login(session);
                 return;
             }
@@ -156,15 +156,26 @@ public class AuthRoute<U extends User> extends AuthService<U> implements SimpleS
             switch (splat[0]) {
                 case "confirm_create": confirmCreate(session);return;
                 case "confirm_update": confirmUpdate(session);return;
-                case "check_mail": hasMail(session);return;
-                case "chick_name": hasName(session);return;
+                case "check_mail":     hasMail(session);return;
+                case "chick_name":     hasName(session);return;
+                case "get_token":
+                    session.send((var = getToken(session)) == null?"":var);
+                    return;
             }
-            session.redirect("/auth/");
-        //} catch (RouteTextFormatter.Exception e){
-
+            onNotfound(session);
         } catch (AuthException | CryptException e){
             session.send(e.toString(), HttpResponseStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+
+    protected void onNotfound(RequestSession session) throws AuthException, CryptException{
+        session.redirect("/auth");
+    }
+
+
+    protected void onNotfoundPost(RequestSession session){
+        session.send("ERROR UNKNOWN_MTD");
     }
 
 
@@ -178,7 +189,7 @@ public class AuthRoute<U extends User> extends AuthService<U> implements SimpleS
     }
 
 
-    private String getGoTo(RequestSession session){
+    protected String getGoTo(RequestSession session){
         String goTo = session.queryParams("goto");
         return goTo==null?"/":MiniLink.ofMini(goTo);
     }
@@ -231,32 +242,32 @@ public class AuthRoute<U extends User> extends AuthService<U> implements SimpleS
     }
 
 
-    private String getLogin(RequestSession session){
+    protected String getLogin(RequestSession session){
         return session.queryParams("login");
     }
 
 
-    private String getName(RequestSession session){
+    protected String getName(RequestSession session){
         return session.queryParams("name");
     }
 
 
-    private String getCap4aID(RequestSession session){
+    protected String getCap4aID(RequestSession session){
         return session.queryParams("cap4a-id");
     }
 
 
-    private String getCap4aAnswer(RequestSession session){
+    protected String getCap4aAnswer(RequestSession session){
         return session.queryParams("cap4a-answer");
     }
 
 
-    private String getCryptKey(RequestSession session){
+    protected String getCryptKey(RequestSession session){
         return session.queryParams("crypt-key");
     }
 
 
-    private byte[] handleCap4a(RequestSession session, String part) {
+    protected byte[] handleCap4a(RequestSession session, String part) {
         if(part.equals("font"))return font;
         try {
             switch (part) {
@@ -287,7 +298,7 @@ public class AuthRoute<U extends User> extends AuthService<U> implements SimpleS
     }
 
 
-    private void login(RequestSession session){
+    protected void login(RequestSession session){
         fmLogin.handle(session);
     }
 
@@ -302,6 +313,6 @@ public class AuthRoute<U extends User> extends AuthService<U> implements SimpleS
 
     @Override
     public void goToAuth(RequestSession session) {
-        session.redirect("/auth/?goto="+ MiniLink.toMini(session.path()));
+        session.redirect("/auth?goto="+ MiniLink.toMini(session.path()));
     }
 }

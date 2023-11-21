@@ -94,7 +94,8 @@ public class DataProviderBuilder {
                     return new NFileDataProvider(items[1],
                             items.length > 2 && items[2].equalsIgnoreCase("true"));
                 case "sql":
-                    return new NSqlDataProvider(items[1], items[2]);
+                    if(items.length==3) return new NSqlDataProvider(items[1], items[2]);
+                    if(items.length==2) return new NSqlDataProvider(null, items[1]);
                 case "root":
                     if(items.length==1) {
                         return worker.getDefDataPovider();
@@ -150,6 +151,6 @@ public class DataProviderBuilder {
             }
             throw new RuntimeException(obj+" size not 1 or 2!");
         }
-        throw new RuntimeException("["+obj+"] not supported!");
+        throw new RuntimeException("[ "+obj+" ] not supported!");
     }
 }

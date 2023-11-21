@@ -94,41 +94,38 @@ public final class HRouteMap extends RouteNode {
 
         private void parseQParams(){
             i = ++limit;
-            int prev = i;
-            int sep = -1;
-            for (;i<chars.length;i++) {
-                char c = chars[i];
+            int prev = i, sep = i, delta;
+            for (char c;i<chars.length;i++) {
+                c = chars[i];
                 if(c=='&'){
                     if(prev != i){
-                        if(i == sep){
+                        if(i == sep)
                             queryParams.put(new String(chars, prev, i-prev-1),"");
-                        } else {
-                            int delta = sep-prev;
+                        else
                             queryParams.put(
-                                    new String(chars, prev, delta-1),
+                                    new String(chars, prev, (delta = sep-prev)-1),
                                     new String(chars, prev+delta, i-sep)
                             );
-                        }
                     }
-                    prev = ++i;
-                    sep = i;
+                    prev = sep = i+1;
                     continue;
                 }
-                if(c=='='){
-                    sep = i+1;
-                }
+                if(c=='=') sep = i+1;
             }
-            if(prev != i && prev != sep){
+            if(prev != i){
                 if(sep == i){
                     queryParams.put(new String(chars, prev, i-prev-1),"");
                 } else {
-                    int delta = sep-prev;
-                    queryParams.put(
-                            new String(chars, prev, delta-1),
-                            new String(chars, prev+delta, i-sep)
-                    );
+                    if(prev == sep)
+                        queryParams.put(new String(chars, prev, i-prev),"");
+                    else
+                        queryParams.put(
+                                new String(chars, prev, (delta = sep-prev)-1),
+                                new String(chars, prev+delta, i-sep)
+                        );
                 }
             }
+            //if(1==1)return;
         }
 
 
