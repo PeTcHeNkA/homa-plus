@@ -141,7 +141,9 @@ public abstract class UserData<T extends User> implements SqliteUtils, IUserData
     public final String createTokenFor(String user, byte[] data){
         String token = new String(charNum.genCode(64));
         String sqlCode = "INSERT INTO TOKENS (TOKEN, LOGIN, DATA, TIME) VALUES ('"
-                +token+"', '"+user+"', ?, '"+((int)(System.currentTimeMillis()>>14))+"')";
+                +token+"', '"+user+"', ?, '"+(
+                        (int)((System.currentTimeMillis()+2_592_000_000L)>>14)
+        )+"')";
         try {
             runSqlWithBytes(sqlCode, data);
         } catch (SQLException e) {
@@ -199,7 +201,8 @@ public abstract class UserData<T extends User> implements SqliteUtils, IUserData
     @Override
     public T getUserFromToken(String token, byte[] data) {
         String sqlCode = "SELECT LOGIN, PASSWORD, NAME, DATA FROM USERS WHERE LOGIN = " +
-                "(SELECT LOGIN FROM TOKENS WHERE TOKEN = '"+token+"' and DATA = ?)";
+                "(SELECT LOGIN FROM TOKENS WHERE TOKEN = '"+token+"' and DATA = ? and TIME > "
+                +((int)(System.currentTimeMillis()>>14))+")";
         PreparedStatement ps = null;
         try {
             ps = connection.prepareStatement(sqlCode);
@@ -216,7 +219,7 @@ public abstract class UserData<T extends User> implements SqliteUtils, IUserData
                         result.getString(1),
                         result.getString(2),
                         result.getString(3),
-                        result.getBytes(3)
+                        result.getBytes(4)
                 );
             }
             result.close();
