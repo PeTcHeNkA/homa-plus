@@ -8,14 +8,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 
-public class MUser extends User {
+public class McUser extends User {
     public final String uuid;
-    public final String name;
 
-    public MUser(String login, String password, String name, String uuid, byte[] data) {
+    public McUser(String login, String password, String name, String uuid, byte[] data) {
         super(login, password, name, data);
         this.uuid = uuid;
-        this.name = name;
     }
 
 
@@ -47,6 +45,30 @@ public class MUser extends User {
         map.put("timestamp", String.valueOf(System.currentTimeMillis()));
         map.put("profileId", uuid);
         return map;
+    }
+
+
+    public void setSkin(String url, boolean slim){
+        textures().getMap().put("SKIN", newTex(url, slim));
+    }
+
+
+    private TsonMap newTex(String url, boolean slim){
+        TsonMap texture = new TsonMap();
+        texture.put("url", url);
+        if(slim){
+            TsonMap metadata = new TsonMap();
+            metadata.put("model", "slim");
+            texture.put("metadata", metadata);
+        }
+        return texture;
+    }
+
+
+    public String getSkinUrl(){
+        TsonObj skin = textures().getMap().get("SKIN");
+        if(skin==null)return null;
+        return skin.getMap().getStr("url");
     }
 
 

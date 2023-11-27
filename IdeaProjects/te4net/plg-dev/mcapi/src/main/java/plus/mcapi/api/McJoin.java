@@ -1,7 +1,7 @@
 package plus.mcapi.api;
 
 import plus.asyutl.shoulder.IBasicTask;
-import plus.mcapi.MUser;
+import plus.mcapi.McUser;
 import plus.mcapi.McAuth;
 import plus.requests.McJoinServer;
 import plus.requests.McResponse;
@@ -17,7 +17,7 @@ import static plus.mcapi.McAuth.basicApiRoute;
 
 
 public class McJoin implements PluginRoute, IBasicTask {
-    static HashMap<String, HashMap<String, MUser>> cache = new HashMap<>();
+    static HashMap<String, HashMap<String, McJoinServer>> cache = new HashMap<>();
     private int timeClear = 0;
     private int usages = 0;
 
@@ -35,21 +35,19 @@ public class McJoin implements PluginRoute, IBasicTask {
     @Override
     public void handle(RequestSession session) {
         System.out.println(session);
+        McJoinServer request = new McJoinServer(session);
 
-        TsonMap map = new TJsonParser(session.encodeBody()).getMap();
-        McJoinServer request = new McJoinServer(map);
-        MUser user = McAuth.inst.auth(request.accessToken, ByteUtils.EMPTY);
-        if(user != null && user.uuid.equals(request.selectedProfile)){
+        if(request.user != null){
             session.ok();
-            getServer(request).put(user.name, user);
+            getServer(request).put(request.user.name, request);
         } else {
             session.requestError(new McResponse("Token auth failed!").toString());
         }
     }
 
 
-    private HashMap<String,MUser> getServer(McJoinServer request){
-        HashMap<String,MUser> res = cache.get(request.serverId);
+    private HashMap<String, McJoinServer> getServer(McJoinServer request){
+        HashMap<String, McJoinServer> res = cache.get(request.serverId);
         if(res==null){
             res = new HashMap<>();
             if(usages>1000){

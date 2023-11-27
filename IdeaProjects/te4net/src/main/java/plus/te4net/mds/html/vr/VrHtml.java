@@ -2,6 +2,7 @@ package plus.te4net.mds.html.vr;
 
 import plus.asyutl.buf.FastBuffer;
 import plus.te4net.core.node.HEWorker;
+import plus.te4net.mds.html.events.VrHtmlEvent;
 import plus.tson.utl.CharStrBuilder;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -75,6 +76,14 @@ public class VrHtml extends HtmlNode{
         }
 
 
+        @Override
+        public String toString() {
+            StringBuilder b = new StringBuilder();
+            toString(b);
+            return b.toString();
+        }
+
+
         public void setValue(ICitem value){
             this.value = value;
         }
@@ -108,10 +117,32 @@ public class VrHtml extends HtmlNode{
 
         @Override
         public void toString(StringBuilder b) {
+            int count = 0;
             for (String s:this){
-                b.append(s).append(' ');
+                if(s!=null) {
+                    b.append(s).append(' ');
+                    ++count;
+                }
             }
-            b.setLength(b.length()-1);
+            if(count>0) b.setLength(b.length()-1);
+        }
+
+
+        @Override
+        public boolean isEmpty(){
+            int count = 0;
+            for (String s:this){
+                if(s!=null) ++count;
+            }
+            return count == 0;
+        }
+
+
+        @Override
+        public String toString() {
+            StringBuilder b = new StringBuilder();
+            toString(b);
+            return b.toString();
         }
     }
 
@@ -347,8 +378,25 @@ public class VrHtml extends HtmlNode{
     }
 
 
+    public VrHtml uptJs(HEWorker worker){
+        forItems("script", (parent, item) -> {
+            SField field = (SField) ((HtmlNode) item).get(0);
+            if(worker==null){
+                field.value = new FastJsOptimizer(field.value).doScan();
+            } else {
+                VrHtmlEvent e;
+                worker.throwEvent(e=new VrHtmlEvent(worker, VrHtmlEvent.Type.JS, field));
+                if(!e.isCanceled())
+                    field.value = new FastJsOptimizer(field.value).doScan();
+            }
+        });
+        return this;
+    }
+
+
     public VrHtml uptCss(VrCssExportTable table){
         ArrayList<HtmlObject> linkStyles = new ArrayList<>();
+        ArrayList<AnStyle> includedStyles = new ArrayList<>();
 
         forItems((parent, cur) -> {
             ICitem attr = cur.getAttr("class");
@@ -359,6 +407,10 @@ public class VrHtml extends HtmlNode{
                     cur.setAttribute("class", style);
                 }
                 linkStyles.add(cur);
+            }
+            AnStyle atrStyle = (AnStyle) cur.getAttr("style");
+            if(atrStyle != null){
+                includedStyles.add(atrStyle);
             }
         });
 
@@ -388,7 +440,8 @@ public class VrHtml extends HtmlNode{
             Style style = (Style) object.getAttr("class");
             for (String orig : style) {
                 if(styles.add(orig)){
-                    singleUsages.add(orig);
+                    if(vrCss.isSingle(".", orig))
+                        singleUsages.add(orig);
                 } else {
                     singleUsages.remove(orig);
                 }
@@ -410,20 +463,24 @@ public class VrHtml extends HtmlNode{
 
         for(HtmlObject object:linkStyles) {
             Style style = (Style) object.getAttr("class");
+            boolean canOpt = object.remAttribute("no-slim")==null;
             int index = 0;
+            ICitem atr = object.getAttr("style");
+            AnStyle atrStyle = (AnStyle) atr;
+
             for (String orig : new ArrayList<>(style)) {
-                if(singleUsages.contains(orig)){
-                    ICitem atr = object.getAttr("style");
-                    AnStyle atrStyle;
+                if(canOpt && singleUsages.contains(orig)){
+                    style.set(index, null);
                     if(atr==null){
                         atrStyle = new AnStyle();
-                    } else {
-                        atrStyle = (AnStyle) atr;
                     }
                     vrCss.extractStyle(".", orig, atrStyle);
 
                     if(atr==null && atrStyle.size()>0){
                         object.setAttribute("style", atrStyle);
+                    }
+                    if(style.isEmpty()){
+                        object.remAttribute("class");
                     }
                 } else {
                     String tweak = table.get(orig);
@@ -437,6 +494,11 @@ public class VrHtml extends HtmlNode{
                 ++index;
             }
         }
+
+
+
+        optVars(vrCss, table, includedStyles);
+
 //        vrCss.renameVar("background-color", "--b");
 //        vrCss.join("""
 //                div{
@@ -444,6 +506,17 @@ public class VrHtml extends HtmlNode{
 //                }
 //                """);
         return this;
+    }
+
+    private void optVars(VrCss vrCss, VrCssExportTable table, ArrayList<AnStyle> includedStyles){
+        for (String var: vrCss.getCssVars()){
+            String res = table.getOrNewVar(var);
+            if(var.equals(res))continue;
+            vrCss.renameVar(var, res);
+            for (AnStyle style:includedStyles){
+                style.renameVar(var, res, res);
+            }
+        }
     }
 
 

@@ -7,7 +7,10 @@ import java.util.Map;
 
 public class VrCssExportTable {
     private final HashMap<String,String> data = new HashMap<>();
+    //todo add encode
+    private final HashMap<String,String> vars = new HashMap<>();
     private int num = 0;
+    private int num2 = 0;
 
     public void addAll(HashMap<String,String> table){
         data.putAll(table);
@@ -45,6 +48,19 @@ public class VrCssExportTable {
             ++num;
         } while (data.containsKey(res));
         data.put(orig, res);
+        return res;
+    }
+
+
+    public String getOrNewVar(String var){
+        String res = data.get(var);
+        if(res!=null)return res;
+        do {
+            res = "--" + CharNum.Default.getCharNumOf(num2);
+            if (res.length() >= var.length()) return res;
+            ++num2;
+        } while (data.containsKey(res));
+        data.put(var, res);
         return res;
     }
 

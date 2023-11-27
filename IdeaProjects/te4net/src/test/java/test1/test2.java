@@ -12,7 +12,7 @@ public class test2 {
             HRouteMap mp = new HRouteMap();
             mp.put("auth", new Ex("k1"));
 
-            System.out.println(mp.get("/auth/check_mail?login=Te4hnoPublic@yandex.ru&crypt-key=&e2=&et=22&"));
+            System.out.println(mp.get("/auth/get_token?api=0&&a=0&api2"));
 
         } catch (Exception e){
             e.printStackTrace();

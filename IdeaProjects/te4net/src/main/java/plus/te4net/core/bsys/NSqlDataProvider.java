@@ -13,14 +13,14 @@ public class NSqlDataProvider implements SqliteUtils, IDataProvider {
 
     public NSqlDataProvider(String suffix, String dbFile) {
         this.conn = createConnection(dbFile);
-        this.suffix = suffix==null?"":"@"+suffix;
-        createTable(suffix);
+        this.suffix = suffix==null?"@root":"@"+suffix;
+        //createTable(this.suffix);
     }
 
     public NSqlDataProvider(String suffix, Connection conn) {
         this.conn = conn;
-        this.suffix = suffix==null?"":"@"+suffix;
-        createTable(suffix);
+        this.suffix = suffix==null?"@root":"@"+suffix;
+        //createTable(this.suffix);
     }
 
 

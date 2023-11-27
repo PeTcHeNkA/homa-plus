@@ -1,17 +1,22 @@
 package plus.requests;
 
+import plus.mcapi.McAuth;
+import plus.mcapi.McUser;
+import plus.te4net.core.api.RequestSession;
+import plus.tson.TJsonParser;
 import plus.tson.TsonMap;
 
 
 public class McJoinServer {
     public final String accessToken;
-    public final String selectedProfile; //uuid
     public final String serverId;
+    public final McUser user;
 
-    public McJoinServer(TsonMap map){
-        accessToken     = map.getStr("accessToken"    );
-        selectedProfile = map.getStr("selectedProfile");
-        serverId        = map.getStr("serverId"       );
+    public McJoinServer(RequestSession session){
+        TsonMap map = new TJsonParser(session.encodeBody()).getMap();
+        accessToken            = map.getStr("accessToken"    );
+        serverId               = map.getStr("serverId"       );
+        user = McAuth.inst.getByUUID(map.getStr("selectedProfile"));
     }
 
 
@@ -23,7 +28,8 @@ public class McJoinServer {
         McJoinServer that = (McJoinServer) o;
 
         if (!accessToken.equals(that.accessToken)) return false;
-        if (!selectedProfile.equals(that.selectedProfile)) return false;
+        if (user == null) return that.user == null;
+        if(!user.uuid.equals(that.user.uuid))return false;
         return serverId.equals(that.serverId);
     }
 
@@ -31,7 +37,8 @@ public class McJoinServer {
     @Override
     public int hashCode() {
         int result = accessToken.hashCode();
-        result = 31 * result + selectedProfile.hashCode();
+        if(user != null)
+            result = 31 * result + user.uuid.hashCode();
         result = 31 * result + serverId.hashCode();
         return result;
     }

@@ -110,4 +110,12 @@ public class HtmlObject implements ICitem {
         }
         b.append('>');
     }
+
+
+    @Override
+    public String toString() {
+        StringBuilder b = new StringBuilder();
+        toString(b);
+        return b.toString();
+    }
 }

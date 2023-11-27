@@ -1,10 +1,12 @@
 package plus.te4net.mds.html.vr;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 
 class Style extends AnStyle implements ICitem {
     final ArrayList<StyleName> names = new ArrayList<>();
+    HashSet<String> immutable;
 
     public String fullName() {
         StringBuilder b = new StringBuilder();
@@ -14,6 +16,17 @@ class Style extends AnStyle implements ICitem {
         }
         b.setLength(b.length() - 1);
         return b.toString();
+    }
+
+
+    @Override
+    public void addParam(StyleParam param) {
+        if(immutable==null){
+            immutable = new HashSet<>();
+            for (StyleParam name:items) immutable.add(name.key);
+        }
+        if(immutable.contains(param.key))return;
+        super.addParam(param);
     }
 
 

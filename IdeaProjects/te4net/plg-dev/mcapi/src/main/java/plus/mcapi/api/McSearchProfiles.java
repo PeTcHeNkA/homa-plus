@@ -1,6 +1,6 @@
 package plus.mcapi.api;
 
-import plus.mcapi.MUser;
+import plus.mcapi.McUser;
 import plus.mcapi.McAuth;
 import plus.requests.McResponse;
 import plus.te4net.core.api.RequestSession;
@@ -21,13 +21,13 @@ public class McSearchProfiles implements PluginRoute {
         System.out.println(session);
 
         String name = session.splat()[0];
-        ArrayList<MUser> users = McAuth.inst.getByName(name);
+        ArrayList<McUser> users = McAuth.inst.getByName(name);
         if(users.isEmpty()){
             session.send(new McResponse("Error", "Not founded", "Not founded").toString());
             return;
         }
         StringBuilder builder = new StringBuilder("[");
-        for(MUser user:users){
+        for(McUser user:users){
             builder.append(user.toGameProfile()).append(",");
         }
         builder.setCharAt(builder.length()-1, ']');

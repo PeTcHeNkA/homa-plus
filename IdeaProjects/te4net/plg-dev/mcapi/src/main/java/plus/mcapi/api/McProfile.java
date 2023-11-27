@@ -1,10 +1,9 @@
 package plus.mcapi.api;
 
-import plus.mcapi.MUser;
+import plus.mcapi.McUser;
 import plus.mcapi.McAuth;
 import plus.te4net.core.api.PluginRoute;
 import plus.te4net.core.api.RequestSession;
-import plus.tson.TsonMap;
 
 import static plus.mcapi.McAuth.basicApiRoute;
 
@@ -21,7 +20,7 @@ public class McProfile implements PluginRoute {
         System.out.println(session);
 
         String uuid = session.splat()[0];
-        MUser user = McAuth.inst.getByUUID(uuid);
+        McUser user = McAuth.inst.getByUUID(uuid);
         if(user==null){
             session.notFound();
             return;

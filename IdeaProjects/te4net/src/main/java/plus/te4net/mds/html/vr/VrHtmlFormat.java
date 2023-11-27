@@ -86,7 +86,7 @@ public class VrHtmlFormat implements IRequestProcessor {
     public static VrHtmlFormat ofHtml(HEWorker worker, String data){
         VrHtml vrHtml = new VrHtml(data).uptCss(worker);
         worker.throwEvent(new VrHtmlEvent(worker, VrHtmlEvent.Type.HTML, vrHtml));
-        return new VrHtmlFormat(vrHtml, worker);
+        return new VrHtmlFormat(vrHtml.uptJs(worker), worker);
     }
 
 

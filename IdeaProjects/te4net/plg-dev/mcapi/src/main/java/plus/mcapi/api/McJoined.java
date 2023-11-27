@@ -1,6 +1,6 @@
 package plus.mcapi.api;
 
-import plus.mcapi.MUser;
+import plus.requests.McJoinServer;
 import plus.te4net.core.api.RequestSession;
 import plus.te4net.core.api.PluginRoute;
 import java.util.HashMap;
@@ -22,19 +22,19 @@ public class McJoined implements PluginRoute {
         String serverId = session.queryParams("serverId");
         String ip       = session.queryParams("ip"      );
 
-        HashMap<String, MUser> server = McJoin.cache.get(serverId);
+        HashMap<String, McJoinServer> server = McJoin.cache.get(serverId);
         if(server==null){
             session.requestError("Not joined!");
             return;
         }
-        MUser user = server.remove(username);
+        McJoinServer joinData = server.remove(username);
 
-        if(user==null){
+        if(joinData==null){
             session.requestError("Not joined!");
             return;
         }
 
-        session.send(new McHasJoined(user.uuid, user.properties()).toString());
+        session.send(new McHasJoined(joinData.user.uuid, joinData.user.properties()).toString());
     }
 }
 

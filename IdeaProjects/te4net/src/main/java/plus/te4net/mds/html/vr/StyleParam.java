@@ -19,4 +19,12 @@ class StyleParam implements ICitem {
             flag = true;
         }
     }
+
+
+    @Override
+    public String toString() {
+        StringBuilder b = new StringBuilder();
+        toString(b);
+        return b.toString();
+    }
 }

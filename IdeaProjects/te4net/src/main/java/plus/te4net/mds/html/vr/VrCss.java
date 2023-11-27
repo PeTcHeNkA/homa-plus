@@ -1,6 +1,9 @@
 package plus.te4net.mds.html.vr;
 
+import plus.tson.utl.CharStrBuilder;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BiConsumer;
 
 
 public class VrCss implements ICitem {
@@ -52,32 +55,30 @@ public class VrCss implements ICitem {
         }
     }
 
+    private final ICitem comma = b -> b.append(',');
 
-    private static class Var implements ICitem {
-        private ArrayList<ArrayList<ICitem>> items;
-        private String header;
+    static class Var implements ICitem {
+        ArrayList<ArrayList<ICitem>> items;
+        String header;
 
         @Override
         public void toString(StringBuilder b) {
-            if(items==null){
-                b.append(header);
-            } else {
+            if(items==null) b.append(header);
+            else {
                 b.append(header).append('(');
-                for (ArrayList<ICitem> item : items) {
+                for (ArrayList<ICitem> item : items){
                     for (ICitem item0:item){
                         item0.toString(b);
                     }
-                    b.append(',');
                 }
-                last(b, ')');
+                b.append(')');
             }
         }
 
 
         private ArrayList<ICitem> add(ICitem e){
-            if(items==null){
+            if(items==null)
                 items = new ArrayList<>();
-            }
             ArrayList<ICitem> res = new ArrayList<>();
             res.add(e);
             items.add(res);
@@ -96,12 +97,35 @@ public class VrCss implements ICitem {
 
     public VrCss(String code) {
         groups = new ArrayList<>();
-        this.chars = code.toCharArray();
+        chars = code.toCharArray();
+        uncommentAll();
         parse();
+        chars = null;
     }
 
 
-    static AnStyle readInline(String code){
+    private void uncommentAll(){
+        CharStrBuilder builder = new CharStrBuilder(chars.length);
+        while (cursor < chars.length) {
+            if(cursor+1>=chars.length)break;
+            char cur = cur(), next = chars[cursor+1];
+            if(cur=='/' && next=='*'){
+                while (cursor+1 < chars.length){
+                    if(cur()=='*'&&chars[cursor+1]=='/')break;
+                    ++cursor;
+                }
+                cursor += 2;
+                continue;
+            }
+            builder.append(cur);
+            ++cursor;
+        }
+        chars = builder.toString().toCharArray();
+        cursor = 0;
+    }
+
+
+    public static AnStyle readInline(String code){
         AnStyle style = new AnStyle();
         new VrCss(code, style);
         return style;
@@ -117,7 +141,11 @@ public class VrCss implements ICitem {
             int start = cursor;
             skipToNext();
             StyleParam param = readSParam(builder);
-            if(param != null && param.key != null && param.value != null){
+            if(param==null){
+                ++cursor;
+                continue;
+            }
+            if(param.key != null && param.value != null){
                 style.items.add(param);
             }
             builder.setLength(0);
@@ -179,7 +207,7 @@ public class VrCss implements ICitem {
 
 
     private static boolean isMatchUsed(char c){
-        return c =='+'||c=='*'||c=='-'||c=='/';
+        return c =='+'||c=='*'||c=='/';
     }
 
 
@@ -194,38 +222,49 @@ public class VrCss implements ICitem {
     private char cur(){
         return chars[cursor];
     }
-
-
-    private String readGroupName(){
-        if(
-                check('@','m','e','d','i','a') ||
-                check('@','c','o','n','t','a','i','n','e','r')
-        ){
-            StringBuilder builder = new StringBuilder();
-            builder.append(cur());
-            ++cursor;
-            while (cursor<chars.length){
-                char cur = cur();
-                if(cur=='{')return builder.toString();
-                if(isEmpty(cur)){
-                    char prev = chars[cursor-1];
-                    if(isEmpty(prev) || prev=='(' || prev==')' || prev==':'){
-                        ++cursor;
-                        continue;
-                    } else {
-                        char next = chars[cursor+1];
-                        if(isEmpty(next) || next=='(' || next==')' || next=='{'){
-                            ++cursor;
-                            continue;
-                        }
-                    }
-                }
-                ++cursor;
-                builder.append(cur);
-            }
-        }
-        return null;
-    }
+//
+//
+//    private String readGroupName(){
+//        if(
+//                check('@','m','e','d','i','a') ||
+//                check('@','c','o','n','t','a','i','n','e','r')
+//        ){
+//            StringBuilder builder = new StringBuilder();
+//            builder.append(cur());
+//            ++cursor;
+//            while (cursor<chars.length){
+//                char cur = cur();
+//                if(cur=='{')return builder.toString();
+//                if(isEmpty(cur)){
+//                    char prev = chars[cursor-1];
+//                    if(isEmpty(prev) || prev=='(' || prev==')' || prev==':'){
+//                        ++cursor;
+//                        continue;
+//                    } else {
+//                        char next = chars[cursor+1];
+//                        if(isEmpty(next) || next=='(' || next==')' || next=='{'){
+//                            ++cursor;
+//                            continue;
+//                        }
+//                    }
+//                }
+//                ++cursor;
+//                builder.append(cur);
+//            }
+//        }
+//        return null;
+//    }
+//
+//
+//    private boolean check(char... chars0){
+//        int lim = Math.min(cursor+chars0.length, chars.length);
+//        int n = 0;
+//        for (int i=cursor;i<lim;i++){
+//            if(chars[i]!=chars0[n])return false;
+//            n++;
+//        }
+//        return true;
+//    }
 
 
     private void goTo(char c){
@@ -261,17 +300,6 @@ public class VrCss implements ICitem {
     }
 
 
-    private boolean check(char... chars0){
-        int lim = Math.min(cursor+chars0.length, chars.length);
-        int n = 0;
-        for (int i=cursor;i<lim;i++){
-            if(chars[i]!=chars0[n])return false;
-            n++;
-        }
-        return true;
-    }
-
-
     private boolean readStyle(Group group){
         if(cursor>=chars.length)return false;
         Style style = new Style();
@@ -292,12 +320,17 @@ public class VrCss implements ICitem {
         while (cursor<chars.length){
             int start = cursor;
             skipToNext();
+            if(cursor>=chars.length)break;
             if(cur()=='}'){
                 ++cursor;
                 break;
             }
             StyleParam param = readSParam(builder);
-            if(param != null && param.key != null && param.value != null){
+            if(param==null){
+                ++cursor;
+                continue;
+            }
+            if(param.key != null && param.value != null){
                 style.items.add(param);
             }
             builder.setLength(0);
@@ -308,7 +341,10 @@ public class VrCss implements ICitem {
     }
 
 
+    //todo
     private StyleParam readSParam(StringBuilder builder){
+        skipToNext();
+        if(cur()==';')return null;
         StyleParam param = new StyleParam();
         while (cursor<chars.length){
             char cur = cur();
@@ -323,99 +359,185 @@ public class VrCss implements ICitem {
         }
         skipToNext();
 
-        while (cursor<chars.length){
-            int start = cursor;
-            skipToNext();
-            if(cur()==';'){
-                ++cursor;
-                break;
-            }
-            if(cur()=='}'){
-                break;
-            }
-            Var var = new Var();
-            if(fillEntry(var, builder, true)!=null){
-                param.value.add(var);
-            }
-            if(start==cursor)throw syntaxError("Infinity loop");
+        Var var = new Var();
+        fillEntry(builder, new Var(), var, new AtomicBoolean(false));
+        if(var.header != null && !var.header.isEmpty()){
+            param.value.add(var);
         }
+
+//        while (cursor<chars.length){
+//            int start = cursor;
+//            skipToNext();
+//            if(cur()==';'){
+//                ++cursor;
+//                break;
+//            }
+//            if(cur()=='}'){
+//                break;
+//            }
+//            Var var = new Var();
+//            fillEntry(builder, null, var);
+//            if(var.header != null && !var.header.isEmpty()){
+//                param.value.add(var);
+//                return param;
+//                //System.out.println("NEN");
+//            }
+////            if(fillEntry(var, builder, true, new FastBuffer<>())!=null){
+////                param.value.add(var);
+////            }
+//            if(start==cursor)throw syntaxError("Infinity loop");
+//        }
 
         return param;
     }
 
 
-    private String fillEntry(Var e, StringBuilder b, boolean root){
+    private void fillEntry(StringBuilder b, Var root, Var curv, AtomicBoolean signal){
         skipToNext();
-        if(cur()=='}')return null;
+        if(cur()=='}')return;
         b.setLength(0);
-        boolean waitEnd0 = false;
         while (cursor<chars.length){
             char cur = cur();
             ++cursor;
             if(cur=='('){
-                e.header = b.toString();
-                waitEnd0 = true;
+                curv.header = b.toString().trim();
+                fillEntry(b, curv, new Var(), signal);
+                if(signal.get())break;
+                b.setLength(0);
+                root.add(curv);
+                curv = new Var();
+                continue;
+            }
+            if(cur==';'||cur=='}') {
+                if(cur=='}') --cursor;
+                if(curv.header==null){
+                    curv.header = b.toString().trim();
+                }
+                signal.set(true);
                 break;
             }
-            if(root){
-                if(cur==';' || cur=='}'){
-                    --cursor;
-                    if(b.length()==0)return null;
-                    return e.header = b.toString();
-                }
+            if(cur==')') {
+                curv.header = b.toString().trim();
+                root.add(curv);
+                break;
             }
-            if(cur==',') {
-                if (b.length() == 0) return null;
-                return e.header = b.toString().trim();
+            if(cur==','){
+                curv.header = b.toString().trim();
+                b.setLength(0);
+                root.add(curv);
+                curv = new Var();
+                root.add(comma);
+                continue;
             }
-
-            if(cur==')'){
-                if(!root){
-                    --cursor;
-                }
-                if(b.length()==0)return null;
-                return e.header = b.toString();
-            }
-
-            if(isEmpty(cur)){
-                char prev = chars[cursor-2];
-                if(isEmpty(prev)||isMatchUsed(prev))continue;
-            }
+            if(isMatchUsed(chars[cursor-1])&&isEmpty(cur))continue;
             b.append(cur);
         }
-        if(groups==null && cursor==chars.length){
-            return e.header = b.toString();
+        if(groups==null && cursor>=chars.length){
+            if(curv.header==null){
+                curv.header = b.toString().trim();
+            }
+            signal.set(true);
         }
-        if(waitEnd0){
-            while (cursor<chars.length){
-                int start = cursor;
-                skipToNext();
-                char cur = cur();
-                if(cur==')')return e.header;
-                if(root && (cur==';' || cur=='}')){
-                    --cursor;
-                    return e.header;
-                }
-                Var e2 = new Var();
-                fillEntry(e2, b, false);
-                if(e2.items==null){
-                    e.add(new SField(e2.header));
-                } else {
-                    ArrayList<ICitem> res = e.add(e2);
-                    ++cursor;
-                    Var i2 = new Var();
-                    while (fillEntry(i2, b, true)!=null){
-                        res.add(i2);
-                        i2 = new Var();
-                    }
-                }
-
-                if(start==cursor)throw syntaxError("Infinity loop");
+        if(curv.items != null){
+            if(curv.items.get(curv.items.size()-1)==comma){
+                curv.items.remove(curv.items.size()-1);
             }
         }
-        if(groups==null)return e.header;
-        throw syntaxError();
     }
+
+
+//    //todo
+//    private String fillEntry(Var e, StringBuilder b, boolean rootf, FastBuffer<Var> root0){
+//        skipToNext();
+//        if(cur()=='}')return null;
+//        b.setLength(0);
+//        boolean waitEnd0 = false;
+//        Var root = root0.get();
+//        while (cursor<chars.length){
+//            char cur = cur();
+//            ++cursor;
+//            if(cur=='('){
+//                root0.put(e);
+//                //root = e;
+//                e.header = b.toString();
+//                waitEnd0 = true;
+//                break;
+//            }
+//            if(rootf){
+//                if(cur==';' || cur=='}'){
+//                    --cursor;
+//                    if(b.length()==0)return null;
+//                    return e.header = b.toString();
+//                }
+//            }
+//            if(cur==',') {
+//                if (b.length() == 0) return null;
+//                e.header = b.toString().trim();
+//                if(root != null) {
+//                    root.add(new SField(e.header));
+//                    root.add(comma);
+//                }
+//                return e.header;
+//            }
+//
+//            if(cur==')'){
+//                if(!rootf){
+//                    --cursor;
+//                }
+//                e.header = b.toString();
+//                if(root != null){
+//                    root.add(new SField(e.header));
+//                    root0.flush();
+//                }
+//                if(b.length()==0)return null;
+//                return e.header;
+//            }
+//
+//            if(isEmpty(cur)){
+//                char prev = chars[cursor-2];
+//                if(isEmpty(prev)||isMatchUsed(prev))continue;
+//            }
+//            b.append(cur);
+//        }
+//        if(groups==null && cursor==chars.length){
+//            return e.header = b.toString();
+//        }
+//        if(waitEnd0){
+//            while (cursor<chars.length){
+//                int start = cursor;
+//                skipToNext();
+//                char cur = cur();
+//                if(cur==')'){
+//                    if(root0.hasNext())
+//                        root0.flush();
+//
+//                    return e.header;
+//                }
+//                if(rootf && (cur==';' || cur=='}')){
+//                    --cursor;
+//                    return e.header;
+//                }
+//                Var e2 = new Var();
+//                fillEntry(e2, b, false, root0);
+//                if(e2.items==null){
+//
+//                    //e.add(new SField(e2.header));
+//                } else {
+//                    ArrayList<ICitem> res = e.add(e2);
+//                    ++cursor;
+//                    Var i2 = new Var();
+//                    while (fillEntry(i2, b, true, root0)!=null){
+//                        //res.add(i2);
+//                        i2 = new Var();
+//                    }
+//                }
+//
+//                if(start==cursor)throw syntaxError("Infinity loop");
+//            }
+//        }
+//        if(groups==null)return e.header;
+//        throw syntaxError();
+//    }
 
 
     private StyleName readStyleName(){
@@ -668,10 +790,39 @@ public class VrCss implements ICitem {
         if(result0==null)return;
         result0.names.get(0).name = null;
         for (StyleParam p:result0.items){
-            if(result.getParam(p.key)==null){
-                result.items.add(p);
+            result.addParam(p);
+//            if(result.getParam(p.key)==null){
+//                result.items.add(p);
+//            }
+        }
+    }
+
+
+    public void forStyles(BiConsumer<Group,Style> consumer){
+        for (Group group:groups) {
+            for (ICitem item:group.items){
+                if(!(item instanceof Style style))continue;
+                consumer.accept(group, style);
             }
         }
+    }
+
+
+    boolean isSingle(String selector, String name){
+        //if(1==1)return false;
+        int count = 0;
+        for (Group group:groups) {
+            for (ICitem item : group.items) {
+                if(!(item instanceof Style style))continue;
+                if(style.names.size()==1){
+                    StyleName name0 = style.names.get(0);
+                    if(name0.selector.equals(selector) && name0.name.equals(name)){
+                        ++count;
+                    }
+                }
+            }
+        }
+        return count == 1;
     }
 
 
@@ -710,7 +861,9 @@ public class VrCss implements ICitem {
 
     private void getCssVarRec(ICitem item, HashSet<String> cssVars){
         if(item instanceof Var){
-            for (ArrayList<ICitem> item0:((Var) item).items){
+            ArrayList<ArrayList<ICitem>> items1 = ((Var) item).items;
+            if(items1==null)return;
+            for (ArrayList<ICitem> item0:items1){
                 for (ICitem iCitem1:item0){
                     getCssVarRec(iCitem1, cssVars);
                 }
@@ -732,14 +885,7 @@ public class VrCss implements ICitem {
         for (Group group:groups) {
             for (ICitem item : group.items) {
                 if(!(item instanceof Style style))continue;
-                for (StyleParam param:style.items){
-                    if(param.key.equals(from)){
-                        param.key = keyTo;
-                    }
-                    for (ICitem iCitem:param.value){
-                        renVarRec(iCitem, from, varTo);
-                    }
-                }
+                style.renameVar(from, keyTo, varTo);
             }
         }
     }
@@ -755,23 +901,6 @@ public class VrCss implements ICitem {
             }
         }
         return null;
-    }
-
-
-    private void renVarRec(ICitem item, String from, String to){
-        if(item instanceof Var){
-            ArrayList<ArrayList<ICitem>> items1 = ((Var) item).items;
-            if(items1==null)return;
-            for (ArrayList<ICitem> item0: items1){
-                for (ICitem iCitem1:item0){
-                    renVarRec(iCitem1, from, to);
-                }
-            }
-        } else if (item instanceof SField val) {
-            if(val.value.equals(from)){
-                val.value = to;
-            }
-        }
     }
 
 

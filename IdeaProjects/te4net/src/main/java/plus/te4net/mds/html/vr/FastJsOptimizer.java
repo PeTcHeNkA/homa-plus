@@ -21,11 +21,29 @@ public class FastJsOptimizer {
     public String doScan(){
         uncommentAll();
         init(toString());
-        return doSkan0();
+        doSkan0();
+
+        return fixLines();
     }
 
 
-    private String doSkan0(){
+    private String fixLines(){
+        String str = toString();
+        builder = new StringBuilder();
+        for (String str0:str.split("\n")){
+            str0 = str0.trim();
+            if(!str0.isEmpty()) {
+                builder.append(str0);
+                if(str0.charAt(str0.length()-1)!=';'){
+                    builder.append('\n');
+                }
+            }
+        }
+        return builder.toString().trim();
+    }
+
+
+    private void doSkan0(){
         skipToNextE();
         try {
             while (cursor < chars.length) {
@@ -37,13 +55,13 @@ public class FastJsOptimizer {
                 write1l();
             }
         } catch (ArrayIndexOutOfBoundsException e){}
-        return builder.toString();
     }
 
 
     private void checkDoScan(){
         checkKeyChar();
         checkString();
+        checkRex();
         checkStartBlock();
     }
 
@@ -51,15 +69,20 @@ public class FastJsOptimizer {
     private void uncommentAll(){
         while (cursor < chars.length) {
             checkString();
-            if(check('/','/')){
+            if(cursor+1>=chars.length)return;
+            char cur = cur(), next = chars[cursor+1];
+            if(cur=='/'&&next=='/'){
                 while (cursor<chars.length && cur() != '\n'){
                     ++cursor;
                 }
-            }else if(check('/','*')){
+                continue;
+            }
+            if(cur=='/' && next=='*'){
                 while (!check('*','/')){
                     ++cursor;
                 }
                 cursor += 2;
+                continue;
             }
             write1l();
         }
@@ -91,6 +114,7 @@ public class FastJsOptimizer {
 
     private void checkKeyChar(){
         checkString();
+        checkRex();
         if(cursor>=chars.length)return;
         switch (cur()){
             case '=':
@@ -114,6 +138,43 @@ public class FastJsOptimizer {
             case '}':
                 remEmptyE();
                 checkEndBlock();
+        }
+    }
+
+
+    private void checkNewLine(){
+        remEmpty();
+        int cur = cursor-1;
+        char cr = ' ';
+        while (cur>0){
+            cr = chars[cur];
+            //????
+            if(!isEmptyE(cr))break;
+            --cur;
+        }
+        if(cur<=0)return;
+        switch (cr){
+            case ';':
+            case '>':
+            case '<':
+            case '=':
+            case '-':
+            case '.':
+            case ',':
+            case '{':
+                skipToNextE();
+                break;
+            case '}':
+                checkEndBlock();
+                break;
+            case ')':
+                write1();
+                skipToNextE();
+                break;
+            default:
+                write1();
+                skipToNextE();
+                break;
         }
     }
 
@@ -147,23 +208,25 @@ public class FastJsOptimizer {
     private void checkString(){
         if(cursor>=chars.length)return;
         char c = cur();
-        switch (c){
-            case '\'':
-            case '"':
-            case '`':
+        switch (c) {
+            case '\'', '"', '`' -> {
                 write1();
                 before(c, this::beforeEndStr);
-                if(cursor>=chars.length)return;
-                write1();
-                skipToNext();
-                break;
-            case '/':
-                write1();
-                beforeRex();
                 if (cursor >= chars.length) return;
                 write1();
                 skipToNext();
-                break;
+            }
+        }
+    }
+    private void checkRex(){
+        if(cursor>=chars.length)return;
+        char c = cur();
+        if(c=='/'){
+            write1();
+            beforeRex();
+            if (cursor >= chars.length) return;
+            write1();
+            skipToNext();
         }
     }
 
@@ -196,42 +259,6 @@ public class FastJsOptimizer {
                 cursor++;
                 app1();
             }
-        }
-    }
-
-
-    private void checkNewLine(){
-        remEmpty();
-        int cur = cursor-1;
-        char cr = ' ';
-        while (cur>0){
-            cr = chars[cur];
-            if(!isEmpty(cr))break;
-            --cur;
-        }
-        if(cur<=0)return;
-        switch (cr){
-            case ';':
-            case '>':
-            case '<':
-            case '=':
-            case '-':
-            case '.':
-            case ',':
-            case '{':
-                skipToNextE();
-                break;
-            case '}':
-                checkEndBlock();
-                break;
-            case ')':
-                write1();
-                skipToNextE();
-                break;
-            default:
-                write1();
-                skipToNextE();
-                break;
         }
     }
 
