@@ -16,8 +16,16 @@ public final class HRouteMap extends RouteNode {
 
 
     public void put(String key, IRequestProcessor value){
-        if(key.charAt(0)=='/')key = key.substring(1);
-        put(new RouteKey(key), value, this, 0);
+        if(key == null || key.isEmpty()){
+            RouteNode node;
+            if(put(0, node = new RouteNode(0))!=null){
+                throw new IllegalArgumentException("Ready exists! ["+key+"] -> ["+value+"]");
+            }
+            node.route = value;
+        } else {
+            RouteKey key0 = new RouteKey(key.charAt(0)=='/'?key.substring(1):key);
+            put(key0, value, this, 0);
+        }
     }
 
 
