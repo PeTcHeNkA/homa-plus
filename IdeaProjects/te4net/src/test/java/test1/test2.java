@@ -11,8 +11,11 @@ public class test2 {
         try {
             HRouteMap mp = new HRouteMap();
             mp.put("auth", new Ex("k1"));
+            mp.put("", new Ex("index"));
 
-            System.out.println(mp.get("/auth/get_token?api=0&&a=0&api2"));
+            //System.out.println(mp.get("/auth/get_token?api=0&&a=0&api2"));
+            System.out.println(mp.get("/"));
+            System.out.println(mp.get("/a"));
 
         } catch (Exception e){
             e.printStackTrace();

@@ -159,6 +159,9 @@ public final class HEWorker extends HWorker implements IVarProvider<RequestSessi
         } else {
             hrt = new HtmlRoute(this, path0, registredName);
         }
+        if(registredName.equals("index")){
+            registredName = "";
+        }
         addRoute(registredName, hrt);
     }
 

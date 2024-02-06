@@ -380,6 +380,7 @@ public class VrHtml extends HtmlNode{
 
     public VrHtml uptJs(HEWorker worker){
         forItems("script", (parent, item) -> {
+            if(item.remAttribute("raw")!=null)return;
             SField field = (SField) ((HtmlNode) item).get(0);
             if(worker==null){
                 field.value = new FastJsOptimizer(field.value).doScan();
@@ -466,36 +467,52 @@ public class VrHtml extends HtmlNode{
             boolean canOpt = object.remAttribute("no-slim")==null;
             int index = 0;
             ICitem atr = object.getAttr("style");
-            AnStyle atrStyle = (AnStyle) atr;
+            AnStyle atrStyle = (AnStyle) object.getAttr("style");
 
             for (String orig : new ArrayList<>(style)) {
                 if(canOpt && singleUsages.contains(orig)){
                     style.set(index, null);
-                    if(atr==null){
+                    if(atrStyle==null){
                         atrStyle = new AnStyle();
                     }
                     vrCss.extractStyle(".", orig, atrStyle);
 
                     if(atr==null && atrStyle.size()>0){
-                        object.setAttribute("style", atrStyle);
+                        object.setAttribute("style", atr = atrStyle);
                     }
                     if(style.isEmpty()){
                         object.remAttribute("class");
                     }
                 } else {
                     String tweak = table.get(orig);
-                    if (tweak == null || Objects.equals(orig, tweak)) {
-                        ++index;
-                        continue;
+                    if (!(tweak == null || Objects.equals(orig, tweak))) {
+                        vrCss.renameStyle(".", orig, tweak);
+                        style.set(index, tweak);
                     }
-                    vrCss.renameStyle(".", orig, tweak);
-                    style.set(index, tweak);
                 }
                 ++index;
             }
         }
 
+        AnStyle svgFills = new AnStyle();
 
+        forItems("svg", (parent, item) -> {
+            HtmlNode node = (HtmlNode) item;
+            ICitem fillAtr = node.getAttr("fill");
+            if(fillAtr!=null){
+                if(fillAtr instanceof SField field){
+                    VrCss.Var var = VrCss.parseVar(field.value);
+                    node.setAttribute("fill", var);
+                    StyleParam param = new StyleParam();
+                    param.key = "";
+                    param.value.add(var);
+                    svgFills.items.add(param);
+                }
+            }
+        });
+        if(svgFills.items.size()>0){
+            includedStyles.add(svgFills);
+        }
 
         optVars(vrCss, table, includedStyles);
 

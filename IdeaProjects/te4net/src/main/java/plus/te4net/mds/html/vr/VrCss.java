@@ -76,6 +76,14 @@ public class VrCss implements ICitem {
         }
 
 
+        @Override
+        public String toString() {
+            StringBuilder b = new StringBuilder();
+            toString(b);
+            return b.toString();
+        }
+
+
         private ArrayList<ICitem> add(ICitem e){
             if(items==null)
                 items = new ArrayList<>();
@@ -92,6 +100,9 @@ public class VrCss implements ICitem {
 
     public VrCss(){
         groups = new ArrayList<>();
+    }
+    private VrCss(ArrayList<Group> groups){
+        this.groups = groups;
     }
 
 
@@ -360,39 +371,26 @@ public class VrCss implements ICitem {
         skipToNext();
 
         Var var = new Var();
-        fillEntry(builder, new Var(), var, new AtomicBoolean(false));
+        fillEntry(true, builder, new Var(), var, new AtomicBoolean(false));
         if(var.header != null && !var.header.isEmpty()){
             param.value.add(var);
         }
-
-//        while (cursor<chars.length){
-//            int start = cursor;
-//            skipToNext();
-//            if(cur()==';'){
-//                ++cursor;
-//                break;
-//            }
-//            if(cur()=='}'){
-//                break;
-//            }
-//            Var var = new Var();
-//            fillEntry(builder, null, var);
-//            if(var.header != null && !var.header.isEmpty()){
-//                param.value.add(var);
-//                return param;
-//                //System.out.println("NEN");
-//            }
-////            if(fillEntry(var, builder, true, new FastBuffer<>())!=null){
-////                param.value.add(var);
-////            }
-//            if(start==cursor)throw syntaxError("Infinity loop");
-//        }
-
         return param;
     }
 
 
-    private void fillEntry(StringBuilder b, Var root, Var curv, AtomicBoolean signal){
+    public static Var parseVar(String str){
+        VrCss vrcss = new VrCss((ArrayList<Group>) null);
+        vrcss.chars = str.toCharArray();
+        Var cur = new Var();
+
+        vrcss.fillEntry(true, new StringBuilder(), new Var(), cur, new AtomicBoolean(false));
+
+        return cur;
+    }
+
+
+    private void fillEntry(boolean root0, StringBuilder b, Var root, Var curv, AtomicBoolean signal){
         skipToNext();
         if(cur()=='}')return;
         b.setLength(0);
@@ -401,7 +399,7 @@ public class VrCss implements ICitem {
             ++cursor;
             if(cur=='('){
                 curv.header = b.toString().trim();
-                fillEntry(b, curv, new Var(), signal);
+                fillEntry(false, b, curv, new Var(), signal);
                 if(signal.get())break;
                 b.setLength(0);
                 root.add(curv);
@@ -421,15 +419,29 @@ public class VrCss implements ICitem {
                 root.add(curv);
                 break;
             }
-            if(cur==','){
-                curv.header = b.toString().trim();
-                b.setLength(0);
-                root.add(curv);
-                curv = new Var();
-                root.add(comma);
-                continue;
+            if(root0){
+                if(cur==' '){
+                    char other = cur();
+                    if(other==','||other==' ')continue;
+                    if(b.length()>0) {
+                        other = b.charAt(b.length() - 1);
+                        if (other == ',' || other == ' ') continue;
+                    }
+                }
+            } else {
+                if (cur == ',') {
+                    curv.header = b.toString().trim();
+                    b.setLength(0);
+                    root.add(curv);
+                    curv = new Var();
+                    root.add(comma);
+                    continue;
+                }
             }
             if(isMatchUsed(chars[cursor-1])&&isEmpty(cur))continue;
+//            if(cur=='"'||cur=='\''){
+//                b.append('\\');
+//            }
             b.append(cur);
         }
         if(groups==null && cursor>=chars.length){
@@ -444,100 +456,6 @@ public class VrCss implements ICitem {
             }
         }
     }
-
-
-//    //todo
-//    private String fillEntry(Var e, StringBuilder b, boolean rootf, FastBuffer<Var> root0){
-//        skipToNext();
-//        if(cur()=='}')return null;
-//        b.setLength(0);
-//        boolean waitEnd0 = false;
-//        Var root = root0.get();
-//        while (cursor<chars.length){
-//            char cur = cur();
-//            ++cursor;
-//            if(cur=='('){
-//                root0.put(e);
-//                //root = e;
-//                e.header = b.toString();
-//                waitEnd0 = true;
-//                break;
-//            }
-//            if(rootf){
-//                if(cur==';' || cur=='}'){
-//                    --cursor;
-//                    if(b.length()==0)return null;
-//                    return e.header = b.toString();
-//                }
-//            }
-//            if(cur==',') {
-//                if (b.length() == 0) return null;
-//                e.header = b.toString().trim();
-//                if(root != null) {
-//                    root.add(new SField(e.header));
-//                    root.add(comma);
-//                }
-//                return e.header;
-//            }
-//
-//            if(cur==')'){
-//                if(!rootf){
-//                    --cursor;
-//                }
-//                e.header = b.toString();
-//                if(root != null){
-//                    root.add(new SField(e.header));
-//                    root0.flush();
-//                }
-//                if(b.length()==0)return null;
-//                return e.header;
-//            }
-//
-//            if(isEmpty(cur)){
-//                char prev = chars[cursor-2];
-//                if(isEmpty(prev)||isMatchUsed(prev))continue;
-//            }
-//            b.append(cur);
-//        }
-//        if(groups==null && cursor==chars.length){
-//            return e.header = b.toString();
-//        }
-//        if(waitEnd0){
-//            while (cursor<chars.length){
-//                int start = cursor;
-//                skipToNext();
-//                char cur = cur();
-//                if(cur==')'){
-//                    if(root0.hasNext())
-//                        root0.flush();
-//
-//                    return e.header;
-//                }
-//                if(rootf && (cur==';' || cur=='}')){
-//                    --cursor;
-//                    return e.header;
-//                }
-//                Var e2 = new Var();
-//                fillEntry(e2, b, false, root0);
-//                if(e2.items==null){
-//
-//                    //e.add(new SField(e2.header));
-//                } else {
-//                    ArrayList<ICitem> res = e.add(e2);
-//                    ++cursor;
-//                    Var i2 = new Var();
-//                    while (fillEntry(i2, b, true, root0)!=null){
-//                        //res.add(i2);
-//                        i2 = new Var();
-//                    }
-//                }
-//
-//                if(start==cursor)throw syntaxError("Infinity loop");
-//            }
-//        }
-//        if(groups==null)return e.header;
-//        throw syntaxError();
-//    }
 
 
     private StyleName readStyleName(){

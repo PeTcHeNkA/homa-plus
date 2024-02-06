@@ -20,6 +20,8 @@ public class FastJsOptimizer {
 
     public String doScan(){
         uncommentAll();
+
+        //if(1==1)return toString();
         init(toString());
         doSkan0();
 
@@ -84,6 +86,7 @@ public class FastJsOptimizer {
                 cursor += 2;
                 continue;
             }
+            checkRex();
             write1l();
         }
     }

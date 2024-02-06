@@ -18,7 +18,8 @@ domains={
 		routes={
 			assets/etc={type="svg",  headers={access-control-allow-origin='*'}},
 			assets/tms={type="html", headers={access-control-allow-origin='*'}},
-			launch={type="files", cache=(3600)}
+			launch={type="files", cache=(3600)},
+			tweak={type="files", headers={content-type="application/json; charset=UTF-8"}, cache=(10)}
 		}
 	}
 }}

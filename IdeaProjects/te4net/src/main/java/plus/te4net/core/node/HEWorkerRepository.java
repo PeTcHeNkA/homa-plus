@@ -263,14 +263,23 @@ final class HEWorkerRepository extends HWorkerRepositoryBase implements ClassMan
     IRequestProcessor buildRoute(HEWorker worker, File workDir, String patch, TsonMap map){
         String type = map.getOrDefault("type", new TsonStr("none")).getStr();
         File root = new File(workDir, map.getOrDefault("dir", new TsonStr(patch)).getStr());
+        TsonObj headers = map.get("headers");
+        IRequestProcessor result;
         switch (type){
             case "files":
             case "file-three":
-                return new FileThreeProc(worker, root,
+                result = new FileThreeProc(worker, root,
                         map.getOrDefault("cache",new TsonInt(DEF_CACHE_TIME)).getInt()
                 );
+                break;
+            default:
+                result = CGzipRoute.build(worker, root, map);
+                break;
         }
-        return CGzipRoute.build(worker, root, map);
+        if(headers != null){
+            result = new TupleProcessor(HeadersProcessor.build(headers), result);
+        }
+        return result;
     }
 
 

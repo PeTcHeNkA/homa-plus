@@ -1,7 +1,6 @@
 package test1;
 
 import plus.te4net.core.Tehnet;
-import plus.te4net.core.node.TehnetSimple;
 
 
 public class TestTehnet {
@@ -11,7 +10,7 @@ public class TestTehnet {
             session.send("""
                     Hello World!
                     """);
-            TehnetSimple.getLogger().info(session);
+            Tehnet.getLogger().info(session);
 
         }).useDomain("example.ru").start();
     }
