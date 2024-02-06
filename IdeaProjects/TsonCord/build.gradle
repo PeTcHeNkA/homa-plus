@@ -1,0 +1,44 @@
+plugins {
+    id 'java'
+}
+
+compileJava.options.encoding = 'UTF-8'
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "net.dv8tion:JDA:5.0.0-beta.20"
+    implementation 'ch.qos.logback:logback-classic:1.4.6'
+    implementation 'it.unimi.dsi:fastutil:8.5.12'
+
+    implementation 'org.ow2.asm:asm-util:9.5'
+    implementation 'org.ow2.asm:asm-tree:9.5'
+    implementation 'org.ow2.asm:asm-analysis:9.5'
+
+
+//    implementation 'com.discord4j:discord4j-core:3.2.4'
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'C:/Users/Te4hnoPlus/IdeaProjects/TsonConfigurations/src/main/java'
+            srcDir 'C:/Users/Te4hnoPlus/IdeaProjects/te4_async_utls/src/main/java'
+            srcDir 'C:/Users/Te4hnoPlus/IdeaProjects/te4_plugin_system/src/main/java'
+
+            srcDir 'C:/Users/Te4hnoPlus/IdeaProjects/te4net/src'
+        }
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
