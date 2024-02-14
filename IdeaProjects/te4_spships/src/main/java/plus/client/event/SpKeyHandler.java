@@ -14,6 +14,7 @@ import plus.asyutl.thread.PopThreadedPool;
 import plus.client.ISpREntity;
 import plus.client.camera.Camera;
 import plus.common.network.spship.SpShootPacket;
+import plus.common.player.PlayerSpship;
 import plus.utls.MathUtils;
 
 import static plus.utls.MathUtils.wrapDegrees180;
@@ -29,18 +30,20 @@ public class SpKeyHandler extends KeyHandler {
         super(wrapper, SpKeyHandler::build, group, lore, i, modify);
     }
 
+
     private static SpShootPacket build(){
         if(settings.thirdPersonView == 1){
             Entity entity = Minecraft.getMinecraft().getRenderViewEntity();
             ISpREntity ispr = (ISpREntity) entity;
             return new SpShootPacket(
-                    wrapDegrees360((float) -ispr.getDCache()[0]),
-                    wrapDegrees180(Camera.spshipRotY-90) + 90
+                    wrapDegrees360((float) -ispr.getDCache()[0]+180),
+                    wrapDegrees180(-Camera.spshipRotY+90)-90
             );
         } else {
             EntityPlayerSP player = Minecraft.getMinecraft().player;
-            return new SpShootPacket(
-                    player.rotationYawHead, player.rotationPitch
+            return new SpShootPacket(//not edit
+                    wrapDegrees360(player.rotationYawHead),
+                    wrapDegrees180(player.rotationPitch+90)-90
             );
         }
     }
