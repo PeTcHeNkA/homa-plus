@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "AGG",
+    "OCG",
+    "AGG"
+  ],
+  "key": {
+    "C": {"item": "te4_spships:sp_press"},
+    "O": {"item": "te4_spships:oxy_ballon_l2"},
+    "A": {"item": "te4_spships:plate_armored"},
+    "G": {"item": "te4_spships:iron_gear"}
+  },
+  "result": {
+    "item": "te4_spships:quantificator",
+    "data": 0,
+    "count": 1
+  }
+}

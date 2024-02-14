@@ -1,0 +1,7 @@
+{"parent":"te4_spships:sp_guns/gun_v1_0",
+  "overrides":[
+    {"predicate":{"cmd":1},"model":"te4_spships:sp_guns/gun_v1_0"},
+    {"predicate":{"cmd":2},"model":"te4_spships:sp_guns/gun_v2_0"},
+    {"predicate":{"cmd":3},"model":"te4_spships:sp_guns/gun_v3_0"}
+  ]
+}
