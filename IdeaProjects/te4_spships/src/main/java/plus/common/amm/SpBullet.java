@@ -18,6 +18,8 @@ import plus.client.entity.SpModelManager;
 import plus.common.player.PlayerSpship;
 import plus.common.spship.entity.LivingBlock;
 import plus.common.spship.modules.SpGun;
+import plus.utls.MathUtils;
+
 import java.util.List;
 
 
@@ -62,14 +64,14 @@ public class SpBullet extends LivingBlock {
         float f = -MathHelper.sin(yaw * 0.017453292F) * cosPith;
         float f1 = -MathHelper.sin(pith * 0.017453292F);
         float f2 = MathHelper.cos(yaw * 0.017453292F) * cosPith;
-        this.calcMotions(f, f1, f2, power, inaccuracy);
+        this.calcMotions(f, f1, f2, power*0.5f, inaccuracy);
 
         this.setLocationAndAngles(
                 shooter.posX + (shooter.motionX + motionX)*boost,
                 shooter.posY + (shooter.motionY + motionY)*boost,
                 shooter.posZ + (shooter.motionZ + motionZ)*boost,
-                shooter.rotationYaw,
-                shooter.rotationPitch
+                MathUtils.wrapDegrees360(yaw),
+                pith
         );
         return this;
     }
@@ -110,6 +112,7 @@ public class SpBullet extends LivingBlock {
 
 
     private void calcImpact(){
+        if(world.isRemote)return;
         BlockPos pos = new BlockPos(
                 MathHelper.floor(posX),
                 MathHelper.floor(posY),
@@ -214,6 +217,8 @@ public class SpBullet extends LivingBlock {
                         (float) this.motionX,
                         (float) this.motionY,
                         (float) this.motionZ
+//                        this.rotationYaw,
+//                        this.rotationPitch
                 )
         );
         compound.setShort("m", (short) getModelId());
@@ -226,7 +231,11 @@ public class SpBullet extends LivingBlock {
         this.motionX = list.getFloatAt(0);
         this.motionY = list.getFloatAt(1);
         this.motionZ = list.getFloatAt(2);
+//        this.rotationYaw = list.getFloatAt(3);
+//        this.rotationPitch = list.getFloatAt(4);
         setModelId(compound.getShort("m"));
+        clearSpRot();
+        //onClientInit();
     }
 
 
@@ -256,20 +265,22 @@ public class SpBullet extends LivingBlock {
 
 
     @SideOnly(Side.CLIENT)
-    private int first = 0;
+    private boolean first = false;
     @Override
     @SideOnly(Side.CLIENT)
     public void onClientUpdate() {
-        super.onClientUpdate();
-        if(first>3)return;
-        ++first;
-        clearSpRot();
+        if(first){
+            super.onClientUpdate();
+        } else {
+            clearSpRot();
+            first = true;
+        }
     }
 
 
     @Override
     @SideOnly(Side.CLIENT)
     public boolean needRender() {
-        return first>3;
+        return first;
     }
 }
