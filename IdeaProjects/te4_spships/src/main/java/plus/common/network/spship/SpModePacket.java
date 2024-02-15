@@ -12,14 +12,6 @@ public class SpModePacket extends BasicPacket {
 
     public boolean mode = false;
 
-    public static class ServerHandler implements IMessageHandler<SpModePacket, SpModePacket> {
-        @Override
-        public SpModePacket onMessage(SpModePacket message, MessageContext ctx) {
-            ((PlayerSpship)ctx.getServerHandler().player).setSpMode(message.mode);
-            return null;
-        }
-    }
-
     public static class ClientHandler implements IMessageHandler<SpModePacket, SpModePacket> {
         @Override
         public SpModePacket onMessage(SpModePacket message, MessageContext ctx) {

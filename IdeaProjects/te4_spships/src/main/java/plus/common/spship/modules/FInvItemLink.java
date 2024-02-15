@@ -8,24 +8,21 @@ import plus.common.mashine.inv.IItemLink;
 public final class FInvItemLink implements IItemLink {
     private final IInventory inventory;
     private final int slot;
-    private ItemStack item;
 
-    public FInvItemLink(IInventory inventory, int slot, ItemStack item) {
+    public FInvItemLink(IInventory inventory, int slot) {
         this.inventory = inventory;
         this.slot = slot;
-        this.item = item;
     }
 
 
     @Override
     public ItemStack getItem() {
-        return item;
+        return inventory.getStackInSlot(slot);
     }
 
 
     @Override
     public void setItem(ItemStack item) {
-        this.item = item;
         inventory.setInventorySlotContents(slot, item);
     }
 }

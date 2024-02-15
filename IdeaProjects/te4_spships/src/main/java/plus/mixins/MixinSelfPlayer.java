@@ -108,6 +108,8 @@ public abstract class MixinSelfPlayer extends AbstractClientPlayer implements Pl
             if(prevSpShield != curShieldSp) {
                 prevSpShield = curShieldSp;
                 Camera.overlay.onPostDamage(curShieldSp);
+            } else {
+                Camera.overlay.updateEnrg(getSp());
             }
         }
 

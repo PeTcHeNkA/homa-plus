@@ -10,7 +10,7 @@ public interface ISpREntity {
     double getPrevSpXZRot();
     double getPrevSpYRot();
 
-    void clearSpRot();
+    default void clearSpRot(){};
 
     boolean isActive();
     void setActive(boolean b);

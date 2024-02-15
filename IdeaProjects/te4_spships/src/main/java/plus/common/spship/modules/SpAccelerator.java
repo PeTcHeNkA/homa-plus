@@ -66,14 +66,15 @@ public final class SpAccelerator{
 
 
     public static void damage(IItemLink[] links, SpShip sp, int dmg){
+        int fdmg;
         for (IItemLink link : links) {
             ItemStack item = link.getItem();
-            dmg = item.getItemDamage() + dmg;
-            if (dmg > item.getMaxDamage()) {
+            fdmg = item.getItemDamage() + dmg;
+            if (fdmg > item.getMaxDamage()) {
                 link.setItem(ItemStack.EMPTY);
                 sp.calcParams();
             } else {
-                item.setItemDamage(dmg);
+                item.setItemDamage(fdmg);
             }
         }
     }

@@ -69,8 +69,8 @@ public class GunCraftProcessor extends DmgPowerProcessor{
 
     private float energyCast(float phys, float enrg){
         float finPhys = phys;
-        finPhys = finPhys*finPhys * 14;
-        float finEnrg = enrg*enrg*35;
+        finPhys = finPhys*finPhys * 28;
+        float finEnrg = enrg*enrg*220;
         return finEnrg + finPhys;
     }
 }

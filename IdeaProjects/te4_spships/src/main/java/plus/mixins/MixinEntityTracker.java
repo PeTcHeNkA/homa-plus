@@ -10,6 +10,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import java.util.Set;
 
 
+@Deprecated //todo remove this
 @Mixin(EntityTracker.class)
 public class MixinEntityTracker {
     @Final

@@ -7,8 +7,7 @@ import plus.common.player.PlayerSpship;
 import plus.common.spship.SpShip;
 import plus.common.spship.item.ItemRegenShield;
 
-import static plus.common.spship.modules.SpAccelerator.coefCount;
-import static plus.common.spship.modules.SpAccelerator.trimTo;
+import static plus.common.spship.modules.SpAccelerator.*;
 
 
 public class SpRegenShield implements ITickModule{
@@ -66,6 +65,8 @@ public class SpRegenShield implements ITickModule{
                     ns += regenAmount;
                     if (ns > sp.maxShield) ns = sp.maxShield;
                     sp0.setSpShield(ns);
+
+                    damage(links, sp, 1);
                 }
             }
         }

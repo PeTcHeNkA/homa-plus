@@ -201,8 +201,8 @@ tile.sp_oxy_charger.lore_2=для очистки и сжатия кислоро�
 gui.sp_shield_a=Прочность щита: §a%s/%s
 gui.sp_shield_b=Щит: §a%s/%s §c+%s/%sE
 
-gui.sp_shield_c=Щит: §a%s/%s&7|§f%sF§7|§e%s
-gui.sp_shield_d=Щит: §a%s/%s&7|§f%sF§7|§e%s §c+%s/%sE
+gui.sp_shield_c=Щит: §a%s/%s§7|§f%sF§7|§e%s
+gui.sp_shield_d=Щит: §a%s/%s§7|§f%sF§7|§e%s §c+%s/%sE
 
 gui.sp_accelerator=Ускоритель: §a+%s%%/%sE
 

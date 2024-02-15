@@ -17,16 +17,16 @@ public class ISprRenderer {
     static final RenderItem renderItem = Minecraft.getMinecraft().getRenderItem();
 
 
-    public static void render(ISpREntity e, float partialTicks){
-        if(!e.needRender())return;
+    public static void render(ISpREntity ent, float partialTicks){
+        if(!ent.needRender())return;
         double rotXZ = MathUtils.interpolateRotation(
-                e.getPrevSpXZRot(),e.getSpXZRot(), partialTicks
+                ent.getPrevSpXZRot(), ent.getSpXZRot(), partialTicks
         );
         double rotY = (float) MathUtils.interpolateRotation(
-                e.getPrevSpYRot(), e.getSpYRot(), partialTicks
+                ent.getPrevSpYRot(), ent.getSpYRot(), partialTicks
         );
 
-        double[] dc = e.getDCache();
+        double[] dc = ent.getDCache();
         dc[1] = dc[0] = MathUtils.interpolateRotation(dc[1], dc[0],0.2f);
         dc[0] = rotXZ = MathUtils.interpolateRotation(dc[0], rotXZ, 0.2f);
 
@@ -35,14 +35,14 @@ public class ISprRenderer {
         GlStateManager.pushMatrix();
         GlStateManager.disableCull();
 
-        float scale = e.getScale();
+        float scale = ent.getScale();
 
         GlStateManager.scale(scale, scale, scale);
         GlStateManager.translate(0,0.5,0);
         GlStateManager.rotate((float) rotXZ, 0, 1, 0);
         GlStateManager.rotate((float) rotY, 1, 0, 0);
 
-        renderItemModel(e.getSpModel());
+        renderItemModel(ent.getSpModel());
 
         GlStateManager.enableCull();
         GlStateManager.popMatrix();

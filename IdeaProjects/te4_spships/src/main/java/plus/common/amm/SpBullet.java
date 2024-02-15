@@ -16,6 +16,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.client.entity.SpModelManager;
 import plus.common.player.PlayerSpship;
+import plus.common.spship.SpShip;
 import plus.common.spship.entity.LivingBlock;
 import plus.common.spship.modules.SpGun;
 import plus.utls.MathUtils;
@@ -56,20 +57,25 @@ public class SpBullet extends LivingBlock {
     }
 
 
-    private static final float boost = 2.5f;
-    public SpBullet shoot(EntityLivingBase shooter, float yaw, float pith, float power, float inaccuracy) {
+    private static final float boost = 0.5f;
+    public SpBullet shoot(SpShip spShip, EntityLivingBase shooter, float yaw, float pith, float power, float inaccuracy) {
         this.shooter = shooter;
 
         float cosPith = MathHelper.cos(pith * 0.017453292F);
-        float f = -MathHelper.sin(yaw * 0.017453292F) * cosPith;
-        float f1 = -MathHelper.sin(pith * 0.017453292F);
-        float f2 = MathHelper.cos(yaw * 0.017453292F) * cosPith;
-        this.calcMotions(f, f1, f2, power*0.5f, inaccuracy);
+        float vX = -MathHelper.sin(yaw * 0.017453292F) * cosPith;
+        float vY = -MathHelper.sin(pith * 0.017453292F);
+        float vZ = MathHelper.cos(yaw * 0.017453292F) * cosPith;
+        this.calcMotions(
+                vX,
+                vY,
+                vZ,
+                power*((float)(1+Math.sqrt(spShip.speedSq())/2)), inaccuracy
+        );
 
         this.setLocationAndAngles(
-                shooter.posX + (shooter.motionX + motionX)*boost,
-                shooter.posY + (shooter.motionY + motionY)*boost,
-                shooter.posZ + (shooter.motionZ + motionZ)*boost,
+                shooter.posX + motionX*boost,
+                shooter.posY + motionY*boost,
+                shooter.posZ + motionZ*boost,
                 MathUtils.wrapDegrees360(yaw),
                 pith
         );

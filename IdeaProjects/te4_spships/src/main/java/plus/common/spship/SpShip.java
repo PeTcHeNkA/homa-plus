@@ -1,6 +1,7 @@
 package plus.common.spship;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.Item;
@@ -14,6 +15,8 @@ import plus.common.player.PlayerSpship;
 import plus.common.spship.item.ItemCorpus;
 import plus.common.spship.item.ItemModule;
 import plus.common.spship.modules.*;
+import plus.utls.MathUtils;
+
 import java.util.ArrayList;
 
 
@@ -31,7 +34,7 @@ public class SpShip {
     public IEnergyFolder powerSystem;
     public ITickModule[] tickModules;
     public SpAccelerator accelerator;
-
+    public double prevSpX, prevSpY, prevSpZ;
 
     public SpShip(Entity owner) {
         this.owner = (EntityPlayer) owner;
@@ -129,6 +132,28 @@ public class SpShip {
         for(ITickModule module:tickModules){
             module.onTick(this);
         }
+        prevSpX = owner.posX;
+        prevSpY = owner.posY;
+        prevSpZ = owner.posZ;
+    }
+
+    public double speedX(){
+        return MathUtils.range(prevSpX, owner.posX);
+    }
+    public double speedY(){
+        return MathUtils.range(prevSpY, owner.posY);
+    }
+    public double speedZ(){
+        return MathUtils.range(prevSpZ, owner.posZ);
+    }
+    public double speedSq(){
+        double num1 = speedX();
+        num1 *= num1;
+        double num2 = speedZ();
+        num2 *= num2;
+        double num3 = speedZ();
+        num3 *= num3;
+        return num1 + num2 + num3;
     }
 
 

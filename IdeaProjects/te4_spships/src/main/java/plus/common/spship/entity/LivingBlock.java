@@ -62,48 +62,57 @@ public abstract class LivingBlock extends Entity implements ILivingBlock {
 
 
     @Override
+    @SideOnly(Side.CLIENT)
     public double getSpXZRot() {
         return mem.curZX;
     }
 
 
     @Override
+    @SideOnly(Side.CLIENT)
     public double getPrevSpXZRot() {
         return mem.prevXZ;
     }
 
 
     @Override
+    @SideOnly(Side.CLIENT)
     public double getPrevSpYRot() {
         return mem.prevY;
     }
 
 
     @Override
+    @SideOnly(Side.CLIENT)
     public double getSpYRot() {
         return mem.curY;
     }
 
 
     @Override
+    @SideOnly(Side.CLIENT)
     public void clearSpRot() {
-        mem.prevXZ = mem.curZX = mem.cache[0] = mem.cache[1] = 180-rotationYaw;
+        mem.prevXZ = mem.curZX = mem.cache[0] = mem.cache[1] = MathUtils.wrapDegrees360(180-rotationYaw);
     }
 
 
     @Override
+    @SideOnly(Side.CLIENT)
     public boolean isActive() {
         return mem.active;
     }
 
 
     @Override
+    @SideOnly(Side.CLIENT)
     public void setActive(boolean active) {
         mem.active = active;
     }
 
 
+
     @Override
+    @SideOnly(Side.CLIENT)
     public void setDCache(double[] cache) {
         mem.cache = cache;
     }

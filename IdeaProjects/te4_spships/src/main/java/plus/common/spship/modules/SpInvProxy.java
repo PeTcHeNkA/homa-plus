@@ -27,7 +27,7 @@ public class SpInvProxy {
     public IItemLink link(int slot){
         IItemLink link = links[slot];
         if(link==null)
-            link = links[slot] = new FInvItemLink(inv, slots[slot], items[slot]);
+            link = links[slot] = new FInvItemLink(inv, slots[slot]);
         return link;
     }
 

@@ -105,7 +105,7 @@ public class SpGun implements ISpGun{
             } else {
                 bullet = new SpBullet(shooter.world, modelId, physDmg*critDmg, engrDmg*critDmg, mark);
             }
-            shooter.world.spawnEntity(bullet.shoot(shooter, yaw, pith,
+            shooter.world.spawnEntity(bullet.shoot(sp, shooter, yaw, pith,
                     physDmg>engrDmg?1.1f:1.35f, 0)
             );
             damage(links, sp, 1);

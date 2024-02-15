@@ -8,22 +8,14 @@ import plus.common.player.PlayerSpship;
 
 
 public class SpShootPacket extends BasicPacket {
-
-    public static class ServerHandler implements IMessageHandler<SpShootPacket, SpShootPacket> {
-        @Override
-        public SpShootPacket onMessage(SpShootPacket message, MessageContext ctx) {
-            ((PlayerSpship)ctx.getServerHandler().player).shoot(message.yaw, message.pith);
-            return null;
-        }
-    }
-    protected float yaw;
-    protected float pith;
+    public float yaw, pith;
 
     public SpShootPacket(){}
 
     public SpShootPacket(float yaw, float pith){
         this.yaw = yaw;
         this.pith = pith;
+        System.out.println("yaw: "+yaw+", pith: "+pith);
     }
 
     @Override

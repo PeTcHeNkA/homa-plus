@@ -14,7 +14,7 @@ public class SyncRenderSlot extends Slot {
 
 
     public static SyncRenderSlot build(IInventory inventoryIn, int index, int xPosition, int yPosition, EntityPlayer player){
-        if(player instanceof EntityPlayerMP){
+        if(!player.world.isRemote){
             return new SyncSlotServer(inventoryIn, index, xPosition, yPosition);
         } else {
             return new SyncSlotClient(inventoryIn, index, xPosition, yPosition);
@@ -32,7 +32,7 @@ final class SyncSlotServer extends SyncRenderSlot {
     }
 
     public void onSynchronizedSlotChange(EntityPlayer player) {
-        PacketSyncRenderItem.updatePlayerCache((EntityPlayerMP) player, getSlotIndex(), getStack());
+        plus.server.ServPacketSyncRenderItem.updatePlayerCache((EntityPlayerMP) player, getSlotIndex(), getStack());
     }
 }
 

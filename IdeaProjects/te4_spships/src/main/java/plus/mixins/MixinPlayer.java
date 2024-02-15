@@ -2,6 +2,7 @@ package plus.mixins;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.passive.EntityTameable;
@@ -22,6 +23,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.EnumDifficulty;
@@ -38,6 +40,7 @@ import plus.common.player.PlayerSpship;
 import plus.common.spship.SpShip;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -93,6 +96,8 @@ public abstract class MixinPlayer extends EntityLivingBase implements PlayerSpsh
     @Shadow public abstract NBTTagCompound getLeftShoulderEntity();
 
     @Shadow public abstract NBTTagCompound getRightShoulderEntity();
+
+    @Shadow public abstract void addMovementStat(double p_71000_1_, double p_71000_3_, double p_71000_5_);
 
     public MixinPlayer(World worldIn) {
         super(worldIn);
@@ -191,11 +196,11 @@ public abstract class MixinPlayer extends EntityLivingBase implements PlayerSpsh
         setSize(0.6f, 1.8f);
     }
 
-
+    private final ArrayList<float[]> shoots = new ArrayList<>(5);
     @Override
     public void shoot(float yaw, float pith) {
-        if(isSpshipMode()) {
-            spShip.shoot(yaw, pith);
+        if(isSpshipMode() && shoots.size()<5){
+            shoots.add(new float[]{yaw, pith});
         }
     }
 
@@ -230,6 +235,10 @@ public abstract class MixinPlayer extends EntityLivingBase implements PlayerSpsh
 
         boolean isSprinting = this.isSprinting();
         if(isSpshipMode()){
+            if(!shoots.isEmpty()) {
+                float[] vec = shoots.remove(0);
+                spShip.shoot(vec[0], vec[1]);
+            }
             if(isSprinting){
                 spSpeed = getSp().accelerate(spSpeed);
                 capabilities.setFlySpeed(0.07f * spSpeed);
@@ -299,6 +308,99 @@ public abstract class MixinPlayer extends EntityLivingBase implements PlayerSpsh
         }
     }
 
+
+//    /**
+//     * @author Te4hno
+//     * @reason add Sp
+//     */
+//    @Overwrite
+//    public void travel(float strafe, float vertical, float forward) {
+//        double d0 = this.posX;
+//        double d1 = this.posY;
+//        double d2 = this.posZ;
+//
+//        if (this.capabilities.isFlying && !this.isRiding()) {
+//            double d3 = this.motionY;
+//            float f = this.jumpMovementFactor;
+//            this.jumpMovementFactor = this.capabilities.getFlySpeed() * (float)(this.isSprinting() ? 2 : 1);
+//
+//            if(isSpshipMode()){
+//                travel0(strafe, vertical, forward);
+//            } else {
+//                super.travel(strafe, vertical, forward);
+//            }
+//
+//            this.motionY = d3 * 0.6D;
+//            this.jumpMovementFactor = f;
+//            this.fallDistance = 0.0F;
+//            this.setFlag(7, false);
+//        } else {
+//            super.travel(strafe, vertical, forward);
+//        }
+//        this.addMovementStat(this.posX - d0, this.posY - d1, this.posZ - d2);
+//
+//    }
+//
+//    private void travel0(float strafe, float vertical, float forward) {
+//        float f6 = 0.91F;
+//        BlockPos.PooledMutableBlockPos pos = BlockPos.PooledMutableBlockPos.retain(this.posX, this.getEntityBoundingBox().minY - 1.0D, this.posZ);
+//
+//        if (this.onGround) {
+//            IBlockState underState = this.world.getBlockState(pos);
+//            f6 = underState.getBlock().getSlipperiness(underState, this.world, pos, this) * 0.91F;
+//        }
+//
+//        float f7 = 0.16277136F / (f6 * f6 * f6);
+//        float f8;
+//
+//        if (this.onGround) {
+//            f8 = this.getAIMoveSpeed() * f7;
+//        } else {
+//            f8 = this.jumpMovementFactor;
+//        }
+//
+//        this.moveRelative(strafe, vertical, forward, f8);
+//        f6 = 0.91F;
+//
+//        if (this.onGround) {
+//            IBlockState underState = this.world.getBlockState(pos.setPos(this.posX, this.getEntityBoundingBox().minY - 1.0D, this.posZ));
+//            f6 = underState.getBlock().getSlipperiness(underState, this.world, pos, this) * 0.91F;
+//        }
+//
+//        double prev = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
+//
+//        this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
+//
+//        if (this.collidedHorizontally) {
+//            double d11 = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
+//            System.out.println("NEN! w"+world.isRemote+";"+prev+"->"+d11);
+//            double d3 = prev - d11;
+//            float f5 = (float)(d3 * 10.0D - 3.0D);
+//
+//            if (f5 > 0.0F) {
+//                this.playSound(this.getFallSound((int)f5), 1.0F, 1.0F);
+//                this.attackEntityFrom(DamageSource.FLY_INTO_WALL, f5);
+//            }
+//        }
+//
+//        pos.setPos(this.posX, 0.0D, this.posZ);
+//
+//        if (!this.world.isRemote || this.world.isBlockLoaded(pos) && this.world.getChunk(pos).isLoaded()) {
+//            if (!this.hasNoGravity()) {
+//                this.motionY -= 0.08D;
+//            }
+//           } else if (this.posY > 0.0D) {
+//            this.motionY = -0.1D;
+//        } else {
+//            this.motionY = 0.0D;
+//        }
+//
+//        this.motionY *= 0.9800000190734863D;
+//        this.motionX *= f6;
+//        this.motionZ *= f6;
+//        pos.release();
+//    }
+//
 
     /**
      * @author Te4hno

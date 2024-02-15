@@ -1,12 +1,10 @@
 package plus.proxy;
 
 import net.minecraft.block.Block;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
@@ -30,7 +28,10 @@ import plus.common.mashine.press.SpPressTileEntity;
 import plus.common.mashine.react.SpReactTileEntity;
 import plus.common.network.PacketSyncRenderItem;
 import plus.common.network.spship.SpModePacket;
+import plus.server.ServerEvents;
+import plus.server.SpModeServerHandler;
 import plus.common.network.spship.SpShootPacket;
+import plus.server.SpShootServerHandler;
 import plus.common.spship.entity.OffSpShip;
 import plus.common.spship.item.*;
 import java.util.HashSet;
@@ -57,23 +58,16 @@ public class ServerProxy {
                 ItemGun.class
         );
         network = NetworkRegistry.INSTANCE.newSimpleChannel(SpMain.MOD_ID);
+        //TODO MOVE TO SERVER ONLY
         network.registerMessage(
-                SpShootPacket.ServerHandler.class, SpShootPacket.class,0, Side.SERVER);
+                SpShootServerHandler.class, SpShootPacket.class,0, Side.SERVER);
         network.registerMessage(
-                SpModePacket.ServerHandler.class,  SpModePacket.class, 1, Side.SERVER);
+                SpModeServerHandler.class,  SpModePacket.class, 1, Side.SERVER);
 
         MinecraftForge.EVENT_BUS.register(this);
+        MinecraftForge.EVENT_BUS.register(new ServerEvents());
     }
 
-
-    @SubscribeEvent
-    public void onStartTracking(PlayerEvent.StartTracking event) {
-        if (event.getTarget().world.isRemote) return;
-        if (!(event.getTarget() instanceof EntityPlayerMP)) return;
-        PacketSyncRenderItem.sendPlayerCacheOf(
-                (EntityPlayerMP) event.getEntityPlayer(), event.getTarget().getEntityId()
-        );
-    }
 
 
     @SubscribeEvent
