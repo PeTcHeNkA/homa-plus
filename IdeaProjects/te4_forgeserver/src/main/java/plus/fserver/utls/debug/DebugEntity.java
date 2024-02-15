@@ -1,0 +1,56 @@
+package plus.fserver.utls.debug;
+
+import net.minecraft.entity.Entity;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
+
+@SideOnly(Side.CLIENT)
+public class DebugEntity extends Entity {
+    private String name;
+    public DebugEntity(World world){
+        this("");
+    }
+    public DebugEntity(){
+        this("");
+    }
+
+    public DebugEntity(String name) {
+        super(null);
+        this.name =name;
+        setAABB(0,0,0);
+    }
+
+
+    public DebugEntity setPos(double x, double y, double z){
+        this.posX = x; this.posY = y; this.posZ = z;
+        return setAABB(x, y, z);
+    }
+
+
+    public DebugEntity setAABB(double x, double y, double z){
+        super.setEntityBoundingBox(new AxisAlignedBB(
+                x-0.5, y-0.5, z-0.5, x+0.5, y+0.5, z+0.5
+        ));
+        return this;
+    }
+
+    @Override
+    public String toString() {
+        return String.format(name+"[x: %s, y: %s, z: %s] ", posX, posY, posZ)+getEntityBoundingBox();
+    }
+
+    @Override
+    protected void entityInit() {}
+
+
+    @Override
+    protected void readEntityFromNBT(NBTTagCompound compound) {}
+
+
+    @Override
+    protected void writeEntityToNBT(NBTTagCompound compound) {}
+}

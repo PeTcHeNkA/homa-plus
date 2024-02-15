@@ -1,0 +1,413 @@
+package plus.fserver.world.light;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.init.Blocks;
+import net.minecraft.world.chunk.*;
+import net.minecraft.block.state.*;
+import net.minecraft.world.chunk.storage.*;
+import net.minecraft.world.*;
+import net.minecraft.util.*;
+import net.minecraft.util.math.*;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import plus.fserver.utls.collections.PooledLongQueue;
+import plus.fserver.world.light.api.IChunkLighting;
+import plus.fserver.world.light.api.ILightingEngine;
+
+import java.util.concurrent.locks.ReentrantLock;
+
+
+public class LightingEngine implements ILightingEngine {
+    public static final Logger LOGGER = LogManager.getLogger("PhosphorLE");
+    private final World world;
+    private final PooledLongQueue[] queuedLightUpdates;
+    private final PooledLongQueue[] queuedDarkenings;
+    private final PooledLongQueue[] queuedBrightenings;
+    private final PooledLongQueue initialBrightenings;
+    private final PooledLongQueue initialDarkenings;
+    private boolean updating;
+    private static final long[] neighborShifts;
+    private final BlockPos.MutableBlockPos curPos;
+    private Chunk curChunk;
+    private long curChunkIdentifier;
+    private long curData;
+    private boolean isNeighborDataValid;
+    private final NeighborInfo[] neighborInfos;
+    private PooledLongQueue.LongQueueIterator queueIt;
+    private final ReentrantLock lock = new ReentrantLock();
+
+    private PooledLongQueue swap;
+
+    public LightingEngine(final World world) {
+        this.queuedLightUpdates = new PooledLongQueue[EnumSkyBlock.values().length];
+        this.queuedDarkenings = new PooledLongQueue[16];
+        this.queuedBrightenings = new PooledLongQueue[16];
+        this.updating = false;
+        this.curPos = new BlockPos.MutableBlockPos();
+        this.isNeighborDataValid = false;
+        this.neighborInfos = new NeighborInfo[6];
+        this.world = world;
+        final PooledLongQueue.Pool pool = new PooledLongQueue.Pool();
+        this.initialBrightenings = new PooledLongQueue(pool);
+        this.initialDarkenings = new PooledLongQueue(pool);
+        for (int i = 0; i < EnumSkyBlock.values().length; ++i) {
+            this.queuedLightUpdates[i] = new PooledLongQueue(pool);
+        }
+        for (int i = 0; i < this.queuedDarkenings.length; ++i) {
+            this.queuedDarkenings[i] = new PooledLongQueue(pool);
+        }
+        for (int i = 0; i < this.queuedBrightenings.length; ++i) {
+            this.queuedBrightenings[i] = new PooledLongQueue(pool);
+        }
+        for (int i = 0; i < this.neighborInfos.length; ++i) {
+            this.neighborInfos[i] = new NeighborInfo();
+        }
+        swap = new PooledLongQueue(pool);
+    }
+
+
+    @Override
+    public void scheduleLightUpdate(final EnumSkyBlock lightType, final BlockPos pos) {
+        this.scheduleLightUpdate(lightType, encodeWorldCoord(pos));
+    }
+
+
+    private void scheduleLightUpdate(final EnumSkyBlock lightType, final long pos) {
+        final PooledLongQueue queue = this.queuedLightUpdates[lightType.ordinal()];
+        queue.add(pos);
+        if (queue.size() >= 4194304) {
+            this.processLightUpdatesForType(lightType);
+        }
+    }
+
+
+    @Override
+    public void processLightUpdates() {
+        this.processLightUpdatesForType(EnumSkyBlock.SKY);
+        this.processLightUpdatesForType(EnumSkyBlock.BLOCK);
+    }
+
+
+    @Override
+    public void processLightUpdatesForType(final EnumSkyBlock lightType) {
+        if (this.updating || this.world.isRemote && !this.isCallingFromMainThread()) {
+            return;
+        }
+        final PooledLongQueue queue = this.queuedLightUpdates[lightType.ordinal()];
+        if (queue.isEmpty()) return;
+        if(lock.tryLock()) {
+            try {
+                this.processLightUpdatesForTypeInner(lightType, queue);
+            } finally {
+                lock.unlock();
+            }
+        }
+    }
+
+
+    @Override
+    public void processSync() {
+        this.processSync(EnumSkyBlock.SKY);
+        this.processSync(EnumSkyBlock.BLOCK);
+    }
+
+
+    @Override
+    public void processSync(final EnumSkyBlock lightType){
+        if (this.updating || this.world.isRemote && !this.isCallingFromMainThread()) {
+            return;
+        }
+        final PooledLongQueue queue = this.queuedLightUpdates[lightType.ordinal()];
+        if (queue.isEmpty()) return;
+        try {
+            lock.lock();
+            this.queuedLightUpdates[lightType.ordinal()] = swap;
+            this.processLightUpdatesForTypeInner(lightType, queue);
+            swap = queue;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+
+    @SideOnly(Side.CLIENT)
+    private boolean isCallingFromMainThread() {
+        return Minecraft.getMinecraft().isCallingFromMinecraftThread();
+    }
+
+
+    private void processLightUpdatesForTypeInner(final EnumSkyBlock lightType, final PooledLongQueue queue) {
+        this.curChunkIdentifier = -1L;
+        this.queueIt = queue.iterator();
+        while (this.nextItem()) {
+            if (this.curChunk == null) continue;
+            final int oldLight = this.getCursorCachedLight(lightType),
+                    newLight = this.calculateNewLightFromCursor(lightType);
+            if (oldLight < newLight)
+                this.initialBrightenings.add((long)newLight << 60 | this.curData);
+            else {
+                if (oldLight <= newLight) continue;
+                this.initialDarkenings.add(this.curData);
+            }
+        }
+        this.queueIt = this.initialBrightenings.iterator();
+        while (this.nextItem()) {
+            final int newLight2 = (int)(this.curData >> 60 & 0xFL);
+            if (newLight2 > this.getCursorCachedLight(lightType)) {
+                this.enqueueBrightening(this.curPos, this.curData & 0xFFFFFFFFFFFFFFFL, newLight2, this.curChunk, lightType);
+            }
+        }
+
+        this.queueIt = this.initialDarkenings.iterator();
+        while (this.nextItem()) {
+            final int oldLight = this.getCursorCachedLight(lightType);
+            if (oldLight != 0) {
+                this.enqueueDarkening(this.curPos, this.curData, oldLight, this.curChunk, lightType);
+            }
+        }
+
+        for (int curLight = 15; curLight >= 0; --curLight) {
+            this.queueIt = this.queuedDarkenings[curLight].iterator();
+            while (this.nextItem()) {
+                if (this.getCursorCachedLight(lightType) >= curLight) continue;
+                final IBlockState state = posToState(this.curPos, this.curChunk);
+                final int luminosity = this.getCursorLuminosity(state, lightType);
+                int opacity;
+                if (luminosity >= 14) {
+                    opacity = 1;
+                }
+                else {
+                    opacity = this.getPosOpacity((BlockPos)this.curPos, state);
+                }
+                if (this.calculateNewLightFromCursor(luminosity, opacity, lightType) < curLight) {
+                    int newLight3 = luminosity;
+                    this.fetchNeighborDataFromCursor(lightType);
+                    for (final NeighborInfo info : this.neighborInfos) {
+                        final Chunk nChunk = info.chunk;
+                        if (nChunk != null) {
+                            final int nLight = info.light;
+                            if (nLight != 0) {
+                                final BlockPos.MutableBlockPos nPos = info.pos;
+                                if (curLight - this.getPosOpacity(nPos, posToState(nPos, info.section)) >= nLight) {
+                                    this.enqueueDarkening(nPos, info.key, nLight, nChunk, lightType);
+                                }
+                                else {
+                                    newLight3 = Math.max(newLight3, nLight - opacity);
+                                }
+                            }
+                        }
+                    }
+                    this.enqueueBrighteningFromCursor(newLight3, lightType);
+                }
+                else {
+                    this.enqueueBrighteningFromCursor(curLight, lightType);
+                }
+            }
+            this.queueIt = this.queuedBrightenings[curLight].iterator();
+            while (this.nextItem()) {
+                final int oldLight2 = this.getCursorCachedLight(lightType);
+                if (oldLight2 == curLight) {
+                    this.world.notifyLightSet(this.curPos);
+                    if (curLight <= 1) {
+                        continue;
+                    }
+                    this.spreadLightFromCursor(curLight, lightType);
+                }
+            }
+        }
+        this.updating = false;
+    }
+
+
+    private void fetchNeighborDataFromCursor(final EnumSkyBlock lightType) {
+        if (this.isNeighborDataValid) return;
+
+        this.isNeighborDataValid = true;
+        for (int i = 0; i < this.neighborInfos.length; ++i) {
+            final NeighborInfo neighborInfo;
+            final NeighborInfo info = neighborInfo = this.neighborInfos[i];
+            final long key = this.curData + LightingEngine.neighborShifts[i];
+            neighborInfo.key = key;
+            if ((key & 0x1000000000000000L) != 0x0L) {
+                info.chunk = null;
+                info.section = null;
+            } else {
+                final BlockPos.MutableBlockPos nPos = decodeWorldCoord(info.pos, key);
+                Chunk nChunk;
+                if ((key & 0xFFFFFC3FFFFF0L) == this.curChunkIdentifier)
+                    info.chunk = nChunk = this.curChunk;
+                else
+                    info.chunk = nChunk = this.getChunk(nPos);
+                if (nChunk != null) {
+                    final ExtendedBlockStorage nSection = nChunk.getBlockStorageArray()[nPos.getY() >> 4];
+                    info.light = getCachedLightFor(nChunk, nSection, nPos, lightType);
+                    info.section = nSection;
+                }
+            }
+        }
+    }
+
+
+    private int getCachedLightFor(final Chunk chunk, final ExtendedBlockStorage storage, final BlockPos pos, final EnumSkyBlock type) {
+        if (storage == null) {
+            if (type == EnumSkyBlock.SKY && chunk.canSeeSky(pos))
+                return type.defaultLightValue;
+            return 0;
+        } else if (type == EnumSkyBlock.SKY) {
+            if (!chunk.getWorld().provider.hasSkyLight()) return 0;
+            return storage.getSkyLight(pos.getX() & 0xF, pos.getY() & 0xF, pos.getZ() & 0xF);
+        } else {
+            if (type == EnumSkyBlock.BLOCK)
+                return storage.getBlockLight(pos.getX() & 0xF, pos.getY() & 0xF, pos.getZ() & 0xF);
+            return type.defaultLightValue;
+        }
+    }
+
+
+    private int calculateNewLightFromCursor(final EnumSkyBlock lightType) {
+        final IBlockState state = posToState(this.curPos, this.curChunk);
+        final int luminosity;
+        return this.calculateNewLightFromCursor(
+                luminosity = this.getCursorLuminosity(state, lightType),
+                (luminosity >= 14)?1:this.getPosOpacity(this.curPos, state),
+                lightType
+        );
+    }
+
+
+    private int calculateNewLightFromCursor(final int luminosity, final int opacity, final EnumSkyBlock lightType) {
+        if (luminosity >= 15 - opacity) return luminosity;
+
+        int newLight = luminosity;
+        this.fetchNeighborDataFromCursor(lightType);
+        for (final NeighborInfo info : this.neighborInfos) {
+            if (info.chunk != null) {
+                final int nLight = info.light;
+                newLight = Math.max(nLight - opacity, newLight);
+            }
+        }
+        return newLight;
+    }
+
+
+    private void spreadLightFromCursor(final int curLight, final EnumSkyBlock lightType) {
+        this.fetchNeighborDataFromCursor(lightType);
+        for (final NeighborInfo info : this.neighborInfos) {
+            final Chunk nChunk = info.chunk;
+            if (nChunk != null) {
+                final int newLight = curLight - this.getPosOpacity(info.pos, posToState(info.pos, info.section));
+                if (newLight > info.light)
+                    this.enqueueBrightening(info.pos, info.key, newLight, nChunk, lightType);
+            }
+        }
+    }
+
+
+    private void enqueueBrighteningFromCursor(final int newLight, final EnumSkyBlock lightType) {
+        this.enqueueBrightening(this.curPos, this.curData, newLight, this.curChunk, lightType);
+    }
+
+
+    private void enqueueBrightening(final BlockPos pos, final long longPos, final int newLight, final Chunk chunk, final EnumSkyBlock lightType) {
+        this.queuedBrightenings[newLight].add(longPos);
+        chunk.setLightFor(lightType, pos, newLight);
+    }
+
+
+    private void enqueueDarkening(final BlockPos pos, final long longPos, final int oldLight, final Chunk chunk, final EnumSkyBlock lightType) {
+        this.queuedDarkenings[oldLight].add(longPos);
+        chunk.setLightFor(lightType, pos, 0);
+    }
+
+
+    private static BlockPos.MutableBlockPos decodeWorldCoord(final BlockPos.MutableBlockPos pos, final long longPos) {
+        return pos.setPos(
+                (int)(longPos >> 26 & 0x3FFFFFFL) - 33554432,
+                    (int)(longPos >> 52 & 0xFFL),
+                (int)(longPos & 0x3FFFFFFL) - 33554432
+        );
+    }
+
+
+    private long encodeWorldCoord(final BlockPos pos) {
+        return (long) pos.getY() << 52 | pos.getX() + 33554432L << 26 | pos.getZ() + 33554432L;
+    }
+
+
+    private boolean nextItem() {
+        if (!this.queueIt.hasNext()) {
+            this.queueIt.finish();
+            this.queueIt = null;
+            return false;
+        }
+        this.curData = this.queueIt.next();
+        this.isNeighborDataValid = false;
+        decodeWorldCoord(this.curPos, this.curData);
+        final long chunkIdentifier = this.curData & 0xFFFFFC3FFFFF0L;
+        if (this.curChunkIdentifier != chunkIdentifier) {
+            this.curChunk = this.getChunk(this.curPos);
+            this.curChunkIdentifier = chunkIdentifier;
+        }
+        return true;
+    }
+
+
+    private int getCursorCachedLight(final EnumSkyBlock lightType) {
+        return ((IChunkLighting)this.curChunk).getCachedLightFor(lightType, this.curPos);
+    }
+
+
+    private int getCursorLuminosity(final IBlockState state, final EnumSkyBlock lightType) {
+        if (lightType != EnumSkyBlock.SKY)
+            return MathHelper.clamp(state.getLightValue(world, curPos), 0, 15);
+        if (this.curChunk.canSeeSky(this.curPos))
+            return EnumSkyBlock.SKY.defaultLightValue;
+        return 0;
+    }
+
+
+    private int getPosOpacity(final BlockPos pos, final IBlockState state) {
+        return MathHelper.clamp(state.getLightOpacity(this.world, pos), 1, 15);
+    }
+
+
+    private Chunk getChunk(final BlockPos pos) {
+        return this.world.getChunkProvider().getLoadedChunk(pos.getX() >> 4, pos.getZ() >> 4);
+    }
+
+
+    private IBlockState posToState(final BlockPos pos, final Chunk chunk) {
+        return posToState(pos, chunk.getBlockStorageArray()[pos.getY() >> 4]);
+    }
+
+
+    private IBlockState posToState(final BlockPos pos, final ExtendedBlockStorage section) {
+        if (section != Chunk.NULL_BLOCK_STORAGE)
+            return section.getData().get(pos.getX() & 0xF, pos.getY() & 0xF, pos.getZ() & 0xF);
+        return BlockIDIndexes.AIR_STATE;
+    }
+
+
+    static {
+        neighborShifts = new long[6];
+        for (int i = 0; i < 6; ++i) {
+            final Vec3i offset = EnumFacing.VALUES[i].getDirectionVec();
+            LightingEngine.neighborShifts[i] = ((long)offset.getY() << 52 | (long)offset.getX() << 26 | (long) offset.getZ());
+        }
+    }
+
+
+    private static class NeighborInfo {
+        Chunk chunk;
+        ExtendedBlockStorage section;
+        int light;
+        long key;
+        final BlockPos.MutableBlockPos pos;
+        
+        private NeighborInfo() {
+            this.pos = new BlockPos.MutableBlockPos();
+        }
+    }
+}

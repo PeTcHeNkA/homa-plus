@@ -1,0 +1,15 @@
+[
+  {
+    "modid": "elca_fserver",
+    "name": "Elca Server",
+    "description": "Elca Server performance patches. Enterprise edition",
+    "version": "2.3",
+    "mcversion": "1.12",
+    "url": "https://vk.com/te4hnoplus",
+    "updateUrl": "",
+    "authorList": ["Te4hnoPlus"],
+    "credits": "",
+    "logoFile": "",
+    "screenshots": []
+  }
+]

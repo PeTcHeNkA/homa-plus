@@ -1,0 +1,299 @@
+package plus.fserver.server;
+
+import net.minecraft.crash.CrashReport;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.crafting.CraftingManager;
+import net.minecraft.network.play.server.SPacketTimeUpdate;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.ReportedException;
+import net.minecraft.world.WorldServer;
+import net.minecraftforge.common.DimensionManager;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import plus.fserver.ElcaConfig;
+import plus.fserver.api.PWorldServer;
+import plus.fserver.world.light.api.ILightingEngineProvider;
+import java.util.concurrent.*;
+
+
+public final class AsyWorldTickerV2 implements ThreadFactory, IAsyWorldTicker{
+    private static final boolean useSync = false;
+    private static final Logger LOGGER = LogManager.getLogger();
+    public final ScheduledThreadPoolExecutor service;
+    private final ConcurrentHashMap<Integer, WorldInfo> infs = new ConcurrentHashMap<>();
+    private final MinecraftServer server;
+    private final int saveAllEvery = ElcaConfig.SAVE_WORLD_RATE;
+    private final boolean ignoreErrors;
+    private boolean enabled = true;
+    private Throwable error;
+    private int tickCounter;
+    private int countThreads = 0;
+    private long lastError = 0;
+
+    static{
+        System.out.printf("Async ticker V2 initialized\n");
+    }
+
+
+    public AsyWorldTickerV2(MinecraftServer server){
+        this.server = server;
+        this.ignoreErrors = ElcaConfig.IGNORE_ERRORS;
+        service = new AsyPoolTickerExecutor(ElcaConfig.ASY_THREAD_POOL_SIZE, this);
+        service.scheduleAtFixedRate(new NetworkTicker(), 0, ElcaConfig.NETWORK_TICK_RATE, TimeUnit.MILLISECONDS);
+    }
+
+    class NetworkTicker implements Runnable{
+        @Override
+        public void run() {
+            server.getNetworkSystem().networkTick();
+        }
+    }
+
+
+    public void addDedicatedServerToTasks(){
+        service.schedule(server, 50, TimeUnit.MILLISECONDS);
+    }
+
+
+    @Override
+    public void runAsync(Runnable task){
+        if(enabled) service.execute(task);
+        else task.run();
+    }
+
+
+    @Override
+    public void stop(){
+        if(!enabled)return;
+        enabled = false;
+        service.shutdown();
+        try {
+            service.awaitTermination(10, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+
+    @Override
+    public void markNeedSave(){
+        for(WorldInfo inf:infs.values()){
+            inf.save = saveAllEvery;
+        }
+    }
+
+
+    @Override
+    public void tick() throws Throwable {
+        Integer[] ids = DimensionManager.getIDs(this.tickCounter++ % 300 == 0);
+        for(int id:ids){
+            WorldInfo result = infs.get(id);
+            if(result==null){
+                WorldServer worldServer = DimensionManager.getWorld(id);
+                if(worldServer != null) {
+                    result = new WorldInfo(id);
+                    infs.put(id, result);
+                }
+            }
+            if(useSync) tickWorld(result);
+        }
+        if(error != null){
+            throw error;
+        }
+    }
+
+
+    @Override
+    public Thread newThread(@NotNull Runnable r) {
+        Thread thread = new Thread(r);
+        thread.setName("MC World thread#"+(countThreads++));
+        thread.setDaemon(true);
+        return thread;
+    }
+
+
+    private final class WorldInfo{
+        final int id;
+        public int checkToUnload;
+        public int save;
+        int tickCounter = 0;
+        //private long lastTicked;
+        private ScheduledFuture<?> future;
+        private ScheduledFuture<?> light;
+        private WorldInfo(int id) {
+            this.id = id;
+            if(!useSync) active();
+        }
+        public void active(){
+            future = service.scheduleAtFixedRate(
+                    () -> tickWorld(WorldInfo.this), 50, 50, TimeUnit.MILLISECONDS
+            );
+            light = service.scheduleAtFixedRate(
+                    () -> updateLight(WorldInfo.this), 50, 50, TimeUnit.MILLISECONDS
+            );
+        }
+
+
+        public void stop(){
+            if(tickCounter==-1)return;
+            System.out.println("STOP TICKING WORLD "+id);
+            tickCounter = -1;
+            infs.remove(id);
+            try {
+                future.cancel(true);
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+            try {
+                light.cancel(true);
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+    private void updateLight(WorldInfo inf){
+        if(!enabled){
+            inf.stop();
+            return;
+        }
+        WorldServer worldserver = DimensionManager.getWorld(inf.id);
+        if(worldserver==null || !worldserver.loaded){
+            inf.stop();
+            ((ILightingEngineProvider)worldserver).getLightingEngine().processLightUpdates();
+        }
+    }
+
+
+    private void tickWorld(WorldInfo inf){
+        if(!enabled){
+            inf.stop();
+            return;
+        }
+        WorldServer worldserver = DimensionManager.getWorld(inf.id);
+        if(worldserver==null || !worldserver.loaded){
+            inf.stop();
+            return;
+        }
+        //System.out.println("Next tick: "+(System.currentTimeMillis()-inf.lastTicked) );
+        ++inf.tickCounter;
+
+        long curNanoTime = System.nanoTime();
+        try {
+            worldserver.tickSyncTasks();
+            if (inf.tickCounter % ElcaConfig.TIME_PACKET_RATE == 0) {
+                SPacketTimeUpdate packet = new SPacketTimeUpdate(
+                        worldserver.getTotalWorldTime(), worldserver.getWorldTime(),
+                        worldserver.getGameRules().doDaylightCycle.getBoolean());
+                EntityPlayer player;
+                for (int i=0;i<worldserver.playerEntities.size();i++){
+                    player = worldserver.playerEntities.get(i);
+                    if(player instanceof EntityPlayerMP) {
+                        EntityPlayerMP mp = (EntityPlayerMP) player;
+                        mp.connection.onTickWorld();
+                        mp.connection.sendPacket(packet);
+                    }
+                }
+            } else {
+                EntityPlayer player;
+                for (int i=0;i<worldserver.playerEntities.size();i++){
+                    player = worldserver.playerEntities.get(i);
+                    if(player instanceof EntityPlayerMP) {
+                        EntityPlayerMP mp = (EntityPlayerMP) player;
+                        mp.connection.onTickWorld();
+                    }
+                }
+            }
+            if(inf.tickCounter % 200 == 0){
+                worldserver.provider.getBiomeProvider().cleanupCache();
+            }
+
+            FMLCommonHandler.instance().onPreWorldTick(worldserver);
+            if(inf.checkToUnload++> ElcaConfig.CHECK_TO_UNLOAD_RATE) {
+                //todo fix join to unloading world
+                inf.checkToUnload = 0;
+                if (((PWorldServer)worldserver).canUnload()) {
+                    unload(worldserver, inf.id);
+                    inf.save = 0;
+                    inf.stop();
+                    return;
+                }
+            }
+            if(inf.save++>saveAllEvery){
+                try {
+                    worldserver.saveAllChunks(true,null);
+                    server.getPlayerList().saveLocalPlayers(worldserver);
+                    inf.save = 0;
+                } catch (Exception e){
+                    inf.save = saveAllEvery - 50;
+                    LOGGER.error("SAVE ERROR");
+                    e.printStackTrace();
+                }
+            }
+            worldserver.tick();
+            worldserver.updateEntities();
+            FMLCommonHandler.instance().onPostWorldTick(worldserver);
+            worldserver.getEntityTracker().tick();
+
+            server.worldTickTimes.get(inf.id)[inf.tickCounter % 100] = System.nanoTime() - curNanoTime;
+        } catch (ReportedException exception){
+            if(ignoreErrors){
+                CrashReport report = exception.getCrashReport();
+                LOGGER.error("----- CRITICAL SERVER ERROR ----------");
+                LOGGER.error("", report.getCrashCause());
+                LOGGER.error("--------------------------------------");
+            } else {
+                stopAnError(exception.getCause(), worldserver);
+            }
+        } catch (Exception throwable) {
+            if(ignoreErrors){
+                LOGGER.error("----- CRITICAL SERVER ERROR ----------");
+                LOGGER.error("", throwable);
+                LOGGER.error("--------------------------------------");
+            } else {
+                stopAnError(throwable, worldserver);
+            }
+        } catch (OutOfMemoryError error){
+            long curTime = System.currentTimeMillis();
+            if(curTime - lastError < 50){
+                stopAnError(error, worldserver);
+            }
+            lastError = curTime;
+            worldserver.cleanCache();
+            CraftingManager.index.clear();
+        } catch (Throwable throwable){
+            stopAnError(throwable, worldserver);
+        }
+    }
+
+
+    private void stopAnError(Throwable throwable, WorldServer worldServer){
+        enabled = false;
+        error = throwable;
+        CrashReport report = CrashReport.makeCrashReport(throwable, "Exception ticking world");
+        if(worldServer != null) worldServer.addWorldInfoToCrashReport(report);
+    }
+
+
+    private void unload(WorldServer server, int id) {
+        try {
+            if(server.getChunkProvider().canSave()) {
+                server.saveAllChunks(true,null);
+                server.getChunkProvider().flushToDisk();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        DimensionManager.setWorld(id, null, this.server);
+    }
+}

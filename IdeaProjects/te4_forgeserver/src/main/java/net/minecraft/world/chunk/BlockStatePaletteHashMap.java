@@ -1,0 +1,188 @@
+package net.minecraft.world.chunk;
+
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.BlockIDIndexes;
+import net.minecraft.util.math.MathHelper;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+import java.util.Arrays;
+
+
+public class BlockStatePaletteHashMap implements IBlockStatePalette {
+    private IBlockState[] values;
+    private int[] intKeys;
+    private IBlockState[] byId;
+    private short nextFreeIndex;
+    private int mapSize;
+    private final IBlockStatePaletteResizer paletteResizer;
+    private final int bits;
+
+    public BlockStatePaletteHashMap(int bitsIn, IBlockStatePaletteResizer paletteResizerIn) {
+        int initialCapacity = 1 << bitsIn;
+        initialCapacity = (int)((float)initialCapacity / 0.8F);
+        this.values = new IBlockState[initialCapacity];
+        this.intKeys = new int[initialCapacity];
+        this.byId = new IBlockState[initialCapacity];
+        this.bits = bitsIn;
+        this.paletteResizer = paletteResizerIn;
+    }
+
+
+    @Override
+    public IBlockState get(int idIn) {
+        return idIn >= 0 && idIn < this.byId.length ? this.byId[idIn] : BlockIDIndexes.AIR_STATE;
+    }
+
+
+    @Override
+    public int idFor(IBlockState state) {
+        int i = getId(state);
+        if (i == -1) {
+            i = add(state);
+            if (i >= 1 << this.bits) {
+                i = this.paletteResizer.onResize(this.bits + 1, state);
+            }
+        }
+        return i;
+    }
+
+
+    private int getId(IBlockState state) {
+        return this.getValue(this.getIndex(state, this.hashObject(state)));
+    }
+
+
+    private int getValue(int num) {
+        return num == -1 ? -1 : this.intKeys[num];
+    }
+
+
+    @SideOnly(Side.CLIENT)
+    public void read(PacketBuffer buf) {
+        clear();
+        int i = buf.readVarInt();
+        for (int j = 0; j < i; ++j) {
+            add(BlockIDIndexes.BLOCK_INDEX.get(buf.readVarInt()));
+        }
+    }
+
+
+    @Override
+    public void write(PacketBuffer buf) {
+        int i = size();
+        buf.writeVarInt(i);
+        IBlockState state;
+        for (int cursor = 0; cursor < i; ++cursor) {
+            state = get(cursor);
+            buf.writeVarInt(state.getId());
+        }
+    }
+
+
+    @Override
+    public int getSerializedSize() {
+        int i = PacketBuffer.getVarIntSize(size());
+        IBlockState state;
+        for (int cursor = 0; cursor < size(); ++cursor) {
+            state = get(cursor);
+            i += PacketBuffer.getVarIntSize(state.getId());
+        }
+        return i;
+    }
+
+
+    public int add(IBlockState objectIn) {
+        int i = this.nextId();
+        this.put(objectIn, i);
+        return i;
+    }
+
+
+    private int nextId() {
+        while (this.nextFreeIndex < this.byId.length && this.byId[this.nextFreeIndex] != null) {
+            ++this.nextFreeIndex;
+        }
+        return this.nextFreeIndex;
+    }
+
+
+    private void grow(int capacity) {
+        IBlockState[] ak = this.values;
+        int[] aint = this.intKeys;
+        this.values = new IBlockState[capacity];
+        this.intKeys = new int[capacity];
+        this.byId = new IBlockState[capacity];
+        this.nextFreeIndex = 0;
+        this.mapSize = 0;
+
+        for (int i = 0; i < ak.length; ++i) {
+            if (ak[i] != null) {
+                this.put(ak[i], aint[i]);
+            }
+        }
+    }
+
+
+    public void put(IBlockState objectIn, int intKey) {
+        int i = Math.max(intKey, this.mapSize + 1);
+        if ((float)i >= (float)this.values.length * 0.8F) {
+            int j;
+            for (j = this.values.length << 1; j < intKey; j <<= 1) {
+                ;
+            }
+            this.grow(j);
+        }
+
+        int k = this.findEmpty(this.hashObject(objectIn));
+        this.values[k] = objectIn;
+        this.intKeys[k] = intKey;
+        this.byId[intKey] = objectIn;
+        ++this.mapSize;
+        if (intKey == this.nextFreeIndex) {
+            ++this.nextFreeIndex;
+        }
+    }
+
+
+    private int hashObject(IBlockState obectIn) {
+        return (MathHelper.hash(System.identityHashCode(obectIn)) & Integer.MAX_VALUE) % this.values.length;
+    }
+
+
+    private int getIndex(IBlockState objectIn, int num) {
+        for (int i = num; i < this.values.length; ++i) {
+            if (this.values[i] == objectIn) return i;
+            if (this.values[i] == null) return -1;
+        }
+        for (int j = 0; j < num; ++j) {
+            if (this.values[j] == objectIn) return j;
+            if (this.values[j] == null) return -1;
+        }
+        return -1;
+    }
+
+
+    private int findEmpty(int num) {
+        for (int i = num; i < this.values.length; ++i)
+            if (this.values[i] == null) return i;
+
+        for (int j = 0; j < num; ++j)
+            if (this.values[j] == null) return j;
+
+        throw new RuntimeException("Overflowed :(");
+    }
+
+
+    public void clear() {
+        Arrays.fill(this.values, null);
+        Arrays.fill(this.byId, null);
+        this.nextFreeIndex = 0;
+        this.mapSize = 0;
+    }
+
+
+    public int size() {
+        return this.mapSize;
+    }
+}
