@@ -155,16 +155,16 @@ public class ChunkGeneratorHell implements IChunkGenerator {
 
 
     public static class GenSession{
-        private double[] slowsandNoise = new double[256];
-        private double[] gravelNoise = new double[256];
-        private double[] depthBuffer = new double[256];
-        private double[] buffer;
-        double[] pnr;
-        double[] ar;
-        double[] br;
-        double[] noiseData4;
-        double[] dr;
-        double[] adouble = new double[0];
+        public double[] slowsandNoise = new double[256];
+        public double[] gravelNoise = new double[256];
+        public double[] depthBuffer = new double[256];
+        public double[] buffer;
+        public double[] pnr;
+        public double[] ar;
+        public double[] br;
+        public double[] noiseData4;
+        public double[] dr;
+        public double[] adouble = new double[0];
         public final Random rand = new Random();
     }
 
