@@ -12,11 +12,11 @@ public class NMemoryCachedProvider extends Te4HashMap<NMemoryCachedProvider.Key,
     private final int timer;
     private int time = 0;
     private String[] items;
+    private boolean active = false;
 
     public NMemoryCachedProvider(IDataProvider parent, int time) {
         this.timer = time;
         this.parent = parent;
-        HEWorker.shoulder.addTask(this);
     }
 
 
@@ -27,6 +27,10 @@ public class NMemoryCachedProvider extends Te4HashMap<NMemoryCachedProvider.Key,
             items = null;
             for (Key key : keysToArray(keySet().toArray(new Key[0]))) {
                 if (!key.used()) remove(key);
+            }
+            if(isEmpty()) {
+                active = false;
+                return true;
             }
         }
         return false;
@@ -47,6 +51,10 @@ public class NMemoryCachedProvider extends Te4HashMap<NMemoryCachedProvider.Key,
         }
         byte[] result = parent.getRaw(path);
         put(key, result);
+        if(!active){
+            active = true;
+            HEWorker.shoulder.addTask(this);
+        }
         return result;
     }
 
@@ -54,6 +62,10 @@ public class NMemoryCachedProvider extends Te4HashMap<NMemoryCachedProvider.Key,
     @Override
     public void saveRaw(byte[] data, String... path) {
         put(new Key(path), data);
+        if(!active){
+            active = true;
+            HEWorker.shoulder.addTask(this);
+        }
         items = null;
         HEWorker.pool.put(() -> parent.saveRaw(data, path));
     }

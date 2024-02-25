@@ -47,7 +47,7 @@ public class NSimpleImgProcessor implements IRequestProcessor {
     }
 
 
-    static void handleImg(RequestSession session, byte[] bytes, int hs) {
+    public static void handleImg(RequestSession session, byte[] bytes, int hs) {
         String etagStr = session.getRHeader(HttpHeaderNames.IF_NONE_MATCH);
         session.setHeader(HttpHeaderNames.CACHE_CONTROL, "max-age=1200");
         boolean isReady = false;
@@ -69,7 +69,7 @@ public class NSimpleImgProcessor implements IRequestProcessor {
     }
 
 
-    static byte[] getStd(RequestSession session, IDataProvider provider, ImgSize size){
+    public static byte[] getStd(RequestSession session, IDataProvider provider, ImgSize size){
         String[] key = getImgName(session.splat());
         key[0] = session.worker().getMainDomain();
         key[1] = size.suffix();
@@ -90,7 +90,7 @@ public class NSimpleImgProcessor implements IRequestProcessor {
     }
 
 
-    static ImgSize getOptimalSize(RequestSession session){
+    public static ImgSize getOptimalSize(RequestSession session){
         String alt = session.queryParams("size");
         if(alt != null){
             char n = alt.charAt(0);

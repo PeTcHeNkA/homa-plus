@@ -81,11 +81,22 @@ public class DataProviderBuilder {
 
 
     public static IDataProvider ofTson(HEWorker worker, TsonObj obj){
-        return ofTson(worker, obj, new FastBuffer<>());
+        return ofTson(worker.getDefDataPovider(), obj, new FastBuffer<>());
     }
 
 
-    private static IDataProvider ofTson(HEWorker worker, TsonObj obj, FastBuffer<IDataProvider> def){
+    public static IDataProvider ofTson(TsonObj obj){
+        return ofTson(null, obj, new FastBuffer<>());
+    }
+
+
+    public static IDataProvider ofTson(IDataProvider defProvider, TsonObj obj){
+        return ofTson(defProvider, obj, new FastBuffer<>());
+    }
+
+
+    private static IDataProvider ofTson(IDataProvider defProvider, TsonObj obj, FastBuffer<IDataProvider> def){
+        if(obj==null)return defProvider;
         if(obj.isString()){
             String str = obj.getStr();
             String[] items = str.split(":");
@@ -98,9 +109,9 @@ public class DataProviderBuilder {
                     if(items.length==2) return new NSqlDataProvider(null, items[1]);
                 case "root":
                     if(items.length==1) {
-                        return worker.getDefDataPovider();
+                        return defProvider;
                     } else {
-                        return new NPrefixDataProvider(worker.getDefDataPovider(),items[1]);
+                        return new NPrefixDataProvider(defProvider, items[1]);
                     }
                 case "def":
                     if (items.length == 2) {
@@ -117,21 +128,21 @@ public class DataProviderBuilder {
             map.remove("type");
             switch (type){
                 case "hybrid":{
-                    IDataProvider root = ofTson(worker, map.remove("root"));
+                    IDataProvider root = ofTson(defProvider, map.remove("root"));
                     if(!(root instanceof NHybrideDataProvider)){
                         root = new NHybrideDataProvider(root);
                     }
                     def.put(root);
                     NHybrideDataProvider hb = (NHybrideDataProvider) root;
                     for(String key: map.keySet()){
-                        hb.include(key, ofTson(worker, map.get(key), def));
+                        hb.include(key, ofTson(defProvider, map.get(key), def));
                     }
                     def.flush();
                     return hb;
                 }
                 case "memory":
                     return new NMemoryCachedProvider(
-                            ofTson(worker, map.get("parent"), def),
+                            ofTson(defProvider, map.get("parent"), def),
                             map.getOrDefault("time", new TsonInt(180)).getInt()
                     );
             }
@@ -140,12 +151,12 @@ public class DataProviderBuilder {
             TsonList lst = obj.getList();
             if(lst.size()==2){
                 return new NDubleProvider(
-                        ofTson(worker, lst.get(0),def),
-                        ofTson(worker, lst.get(1),def)
+                        ofTson(defProvider, lst.get(0),def),
+                        ofTson(defProvider, lst.get(1),def)
                 );
             } else if(lst.size()==1){
                 return new NDubleProvider(
-                        ofTson(worker, lst.get(0),def),
+                        ofTson(defProvider, lst.get(0),def),
                         def.get()
                 );
             }

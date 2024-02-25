@@ -6,6 +6,7 @@ import plus.te4net.core.api.*;
 import plus.te4net.core.bsys.DataProviderBuilder;
 import plus.te4net.core.api.IDataProvider;
 import plus.te4net.mds.html.*;
+import plus.tson.utl.Te4HashMap;
 import plus.util.cons.ConsoleCommand;
 import plus.util.cons.ConsoleListener;
 import plus.tson.*;
@@ -16,13 +17,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import static plus.te4net.core.node.HServer.preLoad;
 import static plus.te4net.mds.html.CGzipRoute.DEF_CACHE_TIME;
 
 
 final class HEWorkerRepository extends HWorkerRepositoryBase implements ClassManager {
-    final HashMap<String, IVarGetter<RequestSession>> functions = new HashMap<>();
+    final Te4HashMap<String, IVarGetter<RequestSession>> functions = new Te4HashMap<>();
     private TempContainer[] tempContainers;
     private final IDataProvider defDataPovider;
     private int curMark = 0;
@@ -33,7 +33,7 @@ final class HEWorkerRepository extends HWorkerRepositoryBase implements ClassMan
             initConsole("tehnet");
         }
         defDataPovider = DataProviderBuilder.ofTson(
-                null, map.getOrDefault("cache",new TsonStr("sql:root:cache.cache"))
+                (IDataProvider) null, map.getOrDefault("cache",new TsonStr("sql:root:cache.cache"))
         );
         TsonFile.fillMap(config, this,
                 new File(map.getOrDefault("config", new TsonStr("config.tson")).getStr()), ""

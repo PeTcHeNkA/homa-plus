@@ -19,19 +19,20 @@ import plus.te4net.core.api.IDataProvider;
 import plus.te4net.core.mapping.QueryGetter;
 import plus.te4net.core.mapping.SplatGetter;
 import plus.te4net.mds.proc.AuthRoute;
+import plus.te4net.mds.proc.IconRoute;
 import plus.tson.*;
 import plus.tson.format.ConstVarGetter;
 import plus.tson.format.IVarGetter;
 import plus.tson.format.IVarProvider;
+import plus.tson.utl.Te4HashMap;
 import java.io.File;
-import java.util.HashMap;
 
 
 @PublicUsage
 public final class HEWorker extends HWorker implements IVarProvider<RequestSession>, IDataProvider {
     public static final PopThreadedPool<Runnable> pool = new PopThreadedPool<>(4);
     public static final TaskShoulder shoulder = new TaskShoulder(500);
-    private final HashMap<String, IVarGetter<RequestSession>> functions = new HashMap<>();
+    private final Te4HashMap<String, IVarGetter<RequestSession>> functions = new Te4HashMap<>();
     final CompressorSettings settings = new CompressorSettings();
     private final HEWorkerRepository.HWorkerContext ctx;
     private final CGzipRoute cssLib;
@@ -83,6 +84,27 @@ public final class HEWorker extends HWorker implements IVarProvider<RequestSessi
         provider = buildAuthProvider(loader, map);
         loadPages(workDir);
         loadRoutes(workDir, map.getMap("routes"));
+        loadIcon(workDir, map);
+    }
+
+
+    private void loadIcon(File workdir, TsonMap map){
+        String path = map.getOrDefaultStr("icon", "any");
+        File file = null;
+        if(path.equals("any")){//"favicon.ico"
+            for (String name:new String[]{"favicon.png","icon.png",
+                    "ico.png","favicon.jpg","icon.jpg","ico.jpg"}){
+                file = new File(workdir, name);
+                if(file.exists())break;
+                else file = null;
+            }
+        } else {
+            file = new File(workdir, path);
+            if(!file.exists())file = null;
+        }
+        if(file != null){
+            addRoute("favicon.ico", new IconRoute(this, file));
+        }
     }
 
 
@@ -242,9 +264,9 @@ public final class HEWorker extends HWorker implements IVarProvider<RequestSessi
 
     public void regFunction(String name, IVarGetter<RequestSession> function, boolean root){
         if(root) {
-            ((HEWorkerRepository)repository).functions.put(name, function);
+            ((HEWorkerRepository)repository).functions.fput(name, function);
         } else {
-            functions.put(name, function);
+            functions.fput(name, function);
         }
     }
 

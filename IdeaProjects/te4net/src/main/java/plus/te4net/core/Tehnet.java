@@ -12,6 +12,7 @@ public class Tehnet extends TehnetSimple {
         this(new TsonMap());
     }
 
+
     public Tehnet(TsonMap config){
         super(config.getOrDefaultInt("threads", 18), config);
     }
