@@ -3,13 +3,14 @@ package plus.te4net.mds.crypt;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.concurrent.ScheduledExecutorService;
 
 
 public abstract class CryptoLibFile<T extends CryptKey,V> extends CryptoLibBase<T,V> {
     private final File file;
 
-    public CryptoLibFile(File file){
-        super((short) 20);
+    public CryptoLibFile(ScheduledExecutorService service, File file){
+        super(service, 20_000);
         this.file = file;
         try {
             if(file.exists()) {

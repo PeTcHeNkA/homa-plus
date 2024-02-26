@@ -1,28 +1,30 @@
 package plus.mcapi.api;
 
-import plus.asyutl.shoulder.IBasicTask;
-import plus.mcapi.McUser;
-import plus.mcapi.McAuth;
 import plus.requests.McJoinServer;
 import plus.requests.McResponse;
 import plus.te4net.core.api.RequestSession;
 import plus.te4net.core.api.PluginRoute;
-import plus.te4net.core.node.HEWorker;
-import plus.te4net.core.node.HWorker;
-import plus.te4net.mds.util.ByteUtils;
-import plus.tson.TJsonParser;
-import plus.tson.TsonMap;
+import plus.tson.utl.Te4HashMap;
 import java.util.HashMap;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import static plus.mcapi.McAuth.basicApiRoute;
 
 
-public class McJoin implements PluginRoute, IBasicTask {
-    static HashMap<String, HashMap<String, McJoinServer>> cache = new HashMap<>();
-    private int timeClear = 0;
+public class McJoin implements PluginRoute, Runnable {
+    private final ScheduledExecutorService service;
+    private ScheduledFuture<?> future;
+    static Te4HashMap<String, HashMap<String, McJoinServer>> cache = new Te4HashMap<>();
     private int usages = 0;
 
-    public McJoin(HWorker worker){
-        HEWorker.shoulder.addTask(this);
+    public McJoin(ScheduledExecutorService service){
+        this.service = service;
+    }
+
+
+    private void restartIfNeed(){
+        if(future == null) future = service.scheduleAtFixedRate(this, 60_000, 120_000, TimeUnit.MILLISECONDS);
     }
 
 
@@ -48,32 +50,24 @@ public class McJoin implements PluginRoute, IBasicTask {
 
     private HashMap<String, McJoinServer> getServer(McJoinServer request){
         HashMap<String, McJoinServer> res = cache.get(request.serverId);
-        if(res==null){
+        if(res == null){
             res = new HashMap<>();
-            if(usages>1000){
+            if(usages > 1000){
                 usages = 0;
-                timeClear = 0;
                 run();
             }
-            cache.put(request.serverId, res);
+            cache.fput(request.serverId, res);
+            restartIfNeed();
         }
         return res;
     }
 
 
     @Override
-    public boolean needRun() {
-        if(timeClear++>120){
-            timeClear = 0;
-            usages = 0;
-            run();
-        }
-        return false;
-    }
-
-
-    @Override
     public void run() {
-        cache = new HashMap<>();
+        if(cache.isEmpty()){
+            future.cancel(false);
+            future = null;
+        } else cache = new Te4HashMap<>();
     }
 }

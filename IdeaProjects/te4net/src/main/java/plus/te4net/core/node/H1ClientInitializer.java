@@ -20,13 +20,15 @@ final class H1ClientInitializer extends ChannelInitializer<SocketChannel> {
 
 
     @Override
-    public void initChannel(SocketChannel ch) {
-        ChannelPipeline p = ch.pipeline();
-        if (sslCtx != null) {
-            p.addLast(sslCtx.newHandler(ch.alloc()));
-        }
-        p.addLast(new HttpClientCodec());
-        p.addLast(new HttpContentDecompressor());
-        p.addLast(new H1ClientHandler(processor));
+    public void initChannel(SocketChannel channel) {
+        ChannelPipeline pipeline = channel.pipeline();
+        if (sslCtx != null)
+            pipeline.addLast(sslCtx.newHandler(channel.alloc()));
+
+        pipeline.addLast(
+                new HttpClientCodec(),
+                new HttpContentDecompressor(),
+                new H1ClientHandler(processor)
+        );
     }
 }

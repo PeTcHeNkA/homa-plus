@@ -20,31 +20,28 @@ final class HSInitializer extends ChannelInitializer<SocketChannel> {
 
 
     @Override
-    protected void initChannel(SocketChannel ch) {
+    protected void initChannel(SocketChannel channel) {
         try {
-            new SSLMap(ch.pipeline());
+            new SSLMap(channel.pipeline());
         } catch (Exception e){
-            ch.close();
+            channel.close();
         }
     }
 
 
     private final class SSLMap implements Mapping<String, SslContext> {
-        private final ChannelPipeline ph;
+        private final ChannelPipeline pipeline;
         HEWorkerRepository.HWorkerContext ctx;
 
-        public SSLMap(ChannelPipeline ph) {
-            this.ph = ph;
-            ph.addLast(new Sni2Handler(this));
+        public SSLMap(ChannelPipeline pipeline) {
+            (this.pipeline = pipeline).addLast(new Sni2Handler(this));
         }
 
 
         @Override
         public SslContext map(String input) {
-            if(input==null) return null;
-            ctx = repository.getFor(input);
-            if(ctx==null)return null;
-            ph.addLast(new H2Proxy(ctx.worker, input));
+            if(input == null || (ctx = repository.getFor(input)) == null)return null;
+            pipeline.addLast(new H2Proxy(ctx.worker, input));
             return ctx.getCert();
         }
     }
@@ -59,17 +56,18 @@ final class HSInitializer extends ChannelInitializer<SocketChannel> {
         protected void replaceHandler(ChannelHandlerContext ctx, String hostname, SslContext sslContext) {
             SslHandler sslHandler = null;
             try {
-                if(sslContext==null) {
+                if(sslContext == null) {
                     ctx.close();
                     return;
                 }
-                sslHandler = newSslHandler(sslContext, ctx.alloc());
-                ctx.pipeline().replace(this, SslHandler.class.getName(), sslHandler);
+                ctx.pipeline().replace(
+                        this,
+                        SslHandler.class.getName(),
+                        sslHandler = newSslHandler(sslContext, ctx.alloc())
+                );
                 sslHandler = null;
             } finally {
-                if (sslHandler != null) {
-                    ReferenceCountUtil.safeRelease(sslHandler.engine());
-                }
+                if (sslHandler != null) ReferenceCountUtil.safeRelease(sslHandler.engine());
             }
         }
 

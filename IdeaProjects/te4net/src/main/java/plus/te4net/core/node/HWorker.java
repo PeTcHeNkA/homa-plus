@@ -1,5 +1,6 @@
 package plus.te4net.core.node;
 
+import io.netty.channel.EventLoopGroup;
 import io.netty.handler.ssl.SslContext;
 import plus.te4net.core.api.*;
 import plus.te4net.core.event.EventBus;
@@ -26,6 +27,11 @@ public abstract class HWorker {
 
     public void addRoute(String path, IRequestProcessor processor){
         routes.put(path, processor);
+    }
+
+
+    public EventLoopGroup pool(){
+        return repository.server.workerGroup;
     }
 
 

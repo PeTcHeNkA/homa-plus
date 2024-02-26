@@ -18,7 +18,7 @@ public class BImgCheckArgs implements PluginFunction {
     @Override
     public String onCall(RequestSession session) {
         String[] splat = session.splat();
-        if(splat[0]==null)return null;
+        if(splat[0] == null)return null;
         HWorker worker = session.worker();
         if(((HEWorker)worker).getImgLib().containsRaw(
                 worker.getMainDomain(), ImgSize.ORIG.suffix(), getImgName(splat)
@@ -29,8 +29,8 @@ public class BImgCheckArgs implements PluginFunction {
 
     private String getImgName(String[] splat){
         StringBuilder b = new StringBuilder(splat[0]);
-        for(int i=1;i<splat.length;i++){
-            if(splat[i]==null)break;
+        for(int i = 1; i < splat.length; i++){
+            if(splat[i] == null)break;
             b.append("/").append(splat[i]);
         }
         return b.toString();

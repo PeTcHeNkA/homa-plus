@@ -10,12 +10,12 @@ import java.io.File;
 @PublicUsage
 public class StaticHtmlFile extends SimpleCompressedTextFile {
     public StaticHtmlFile(HEWorker worker, File file){
-        super(worker, file);
+        super(worker, TYPE_HTML, file);
     }
 
 
     public StaticHtmlFile(HEWorker worker, String name, String data, boolean compress){
-        super(worker, name, data, compress);
+        super(worker, name, data, compress, TYPE_HTML);
     }
 
 
@@ -29,11 +29,5 @@ public class StaticHtmlFile extends SimpleCompressedTextFile {
         VrHtml html = new VrHtml(data);
         worker.throwEvent(new VrHtmlEvent(worker, VrHtmlEvent.Type.HTML, html));
         return html.toString();
-    }
-
-
-    @Override
-    public String type() {
-        return TYPE_HTML;
     }
 }

@@ -131,9 +131,7 @@ public class VrHtml extends HtmlNode{
         @Override
         public boolean isEmpty(){
             int count = 0;
-            for (String s:this){
-                if(s!=null) ++count;
-            }
+            for (String s:this) if(s!=null) ++count;
             return count == 0;
         }
 

@@ -24,12 +24,12 @@ final class H1UHandler extends AbsH1Handler {
         }
         this.request = (FullHttpRequest) msg;
         domain = request.headers().get("host");
-        if(domain==null){
+        if(domain == null){
             super.requestError("You're a bot right?");
             return;
         }
         HEWorkerRepository.HWorkerContext ctx0 = repository.getFor(domain);
-        if(ctx0==null){
+        if(ctx0 == null){
             notFound();
             return;
         }

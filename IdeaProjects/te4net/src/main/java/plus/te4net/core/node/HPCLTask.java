@@ -1,5 +1,6 @@
 package plus.te4net.core.node;
 
+import io.netty.channel.EventLoopGroup;
 import plus.te4net.core.api.IDataProvider;
 import plus.te4net.core.api.HttpClient;
 import plus.te4net.core.api.Var;
@@ -14,6 +15,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ScheduledExecutorService;
 
 
 final class HPCLTask extends PCLTask {
@@ -138,15 +141,16 @@ final class HPCLTask extends PCLTask {
                 if(obj==null) return new TsonStr(var.def());
                 return obj.getList();
             }
+            if(type == EventLoopGroup.class || type == ScheduledExecutorService.class || type == Executor.class){
+                return worker.pool();
+            }
             return null;
         }
     }
 
 
     private Var searchVar(Parameter param){
-        for (Annotation a:param.getAnnotations()){
-            if(a instanceof Var)return (Var) a;
-        }
+        for (Annotation a:param.getAnnotations()) if(a instanceof Var)return (Var) a;
         return null;
     }
 }

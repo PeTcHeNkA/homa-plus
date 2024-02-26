@@ -12,20 +12,23 @@ import plus.tson.utl.Te4HashMap;
 import plus.tson.format.IVarGetter;
 import plus.tson.format.TextFormatter;
 import java.util.Objects;
+import java.util.concurrent.ScheduledExecutorService;
 
 
 public abstract class AuthService<T extends User> implements IAuthProvider {
     private final Cap4aLib<String> lib;
-    private final SCryptoMap<String> keys = new SCryptoMap<>((short) 180);
-    private final SCryptoMap<MailRequest> mails = new SCryptoMap<>((short) 420);
+    private final SCryptoMap<String> keys;
+    private final SCryptoMap<MailRequest> mails;
     private TextFormatter<IVarGetter<String>> mailFormat;
     protected final UserMap<T> userMap;
     private final MailServer mailServer;
 
-    public AuthService(UserMap<T> userMap, Cap4aLib<String> lib, MailServer server) {
+    public AuthService(ScheduledExecutorService service, UserMap<T> userMap, Cap4aLib<String> lib, MailServer server) {
         this.userMap = userMap;
         this.lib = lib;
         this.mailServer = server;
+        keys = new SCryptoMap<>(service, 180_000);
+        mails = new SCryptoMap<>(service, 600_000);
     }
 
 
@@ -50,8 +53,8 @@ public abstract class AuthService<T extends User> implements IAuthProvider {
 
 
     private static class SCryptoMap<T> extends CryptoLibSimple<WebCryptKey,T> {
-        protected SCryptoMap(short skip) {
-            super(skip);
+        protected SCryptoMap(ScheduledExecutorService service, int skip) {
+            super(service, skip);
         }
 
         @Override

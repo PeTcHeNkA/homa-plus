@@ -1,60 +1,56 @@
 package plus.te4net.core.bsys;
 
-import plus.asyutl.shoulder.IBasicTask;
 import plus.te4net.core.api.IDataProvider;
-import plus.te4net.core.node.HEWorker;
 import plus.tson.utl.Te4HashMap;
 import java.util.Arrays;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 
-public class NMemoryCachedProvider extends Te4HashMap<NMemoryCachedProvider.Key,byte[]> implements IDataProvider, IBasicTask {
+public class NMemoryCachedProvider extends Te4HashMap<NMemoryCachedProvider.Key,byte[]> implements IDataProvider, Runnable {
+    private final ScheduledExecutorService service;
     private final IDataProvider parent;
-    private final int timer;
-    private int time = 0;
+    private final int delay;
     private String[] items;
-    private boolean active = false;
+    private ScheduledFuture<?> future;
 
-    public NMemoryCachedProvider(IDataProvider parent, int time) {
-        this.timer = time;
+    public NMemoryCachedProvider(ScheduledExecutorService service, IDataProvider parent, int delay) {
+        this.service = service;
+        this.delay = delay;
         this.parent = parent;
     }
 
 
     @Override
-    public boolean needRun() {
-        if(time++>timer){
-            time=0;
-            items = null;
-            for (Key key : keysToArray(keySet().toArray(new Key[0]))) {
-                if (!key.used()) remove(key);
-            }
-            if(isEmpty()) {
-                active = false;
-                return true;
-            }
+    public void run() {
+        items = null;
+        for (Key key : keysToArray(keySet().toArray(new Key[0]))) {
+            if (!key.used()) remove(key);
         }
-        return false;
+        if(isEmpty()) {
+            future.cancel(false);
+            future = null;
+        }
     }
 
 
-    @Override
-    public void run() {}
+    private void restartTimerIfNeed(){
+        if(future == null) future = service.scheduleAtFixedRate(this, delay, delay, TimeUnit.MILLISECONDS);
+    }
 
 
     @Override
     public byte[] getRaw(String... path) {
         Key key = new Key(path);
         Node<Key, byte[]> node = getNode(key);
-        if(node!=null){
+        if(node != null){
             node.getKey().mark = 3;
             return node.getValue();
         }
         byte[] result = parent.getRaw(path);
         put(key, result);
-        if(!active){
-            active = true;
-            HEWorker.shoulder.addTask(this);
-        }
+        restartTimerIfNeed();
         return result;
     }
 
@@ -62,12 +58,9 @@ public class NMemoryCachedProvider extends Te4HashMap<NMemoryCachedProvider.Key,
     @Override
     public void saveRaw(byte[] data, String... path) {
         put(new Key(path), data);
-        if(!active){
-            active = true;
-            HEWorker.shoulder.addTask(this);
-        }
+        restartTimerIfNeed();
         items = null;
-        HEWorker.pool.put(() -> parent.saveRaw(data, path));
+        service.execute(() -> parent.saveRaw(data, path));
     }
 
 

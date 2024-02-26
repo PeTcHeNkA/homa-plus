@@ -47,8 +47,7 @@ public class HeadersProcessor implements IRequestProcessor {
 
     @Override
     public void handle(RequestSession session) {
-        for(int i=0;i< keys.length;i++){
+        for(int i=0; i < keys.length; i++)
             session.setHeader(keys[i], values[i]);
-        }
     }
 }

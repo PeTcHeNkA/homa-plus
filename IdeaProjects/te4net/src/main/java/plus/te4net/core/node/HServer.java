@@ -19,10 +19,10 @@ import java.util.concurrent.ThreadFactory;
 
 
 public class HServer implements ThreadFactory, Thread.UncaughtExceptionHandler, ChannelFactory<ServerChannel> {
-    static final String SERVER_NAME = "tehnet-v2.1";
+    static final String SERVER_NAME = "tehnet-v2.2";
     private static Logger logger;
     private final EventLoopGroup bossGroup;
-    private final EventLoopGroup workerGroup;
+    final EventLoopGroup workerGroup;
     private final boolean useNative;
     private int threadNum = 0;
     private ChannelFuture PHTTPS;
@@ -33,6 +33,8 @@ public class HServer implements ThreadFactory, Thread.UncaughtExceptionHandler, 
     public HServer(TsonMap config){
         this(config.getOrDefaultInt("threads", 18));
         startRepo(config, new HEWorkerRepository(config, this));
+
+
     }
 
 

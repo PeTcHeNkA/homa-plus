@@ -16,35 +16,29 @@ public class CssFile extends SimpleCompressedTextFile {
 
 
     public CssFile(HEWorker worker, String name, String cssCode){
-        super(worker, name, cssCode);
+        super(worker, TYPE_CSS, name, cssCode);
     }
 
 
     public CssFile(HEWorker worker, String path){
-        super(worker, "???", path);
+        super(worker, TYPE_CSS, "???", path);
     }
 
 
     public CssFile(HEWorker worker, File file){
-        super(worker, file);
+        super(worker, TYPE_CSS, file);
     }
 
 
     public CssFile(IDataProvider worker, String name, String data) {
-        super(worker, name, data);
+        super(worker, TYPE_CSS, name, data);
     }
 
 
     @Override
     public String replace(HEWorker worker, String data) {
-        VrCss css = new VrCss(data);
-        worker.throwEvent(new VrHtmlEvent(worker, VrHtmlEvent.Type.CSS, css));
+        VrCss css;
+        worker.throwEvent(new VrHtmlEvent(worker, VrHtmlEvent.Type.CSS, css = new VrCss(data)));
         return css.toString();
-    }
-
-
-    @Override
-    public String type() {
-        return TYPE_CSS;
     }
 }

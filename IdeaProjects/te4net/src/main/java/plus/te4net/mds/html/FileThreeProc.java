@@ -22,6 +22,8 @@ public class FileThreeProc implements IRequestProcessor {
         cacheStr = "max-age="+cacheTime;
     }
 
+
+    //todo
     private String fixSpaces(String raw){
         return raw.replace("%20"," ");
 //        char[] chars = raw.toCharArray();
@@ -40,6 +42,7 @@ public class FileThreeProc implements IRequestProcessor {
 //            b.append(cur);
 //        }
     }
+
 
     @Override
     public void handle(RequestSession session) {

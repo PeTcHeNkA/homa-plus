@@ -47,11 +47,11 @@ public class CGzipRoute extends HashMap<String, IRequestProcessor> implements Si
                 case "none", "raw", "" -> SimpleCompressedTextFile::new;
                 case "static-html", "static-page" -> StaticHtmlFile::new;
                 default -> (worker1, file) -> {
-                    String pressAlgo0 = pressAlgo;
-                    if(pressAlgo0.equals("svg")){
-                        pressAlgo0 = "image/svg+xml";
+                    String fileType = pressAlgo;
+                    if(fileType.equals("svg")){
+                        fileType = "image/svg+xml";
                     }
-                    return new CustomGzipFile(pressAlgo0, worker1, file);
+                    return new SimpleCompressedTextFile(worker1, fileType, file);
                 };
             };
         } else if (obj.isCustom()){
@@ -128,10 +128,7 @@ public class CGzipRoute extends HashMap<String, IRequestProcessor> implements Si
     public void handle(RequestSession session) {
         session.setHeader(HttpHeaderNames.CACHE_CONTROL, cacheStr);
         IRequestProcessor page = get(session.routeKey().afterRoute());
-        if(page==null) {
-            session.notFound();
-        } else {
-            page.handle(session);
-        }
+        if(page==null) session.notFound();
+        else page.handle(session);
     }
 }

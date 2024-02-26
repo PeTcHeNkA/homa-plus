@@ -36,9 +36,9 @@ public class CharLib {
 
     public char[] genCode(int size){
         char[] chars = new char[size];
-        for(int i=0;i<chars.length;i++){
+
+        for(int i = 0; i < chars.length; i++)
             chars[i] = nextRChar();
-        }
         return chars;
     }
 
@@ -57,45 +57,45 @@ public class CharLib {
 
     public final String code(String s){
         char[] chars = s.toCharArray();
-        for(int i=0;i<chars.length;i++){
+
+        for(int i = 0; i < chars.length; i++)
             chars[i] = codeTable[chars[i]];
-        }
         return new String(chars);
     }
 
 
     public final String encode(String s){
         char[] chars = s.toCharArray();
-        for(int i=0;i<chars.length;i++){
+
+        for(int i = 0; i < chars.length; i++)
             chars[i] = encodeTable[chars[i]];
-        }
         return new String(chars);
     }
 
 
     private static char[] compileEncodeTable(char[][] chars){
         char[] data = new char[123];
-        for(char[] pair:chars){
+
+        for(char[] pair: chars)
             data[pair[1]] = pair[0];
-        }
         return data;
     }
 
 
     private static char[] compileCodeTable(char[][] chars){
         char[] data = new char[123];
-        for(char[] pair:chars){
+
+        for(char[] pair: chars)
             data[pair[0]] = pair[1];
-        }
         return data;
     }
 
 
     private static char[] compileGeneratorTable(char[][] chars){
         char[] result = new char[chars.length-6];
-        for(int i=0;i<result.length;i++){
+
+        for(int i = 0; i < result.length; i++)
             result[i] = chars[i][1];
-        }
         return result;
     }
 }

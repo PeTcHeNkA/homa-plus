@@ -7,7 +7,7 @@ import plus.tson.TsonBool;
 import plus.tson.TsonMap;
 import plus.util.SimpleSrcGetter;
 import java.util.Properties;
-import static plus.te4net.core.node.HEWorker.pool;
+import java.util.concurrent.Executor;
 
 
 public class MailServer implements SimpleSrcGetter {
@@ -18,8 +18,10 @@ public class MailServer implements SimpleSrcGetter {
     private final Session session;
     private final String user, password;
     private final boolean virtual;
+    private final Executor executor;
 
-    public MailServer(TsonMap map){
+    public MailServer(Executor executor, TsonMap map){
+        this.executor = executor;
         if(map != null && !(map.getOrDefault("virtual", new TsonBool(false)).getBool())) {
             boolean debug = map.getOrDefault("debug", new TsonBool(false)).getBool();
             this.user = map.getStr("mail-login");
@@ -54,12 +56,12 @@ public class MailServer implements SimpleSrcGetter {
         if(virtual){
             HEWorker.getLogger().info("EMULATE SEND MAIL TO ["+mail
                     +"]:\n---------------\n"+content+"\n---------------");
-            pool.put(cl::onSuccess);
+            executor.execute(cl::onSuccess);
         } else {
             if (user == null || password == null) {
                 cl.onError(new NumberFormatException("Mail server not configured!"));
             } else {
-                pool.put(() -> send0(mail, content, cl));
+                executor.execute(() -> send0(mail, content, cl));
             }
         }
     }

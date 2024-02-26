@@ -1,21 +1,28 @@
 package plus.te4net.mds.img;
 
-import plus.asyutl.shoulder.IBasicTask;
 import plus.te4net.core.api.IRequestProcessor;
 import plus.te4net.core.api.RequestSession;
 import plus.te4net.core.api.IDataProvider;
 import plus.tson.utl.Te4HashMap;
 import java.util.Arrays;
-import static plus.te4net.core.node.HEWorker.shoulder;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 
-public class NCachedImgProcessor extends Te4HashMap<NCachedImgProcessor.Key, NCachedImgProcessor.Img> implements IRequestProcessor, IBasicTask {
+public class NCachedImgProcessor extends Te4HashMap<NCachedImgProcessor.Key, NCachedImgProcessor.Img> implements IRequestProcessor, Runnable {
+    private final ScheduledExecutorService service;
     private final IDataProvider provider;
-    private int skip = 0;
+    ScheduledFuture<?> future;
 
-    public NCachedImgProcessor(IDataProvider provider) {
+    public NCachedImgProcessor(ScheduledExecutorService service, IDataProvider provider) {
         this.provider = provider;
-        shoulder.addTask(this);
+        this.service = service;
+    }
+
+
+    private void restartIfNeed(){
+        if(future == null)future = service.scheduleAtFixedRate(this, 10_000, 10_000, TimeUnit.MILLISECONDS);
     }
 
 
@@ -41,30 +48,28 @@ public class NCachedImgProcessor extends Te4HashMap<NCachedImgProcessor.Key, NCa
             }
             Img img = new Img(result);
             realKey.use();
-            put(realKey, img);
+            fput(realKey, img);
+            restartIfNeed();
             NSimpleImgProcessor.handleImg(session, img.bytes, img.hs);
         }
     }
 
 
     @Override
-    public boolean needRun() {
-        if(skip++>180){
-            if(size()>0) {
-                for (Key key : keysToArray(keySet().toArray(new Key[0]))) {
-                    if (key.notUsed()) {
-                        remove(key);
-                    }
+    public void run() {
+        if(size()>0) {
+            for (Key key : keysToArray(keySet().toArray(new Key[0]))) {
+                if (key.notUsed()) {
+                    remove(key);
                 }
             }
-            skip = 0;
+        } else {
+            if(future != null){
+                future.cancel(true);
+                future = null;
+            }
         }
-        return false;
     }
-
-
-    @Override
-    public void run() {}
 
 
     static class Img {

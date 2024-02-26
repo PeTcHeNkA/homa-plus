@@ -57,6 +57,7 @@ abstract class AbsH1Handler extends ChannelInboundHandlerAdapter implements Requ
         return request.uri();
     }
 
+
     @Override
     public byte[] encodeBody() {
         return ByteBufUtil.getBytes(request.content());

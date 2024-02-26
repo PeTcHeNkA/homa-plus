@@ -20,8 +20,7 @@ final class NHInitializer extends ChannelInitializer<SocketChannel> {
 
     @Override
     protected void initChannel(SocketChannel ch) {
-        ChannelPipeline p = ch.pipeline();
-        p.addLast(
+        ch.pipeline().addLast(
                 new HttpRequestDecoder(),
                 new HttpObjectAggregator(repository.maxPostMemory),
                 new HttpResponseEncoder(),

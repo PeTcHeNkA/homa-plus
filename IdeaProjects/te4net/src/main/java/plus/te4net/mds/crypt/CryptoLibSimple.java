@@ -1,9 +1,11 @@
 package plus.te4net.mds.crypt;
 
+import java.util.concurrent.ScheduledExecutorService;
+
 
 public abstract class CryptoLibSimple<T extends CryptKey,V> extends CryptoLibBase<T,V>{
-    protected CryptoLibSimple(short skip) {
-        super(skip);
+    protected CryptoLibSimple(ScheduledExecutorService service, int skip) {
+        super(service, skip);
     }
 
 

@@ -17,6 +17,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
+
 import static plus.te4net.core.node.HServer.preLoad;
 import static plus.te4net.mds.html.CGzipRoute.DEF_CACHE_TIME;
 
@@ -32,7 +34,7 @@ final class HEWorkerRepository extends HWorkerRepositoryBase implements ClassMan
         if(map.getOrDefault("init-console", new TsonBool(true)).getBool()){
             initConsole("tehnet");
         }
-        defDataPovider = DataProviderBuilder.ofTson(
+        defDataPovider = DataProviderBuilder.ofTson(server.workerGroup,
                 (IDataProvider) null, map.getOrDefault("cache",new TsonStr("sql:root:cache.cache"))
         );
         TsonFile.fillMap(config, this,
@@ -220,24 +222,11 @@ final class HEWorkerRepository extends HWorkerRepositoryBase implements ClassMan
     protected void onAddTempRoute(HPCLTask task){
         if(tempContainers==null){
             tempContainers = new TempContainer[]{};
-            HEWorker.shoulder.addTask(new IBasicTask() {
-                private int timer = 0;
-                @Override
-                public boolean needRun() {
-                    if(timer++>30){
-                        timer = 0;
-                        return true;
-                    }
-                    return false;
+            task.worker.pool().scheduleWithFixedDelay(() -> {
+                for (TempContainer ctn:tempContainers){
+                    ctn.check(curMark);
                 }
-                @Override
-                public void run() {
-                    for (TempContainer ctn:tempContainers){
-                        ctn.check(curMark);
-                    }
-                    curMark++;
-                }
-            });
+            }, 5_000,5_000, TimeUnit.MILLISECONDS);
         }
         TempContainer ctn = new TempContainer(task);
         ctn.curMark = ctn.markUse = curMark;

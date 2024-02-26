@@ -59,6 +59,7 @@ public class HtmlRoute implements PluginBase, IRequestProcessor, PluginRoute {
         cookie.setPath("/");
         cookie.setMaxAge(2147483647);
         cookie.setSecure(true);
+        cookie.setHttpOnly(true);
         session.setCookie(cookie);
         HEWorker.getLogger().info("New user IP: "+rIp);
     }

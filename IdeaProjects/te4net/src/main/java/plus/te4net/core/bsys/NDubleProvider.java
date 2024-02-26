@@ -2,29 +2,31 @@ package plus.te4net.core.bsys;
 
 import plus.te4net.core.api.IDataProvider;
 import java.util.HashSet;
-import static plus.te4net.core.node.HEWorker.pool;
+import java.util.concurrent.Executor;
 
 
 public class NDubleProvider implements IDataProvider {
     private final HashSet<String[]> blocked = new HashSet<>();
     private final IDataProvider fastProvider;
     private final IDataProvider defProvider;
+    private final Executor service;
 
-    public NDubleProvider(IDataProvider fastProvider, IDataProvider defProvider) {
+    public NDubleProvider(IDataProvider fastProvider, IDataProvider defProvider, Executor service) {
         this.fastProvider = fastProvider;
         this.defProvider = defProvider;
+        this.service = service;
     }
 
 
     @Override
     public byte[] getRaw(String... path) {
-        byte[] result = fastProvider.getRaw(path);
-        if(result != null)return result;
-        result = defProvider.getRaw(path);
-        if(result==null)return null;
+        byte[] result;
+        if((result = fastProvider.getRaw(path)) != null)return result;
+        if((result = defProvider .getRaw(path)) == null)return null;
+
         if(blocked.add(path)) {
             byte[] finalResult = result;
-            pool.put(() -> {
+            service.execute(() -> {
                 fastProvider.saveRaw(finalResult, path);
                 blocked.remove(path);
             });

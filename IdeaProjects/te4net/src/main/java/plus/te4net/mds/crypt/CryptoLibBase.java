@@ -1,27 +1,25 @@
 package plus.te4net.mds.crypt;
 
-import plus.asyutl.shoulder.IBasicTask;
-import static plus.te4net.core.node.HEWorker.shoulder;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 
-public abstract class CryptoLibBase<T extends CryptKey,V> extends CryptoMap<T,V> implements IBasicTask {
-    private final short skip;
-    private short timer = 0;
+public abstract class CryptoLibBase<T extends CryptKey,V> extends CryptoMap<T,V> implements Runnable {
+    private final ScheduledExecutorService service;
+    private ScheduledFuture<?> future;
+    private final int delay;
     private int apiUsages = 0;
-    boolean remove = false;
-    boolean disabled = false;
 
-    protected CryptoLibBase(short skip) {
-        this.skip = skip;
+    protected CryptoLibBase(ScheduledExecutorService service, int delay) {
+        this.service = service;
+        this.delay = delay;
     }
 
 
     private void useApi(){
         apiUsages++;
-        if(disabled){
-            disabled = false;
-            shoulder.addTask(this);
-        }
+        if(future == null) future = service.scheduleAtFixedRate(this, delay, delay, TimeUnit.MILLISECONDS);
     }
 
 
@@ -53,23 +51,10 @@ public abstract class CryptoLibBase<T extends CryptKey,V> extends CryptoMap<T,V>
 
 
     @Override
-    public final boolean needRun() {
-        if(timer++>skip){
-            timer = 0;
-            if(remove){
-                disabled = true;
-                return true;
-            }
-            run();
-        }
-        return false;
-    }
-
-
-    @Override
     public final void run() {
-        if(apiUsages==0){
-            remove = true;
+        if(apiUsages == 0){
+            future.cancel(true);
+            future = null;
             return;
         }
         else apiUsages = 0;

@@ -63,23 +63,25 @@ public class Cap4a extends CryptKey {
 
 
     public boolean check(String answer){
-        if(use()){
-            return keyWord.equals(answer);
-        }
-        return false;
+        return use() && keyWord.equals(answer);
     }
 }
 
 
 final class K{
     final int k;
+
     K(int k) {
         this.k = k;
     }
+
+
     @Override
     public boolean equals(Object o) {
         return k == ((K) o).k;
     }
+
+
     @Override
     public int hashCode() {
         return k;
@@ -91,6 +93,7 @@ final class StyleMap extends HashMap<K, Character> {
     private static final char[] def = "mkplnjiubgytcxdreszqw".toCharArray();
     private static final char[] hiden = {'h','o','v','f',0,1};
     private static int usages = 0;
+
     char getOrCreate(int tab){
         Character c = get(new K(tab));
         if(c==null){
@@ -104,23 +107,18 @@ final class StyleMap extends HashMap<K, Character> {
 
 
     String getRStyle(int tab){
-        if(FastRandom.INST.nextBoolean()){
-            return getOrCreate(tab)+" a";
-        } else {
-            return "a "+getOrCreate(tab);
-        }
+        return FastRandom.INST.nextBoolean()?
+                getOrCreate(tab)+" a":
+                "a "+getOrCreate(tab);
     }
 
 
     HashSet<String> hStyles = new HashSet<>();
     String getHStyle(int tab){
         char c = hiden[FastRandom.INST.nextInt(hiden.length)];
-        if(c==0){
-            return getRStyle(90 + tab);
-        }
-        if(c==1){
-            return getRStyle(-90 - tab);
-        }
+        if(c==0) return getRStyle( 90 + tab);
+        if(c==1) return getRStyle(-90 - tab);
+
         switch (c) {
             case 'h':hStyles.add(".h{display:none}");break;
             case 'o':hStyles.add(".o{visibility:hidden}");break;
@@ -138,9 +136,8 @@ final class StyleMap extends HashMap<K, Character> {
     @Override
     public String toString() {
         StringBuilder styles = new StringBuilder();
-        for(String s:hStyles){
-            styles.append(s);
-        }
+        for(String s:hStyles) styles.append(s);
+
         super.forEach((key, ch) -> {
             styles.append('.')
                     .append(ch).append("{margin-left:")
@@ -153,16 +150,15 @@ final class StyleMap extends HashMap<K, Character> {
 
 final class SArray extends ArrayList<Element> {
     public SArray(){}
+
     public SArray(int size){
         super(size);
     }
 
     public String toString(StyleMap styleMap) {
-        if(size()==0)return "";
+        if(size()==0) return "";
         StringBuilder data = new StringBuilder();
-        for (Element o : this) {
-            o.toString(styleMap, data);
-        }
+        for (Element o : this) o.toString(styleMap, data);
         return data.toString();
     }
 }

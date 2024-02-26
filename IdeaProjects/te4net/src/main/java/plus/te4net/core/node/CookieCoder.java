@@ -16,9 +16,8 @@ final class CookieCoder {
     static void decode(Map<String,Cookie> map, String header) {
         if(header==null)return;
         final int headerLen = header.length();
-        if (headerLen == 0) {
-            return;
-        }
+        if (headerLen == 0) return;
+
         int i = 0;
         boolean rfc2965Style = false;
         String RFC2965_VERSION = "$Version";

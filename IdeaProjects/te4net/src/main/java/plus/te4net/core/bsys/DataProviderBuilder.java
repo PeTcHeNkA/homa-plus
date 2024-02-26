@@ -6,6 +6,8 @@ import plus.te4net.core.api.PublicUsage;
 import plus.te4net.core.node.HEWorker;
 import plus.tson.*;
 import java.sql.Connection;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ScheduledExecutorService;
 
 
 @PublicUsage
@@ -13,8 +15,15 @@ public class DataProviderBuilder {
     enum Type{
         FILE, SQL, JAR, HYBRID, DOUBLE,
     }
+    private static final Executor EMPTY = Runnable::run;
     private IDataProvider provider;
     private IDataProvider latest;
+    private Executor executor;
+
+    public DataProviderBuilder(Executor executor) {
+        this.executor = executor;
+    }
+
 
     public DataProviderBuilder defaultBy(IDataProvider provider){
         this.provider = provider;
@@ -35,7 +44,7 @@ public class DataProviderBuilder {
             case HYBRID: provider = new NHybrideDataProvider((IDataProvider) init[0]);break;
             case FILE: provider = new NFileDataProvider((String) init[0]);break;
             case SQL: provider = new NSqlDataProvider((String) init[0], (Connection) init[1]);break;
-            case DOUBLE:provider = new NDubleProvider((IDataProvider) init[0], (IDataProvider) init[1]);
+            case DOUBLE:provider = new NDubleProvider((IDataProvider) init[0], (IDataProvider) init[1], executor);
         }
         return this;
     }
@@ -56,7 +65,7 @@ public class DataProviderBuilder {
             case FILE:  innner = new NFileDataProvider((String) init[0]);break;
             case SQL:   innner = new NSqlDataProvider((String) init[0], (Connection) init[1]);break;
             case JAR:   innner = new NJarFileDataProvider();break;
-            case DOUBLE: innner = new NDubleProvider((IDataProvider) init[0], (IDataProvider) init[1]);break;
+            case DOUBLE: innner = new NDubleProvider((IDataProvider) init[0], (IDataProvider) init[1], executor);break;
             default: throw new RuntimeException();
         }
         if(!(provider instanceof NHybrideDataProvider)){
@@ -81,21 +90,31 @@ public class DataProviderBuilder {
 
 
     public static IDataProvider ofTson(HEWorker worker, TsonObj obj){
-        return ofTson(worker.getDefDataPovider(), obj, new FastBuffer<>());
+        return ofTson(worker.pool(), worker.getDefDataPovider(), obj, new FastBuffer<>());
+    }
+
+
+    public static IDataProvider ofTson(Executor executor, TsonObj obj){
+        return ofTson(executor, null, obj, new FastBuffer<>());
+    }
+
+
+    public static IDataProvider ofTson(Executor executor, IDataProvider defProvider, TsonObj obj){
+        return ofTson(executor, defProvider, obj, new FastBuffer<>());
     }
 
 
     public static IDataProvider ofTson(TsonObj obj){
-        return ofTson(null, obj, new FastBuffer<>());
+        return ofTson(EMPTY, null, obj, new FastBuffer<>());
     }
 
 
     public static IDataProvider ofTson(IDataProvider defProvider, TsonObj obj){
-        return ofTson(defProvider, obj, new FastBuffer<>());
+        return ofTson(EMPTY, defProvider, obj, new FastBuffer<>());
     }
 
 
-    private static IDataProvider ofTson(IDataProvider defProvider, TsonObj obj, FastBuffer<IDataProvider> def){
+    private static IDataProvider ofTson(Executor executor, IDataProvider defProvider, TsonObj obj, FastBuffer<IDataProvider> def){
         if(obj==null)return defProvider;
         if(obj.isString()){
             String str = obj.getStr();
@@ -128,37 +147,41 @@ public class DataProviderBuilder {
             map.remove("type");
             switch (type){
                 case "hybrid":{
-                    IDataProvider root = ofTson(defProvider, map.remove("root"));
+                    IDataProvider root = ofTson(executor, defProvider, map.remove("root"));
                     if(!(root instanceof NHybrideDataProvider)){
                         root = new NHybrideDataProvider(root);
                     }
                     def.put(root);
                     NHybrideDataProvider hb = (NHybrideDataProvider) root;
                     for(String key: map.keySet()){
-                        hb.include(key, ofTson(defProvider, map.get(key), def));
+                        hb.include(key, ofTson(executor, defProvider, map.get(key), def));
                     }
                     def.flush();
                     return hb;
                 }
                 case "memory":
-                    return new NMemoryCachedProvider(
-                            ofTson(defProvider, map.get("parent"), def),
-                            map.getOrDefault("time", new TsonInt(180)).getInt()
-                    );
+                    if(executor instanceof ScheduledExecutorService service){
+                        return new NMemoryCachedProvider(service,
+                                ofTson(executor, defProvider, map.get("parent"), def),
+                                map.getOrDefault("time", new TsonInt(180)).getInt()
+                        );
+                    } else {
+                        throw new RuntimeException("[ memory ] not supported by current Executor. Use [ScheduledExecutorService]");
+                    }
             }
         }
         if (obj.isList()) {
             TsonList lst = obj.getList();
             if(lst.size()==2){
                 return new NDubleProvider(
-                        ofTson(defProvider, lst.get(0),def),
-                        ofTson(defProvider, lst.get(1),def)
-                );
+                        ofTson(executor, defProvider, lst.get(0),def),
+                        ofTson(executor, defProvider, lst.get(1),def),
+                        executor);
             } else if(lst.size()==1){
                 return new NDubleProvider(
-                        ofTson(defProvider, lst.get(0),def),
-                        def.get()
-                );
+                        ofTson(executor, defProvider, lst.get(0),def),
+                        def.get(),
+                        executor);
             }
             throw new RuntimeException(obj+" size not 1 or 2!");
         }

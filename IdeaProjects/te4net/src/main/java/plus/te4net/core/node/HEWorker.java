@@ -1,8 +1,6 @@
 package plus.te4net.core.node;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
-import plus.asyutl.shoulder.TaskShoulder;
-import plus.asyutl.thread.PopThreadedPool;
 import plus.te4net.core.Args;
 import plus.te4net.core.api.RequestSession;
 import plus.te4net.core.api.PublicUsage;
@@ -30,8 +28,6 @@ import java.io.File;
 
 @PublicUsage
 public final class HEWorker extends HWorker implements IVarProvider<RequestSession>, IDataProvider {
-    public static final PopThreadedPool<Runnable> pool = new PopThreadedPool<>(4);
-    public static final TaskShoulder shoulder = new TaskShoulder(500);
     private final Te4HashMap<String, IVarGetter<RequestSession>> functions = new Te4HashMap<>();
     final CompressorSettings settings = new CompressorSettings();
     private final HEWorkerRepository.HWorkerContext ctx;
@@ -76,11 +72,16 @@ public final class HEWorker extends HWorker implements IVarProvider<RequestSessi
                 new File(workDir, "static"), HEWorkerRepository::buildStaticHtml)
         );
         if(!map.getOrDefault("use_cdn", new TsonBool(false)).getBool()) {
-            addRoute("assets/img", new NCachedImgProcessor(imageProvider));
+            addRoute("assets/img", new NCachedImgProcessor(pool(), imageProvider));
         } else {
             addRoute("assets/img", new NSimpleImgProcessor(imageProvider));
         }
-        HEPluginSystem loader = loadPlugins(workDir, map);
+        HEPluginSystem loader = null;
+        try {
+            loader = loadPlugins(workDir, map);
+        } catch (Throwable e){
+            e.printStackTrace();
+        }
         provider = buildAuthProvider(loader, map);
         loadPages(workDir);
         loadRoutes(workDir, map.getMap("routes"));

@@ -128,6 +128,7 @@ public class VrHtmlFormat implements IRequestProcessor {
 
 
     public static final class Redirect extends RuntimeException implements IRequestProcessor {
+        private static final StackTraceElement[] EMPTY = new StackTraceElement[]{};
         private final String to;
 
         public Redirect(String to) {
@@ -140,6 +141,18 @@ public class VrHtmlFormat implements IRequestProcessor {
         public void handle(RequestSession session){
             session.setHeader(HttpHeaderNames.CACHE_CONTROL, "no-cache");
             session.redirect(to);
+        }
+
+
+        @Override
+        public Throwable initCause(Throwable cause) {
+            return this;
+        }
+
+
+        @Override
+        public StackTraceElement[] getStackTrace() {
+            return EMPTY;
         }
 
 

@@ -24,9 +24,8 @@ class AnStyle implements ICitem{
 
     public void renameVar(String from, String keyTo, String varTo){
         for (StyleParam param:items){
-            if(param.key.equals(from)){
-                param.key = keyTo;
-            }
+            if(param.key.equals(from)) param.key = keyTo;
+
             for (ICitem iCitem:param.value){
                 renVarRec(iCitem, from, varTo);
             }
@@ -36,9 +35,8 @@ class AnStyle implements ICitem{
 
     private void renVarRec(ICitem item, String from, String to){
         if(item instanceof VrCss.Var vrcssvar){
-            if(Objects.equals(from, vrcssvar.header)){
-                vrcssvar.header = to;
-            }
+            if(Objects.equals(from, vrcssvar.header)) vrcssvar.header = to;
+
             if(vrcssvar.items==null)return;
             for (ArrayList<ICitem> item0: vrcssvar.items){
                 for (ICitem iCitem1:item0){
@@ -62,18 +60,14 @@ class AnStyle implements ICitem{
                 break;
             }
         }
-        if(add){
-            items.add(param);
-        }
+        if(add) items.add(param);
+
     }
 
 
     public StyleParam getParam(String key){
-        for (StyleParam p:items){
-            if(p.key.equals(key)){
-                return p;
-            }
-        }
+        for (StyleParam p:items)
+            if(p.key.equals(key)) return p;
         return null;
     }
 

@@ -207,11 +207,10 @@ final class H2Handler extends ChannelDuplexHandler implements RequestSession {
     public Cookie getCookie(String key) {
         if(cookieHashMap==null) {
             List<CharSequence> items = headersFrame.headers().getAll("cookie");
-            if(items.size()>0) {
+            if(items.size() > 0) {
                 cookieHashMap = new HashMap<>();
-                for (CharSequence item : items) {
+                for (CharSequence item : items)
                     CookieCoder.decode(cookieHashMap, item.toString());
-                }
             } else {
                 cookieHashMap = Collections.emptyMap();
             }

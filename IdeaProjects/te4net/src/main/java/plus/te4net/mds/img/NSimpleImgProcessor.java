@@ -34,11 +34,11 @@ public class NSimpleImgProcessor implements IRequestProcessor {
 
     private static String[] getImgName(String[] splat){
         int size = 1;
-        for(;size<splat.length;size++){
+        for(;size < splat.length; size++){
             if(splat[size]==null)break;
         }
         String[] st = new String[2+size];
-        if(size==1){
+        if(size == 1){
             st[2] = splat[0];
         } else {
             System.arraycopy(splat, 0, st, 2, st.length-2);

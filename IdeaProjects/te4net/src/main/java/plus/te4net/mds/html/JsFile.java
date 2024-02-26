@@ -15,17 +15,17 @@ public class JsFile extends SimpleCompressedTextFile {
 
 
     public JsFile(HEWorker worker, String name, String code, boolean needPress){
-        super(worker, name, code, needPress);
+        super(worker, name, code, needPress, TYPE_JS);
     }
 
 
     public JsFile(HEWorker worker, File file){
-        super(worker, file);
+        super(worker, TYPE_JS, file);
     }
 
 
     public JsFile(IDataProvider worker, String name, String data) {
-        super(worker, name, data);
+        super(worker, TYPE_JS, name, data);
     }
 
 
@@ -37,11 +37,5 @@ public class JsFile extends SimpleCompressedTextFile {
 
     public static String optimizeJs(HEWorker worker, String code){
         return new FastJsOptimizer(code).doScan();
-    }
-
-
-    @Override
-    public String type() {
-        return TYPE_JS;
     }
 }

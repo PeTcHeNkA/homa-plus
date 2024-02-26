@@ -31,18 +31,30 @@ public class SimpleCompressedTextFile implements IRequestProcessor{
 
     private final byte[] brotli, data;
     private final int hs;
+    private final String type;
 
     public SimpleCompressedTextFile(HEWorker worker, String name, String data) {
         this(worker, name, data, true);
     }
 
 
+    public SimpleCompressedTextFile(HEWorker worker, String type, File file){
+        this(worker, file.getName(), TsonFile.read(file,""), true, type);
+    }
+
+
     public SimpleCompressedTextFile(HEWorker worker, File file){
-        this(worker, file.getName(), TsonFile.read(file,""));
+        this(worker, file.getName(), TsonFile.read(file,""), true, TYPE_TEXT);
     }
 
 
     public SimpleCompressedTextFile(HEWorker worker, String name, String data, boolean compress) {
+        this(worker, name, data, compress, TYPE_TEXT);
+    }
+
+
+    public SimpleCompressedTextFile(HEWorker worker, String name, String data, boolean compress, String type) {
+        this.type = type;
         if(data.isBlank()){
             this.data = new byte[0];
             this.brotli = this.data;
@@ -58,6 +70,12 @@ public class SimpleCompressedTextFile implements IRequestProcessor{
 
 
     public SimpleCompressedTextFile(IDataProvider worker, String name, String data){
+        this(worker, TYPE_TEXT, name, data);
+    }
+
+
+    public SimpleCompressedTextFile(IDataProvider worker, String type, String name, String data){
+        this.type = type;
         this.data = gZip(data);
         hs = Arrays.hashCode(this.data);
         this.brotli = createOrCompressBrotli(worker, name,hashCode(), data);
@@ -181,8 +199,8 @@ public class SimpleCompressedTextFile implements IRequestProcessor{
     }
 
 
-    public String type() {
-        return TYPE_TEXT;
+    public final String type() {
+        return type;
     }
 
 

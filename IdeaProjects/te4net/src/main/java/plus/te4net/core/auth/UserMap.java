@@ -1,19 +1,29 @@
 package plus.te4net.core.auth;
 
 import java.util.ArrayList;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+
 import plus.asyutl.shoulder.IBasicTask;
 import plus.te4net.core.node.HEWorker;
 import plus.tson.utl.Tuple;
 import plus.tson.utl.Te4HashMap;
 
 
-public class UserMap<T extends User> extends Te4HashMap<TokenInfo, T> implements IBasicTask {
+public class UserMap<T extends User> extends Te4HashMap<TokenInfo, T> implements Runnable {
     protected final IUserData<T> users;
-    protected int cd = 0;
+    private final ScheduledExecutorService service;
+    private ScheduledFuture<?> future;
 
-    public UserMap(UserData<T> userData){
+    public UserMap(ScheduledExecutorService service, UserData<T> userData){
+        this.service = service;
         this.users = userData;
-        HEWorker.shoulder.addTask(this);
+    }
+
+
+    private void restartIfNeed(){
+        if(future == null)future = service.scheduleAtFixedRate(this, 10_000, 10_000, TimeUnit.MILLISECONDS);
     }
 
 
@@ -30,7 +40,8 @@ public class UserMap<T extends User> extends Te4HashMap<TokenInfo, T> implements
         if (token == null) {
             throw new AuthException(AuthException.Type.SQL);
         }
-        put(new TokenIKey(token, data), user);
+        fput(new TokenIKey(token, data), user);
+        restartIfNeed();
         return new Tuple<>(user, token);
     }
 
@@ -69,7 +80,10 @@ public class UserMap<T extends User> extends Te4HashMap<TokenInfo, T> implements
         Node<TokenInfo,T> node = getNode(new TokenInfo(token, data));
         if(node==null){
             T user = getUserFromTable(token, data);
-            if(user != null) put(new TokenIKey(token, data), user);
+            if(user != null) {
+                fput(new TokenIKey(token, data), user);
+                restartIfNeed();
+            }
             return user;
         } else {
             node.getKey().use();
@@ -92,25 +106,12 @@ public class UserMap<T extends User> extends Te4HashMap<TokenInfo, T> implements
         if (containsKey(key)) {
             users.removeToken(token);
             remove(key);
-        } else {
-            if (users.getUserFromToken(token, data) != null) users.removeToken(token);
-        }
+        } else if (users.getUserFromToken(token, data) != null) users.removeToken(token);
     }
 
 
     T getUserFromTable(String token, byte[] data) {
         return users.getUserFromToken(token, data);
-    }
-
-
-    @Override
-    public boolean needRun() {
-        if(cd++>180){
-            cd = 0;
-            run();
-            users.onCleanCache();
-        }
-        return false;
     }
 
 
@@ -122,6 +123,10 @@ public class UserMap<T extends User> extends Te4HashMap<TokenInfo, T> implements
                 int hash = hash(key);
                 removeNode(hash, key, null, false, true);
             }
+        }
+        if(isEmpty() && future != null){
+            future.cancel(true);
+            future = null;
         }
     }
 

@@ -19,6 +19,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.UUID;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 
 
@@ -29,7 +30,7 @@ public class McAuth extends AuthRoute<McUser> {
 
     public McAuth(HEWorker worker, @Var(key = "database", def = "mcusers.db")
         String database, TsonMap mailAuth) {
-        super(worker, new MMap(database), mailAuth);
+        super(worker, new MMap(worker.pool(), database), mailAuth);
         inst = this;
     }
 
@@ -110,8 +111,8 @@ public class McAuth extends AuthRoute<McUser> {
 
 
     static class MMap extends UserMap<McUser> {
-        public MMap(String database) {
-            super(new Data(database));
+        public MMap(ScheduledExecutorService service, String database) {
+            super(service, new Data(database));
         }
 
         public McUser getByUUID(String uuid) {

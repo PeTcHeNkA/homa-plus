@@ -34,24 +34,27 @@ public class AuthRoute<U extends User> extends AuthService<U> implements SimpleS
     private final HEWorker worker;
 
     public AuthRoute(HEWorker worker, TsonMap config){
-        this(worker, new UserMap<>((UserData<U>) new DefData(config.getOrDefault(
+        this(worker, new UserMap<>(worker.pool(), (UserData<U>) new DefData(config.getOrDefault(
                         "database", new TsonStr(worker.getWorkDir().getPath() + "/users.db")
                 ).getStr())),
                 config.getOrDefault("mail",new TsonMap("{virtual=(true)}")).getMap()
         );
     }
 
+
     public AuthRoute(HEWorker worker, UserMap<U> userMap, TsonMap mailAuth){
-        super(userMap, new Cap4aLib<>(), new MailServer(mailAuth.getMap("mail")));
+        super(worker.pool(), userMap, new Cap4aLib<>(worker.pool()), new MailServer(worker.pool(), mailAuth.getMap("mail")));
         setMailFormat(new TextMapFormatter(getStrSrc("mail-code-template.html"),"{%","%}"));
         fmLogin = VrHtmlFormat.ofHtml(worker, getStrSrc("mcauth2.html"));
         this.worker = worker;// mcauth2.html  login-template.html
         onInit(worker);
     }
 
+
     protected void onInit(HEWorker worker){
         worker.addRoute("auth", this);
     }
+
 
     static class DefData extends UserData<User>{
         public DefData(String database) {
@@ -62,6 +65,7 @@ public class AuthRoute<U extends User> extends AuthService<U> implements SimpleS
             return new User(login, password, name, data);
         }
     }
+
 
     public void post(RequestSession session) {
         try {
@@ -233,6 +237,7 @@ public class AuthRoute<U extends User> extends AuthService<U> implements SimpleS
         cToken.setPath("/");
         cToken.setMaxAge(2592000);
         cToken.setSecure(true);
+        cToken.setHttpOnly(true);
         session.setCookie(cToken);
     }
 
