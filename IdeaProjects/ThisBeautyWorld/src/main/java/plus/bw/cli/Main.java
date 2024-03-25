@@ -155,8 +155,8 @@ public class Main extends SimpleApplication{
 
         rootNode.attachChild(manager.root());
 
-        for (int x=7;x < (orig.width()/24)+1;x++){
-            for (int y=7;y < (orig.height()/24)+1;y++){
+        for (int x=5;x < (orig.width()/24)+1;x++){
+            for (int y=5;y < (orig.height()/24)+1;y++){
                 manager.show(x, y);
             }
         }

@@ -21,25 +21,24 @@ public class GlobalMapCGen {
         Matrix matrix = new Matrix(baseX*2, baseY*2);
         matrix.apply(ctx.rand(2));
 
-        //System.out.println(matrix.toString(MatrixUtl.viFunc(1, "#"," ")));
-
         Matrix ciMask = new IslandCGen(baseX, baseY, rescale, ctx).make();
-        //TsonFile.write(new File("render2.txt"), print(ciMask));
 
 
         Matrix mask = new Matrix(baseX*2*rescale, baseY*2*rescale);
         mask.apply(ctx.rand(27));
 
+        int[] reUse, reuse2;
 
         Matrix scaled = MatrixUtl.zoom(matrix, rescale);
         scaled.apply(MatrixUtl.boost(100));
+        reUse = scaled.raw();
         scaled = MatrixUtl.smooth9(scaled);
-        scaled = MatrixUtl.smooth9(scaled);
-        scaled = MatrixUtl.smooth9(scaled);
-        scaled = MatrixUtl.smooth9(scaled);
+        reuse2 = scaled.raw();
+        scaled = MatrixUtl.smooth9(scaled, reUse);
+        scaled = MatrixUtl.smooth9(scaled, reuse2);
+        scaled = MatrixUtl.smooth9(scaled, reUse);
 
         MatrixUtl.DEC_FUNC.apply(scaled, ciMask);
-
         MatrixUtl.ADD_FUNC.apply(scaled, mask);
         //scaled = MatrixUtl.smooth5(scaled);
         //scaled.update(MatrixUtl.boost(0.07f));

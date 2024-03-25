@@ -46,16 +46,20 @@ public class IslandCGen {
         ciMask = MatrixUtl.zoom(ciMask, rescale);
         MatrixUtl.applyBounds(ciMask, MatrixUtl.use(150));
 
+        int[] reUse, reUse2;
+        reUse = ciMask.raw();
         ciMask = MatrixUtl.smooth9(ciMask);
-        ciMask = MatrixUtl.smooth9(ciMask);
+        ciMask = MatrixUtl.smooth9(ciMask, reUse);
 
         MatrixUtl.applyBounds(ciMask, MatrixUtl.use(250));
 
         ciMask = MatrixUtl.zoom(ciMask, 2);
+        reUse = ciMask.raw();
 
         ciMask = MatrixUtl.smooth9(ciMask);
-        ciMask = MatrixUtl.smooth9(ciMask);
-        ciMask = MatrixUtl.smooth9(ciMask);
+        reUse2 = ciMask.raw();
+        ciMask = MatrixUtl.smooth9(ciMask, reUse); //maybe used
+        ciMask = MatrixUtl.smooth9(ciMask, reUse2);
 
         return ciMask;
     }

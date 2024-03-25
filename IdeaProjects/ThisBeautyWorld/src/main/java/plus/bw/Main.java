@@ -43,14 +43,14 @@ public class Main {
 
 
     public static void main(String[] args) {
-        RandomCtx ctx = new RandomCtx();
-        Matrix orig = new GlobalMapCGen(64, 64, 4, ctx).make();
-
-//        test(orig, 21, 21);
-//        test(orig, 20, 20);
+//        RandomCtx ctx = new RandomCtx();
+//        Matrix orig = new GlobalMapCGen(64, 64, 4, ctx).make();
 //
-        test(orig, 20, 21);
-        test(orig, 21, 20);
+////        test(orig, 21, 21);
+////        test(orig, 20, 20);
+////
+//        test(orig, 20, 21);
+//        test(orig, 21, 20);
 
 //        Matrix matrix = new GlobalMapCGen(baseX, baseY, rescale, ctx).make();
 //

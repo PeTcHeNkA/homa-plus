@@ -32,8 +32,9 @@ public class RiverMixCGen {
         matrix.apply(gen);
 
         matrix = MatrixUtl.zoom(matrix, 2);
+        int[] reUse = matrix.raw();
         matrix = MatrixUtl.smooth9(matrix);
-        matrix = MatrixUtl.smooth9(matrix);
+        matrix = MatrixUtl.smooth9(matrix, reUse);
 
         return matrix;
     }

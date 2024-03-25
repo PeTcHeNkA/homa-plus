@@ -129,13 +129,19 @@ public class MatrixUtl {
      * @return The copy of a matrix with smoothing on the basis of average values in a square 3х3
      */
     public static Matrix smooth9(Matrix src){
-        return smooth9var(src, 9);
+        return smooth9var(src, 9, null);
     }
 
 
-    public static Matrix smooth9var(Matrix src, final int del){
+    public static Matrix smooth9(Matrix src, int[] alloc){
+        return smooth9var(src, 9, alloc);
+    }
+
+
+    public static Matrix smooth9var(Matrix src, final int del, int[] alloc){
         int w;
-        Matrix result = new Matrix(w = src.width(), src.height());
+        Matrix result = alloc ==null?new Matrix(w = src.width(), src.height()):
+                new Matrix(w = src.width(), src.height(), alloc);
         int[] raw = src.raw();
 
         for (int cX = 1, p0; cX < src.height() - 1; cX++){
