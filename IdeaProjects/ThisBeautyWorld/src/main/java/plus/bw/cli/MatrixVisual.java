@@ -57,30 +57,19 @@ public class MatrixVisual {
     }
 
 
-    private int isAllNear1Height(int[] raw, int w, int h, int x, int y){
-        try {
+    private int isAllNear1Height(int[] raw, int w, int h, int x, int y) {
+        if (y == 0 || y >= w - 1 || x == 0 || x >= h - 1) return Integer.MIN_VALUE;
+        int delta = (w * x) + y;
+        int center = raw[delta];
 
+        int temp;
 
-            if (y == 0 || y >= w - 1 || x == 0 || x >= h - 1) return Integer.MIN_VALUE;
-            int delta = (w * x) + y;
-            int center = raw[delta];
+        if ((temp = raw[delta + w]) < center) center = temp;
+        if ((temp = raw[delta - w]) < center) center = temp;
+        if ((temp = raw[delta + 1]) < center) center = temp;
+        if ((temp = raw[delta - 1]) < center) center = temp;
 
-            int temp;
-
-            if ((temp = raw[delta + w]) < center) center = temp;
-            if ((temp = raw[delta - w]) < center) center = temp;
-            if ((temp = raw[delta + 1]) < center) center = temp;
-            if ((temp = raw[delta - 1]) < center) center = temp;
-
-            return center;
-
-        } catch (Exception e){
-            System.err.println("NEN_ERR");
-            e.printStackTrace();
-
-            return Integer.MIN_VALUE;
-        }
-        //return raw[delta+w] == center && raw[delta-w] == center && raw[delta+1] == center && raw[delta-1] == center;
+        return center;
     }
 
 
@@ -137,18 +126,95 @@ public class MatrixVisual {
     }
 
 
+    private static class FBox extends AbstractBox {
+        private static final short[] GEOMETRY_INDICES_DATA = {
+                2,  1,  0,  3,  2,  0, // back
+                6,  5,  4,  7,  6,  4, // right
+                10,  9,  8, 11, 10,  8, // front
+                14, 13, 12, 15, 14, 12, // left
+                18, 17, 16, 19, 18, 16, // top
+        };
+
+        private static final float[] GEOMETRY_NORMALS_DATA = {
+                0,  0, -1,  0,  0, -1,  0,  0, -1,  0,  0, -1, // back
+                1,  0,  0,  1,  0,  0,  1,  0,  0,  1,  0,  0, // right
+                0,  0,  1,  0,  0,  1,  0,  0,  1,  0,  0,  1, // front
+                -1,  0,  0, -1,  0,  0, -1,  0,  0, -1,  0,  0, // left
+                0,  1,  0,  0,  1,  0,  0,  1,  0,  0,  1,  0, // top
+        };
+
+        private static final float[] GEOMETRY_TEXTURE_DATA = {
+                1, 0, 0, 0, 0, 1, 1, 1, // back
+                1, 0, 0, 0, 0, 1, 1, 1, // right
+                1, 0, 0, 0, 0, 1, 1, 1, // front
+                1, 0, 0, 0, 0, 1, 1, 1, // left
+                1, 0, 0, 0, 0, 1, 1, 1, // top
+        };
+
+
+        public FBox(float x, float y, float z) {
+            super();
+            updateGeometry(Vector3f.ZERO, x, y, z);
+        }
+
+
+        @Override
+        public FBox clone() {
+            return new FBox(xExtent, yExtent, zExtent);
+        }
+
+
+        @Override
+        protected void doUpdateGeometryIndices() {
+            if (getBuffer(VertexBuffer.Type.Index) == null){
+                setBuffer(VertexBuffer.Type.Index, 3, BufferUtils.createShortBuffer(GEOMETRY_INDICES_DATA));
+            }
+        }
+
+
+        @Override
+        protected void doUpdateGeometryNormals() {
+            if (getBuffer(VertexBuffer.Type.Normal) == null){
+                setBuffer(VertexBuffer.Type.Normal, 3, BufferUtils.createFloatBuffer(GEOMETRY_NORMALS_DATA));
+            }
+        }
+
+
+        @Override
+        protected void doUpdateGeometryTextures() {
+            if (getBuffer(VertexBuffer.Type.TexCoord) == null){
+                setBuffer(VertexBuffer.Type.TexCoord, 2, BufferUtils.createFloatBuffer(GEOMETRY_TEXTURE_DATA));
+            }
+        }
+
+
+        @Override
+        protected void doUpdateGeometryVertices() {
+            FloatBuffer fpb = BufferUtils.createVector3Buffer(20);
+            Vector3f[] v = computeVertices();
+            fpb.put(new float[] {
+                    v[0].x, v[0].y, v[0].z, v[1].x, v[1].y, v[1].z, v[2].x, v[2].y, v[2].z, v[3].x, v[3].y, v[3].z, // back
+                    v[1].x, v[1].y, v[1].z, v[4].x, v[4].y, v[4].z, v[6].x, v[6].y, v[6].z, v[2].x, v[2].y, v[2].z, // right
+                    v[4].x, v[4].y, v[4].z, v[5].x, v[5].y, v[5].z, v[7].x, v[7].y, v[7].z, v[6].x, v[6].y, v[6].z, // front
+                    v[5].x, v[5].y, v[5].z, v[0].x, v[0].y, v[0].z, v[3].x, v[3].y, v[3].z, v[7].x, v[7].y, v[7].z, // left
+                    v[2].x, v[2].y, v[2].z, v[6].x, v[6].y, v[6].z, v[7].x, v[7].y, v[7].z, v[3].x, v[3].y, v[3].z, // top
+            });
+            setBuffer(VertexBuffer.Type.Position, 3, fpb);
+            updateBound();
+        }
+    }
+
+
     private Geometry newQuad(int num, Int2ObjectFunction<Material> func){
         Mesh quad = new FQuad(0.5f, 0.5f);
         Geometry geo = new Geometry("Quad", quad);
-
         geo.setMaterial(func.get(num));
-
         return geo;
     }
 
 
     private Geometry newBox(int num, float height, Int2ObjectFunction<Material> func){
-        Box aBox = new Box(0.5f, height/2, 0.5f);
+        Mesh aBox = new FBox(0.5f, height/2, 0.5f);
         Geometry geo = new Geometry("Box", aBox);
         geo.setMaterial(func.get(num));
         return geo;
