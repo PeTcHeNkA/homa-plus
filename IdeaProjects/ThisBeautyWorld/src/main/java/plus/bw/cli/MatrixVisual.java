@@ -12,21 +12,20 @@ import it.unimi.dsi.fastutil.ints.Int2FloatFunction;
 import it.unimi.dsi.fastutil.ints.Int2ObjectFunction;
 import jme3tools.optimize.GeometryBatchFactory;
 import plus.bw.world.Matrix;
-
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
 
 public class MatrixVisual {
-    private int isAllNear1Height(int[] raw, int w, int h, int x, int y) {
-        if (y == 0 || y >= w - 1 || x == 0 || x >= h - 1) return Integer.MIN_VALUE;
-        int delta = (w * x) + y;
+    private int isAllNear1Height(int[] raw, int width, int height, int x, int y) {
+        if (y == 0 || y >= width - 1 || x == 0 || x >= height - 1) return Integer.MIN_VALUE;
+        int delta = (width * x) + y;
         int center = raw[delta];
 
         int temp;
 
-        if ((temp = raw[delta + w]) < center) center = temp;
-        if ((temp = raw[delta - w]) < center) center = temp;
+        if ((temp = raw[delta + width]) < center) center = temp;
+        if ((temp = raw[delta - width]) < center) center = temp;
         if ((temp = raw[delta + 1]) < center) center = temp;
         if ((temp = raw[delta - 1]) < center) center = temp;
 
@@ -41,25 +40,30 @@ public class MatrixVisual {
         int width = matrix.width();
         int height = matrix.height();
 
-        for (int cw = 0, cursor = 0; cw < height; cw++){
-            for (int ch = 0; ch < width; ch++){
-                float calculated = hFunc.get(raw[cursor]);
+        float[] results = new float[matrix.size()];
+        for (int i=0;i<results.length;i++){
+            results[i] = hFunc.get(raw[i]);
+        }
+
+        for (int x = 0, cursor = 0; x < height; x++){
+            for (int y = 0; y < width; y++){
+                float calculated = results[cursor];
 
                 Geometry geo;
-                int min = isAllNear1Height(raw, width, height, cw, ch);
+                int min = isAllNear1Height(raw, width, height, x, y);
 
                 if(min == raw[cursor]){
                     geo = newQuad(raw[cursor], func);
 
-                    geo.setLocalTranslation(cw, calculated, ch);
+                    geo.setLocalTranslation(x, calculated, y);
                 } else {
                     if(min != Integer.MIN_VALUE) {
                         float shift = hFunc.get(min);
                         geo = newBox(raw[cursor], calculated - shift, func);
-                        geo.setLocalTranslation(cw, (calculated / 2) + (shift / 2), ch);
+                        geo.setLocalTranslation(x, (calculated / 2) + (shift / 2), y);
                     } else {
                         geo = newBox(raw[cursor], calculated, func);
-                        geo.setLocalTranslation(cw, (calculated / 2), ch);
+                        geo.setLocalTranslation(x, (calculated / 2), y);
                     }
                 }
                 node.attachChild(geo);
