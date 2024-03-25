@@ -74,7 +74,7 @@ public class MatrixVisual {
 
 
     private static class FQuad extends AbstractBox {
-        private static final short[] GEOMETRY_INDICES_DATA = {
+        private static final byte[] GEOMETRY_INDICES_DATA = {
                 2,  1,  0,  3,  2,  0
         };
 
@@ -95,9 +95,10 @@ public class MatrixVisual {
         @Override
         protected void doUpdateGeometryIndices() {
             if (getBuffer(VertexBuffer.Type.Index) == null){
-                setBuffer(VertexBuffer.Type.Index, 3, BufferUtils.createShortBuffer(GEOMETRY_INDICES_DATA));
+                setBuffer(VertexBuffer.Type.Index, 3, BufferUtils.createByteBuffer(GEOMETRY_INDICES_DATA));
             }
         }
+
 
         @Override
         protected void doUpdateGeometryNormals() {
@@ -106,12 +107,14 @@ public class MatrixVisual {
             }
         }
 
+
         @Override
         protected void doUpdateGeometryTextures() {
             if (getBuffer(VertexBuffer.Type.TexCoord) == null){
                 setBuffer(VertexBuffer.Type.TexCoord, 2, BufferUtils.createFloatBuffer(GEOMETRY_TEXTURE_DATA));
             }
         }
+
 
         @Override
         protected void doUpdateGeometryVertices() {
@@ -127,7 +130,7 @@ public class MatrixVisual {
 
 
     private static class FBox extends AbstractBox {
-        private static final short[] GEOMETRY_INDICES_DATA = {
+        private static final byte[] GEOMETRY_INDICES_DATA = {
                 2,  1,  0,  3,  2,  0, // back
                 6,  5,  4,  7,  6,  4, // right
                 10,  9,  8, 11, 10,  8, // front
@@ -167,7 +170,7 @@ public class MatrixVisual {
         @Override
         protected void doUpdateGeometryIndices() {
             if (getBuffer(VertexBuffer.Type.Index) == null){
-                setBuffer(VertexBuffer.Type.Index, 3, BufferUtils.createShortBuffer(GEOMETRY_INDICES_DATA));
+                setBuffer(VertexBuffer.Type.Index, 3, BufferUtils.createByteBuffer(GEOMETRY_INDICES_DATA));
             }
         }
 
