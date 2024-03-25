@@ -12,10 +12,27 @@ import it.unimi.dsi.fastutil.ints.Int2FloatFunction;
 import it.unimi.dsi.fastutil.ints.Int2ObjectFunction;
 import jme3tools.optimize.GeometryBatchFactory;
 import plus.bw.world.Matrix;
+
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
 
 public class MatrixVisual {
+    private int isAllNear1Height(int[] raw, int w, int h, int x, int y) {
+        if (y == 0 || y >= w - 1 || x == 0 || x >= h - 1) return Integer.MIN_VALUE;
+        int delta = (w * x) + y;
+        int center = raw[delta];
+
+        int temp;
+
+        if ((temp = raw[delta + w]) < center) center = temp;
+        if ((temp = raw[delta - w]) < center) center = temp;
+        if ((temp = raw[delta + 1]) < center) center = temp;
+        if ((temp = raw[delta - 1]) < center) center = temp;
+
+        return center;
+    }
+
 
     public Node make(String name, Matrix matrix, Int2ObjectFunction<Material> func, Int2FloatFunction hFunc){
         Node node = new Node(name);
@@ -56,34 +73,10 @@ public class MatrixVisual {
     }
 
 
-    private int isAllNear1Height(int[] raw, int w, int h, int x, int y) {
-        if (y == 0 || y >= w - 1 || x == 0 || x >= h - 1) return Integer.MIN_VALUE;
-        int delta = (w * x) + y;
-        int center = raw[delta];
-
-        int temp;
-
-        if ((temp = raw[delta + w]) < center) center = temp;
-        if ((temp = raw[delta - w]) < center) center = temp;
-        if ((temp = raw[delta + 1]) < center) center = temp;
-        if ((temp = raw[delta - 1]) < center) center = temp;
-
-        return center;
-    }
-
-
     private static class FQuad extends AbstractBox {
-        private static final byte[] GEOMETRY_INDICES_DATA = {
-                2,  1,  0,  3,  2,  0
-        };
-
-        private static final float[] GEOMETRY_NORMALS_DATA = {
-                0,  1,  0,  0,  1,  0,  0,  1,  0,  0,  1,  0
-        };
-
-        private static final float[] GEOMETRY_TEXTURE_DATA = {
-                1, 0, 0, 0, 0, 1, 1, 1
-        };
+        private static final byte[] GEOMETRY_INDICES_DATA_TOP  = {2,  1,  0,  3,  2,  0};
+        private static final float[] GEOMETRY_NORMALS_DATA_TOP = {0,  1,  0,  0,  1,  0,  0,  1,  0,  0,  1,  0};
+        private static final float[] GEOMETRY_TEXTURE_DATA_TOP = {1, 0, 0, 0, 0, 1, 1, 1};
 
         public FQuad(float w, float h){
             super();
@@ -94,7 +87,7 @@ public class MatrixVisual {
         @Override
         protected void doUpdateGeometryIndices() {
             if (getBuffer(VertexBuffer.Type.Index) == null){
-                setBuffer(VertexBuffer.Type.Index, 3, BufferUtils.createByteBuffer(GEOMETRY_INDICES_DATA));
+                setBuffer(VertexBuffer.Type.Index, 3, BufferUtils.createByteBuffer(GEOMETRY_INDICES_DATA_TOP));
             }
         }
 
@@ -102,7 +95,7 @@ public class MatrixVisual {
         @Override
         protected void doUpdateGeometryNormals() {
             if (getBuffer(VertexBuffer.Type.Normal) == null){
-                setBuffer(VertexBuffer.Type.Normal, 3, BufferUtils.createFloatBuffer(GEOMETRY_NORMALS_DATA));
+                setBuffer(VertexBuffer.Type.Normal, 3, BufferUtils.createFloatBuffer(GEOMETRY_NORMALS_DATA_TOP));
             }
         }
 
@@ -110,7 +103,7 @@ public class MatrixVisual {
         @Override
         protected void doUpdateGeometryTextures() {
             if (getBuffer(VertexBuffer.Type.TexCoord) == null){
-                setBuffer(VertexBuffer.Type.TexCoord, 2, BufferUtils.createFloatBuffer(GEOMETRY_TEXTURE_DATA));
+                setBuffer(VertexBuffer.Type.TexCoord, 2, BufferUtils.createFloatBuffer(GEOMETRY_TEXTURE_DATA_TOP));
             }
         }
 
@@ -128,23 +121,73 @@ public class MatrixVisual {
     }
 
 
+    private static final byte[] GEOMETRY_INDICES_DATA = {
+            2,  1,  0,  3,  2,  0, // back
+            6,  5,  4,  7,  6,  4, // right
+            10,  9,  8, 11, 10,  8, // front
+            14, 13, 12, 15, 14, 12, // left
+            18, 17, 16, 19, 18, 16, // top
+    };
+
+    private static final float[] GEOMETRY_NORMALS_DATA = {
+            0,  0, -1,  0,  0, -1,  0,  0, -1,  0,  0, -1, // back
+            1,  0,  0,  1,  0,  0,  1,  0,  0,  1,  0,  0, // right
+            0,  0,  1,  0,  0,  1,  0,  0,  1,  0,  0,  1, // front
+            -1,  0,  0, -1,  0,  0, -1,  0,  0, -1,  0,  0, // left
+            0,  1,  0,  0,  1,  0,  0,  1,  0,  0,  1,  0, // top
+    };
+
+    private static final float[] GEOMETRY_TEXTURE_DATA = {
+            1, 0, 0, 0, 0, 1, 1, 1, // back
+            1, 0, 0, 0, 0, 1, 1, 1, // right
+            1, 0, 0, 0, 0, 1, 1, 1, // front
+            1, 0, 0, 0, 0, 1, 1, 1, // left
+            1, 0, 0, 0, 0, 1, 1, 1, // top
+    };
+
     public static class FBox extends AbstractBox {
-        private static final byte[] GEOMETRY_INDICES_DATA = {
+        private static final byte[] GEOMETRY_INDICES_DATA_0 = {
                 2,  1,  0,  3,  2,  0, // back
+        };
+        private static final byte[] GEOMETRY_INDICES_DATA_4 = {
                 6,  5,  4,  7,  6,  4, // right
+        };
+        private static final byte[] GEOMETRY_INDICES_DATA_8 = {
                 10,  9,  8, 11, 10,  8, // front
+        };
+        private static final byte[] GEOMETRY_INDICES_DATA_12 = {
                 14, 13, 12, 15, 14, 12, // left
+        };
+        private static final byte[] GEOMETRY_INDICES_DATA_16 = {
                 18, 17, 16, 19, 18, 16, // top
         };
+        private static final byte[][] GEOMETRY_INDICES_DATA_ALL = {
+                GEOMETRY_INDICES_DATA_0,
+                GEOMETRY_INDICES_DATA_4,
+                GEOMETRY_INDICES_DATA_8,
+                GEOMETRY_INDICES_DATA_12,
+                GEOMETRY_INDICES_DATA_16
+        };
 
-        private static final float[] GEOMETRY_NORMALS_DATA = {
+        //total 20, step = 4
+
+        private static final float[] GEOMETRY_NORMALS_DATA_B = {
                 0,  0, -1,  0,  0, -1,  0,  0, -1,  0,  0, -1, // back
+        };
+        private static final float[] GEOMETRY_NORMALS_DATA_R = {
                 1,  0,  0,  1,  0,  0,  1,  0,  0,  1,  0,  0, // right
+        };
+        private static final float[] GEOMETRY_NORMALS_DATA_F = {
                 0,  0,  1,  0,  0,  1,  0,  0,  1,  0,  0,  1, // front
+        };
+        private static final float[] GEOMETRY_NORMALS_DATA_L = {
                 -1,  0,  0, -1,  0,  0, -1,  0,  0, -1,  0,  0, // left
+        };
+        private static final float[] GEOMETRY_NORMALS_DATA_T = {
                 0,  1,  0,  0,  1,  0,  0,  1,  0,  0,  1,  0, // top
         };
 
+        //TODO FIXED
         private static final float[] GEOMETRY_TEXTURE_DATA = {
                 1, 0, 0, 0, 0, 1, 1, 1, // back
                 1, 0, 0, 0, 0, 1, 1, 1, // right
@@ -153,15 +196,38 @@ public class MatrixVisual {
                 1, 0, 0, 0, 0, 1, 1, 1, // top
         };
 
-        private final float b, r, f, l;
-        public FBox(float b, float r, float f, float l) {
-            super();
-            this.b = b;
-            this.r = r;
-            this.f = f;
-            this.l = l;
+        //TODO ERROR
+        private static final float[] GEOMETRY_TEXTURE_DATA_B = {
+                1, 0, 0, 0, 0, 1, 1, 1, // back
+        };
 
-            updateGeometry(Vector3f.ZERO, b,r, f);
+        private static final float[] GEOMETRY_TEXTURE_DATA_R = {
+                1, 0, 0, 0, 0, 1, 1, 1, // right
+        };
+
+        private static final float[] GEOMETRY_TEXTURE_DATA_F = {
+                1, 0, 0, 0, 0, 1, 1, 1, // front
+        };
+
+        private static final float[] GEOMETRY_TEXTURE_DATA_L = {
+                1, 0, 0, 0, 0, 1, 1, 1, // left
+        };
+
+        private static final float[] GEOMETRY_TEXTURE_DATA_T = {
+                1, 0, 0, 0, 0, 1, 1, 1, // top
+        };
+        //TODO ERROR
+
+        private final float b, r, f, l;
+        public FBox(float b1, float r1, float f1, float l1) {
+            super();
+            b = 1; r = -1; f = -1; l = 1;
+//            this.b = b;
+//            this.r = r;
+//            this.f = f;
+//            this.l = l;
+
+            updateGeometry(Vector3f.ZERO, b1, r1, f1);
         }
 
 
@@ -171,51 +237,126 @@ public class MatrixVisual {
         }
 
 
-        protected void doUpdateGeometryIndices() {
+        protected void doUpdateGeometryIndices() {//stabile
             if (getBuffer(VertexBuffer.Type.Index) == null){
-                setBuffer(VertexBuffer.Type.Index, 3, BufferUtils.createByteBuffer(GEOMETRY_INDICES_DATA));
+                int size = 6; // GEOMETRY_INDICES_DATA_0.length == 6
+                if(b > 0)size += 6;
+                if(r > 0)size += 6;
+                if(f > 0)size += 6;
+                if(l > 0)size += 6;
+
+                ByteBuffer buffer = BufferUtils.createByteBuffer(size);
+                size = 0;
+                if(b > 0)buffer.put(GEOMETRY_INDICES_DATA_ALL[size++]);
+                if(r > 0)buffer.put(GEOMETRY_INDICES_DATA_ALL[size++]);
+                if(f > 0)buffer.put(GEOMETRY_INDICES_DATA_ALL[size++]);
+                if(l > 0)buffer.put(GEOMETRY_INDICES_DATA_ALL[size++]);
+                buffer.put(GEOMETRY_INDICES_DATA_ALL[size]);
+
+                setBuffer(VertexBuffer.Type.Index, 3, buffer);
+
+                //setBuffer(VertexBuffer.Type.Index, 3, BufferUtils.createByteBuffer(GEOMETRY_INDICES_DATA));
             }
         }
 
 
         protected void doUpdateGeometryNormals() {
+            //stabile
             if (getBuffer(VertexBuffer.Type.Normal) == null){
-                setBuffer(VertexBuffer.Type.Normal, 3, BufferUtils.createFloatBuffer(GEOMETRY_NORMALS_DATA));
+
+                int size = 12; // GEOMETRY_NORMALS_DATA == 12
+                if(b > 0)size += 12;
+                if(r > 0)size += 12;
+                if(f > 0)size += 12;
+                if(l > 0)size += 12;
+
+                FloatBuffer buffer = BufferUtils.createFloatBuffer(size);
+                //size = 0;
+                if(b > 0)buffer.put(GEOMETRY_NORMALS_DATA_B);
+                if(r > 0)buffer.put(GEOMETRY_NORMALS_DATA_R);
+                if(f > 0)buffer.put(GEOMETRY_NORMALS_DATA_F);
+                if(l > 0)buffer.put(GEOMETRY_NORMALS_DATA_L);
+                buffer.put(GEOMETRY_NORMALS_DATA_T);
+
+                setBuffer(VertexBuffer.Type.Normal, 3, buffer);
+
+                //setBuffer(VertexBuffer.Type.Normal, 3, BufferUtils.createFloatBuffer(GEOMETRY_NORMALS_DATA));
             }
         }
 
 
-        protected void doUpdateGeometryTextures() {
+        protected void doUpdateGeometryTextures() {//stabile
             if (getBuffer(VertexBuffer.Type.TexCoord) == null){
-                setBuffer(VertexBuffer.Type.TexCoord, 2, BufferUtils.createFloatBuffer(GEOMETRY_TEXTURE_DATA));
+
+                int size = 8; // GEOMETRY_TEXTURE_DATA_T == 8
+                if(b > 0)size += 8;
+                if(r > 0)size += 8;
+                if(f > 0)size += 8;
+                if(l > 0)size += 8;
+
+                FloatBuffer buffer = BufferUtils.createFloatBuffer(size);
+                //size = 0;
+                if(b > 0)buffer.put(GEOMETRY_TEXTURE_DATA_B);
+                if(r > 0)buffer.put(GEOMETRY_TEXTURE_DATA_R);
+                if(f > 0)buffer.put(GEOMETRY_TEXTURE_DATA_F);
+                if(l > 0)buffer.put(GEOMETRY_TEXTURE_DATA_L);
+                buffer.put(GEOMETRY_TEXTURE_DATA_T);
+
+                setBuffer(VertexBuffer.Type.TexCoord, 2, buffer);
+                //setBuffer(VertexBuffer.Type.TexCoord, 2, buf2);
             }
         }
+//
+//
+//        private String toStr(FloatBuffer buf){
+//            int size = buf.capacity();
+//            StringBuilder builder = new StringBuilder("[");
+//            for (int i=0;i<size;i++){
+//                builder.append(buf.get(i));
+//                builder.append(',');
+//            }
+//            builder.setCharAt(builder.length()-1, ']');
+//            return builder.toString();
+//        }
 
 
         protected void doUpdateGeometryVertices() {
-            FloatBuffer fpb = BufferUtils.createVector3Buffer(20);
+            int size = 4;
+            if(b > 0)size += 4;
+            if(r > 0)size += 4;
+            if(f > 0)size += 4;
+            if(l > 0)size += 4;
+
+            FloatBuffer fpb = BufferUtils.createVector3Buffer(size);
             Vector3f[] v = computeVertices();
 
-            float[] back = {
-                    v[0].x, v[0].y, v[0].z, v[1].x, v[1].y, v[1].z, v[2].x, v[2].y, v[2].z, v[3].x, v[3].y, v[3].z, // back
-            };
-            fpb.put(back);
+            if(b>0) {
+                float[] back = {
+                        v[0].x, v[0].y, v[0].z, v[1].x, v[1].y, v[1].z, v[2].x, v[2].y, v[2].z, v[3].x, v[3].y, v[3].z, // back
+                };
+                fpb.put(back);
+            }
 
-            float[] right = {
-                    v[1].x, v[1].y, v[1].z, v[4].x, v[4].y, v[4].z, v[6].x, v[6].y, v[6].z, v[2].x, v[2].y, v[2].z, // right
-            };
-            fpb.put(right);
+            if(r>0) {
+                float[] right = {
+                        v[1].x, v[1].y, v[1].z, v[4].x, v[4].y, v[4].z, v[6].x, v[6].y, v[6].z, v[2].x, v[2].y, v[2].z, // right
+                };
+                fpb.put(right);
+            }
 
-            float[] front = {
-                    v[4].x, v[4].y, v[4].z, v[5].x, v[5].y, v[5].z, v[7].x, v[7].y, v[7].z, v[6].x, v[6].y, v[6].z, // front
-            };
-            fpb.put(front);
+            if(f>0) {
+                float[] front = {
+                        v[4].x, v[4].y, v[4].z, v[5].x, v[5].y, v[5].z, v[7].x, v[7].y, v[7].z, v[6].x, v[6].y, v[6].z, // front
+                };
+                fpb.put(front);
+            }
 
-            float[] left = {
-                    v[5].x, v[5].y, v[5].z, v[0].x, v[0].y, v[0].z, v[3].x, v[3].y, v[3].z, v[7].x, v[7].y, v[7].z, // left
-            };
-            fpb.put(left);
-
+            if(l>0) {
+                float[] left = {
+                        v[5].x, v[5].y, v[5].z, v[0].x, v[0].y, v[0].z, v[3].x, v[3].y, v[3].z, v[7].x, v[7].y, v[7].z, // left
+                };
+                fpb.put(left);
+            }
 
             float[] top = {
                     v[2].x, v[2].y, v[2].z, v[6].x, v[6].y, v[6].z, v[7].x, v[7].y, v[7].z, v[3].x, v[3].y, v[3].z, // top
@@ -237,12 +378,19 @@ public class MatrixVisual {
 
 
     public static void main(String[] args) {
-        Mesh aBox = new FBox(0.5f, 1, 0.5f, 1);
-        System.out.println(aBox);
+        Node node = new Node();
+        node.attachChild(newBox(1, 5, null));
+        node.attachChild(newBox(1, 7, null));
+        //node
+
+        GeometryBatchFactory.optimize(node);
+
+
+        //System.out.println(aBox);
     }
 
 
-    private Geometry newBox(int num, float height, Int2ObjectFunction<Material> func){
+    private static Geometry newBox(int num, float height, Int2ObjectFunction<Material> func){
         Mesh aBox = new FBox(0.5f, height/2, 0.5f, 1);//todo
         Geometry geo = new Geometry("Box", aBox);
         geo.setMaterial(func.get(num));
