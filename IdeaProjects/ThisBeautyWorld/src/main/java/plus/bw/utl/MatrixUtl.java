@@ -229,36 +229,11 @@ public class MatrixUtl {
 
     public static Matrix copyOf(Matrix src, int xStart, int yStart, int xEnd, int yEnd){
         Matrix copy = new Matrix(yEnd - yStart, xEnd - xStart);
-
         for (int x = xStart; x < xEnd; x++){
             for (int y = yStart; y < yEnd; y++){
-                try {
-                    copy.set(x - xStart, y - yStart, src.get(x, y));
-                } catch (Exception e){
-                    System.out.println("GET x="+(x)+",y="+(y)+"["+copy.width()+","+copy.height()+"]");
-                    System.out.println("SET x="+(x - xStart)+",y="+(y - yStart)+"["+copy.width()+","+copy.height()+"]");
-                }
+                copy.set(x - xStart, y - yStart, src.get(x, y));
             }
         }
-
-//        int dx=-1, dy=-1, width=-1, height=-1;
-//        try {
-//
-//            for (dx = 0, width = copy.width(), height = copy.height(); dx < height; dx++) {
-//                for (dy = 0; dy < width; dy++) {
-//                    //TODO
-//                    //if(!src.legalPos(dx + xStart, dy + yStart))continue;
-//                    copy.set(dx, dy, src.get(dx + xStart, dy + yStart));
-//                }
-//            }
-//        } catch (Exception e){
-//            e.printStackTrace(System.out);
-//            System.out.println("dx="+dx+",dy="+dy+",w="+width+",h="+height+",xs="+xStart+",ys"+yStart);
-//            System.out.println("GET x="+(dx + xStart)+",y="+(dy + yStart));
-//            System.out.println("SET x="+(dx)+",y="+(dy)+"["+height+","+width+"]");
-//        }
         return copy;
     }
 }
-
-
