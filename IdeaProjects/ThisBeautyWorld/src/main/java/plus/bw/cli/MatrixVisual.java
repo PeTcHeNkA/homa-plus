@@ -59,10 +59,17 @@ public class MatrixVisual {
                 } else {
                     if(min != Integer.MIN_VALUE) {
                         float shift = hFunc.get(min);
-                        geo = newBox(raw[cursor], calculated - shift, func);
+                        byte mask = 0;
+                        if(calculated > results[cursor+width])mask |= 2;
+                        if(calculated > results[cursor+1])    mask |= 4;
+                        if(calculated > results[cursor-width])mask |= 8;
+                        if(calculated > results[cursor-1])    mask |= 1;
+
+                        geo = newBox(raw[cursor], func, calculated - shift, mask);
                         geo.setLocalTranslation(x, (calculated / 2) + (shift / 2), y);
+
                     } else {
-                        geo = newBox(raw[cursor], calculated, func);
+                        geo = newBox(raw[cursor], func, calculated, (byte) 15);
                         geo.setLocalTranslation(x, (calculated / 2), y);
                     }
                 }
@@ -222,39 +229,32 @@ public class MatrixVisual {
         };
         //TODO ERROR
 
-        private final float b, r, f, l;
-        public FBox(float b1, float r1, float f1, float l1) {
+        private final byte mask;
+        public FBox(float x, float y, float z, byte mask) {
             super();
-            b = 1; r = -1; f = -1; l = 1;
+            this.mask = mask;
 //            this.b = b;
 //            this.r = r;
 //            this.f = f;
 //            this.l = l;
-
-            updateGeometry(Vector3f.ZERO, b1, r1, f1);
-        }
-
-
-        @Override
-        public FBox clone() {
-            return new FBox(b, r, f, l);
+            updateGeometry(Vector3f.ZERO, x, y, z);
         }
 
 
         protected void doUpdateGeometryIndices() {//stabile
             if (getBuffer(VertexBuffer.Type.Index) == null){
                 int size = 6; // GEOMETRY_INDICES_DATA_0.length == 6
-                if(b > 0)size += 6;
-                if(r > 0)size += 6;
-                if(f > 0)size += 6;
-                if(l > 0)size += 6;
+                if((mask & 1) == 1)size += 6;
+                if((mask & 2) == 2)size += 6;
+                if((mask & 4) == 4)size += 6;
+                if((mask & 8) == 8)size += 6;
 
                 ByteBuffer buffer = BufferUtils.createByteBuffer(size);
                 size = 0;
-                if(b > 0)buffer.put(GEOMETRY_INDICES_DATA_ALL[size++]);
-                if(r > 0)buffer.put(GEOMETRY_INDICES_DATA_ALL[size++]);
-                if(f > 0)buffer.put(GEOMETRY_INDICES_DATA_ALL[size++]);
-                if(l > 0)buffer.put(GEOMETRY_INDICES_DATA_ALL[size++]);
+                if((mask & 1) == 1)buffer.put(GEOMETRY_INDICES_DATA_ALL[size++]);
+                if((mask & 2) == 2)buffer.put(GEOMETRY_INDICES_DATA_ALL[size++]);
+                if((mask & 4) == 4)buffer.put(GEOMETRY_INDICES_DATA_ALL[size++]);
+                if((mask & 8) == 8)buffer.put(GEOMETRY_INDICES_DATA_ALL[size++]);
                 buffer.put(GEOMETRY_INDICES_DATA_ALL[size]);
 
                 setBuffer(VertexBuffer.Type.Index, 3, buffer);
@@ -269,17 +269,17 @@ public class MatrixVisual {
             if (getBuffer(VertexBuffer.Type.Normal) == null){
 
                 int size = 12; // GEOMETRY_NORMALS_DATA == 12
-                if(b > 0)size += 12;
-                if(r > 0)size += 12;
-                if(f > 0)size += 12;
-                if(l > 0)size += 12;
+                if((mask & 1) == 1)size += 12;
+                if((mask & 2) == 2)size += 12;
+                if((mask & 4) == 4)size += 12;
+                if((mask & 8) == 8)size += 12;
 
                 FloatBuffer buffer = BufferUtils.createFloatBuffer(size);
                 //size = 0;
-                if(b > 0)buffer.put(GEOMETRY_NORMALS_DATA_B);
-                if(r > 0)buffer.put(GEOMETRY_NORMALS_DATA_R);
-                if(f > 0)buffer.put(GEOMETRY_NORMALS_DATA_F);
-                if(l > 0)buffer.put(GEOMETRY_NORMALS_DATA_L);
+                if((mask & 1) == 1)buffer.put(GEOMETRY_NORMALS_DATA_B);
+                if((mask & 2) == 2)buffer.put(GEOMETRY_NORMALS_DATA_R);
+                if((mask & 4) == 4)buffer.put(GEOMETRY_NORMALS_DATA_F);
+                if((mask & 8) == 8)buffer.put(GEOMETRY_NORMALS_DATA_L);
                 buffer.put(GEOMETRY_NORMALS_DATA_T);
 
                 setBuffer(VertexBuffer.Type.Normal, 3, buffer);
@@ -293,17 +293,17 @@ public class MatrixVisual {
             if (getBuffer(VertexBuffer.Type.TexCoord) == null){
 
                 int size = 8; // GEOMETRY_TEXTURE_DATA_T == 8
-                if(b > 0)size += 8;
-                if(r > 0)size += 8;
-                if(f > 0)size += 8;
-                if(l > 0)size += 8;
+                if((mask & 1) == 1)size += 8;
+                if((mask & 2) == 2)size += 8;
+                if((mask & 4) == 4)size += 8;
+                if((mask & 8) == 8)size += 8;
 
                 FloatBuffer buffer = BufferUtils.createFloatBuffer(size);
                 //size = 0;
-                if(b > 0)buffer.put(GEOMETRY_TEXTURE_DATA_B);
-                if(r > 0)buffer.put(GEOMETRY_TEXTURE_DATA_R);
-                if(f > 0)buffer.put(GEOMETRY_TEXTURE_DATA_F);
-                if(l > 0)buffer.put(GEOMETRY_TEXTURE_DATA_L);
+                if((mask & 1) == 1)buffer.put(GEOMETRY_TEXTURE_DATA_B);
+                if((mask & 2) == 2)buffer.put(GEOMETRY_TEXTURE_DATA_R);
+                if((mask & 4) == 4)buffer.put(GEOMETRY_TEXTURE_DATA_F);
+                if((mask & 8) == 8)buffer.put(GEOMETRY_TEXTURE_DATA_L);
                 buffer.put(GEOMETRY_TEXTURE_DATA_T);
 
                 setBuffer(VertexBuffer.Type.TexCoord, 2, buffer);
@@ -326,36 +326,36 @@ public class MatrixVisual {
 
         protected void doUpdateGeometryVertices() {
             int size = 4;
-            if(b > 0)size += 4;
-            if(r > 0)size += 4;
-            if(f > 0)size += 4;
-            if(l > 0)size += 4;
+            if((mask & 1) == 1)size += 4;
+            if((mask & 2) == 2)size += 4;
+            if((mask & 4) == 4)size += 4;
+            if((mask & 8) == 8)size += 4;
 
             FloatBuffer fpb = BufferUtils.createVector3Buffer(size);
             Vector3f[] v = computeVertices();
 
-            if(b>0) {
+            if((mask & 1) == 1) {
                 float[] back = {
                         v[0].x, v[0].y, v[0].z, v[1].x, v[1].y, v[1].z, v[2].x, v[2].y, v[2].z, v[3].x, v[3].y, v[3].z, // back
                 };
                 fpb.put(back);
             }
 
-            if(r>0) {
+            if((mask & 2) == 2) {
                 float[] right = {
                         v[1].x, v[1].y, v[1].z, v[4].x, v[4].y, v[4].z, v[6].x, v[6].y, v[6].z, v[2].x, v[2].y, v[2].z, // right
                 };
                 fpb.put(right);
             }
 
-            if(f>0) {
+            if((mask & 4) == 4) {
                 float[] front = {
                         v[4].x, v[4].y, v[4].z, v[5].x, v[5].y, v[5].z, v[7].x, v[7].y, v[7].z, v[6].x, v[6].y, v[6].z, // front
                 };
                 fpb.put(front);
             }
 
-            if(l>0) {
+            if((mask & 8) == 8) {
                 float[] left = {
                         v[5].x, v[5].y, v[5].z, v[0].x, v[0].y, v[0].z, v[3].x, v[3].y, v[3].z, v[7].x, v[7].y, v[7].z, // left
                 };
@@ -382,20 +382,20 @@ public class MatrixVisual {
 
 
     public static void main(String[] args) {
-        Node node = new Node();
-        node.attachChild(newBox(1, 5, null));
-        node.attachChild(newBox(1, 7, null));
-        //node
-
-        GeometryBatchFactory.optimize(node);
+//        Node node = new Node();
+//        node.attachChild(newBox(1, 5, null));
+//        node.attachChild(newBox(1, 7, null));
+//        //node
+//
+//        GeometryBatchFactory.optimize(node);
 
 
         //System.out.println(aBox);
     }
 
 
-    private static Geometry newBox(int num, float height, Int2ObjectFunction<Material> func){
-        Mesh aBox = new FBox(0.5f, height/2, 0.5f, 1);//todo
+    private static Geometry newBox(int num, Int2ObjectFunction<Material> func, float height, byte mask){
+        Mesh aBox = new FBox(0.5f, height/2, 0.5f, mask);//todo
         Geometry geo = new Geometry("Box", aBox);
         geo.setMaterial(func.get(num));
         return geo;
