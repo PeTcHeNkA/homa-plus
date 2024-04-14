@@ -87,19 +87,20 @@ public class PlayerCMapSelector{
     }
 
 
+    //todo
     public void updateMovingPlayer(PlayerChunkMap pcm, EntityPlayerMP player) {
-        int i = (int)player.posX >> 4;
-        int j = (int)player.posZ >> 4;
+        int curX = (int)player.posX >> 4;
+        int curZ = (int)player.posZ >> 4;
         double d0 = player.managedPosX - player.posX;
         double d1 = player.managedPosZ - player.posZ;
         double d2 = d0 * d0 + d1 * d1;
 
         if (d2 >= 64.0D) {
-            int senX = (int)player.managedPosX >> 4;
-            int senZ = (int)player.managedPosZ >> 4;
+            int preX = (int)player.managedPosX >> 4;
+            int preZ = (int)player.managedPosZ >> 4;
 
-            int j1 = i - senX;
-            int k1 = j - senZ;
+            int j1 = curX - preX;
+            int k1 = curZ - preZ;
 
             int radius = this.radius;
             if(player.renderRadius != player.prevRenderRadius){
@@ -109,14 +110,14 @@ public class PlayerCMapSelector{
                     radius = pcm.getMaxPlayerViewRadius();
                 player.prevRenderRadius = player.renderRadius;
             }
-
+            //todo fix this
             if (j1 != 0 || k1 != 0) {
-                for (int l1 = i - radius; l1 <= i + radius; ++l1) {
-                    for (int i2 = j - radius; i2 <= j + radius; ++i2) {
-                        if (overlapsCircle(l1, i2, senX, senZ)) {
+                for (int l1 = curX - radius; l1 <= curX + radius; ++l1) {
+                    for (int i2 = curZ - radius; i2 <= curZ + radius; ++i2) {
+                        if (overlapsCircle(l1, i2, preX, preZ)) {
                             pcm.getOrCreateEntry(l1, i2).addPlayer(player);
                         }
-                        if (overlapsSq(l1 - j1, i2 - k1, i, j, radius)) {
+                        if (overlapsSq(l1 - j1, i2 - k1, curX, curZ, radius)) {
                             PlayerChunkMapEntry playerchunkmapentry = pcm.getEntry(l1 - j1, i2 - k1);
 
                             if (playerchunkmapentry != null) {
