@@ -2,8 +2,8 @@ package net.minecraft.world.gen;
 
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.annotation.Nullable;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFalling;
 import net.minecraft.block.BlockLiquid;
@@ -38,13 +38,14 @@ import plus.fserver.ElcaConfig;
 import plus.fserver.api.PWorldServer;
 import plus.fserver.world.generator.GenSession;
 import plus.fserver.world.generator.biome.BiomeProviderEx;
+import plus.fserver.world.generator.future.WorldGenStalactite;
 import plus.fserver.world.generator.map.EMapGenBase;
 import plus.fserver.world.generator.map.EMapGenCaves;
 import plus.fserver.world.generator.map.EMapGenRavine;
 
 
 public class ChunkGeneratorOverworld implements IChunkGenerator {
-//    private final long seed;
+    //    private final long seed;
     private final Random rand;
     private NoiseGeneratorOctaves minLimitPerlinNoise;
     private NoiseGeneratorOctaves maxLimitPerlinNoise;
@@ -61,7 +62,7 @@ public class ChunkGeneratorOverworld implements IChunkGenerator {
 
     private final EMapGenBase caveGenerator = new EMapGenCaves();
     private final EMapGenBase ravineGenerator = new EMapGenRavine();
-//    private MapGenBase caveGenerator = new MapGenCaves();
+    //    private MapGenBase caveGenerator = new MapGenCaves();
 //    private MapGenBase ravineGenerator = new MapGenRavine();
     private MapGenStronghold strongholdGenerator = new MapGenStronghold();
     private MapGenVillage villageGenerator = new MapGenVillage();
@@ -120,11 +121,29 @@ public class ChunkGeneratorOverworld implements IChunkGenerator {
     }
 
 
+    private final ConcurrentLinkedQueue<GenSession> sessionPool = new ConcurrentLinkedQueue<>();
+    private GenSession makeGenSession() {
+        GenSession session = sessionPool.poll();
+        return session==null ? new GenSession() : session;
+    }
+    private void freeSession(GenSession session) {
+        sessionPool.add(session);
+    }
+    @Override
+    public void cleanupCache() {
+        if(sessionPool.size()==1){
+            sessionPool.clear();
+        } else {
+            while (sessionPool.size()>1) sessionPool.poll();
+        }
+    }
+
+
     public void setBlocksInChunk(int x, int z, ChunkPrimer primer) {
         BiomeProvider provider = this.world.getBiomeProvider();
-        GenSession session = (GenSession) provider.makeGenSession();
+        GenSession session = makeGenSession();
         setBlocksInChunk(session, x, z, primer);
-        provider.freeSession(session);
+        freeSession(session);
     }
 
 
@@ -207,7 +226,7 @@ public class ChunkGeneratorOverworld implements IChunkGenerator {
     @Override
     public Chunk generateChunk(int x, int z) {
         BiomeProvider provider = this.world.getBiomeProvider();
-        GenSession session = (GenSession) provider.makeGenSession();
+        GenSession session = makeGenSession();
 
         session.rand.setSeed((long)x * 341873128712L + (long)z * 132897987541L);
         ChunkPrimer chunkprimer = new ChunkPrimer();
@@ -264,7 +283,7 @@ public class ChunkGeneratorOverworld implements IChunkGenerator {
             abyte[i] = (byte)Biome.getIdForBiome(session.biomesForGeneration[i]);
         }
 
-        provider.freeSession(session);
+        freeSession(session);
 
         chunk.generateSkylightMap();
         return chunk;
@@ -273,98 +292,97 @@ public class ChunkGeneratorOverworld implements IChunkGenerator {
 
     private void generateHeightmap(GenSession session, int x, int y, int z) {
         session.depthRegion = this.depthNoise.generateNoiseOctaves(session.depthRegion, x, z, 5, 5, (double)this.settings.depthNoiseScaleX, (double)this.settings.depthNoiseScaleZ, (double)this.settings.depthNoiseScaleExponent);
-        float f0 = this.settings.coordinateScale;
+        float f = this.settings.coordinateScale;
         float f1 = this.settings.heightScale;
-        session.mainNoiseRegion = this.mainPerlinNoise.generateNoiseOctaves(session.mainNoiseRegion, x, y, z, 5, 33, 5, f0 / this.settings.mainNoiseScaleX, (double)(f1 / this.settings.mainNoiseScaleY), (double)(f0 / this.settings.mainNoiseScaleZ));
-        session.minLimitRegion = this.minLimitPerlinNoise.generateNoiseOctaves(session.minLimitRegion, x, y, z, 5, 33, 5, f0, f1, f0);
-        session.maxLimitRegion = this.maxLimitPerlinNoise.generateNoiseOctaves(session.maxLimitRegion, x, y, z, 5, 33, 5, f0, f1, f0);
-
-        int i = 0, j = 0;
-        float f2, f3, f4, f5;
+        session.mainNoiseRegion = this.mainPerlinNoise.generateNoiseOctaves(session.mainNoiseRegion, x, y, z, 5, 33, 5, f / this.settings.mainNoiseScaleX, (double)(f1 / this.settings.mainNoiseScaleY), (double)(f / this.settings.mainNoiseScaleZ));
+        session.minLimitRegion = this.minLimitPerlinNoise.generateNoiseOctaves(session.minLimitRegion, x, y, z, 5, 33, 5, f, f1, f);
+        session.maxLimitRegion = this.maxLimitPerlinNoise.generateNoiseOctaves(session.maxLimitRegion, x, y, z, 5, 33, 5, f, f1, f);
+        int i = 0;
+        int j = 0;
 
         for (int k = 0; k < 5; ++k) {
             for (int l = 0; l < 5; ++l) {
-                f2 = 0.0F;
-                f3 = 0.0F;
-                f4 = 0.0F;
+                float f2 = 0.0F;
+                float f3 = 0.0F;
+                float f4 = 0.0F;
+                int i1 = 2;
                 Biome biome = session.biomesForGeneration[k + 2 + (l + 2) * 10];
 
                 for (int j1 = -2; j1 <= 2; ++j1) {
                     for (int k1 = -2; k1 <= 2; ++k1) {
                         Biome biome1 = session.biomesForGeneration[k + j1 + 2 + (l + k1 + 2) * 10];
-                        f5 = this.settings.biomeDepthOffSet + biome1.getBaseHeight() * this.settings.biomeDepthWeight;
-                        f0 = this.settings.biomeScaleOffset + biome1.getHeightVariation() * this.settings.biomeScaleWeight;
+                        float f5 = this.settings.biomeDepthOffSet + biome1.getBaseHeight() * this.settings.biomeDepthWeight;
+                        float f6 = this.settings.biomeScaleOffset + biome1.getHeightVariation() * this.settings.biomeScaleWeight;
 
                         if (this.terrainType == WorldType.AMPLIFIED && f5 > 0.0F) {
                             f5 = 1.0F + f5 * 2.0F;
-                            f0 = 1.0F + f0 * 4.0F;
+                            f6 = 1.0F + f6 * 4.0F;
                         }
 
-                        f0 = session.biomeWeights[j1 + 2 + (k1 + 2) * 5] / (f5 + 2.0F);
+                        float f7 = session.biomeWeights[j1 + 2 + (k1 + 2) * 5] / (f5 + 2.0F);
 
                         if (biome1.getBaseHeight() > biome.getBaseHeight()) {
-                            f0 /= 2.0F;
+                            f7 /= 2.0F;
                         }
 
-                        f2 += f0 * f0;
-                        f3 += f5 * f0;
-                        f4 += f0;
+                        f2 += f6 * f7;
+                        f3 += f5 * f7;
+                        f4 += f7;
                     }
                 }
                 f2 = f2 / f4;
                 f3 = f3 / f4;
                 f2 = f2 * 0.9F + 0.1F;
                 f3 = (f3 * 4.0F - 1.0F) / 8.0F;
-                double temp0 = session.depthRegion[j] / 8000.0D;
+                double d7 = session.depthRegion[j] / 8000.0D;
 
-                if (temp0 < 0.0D) {
-                    temp0 = -temp0 * 0.3D;
+                if (d7 < 0.0D) {
+                    d7 = -d7 * 0.3D;
                 }
 
-                temp0 = temp0 * 3.0D - 2.0D;
+                d7 = d7 * 3.0D - 2.0D;
 
-                if (temp0 < 0.0D) {
-                    temp0 = temp0 / 2.0D;
+                if (d7 < 0.0D) {
+                    d7 = d7 / 2.0D;
 
-                    if (temp0 < -1.0D) {
-                        temp0 = -1.0D;
+                    if (d7 < -1.0D) {
+                        d7 = -1.0D;
                     }
 
-                    temp0 = temp0 / 1.4D;
-                    temp0 = temp0 / 2.0D;
+                    d7 = d7 / 1.4D;
+                    d7 = d7 / 2.0D;
                 } else {
-                    if (temp0 > 1.0D) {
-                        temp0 = 1.0D;
+                    if (d7 > 1.0D) {
+                        d7 = 1.0D;
                     }
-                    temp0 = temp0 / 8.0D;
+                    d7 = d7 / 8.0D;
                 }
 
                 ++j;
-                double temp1 = f3;
-                double boost1 = (double)this.settings.stretchY * 128.0D / 256.0D / f2;
-
-                temp1 = temp1 + temp0 * 0.2D;
-                temp1 = temp1 * (double)this.settings.baseSize / 8.0D;
-                double delta = (double)this.settings.baseSize + temp1 * 4.0D;
+                double d8 = f3;
+                double d9 = f2;
+                d8 = d8 + d7 * 0.2D;
+                d8 = d8 * (double)this.settings.baseSize / 8.0D;
+                double d0 = (double)this.settings.baseSize + d8 * 4.0D;
 
                 for (int l1 = 0; l1 < 33; ++l1) {
-                    temp1 = ((double)l1 - delta) * boost1;
+                    double d1 = ((double)l1 - d0) * (double)this.settings.stretchY * 128.0D / 256.0D / d9;
 
-                    if (temp1 < 0.0D) {
-                        temp1 *= 4.0D;
+                    if (d1 < 0.0D) {
+                        d1 *= 4.0D;
                     }
 
-                    temp0 = session.minLimitRegion[i] / (double)this.settings.lowerLimitScale;
-                    double temp2 = session.maxLimitRegion[i] / (double)this.settings.upperLimitScale;
-                    double temp3 = (session.mainNoiseRegion[i] / 10.0D + 1.0D) / 2.0D;
-                    temp3 = MathHelper.clampedLerp(temp0, temp2, temp3) - temp1;
+                    double d2 = session.minLimitRegion[i] / (double)this.settings.lowerLimitScale;
+                    double d3 = session.maxLimitRegion[i] / (double)this.settings.upperLimitScale;
+                    double d4 = (session.mainNoiseRegion[i] / 10.0D + 1.0D) / 2.0D;
+                    double d5 = MathHelper.clampedLerp(d2, d3, d4) - d1;
 
                     if (l1 > 29) {
-                        temp2 = (float)(l1 - 29) / 3.0F;
-                        temp3 = temp3 * (1.0D - temp2) + -10.0D * temp2;
+                        double d6 = (float)(l1 - 29) / 3.0F;
+                        d5 = d5 * (1.0D - d6) + -10.0D * d6;
                     }
 
-                    session.heightMap[i] = temp3;
+                    session.heightMap[i] = d5;
                     ++i;
                 }
             }
@@ -408,9 +426,13 @@ public class ChunkGeneratorOverworld implements IChunkGenerator {
                 }
             }
 
+        if(true){
+            new WorldGenStalactite().generate(world, rand, blockpos.add(8,8,8));
+        }
+
         if (this.settings.useDungeons)
-            if (TerrainGen.populate(this, this.world, this.rand, x, z, false, PopulateChunkEvent.Populate.EventType.DUNGEON))
-            {
+            if (TerrainGen.populate(this, this.world, this.rand, x, z, false,
+                    PopulateChunkEvent.Populate.EventType.DUNGEON)) {
                 for (int j2 = 0; j2 < this.settings.dungeonChance; ++j2) {
                     int i3 = this.rand.nextInt(16) + 8;
                     int l3 = this.rand.nextInt(256);
@@ -449,33 +471,36 @@ public class ChunkGeneratorOverworld implements IChunkGenerator {
                 WorldEntitySpawner.performWorldGenSpawning(world, finalBiome, i + 8, j + 8, 16, 16, rand);
         });
 
-        //blockpos = blockpos.add(8, 0, 8);
-
         if (TerrainGen.populate(this, this.world, this.rand, x, z, false, PopulateChunkEvent.Populate.EventType.ICE)) {
-            //todo fix snow
-            Chunk chunk = this.world.getChunk(x, z);
-            BlockPos down;
-            for (int curX = 0; curX < 16; ++curX) {
-                for (int curZ = 0; curZ < 16; ++curZ) {
-                    blockpos = chunk.getPrecipitationHeight(curX, curZ);
-                    if(blockpos.getY() < 0 || blockpos.getY() > 255)continue;
+            Chunk chunk = world.getChunk(x, z);
+            BiomeProvider bpw = world.provider.getBiomeProvider();
+            IBlockState prevState, newState;
+            BlockPos.MutableBlockPos blockpos2 = new BlockPos.MutableBlockPos();
 
-                    biome = chunk.getBiome(blockpos, world.getBiomeProvider());
+            for (int dX = 0; dX < 16; ++dX) {
+                int absX = blockpos.getX()+dX;
+                for (int dZ = 0; dZ < 16; ++dZ) {
+                    int absZ = blockpos.getZ()+dZ;
 
-                    if(biome.getTemperature(blockpos) < 0.155F){
-                        if (canBlockFreezeBody(chunk, down = blockpos.down())) {
-                            chunk.setBlockState(down, Blocks.ICE.getDefaultState());
-                        }
-                        if (canSnowAt(chunk, blockpos, down)) {
-                            chunk.setBlockStateFastNoTile(
-                                    blockpos.getX(), blockpos.getY(), blockpos.getZ(),
-                                    Blocks.SNOW_LAYER.getDefaultState()
-                            );
-                        }
+                    Biome biome0 = chunk.getBiome(absX, absZ, bpw);
+                    BlockPos blockpos1 = chunk.getPrecipitationHeight(absX, absZ);
+                    blockpos2.setPos(blockpos1.getX(), blockpos1.getY()-1, blockpos1.getZ());
+
+                    if (biome0.getTemperature(blockpos2) < 0.15f && canBlockFreezeBody(chunk, blockpos2)) {
+                        prevState = chunk.setBlockState(blockpos2, newState = Blocks.ICE.getDefaultState());
+                        if(prevState != null)
+                            world.markAndNotifyBlock(blockpos2, chunk, prevState, newState, 2);
+                    }
+
+                    if (biome0.getTemperature(blockpos1) < 0.15f && canSnowAtBody(world, chunk, blockpos1)) {
+                        prevState = chunk.setBlockState(blockpos1, newState = Blocks.SNOW_LAYER.getDefaultState());
+
+                        if(prevState != null)
+                            world.markAndNotifyBlock(blockpos1, chunk, prevState, newState, 2);
                     }
                 }
             }
-        }//Forge: End ICE
+        }
 
         ForgeEventFactory.onChunkPopulate(false, this, this.world, this.rand, x, z, false);
 
@@ -483,18 +508,17 @@ public class ChunkGeneratorOverworld implements IChunkGenerator {
     }
 
 
-    private boolean canSnowAt(Chunk chunk, BlockPos pos, BlockPos down) {
-        if (chunk.getLightFor(EnumSkyBlock.BLOCK, pos) < 10) {
+    private boolean canSnowAtBody(World world, Chunk chunk, BlockPos pos) {
+        if (pos.getY() >= 0 && pos.getY() < 256 && chunk.getLightFor(EnumSkyBlock.BLOCK, pos) < 10) {
             IBlockState state = chunk.getBlockState(pos);
-            return state.getBlock().isAir(state, this.world, pos)
-                    && Blocks.SNOW_LAYER.canPlaceBlockAt(this.world, down);
+            return state.getBlock().isAir(state, world, pos) && Blocks.SNOW_LAYER.canPlaceBlockAt(world, pos);
         }
         return false;
     }
 
 
     private boolean canBlockFreezeBody(Chunk chunk, BlockPos pos) {
-        if (chunk.getLightFor(EnumSkyBlock.BLOCK, pos) < 10) {
+        if (pos.getY() >= 0 && pos.getY() < 256 && chunk.getLightFor(EnumSkyBlock.BLOCK, pos) < 10) {
             IBlockState state = chunk.getBlockState(pos);
             Block block = state.getBlock();
             return (block == Blocks.WATER || block == Blocks.FLOWING_WATER) && state.getValue(BlockLiquid.LEVEL) == 0;
@@ -503,6 +527,7 @@ public class ChunkGeneratorOverworld implements IChunkGenerator {
     }
 
 
+    @Override
     public boolean generateStructures(Chunk chunkIn, int x, int z) {
         boolean flag = false;
         if (this.settings.useMonuments && this.mapFeaturesEnabled && chunkIn.getInhabitedTime() < 3600L) {
@@ -512,6 +537,7 @@ public class ChunkGeneratorOverworld implements IChunkGenerator {
     }
 
 
+    @Override
     public List<Biome.SpawnListEntry> getPossibleCreatures(EnumCreatureType creatureType, BlockPos pos) {
         Biome biome = this.world.getBiome(pos);
 
