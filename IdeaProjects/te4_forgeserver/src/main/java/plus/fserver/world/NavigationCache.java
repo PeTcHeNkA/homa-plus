@@ -2,6 +2,8 @@ package plus.fserver.world;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.EntityLiving;
+import plus.tson.utl.Te4HashMap;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -61,8 +63,10 @@ public class NavigationCache {
 
     public PntMatrix getBy(int id){
         Field field = cache.get(id);
-        if(field==null){
-            cache.put(id, field = new Field());
+        if(field == null){
+            HashMap<Integer, Field> map = new HashMap<>(cache);
+            map.put(id, field = new Field());
+            cache = ImmutableMap.copyOf(map);
             allFields.add(field);
         }
         return field.matrix==null?field.matrix = new PntMatrix(): field.matrix;
