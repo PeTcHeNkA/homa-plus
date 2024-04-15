@@ -1740,6 +1740,7 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
 
     public void cleanCache(){
         navCache.clean(true);
+        chunkProviderServer.chunkGenerator.cleanupCache();
         provider.getBiomeProvider().cleanupCache();
         clearEvents();
     }
