@@ -4,7 +4,7 @@ import net.minecraft.init.Biomes;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeJungle;
 import net.minecraft.world.biome.BiomeMesa;
-import plus.fserver.world.generator.GenSession;
+import plus.fserver.world.generator.biome.EIntCache;
 
 
 public class EGenLayerShore extends EGenLayer{
@@ -16,7 +16,7 @@ public class EGenLayerShore extends EGenLayer{
 
 
     @Override
-    public int[] getInts(GenSession cache, int areaX, int areaY, int areaWidth, int areaHeight) {
+    public int[] getInts(EIntCache cache, int areaX, int areaY, int areaWidth, int areaHeight) {
         int[] ints = this.parent.getInts(cache, areaX - 1, areaY - 1, areaWidth + 2, areaHeight + 2);
         int[] intCache = cache.getIntCache(areaWidth * areaHeight);
 

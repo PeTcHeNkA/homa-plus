@@ -1,8 +1,7 @@
 package plus.fserver.world.generator.biome.layers;
 
-import net.minecraft.init.Biomes;
 import net.minecraft.world.biome.Biome;
-import plus.fserver.world.generator.GenSession;
+import plus.fserver.world.generator.biome.EIntCache;
 
 
 public class EGenLayerRiverPlus extends EGenLayer {
@@ -23,7 +22,7 @@ public class EGenLayerRiverPlus extends EGenLayer {
 
 
     @Override
-    public int[] getInts(GenSession cache, int p_75904_1_, int p_75904_2_, int p_75904_3_, int p_75904_4_) {
+    public int[] getInts(EIntCache cache, int p_75904_1_, int p_75904_2_, int p_75904_3_, int p_75904_4_) {
         int i1 = p_75904_1_ - 1;
         int i2 = p_75904_2_ - 1;
         int i3 = p_75904_3_ + 2;
@@ -41,7 +40,7 @@ public class EGenLayerRiverPlus extends EGenLayer {
                 if (n5 == n1 && n5 == n3 && n5 == n2 && n5 == n4) {
                     intCache[j + i * p_75904_3_] = -1;
                 } else {
-                    intCache[j + i * p_75904_3_] = Biome.getIdForBiome(Biomes.RIVER);
+                    intCache[j + i * p_75904_3_] = riverBiomeId;
                 }
             }
         }

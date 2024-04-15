@@ -1,7 +1,6 @@
 package plus.fserver.world.generator.biome.layers;
 
-import plus.fserver.world.generator.GenSession;
-import plus.fserver.world.generator.biome.layers.EGenLayer;
+import plus.fserver.world.generator.biome.EIntCache;
 
 
 public class EGenLayerShorePlus extends EGenLayer {
@@ -17,7 +16,7 @@ public class EGenLayerShorePlus extends EGenLayer {
 
 
     @Override
-    public int[] getInts(GenSession cache, int areaX, int areaY, int areaWidth, int areaHeight) {
+    public int[] getInts(EIntCache cache, int areaX, int areaY, int areaWidth, int areaHeight) {
         int[] aint = this.parent.getInts(cache, areaX - 1, areaY - 1, areaWidth + 2, areaHeight + 2);
         int[] aint1 = cache.getIntCache(areaWidth * areaHeight);
 

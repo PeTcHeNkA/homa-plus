@@ -2,7 +2,7 @@ package plus.fserver.world.generator.biome.layers;
 
 import net.minecraft.init.Biomes;
 import net.minecraft.world.biome.Biome;
-import plus.fserver.world.generator.GenSession;
+import plus.fserver.world.generator.biome.EIntCache;
 
 
 public class EGenLayerBiomeEdge extends EGenLayer {
@@ -13,7 +13,7 @@ public class EGenLayerBiomeEdge extends EGenLayer {
 
 
     @Override
-    public int[] getInts(GenSession cache, int areaX, int areaY, int areaWidth, int areaHeight) {
+    public int[] getInts(EIntCache cache, int areaX, int areaY, int areaWidth, int areaHeight) {
         int[] ints = this.parent.getInts(cache, areaX - 1, areaY - 1, areaWidth + 2, areaHeight + 2);
         int[] intCache = cache.getIntCache(areaWidth * areaHeight);
 

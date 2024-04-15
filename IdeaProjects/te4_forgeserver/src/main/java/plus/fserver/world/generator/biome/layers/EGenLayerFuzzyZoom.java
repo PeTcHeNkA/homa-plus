@@ -1,6 +1,6 @@
 package plus.fserver.world.generator.biome.layers;
 
-import plus.fserver.world.generator.GenSession;
+import plus.fserver.world.generator.biome.EIntCache;
 
 
 public class EGenLayerFuzzyZoom extends EGenLayerZoom{
@@ -10,7 +10,7 @@ public class EGenLayerFuzzyZoom extends EGenLayerZoom{
 
 
     @Override
-    protected int selectModeOrRandom(GenSession cache, int num1, int num2, int num3, int num4) {
+    protected int selectModeOrRandom(EIntCache cache, int num1, int num2, int num3, int num4) {
         return cache.selectRandom(num1, num2, num3, num4);
     }
 }

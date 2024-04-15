@@ -2,7 +2,7 @@ package plus.fserver.world.generator.biome.layers;
 
 import net.minecraft.init.Biomes;
 import net.minecraft.world.biome.Biome;
-import plus.fserver.world.generator.GenSession;
+import plus.fserver.world.generator.biome.EIntCache;
 
 
 public abstract class EGenLayer{
@@ -60,7 +60,7 @@ public abstract class EGenLayer{
     }
 
 
-    public abstract int[] getInts(GenSession cache, int areaX, int areaY, int areaWidth, int areaHeight);
+    public abstract int[] getInts(EIntCache cache, int areaX, int areaY, int areaWidth, int areaHeight);
 
 
     protected static boolean biomesEqualOrMesaPlateau(int biomeIDA, int biomeIDB) {

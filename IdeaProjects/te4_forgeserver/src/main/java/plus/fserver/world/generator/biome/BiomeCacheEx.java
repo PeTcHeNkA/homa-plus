@@ -20,7 +20,7 @@ class BiomeCacheEx {
     }
 
 
-    public Block getEntry(GenSession session, int num, int num2) {
+    public Block getEntry(EIntCache session, int num, int num2) {
         num >>= 4;
         num2 >>= 4;
         long num3 = (long) num & 4294967295L | ((long) num2 & 4294967295L) << 32;
@@ -35,7 +35,7 @@ class BiomeCacheEx {
     }
 
 
-    public Biome getBiome(GenSession session, int num1, int num2, Biome def) {
+    public Biome getBiome(EIntCache session, int num1, int num2, Biome def) {
         Biome result = this.getEntry(session, num1, num2).getBiome(num1, num2);
         return result == null ? def : result;
     }
@@ -60,7 +60,7 @@ class BiomeCacheEx {
     }
 
 
-    public Biome[] getCachedBiomes(GenSession session, int num1, int num2) {
+    public Biome[] getCachedBiomes(EIntCache session, int num1, int num2) {
         return this.getEntry(session, num1, num2).biomes;
     }
 
@@ -71,7 +71,7 @@ class BiomeCacheEx {
         public int z;
         public long lastAccessTime;
 
-        public Block(GenSession session, int num1, int num2) {
+        public Block(EIntCache session, int num1, int num2) {
             this.x = num1;
             this.z = num2;
             BiomeCacheEx.this.provider.getBiomes(session, this.biomes, num1 << 4, num2 << 4, 16, 16, false);

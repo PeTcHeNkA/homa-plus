@@ -53,13 +53,13 @@ public class BiomeProviderMc extends BiomeProvider {
 
 
     @Override
-    public GenSession makeGenSession() {
+    public EIntCache allocCache() {
         return session;
     }
 
 
     @Override
-    public void freeSession(Object session) {}
+    public void freeCache(EIntCache session) {}
 
 
     @Override

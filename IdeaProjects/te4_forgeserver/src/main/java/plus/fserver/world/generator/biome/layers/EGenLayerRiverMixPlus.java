@@ -4,8 +4,8 @@ import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.minecraft.world.biome.Biome;
 import plus.fserver.api.BiomeIndexes;
 import plus.fserver.api.ExBiome;
-import plus.fserver.world.generator.GenSession;
 import plus.fserver.world.generator.biome.BiomeLib;
+import plus.fserver.world.generator.biome.EIntCache;
 import java.util.ArrayList;
 
 
@@ -65,7 +65,7 @@ public class EGenLayerRiverMixPlus extends EGenLayer {
 
 
     @Override
-    public int[] getInts(GenSession cache, int areaX, int areaY, int areaWidth, int areaHeight) {
+    public int[] getInts(EIntCache cache, int areaX, int areaY, int areaWidth, int areaHeight) {
         int[] aint = this.biomePatternGeneratorChain.getInts(cache, areaX, areaY, areaWidth, areaHeight);
         int[] aint1 = this.riverPatternGeneratorChain.getInts(cache, areaX, areaY, areaWidth, areaHeight);
         int[] aint2 = cache.getIntCache(areaWidth * areaHeight);

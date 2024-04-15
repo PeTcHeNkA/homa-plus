@@ -8,6 +8,8 @@ import net.minecraft.world.gen.ChunkGeneratorSettings;
 import net.minecraftforge.common.BiomeManager;
 import plus.fserver.world.generator.GenSession;
 import plus.fserver.world.generator.biome.BiomeLib;
+import plus.fserver.world.generator.biome.EIntCache;
+
 import java.util.ArrayList;
 
 
@@ -48,7 +50,7 @@ public class EGenLayerBiomePlus extends EGenLayer {
 
 
     @Override
-    public int[] getInts(GenSession cache, int areaX, int areaY, int areaWidth, int areaHeight) {
+    public int[] getInts(EIntCache cache, int areaX, int areaY, int areaWidth, int areaHeight) {
         int[] aint = this.parent.getInts(cache, areaX, areaY, areaWidth, areaHeight);
         int[] aint1 = cache.getIntCache(areaWidth * areaHeight);
 
@@ -114,7 +116,7 @@ public class EGenLayerBiomePlus extends EGenLayer {
     }
 
 
-    protected int getWeightedBiome(GenSession cache, BiomeManager.BiomeType type) {
+    protected int getWeightedBiome(EIntCache cache, BiomeManager.BiomeType type) {
         ArrayList<BiomeEntry> list = biomes[type.ordinal()];
         int totalWeight = WeightedRandom.getTotalWeight(list);
 

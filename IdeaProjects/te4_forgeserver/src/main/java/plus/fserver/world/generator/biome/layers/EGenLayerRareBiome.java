@@ -1,6 +1,6 @@
 package plus.fserver.world.generator.biome.layers;
 
-import plus.fserver.world.generator.GenSession;
+import plus.fserver.world.generator.biome.EIntCache;
 
 
 public class EGenLayerRareBiome extends EGenLayer {
@@ -11,7 +11,7 @@ public class EGenLayerRareBiome extends EGenLayer {
 
 
     @Override
-    public int[] getInts(GenSession cache, int areaX, int areaY, int areaWidth, int areaHeight) {
+    public int[] getInts(EIntCache cache, int areaX, int areaY, int areaWidth, int areaHeight) {
         int[] ints = this.parent.getInts(cache, areaX - 1, areaY - 1, areaWidth + 2, areaHeight + 2);
         int[] intCache = cache.getIntCache(areaWidth * areaHeight);
 

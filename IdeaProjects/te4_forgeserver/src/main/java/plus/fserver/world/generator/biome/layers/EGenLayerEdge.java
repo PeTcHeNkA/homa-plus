@@ -1,7 +1,7 @@
 package plus.fserver.world.generator.biome.layers;
 
 import net.minecraft.world.gen.layer.GenLayerEdge;
-import plus.fserver.world.generator.GenSession;
+import plus.fserver.world.generator.biome.EIntCache;
 
 
 public class EGenLayerEdge extends EGenLayer{
@@ -15,7 +15,7 @@ public class EGenLayerEdge extends EGenLayer{
 
 
     @Override
-    public int[] getInts(GenSession cache, int areaX, int areaY, int areaWidth, int areaHeight) {
+    public int[] getInts(EIntCache cache, int areaX, int areaY, int areaWidth, int areaHeight) {
         switch (this.mode) {
             case COOL_WARM:
             default:
@@ -28,7 +28,7 @@ public class EGenLayerEdge extends EGenLayer{
     }
 
 
-    private int[] getIntsCoolWarm(GenSession cache, int aX, int aZ, int aW, int aH) {
+    private int[] getIntsCoolWarm(EIntCache cache, int aX, int aZ, int aW, int aH) {
         int i1 = aX - 1;
         int i2 = aZ - 1;
         int i3 = 1 + aW + 1;
@@ -60,7 +60,7 @@ public class EGenLayerEdge extends EGenLayer{
     }
 
 
-    private int[] getIntsHeatIce(GenSession cache, int aX, int aZ, int aW, int aH) {
+    private int[] getIntsHeatIce(EIntCache cache, int aX, int aZ, int aW, int aH) {
         int i1 = aX - 1;
         int i2 = aZ - 1;
         int i3 = 1 + aW + 1;
@@ -90,7 +90,7 @@ public class EGenLayerEdge extends EGenLayer{
     }
 
 
-    private int[] getIntsSpecial(GenSession cache, int aX, int aZ, int aW, int aH) {
+    private int[] getIntsSpecial(EIntCache cache, int aX, int aZ, int aW, int aH) {
         int[] ints = this.parent.getInts(cache, aX, aZ, aW, aH);
         int[] intCache = cache.getIntCache(aW * aH);
 

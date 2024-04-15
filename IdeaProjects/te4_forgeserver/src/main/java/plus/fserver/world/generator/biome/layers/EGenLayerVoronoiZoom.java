@@ -1,6 +1,6 @@
 package plus.fserver.world.generator.biome.layers;
 
-import plus.fserver.world.generator.GenSession;
+import plus.fserver.world.generator.biome.EIntCache;
 
 
 public class EGenLayerVoronoiZoom extends EGenLayer{
@@ -11,7 +11,7 @@ public class EGenLayerVoronoiZoom extends EGenLayer{
 
 
     @Override
-    public int[] getInts(GenSession cache, int areaX, int areaY, int areaWidth, int areaHeight) {
+    public int[] getInts(EIntCache cache, int areaX, int areaY, int areaWidth, int areaHeight) {
         areaX -= 2;
         areaY -= 2;
         int i1 = areaX >> 2;

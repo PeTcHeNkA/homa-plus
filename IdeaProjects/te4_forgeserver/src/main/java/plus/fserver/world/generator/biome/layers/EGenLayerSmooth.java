@@ -1,6 +1,6 @@
 package plus.fserver.world.generator.biome.layers;
 
-import plus.fserver.world.generator.GenSession;
+import plus.fserver.world.generator.biome.EIntCache;
 
 
 public class EGenLayerSmooth extends EGenLayer{
@@ -11,7 +11,7 @@ public class EGenLayerSmooth extends EGenLayer{
 
 
     @Override
-    public int[] getInts(GenSession cache, int areaX, int areaY, int areaWidth, int areaHeight) {
+    public int[] getInts(EIntCache cache, int areaX, int areaY, int areaWidth, int areaHeight) {
         int i1 = areaX - 1;
         int i2 = areaY - 1;
         int i3 = areaWidth + 2;

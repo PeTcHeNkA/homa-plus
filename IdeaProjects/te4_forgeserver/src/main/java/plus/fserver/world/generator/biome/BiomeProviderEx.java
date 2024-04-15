@@ -28,7 +28,7 @@ public class BiomeProviderEx extends BiomeProvider{
     private final EGenLayer getBiomes;
     private final EGenLayer biomeIndex;
     private final BiomeCacheEx biomeCache = new BiomeCacheEx(this);
-    private final ConcurrentLinkedQueue<GenSession> sessionPool = new ConcurrentLinkedQueue<>();
+    private final ConcurrentLinkedQueue<EIntCache> cache = new ConcurrentLinkedQueue<>();
     private final long seed;
 
     public BiomeProviderEx(WorldInfo info, BiomeLib lib) {
@@ -165,7 +165,7 @@ public class BiomeProviderEx extends BiomeProvider{
     }
 
 
-    public Biome[] getBiomesForGeneration(GenSession cache, Biome[] biomes, int x, int z, int width, int height) {
+    public Biome[] getBiomesForGeneration(EIntCache cache, Biome[] biomes, int x, int z, int width, int height) {
         if (biomes == null || biomes.length < width * height) {
             biomes = new Biome[width * height];
         }
@@ -173,8 +173,8 @@ public class BiomeProviderEx extends BiomeProvider{
 
         int[] aint;
         //synchronized (cache) {
-            cache.resetIntCache();
-            aint = getBiomes.getInts(cache, x, z, width, height);
+        cache.resetIntCache();
+        aint = getBiomes.getInts(cache, x, z, width, height);
         //}
 
         try {
@@ -196,11 +196,12 @@ public class BiomeProviderEx extends BiomeProvider{
     }
 
 
+    @Override
     public void cleanupCache() {
-        if(sessionPool.size()==1){
-            sessionPool.clear();
+        if(cache.size()==1){
+            cache.clear();
         } else {
-            while (sessionPool.size()>1)sessionPool.poll();
+            while (cache.size()>1) cache.poll();
         }
         synchronized (biomeCache) {
             this.biomeCache.cleanupCache();
@@ -208,7 +209,7 @@ public class BiomeProviderEx extends BiomeProvider{
     }
 
 
-    public Biome[] getBiomes(GenSession cache, @Nullable Biome[] listToReuse, int x, int z, int width, int length, boolean cacheFlag) {
+    public Biome[] getBiomes(EIntCache cache, @Nullable Biome[] listToReuse, int x, int z, int width, int length, boolean cacheFlag) {
         if (listToReuse == null || listToReuse.length < width * length) {
             listToReuse = new Biome[width * length];
         }
@@ -223,10 +224,8 @@ public class BiomeProviderEx extends BiomeProvider{
                 return listToReuse;
             } else {
                 int[] aint;
-                //synchronized (cache) {
-                    cache.resetIntCache();
-                    aint = biomeIndex.getInts(cache, x, z, width, length);
-                //}
+                cache.resetIntCache();
+                aint = biomeIndex.getInts(cache, x, z, width, length);
 
                 for (int i = 0; i < width * length; ++i) {
                     listToReuse[i] = Biome.getBiome(aint[i], Biomes.DEFAULT);
@@ -237,21 +236,16 @@ public class BiomeProviderEx extends BiomeProvider{
     }
 
 
-    public boolean areBiomesViable(GenSession cache, int x, int z, int radius, List<Biome> allowed) {
-//        if(1==1)return true;
-        //cache.resetIntCache();
+    public boolean areBiomesViable(EIntCache cache, int x, int z, int radius, List<Biome> allowed) {
         int i = x - radius >> 2;
         int j = z - radius >> 2;
         int k = x + radius >> 2;
         int l = z + radius >> 2;
         int i1 = k - i + 1;
         int j1 = l - j + 1;
-        //TODO
         int[] aint;
-        //synchronized (cache) {
-            cache.resetIntCache();
-            aint = getBiomes.getInts(cache, i, j, i1, j1);
-        //}
+        cache.resetIntCache();
+        aint = getBiomes.getInts(cache, i, j, i1, j1);
 
         try {
             for (int k1 = 0; k1 < i1 * j1; ++k1) {
@@ -275,7 +269,7 @@ public class BiomeProviderEx extends BiomeProvider{
 
 
     @Nullable
-    public BlockPos findBiomePosition(GenSession cache, int x, int z, int range, List<Biome> biomes, Random random) {
+    public BlockPos findBiomePosition(EIntCache cache, int x, int z, int range, List<Biome> biomes, Random random) {
         //cache.resetIntCache();
         int i = x - range >> 2;
         int j = z - range >> 2;
@@ -283,12 +277,10 @@ public class BiomeProviderEx extends BiomeProvider{
         int l = z + range >> 2;
         int i1 = k - i + 1;
         int j1 = l - j + 1;
-        //TODO
         int[] aint;
-        //synchronized (cache) {
-            cache.resetIntCache();
-            aint = getBiomes.getInts(cache, i, j, i1, j1);
-        //}
+
+        cache.resetIntCache();
+        aint = getBiomes.getInts(cache, i, j, i1, j1);
 
         BlockPos blockpos = null;
         int k1 = 0;
@@ -313,47 +305,56 @@ public class BiomeProviderEx extends BiomeProvider{
 
 
     public Biome getBiome(int x, int z, @NotNull Biome defaultBiome) {
-        return this.biomeCache.getBiome(makeGenSession(), x, z, defaultBiome);
+        return this.biomeCache.getBiome(allocCache(), x, z, defaultBiome);
     }
 
 
     @NotNull
     @Override
-    public GenSession makeGenSession() {
-        GenSession session = sessionPool.poll();
+    public EIntCache allocCache() {
+        EIntCache session = cache.poll();
         return session==null ? new GenSession(seed) : session;
     }
 
 
     @Override
-    public void freeSession(@NotNull Object session) {
-        sessionPool.add((GenSession) session);
+    public void freeCache(@NotNull EIntCache session) {
+        cache.add(session);
     }
 
 
     @NotNull
     @Override
     public Biome[] getBiomesForGeneration(@NotNull Biome[] biomes, int x, int z, int width, int height) {
-        return getBiomesForGeneration(makeGenSession(), biomes, x, z, width, height);
+        return getBiomesForGeneration(allocCache(), biomes, x, z, width, height);
     }
 
 
     @NotNull
     @Override
     public Biome[] getBiomes(@Nullable Biome[] listToReuse, int x, int z, int width, int length, boolean cacheFlag) {
-        return getBiomes(makeGenSession(), listToReuse, x, z, width, length, cacheFlag);
+        EIntCache session = allocCache();
+        listToReuse = getBiomes(session, listToReuse, x, z, width, length, cacheFlag);
+        freeCache(session);
+        return listToReuse;
     }
 
 
     @Override
     public boolean areBiomesViable(int x, int z, int radius, @NotNull List<Biome> allowed) {
-        return areBiomesViable(makeGenSession(), x, z, radius, allowed);
+        EIntCache session = allocCache();
+        boolean result = areBiomesViable(session, x, z, radius, allowed);
+        freeCache(session);
+        return result;
     }
 
 
     @Nullable
     @Override
     public BlockPos findBiomePosition(int x, int z, int range, @NotNull List<Biome> biomes, @NotNull Random random) {
-        return findBiomePosition(makeGenSession(), x, z, range, biomes, random);
+        EIntCache session = allocCache();
+        BlockPos result = findBiomePosition(session, x, z, range, biomes, random);
+        freeCache(session);
+        return result;
     }
 }

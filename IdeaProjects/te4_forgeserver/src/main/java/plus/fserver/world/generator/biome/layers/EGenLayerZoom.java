@@ -1,6 +1,6 @@
 package plus.fserver.world.generator.biome.layers;
 
-import plus.fserver.world.generator.GenSession;
+import plus.fserver.world.generator.biome.EIntCache;
 
 
 public class EGenLayerZoom extends EGenLayer{
@@ -11,7 +11,7 @@ public class EGenLayerZoom extends EGenLayer{
 
 
     @Override
-    public int[] getInts(GenSession cache, int areaX, int areaY, int areaWidth, int areaHeight) {
+    public int[] getInts(EIntCache cache, int areaX, int areaY, int areaWidth, int areaHeight) {
         int i1 = areaX >> 1;
         int i2 = areaY >> 1;
         int i3 = (areaWidth >> 1) + 2;
@@ -49,7 +49,7 @@ public class EGenLayerZoom extends EGenLayer{
     }
 
 
-    protected int selectModeOrRandom(GenSession cache, int j2, int l2, int k2, int i3) {
+    protected int selectModeOrRandom(EIntCache cache, int j2, int l2, int k2, int i3) {
         return cache.selectModeOrRandom(j2, l2, k2, i3);
     }
 
