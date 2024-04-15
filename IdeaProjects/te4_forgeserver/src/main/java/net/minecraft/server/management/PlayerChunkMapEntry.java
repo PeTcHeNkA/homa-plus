@@ -16,9 +16,9 @@ import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.world.ChunkWatchEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import plus.fserver.server.chunk.io.TChunkExecutor;
@@ -66,7 +66,8 @@ public class PlayerChunkMapEntry {
             this.players.add(player);
             if (this.sentToPlayers) {
                 this.sendToPlayer(player);
-                MinecraftForge.EVENT_BUS.post(new ChunkWatchEvent.Watch(this.chunk, player));
+                MinecraftForge.EVENT_BUS.post(player.world.chunkWatchEvent.init(chunk, player));
+                //MinecraftForge.EVENT_BUS.post(new ChunkWatchEvent.Watch(this.chunk, player));
             }
         }
     }
@@ -87,7 +88,8 @@ public class PlayerChunkMapEntry {
             }
 
             this.players.remove(player);
-            MinecraftForge.EVENT_BUS.post(new ChunkWatchEvent.UnWatch(this.chunk, player));
+            MinecraftForge.EVENT_BUS.post(player.world.chunkUnWatchEvent.init(chunk, player));
+            //MinecraftForge.EVENT_BUS.post(new ChunkWatchEvent.UnWatch(this.chunk, player));
             if (this.players.isEmpty()) {
                 this.playerChunkMap.removeEntry(this);
             }
@@ -118,18 +120,26 @@ public class PlayerChunkMapEntry {
         } else if (!this.chunk.isPopulated()) {
             return false;
         } else {
-            this.changes = 0;
-            this.changedSectionFilter = 0;
-            this.sentToPlayers = true;
-            if (this.players.isEmpty()) return true;
-            Packet<?> packet = new SPacketChunkData(this.chunk, 65535);
+            if (this.players.isEmpty()) {
+                this.changes = 0;
+                this.changedSectionFilter = 0;
+                this.sentToPlayers = true;
+                return true;
+            } else try {
+                Packet<?> packet = new SPacketChunkData(this.chunk, 65535);
+                for (EntityPlayerMP player : this.players) {
+                    player.connection.netManager.addToQueueE(packet);
+                    this.playerChunkMap.getWorldServer().getEntityTracker().sendLeashedEntitiesInChunk(player, this.chunk);
 
-            for (EntityPlayerMP entityplayermp : this.players) {
-                entityplayermp.connection.netManager.addToQueueE(packet);
-                this.playerChunkMap.getWorldServer().getEntityTracker().sendLeashedEntitiesInChunk(entityplayermp, this.chunk);
-                MinecraftForge.EVENT_BUS.post(new ChunkWatchEvent.Watch(this.chunk, entityplayermp));
+                    MinecraftForge.EVENT_BUS.post(player.world.chunkWatchEvent.init(chunk, player));
+                    //MinecraftForge.EVENT_BUS.post(new ChunkWatchEvent.Watch(this.chunk, player));
+                }
+                return true;
+            } catch (Exception e){
+                WorldServer world = ((WorldServer)chunk.getWorld());
+                world.getMinecraftServer().ticker().onError(world, e);
+                return false;
             }
-            return true;
         }
     }
 

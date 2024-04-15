@@ -57,6 +57,7 @@ import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.world.ChunkWatchEvent;
 import net.minecraftforge.event.world.GetCollisionBoxesEvent;
 import net.minecraftforge.fml.common.FMLLog;
 import net.minecraftforge.fml.relauncher.Side;
@@ -3842,6 +3843,8 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     private final LivingHurtEvent               hurtEvent     = new LivingHurtEvent(null,null,0);
     private final LivingDamageEvent             damageEvent   = new LivingDamageEvent(null, null, 0);
     public  final EntityEvent.EnteringChunk     enteringChunk = new EntityEvent.EnteringChunk(null,0,0,0,0);
+    public  final ChunkWatchEvent.Watch       chunkWatchEvent = new ChunkWatchEvent.Watch();
+    public  final ChunkWatchEvent.UnWatch   chunkUnWatchEvent = new ChunkWatchEvent.UnWatch();
 
     protected void clearEvents(){
         jumpEvent.setEntity(null);
