@@ -9,6 +9,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.ForgeVersion;
 import net.minecraftforge.fml.common.registry.EntityEntry;
@@ -17,6 +19,10 @@ import net.minecraftforge.server.command.TextComponentHelper;
 import org.jetbrains.annotations.Nullable;
 import plus.fserver.api.ServerCommand;
 import plus.fserver.plugin.SSPatchLoader;
+import plus.tson.TsonFile;
+import plus.tson.utl.ByteStrBuilder;
+
+import java.io.File;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -63,6 +69,9 @@ public class ElcaCommands extends ServerCommand {
         if(arg0.equalsIgnoreCase("info")){
             info(server, sender);
         }
+        if(arg0.equalsIgnoreCase("cvi")){
+            chunkViTxt(server, sender);
+        }
         if(arg0.equalsIgnoreCase("mobs")){
             if(args.length>1){
                 int dim = Integer.parseInt(args[1].trim());
@@ -71,6 +80,36 @@ public class ElcaCommands extends ServerCommand {
                 mobs(server, sender);
             }
         }
+    }
+
+
+    private void chunkViTxt(MinecraftServer server, ICommandSender sender){
+        ChunkProviderServer ch = (ChunkProviderServer) sender.getEntityWorld().getChunkProvider();
+        int minX = 0, minZ = 0;
+        int maxX = 0, maxZ = 0;
+        for (Chunk c:ch.loadedChunks.values()){
+            if(c.x < minX)minX = c.x;
+            if(c.z < minZ)minZ = c.z;
+
+            if(c.x > maxX)maxX = c.x;
+            if(c.z > maxZ)maxZ = c.z;
+        }
+        byte[][] table = new byte[maxX-minX+1][maxZ-minZ+1];
+
+        for (Chunk c:ch.loadedChunks.values()){
+            table[c.x-minX][c.z-minZ] = (byte) (c.maybeUnload()?1:2);
+        }
+
+        ByteStrBuilder builder = new ByteStrBuilder(((table.length+1)*table[0].length)+1);
+        for (byte[] line:table){
+            for (byte pos:line){
+                builder.append(pos==0?' ':pos==1?'_':'#');
+            }
+            builder.append('\n');
+        }
+        String name = "CVI_"+minX+"_"+minZ+".txt";
+        TsonFile.write(new File(name), builder.toString());
+        reply(sender, "Saved to ["+name+"]");
     }
 
 
