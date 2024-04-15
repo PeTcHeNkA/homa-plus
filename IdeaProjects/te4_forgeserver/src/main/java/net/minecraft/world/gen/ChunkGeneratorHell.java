@@ -2,6 +2,7 @@ package net.minecraft.world.gen;
 
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.annotation.Nullable;
 import net.minecraft.block.BlockFalling;
 import net.minecraft.block.material.Material;
@@ -69,7 +70,7 @@ public class ChunkGeneratorHell implements IChunkGenerator {
     public ChunkGeneratorHell(World worldIn, boolean structures, long seed) {
         this.world = worldIn;
         NetherGenInitEvent event = new NetherGenInitEvent(world, structures);
-        MinecraftForge.EVENT_BUS.post(event);
+        editGenSettings(event);
         this.generateStructures = event.structures;
 
         //this.generateStructures = structures;
@@ -108,7 +109,8 @@ public class ChunkGeneratorHell implements IChunkGenerator {
 //
 //            event.noiseScaleZX  = 5;
 //            event.noiseScaleY   = 5;
-//            event.fillFactor    = 45;
+//            event.fillFactor    = 55;
+//            event.minFillFactor = -75;
 //            //event.heightAddFactor /= 2;
 //        }
 
@@ -130,7 +132,14 @@ public class ChunkGeneratorHell implements IChunkGenerator {
         noiseScaleXZ  = event.noiseScaleZX;
         noiseScaleY   = event.noiseScaleY;
         fillFactor    = event.fillFactor;
+
+        minFillFactor = event.minFillFactor;
         //heightAddFactor = event.heightAddFactor;
+    }
+
+
+    protected void editGenSettings(NetherGenInitEvent event){
+        MinecraftForge.EVENT_BUS.post(event);
     }
 
 
@@ -146,6 +155,7 @@ public class ChunkGeneratorHell implements IChunkGenerator {
     private final boolean borderTop       ;
     private final boolean borderDown      ;
     private final double fillFactor       ;
+    private final double minFillFactor    ;
     private final IBlockState boundState  ;
     private final IBlockState fillState   ;
     private final IBlockState airState    ;
@@ -155,9 +165,9 @@ public class ChunkGeneratorHell implements IChunkGenerator {
 
 
     public static class GenSession{
-        public double[] slowsandNoise = new double[256];
-        public double[] gravelNoise = new double[256];
-        public double[] depthBuffer = new double[256];
+        public double[] slowsandNoise;
+        public double[] gravelNoise;
+        public double[] depthBuffer;
         public double[] buffer;
         public double[] pnr;
         public double[] ar;
@@ -166,6 +176,7 @@ public class ChunkGeneratorHell implements IChunkGenerator {
         public double[] dr;
         public double[] adouble = new double[0];
         public final Random rand = new Random();
+        public Biome[] biomes;
     }
 
 
@@ -206,7 +217,7 @@ public class ChunkGeneratorHell implements IChunkGenerator {
                                     iblockstate = liquidState;
                                 }
 
-                                if (d13 > fillFactor) {
+                                if (d13 > fillFactor || d13 < minFillFactor) {
                                     iblockstate = fillState;
                                 }
                                 primer.setBlockState(
@@ -304,9 +315,28 @@ public class ChunkGeneratorHell implements IChunkGenerator {
     }
 
 
+    private final ConcurrentLinkedQueue<GenSession> sessionPool = new ConcurrentLinkedQueue<>();
+
+    private GenSession makeGenSession() {
+        GenSession session = sessionPool.poll();
+        return session==null ? new ChunkGeneratorHell.GenSession() : session;
+    }
+    private void freeSession(GenSession session) {
+        sessionPool.add(session);
+    }
+    @Override
+    public void cleanupCache() {
+        if(sessionPool.size()==1){
+            sessionPool.clear();
+        } else {
+            while (sessionPool.size()>1) sessionPool.poll();
+        }
+    }
+
+
     @Override
     public Chunk generateChunk(int x, int z) {
-        GenSession session = (GenSession) world.getBiomeProvider().makeGenSession();
+        GenSession session = makeGenSession();
         session.rand.setSeed((long)x * 341873128712L + (long)z * 132897987541L);
 
         ChunkPrimer chunkprimer = new ChunkPrimer();
@@ -314,20 +344,21 @@ public class ChunkGeneratorHell implements IChunkGenerator {
         this.buildSurfaces(session, x, z, chunkprimer);
 
         this.genNetherCaves.generate(session.rand, this.world, x, z, chunkprimer);
-        world.getBiomeProvider().freeSession(session);
 
         if (this.generateStructures) {
             this.genNetherBridge.generate(this.world, x, z, chunkprimer);
         }
 
         Chunk chunk = new Chunk(this.world, chunkprimer, x, z);
-        Biome[] abiome = this.world.getBiomeProvider().getBiomes(null, x * 16, z * 16, 16, 16);
+        Biome[] abiome = session.biomes =
+                this.world.getBiomeProvider().getBiomes(session.biomes, x * 16, z * 16, 16, 16);
         byte[] abyte = chunk.getBiomeArray();
 
         for (int i = 0; i < abyte.length; ++i) {
             abyte[i] = (byte)Biome.getIdForBiome(abiome[i]);
         }
 
+        freeSession(session);
         chunk.resetRelightChecks();
         return chunk;
     }

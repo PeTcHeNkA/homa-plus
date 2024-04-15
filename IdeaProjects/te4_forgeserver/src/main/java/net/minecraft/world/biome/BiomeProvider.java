@@ -9,6 +9,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.gen.ChunkGeneratorSettings;
 import net.minecraft.world.gen.layer.GenLayer;
+import plus.fserver.world.generator.biome.EIntCache;
 
 
 public abstract class BiomeProvider {
@@ -35,10 +36,10 @@ public abstract class BiomeProvider {
     public abstract Biome getBiome(int x, int z, Biome defaultBiome);
 
 
-    public abstract Object makeGenSession();
+    public abstract EIntCache allocCache();
 
 
-    public abstract void freeSession(Object session);
+    public abstract void freeCache(EIntCache session);
 
 
     public float getTemperatureAtHeight(float num1, int num2) {
@@ -64,9 +65,7 @@ public abstract class BiomeProvider {
     public abstract BlockPos findBiomePosition(int x, int z, int range, List<Biome> biomes, Random random);
 
 
-    public void cleanupCache(){
-        throw new UnsupportedOperationException("CLASS: "+getClass());
-    }
+    public void cleanupCache(){}
 
 
     public GenLayer[] getModdedBiomeGenerators(WorldType worldType, long seed, GenLayer[] original) {

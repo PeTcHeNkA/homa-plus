@@ -7,6 +7,7 @@ import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
+import plus.fserver.world.generator.biome.EIntCache;
 
 
 public class BiomeProviderSingle extends BiomeProvider {
@@ -45,17 +46,13 @@ public class BiomeProviderSingle extends BiomeProvider {
 
     @NotNull
     @Override
-    public Object makeGenSession() {
+    public EIntCache allocCache() {
         throw new UnsupportedOperationException();
     }
 
 
     @Override
-    public void freeSession(@NotNull Object session) {}
-
-
-    @Override
-    public void cleanupCache() {}
+    public void freeCache(@NotNull EIntCache session) {}
 
 
     @Override

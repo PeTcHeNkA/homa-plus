@@ -15,9 +15,9 @@ public class NetherGenInitEvent extends WorldEvent {
     public double noiseScaleZX    = 100;
     public double noiseScaleY     = 0;
     public double fillFactor      = 0;
+    public double minFillFactor   = Double.MIN_VALUE;
     public int maxHeight          = 127;
     public int minHeight          = 0;
-    public double heightAddFactor = 0.125D;
     public boolean borderTop = true;
     public boolean borderDown = true;
     public boolean structures     = true;
