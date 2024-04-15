@@ -215,6 +215,7 @@ public final class AsyWorldTickerV2 implements ThreadFactory, IAsyWorldTicker{
                 }
             }
             if(inf.tickCounter % 200 == 0){
+                worldserver.getChunkProvider().chunkGenerator.cleanupCache();
                 worldserver.provider.getBiomeProvider().cleanupCache();
             }
 
