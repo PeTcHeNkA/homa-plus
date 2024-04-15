@@ -9,14 +9,12 @@ import net.minecraft.server.management.PlayerChunkMapEntry;
 public class PlayerCMapSelector{
     private final int[] mask;
     private final int radius;
-    private final int radiusSq;
 
     public PlayerCMapSelector(int radius){
         mask = makeMask((this.radius = radius)+1);
-        radiusSq = radius * radius;
     }
 
-    public static int inCircle(int x1, int y1, int x2, int y2) {
+    public static int range(int x1, int y1, int x2, int y2) {
         int temp;
         if(x1>x2){
             temp = x1;
@@ -41,9 +39,8 @@ public class PlayerCMapSelector{
         int maxSq = radius*radius;
         for (int x=0;x<64;++x){
             for (int z=0;z<64;++z){
-                int range = inCircle(x, z,32, 32);
+                int range = range(x, z,32, 32);
                 if(range <= maxSq) {
-//                    System.out.println(range);
                     list.add(range<<16 | x<<8 | z);
                 }
             }
@@ -61,33 +58,73 @@ public class PlayerCMapSelector{
     }
 
 
-//    public void test(int x, int z){
-//        int radX = x >> 4;
-//        int radZ = z >> 4;
-//
-//        for (int item:mask){
-//            int dz = (item & 0xFF) - 32;
-//            int dx = (item >> 8) - 32;
-//            System.out.printf("Add to X: %s Z: %s\n", dx+radX, dz+radZ);
-//        }
-//    }
-
-
     public void addPlayer(PlayerChunkMap pcm, EntityPlayerMP player) {
-        int radX = (int)player.posX >> 4;
-        int radZ = (int)player.posZ >> 4;
+        int curX = (int) player.posX >> 4;
+        int curZ = (int) player.posZ >> 4;
+
+        for (int item : mask) {
+            int mdZ = (item & 0xFF) - 32;
+            int mdX = (item >> 8) - 32;
+            pcm.getOrCreateEntry(curX - mdX, curZ - mdZ).addPlayer(player);
+        }
         player.managedPosX = player.posX;
         player.managedPosZ = player.posZ;
 
-        for (int item:mask){
-            int dz = (item & 0xFF) - 32;
-            int dx = (item >> 8) - 32;
-            pcm.getOrCreateEntry(radX-dx, radZ-dz).addPlayer(player);
+    }
+
+
+    public void removePlayer(PlayerChunkMap pcm, EntityPlayerMP player){
+        int curX = (int) player.posX >> 4;
+        int curZ = (int) player.posZ >> 4;
+
+        for (int item : mask) {
+            int mdZ = (item & 0xFF) - 32;
+            int mdX = (item >> 8) - 32;
+            PlayerChunkMapEntry entry = pcm.getEntry(curX - mdX, curZ - mdZ);
+            if(entry != null) entry.removePlayer(player);
         }
     }
 
 
-    //todo
+    private void updatePlayerRadius(PlayerChunkMap pcm, EntityPlayerMP player){
+        int curX = (int) player.posX >> 4;
+        int curZ = (int) player.posZ >> 4;
+        int minRad;
+
+
+        if(player.prevRenderRadius < player.renderRadius){
+            minRad = player.prevRenderRadius;
+
+            minRad = (minRad+1) * (minRad +1);
+
+            for (int item : mask) {
+                int mdZ = (item & 0xFF) - 32;
+                int mdX = (item >> 8) - 32;
+
+                if(range(0,0, mdX, mdZ) > minRad){
+                    pcm.getOrCreateEntry(curX - mdX, curZ - mdZ).addPlayer(player);
+                }
+            }
+        } else {
+            minRad = player.renderRadius;
+
+            minRad = (minRad+1) * (minRad +1);
+
+            for (int item : mask) {
+                int mdZ = (item & 0xFF) - 32;
+                int mdX = (item >> 8) - 32;
+
+                if(range(0,0, mdX, mdZ) > minRad){
+                    PlayerChunkMapEntry entry = pcm.getEntry(curX - mdX, curZ - mdZ);
+                    if(entry != null) entry.removePlayer(player);
+                }
+            }
+        }
+
+        player.prevRenderRadius = player.renderRadius;
+    }
+
+
     public void updateMovingPlayer(PlayerChunkMap pcm, EntityPlayerMP player) {
         int curX = (int)player.posX >> 4;
         int curZ = (int)player.posZ >> 4;
@@ -95,59 +132,40 @@ public class PlayerCMapSelector{
         double d1 = player.managedPosZ - player.posZ;
         double d2 = d0 * d0 + d1 * d1;
 
-        if (d2 >= 64.0D) {
+        if (d2 >= 64d) {
             int preX = (int)player.managedPosX >> 4;
             int preZ = (int)player.managedPosZ >> 4;
 
-            int j1 = curX - preX;
-            int k1 = curZ - preZ;
+            int dX = curX - preX;
+            int dZ = curZ - preZ;
 
-            int radius = this.radius;
-            if(player.renderRadius != player.prevRenderRadius){
-                radius = player.prevRenderRadius;
-                if(radius<3)radius = 3;
-                else if(radius>pcm.getMaxPlayerViewRadius())
-                    radius = pcm.getMaxPlayerViewRadius();
-                player.prevRenderRadius = player.renderRadius;
-            }
-            //todo fix this
-            if (j1 != 0 || k1 != 0) {
-                for (int l1 = curX - radius; l1 <= curX + radius; ++l1) {
-                    for (int i2 = curZ - radius; i2 <= curZ + radius; ++i2) {
-                        if (overlapsCircle(l1, i2, preX, preZ)) {
-                            pcm.getOrCreateEntry(l1, i2).addPlayer(player);
-                        }
-                        if (overlapsSq(l1 - j1, i2 - k1, curX, curZ, radius)) {
-                            PlayerChunkMapEntry playerchunkmapentry = pcm.getEntry(l1 - j1, i2 - k1);
+            if (dX != 0 || dZ != 0) {
+                int radSq = (radius+1) * (radius+1);
 
-                            if (playerchunkmapentry != null) {
-                                playerchunkmapentry.removePlayer(player);
-                            }
-                        }
+                for (int item:mask){
+                    int mdZ = (item & 0xFF) - 32;
+                    int mdX = (item >> 8) - 32;
+
+
+                    if(range(preX, preZ, curX-mdX, curZ-mdZ) > radSq){
+                        pcm.getOrCreateEntry(curX-mdX, curZ-mdZ).addPlayer(player);
+                    }
+
+                    if(range(curX, curZ, preX-mdX, preZ-mdZ) > radSq){
+                        PlayerChunkMapEntry entry = pcm.getEntry(preX-mdX, preZ-mdZ);
+                        if(entry != null) entry.removePlayer(player);
                     }
                 }
                 player.managedPosX = player.posX;
                 player.managedPosZ = player.posZ;
                 pcm.markSortPending();
             }
+        } else if (player.prevRenderRadius != player.renderRadius && d2 > 16d) {
+            if(player.renderRadius > player.prevRenderRadius){
+                pcm.getBy(player.renderRadius).updatePlayerRadius(pcm, player);
+            } else {
+                updatePlayerRadius(pcm, player);
+            }
         }
-    }
-
-
-    private boolean overlapsSq(int x1, int z1, int x2, int z2, int radius) {
-        int dx = x1 - x2;
-        int dy = z1 - z2;
-        if (dx >= -radius && dx <= radius) {
-            return dy < -radius || dy > radius;
-        } else {
-            return true;
-        }
-    }
-
-
-    private boolean overlapsCircle(int x1, int z1, int senX, int senZ) {
-        int dx = x1 - senX;
-        int dy = z1 - senZ;
-        return (dx * dx) + (dy * dy) < radiusSq;
     }
 }

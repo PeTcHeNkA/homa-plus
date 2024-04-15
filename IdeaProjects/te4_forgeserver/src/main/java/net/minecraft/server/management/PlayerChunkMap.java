@@ -15,7 +15,6 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import plus.fserver.ElcaConfig;
@@ -24,8 +23,8 @@ import plus.tson.utl.Te4HashSet;
 
 
 public class PlayerChunkMap {
-    private static final Predicate<EntityPlayerMP> NOT_SPECTATOR = p_apply_1_ -> p_apply_1_ != null && !p_apply_1_.isSpectator();
-    private static final Predicate<EntityPlayerMP> CAN_GENERATE_CHUNKS = p_apply_1_ -> p_apply_1_ != null && (!p_apply_1_.isSpectator() || p_apply_1_.getServerWorld().getGameRules().getBoolean("spectatorsGenerateChunks"));
+    private static final Predicate<EntityPlayerMP> NOT_SPECTATOR = player -> player != null && !player.isSpectator();
+    private static final Predicate<EntityPlayerMP> CAN_GENERATE_CHUNKS = player -> player != null && (!player.isSpectator() || player.getServerWorld().getGameRules().getBoolean("spectatorsGenerateChunks"));
 
     private final WorldServer world;
     private final List<EntityPlayerMP> players = Lists.newArrayList();
@@ -223,7 +222,7 @@ public class PlayerChunkMap {
     }
 
 
-    private PlayerCMapSelector getBy(int radius){
+    public final PlayerCMapSelector getBy(int radius){
         if(radius>playerViewRadius)radius = playerViewRadius;
         if(radius<3)radius = 3;
         PlayerCMapSelector sel = selectors.get(radius);
@@ -234,37 +233,17 @@ public class PlayerChunkMap {
     }
 
 
-    //todo
     public void addPlayer(EntityPlayerMP player) {
         PlayerCMapSelector sel = getBy(player.prevRenderRadius = player.renderRadius);
         sel.addPlayer(this, player);
-//        int i = (int)player.posX >> 4;
-//        int j = (int)player.posZ >> 4;
-//        player.managedPosX = player.posX;
-//        player.managedPosZ = player.posZ;
-//
-//        for (int k = i - this.playerViewRadius; k <= i + this.playerViewRadius; ++k) {
-//            for (int l = j - this.playerViewRadius; l <= j + this.playerViewRadius; ++l) {
-//                this.getOrCreateEntry(k, l).addPlayer(player);
-//            }
-//        }
         this.players.add(player);
         this.markSortPending();
     }
 
 
     public void removePlayer(EntityPlayerMP player) {
-        int i = (int)player.managedPosX >> 4;
-        int j = (int)player.managedPosZ >> 4;
-
-        for (int k = i - this.playerViewRadius; k <= i + this.playerViewRadius; ++k) {
-            for (int l = j - this.playerViewRadius; l <= j + this.playerViewRadius; ++l) {
-                PlayerChunkMapEntry playerchunkmapentry = this.getEntry(k, l);
-                if (playerchunkmapentry != null) {
-                    playerchunkmapentry.removePlayer(player);
-                }
-            }
-        }
+        PlayerCMapSelector sel = getBy(player.renderRadius);
+        sel.removePlayer(this, player);
         this.players.remove(player);
         this.markSortPending();
     }
@@ -285,41 +264,6 @@ public class PlayerChunkMap {
     public void updateMovingPlayer(EntityPlayerMP player) {
         PlayerCMapSelector sel = getBy(player.renderRadius);
         sel.updateMovingPlayer(this, player);
-//        int i = (int)player.posX >> 4;
-//        int j = (int)player.posZ >> 4;
-//        double d0 = player.managedPosX - player.posX;
-//        double d1 = player.managedPosZ - player.posZ;
-//        double d2 = d0 * d0 + d1 * d1;
-//
-//        if (d2 >= 64.0D) {
-//            int k = (int)player.managedPosX >> 4;
-//            int l = (int)player.managedPosZ >> 4;
-//            int i1 = this.playerViewRadius;
-//            int j1 = i - k;
-//            int k1 = j - l;
-//
-//            if (j1 != 0 || k1 != 0) {
-//                for (int l1 = i - i1; l1 <= i + i1; ++l1) {
-//                    for (int i2 = j - i1; i2 <= j + i1; ++i2) {
-//                        if (!this.overlaps(l1, i2, k, l, i1)) {
-//                            this.getOrCreateEntry(l1, i2).addPlayer(player);
-//                        }
-//
-//                        if (!this.overlaps(l1 - j1, i2 - k1, i, j, i1)) {
-//                            PlayerChunkMapEntry playerchunkmapentry = this.getEntry(l1 - j1, i2 - k1);
-//
-//                            if (playerchunkmapentry != null)
-//                            {
-//                                playerchunkmapentry.removePlayer(player);
-//                            }
-//                        }
-//                    }
-//                }
-//                player.managedPosX = player.posX;
-//                player.managedPosZ = player.posZ;
-//                this.markSortPending();
-//            }
-//        }
     }
 
 
