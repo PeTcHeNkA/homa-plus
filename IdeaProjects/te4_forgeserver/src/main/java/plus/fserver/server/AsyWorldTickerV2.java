@@ -263,9 +263,9 @@ public final class AsyWorldTickerV2 implements ThreadFactory, IAsyWorldTicker{
 
 
     private static class ErrorTask implements Runnable{
-        private final Exception exception;
+        private final Throwable exception;
 
-        private ErrorTask(Exception exception) {
+        private ErrorTask(Throwable exception) {
             this.exception = exception;
         }
 
@@ -283,7 +283,7 @@ public final class AsyWorldTickerV2 implements ThreadFactory, IAsyWorldTicker{
     }
 
 
-    public void onError(WorldServer world, Exception throwable){
+    public void onError(WorldServer world, Throwable throwable){
         if(ignoreErrors){
             service.execute(new ErrorTask(throwable));
         } else {

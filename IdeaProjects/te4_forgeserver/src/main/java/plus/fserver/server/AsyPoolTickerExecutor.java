@@ -2,19 +2,19 @@ package plus.fserver.server;
 
 import org.jetbrains.annotations.NotNull;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadFactory;
 
 
 public class AsyPoolTickerExecutor extends ScheduledThreadPoolExecutor {
-    public AsyPoolTickerExecutor(int corePoolSize, @NotNull ThreadFactory threadFactory) {
-        super(corePoolSize, threadFactory);
+    private final AsyWorldTickerV2 tickerV2;
+
+    public AsyPoolTickerExecutor(int corePoolSize, @NotNull AsyWorldTickerV2 ticker) {
+        super(corePoolSize, ticker);
+        this.tickerV2 = ticker;
     }
 
 
     @Override
     protected void afterExecute(Runnable r, Throwable t) {
-        if(t != null){
-            t.printStackTrace();
-        }
+        if(t != null) tickerV2.onError(null, t);
     }
 }
