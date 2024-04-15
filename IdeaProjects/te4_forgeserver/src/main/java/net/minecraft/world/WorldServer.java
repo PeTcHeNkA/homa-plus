@@ -482,15 +482,16 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
         entityIn.prevRotationYaw = entityIn.rotationYaw;
         entityIn.prevRotationPitch = entityIn.rotationPitch;
 
-        if (forceUpdate && entityIn.addedToChunk) {
+        if (forceUpdate && entityIn.addedToChunk) try {
             ++entityIn.ticksExisted;
 
             if (entityIn.isRiding()) {
                 entityIn.updateRidden();
             } else {
-                if(!entityIn.updateBlocked)
-                    entityIn.onUpdate();
+                entityIn.onUpdate();
             }
+        } catch (Exception exception){
+            server.ticker().onError(this, onEntityError(entityIn, exception));
         }
 
         if (Double.isNaN(entityIn.posX) || Double.isInfinite(entityIn.posX)) {

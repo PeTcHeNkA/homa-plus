@@ -235,10 +235,9 @@ public final class AsyWorldTickerV2 implements ThreadFactory, IAsyWorldTicker{
                     worldserver.saveAllChunks(true,null);
                     server.getPlayerList().saveLocalPlayers(worldserver);
                     inf.save = 0;
-                } catch (Exception e){
-                    inf.save = saveAllEvery - 50;
-                    LOGGER.error("SAVE ERROR");
-                    e.printStackTrace();
+                } catch (Exception saveError){
+                    inf.save = saveAllEvery - 75;
+                    onError(worldserver, saveError);
                 }
             }
             worldserver.tick();
@@ -247,23 +246,8 @@ public final class AsyWorldTickerV2 implements ThreadFactory, IAsyWorldTicker{
             worldserver.getEntityTracker().tick();
 
             server.worldTickTimes.get(inf.id)[inf.tickCounter % 100] = System.nanoTime() - curNanoTime;
-        } catch (ReportedException exception){
-            if(ignoreErrors){
-                CrashReport report = exception.getCrashReport();
-                LOGGER.error("----- CRITICAL SERVER ERROR ----------");
-                LOGGER.error("", report.getCrashCause());
-                LOGGER.error("--------------------------------------");
-            } else {
-                stopAnError(exception.getCause(), worldserver);
-            }
-        } catch (Exception throwable) {
-            if(ignoreErrors){
-                LOGGER.error("----- CRITICAL SERVER ERROR ----------");
-                LOGGER.error("", throwable);
-                LOGGER.error("--------------------------------------");
-            } else {
-                stopAnError(throwable, worldserver);
-            }
+        } catch (Exception exception){
+            onError(worldserver, exception);
         } catch (OutOfMemoryError error){
             long curTime = System.currentTimeMillis();
             if(curTime - lastError < 50){
@@ -274,6 +258,36 @@ public final class AsyWorldTickerV2 implements ThreadFactory, IAsyWorldTicker{
             CraftingManager.index.clear();
         } catch (Throwable throwable){
             stopAnError(throwable, worldserver);
+        }
+    }
+
+
+    private static class ErrorTask implements Runnable{
+        private final Exception exception;
+
+        private ErrorTask(Exception exception) {
+            this.exception = exception;
+        }
+
+        @Override
+        public void run() {
+            LOGGER.error("-------- CRITICAL SERVER ERROR ------------");
+            if(exception instanceof ReportedException){
+                CrashReport report = ((ReportedException)exception).getCrashReport();
+                LOGGER.error("", report.getCrashCause());
+            } else {
+                LOGGER.error("", exception);
+            }
+            LOGGER.error("-------------------------------------------");
+        }
+    }
+
+
+    public void onError(WorldServer world, Exception throwable){
+        if(ignoreErrors){
+            service.execute(new ErrorTask(throwable));
+        } else {
+            stopAnError(throwable, world);
         }
     }
 

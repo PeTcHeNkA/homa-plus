@@ -1574,13 +1574,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
                     this.updateEntity(entity2);
                     TimeTracker.ENTITY_UPDATE.trackEnd(entity2);
                 } catch (Throwable throwable1) {
-                    CrashReport crashreport1 = CrashReport.makeCrashReport(throwable1, "Ticking entity");
-                    CrashReportCategory crashreportcategory1 = crashreport1.makeCategory("Entity being ticked");
-                    entity2.addEntityCrashInfo(crashreportcategory1);
-                    if (ElcaConfig.REMOVE_ERROR_ENTITIES) {
-                        FMLLog.log.fatal("{}", crashreport1.getCompleteReport());
-                        removeEntity(entity2);
-                    } else throw new ReportedException(crashreport1);
+                    onEntityError(entity2, throwable1);
                 }
             }
 
@@ -1597,6 +1591,23 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
+    protected ReportedException onEntityError(Entity entity, Throwable exception){
+        CrashReport crashreport = CrashReport.makeCrashReport(exception, "Ticking entity");
+        CrashReportCategory crashreportcategory = crashreport.makeCategory("Entity being ticked");
+
+        if (entity == null) {
+            crashreportcategory.addCrashSection("Entity", "~~NULL~~");
+        } else {
+            entity.addEntityCrashInfo(crashreportcategory);
+        }
+        if (ElcaConfig.REMOVE_ERROR_ENTITIES) {
+            //FMLLog.log.fatal("{}", crashreport.getCompleteReport());
+            removeEntity(entity);
+        }
+        return new ReportedException(crashreport);
+    }
+
+
     public void updateEntities() {
         this.profiler.startSection("entities");
         this.profiler.startSection("global");
@@ -1609,18 +1620,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
                 ++entity.ticksExisted;
                 entity.onUpdate();
             } catch (Throwable throwable2) {
-                CrashReport crashreport = CrashReport.makeCrashReport(throwable2, "Ticking entity");
-                CrashReportCategory crashreportcategory = crashreport.makeCategory("Entity being ticked");
-
-                if (entity == null) {
-                    crashreportcategory.addCrashSection("Entity", "~~NULL~~");
-                } else {
-                    entity.addEntityCrashInfo(crashreportcategory);
-                }
-                if (ElcaConfig.REMOVE_ERROR_ENTITIES) {
-                    FMLLog.log.fatal("{}", crashreport.getCompleteReport());
-                    removeEntity(entity);
-                } else throw new ReportedException(crashreport);
+                throw onEntityError(entity, throwable2);
             }
             if (entity.isDead) {
                 this.weatherEffects.remove(i--);
