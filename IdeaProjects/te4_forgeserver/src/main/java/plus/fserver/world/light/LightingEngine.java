@@ -1,7 +1,6 @@
 package plus.fserver.world.light;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.init.Blocks;
 import net.minecraft.world.chunk.*;
 import net.minecraft.block.state.*;
 import net.minecraft.world.chunk.storage.*;
@@ -177,8 +176,7 @@ public class LightingEngine implements ILightingEngine {
                 int opacity;
                 if (luminosity >= 14) {
                     opacity = 1;
-                }
-                else {
+                } else {
                     opacity = this.getPosOpacity((BlockPos)this.curPos, state);
                 }
                 if (this.calculateNewLightFromCursor(luminosity, opacity, lightType) < curLight) {
@@ -369,7 +367,9 @@ public class LightingEngine implements ILightingEngine {
 
 
     private int getPosOpacity(final BlockPos pos, final IBlockState state) {
-        return MathHelper.clamp(state.getLightOpacity(this.world, pos), 1, 15);
+        int opacity = state.getLightOpacity(this.world, pos);
+        return opacity < 2 ? 1 : opacity > 15 ? 15 : opacity;
+        //return MathHelper.clamp(state.getLightOpacity(this.world, pos), 1, 15);
     }
 
 
