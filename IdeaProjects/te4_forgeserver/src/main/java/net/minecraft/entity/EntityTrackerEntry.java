@@ -252,10 +252,11 @@ public class EntityTrackerEntry {
 
 
     public boolean isVisibleTo(EntityPlayerMP playerMP) {
-        double d0 = playerMP.posX - (double)this.encodedPosX / 4096.0D;
-        double d1 = playerMP.posZ - (double)this.encodedPosZ / 4096.0D;
-        int i = Math.min(this.range, this.maxRange);
-        return d0 >= (double)(-i) && d0 <= (double)i && d1 >= (double)(-i) && d1 <= (double)i && this.trackedEntity.isSpectatedByPlayer(playerMP);
+        double d0 = playerMP.posX - (double)this.encodedPosX * 0.000244140625; // 1/4096.0D = 0.000244140625
+        double i = Math.min(this.range, this.maxRange);
+        return d0 >= -i && d0 <= i &&
+                (d0=playerMP.posZ - (double)this.encodedPosZ * 0.000244140625) >= -i && d0 <= i
+                && this.trackedEntity.isSpectatedByPlayer(playerMP);
     }
 
 
