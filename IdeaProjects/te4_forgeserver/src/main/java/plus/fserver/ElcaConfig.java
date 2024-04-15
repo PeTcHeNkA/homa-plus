@@ -27,6 +27,8 @@ public class ElcaConfig {
     public static int MAX_ENTITY_COLLISIONS      = 3;
     public static int MAX_ENTITY_COLLISIONS_MOVE = 1;
 
+    public static int MIN_CHANGED_BLOCKS_BUF     = 24;
+
     public static boolean FAST_LIGHT                 = true;
     public static boolean SLOW_SWIM_AI               = true;
     public static boolean SLOW_TEMP_CHECK            = true;
