@@ -261,9 +261,7 @@ public class ChunkProviderServer implements IChunkProvider {
                         }
                     }
                 }
-                if(i > 10){
-                    realLC.trim();
-                }
+                if(i > 10) realLC.trim();
             }
             if (this.loadedChunks.isEmpty()) {
                 DimensionManager.unloadWorld(this.world.provider.getDimension());
@@ -273,18 +271,23 @@ public class ChunkProviderServer implements IChunkProvider {
                     Iterator<Chunk> iter = loadedChunks.values().iterator();
                     while (iter.hasNext() && limit<100){
                         Chunk chunk = iter.next();
-                        if(chunk != null && chunk.maybeUnload()){
-                            long olong = ChunkPos.asLong(chunk.x, chunk.z);
-                            chunk.onUnload();
-                            ForgeChunkManager.putDormantChunk(olong, chunk);
-                            this.saveChunkData(chunk);
-                            this.saveChunkExtraData(chunk);
-                            this.loadedChunks.remove(olong);
-                            ++limit;
+                        if(chunk != null) {
+                            if (chunk.maybeUnload()) {
+                                long olong = ChunkPos.asLong(chunk.x, chunk.z);
+                                chunk.onUnload();
+                                ForgeChunkManager.putDormantChunk(olong, chunk);
+                                this.saveChunkData(chunk);
+                                this.saveChunkExtraData(chunk);
+                                iter.remove();
+                                this.loadedChunks.remove(olong);
+                                ++limit;
+                            } else {
+                                chunk.setRequested(false);
+                            }
                         }
                     }
-                    realLC.trim();
-                    if(limit>=100){
+                    if(limit>10) realLC.trim();
+                    if(limit >= 100){
                         ticks = 1190;
                     } else {
                         ticks = 0;
