@@ -3,13 +3,12 @@ package plus.fserver.utls.collections;
 import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.ConcurrentModificationException;
 
 
 public class ArrayListE6<T> extends AbstractList<T> {
-    static final Object[] empty = {};
-    private Object[] data = empty;
-    private int size = 0;
+    static final Object[] EMPTY_ARR = {};
+    protected Object[] data = EMPTY_ARR;
+    protected int size = 0;
 
     @Override
     public int size() {
@@ -34,9 +33,14 @@ public class ArrayListE6<T> extends AbstractList<T> {
 
     @Override
     public boolean add(T obj){
-        if(data.length<=++size)data = Arrays.copyOf(data, data==empty?6: data.length+10);
+        if(data.length<=++size)data = Arrays.copyOf(data, data== EMPTY_ARR ?6: data.length+10);
         data[size-1] = obj;
         return true;
+    }
+
+
+    public int newSizeAuto() {
+        return data== EMPTY_ARR ?6: data.length+10;
     }
 
 
