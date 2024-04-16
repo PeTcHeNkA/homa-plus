@@ -19,6 +19,8 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import plus.fserver.ElcaConfig;
 import plus.fserver.server.chunk.PlayerCMapSelector;
+import plus.fserver.utls.collections.ArrayListE6;
+import plus.fserver.utls.collections.ArrayListEV;
 import plus.tson.utl.Te4HashSet;
 
 
@@ -27,12 +29,12 @@ public class PlayerChunkMap {
     private static final Predicate<EntityPlayerMP> CAN_GENERATE_CHUNKS = player -> player != null && (!player.isSpectator() || player.getServerWorld().getGameRules().getBoolean("spectatorsGenerateChunks"));
 
     private final WorldServer world;
-    private final List<EntityPlayerMP> players = Lists.newArrayList();
+    private final ArrayListE6<EntityPlayerMP> players = new ArrayListE6<>();
     private final Long2ObjectMap<PlayerChunkMapEntry> entryMap = new Long2ObjectOpenHashMap<>(4096);
     private Set<PlayerChunkMapEntry> dirtyEntries = new Te4HashSet<>();
     private final List<PlayerChunkMapEntry> pendingSendToPlayers = Lists.newLinkedList();
     private final List<PlayerChunkMapEntry> entriesWithoutChunks = Lists.newLinkedList();
-    private final List<PlayerChunkMapEntry> entries = Lists.newArrayList();
+    private final ArrayListEV<PlayerChunkMapEntry> entries = new ArrayListEV<>(50);
 
     private int playerViewRadius;
     private long previousTotalWorldTime;
@@ -193,22 +195,24 @@ public class PlayerChunkMap {
 
     public PlayerChunkMapEntry getOrCreateEntry(int chunkX, int chunkZ) {
         long i = getIndex(chunkX, chunkZ);
-        PlayerChunkMapEntry playerchunkmapentry = this.entryMap.get(i);
+        PlayerChunkMapEntry entry = this.entryMap.get(i);
 
-        if (playerchunkmapentry == null) {
-            playerchunkmapentry = new PlayerChunkMapEntry(this, chunkX, chunkZ);
-            this.entryMap.put(i, playerchunkmapentry);
-            this.entries.add(playerchunkmapentry);
+        if (entry == null) {
+            entry = new PlayerChunkMapEntry(this, chunkX, chunkZ);
+            this.entries.addF(entry);
+            //entry.id = entries.size()-1;
 
-            if (playerchunkmapentry.getChunk() == null) {
-                this.entriesWithoutChunks.add(playerchunkmapentry);
+            this.entryMap.put(i, entry);
+
+            if (entry.getChunk() == null) {
+                this.entriesWithoutChunks.add(entry);
             }
 
-            if (!playerchunkmapentry.sendToPlayers()) {
-                this.pendingSendToPlayers.add(playerchunkmapentry);
+            if (!entry.sendToPlayers()) {
+                this.pendingSendToPlayers.add(entry);
             }
         }
-        return playerchunkmapentry;
+        return entry;
     }
 
 
@@ -236,7 +240,7 @@ public class PlayerChunkMap {
     public void addPlayer(EntityPlayerMP player) {
         PlayerCMapSelector sel = getBy(player.prevRenderRadius = player.renderRadius);
         sel.addPlayer(this, player);
-        this.players.add(player);
+        players.addF(player);
         this.markSortPending();
     }
 
@@ -244,7 +248,7 @@ public class PlayerChunkMap {
     public void removePlayer(EntityPlayerMP player) {
         PlayerCMapSelector sel = getBy(player.renderRadius);
         sel.removePlayer(this, player);
-        this.players.remove(player);
+        players.removeRef(player);
         this.markSortPending();
     }
 
@@ -269,7 +273,7 @@ public class PlayerChunkMap {
 
     public boolean isPlayerWatchingChunk(EntityPlayerMP player, int chunkX, int chunkZ) {
         PlayerChunkMapEntry playerchunkmapentry = this.getEntry(chunkX, chunkZ);
-        return playerchunkmapentry != null && playerchunkmapentry.containsPlayer(player) && playerchunkmapentry.isSentToPlayers();
+        return playerchunkmapentry != null && playerchunkmapentry.containsRef(player) && playerchunkmapentry.isSentToPlayers();
     }
 
 
@@ -290,7 +294,11 @@ public class PlayerChunkMap {
         if (radius != this.playerViewRadius) {
             int i = radius - this.playerViewRadius;
 
-            for (EntityPlayerMP entityplayermp : Lists.newArrayList(this.players)) {
+            Object[] data = players.toArray().clone();
+            int size = players.size();
+
+            for (int i2 = 0; i2 < size; i2++) {
+                EntityPlayerMP entityplayermp = (EntityPlayerMP) data[i2];
                 int j = (int)entityplayermp.posX >> 4;
                 int k = (int)entityplayermp.posZ >> 4;
 
@@ -299,7 +307,7 @@ public class PlayerChunkMap {
                         for (int k1 = k - radius; k1 <= k + radius; ++k1) {
                             PlayerChunkMapEntry playerchunkmapentry = this.getOrCreateEntry(j1, k1);
 
-                            if (!playerchunkmapentry.containsPlayer(entityplayermp)) {
+                            if (!playerchunkmapentry.contains(entityplayermp)) {
                                 playerchunkmapentry.addPlayer(entityplayermp);
                             }
                         }
@@ -347,7 +355,7 @@ public class PlayerChunkMap {
         long i = getIndex(chunkpos.x, chunkpos.z);
         entry.updateChunkInhabitedTime();
         this.entryMap.remove(i);
-        this.entries.remove(entry);
+        this.entries.removeRef(entry);
         this.dirtyEntries.remove(entry);
         this.pendingSendToPlayers.remove(entry);
         this.entriesWithoutChunks.remove(entry);

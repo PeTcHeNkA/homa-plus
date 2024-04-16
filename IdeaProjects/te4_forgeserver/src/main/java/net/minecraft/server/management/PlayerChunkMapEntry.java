@@ -26,10 +26,10 @@ import plus.fserver.server.chunk.io.TChunkExecutor;
 import plus.fserver.utls.collections.ArrayListE6;
 
 
-public class PlayerChunkMapEntry implements Runnable{
+public class PlayerChunkMapEntry extends ArrayListE6<EntityPlayerMP> implements Runnable{
     private static final Logger LOGGER = LogManager.getLogger();
     private final PlayerChunkMap playerChunkMap;
-    private final List<EntityPlayerMP> players = new ArrayListE6<>();
+    //private final List<EntityPlayerMP> players = new ArrayListE6<>();
     public final int posX, posZ;
     private short[] changedBlocks = new short[ElcaConfig.MIN_CHANGED_BLOCKS_BUF];
     @Nullable
@@ -60,13 +60,13 @@ public class PlayerChunkMapEntry implements Runnable{
 
 
     public void addPlayer(EntityPlayerMP player) {
-        if (this.players.contains(player)) {
+        if (containsRef(player)) {
             LOGGER.debug("Failed to add player. {} already is in chunk {}, {}", player, posX, posZ);
         } else {
-            if (this.players.isEmpty()) {
+            if (isEmpty()) {
                 this.lastUpdateInhabitedTime = this.playerChunkMap.getWorldServer().getTotalWorldTime();
             }
-            this.players.add(player);
+            addF(player);
             if (this.sentToPlayers) {
                 this.sendToPlayer(player);
                 MinecraftForge.EVENT_BUS.post(player.world.chunkWatchEvent.init(chunk, player));
@@ -77,10 +77,10 @@ public class PlayerChunkMapEntry implements Runnable{
 
 
     public void removePlayer(EntityPlayerMP player) {
-        if (this.players.contains(player)) {
+        if (removeRef(player)) {
             if (this.chunk == null) {
-                this.players.remove(player);
-                if (this.players.isEmpty()) {
+
+                if (isEmpty()) {
                     if (this.loading) TChunkExecutor.dropQueuedChunkLoad(this.playerChunkMap.getWorldServer(), posX, posZ, this);
                     this.playerChunkMap.removeEntry(this);
                 }
@@ -90,10 +90,9 @@ public class PlayerChunkMapEntry implements Runnable{
                 player.connection.netManager.addToQueueE(new SPacketUnloadChunk(posX, posZ));
             }
 
-            this.players.remove(player);
             MinecraftForge.EVENT_BUS.post(player.world.chunkUnWatchEvent.init(chunk, player));
             //MinecraftForge.EVENT_BUS.post(new ChunkWatchEvent.UnWatch(this.chunk, player));
-            if (this.players.isEmpty()) {
+            if (isEmpty()) {
                 this.playerChunkMap.removeEntry(this);
             }
         }
@@ -123,21 +122,24 @@ public class PlayerChunkMapEntry implements Runnable{
         } else if (!this.chunk.isPopulated()) {
             return false;
         } else {
-            if (this.players.isEmpty()) {
+            if (isEmpty()) {
                 this.changes = 0;
                 this.changedSectionFilter = 0;
                 this.sentToPlayers = true;
                 return true;
             } else try {
                 Packet<?> packet = new SPacketChunkData(this.chunk, 65535);
-                for (int i=0;i<players.size();i++) {
-                    EntityPlayerMP player = players.get(i);
+                for (int i=0;i<size;i++) {
+                    EntityPlayerMP player = get(i);
                     player.connection.netManager.addToQueueE(packet);
                     this.playerChunkMap.getWorldServer().getEntityTracker().sendLeashedEntitiesInChunk(player, this.chunk);
 
                     MinecraftForge.EVENT_BUS.post(player.world.chunkWatchEvent.init(chunk, player));
                     //MinecraftForge.EVENT_BUS.post(new ChunkWatchEvent.Watch(this.chunk, player));
                 }
+                this.changes = 0;
+                this.changedSectionFilter = 0;
+                this.sentToPlayers = true;
                 return true;
             } catch (Exception e){
                 WorldServer world = ((WorldServer)chunk.getWorld());
@@ -186,12 +188,12 @@ public class PlayerChunkMapEntry implements Runnable{
 
 
     public void sendPacket(Packet<?> packetIn) {
-        if (this.sentToPlayers && !players.isEmpty()) {
-            NetworkManager manager = players.get(0).connection.netManager;
+        if (this.sentToPlayers && !isEmpty()) {
+            NetworkManager manager = get(0).connection.netManager;
             manager.exec(() -> {
                 manager.sendPacketSync(packetIn);
-                for (int i = 1; i < players.size(); ++i) {
-                    (players.get(i)).connection.netManager.sendPacketSync(packetIn);
+                for (int i = 1; i < size; ++i) {
+                    (get(i)).connection.netManager.sendPacketSync(packetIn);
                 }
             });
         }
@@ -252,19 +254,19 @@ public class PlayerChunkMapEntry implements Runnable{
 
 
     public boolean containsPlayer(EntityPlayerMP player) {
-        return this.players.contains(player);
+        return containsRef(player);
     }
 
 
     public boolean hasPlayerMatching(Predicate<EntityPlayerMP> predicate) {
-        return Iterables.tryFind(this.players, predicate).isPresent();
+        return Iterables.tryFind(this, predicate).isPresent();
     }
 
 
     public boolean hasPlayerMatchingInRange(double range, Predicate<EntityPlayerMP> predicate) {
         range *= range;
-        for (int j = this.players.size(), i = 0; i < j; ++i) {
-            EntityPlayerMP entityplayermp = this.players.get(i);
+        for (int j = size, i = 0; i < j; ++i) {
+            EntityPlayerMP entityplayermp = get(i);
             if (predicate.apply(entityplayermp) && getDistanceSq(entityplayermp) < range) {
                 return true;
             }
@@ -286,7 +288,7 @@ public class PlayerChunkMapEntry implements Runnable{
 
     public double getClosestPlayerDistance() {
         double d0 = Double.MAX_VALUE;
-        for (EntityPlayerMP entityplayermp : this.players) {
+        for (EntityPlayerMP entityplayermp : this) {
             double d1 = getDistanceSq(entityplayermp);
             if (d1 < d0) d0 = d1;
         }
@@ -302,6 +304,6 @@ public class PlayerChunkMapEntry implements Runnable{
 
 
     public List<EntityPlayerMP> getWatchingPlayers() {
-        return isSentToPlayers() ? java.util.Collections.unmodifiableList(players) : java.util.Collections.emptyList();
+        return isSentToPlayers() ? java.util.Collections.unmodifiableList(this) : java.util.Collections.emptyList();
     }
 }

@@ -1,24 +1,21 @@
 package net.minecraft.util;
 
 import com.google.common.collect.Iterators;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import io.netty.util.collection.IntObjectHashMap;
-import java.util.AbstractSet;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import org.jetbrains.annotations.NotNull;
+import plus.fserver.utls.collections.ArrayListE6;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 
 public class ClassInheritanceMultiMap<T> extends AbstractSet<T> {
-    // Forge: Use concurrent collection to allow creating chunks from multiple threads safely
+    private static final EmptyByClass EMPTY_BY_CLASS = new EmptyByClass();
     private static final Set<Class<?>> ALL_KNOWN = Collections.newSetFromMap(new ConcurrentHashMap<>());
-    private final IntObjectHashMap<List<T>> map = new IntObjectHashMap<>();
+    private final IntObjectHashMap<ArrayListEA<T>> map = new IntObjectHashMap<>();
     private final Set<Class<?>> knownKeys = Sets.newIdentityHashSet();
     private final Class<T> baseClass;
-    private final List<T> values = Lists.newArrayList();
+    private final ArrayListEA<T> values = new ArrayListEA<>();
 
     public ClassInheritanceMultiMap(Class<T> baseClassIn) {
         this.baseClass = baseClassIn;
@@ -46,7 +43,7 @@ public class ClassInheritanceMultiMap<T> extends AbstractSet<T> {
         ALL_KNOWN.add(clazz);
         for (T obj : this.values) {
             if (clazz.isAssignableFrom(obj.getClass())) {
-                this.addForClass(obj, clazz);
+                this.addForClass((T) obj, clazz);
             }
         }
         this.knownKeys.add(clazz);
@@ -78,11 +75,11 @@ public class ClassInheritanceMultiMap<T> extends AbstractSet<T> {
 
     private void addForClass(T value, Class<?> parentClass) {
         int key = parentClass.hashCode();
-        List<T> list = this.map.get(key);
+        ArrayListE6<T> list = this.map.get(key);
         if (list == null) {
-            this.map.put(key, Lists.newArrayList(value));
+            this.map.put(key, new ArrayListE1V<>(value));
         } else {
-            list.add(value);
+            list.addF(value);
         }
     }
 
@@ -93,14 +90,26 @@ public class ClassInheritanceMultiMap<T> extends AbstractSet<T> {
         boolean flag = false;
         for (Class<?> oclass : this.knownKeys) {
             if (oclass.isAssignableFrom(obj.getClass())) {
-                List<T> list = this.map.get(oclass.hashCode());
+                ArrayListEA<T> list = this.map.get(oclass.hashCode());
 
-                if (list != null && list.remove(obj)) {
+                if (list != null && list.removeF(obj)) {
                     flag = true;
                 }
             }
         }
         return flag;
+    }
+
+
+    @Override
+    public Iterator<T> iterator() {
+        return values.iterator();
+    }
+
+
+    @Override
+    public int size() {
+        return values.size();
     }
 
 
@@ -111,18 +120,9 @@ public class ClassInheritanceMultiMap<T> extends AbstractSet<T> {
 
 
     public <S> Iterable<S> getByClass(final Class<S> clazz) {
-        return () -> {
-            List<T> list = ClassInheritanceMultiMap.this.map.get(
-                    ClassInheritanceMultiMap.this.initializeClassLookup(clazz).hashCode()
-            );
-
-            if (list == null) {
-                return Collections.emptyIterator();
-            } else {
-                Iterator<T> iterator = list.iterator();
-                return Iterators.filter(iterator, clazz);
-            }
-        };
+        List<T> list = map.get(initializeClassLookup(clazz).hashCode());
+        if(list == null || list.isEmpty())return (Iterable<S>) EMPTY_BY_CLASS;
+        return new ByClass<>(clazz, list);
     }
 
 
@@ -140,16 +140,89 @@ public class ClassInheritanceMultiMap<T> extends AbstractSet<T> {
     public FastIter fastIter(){
         return new FastIter();
     }
+}
 
 
+final class ArrayListE1V<T> extends ArrayListEA<T>{
+    public ArrayListE1V(T v){
+        this.data = new Object[]{v};
+        this.size = 1;
+    }
     @Override
-    public Iterator<T> iterator() {
-        return this.values.isEmpty() ? Collections.emptyIterator() : this.values.iterator();
+    public int newSizeAuto() {
+        return data.length == 1?5:data.length+7;
+    }
+}
+
+
+class ArrayListEA<T> extends ArrayListE6<T>{
+    boolean removeF(Object o) {
+        for (int index = 0; index < size; index++)
+            if (o.equals(data[index])) {
+                int numMoved = size - index - 1;
+                if (numMoved > 0) System.arraycopy(data, index+1, data, index, numMoved);
+                data[--size] = null;
+                return true;
+            }
+        return false;
+    }
+}
+
+
+final class EmptyByClass<S> implements Iterable<S>, Iterator<S>{
+    @NotNull
+    @Override
+    public Iterator<S> iterator() {
+        return this;
+    }
+    @Override
+    public boolean hasNext() {
+        return false;
+    }
+    @Override
+    public S next() {
+        return null;
+    }
+}
+
+
+final class ByClass<S,T> implements Iterable<S>, Iterator<S> {
+    private final Class<S> clazz;
+    private T next;
+    private int cursor = 0;
+    private final List<T> src;
+
+    ByClass(Class<S> clazz, List<T> src) {
+        this.clazz = clazz;
+        this.src = src;
+        calcNext();
     }
 
 
+    private void calcNext(){
+        while (cursor<src.size()){
+            T temp = src.get(cursor);
+            ++cursor;
+            if(clazz.isInstance(temp)){
+                next = temp;
+                return;
+            }
+        }
+        next = null;
+    }
+    @NotNull
     @Override
-    public int size() {
-        return this.values.size();
+    public Iterator<S> iterator() {
+        return this;
+    }
+    @Override
+    public boolean hasNext() {
+        return next != null;
+    }
+    @Override
+    public S next() {
+        S prev = (S) next;
+        calcNext();
+        return prev;
     }
 }

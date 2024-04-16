@@ -3,7 +3,6 @@ package col;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ClassInheritanceMultiMap;
 import net.minecraft.util.math.AxisAlignedBB;
-import plus.fserver.server.chunk.ChunkSlimMobContainer;
 import plus.fserver.utls.debug.DebugEntity;
 
 import java.util.ArrayList;
