@@ -10,6 +10,14 @@ public class ArrayListE6<T> implements List<T> {
     protected Object[] data = EMPTY_ARR;
     protected int size = 0;
 
+    public ArrayListE6(){}
+
+
+    public ArrayListE6(Object... data){
+        this.data = data;
+    }
+
+
     @Override
     public int size() {
         return size;
@@ -27,12 +35,6 @@ public class ArrayListE6<T> implements List<T> {
         T prev = (T) data[index];
         data[index] = element;
         return prev;
-    }
-
-
-    @Override
-    public void add(int index, T element) {
-        throw new UnsupportedOperationException();
     }
 
 
@@ -189,7 +191,14 @@ public class ArrayListE6<T> implements List<T> {
 
     @Override
     public boolean addAll(int index, @NotNull Collection<? extends T> c) {
-        throw new UnsupportedOperationException();
+        Object[] a = c.toArray();
+        int numNew = a.length;
+        if(size + numNew > data.length)data = Arrays.copyOf(data, size + numNew);
+        int numMoved = size - index;
+        if (numMoved > 0) System.arraycopy(data, index, data, index + numNew, numMoved);
+        System.arraycopy(a, 0, data, index, numNew);
+        size += numNew;
+        return numNew != 0;
     }
 
 
@@ -222,20 +231,29 @@ public class ArrayListE6<T> implements List<T> {
 
     @Override
     public boolean add(T obj){
-        if(data.length<=++size)data = Arrays.copyOf(data, newSizeAuto());
-        data[size-1] = obj;
+        if(data.length<=size)data = Arrays.copyOf(data, newSizeAuto());
+        data[size++] = obj;
         return true;
     }
 
 
+    @Override
+    public void add(int index, T element) {
+        if(data.length<=size)data = Arrays.copyOf(data, newSizeAuto());
+        System.arraycopy(data, index, data, index + 1, size - index);
+        data[index] = element;
+        size++;
+    }
+
+
     public void addF(Object obj){
-        if(data.length<=++size)data = Arrays.copyOf(data, newSizeAuto());
-        data[size-1] = obj;
+        if(data.length<=size)data = Arrays.copyOf(data, newSizeAuto());
+        data[size++] = obj;
     }
 
 
     public int newSizeAuto(){
-        return data== EMPTY_ARR ?6: data.length+10;
+        return data == EMPTY_ARR ?6: data.length+10;
     }
 
 

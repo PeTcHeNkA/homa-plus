@@ -20,7 +20,8 @@ def getDeepFiles(pth, prefix = "", ignore=[]):
     return fls2
 
 
-
+print("\nprivate void addPatch(){")
 for item in getDeepFiles(dir+"build/classes/java/main/net"):
     name = "net."+item.replace("/",".")[0:-6]
     print(f"add(\"{name}\");")
+print("}\n")

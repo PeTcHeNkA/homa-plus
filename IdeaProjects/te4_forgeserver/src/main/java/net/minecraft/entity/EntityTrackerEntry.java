@@ -65,6 +65,7 @@ import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fml.common.network.internal.FMLNetworkHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import plus.fserver.utls.collections.IdentityTe4HashSet;
 import plus.tson.utl.Te4HashSet;
 import javax.annotation.Nullable;
 
@@ -95,7 +96,7 @@ public class EntityTrackerEntry {
     private boolean ridingEntity;
     private boolean onGround;
     public boolean playerEntitiesUpdated;
-    public final Set<EntityPlayerMP> trackingPlayers = new Te4HashSet<>(4);
+    public final Set<EntityPlayerMP> trackingPlayers = new Te4HashSet<>(4);//not edit this!!!
 
     public EntityTrackerEntry(Entity entityIn, int rangeIn, int maxRangeIn, int updateFrequencyIn, boolean sendVelocityUpdatesIn) {
         this.trackedEntity = entityIn;

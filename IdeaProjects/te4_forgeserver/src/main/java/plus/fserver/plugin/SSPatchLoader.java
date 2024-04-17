@@ -82,6 +82,8 @@ public class SSPatchLoader extends TweakEngine implements IClassTransformer, ITw
         add("net.minecraft.entity.ai.EntityAINearestAttackableTarget$Player2Double");
         add("net.minecraft.entity.ai.EntityAINearestAttackableTarget$Sorter");
         add("net.minecraft.entity.ai.EntityAINearestAttackableTarget");
+        add("net.minecraft.entity.ai.EntityAITasks$EntityAITaskEntry");
+        add("net.minecraft.entity.ai.EntityAITasks");
         add("net.minecraft.entity.Entity$1");
         add("net.minecraft.entity.Entity$2");
         add("net.minecraft.entity.Entity$3");
@@ -174,11 +176,15 @@ public class SSPatchLoader extends TweakEngine implements IClassTransformer, ITw
         add("net.minecraft.server.MinecraftServer$1");
         add("net.minecraft.server.MinecraftServer$2");
         add("net.minecraft.server.MinecraftServer");
+        add("net.minecraft.util.ArrayListE1V");
+        add("net.minecraft.util.ArrayListEA");
         add("net.minecraft.util.BitArray");
         add("net.minecraft.util.BlockIDIndexes$Index");
         add("net.minecraft.util.BlockIDIndexes");
+        add("net.minecraft.util.ByClass");
         add("net.minecraft.util.ClassInheritanceMultiMap$FastIter");
         add("net.minecraft.util.ClassInheritanceMultiMap");
+        add("net.minecraft.util.EmptyByClass");
         add("net.minecraft.util.math.AxisAlignedBB");
         add("net.minecraft.util.math.BlockPos$1$1");
         add("net.minecraft.util.math.BlockPos$1");
@@ -302,8 +308,10 @@ public class SSPatchLoader extends TweakEngine implements IClassTransformer, ITw
         add("net.minecraftforge.event.entity.living.LivingEvent$LivingUpdateEvent");
         add("net.minecraftforge.event.entity.living.LivingEvent");
         add("net.minecraftforge.event.entity.living.LivingHurtEvent");
+        add("net.minecraftforge.event.world.ChunkWatchEvent$UnWatch");
+        add("net.minecraftforge.event.world.ChunkWatchEvent$Watch");
+        add("net.minecraftforge.event.world.ChunkWatchEvent");
         add("net.minecraftforge.event.world.GetCollisionBoxesEvent");
-
     }
 
 

@@ -10,6 +10,6 @@ public class ArrayListEV<T> extends ArrayListE6<T>{
 
     @Override
     public int newSizeAuto() {
-        return data== EMPTY_ARR ?exp: data.length+exp;
+        return data.length + exp;
     }
 }

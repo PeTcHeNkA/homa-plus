@@ -23,16 +23,15 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-//import plus.fserver.utls.debug.AsyncChecker;
+import plus.fserver.utls.collections.IdentityTe4HashSet;
 import plus.fserver.world.EntityTrackerFactory;
-import plus.tson.utl.Te4HashSet;
 
 
 public class EntityTracker {
     private static final EntityTrackerFactory trackingTable = new EntityTrackerFactory();
     private static final Logger LOGGER = LogManager.getLogger();
     private final WorldServer world;
-    private final Set<EntityTrackerEntry> entries = new Te4HashSet<>();
+    private final Set<EntityTrackerEntry> entries = new IdentityTe4HashSet<>(); //is safe
     private final IntHashMap<EntityTrackerEntry> trackedEntityHashTable = new IntHashMap<>();
     private int maxTrackingDistanceThreshold;
 
