@@ -66,6 +66,7 @@ public abstract class EntityLiving extends EntityLivingBase {
     private final EntityLookHelper lookHelper;
     protected EntityMoveHelper moveHelper;
     protected EntityJumpHelper jumpHelper;
+    @SideOnly(Side.CLIENT)
     private final EntityBodyHelper bodyHelper;
     protected PathNavigate navigator;
     public final EntityAITasks tasks;
@@ -283,9 +284,10 @@ public abstract class EntityLiving extends EntityLivingBase {
     }
 
 
-    protected float updateDistance(float p_110146_1_, float p_110146_2_) {
+    @SideOnly(Side.CLIENT)
+    protected float updateDistance(float f1, float f2) {
         this.bodyHelper.updateRenderAngles();
-        return p_110146_2_;
+        return f2;
     }
 
 

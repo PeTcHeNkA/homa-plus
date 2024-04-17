@@ -204,7 +204,12 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
         //todo use local or thread - bad idea
         //this.rand = ThreadLocalRandom.current();
-        this.rand = new Random();
+        if (worldIn != null) {
+            this.dimension = worldIn.provider.getDimension();
+            this.rand = new Random();
+        } else {
+            this.rand = world.commonWorldEntityRandom;
+        }
 
         this.fire = (short) -this.getFireImmuneTicks();
         this.firstUpdate = true;
@@ -216,9 +221,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         this.world = worldIn;
         this.setPosition(0.0D, 0.0D, 0.0D);
 
-        if (worldIn != null) {
-            this.dimension = worldIn.provider.getDimension();
-        }
+
         //if(ElcaCV.DEBUG_NO_SERVER)return;
 
         this.dataManager = new EntityDataManager(this);
@@ -3341,6 +3344,11 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         } else {
             return !this.world.isRemote;
         }
+    }
+
+
+    protected float updateDistance(float f1, float f2){
+        return f2;
     }
 
 

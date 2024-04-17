@@ -16,15 +16,15 @@ import plus.tson.utl.Te4HashSet;
 import java.util.*;
 
 
+@Deprecated
 public final class CustomGoalSelector extends EntityAITasks implements PEntityAITasks{
     public static final Logger LOGGER = LogManager.getLogger();
     public static final CustomGoalTypeData goalData = new CustomGoalTypeData();
     public static final int SHOULD_EXECUTE_INTERVAL;
     public static int timeForAI;
-    private final Set<CustomPriotizedSlowedGoal>  toAdd    = new Te4HashSet<>(),
-                                                  toRemove = new Te4HashSet<>();
-    private final List<CustomPriotizedSlowedGoal> goals   = new ArrayList<>();
-    private EntityAIBase slowestGoal = null;
+    private final Set<CustomPriotizedSlowedGoal>  toAdd    = new Te4HashSet<>(8),
+                                                  toRemove = new Te4HashSet<>(8);
+    private final List<CustomPriotizedSlowedGoal> goals    = new ArrayList<>();
     private int runningFlags = 0, runningNoOverRuleFlags = 0;
     private boolean addedGoals = false, removedGoals = false;
     private long avgTick = 0, preTick = 0, tempTime = 0, slowest = 0, preTask;
@@ -136,7 +136,7 @@ public final class CustomGoalSelector extends EntityAITasks implements PEntityAI
                 this.tempTime = - this.preTask + (this.preTask = System.nanoTime());
                 if (this.tempTime <= this.slowest) continue;
                 this.slowest = this.tempTime;
-                this.slowestGoal = currentGoal.goal;
+                EntityAIBase slowestGoal = currentGoal.goal;
             }
         }
         this.avgTick += System.currentTimeMillis() - this.preTick;

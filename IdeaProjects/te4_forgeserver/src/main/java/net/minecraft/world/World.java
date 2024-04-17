@@ -72,6 +72,7 @@ import plus.fserver.server.CacheBuilder;
 import plus.fserver.utls.AABKey;
 import plus.fserver.utls.math.BlockPosDelta;
 import plus.fserver.utls.ChunkSelector;
+import plus.fserver.utls.math.FastRandom;
 import plus.fserver.world.RedstoneEngine;
 import plus.fserver.utls.collections.HoleList;
 
@@ -3844,6 +3845,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public  final EntityEvent.EnteringChunk     enteringChunk = new EntityEvent.EnteringChunk(null,0,0,0,0);
     public  final ChunkWatchEvent.Watch       chunkWatchEvent = new ChunkWatchEvent.Watch();
     public  final ChunkWatchEvent.UnWatch   chunkUnWatchEvent = new ChunkWatchEvent.UnWatch();
+    public  final Random              commonWorldEntityRandom = new FastRandom();
 
     protected void clearEvents(){
         jumpEvent.setEntity(null);

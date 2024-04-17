@@ -75,6 +75,8 @@ import plus.fserver.ElcaConfig;
 import plus.fserver.server.SStrings;
 import plus.fserver.utls.collections.FixedItemList;
 
+import static plus.fserver.utls.math.Constants.F_180_PI;
+
 
 public abstract class EntityLivingBase extends Entity {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -110,8 +112,11 @@ public abstract class EntityLivingBase extends Entity {
     public float cameraPitch;
     public float randomUnused2;
     public float randomUnused1;
+
+    //todo move to client
     public float renderYawOffset;
     public float prevRenderYawOffset;
+
     public float rotationYawHead;
     public float prevRotationYawHead;
     public float jumpMovementFactor = 0.02F;
@@ -299,8 +304,11 @@ public abstract class EntityLivingBase extends Entity {
 
         this.updatePotionEffects();
         this.prevMovedDistance = this.movedDistance;
+
+        //todo move to client
         this.prevRenderYawOffset = this.renderYawOffset;
         this.prevRotationYawHead = this.rotationYawHead;
+
         this.prevRotationYaw = this.rotationYaw;
         this.prevRotationPitch = this.rotationPitch;
     }
@@ -1758,7 +1766,9 @@ public abstract class EntityLivingBase extends Entity {
         double d0 = this.posX - this.prevPosX;
         double d1 = this.posZ - this.prevPosZ;
         float f3 = (float)(d0 * d0 + d1 * d1);
+
         float f4 = this.renderYawOffset;
+
         float f5 = 0.0F;
         this.prevOnGroundSpeedFactor = this.onGroundSpeedFactor;
         float f = 0.0F;
@@ -1766,7 +1776,7 @@ public abstract class EntityLivingBase extends Entity {
         if (f3 > 0.0025000002F) {
             f = 1.0F;
             f5 = (float)Math.sqrt(f3) * 3.0F;
-            float f1 = (float)MathHelper.atan2(d1, d0) * (180F / (float)Math.PI) - 90.0F;
+            float f1 = (float)MathHelper.atan2(d1, d0) * (F_180_PI) - 90.0F;
             float f2 = MathHelper.abs(MathHelper.wrapDegrees(this.rotationYaw) - f1);
             if (95.0F < f2 && f2 < 265.0F) {
                 f4 = f1 - 180.0F;
@@ -1826,8 +1836,9 @@ public abstract class EntityLivingBase extends Entity {
     }
 
 
-    protected float updateDistance(float p_110146_1_, float p_110146_2_) {
-        float f = MathHelper.wrapDegrees(p_110146_1_ - this.renderYawOffset);
+    @SideOnly(Side.CLIENT)
+    protected float updateDistance(float num0, float num2) {
+        float f = MathHelper.wrapDegrees(num0 - this.renderYawOffset);
         this.renderYawOffset += f * 0.3F;
         float f1 = MathHelper.wrapDegrees(this.rotationYaw - this.renderYawOffset);
         boolean flag = f1 < -90.0F || f1 >= 90.0F;
@@ -1843,9 +1854,9 @@ public abstract class EntityLivingBase extends Entity {
             this.renderYawOffset += f1 * 0.2F;
         }
         if (flag) {
-            p_110146_2_ *= -1.0F;
+            num2 *= -1.0F;
         }
-        return p_110146_2_;
+        return num2;
     }
 
 

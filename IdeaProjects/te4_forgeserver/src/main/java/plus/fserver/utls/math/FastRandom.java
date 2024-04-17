@@ -8,6 +8,14 @@ import java.util.Random;
 public class FastRandom extends Random {
     public static final FastRandom INST = new FastRandom();
 
+    public FastRandom(){}
+
+
+    public FastRandom(int i) {
+        super(i);
+    }
+
+
     public static int range(int f1, int f2){
         if(f1>0){
             if(f2>0) return f1>f2 ? -(f1-f2) : f2-f1;
@@ -18,6 +26,7 @@ public class FastRandom extends Random {
         }
     }
 
+
     public static double range(double f1, double f2){
         if(f1>0){
             if(f2>0) return f1>f2 ? -(f1-f2) : f2-f1;
@@ -27,29 +36,8 @@ public class FastRandom extends Random {
             else return f1<f2 ? -(f1-f2) : f2-f1;
         }
     }
-    //TODO
 
-//    int size = list.size();
-//        if (size < SHUFFLE_THRESHOLD || list instanceof RandomAccess) {
-//        for (int i=size; i>1; i--)
-//            swap(list, i-1, rnd.nextInt(i));
-//    } else {
-//        Object[] arr = list.toArray();
-//
-//        // Shuffle array
-//        for (int i=size; i>1; i--)
-//            swap(arr, i-1, rnd.nextInt(i));
-//
-//        // Dump array back into list
-//        // instead of using a raw type here, it's possible to capture
-//        // the wildcard but it will require a call to a supplementary
-//        // private method
-//        ListIterator it = list.listIterator();
-//        for (int i=0; i<arr.length; i++) {
-//            it.next();
-//            it.set(arr[i]);
-//        }
-//    }
+
     public void shuffle(Object[] array){
         if(array.length==0)return;
         int i=0, e;
