@@ -95,7 +95,7 @@ public class EntityTrackerEntry {
     private boolean ridingEntity;
     private boolean onGround;
     public boolean playerEntitiesUpdated;
-    public final Set<EntityPlayerMP> trackingPlayers = new Te4HashSet<>();
+    public final Set<EntityPlayerMP> trackingPlayers = new Te4HashSet<>(4);
 
     public EntityTrackerEntry(Entity entityIn, int rangeIn, int maxRangeIn, int updateFrequencyIn, boolean sendVelocityUpdatesIn) {
         this.trackedEntity = entityIn;
@@ -554,17 +554,6 @@ public class EntityTrackerEntry {
     public void sendPacketToTrackedPlayersAndSelf(NetworkManager manager, Packet<?> packetIn){
         manager.addToQueueE(packetIn);
         sendPacketToTrackedPlayers(packetIn);
-//        manager.exec(() -> {
-//            manager.sendPacketSync(packetIn);
-//            if(trackingPlayers.isEmpty())return;
-//            Te4HashSet<EntityPlayerMP>.KeyIterator iter = (Te4HashSet<EntityPlayerMP>.KeyIterator)
-//                    trackingPlayers.iterator();
-//            EntityPlayerMP mp = iter.nextIfCan();
-//            while (mp != null){
-//                mp.connection.netManager.sendPacketSync(packetIn);
-//                mp = iter.nextIfCan();
-//            }
-//        });
     }
 
 
@@ -578,15 +567,6 @@ public class EntityTrackerEntry {
             mp.connection.netManager.addToQueueE(packetIn);
             mp = iter.nextIfCan();
         }
-//        NetworkManager manager = iter.next().connection.netManager;
-//        manager.exec(() -> {
-//            manager.sendPacketSync(packetIn);
-//            EntityPlayerMP mp = iter.nextIfCan();
-//            while (mp != null){
-//                mp.connection.netManager.sendPacketSync(packetIn);
-//                mp = iter.nextIfCan();
-//            }
-//        });
     }
 
 

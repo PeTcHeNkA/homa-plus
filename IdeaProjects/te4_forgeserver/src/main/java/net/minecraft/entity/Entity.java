@@ -92,6 +92,7 @@ import org.jetbrains.annotations.NotNull;
 import plus.fserver.ElcaConfig;
 import plus.fserver.server.SStrings;
 import plus.fserver.utls.ChunkSelector;
+import plus.tson.utl.Te4HashSet;
 
 
 public abstract class Entity implements ICommandSender, net.minecraftforge.common.capabilities.ICapabilitySerializable<NBTTagCompound> {
@@ -210,7 +211,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         this.entityUniqueID = MathHelper.getRandomUUID(this.rand);
         this.cachedUniqueIdString = this.entityUniqueID.toString();
         //this.cmdResultStats = new CommandResultStats();
-        this.tags = Sets.newHashSet();
+        this.tags = new Te4HashSet<>(2);
         this.pistonDeltas = new float[] {0.0f, 0.0f, 0.0f};
         this.world = worldIn;
         this.setPosition(0.0D, 0.0D, 0.0D);

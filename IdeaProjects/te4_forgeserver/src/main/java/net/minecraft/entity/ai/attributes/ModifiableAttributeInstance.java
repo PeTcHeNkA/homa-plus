@@ -13,8 +13,8 @@ public class ModifiableAttributeInstance implements IAttributeInstance {
     private final AbstractAttributeMap attributeMap;
     private final IAttribute genericAttribute;
     private final Set<AttributeModifier>[] mapByOperation = new Set[3];
-    private final Map<String, Set<AttributeModifier>> mapByName = Maps.newHashMap();
-    private final Map<UUID, AttributeModifier> mapByUUID = Maps.newHashMap();
+    private final Map<String, Set<AttributeModifier>> mapByName = new HashMap<>(4);
+    private final Map<UUID, AttributeModifier> mapByUUID = new HashMap<>(4);
     private double baseValue;
     private boolean needsUpdate = true;
     private double cachedValue;
@@ -59,22 +59,29 @@ public class ModifiableAttributeInstance implements IAttributeInstance {
 
     @Override
     public Collection<AttributeModifier> getModifiers() {
-        Set<AttributeModifier> set = new Te4HashSet<>();
-        for (int i = 0; i < 3; ++i) {
-            set.addAll(this.getModifiersByOperation(i));
-        }
+        Collection<AttributeModifier> op1 = this.getModifiersByOperation(0);
+        Collection<AttributeModifier> op2 = this.getModifiersByOperation(1);
+        Collection<AttributeModifier> op3 = this.getModifiersByOperation(2);
+        int size;
+        if((size = op1.size()+op2.size()+op3.size()) == 0)
+            return Collections.emptyList();
+
+        Set<AttributeModifier> set = new Te4HashSet<>(size);
+
+        set.addAll(op1);
+        set.addAll(op2);
+        set.addAll(op3);
         return set;
     }
 
 
     @Nullable
-    public AttributeModifier getModifier(UUID uuid)
-    {
+    public AttributeModifier getModifier(UUID uuid) {
         return this.mapByUUID.get(uuid);
     }
 
-    public boolean hasModifier(AttributeModifier modifier)
-    {
+
+    public boolean hasModifier(AttributeModifier modifier) {
         return this.mapByUUID.get(modifier.getID()) != null;
     }
 
