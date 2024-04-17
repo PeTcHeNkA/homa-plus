@@ -127,6 +127,9 @@ jar {
             if(it.name.equalsIgnoreCase("zstd-jni-1.5.5-9-universal.jar")) {
                 zipTree(it)
             }
+            if(it.name.contains('caffeine')){
+                zipTree(it)
+            }
         }
     }
 }

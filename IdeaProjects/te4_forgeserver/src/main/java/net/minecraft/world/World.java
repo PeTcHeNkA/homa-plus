@@ -63,7 +63,6 @@ import net.minecraftforge.fml.common.FMLLog;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.server.timings.TimeTracker;
-import org.cache2k.Cache;
 import org.jetbrains.annotations.NotNull;
 import plus.fserver.ElcaConfig;
 import plus.fserver.api.IBlockEAccess;
@@ -142,8 +141,8 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
     public long tryUpdateNavigationLimit = 20L;
 
-    private final Cache<AABKey, List<AxisAlignedBB>> bbCache;
-    private final Cache<AABKey, List<Entity>>        eeCache;
+    private final Map<AABKey, List<AxisAlignedBB>> bbCache;
+    private final Map<AABKey, List<Entity>>        eeCache;
 
 
     protected World(ISaveHandler saveHandlerIn, WorldInfo info, WorldProvider providerIn, Profiler profilerIn, boolean client) {

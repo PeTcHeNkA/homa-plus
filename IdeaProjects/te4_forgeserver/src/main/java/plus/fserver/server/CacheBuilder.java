@@ -1,37 +1,50 @@
 package plus.fserver.server;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.AxisAlignedBB;
-import org.cache2k.Cache;
-import org.cache2k.Cache2kBuilder;
 import plus.fserver.ElcaConfig;
 import plus.fserver.utls.AABKey;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 
 public class CacheBuilder{
-    public static Cache<AABKey, List<Entity>> buildEECache(AsyWorldTickerV2 ticker){
-        Cache2kBuilder<AABKey, List<Entity>> builder = new Cache2kBuilder<AABKey, List<Entity>>(){}
-                .expireAfterWrite(ElcaConfig.EE_CACHE_ALIVE, TimeUnit.MILLISECONDS)
-                .disableStatistics(true).strictEviction(true);
+    public static Map<AABKey, List<Entity>> buildEECache(AsyWorldTickerV2 ticker){
+        Caffeine<Object, Object> caffeine = Caffeine.newBuilder()
+                .expireAfterWrite(ElcaConfig.EE_CACHE_ALIVE, TimeUnit.MILLISECONDS);
 
-        if(ticker != null){
-            builder.asyncListenerExecutor(ticker.service);
+        if(ticker != null) {
+            caffeine.executor(ticker.service);
         }
-        return builder.build();
+
+        Cache<AABKey, List<Entity>> cache = caffeine.build();
+        return cache.asMap();
     }
 
 
 
-    public static Cache<AABKey, List<AxisAlignedBB>> buildBBCache(AsyWorldTickerV2 ticker){
-        Cache2kBuilder<AABKey, List<AxisAlignedBB>> builder = new Cache2kBuilder<AABKey, List<AxisAlignedBB>>(){}
-                .expireAfterWrite(ElcaConfig.BB_CACHE_ALIVE, TimeUnit.MILLISECONDS)
-                .disableStatistics(true).strictEviction(true);
+    public static Map<AABKey, List<AxisAlignedBB>> buildBBCache(AsyWorldTickerV2 ticker){
 
-        if(ticker != null){
-            builder.asyncListenerExecutor(ticker.service);
+        Caffeine<Object, Object> caffeine = Caffeine.newBuilder()
+                .expireAfterWrite(ElcaConfig.BB_CACHE_ALIVE, TimeUnit.MILLISECONDS);
+
+        if(ticker != null) {
+            caffeine.executor(ticker.service);
         }
-        return builder.build();
+
+        Cache<AABKey, List<AxisAlignedBB>> cache = caffeine.build();
+        return cache.asMap();
+
+//        Cache2kBuilder<AABKey, List<AxisAlignedBB>> builder = new Cache2kBuilder<AABKey, List<AxisAlignedBB>>(){}
+//                .expireAfterWrite(ElcaConfig.BB_CACHE_ALIVE, TimeUnit.MILLISECONDS)
+//                .disableStatistics(true).strictEviction(true);
+//
+//        if(ticker != null){
+//            builder.asyncListenerExecutor(ticker.service);
+//        }
+//        return builder.build();
     }
 }

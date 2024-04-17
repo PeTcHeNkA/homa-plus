@@ -7,15 +7,16 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import plus.fserver.api.PBiomeRegistrator;
 
 
+@Deprecated
 public class ElcaBiomes {
     private static ElcaBiomes INST;
     static void registerIfNeed(){
         if(INST != null)return;
-        MinecraftForge.EVENT_BUS.register(INST = new ElcaBiomes());
+        //MinecraftForge.EVENT_BUS.register(INST = new ElcaBiomes());
     }
 
 
-    @SubscribeEvent
+    //@SubscribeEvent
     public void regBiomes(RegistryEvent.Register<Biome> e){
         PBiomeRegistrator.registerAll(e);
     }
