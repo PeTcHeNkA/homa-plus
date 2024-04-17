@@ -949,7 +949,7 @@ public abstract class EntityLivingBase extends Entity {
                 captureDrops = true;
                 capturedDrops.clear();
 
-                if (this.canDropLoot() && this.world.getGameRules().getBoolean("doMobLoot")) {
+                if (this.canDropLoot() && this.world.getGameRules().doMobLoot.getBoolean()) {
                     boolean flag = this.recentlyHit > 0;
                     this.dropLoot(flag, i, cause);
                 }

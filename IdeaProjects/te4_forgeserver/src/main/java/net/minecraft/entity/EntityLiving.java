@@ -92,8 +92,8 @@ public abstract class EntityLiving extends EntityLivingBase {
     public EntityLiving(World worldIn) {
         super(worldIn);
         mapPathPriority.defaultReturnValue(Float.NaN);
-        this.tasks = new EntityAITasks(worldIn != null && worldIn.profiler != null ? worldIn.profiler : null);
-        this.targetTasks = new EntityAITasks(worldIn != null && worldIn.profiler != null ? worldIn.profiler : null);
+        this.tasks = new EntityAITasks(worldIn);
+        this.targetTasks = new EntityAITasks(world);
         this.lookHelper = new EntityLookHelper(this);
         this.moveHelper = new EntityMoveHelper(this);
         this.jumpHelper = new EntityJumpHelper(this);

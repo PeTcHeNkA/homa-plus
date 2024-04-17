@@ -1,10 +1,10 @@
 package plus.fserver.server.ai.goals;
 
 import net.minecraft.entity.ai.*;
-import plus.fserver.server.ai.CustomGoalSelector;
+import org.jetbrains.annotations.NotNull;
 
 
-public class CustomPriotizedSlowedGoal {
+public class CustomPriotizedSlowedGoal implements Comparable<CustomPriotizedSlowedGoal>{
     public final EntityAIBase goal;
     private final int shouldExecuteRate;
     private final int tickRate;
@@ -12,9 +12,8 @@ public class CustomPriotizedSlowedGoal {
     private int shouldExecuteCounter;
     private int tickCounter;
     public boolean isrunning;
-    private boolean shouldExecute = false;
-    
-    public CustomPriotizedSlowedGoal(final int priority, final EntityAIBase goal, final CustomGoalSelector selector, final int shouldExecuteRate, final int tickRate) {
+
+    public CustomPriotizedSlowedGoal(final int priority, final EntityAIBase goal, final int shouldExecuteRate, final int tickRate) {
         this.shouldExecuteCounter = 1;
         this.tickCounter = 1;
         this.isrunning = false;
@@ -54,5 +53,11 @@ public class CustomPriotizedSlowedGoal {
 
     public boolean isRunning() {
         return this.isrunning;
+    }
+
+
+    @Override
+    public int compareTo(@NotNull CustomPriotizedSlowedGoal o) {
+        return Integer.compare(priority, o.priority);
     }
 }

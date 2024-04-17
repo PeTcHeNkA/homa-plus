@@ -269,8 +269,14 @@ public class ChunkProviderServer implements IChunkProvider {
                 if(++ticks>1200){
                     int limit = 0;
                     Iterator<Chunk> iter = loadedChunks.values().iterator();
+                    Chunk chunk;
                     while (iter.hasNext() && limit<100){
-                        Chunk chunk = iter.next();
+                        try {
+                            chunk = iter.next();
+                        } catch (NullPointerException e){
+                            world.getMinecraftServer().ticker().onError(world, e);
+                            break;
+                        }
                         if(chunk != null) {
                             if (chunk.maybeUnload()) {
                                 long olong = ChunkPos.asLong(chunk.x, chunk.z);

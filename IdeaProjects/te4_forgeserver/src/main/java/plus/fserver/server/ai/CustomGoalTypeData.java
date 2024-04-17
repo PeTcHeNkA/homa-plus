@@ -17,12 +17,12 @@ public class CustomGoalTypeData {
     }
 
 
-    public CustomPriotizedSlowedGoal getPriotizedGoalFor(final int priority, final EntityAIBase goal, final CustomGoalSelector selector) {
+    public CustomPriotizedSlowedGoal getPriotizedGoalFor(final int priority, final EntityAIBase goal) {
         final CustomGoalTypeParameter params = this.GOAL_TYPES.get(goal.getClass());
         if (params != null && params.isEnabled) {
-            return new CustomPriotizedSlowedGoal(priority, params.goalConverter.apply(goal), selector, params.shouldExecuteRate, params.tickRate);
+            return new CustomPriotizedSlowedGoal(priority, params.goalConverter.apply(goal), params.shouldExecuteRate, params.tickRate);
         }
-        return new CustomPriotizedSlowedGoal(priority, goal, selector, 1, 1);
+        return new CustomPriotizedSlowedGoal(priority, goal, 1, 1);
     }
 
 

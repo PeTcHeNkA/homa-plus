@@ -1,144 +1,100 @@
 package net.minecraft.entity.ai;
 
-import com.google.common.collect.Sets;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 import javax.annotation.Nullable;
 import net.minecraft.profiler.Profiler;
+import net.minecraft.world.World;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import plus.fserver.ElcaConfig;
+import plus.fserver.api.MeanTicker;
+import plus.fserver.server.ai.CustomGoalTypeData;
+import plus.fserver.server.ai.goals.CustomPriotizedSlowedGoal;
+import plus.fserver.utls.collections.ArrayListEV;
+import plus.tson.utl.Te4HashSet;
 
 
 public class EntityAITasks {
     private static final Logger LOGGER = LogManager.getLogger();
-    public final Set<EntityAITasks.EntityAITaskEntry> taskEntries = Sets.newLinkedHashSet();
-    private final Set<EntityAITasks.EntityAITaskEntry> executingTaskEntries = Sets.newLinkedHashSet();
-    private int tickCount;
-    private int tickRate = 3;
-    private int disabledControlFlags;
+    public static final CustomGoalTypeData            goalData = new CustomGoalTypeData();
+    private final Set<CustomPriotizedSlowedGoal>         toAdd = new Te4HashSet<>(8),
+                                                      toRemove = new Te4HashSet<>(8);
+    private final ArrayListEV<CustomPriotizedSlowedGoal> goals = new ArrayListEV<>(8);
 
-    public EntityAITasks(Profiler profilerIn) {
+    private int runningFlags = 0, runningNoOverRuleFlags = 0;
+    private int avgTickCount, pauseTicks, pauseTickDelay, counter;
+    private boolean addedGoals = false, removedGoals = false;
+    private long avgTick = 0;
+    protected int disabledControlFlags;
+    public final MeanTicker ticker;
+
+    @Deprecated
+    public EntityAITasks(Profiler profiler){
+        this(MeanTicker.EMPTY);
+    }
+
+
+    public EntityAITasks(World world){
+        this(world == null || !(world instanceof MeanTicker)?MeanTicker.EMPTY:((MeanTicker)world));
+    }
+
+
+    public EntityAITasks(MeanTicker ticker) {
+        this.ticker = ticker;
     }
 
 
     public void addTask(int priority, EntityAIBase task) {
-        this.taskEntries.add(new EntityAITaskEntry(priority, task));
+        if (this.goals.size() > 100) {
+            LOGGER.warn("Tried to add over 100 AI tasks, pausing ai and aborting");
+            this.pauseTicks = 500;
+            return;
+        }
+        for (final CustomPriotizedSlowedGoal goal : this.goals) {
+            if (goal.goal == task) return;
+        }
+        this.toAdd.add(goalData.getPriotizedGoalFor(priority, task));
+        this.addedGoals = true;
     }
 
 
     public void removeTask(EntityAIBase task) {
-        Iterator<EntityAITasks.EntityAITaskEntry> iterator = this.taskEntries.iterator();
-
-        while (iterator.hasNext()) {
-            EntityAITasks.EntityAITaskEntry entry = iterator.next();
-            EntityAIBase entityaibase = entry.action;
-
-            if (entityaibase == task) {
-                if (entry.using) {
-                    entry.using = false;
-                    entry.action.resetTask();
-                    this.executingTaskEntries.remove(entry);
-                }
-                iterator.remove();
-                return;
+        for (final CustomPriotizedSlowedGoal goal : this.goals) {
+            if (goal.goal == task) {
+                this.resetGoal(goal);
+                this.toRemove.add(goal);
+                this.removedGoals = true;
             }
         }
     }
 
 
-    public void onUpdateTasks() {
-        if (this.tickCount++ % this.tickRate == 0) {
-            for (EntityAITasks.EntityAITaskEntry entry : this.taskEntries) {
-                if (entry.using) {
-                    if (!this.canUse(entry) || !this.canContinue(entry)) {
-                        entry.using = false;
-                        entry.action.resetTask();
-                        this.executingTaskEntries.remove(entry);
-                    }
-                } else if (this.canUse(entry) && entry.action.shouldExecute()) {
-                    entry.using = true;
-                    entry.action.startExecuting();
-                    this.executingTaskEntries.add(entry);
-                }
-            }
+    public boolean isControlFlagDisabled(int flag) {
+        return (this.disabledControlFlags & flag) > 0;
+    }
+
+
+    public void disableControlFlag(int flag) {
+        this.disabledControlFlags |= flag;
+    }
+
+
+    public void enableControlFlag(int flag) {
+        this.disabledControlFlags &= ~flag;
+    }
+
+
+    public void setControlFlag(int flag, boolean enable) {
+        if (enable) {
+            this.enableControlFlag(flag);
         } else {
-            Iterator<EntityAITasks.EntityAITaskEntry> iterator = this.executingTaskEntries.iterator();
-
-            while (iterator.hasNext()) {
-                EntityAITasks.EntityAITaskEntry entityaitasks$entityaitaskentry1 = iterator.next();
-
-                if (!this.canContinue(entityaitasks$entityaitaskentry1)) {
-                    entityaitasks$entityaitaskentry1.using = false;
-                    entityaitasks$entityaitaskentry1.action.resetTask();
-                    iterator.remove();
-                }
-            }
-        }
-
-        if (!this.executingTaskEntries.isEmpty()) {
-            for (EntityAITasks.EntityAITaskEntry entry : this.executingTaskEntries) {
-                entry.action.updateTask();
-            }
+            this.disableControlFlag(flag);
         }
     }
 
 
-    private boolean canContinue(EntityAITasks.EntityAITaskEntry taskEntry) {
-        return taskEntry.action.shouldContinueExecuting();
-    }
-
-
-    private boolean canUse(EntityAITasks.EntityAITaskEntry taskEntry) {
-        if (this.executingTaskEntries.isEmpty()) {
-            return true;
-        } else if (this.isControlFlagDisabled(taskEntry.action.getMutexBits())) {
-            return false;
-        } else {
-            for (EntityAITasks.EntityAITaskEntry entityaitasks$entityaitaskentry : this.executingTaskEntries) {
-                if (entityaitasks$entityaitaskentry != taskEntry) {
-                    if (taskEntry.priority >= entityaitasks$entityaitaskentry.priority) {
-                        if (!this.areTasksCompatible(taskEntry, entityaitasks$entityaitaskentry)) {
-                            return false;
-                        }
-                    } else if (!entityaitasks$entityaitaskentry.action.isInterruptible()) {
-                        return false;
-                    }
-                }
-            }
-            return true;
-        }
-    }
-
-
-    private boolean areTasksCompatible(EntityAITasks.EntityAITaskEntry taskEntry1, EntityAITasks.EntityAITaskEntry taskEntry2) {
-        return (taskEntry1.action.getMutexBits() & taskEntry2.action.getMutexBits()) == 0;
-    }
-
-
-    public boolean isControlFlagDisabled(int p_188528_1_) {
-        return (this.disabledControlFlags & p_188528_1_) > 0;
-    }
-
-    public void disableControlFlag(int p_188526_1_) {
-        this.disabledControlFlags |= p_188526_1_;
-    }
-
-
-    public void enableControlFlag(int p_188525_1_) {
-        this.disabledControlFlags &= ~p_188525_1_;
-    }
-
-
-    public void setControlFlag(int p_188527_1_, boolean p_188527_2_) {
-        if (p_188527_2_) {
-            this.enableControlFlag(p_188527_1_);
-        } else {
-            this.disableControlFlag(p_188527_1_);
-        }
-    }
-
-
-    public static class EntityAITaskEntry {
+    @Deprecated //removed by Elca Server
+    public class EntityAITaskEntry {
         public final EntityAIBase action;
         public final int priority;
         public boolean using;
@@ -163,5 +119,86 @@ public class EntityAITasks {
         public int hashCode() {
             return this.action.hashCode();
         }
+    }
+
+
+    private boolean goalContainsDisabledFlag(final CustomPriotizedSlowedGoal goal) {
+        return (disabledControlFlags & goal.goal.getMutexBits()) != 0x0;
+    }
+
+
+    private boolean isPreemptedByAll(final CustomPriotizedSlowedGoal goal1) {
+        return (this.runningFlags & goal1.goal.getMutexBits()) == 0x0 && (this.runningNoOverRuleFlags & goal1.goal.getMutexBits()) == 0x0;
+    }
+
+
+    private void resetGoal(final CustomPriotizedSlowedGoal goal) {
+        if (goal.isrunning && !goal.goal.isInterruptible())
+            this.runningNoOverRuleFlags &= ~goal.goal.getMutexBits();
+        goal.goal.resetTask();
+        goal.isrunning = false;
+    }
+
+
+    public void onUpdateTasks() {
+        if (this.pauseTicks-- > 0) return;
+
+        this.pauseTicks = this.pauseTickDelay;
+        long slowest = 0L;
+        ++this.counter;
+        this.runningFlags = 0;
+        long preTick = System.currentTimeMillis();
+
+        long preTask = this.pauseTickDelay >= 5 ? System.nanoTime() : 0;
+
+        for (final CustomPriotizedSlowedGoal cur : goals) {
+            if (cur.isRunning() && (goalContainsDisabledFlag(cur) || (cur.goal.isInterruptible() && (runningFlags & cur.goal.getMutexBits()) != 0x0) || !cur.shouldContinueExecuting())) {
+                this.resetGoal(cur);
+            }
+            if (this.counter == 1 && !cur.isrunning && !goalContainsDisabledFlag(cur) && isPreemptedByAll(cur) && cur.shouldExecute()) {
+                if (!cur.goal.isInterruptible()) {
+                    this.runningNoOverRuleFlags |= cur.goal.getMutexBits();
+                }
+                cur.goal.startExecuting();
+                cur.isrunning = true;
+            }
+            if (cur.isRunning()) {
+                this.runningFlags |= cur.goal.getMutexBits();
+                cur.updateTask();
+            }
+            if (this.pauseTickDelay >= 5) {
+                long tempTime = -preTask + (preTask = System.nanoTime());
+                if (tempTime <= slowest) continue;
+                slowest = tempTime;
+            }
+        }
+        this.avgTick += System.currentTimeMillis() - preTick;
+        ++this.avgTickCount;
+        if (this.avgTickCount == 20) {
+            if (ticker.meanTickTime() > ElcaConfig.MEAN_BALANCE_MOB) {
+                if (this.avgTick > 0L) {
+                    this.pauseTicks = (int)this.avgTick * 100 / ElcaConfig.MEAN_BALANCE_MOB;
+                    if (this.pauseTicks > 20) this.pauseTicks = 200;
+                }
+                this.pauseTickDelay = this.pauseTicks;
+            } else
+                this.pauseTickDelay = 0;
+            this.avgTickCount = 0;
+            this.avgTick = 0L;
+        }
+        if (this.removedGoals) {
+            for (final CustomPriotizedSlowedGoal goal : this.toRemove) {
+                this.goals.remove(goal);
+            }
+            this.goals.sort(CustomPriotizedSlowedGoal::compareTo);
+            this.removedGoals = false;
+        }
+        if (this.addedGoals) {
+            this.goals.addAll(this.toAdd);
+            this.goals.sort(CustomPriotizedSlowedGoal::compareTo);
+            this.addedGoals = false;
+        }
+        if (this.counter > ElcaConfig.GOAL_TICK_RATE)
+            this.counter = 0;
     }
 }
