@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
 import io.netty.buffer.Unpooled;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -113,6 +112,7 @@ import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import plus.fserver.utls.collections.Int1LinkedList;
 
 
 public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
@@ -123,7 +123,8 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
     public final PlayerInteractionManager interactionManager;
     public double managedPosX;
     public double managedPosZ;
-    private final List<Integer> entityRemoveQueue = Lists.newLinkedList();
+    //private final List<Integer> entityRemoveQueue = new LinkedList<>();
+    private final Int1LinkedList entityRemoveQueue = new Int1LinkedList();
     private final PlayerAdvancements advancements;
     private final StatisticsManagerServer statsFile;
     private float lastHealthScore = Float.MIN_VALUE;
@@ -309,17 +310,11 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
             this.openContainer = this.inventoryContainer;
         }
 
-        while (!this.entityRemoveQueue.isEmpty()) {
-            int i = Math.min(this.entityRemoveQueue.size(), Integer.MAX_VALUE);
-            int[] aint = new int[i];
-            Iterator<Integer> iterator = this.entityRemoveQueue.iterator();
-            int j = 0;
-
-            while (iterator.hasNext() && j < i) {
-                aint[j++] = iterator.next();
-                iterator.remove();
-            }
-            this.connection.netManager.sendPacketE(new SPacketDestroyEntities(aint));
+        entityRemoveQueue.resetIter();
+        while (entityRemoveQueue.hasCur()){
+            int toRem = entityRemoveQueue.getCur();
+            this.connection.netManager.sendPacketE(new SPacketDestroyEntities(toRem));
+            entityRemoveQueue.removeCur();
         }
 
         Entity entity = this.getSpectatingEntity();
@@ -1221,7 +1216,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
 
 
     public void addEntity(Entity entityIn) {
-        this.entityRemoveQueue.remove(Integer.valueOf(entityIn.getEntityId()));
+        this.entityRemoveQueue.removeVal(entityIn.getEntityId());
     }
 
 
