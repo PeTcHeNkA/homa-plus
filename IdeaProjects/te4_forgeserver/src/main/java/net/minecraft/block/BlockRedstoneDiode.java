@@ -16,6 +16,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.fserver.event.ElcaCV;
 
 
 public abstract class BlockRedstoneDiode extends BlockHorizontal {
@@ -204,8 +205,10 @@ public abstract class BlockRedstoneDiode extends BlockHorizontal {
     protected void notifyNeighbors(World worldIn, BlockPos pos, IBlockState state) {
         EnumFacing enumfacing = state.getValue(FACING);
         BlockPos blockpos = pos.offset(enumfacing.getOpposite());
-        if(net.minecraftforge.event.ForgeEventFactory.onNeighborNotify(worldIn, pos, worldIn.getBlockState(pos), java.util.EnumSet.of(enumfacing.getOpposite()), false).isCanceled())
-            return;
+
+        if(ElcaCV.ENABLE_NEIGHBOR_NOTIFY_EVENT)
+            if(worldIn.onNeighborNotify(pos, worldIn.getBlockState(pos), false, enumfacing.getOpposite()).isCanceled())
+                return;
         worldIn.neighborChanged(blockpos, this, pos);
         worldIn.notifyNeighborsOfStateExcept(blockpos, this, enumfacing);
     }

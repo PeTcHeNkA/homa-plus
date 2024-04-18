@@ -15,7 +15,9 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.ForgeEventFactory;
+import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import plus.fserver.ElcaConfig;
 import plus.fserver.utls.math.FastRandom;
@@ -137,7 +139,8 @@ public final class WorldEntitySpawner {
 
                                                 entityliving.setLocationAndAngles(f, sY, f1, world.rand.nextFloat() * 360.0F, 0.0F);
 
-                                                Event.Result canSpawn = ForgeEventFactory.canEntitySpawn(entityliving, world, f, sY, f1, false);
+                                                //todo
+                                                Event.Result canSpawn = world.canEntitySpawn(entityliving, f, sY, f1);
                                                 if (canSpawn == Event.Result.ALLOW || (canSpawn == net.minecraftforge.fml.common.eventhandler.Event.Result.DEFAULT && (entityliving.getCanSpawnHere() && entityliving.isNotColliding()))) {
                                                     if (!ForgeEventFactory.doSpecialSpawn(entityliving, world, f, sY, f1))
                                                         ientitylivingdata = entityliving.onInitialSpawn(
@@ -254,7 +257,7 @@ public final class WorldEntitySpawner {
                                 continue;
                             }
 
-                            if (ForgeEventFactory.canEntitySpawn(entityliving, worldIn, j + 0.5f, (float) blockpos.getY(), k +0.5f, false) == Event.Result.DENY) continue;
+                            if (worldIn.canEntitySpawn(entityliving, j + 0.5f, (float) blockpos.getY(), k +0.5f) == Event.Result.DENY) continue;
                             entityliving.setLocationAndAngles((float)j + 0.5F, blockpos.getY(), (float)k + 0.5F, randomIn.nextFloat() * 360.0F, 0.0F);
                             worldIn.spawnEntity(entityliving);
                             ientitylivingdata = entityliving.onInitialSpawn(worldIn.getDifficultyForLocation(new BlockPos(entityliving)), ientitylivingdata);

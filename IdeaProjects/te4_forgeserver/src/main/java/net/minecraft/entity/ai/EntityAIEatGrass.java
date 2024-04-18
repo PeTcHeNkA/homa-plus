@@ -9,9 +9,9 @@ import net.minecraft.block.state.pattern.BlockStateMatcher;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraftforge.event.ForgeEventFactory;
 
 
 public class EntityAIEatGrass extends EntityAIBase {
@@ -32,12 +32,15 @@ public class EntityAIEatGrass extends EntityAIBase {
         if (this.grassEaterEntity.getRNG().nextInt(this.grassEaterEntity.isChild() ? 50 : 1000) != 0) {
             return false;
         } else {
-            BlockPos blockpos = new BlockPos(this.grassEaterEntity.posX, this.grassEaterEntity.posY, this.grassEaterEntity.posZ);
-            Chunk chunk = this.entityWorld.getChunk(blockpos);
-            if (IS_TALL_GRASS.apply(chunk.getBlockState(blockpos))) {
+            int bx = MathHelper.floor(grassEaterEntity.posX),
+                by = MathHelper.floor(grassEaterEntity.posY),
+                bz = MathHelper.floor(grassEaterEntity.posZ);
+
+            Chunk chunk = this.entityWorld.getChunk(bx>>4, bz>>4);
+            if (IS_TALL_GRASS.apply(chunk.getBlockState(bx, by, bz))) {
                 return true;
             } else {
-                return chunk.getBlockState(blockpos.down()).getBlock() == Blocks.GRASS;
+                return chunk.getBlockState(bx, by-1, bz).getBlock() == Blocks.GRASS;
             }
         }
     }
@@ -77,17 +80,17 @@ public class EntityAIEatGrass extends EntityAIBase {
             Chunk chunk = this.entityWorld.getChunk(blockpos);
 
             if (IS_TALL_GRASS.apply(chunk.getBlockState(blockpos))) {
-                if (ForgeEventFactory.getMobGriefingEvent(this.entityWorld, this.grassEaterEntity)) {
+                if (entityWorld.getMobGrifering(grassEaterEntity)) {
                     this.entityWorld.destroyBlock(blockpos, false);
                 }
                 this.grassEaterEntity.eatGrassBonus();
             } else {
-                BlockPos blockpos1 = blockpos.down();
+                BlockPos.unsafeEdit(blockpos, blockpos.getX(), blockpos.getY()-1, blockpos.getZ());
 
-                if (chunk.getBlockState(blockpos1).getBlock() == Blocks.GRASS) {
-                    if (ForgeEventFactory.getMobGriefingEvent(this.entityWorld, this.grassEaterEntity)) {
-                        this.entityWorld.playEvent(2001, blockpos1, Block.getIdFromBlock(Blocks.GRASS));
-                        chunk.setBlockState(blockpos1, Blocks.DIRT.getDefaultState());
+                if (chunk.getBlockState(blockpos).getBlock() == Blocks.GRASS) {
+                    if (entityWorld.getMobGrifering(grassEaterEntity)) {
+                        this.entityWorld.playEvent(2001, blockpos, Block.getIdFromBlock(Blocks.GRASS));
+                        chunk.setBlockState(blockpos, Blocks.DIRT.getDefaultState());
                     }
                     this.grassEaterEntity.eatGrassBonus();
                 }

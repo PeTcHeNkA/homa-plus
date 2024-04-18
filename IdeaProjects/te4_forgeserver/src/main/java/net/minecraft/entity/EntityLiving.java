@@ -67,7 +67,7 @@ public abstract class EntityLiving extends EntityLivingBase {
     protected EntityMoveHelper moveHelper;
     protected EntityJumpHelper jumpHelper;
     @SideOnly(Side.CLIENT)
-    private final EntityBodyHelper bodyHelper;
+    private EntityBodyHelper bodyHelper;
     protected PathNavigate navigator;
     public final EntityAITasks tasks;
     public final EntityAITasks targetTasks;
@@ -97,7 +97,7 @@ public abstract class EntityLiving extends EntityLivingBase {
         this.lookHelper = new EntityLookHelper(this);
         this.moveHelper = new EntityMoveHelper(this);
         this.jumpHelper = new EntityJumpHelper(this);
-        this.bodyHelper = this.createBodyHelper();
+        //this.bodyHelper = this.createBodyHelper();
         this.navigator = this.createNavigator(worldIn);
         this.senses = new EntitySenses(this);
         Arrays.fill(this.inventoryArmorDropChances, 0.085F);
@@ -108,6 +108,12 @@ public abstract class EntityLiving extends EntityLivingBase {
         }
     }
 
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    protected void onCliInit() {
+        this.bodyHelper = this.createBodyHelper();
+    }
 
     protected void initEntityAI() {}
 
@@ -512,16 +518,14 @@ public abstract class EntityLiving extends EntityLivingBase {
     @Override
     public void onLivingUpdate() {
         super.onLivingUpdate();
-        this.world.profiler.startSection("looting");
 
-        if (!this.world.isRemote && this.canPickUpLoot() && !this.dead && net.minecraftforge.event.ForgeEventFactory.getMobGriefingEvent(this.world, this)) {
+        if (!this.world.isRemote && this.canPickUpLoot() && !this.dead && world.getMobGrifering(this)) {
             for (EntityItem entityitem : this.world.getEntitiesWithinAABB(EntityItem.class, this.getEntityBoundingBox().grow(1.0D, 0.0D, 1.0D))) {
                 if (!entityitem.isDead && !entityitem.getItem().isEmpty() && !entityitem.cannotPickup()) {
                     this.updateEquipmentIfNeeded(entityitem);
                 }
             }
         }
-        this.world.profiler.endSection();
     }
 
 

@@ -10,4 +10,5 @@ public class ElcaCV {
     public static final double  PATH_NEAR_RADIUS              = 0.6;
     public static final boolean DEBUG_NO_SERVER               = false;
     public static final boolean CHECK_LEGAL_CHUNK_CHANGE      = false;
+    public static final boolean MORE_MOBS_OPTIMIZER           = true;
 }

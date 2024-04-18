@@ -236,7 +236,10 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
                 new EntityEvent.EntityConstructing(this)
         );
         capabilities = ForgeEventFactory.gatherCapabilities(this);
+        onCliInit();
     }
+
+    protected void onCliInit(){}
 
     /** Forge: Used to store custom data for each entity. */
     private NBTTagCompound customEntityData;
@@ -3204,29 +3207,25 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
      * @param fallDistance The fall distance
      * @return {@code true} if this entity can trample, {@code false} otherwise
      */
-    public boolean canTrample(World world, Block block, BlockPos pos, float fallDistance)
-    {
+    public boolean canTrample(World world, Block block, BlockPos pos, float fallDistance) {
         return world.rand.nextFloat() < fallDistance - 0.5F
                 && this instanceof EntityLivingBase
-                && (this instanceof EntityPlayer || net.minecraftforge.event.ForgeEventFactory.getMobGriefingEvent(world, this))
+                && (this instanceof EntityPlayer || world.getMobGrifering(this))
                 && this.width * this.width * this.height > 0.512F;
     }
     /* ================================== Forge End =====================================*/
 
-    public void addTrackingPlayer(EntityPlayerMP player)
-    {
-    }
 
-    public void removeTrackingPlayer(EntityPlayerMP player)
-    {
-    }
+    public void addTrackingPlayer(EntityPlayerMP player) {}
 
-    public float getRotatedYaw(Rotation transformRotation)
-    {
+
+    public void removeTrackingPlayer(EntityPlayerMP player) {}
+
+
+    public float getRotatedYaw(Rotation transformRotation) {
         float f = MathHelper.wrapDegrees(this.rotationYaw);
 
-        switch (transformRotation)
-        {
+        switch (transformRotation) {
             case CLOCKWISE_180:
                 return f + 180.0F;
             case COUNTERCLOCKWISE_90:
@@ -3238,12 +3237,11 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         }
     }
 
-    public float getMirroredYaw(Mirror transformMirror)
-    {
+
+    public float getMirroredYaw(Mirror transformMirror) {
         float f = MathHelper.wrapDegrees(this.rotationYaw);
 
-        switch (transformMirror)
-        {
+        switch (transformMirror) {
             case LEFT_RIGHT:
                 return -f;
             case FRONT_BACK:
@@ -3253,21 +3251,21 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         }
     }
 
-    public boolean ignoreItemEntityData()
-    {
+
+    public boolean ignoreItemEntityData() {
         return false;
     }
 
-    public boolean setPositionNonDirty()
-    {
+
+    public boolean setPositionNonDirty() {
         boolean flag = this.isPositionDirty;
         this.isPositionDirty = false;
         return flag;
     }
 
+
     @Nullable
-    public Entity getControllingPassenger()
-    {
+    public Entity getControllingPassenger() {
         return null;
     }
 
@@ -3275,6 +3273,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
     public List<Entity> getPassengers() {
         return this.riddenByEntities.isEmpty() ? Collections.emptyList() : Lists.newArrayList(this.riddenByEntities);
     }
+
 
     public boolean isPassenger(Entity entityIn) {
         for (Entity entity : this.getPassengers()) {
