@@ -3898,7 +3898,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public Event.Result canEntitySpawn(EntityLiving entity, float x, float y, float z) {
         if (entity == null) return Event.Result.DEFAULT;
         checkSpawnEvemt.initCheckSpawn(entity, this, x, y, z, null);
-        MinecraftForge.EVENT_BUS.post(chunkUnWatchEvent);
+        MinecraftForge.EVENT_BUS.postF(chunkUnWatchEvent);
         return checkSpawnEvemt.getResult();
     }
 
@@ -3906,7 +3906,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public BlockEvent.EntityPlaceEvent onBlockPlace(Entity entity, BlockSnapshot snapshot, EnumFacing direction) {
         IBlockState placedAgainst = snapshot.getWorld().getBlockState(snapshot.getPos().offset(direction.getOpposite()));
         blockPlaceEvent.initEntityPlaceEvent(snapshot, placedAgainst, entity);
-        MinecraftForge.EVENT_BUS.post(blockPlaceEvent);
+        MinecraftForge.EVENT_BUS.postF(blockPlaceEvent);
         return blockPlaceEvent;
     }
 
@@ -3919,7 +3919,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
                                                                   boolean forceRedstoneUpdate) {
 
         nNotifyEvent.initNeighborNotifyEvent(this, pos, state, forceRedstoneUpdate, notifiedSides);
-        MinecraftForge.EVENT_BUS.post(nNotifyEvent);
+        MinecraftForge.EVENT_BUS.postF(nNotifyEvent);
         return nNotifyEvent;
     }
 
@@ -3928,7 +3928,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
                                                            boolean forceRedstoneUpdate, EnumFacing... faces) {
 
         nNotifyEvent.initNeighborNotifyEvent(this, pos, state, forceRedstoneUpdate, faces);
-        MinecraftForge.EVENT_BUS.post(nNotifyEvent);
+        MinecraftForge.EVENT_BUS.postF(nNotifyEvent);
         return nNotifyEvent;
     }
 
@@ -3936,14 +3936,14 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public boolean getMobGrifering(Entity entity){
         mobGriefingEvent.setEntity(entity);
         mobGriefingEvent.setResult(Event.Result.DEFAULT);
-        MinecraftForge.EVENT_BUS.post(mobGriefingEvent);
+        MinecraftForge.EVENT_BUS.postF(mobGriefingEvent);
         Event.Result result = mobGriefingEvent.getResult();
         return result == Event.Result.DEFAULT ? getGameRules().mobGriefing.getBoolean() : result == Event.Result.ALLOW;
     }
 
 
     public void onLivingJump(EntityLivingBase entity){
-        MinecraftForge.EVENT_BUS.post(jumpEvent.initLiving(entity));
+        MinecraftForge.EVENT_BUS.postF(jumpEvent.initLiving(entity));
     }
 
 

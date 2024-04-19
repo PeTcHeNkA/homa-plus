@@ -48,8 +48,8 @@ public class BlockStateContainer {
     private static final Pattern NAME_PATTERN = Pattern.compile("^[a-z0-9_]+$");
     private static final Function < IProperty<?>, String > GET_NAME_FUNC = new Function < IProperty<?>, String > () {
         @Nullable
-        public String apply(@Nullable IProperty<?> p_apply_1_) {
-            return p_apply_1_ == null ? "<NULL>" : p_apply_1_.getName();
+        public String apply(@Nullable IProperty<?> property) {
+            return property == null ? "<NULL>" : property.getName();
         }
     };
     private final Block block;
@@ -426,7 +426,8 @@ public class BlockStateContainer {
         @Override
         @SideOnly(Side.CLIENT)
         public boolean shouldSideBeRendered(IBlockAccess blockAccess, BlockPos pos, EnumFacing facing) {
-            return this.block.shouldSideBeRendered(this, blockAccess, pos, facing);
+            try {return this.block.shouldSideBeRendered(this, blockAccess, pos, facing);
+            } catch (Exception e){return false;}
         }
 
 
@@ -547,33 +548,29 @@ public class BlockStateContainer {
      *   }
      *
      */
-    public static class Builder
-    {
+    public static class Builder {
         private final Block block;
         private final List<IProperty<?>> listed = Lists.newArrayList();
         private final List<net.minecraftforge.common.property.IUnlistedProperty<?>> unlisted = Lists.newArrayList();
 
-        public Builder(Block block)
-        {
+        public Builder(Block block) {
             this.block = block;
         }
 
-        public Builder add(IProperty<?>... props)
-        {
+        public Builder add(IProperty<?>... props) {
             for (IProperty<?> prop : props)
                 this.listed.add(prop);
             return this;
         }
 
-        public Builder add(net.minecraftforge.common.property.IUnlistedProperty<?>... props)
-        {
+
+        public Builder add(net.minecraftforge.common.property.IUnlistedProperty<?>... props) {
             for (net.minecraftforge.common.property.IUnlistedProperty<?> prop : props)
                 this.unlisted.add(prop);
             return this;
         }
 
-        public BlockStateContainer build()
-        {
+        public BlockStateContainer build() {
             IProperty<?>[] listed = new IProperty[this.listed.size()];
             listed = this.listed.toArray(listed);
             if (this.unlisted.size() == 0)

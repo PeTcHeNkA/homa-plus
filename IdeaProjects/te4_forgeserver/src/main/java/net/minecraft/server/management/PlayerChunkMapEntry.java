@@ -69,7 +69,7 @@ public class PlayerChunkMapEntry extends ArrayListE6<EntityPlayerMP> implements 
             addF(player);
             if (this.sentToPlayers) {
                 this.sendToPlayer(player);
-                MinecraftForge.EVENT_BUS.post(player.world.chunkWatchEvent.init(chunk, player));
+                MinecraftForge.EVENT_BUS.postF(player.world.chunkWatchEvent.init(chunk, player));
                 //MinecraftForge.EVENT_BUS.post(new ChunkWatchEvent.Watch(this.chunk, player));
             }
         }
@@ -90,7 +90,7 @@ public class PlayerChunkMapEntry extends ArrayListE6<EntityPlayerMP> implements 
                 player.connection.netManager.addToQueueE(new SPacketUnloadChunk(posX, posZ));
             }
 
-            MinecraftForge.EVENT_BUS.post(player.world.chunkUnWatchEvent.init(chunk, player));
+            MinecraftForge.EVENT_BUS.postF(player.world.chunkUnWatchEvent.init(chunk, player));
             //MinecraftForge.EVENT_BUS.post(new ChunkWatchEvent.UnWatch(this.chunk, player));
             if (isEmpty()) {
                 this.playerChunkMap.removeEntry(this);
