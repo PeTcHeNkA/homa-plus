@@ -4,6 +4,7 @@ import net.minecraft.crash.CrashReport;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.crafting.CraftingManager;
+import net.minecraft.network.EnumConnectionState;
 import net.minecraft.network.play.server.SPacketTimeUpdate;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ReportedException;
@@ -42,6 +43,7 @@ public final class AsyWorldTickerV2 implements ThreadFactory, IAsyWorldTicker{
         this.server = server;
         this.ignoreErrors = ElcaConfig.IGNORE_ERRORS;
         service = new AsyPoolTickerExecutor(ElcaConfig.ASY_THREAD_POOL_SIZE, this);
+        EnumConnectionState.optimizeAccess();
         service.scheduleAtFixedRate(new NetworkTicker(), 0, ElcaConfig.NETWORK_TICK_RATE, TimeUnit.MILLISECONDS);
     }
 

@@ -70,6 +70,7 @@ import plus.tson.utl.Te4HashSet;
 import javax.annotation.Nullable;
 
 
+//todo fix 1 player dont see 2 player
 public class EntityTrackerEntry {
     private static final Logger LOGGER = LogManager.getLogger();
     private final Entity trackedEntity;

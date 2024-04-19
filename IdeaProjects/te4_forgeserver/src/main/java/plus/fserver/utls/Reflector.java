@@ -1,8 +1,8 @@
 package plus.fserver.utls;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
+import java.lang.invoke.*;
 import java.lang.reflect.Constructor;
+import java.util.function.Supplier;
 
 
 public class Reflector {
@@ -16,6 +16,32 @@ public class Reflector {
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+
+    public static <T> Supplier<T> compileCtor(Class<T> clazz) {
+        try {
+            Constructor<T> ctor = clazz.getDeclaredConstructor();
+            ctor.setAccessible(true);
+
+            CallSite callSite = LambdaMetafactory.metafactory(
+                    Reflector.LOOKUP,
+                    "get",
+                    MethodType.methodType(Supplier.class),
+                    MethodType.methodType(Object.class),
+                    resolveCtor(clazz),
+                    MethodType.genericMethodType(0)
+            );
+
+            return (Supplier<T>) callSite.getTarget().invokeExact();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+            return null;
+        } catch (LambdaConversionException e) {
+            throw new RuntimeException(e);
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
         }
     }
 
