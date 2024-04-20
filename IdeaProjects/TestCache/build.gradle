@@ -1,0 +1,36 @@
+plugins {
+    id 'java'
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.cache2k:cache2k-all:1.6.0.Final'
+
+    implementation 'com.github.ben-manes.caffeine:caffeine:2.9.3'
+//    implementation 'com.github.ben-manes.caffeine:caffeine:3.1.8'
+
+    implementation 'org.openjdk.jmh:jmh-core:1.37'
+}
+
+
+jar{
+    from {
+        configurations.runtimeClasspath.findAll {
+            it.name.contains('caffeine') }
+                .collect { zipTree(it) }
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'C:/Users/Te4hnoPlus/IdeaProjects/TsonConfigurations/core/src/main/java'
+        }
+    }
+}
