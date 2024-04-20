@@ -4,8 +4,7 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
-import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import com.google.common.collect.Maps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.network.handshake.client.C00Handshake;
 import net.minecraft.network.login.client.CPacketEncryptionResponse;
@@ -124,6 +123,8 @@ import net.minecraft.network.status.client.CPacketPing;
 import net.minecraft.network.status.client.CPacketServerQuery;
 import net.minecraft.network.status.server.SPacketPong;
 import net.minecraft.network.status.server.SPacketServerInfo;
+import org.apache.logging.log4j.LogManager;
+import plus.fserver.ElcaConfig;
 import plus.fserver.utls.Reflector;
 
 
@@ -263,23 +264,16 @@ public enum EnumConnectionState {
 
     private static final Supplier<Packet<?>> EMPTY = () -> null;
     private static final EnumConnectionState[] STATES_BY_ID = new EnumConnectionState[4];
-    private static final Map<Class<?extends Packet<? >> , EnumConnectionState> STATES_BY_CLASS = new IdentityHashMap<>();
+    private static final Map < Class <? extends Packet<? >> , EnumConnectionState > STATES_BY_CLASS = Maps.newHashMap();
     private final int id;
 
-    //id to constructor
     private final Int2ObjectOpenHashMap<Supplier<Packet<?>>>[] constructMap = new Int2ObjectOpenHashMap[]{makeConMap(), makeConMap()};
-    //class to id
-    private final Int2IntOpenHashMap[] idMaps = new Int2IntOpenHashMap[]{makeIdMap(), makeIdMap()};
+    private final IdentityHashMap<Class, Integer>[] clazzMaps = new IdentityHashMap[]{new IdentityHashMap<>(), new IdentityHashMap<>()};
+
 
     private static Int2ObjectOpenHashMap<Supplier<Packet<?>>> makeConMap(){
         Int2ObjectOpenHashMap<Supplier<Packet<?>>> map = new Int2ObjectOpenHashMap<>();
         map.defaultReturnValue(EMPTY);
-        return map;
-    }
-
-    private static Int2IntOpenHashMap makeIdMap(){
-        Int2IntOpenHashMap map = new Int2IntOpenHashMap();
-        map.defaultReturnValue(-1);
         return map;
     }
 
@@ -291,24 +285,25 @@ public enum EnumConnectionState {
 
     protected EnumConnectionState registerPacket(EnumPacketDirection direction, Class <? extends Packet<? >> packetClass) {
         Int2ObjectOpenHashMap<Supplier<Packet<?>>> conMap = constructMap[direction.id];
-        Int2IntOpenHashMap idMap = idMaps[direction.id];
+        IdentityHashMap<Class, Integer> clazzMap = clazzMaps[direction.id];
 
-        try {
-            int curId = idMap.size();
+        if (clazzMap.containsKey(packetClass)) {
+            String s = direction + " packet " + packetClass + " is already known to ID " + clazzMap.get(packetClass);
+            LogManager.getLogger().fatal(s);
+            throw new IllegalArgumentException(s);
+        } else {
             Supplier<? extends Packet<?>> con = Reflector.compileCtor(packetClass);
-            conMap.put(curId, (Supplier<Packet<?>>) con);
-            idMap.put(packetClass.hashCode(), curId);
 
+            int id = clazzMap.size();
+            conMap  .put(id, (Supplier<Packet<?>>) con);
+            clazzMap.put(packetClass, id);
             return this;
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
     }
 
 
-    public int getPacketId(EnumPacketDirection direction, Packet<?> packetIn) throws Exception {
-        return idMaps[direction.id].get(packetIn.getClass().hashCode());
+    public Integer getPacketId(EnumPacketDirection direction, Packet<?> packetIn) throws Exception {
+        return this.clazzMaps[direction.id].get(packetIn.getClass());
     }
 
 
@@ -337,36 +332,37 @@ public enum EnumConnectionState {
         for (EnumConnectionState state:values()){
             state.constructMap[0].trim();
             state.constructMap[1].trim();
-            state.idMaps[0].trim();
-            state.idMaps[1].trim();
         }
     }
 
 
     static {
-        optimizeAccess();
-        for (EnumConnectionState state : values()) {
-            int i = state.getId();
+        boolean skipCheck = ElcaConfig.SKIP_CHECK_NETWORK;
+
+        for (EnumConnectionState enumconnectionstate : values()) {
+            int i = enumconnectionstate.getId();
+
             if (i < -1 || i > 2) {
                 throw new Error("Invalid protocol ID " + i);
             }
-            STATES_BY_ID[i - -1] = state;
 
-            for (EnumPacketDirection direct : EnumPacketDirection.values()) {
+            STATES_BY_ID[i - -1] = enumconnectionstate;
 
-                for (Int2ObjectMap.Entry<Supplier<Packet<?>>> entr: state.constructMap[direct.id].int2ObjectEntrySet()) {
-                    Packet<?> packet = null;
-                    try {
-                        packet = entr.getValue().get();
-                    } catch (Throwable var10) {
-                        throw new Error("Packet id=[" + entr.getIntKey() + "] fails instantiation checks! ");
+            for (int c = 0;c<2;c++) {
+
+                for (Class <? extends Packet<? >> oclass : enumconnectionstate.clazzMaps[c].keySet()) {
+                    if(!skipCheck) {
+                        if (STATES_BY_CLASS.containsKey(oclass) && STATES_BY_CLASS.get(oclass) != enumconnectionstate) {
+                            throw new Error("Packet " + oclass + " is already assigned to protocol " + STATES_BY_CLASS.get(oclass) + " - can't reassign to " + enumconnectionstate);
+                        }
+
+                        try {
+                            oclass.newInstance();
+                        } catch (Throwable var10) {
+                            throw new Error("Packet " + oclass + " fails instantiation checks! " + oclass);
+                        }
                     }
-                    Class<Packet<?>> oclass = (Class<Packet<?>>) packet.getClass();
-
-                    if (STATES_BY_CLASS.containsKey(oclass) && STATES_BY_CLASS.get(oclass) != state) {
-                        throw new Error("Packet " + oclass + " is already assigned to protocol " + STATES_BY_CLASS.get(oclass) + " - can't reassign to " + state);
-                    }
-                    STATES_BY_CLASS.put(oclass, state);
+                    STATES_BY_CLASS.put(oclass, enumconnectionstate);
                 }
             }
         }
