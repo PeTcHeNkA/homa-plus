@@ -142,6 +142,11 @@ public class EventBus implements IEventExceptionHandler {
     }
 
 
+    public final int id(){
+        return busID;
+    }
+
+
     public void postF(Event event){
         for (IEventListener listener : event.getListenerList().getListeners(busID)) listener.invoke(event);
     }

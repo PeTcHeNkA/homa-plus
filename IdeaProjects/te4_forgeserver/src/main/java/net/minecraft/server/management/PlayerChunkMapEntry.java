@@ -69,8 +69,8 @@ public class PlayerChunkMapEntry extends ArrayListE6<EntityPlayerMP> implements 
             addF(player);
             if (this.sentToPlayers) {
                 this.sendToPlayer(player);
-                MinecraftForge.EVENT_BUS.postF(player.world.chunkWatchEvent.init(chunk, player));
-                //MinecraftForge.EVENT_BUS.post(new ChunkWatchEvent.Watch(this.chunk, player));
+                player.world.chunkWatchEvent.post(chunk, player);
+                //MinecraftForge.EVENT_BUS.postF(player.world.chunkWatchEvent.init(chunk, player));
             }
         }
     }
@@ -90,8 +90,8 @@ public class PlayerChunkMapEntry extends ArrayListE6<EntityPlayerMP> implements 
                 player.connection.netManager.addToQueueE(new SPacketUnloadChunk(posX, posZ));
             }
 
-            MinecraftForge.EVENT_BUS.postF(player.world.chunkUnWatchEvent.init(chunk, player));
-            //MinecraftForge.EVENT_BUS.post(new ChunkWatchEvent.UnWatch(this.chunk, player));
+            player.world.chunkUnWatchEvent.post(chunk, player);
+            //MinecraftForge.EVENT_BUS.postF(player.world.chunkUnWatchEvent.init(chunk, player));
             if (isEmpty()) {
                 this.playerChunkMap.removeEntry(this);
             }
@@ -134,8 +134,8 @@ public class PlayerChunkMapEntry extends ArrayListE6<EntityPlayerMP> implements 
                     player.connection.netManager.addToQueueE(packet);
                     this.playerChunkMap.getWorldServer().getEntityTracker().sendLeashedEntitiesInChunk(player, this.chunk);
 
-                    MinecraftForge.EVENT_BUS.post(player.world.chunkWatchEvent.init(chunk, player));
-                    //MinecraftForge.EVENT_BUS.post(new ChunkWatchEvent.Watch(this.chunk, player));
+                    player.world.chunkWatchEvent.post(chunk, player);
+                    //MinecraftForge.EVENT_BUS.post(player.world.chunkWatchEvent.init(chunk, player));
                 }
                 this.changes = 0;
                 this.changedSectionFilter = 0;

@@ -22,11 +22,13 @@ import net.minecraft.network.login.server.SPacketEnableCompression;
 import net.minecraft.network.login.server.SPacketEncryptionRequest;
 import net.minecraft.network.login.server.SPacketLoginSuccess;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.CryptManager;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.network.internal.FMLNetworkHandler;
 import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.LogManager;
@@ -52,7 +54,46 @@ public class NetHandlerLoginServer implements INetHandlerLoginServer, ITickable 
         this.server = serverIn;
         this.networkManager = networkManagerIn;
         FastRandom.INST.nextBytes(this.verifyToken);
-        event = new ElcaConnectEvent(serverIn.getPlayerList(), this.networkManager.getRemoteAddress(), this.loginGameProfile);
+        event = new ElcaConnectEvent(this);
+    }
+
+
+    public static class ConnectEvent extends Event{
+        private final NetHandlerLoginServer loginServer;
+
+        public ConnectEvent(NetHandlerLoginServer loginServer) {
+            this.loginServer = loginServer;
+        }
+
+
+        public GameProfile getProfile() {
+            return loginServer.loginGameProfile;
+        }
+
+
+        public SocketAddress getAddress() {
+            return loginServer.networkManager.getRemoteAddress();
+        }
+
+
+        public PlayerList getPlayerList(){
+            return loginServer.server.getPlayerList();
+        }
+
+
+        public MinecraftServer getServer(){
+            return loginServer.server;
+        }
+
+
+        public NetHandlerLoginServer getLoginServer(){
+            return loginServer;
+        }
+
+
+        public LoginState loginState(){
+            return loginServer.currentLoginState;
+        }
     }
 
 
@@ -74,6 +115,7 @@ public class NetHandlerLoginServer implements INetHandlerLoginServer, ITickable 
             event.setStatus(ElcaConnectEvent.Status.REJECT_TIME_OUT);
             event.reject("multiplayer.disconnect.slow_login");
             event.setData(connectionTimer);
+            if(event.isCanceled())return;
             if(!event.canJoin()) {
                 this.disconnect(new TextComponentTranslation(event.getMessage()));
             } else {
@@ -104,6 +146,7 @@ public class NetHandlerLoginServer implements INetHandlerLoginServer, ITickable 
 
         event.setStatus(ElcaConnectEvent.Status.TRY_ACCEPT);
         String s = this.server.getPlayerList().allowUserToConnect(event, this.networkManager.getRemoteAddress(), this.loginGameProfile);
+        if(event.isCanceled())return;
 
         if (s != null) {
             this.disconnect(new TextComponentTranslation(s));
@@ -189,10 +232,10 @@ public class NetHandlerLoginServer implements INetHandlerLoginServer, ITickable 
                 LOGGER.info("UUID of player {} is {}", this.loginGameProfile.getName(), this.loginGameProfile.getId());
                 this.currentLoginState = NetHandlerLoginServer.LoginState.READY_TO_ACCEPT;
 
-                event.setProfile(loginGameProfile);
                 event.setStatus(ElcaConnectEvent.Status.SUCCESS_AUTH);
                 event.accept();
                 MinecraftForge.EVENT_BUS.postF(event);
+                if(event.isCanceled())return;
                 if(!event.canJoin()){
                     disconnect(new TextComponentTranslation(event.getMessage()));
                 }
@@ -205,6 +248,7 @@ public class NetHandlerLoginServer implements INetHandlerLoginServer, ITickable 
                 event.setStatus(ElcaConnectEvent.Status.REJECT_NO_AUTH);
                 event.reject("multiplayer.disconnect.unverified_username");
                 MinecraftForge.EVENT_BUS.postF(event);
+                if(event.isCanceled())return;
                 if(!event.canJoin()) {
                     disconnect(new TextComponentTranslation("multiplayer.disconnect.unverified_username"));
                     LOGGER.error("Username '{}' tried to join with an invalid session", gameprofile.getName());
@@ -222,6 +266,7 @@ public class NetHandlerLoginServer implements INetHandlerLoginServer, ITickable 
                 event.setStatus(ElcaConnectEvent.Status.REJECT_NO_AUTH_SERVER);
                 event.reject("multiplayer.disconnect.authservers_down");
                 MinecraftForge.EVENT_BUS.postF(event);
+                if(event.isCanceled())return;
                 if(!event.canJoin()) {
                     disconnect(new TextComponentTranslation(event.getMessage()));
                     LOGGER.error("Couldn't verify username because servers are unavailable");
@@ -234,8 +279,8 @@ public class NetHandlerLoginServer implements INetHandlerLoginServer, ITickable 
             event.setStatus(ElcaConnectEvent.Status.REJECT_ERROR);
             event.reject("Exception: "+e.getMessage());
             event.setData(e);
-            if(loginGameProfile != null)event.setProfile(loginGameProfile);
             MinecraftForge.EVENT_BUS.postF(event);
+            if(event.isCanceled())return;
             if(!event.canJoin()) {
                 disconnect(new TextComponentTranslation(event.getMessage()));
                 return;
@@ -252,7 +297,7 @@ public class NetHandlerLoginServer implements INetHandlerLoginServer, ITickable 
     }
 
 
-    static enum LoginState {
+    public enum LoginState {
         HELLO,
         KEY,
         AUTHENTICATING,

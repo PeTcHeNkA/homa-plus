@@ -3875,13 +3875,13 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     private final BlockEvent.EntityPlaceEvent blockPlaceEvent = new BlockEvent.EntityPlaceEvent();
     private final EntityMobGriefingEvent     mobGriefingEvent = new EntityMobGriefingEvent(null);
     private final LivingEvent.LivingJumpEvent   jumpEvent     = new LivingEvent.LivingJumpEvent(null);
-    private final LivingEvent.LivingUpdateEvent updateEvent   = new LivingEvent.LivingUpdateEvent(null);
+    private final LivingEvent.LivingUpdateEvent updateEvent   = new LivingEvent.LivingUpdateEvent().forBus(MinecraftForge.EVENT_BUS);
     private final LivingAttackEvent             attackEvent   = new LivingAttackEvent(null, null, 0);
     private final LivingHurtEvent               hurtEvent     = new LivingHurtEvent(null,null,0);
     private final LivingDamageEvent             damageEvent   = new LivingDamageEvent(null, null, 0);
     public  final EntityEvent.EnteringChunk     enteringChunk = new EntityEvent.EnteringChunk(null,0,0,0,0);
-    public  final ChunkWatchEvent.Watch       chunkWatchEvent = new ChunkWatchEvent.Watch();
-    public  final ChunkWatchEvent.UnWatch   chunkUnWatchEvent = new ChunkWatchEvent.UnWatch();
+    public  final ChunkWatchEvent             chunkWatchEvent = new ChunkWatchEvent.Watch().forBus(MinecraftForge.EVENT_BUS);
+    public  final ChunkWatchEvent           chunkUnWatchEvent = new ChunkWatchEvent.UnWatch().forBus(MinecraftForge.EVENT_BUS);
     public  final Random              commonWorldEntityRandom = new FastRandom();
 
     protected void clearEvents(){
@@ -3898,7 +3898,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public Event.Result canEntitySpawn(EntityLiving entity, float x, float y, float z) {
         if (entity == null) return Event.Result.DEFAULT;
         checkSpawnEvemt.initCheckSpawn(entity, this, x, y, z, null);
-        MinecraftForge.EVENT_BUS.postF(chunkUnWatchEvent);
+        MinecraftForge.EVENT_BUS.postF(checkSpawnEvemt);
         return checkSpawnEvemt.getResult();
     }
 
@@ -3948,7 +3948,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     public boolean onLivingUpdate(EntityLivingBase entity){
-        return MinecraftForge.EVENT_BUS.post(updateEvent.initLivingCancelable(entity));
+        return updateEvent.post(entity);
     }
 
 

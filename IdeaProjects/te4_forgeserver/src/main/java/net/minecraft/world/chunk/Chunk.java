@@ -103,7 +103,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
         this.blockBiomeArray = new byte[256];
         this.precipitationHeightMap = new short[256];
         this.updateSkylights = new short[16];
-        //this.updateSkylightColumns = new boolean[256];
+
         this.tileEntities = new Te4HashMap<>();
         this.queuedLightChecks = 4096;
         this.tileEntityPosQueue = new FastBuffer<>();

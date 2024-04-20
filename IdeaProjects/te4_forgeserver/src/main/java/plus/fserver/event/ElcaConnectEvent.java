@@ -1,26 +1,18 @@
 package plus.fserver.event;
 
-import com.mojang.authlib.GameProfile;
-import net.minecraft.server.management.PlayerList;
+import net.minecraft.server.network.NetHandlerLoginServer;
 import net.minecraftforge.fml.common.eventhandler.Cancelable;
-import net.minecraftforge.fml.common.eventhandler.Event;
 import plus.fserver.ElcaConfig;
-import java.net.SocketAddress;
 
 
 @Cancelable
-public class ElcaConnectEvent extends Event {
-    private final PlayerList playerList;
-    private final SocketAddress address;
-    private GameProfile profile;
+public class ElcaConnectEvent extends NetHandlerLoginServer.ConnectEvent {
     private String rejectMsg;
     private Status status;
     private Object data;
 
-    public ElcaConnectEvent(PlayerList playerList, SocketAddress address, GameProfile profile) {
-        this.playerList = playerList;
-        this.address = address;
-        this.profile = profile;
+    public ElcaConnectEvent(NetHandlerLoginServer loginServer) {
+        super(loginServer);
     }
 
 
@@ -50,21 +42,6 @@ public class ElcaConnectEvent extends Event {
     }
 
 
-    public void setProfile(GameProfile profile){
-        this.profile = profile;
-    }
-
-
-    public GameProfile getProfile() {
-        return profile;
-    }
-
-
-    public SocketAddress getAddress() {
-        return address;
-    }
-
-
     public void reject(){
         reject(null);
     }
@@ -88,11 +65,6 @@ public class ElcaConnectEvent extends Event {
 
     public String getMessage(){
         return rejectMsg;
-    }
-
-
-    public PlayerList getPlayerList() {
-        return playerList;
     }
 
 

@@ -1,12 +1,15 @@
 package net.minecraftforge.event.entity.living;
 
+import net.minecraftforge.event.world.ChunkWatchEvent;
 import net.minecraftforge.fml.common.eventhandler.Cancelable;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraftforge.event.entity.EntityEvent;
+import net.minecraftforge.fml.common.eventhandler.EventBus;
+import net.minecraftforge.fml.common.eventhandler.IEventListener;
 
 
 public class LivingEvent extends EntityEvent {
-    private EntityLivingBase entityLiving;
+    EntityLivingBase entityLiving;
 
     public LivingEvent(EntityLivingBase entity) {
         super(entity);
@@ -33,7 +36,26 @@ public class LivingEvent extends EntityEvent {
 
 
     @Cancelable
-    public static class LivingUpdateEvent extends LivingEvent {
+    public static final class LivingUpdateEvent extends LivingEvent {
+        IEventListener[] listeners;
+        public LivingUpdateEvent forBus(EventBus bus){
+            listeners = getListenerList().getListeners(bus.id());
+            return this;
+        }
+
+
+        public boolean post(EntityLivingBase entity){
+            setEntity(this.entityLiving = entity);
+            setCanceled(false);
+            for (IEventListener listener:listeners)listener.invoke(this);
+            return isCanceled();
+        }
+
+
+        public LivingUpdateEvent(){ super(null); }
+
+
+        @Deprecated
         public LivingUpdateEvent(EntityLivingBase e){ super(e); }
     }
 

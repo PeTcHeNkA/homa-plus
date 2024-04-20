@@ -1,24 +1,35 @@
 package net.minecraftforge.event.world;
 
-
 import net.minecraftforge.fml.common.eventhandler.Event;
 import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraftforge.fml.common.eventhandler.EventBus;
+import net.minecraftforge.fml.common.eventhandler.IEventListener;
 
 
 public class ChunkWatchEvent extends Event{
     private EntityPlayerMP player;
     private Chunk chunkInstance;
+    private IEventListener[] listeners;
 
     public ChunkWatchEvent(){}
+    public ChunkWatchEvent(EventBus bus){forBus(bus);}
 
-    public ChunkWatchEvent init(Chunk chunk, EntityPlayerMP player){
-        this.chunkInstance = chunk;
-        this.player = player;
+
+    public ChunkWatchEvent forBus(EventBus bus){
+        listeners = getListenerList().getListeners(bus.id());
         return this;
     }
+
+
+    public void post(Chunk chunk, EntityPlayerMP player){
+        this.chunkInstance = chunk;
+        this.player = player;
+        for (IEventListener listener:listeners)listener.invoke(this);
+    }
+
 
     @Deprecated //TODO: Remove in 1.13
     public ChunkWatchEvent(ChunkPos chunk, EntityPlayerMP player) {

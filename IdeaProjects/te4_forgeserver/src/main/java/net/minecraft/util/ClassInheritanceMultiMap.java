@@ -5,6 +5,8 @@ import com.google.common.collect.Sets;
 import io.netty.util.collection.IntObjectHashMap;
 import org.jetbrains.annotations.NotNull;
 import plus.fserver.utls.collections.ArrayListE6;
+import plus.fserver.utls.collections.IdentityTe4HashSet;
+
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -13,7 +15,7 @@ public class ClassInheritanceMultiMap<T> extends AbstractSet<T> {
     private static final EmptyByClass EMPTY_BY_CLASS = new EmptyByClass();
     private static final Set<Class<?>> ALL_KNOWN = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private final IntObjectHashMap<ArrayListEA<T>> map = new IntObjectHashMap<>();
-    private final Set<Class<?>> knownKeys = Sets.newIdentityHashSet();
+    private final Set<Class<?>> knownKeys = new IdentityTe4HashSet<>();
     private final Class<T> baseClass;
     private final ArrayListEA<T> values = new ArrayListEA<>();
 
