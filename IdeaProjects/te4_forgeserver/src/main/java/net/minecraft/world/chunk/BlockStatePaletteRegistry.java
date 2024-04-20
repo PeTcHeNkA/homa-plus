@@ -8,7 +8,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 
 public class BlockStatePaletteRegistry implements IBlockStatePalette {
-    private final int size = PacketBuffer.getVarIntSize(0);
+    private static final int size = PacketBuffer.getVarIntSize(0);
     @Override
     public int idFor(IBlockState state) {
         int i = state.getId();
@@ -19,8 +19,6 @@ public class BlockStatePaletteRegistry implements IBlockStatePalette {
     @Override //not null
     public IBlockState get(int indexKey) {
         return BlockIDIndexes.BLOCK_INDEX.get(indexKey);
-//        IBlockState state = BlockIDIndexes.BLOCK_INDEX.get(indexKey);
-//        return state == null ? BlockIDIndexes.AIR_STATE : state;
     }
 
 

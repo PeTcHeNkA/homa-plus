@@ -28,13 +28,14 @@ public abstract class Container {
     @SideOnly(Side.CLIENT)
     private short transactionID;
     private int dragMode = -1;
-    private int dragEvent;
+    private byte dragEvent;
     private final Set<Slot> dragSlots            = new Te4HashSet<>(8);
     protected List<IContainerListener> listeners = new ArrayListE2<>();
     private final Set<EntityPlayer>   playerList = new Te4HashSet<>(4);
 
     protected Slot addSlotToContainer(Slot slotIn) {
-        slotIn.slotNumber = this.inventorySlots.size();
+        slotIn.setSlotNum(inventorySlots.size());
+        //slotIn.slotNumber = this.inventorySlots.size();
         this.inventorySlots.add(slotIn);
         this.inventoryItemStacks.add(ItemStack.EMPTY);
         return slotIn;
@@ -121,7 +122,7 @@ public abstract class Container {
 
         if (clickTypeIn == ClickType.QUICK_CRAFT) {
             int j1 = this.dragEvent;
-            this.dragEvent = getDragEvent(dragType);
+            this.dragEvent = (byte) getDragEvent(dragType);
 
             if ((j1 != 1 || this.dragEvent != 2) && j1 != this.dragEvent) {
                 this.resetDrag();
@@ -544,14 +545,7 @@ public abstract class Container {
 
 
     public static boolean isValidDragMode(int dragModeIn, EntityPlayer player) {
-        if (dragModeIn == 0) {
-            return true;
-        } else if (dragModeIn == 1)
-        {
-            return true;
-        } else {
-            return dragModeIn == 2 && player.capabilities.isCreativeMode;
-        }
+        return dragModeIn == 0 || dragModeIn == 1 || dragModeIn == 2 && player.capabilities.isCreativeMode;
     }
 
 

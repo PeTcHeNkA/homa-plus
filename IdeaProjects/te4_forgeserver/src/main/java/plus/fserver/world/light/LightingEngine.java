@@ -36,7 +36,6 @@ public class LightingEngine implements ILightingEngine {
     private final NeighborInfo[] neighborInfos;
     private PooledLongQueue.LongQueueIterator queueIt;
     private final ReentrantLock lock = new ReentrantLock();
-
     private PooledLongQueue swap;
 
     public LightingEngine(final World world) {

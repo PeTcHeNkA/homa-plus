@@ -62,7 +62,7 @@ public class BlockStatePaletteLinear implements IBlockStatePalette {
         IBlockState state;
         for (int i = 0; i < this.arraySize; ++i) {
             state = this.states[i];
-            buf.writeVarInt(state==null?BlockIDIndexes.AIR_STATE.getId():state.getId());
+            buf.writeVarInt(state==null?BlockIDIndexes.AIR_STATE_ID:state.getId());
         }
     }
 
@@ -73,7 +73,7 @@ public class BlockStatePaletteLinear implements IBlockStatePalette {
         IBlockState state;
         for (int j = 0; j < this.arraySize; ++j) {
             state = this.states[j];
-            i += PacketBuffer.getVarIntSize(state==null? BlockIDIndexes.AIR_STATE.getId():state.getId());
+            i += PacketBuffer.getVarIntSize(state==null? BlockIDIndexes.AIR_STATE_ID:state.getId());
         }
         return i;
     }

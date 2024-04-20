@@ -226,7 +226,7 @@ public class NetHandlerLoginServer implements INetHandlerLoginServer, ITickable 
 
             this.loginGameProfile =
                     server.getMinecraftSessionService().hasJoinedServer(new GameProfile(null, gameprofile.getName()), svId,
-                    getAddress());
+                            getAddress());
 
             if (loginGameProfile != null) {
                 LOGGER.info("UUID of player {} is {}", this.loginGameProfile.getName(), this.loginGameProfile.getId());

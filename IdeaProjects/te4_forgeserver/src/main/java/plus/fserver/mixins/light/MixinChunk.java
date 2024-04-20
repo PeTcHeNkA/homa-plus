@@ -35,21 +35,15 @@ public abstract class MixinChunk implements IChunkLighting, IChunkLightingData, 
     @Shadow private boolean isTerrainPopulated;
     @Shadow private boolean isGapLightingUpdated;
     @Shadow @Final private short[] updateSkylights;
-    //@Shadow @Final private boolean[] updateSkylightColumns;
     @Shadow @Final public int x;
     @Shadow @Final public int z;
     @Shadow private boolean dirty;
     @Shadow private boolean loaded;
     @Shadow @Final private Map<BlockPos, TileEntity> tileEntities;
     @Shadow @Final private ClassInheritanceMultiMap<Entity>[] entityLists;
-    private ILightingEngine lightingEngine;
+
     private short[] neighborLightChecks;
     private boolean isLightInitialized;
-
-    @Inject(method = "<init>*", at = @At("RETURN"))
-    private void onConstructed(final CallbackInfo ci) {
-        this.lightingEngine = ((ILightingEngineProvider)this.world).getLightingEngine();
-    }
 
 
     /**
@@ -58,7 +52,7 @@ public abstract class MixinChunk implements IChunkLighting, IChunkLightingData, 
      */
     @Overwrite
     public int getLightSubtracted(BlockPos pos, int amount) {
-        if(world.isRemote)this.lightingEngine.processLightUpdates();
+        if(world.isRemote)this.getLightingEngine().processLightUpdates();
         int i = pos.getX() & 15, j = pos.getY(), k = pos.getZ() & 15;
         ExtendedBlockStorage storage = this.storageArrays[j >> 4];
         if (storage == null) {
@@ -126,7 +120,7 @@ public abstract class MixinChunk implements IChunkLighting, IChunkLightingData, 
      */
     @Overwrite
     public int getLightFor(final EnumSkyBlock type, final BlockPos pos) {
-        if(world.isRemote)this.lightingEngine.processLightUpdatesForType(type);
+        if(world.isRemote)this.getLightingEngine().processLightUpdatesForType(type);
         return this.getCachedLightFor(type, pos);
     }
 
@@ -232,12 +226,6 @@ public abstract class MixinChunk implements IChunkLighting, IChunkLightingData, 
     @Override
     public void setNeighborLightChecks(final short[] data) {
         this.neighborLightChecks = data;
-    }
-
-
-    @Override
-    public ILightingEngine getLightingEngine() {
-        return this.lightingEngine;
     }
 
 

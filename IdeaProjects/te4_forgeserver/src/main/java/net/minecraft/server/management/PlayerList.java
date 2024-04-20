@@ -334,12 +334,12 @@ public abstract class PlayerList {
         }
         this.sendPacketToAllPlayersE(new SPacketPlayerListItem(SPacketPlayerListItem.Action.REMOVE_PLAYER, playerIn));
     }
-
-
-    @Deprecated
-    public String allowUserToConnect(SocketAddress address, GameProfile profile) {
-        return allowUserToConnect(new ElcaConnectEvent(this, address, profile), address, profile);
-    }
+//
+//
+//    @Deprecated
+//    public String allowUserToConnect(SocketAddress address, GameProfile profile) {
+//        return allowUserToConnect(new ElcaConnectEvent(this, address, profile), address, profile);
+//    }
 
 
     public String allowUserToConnect(ElcaConnectEvent event, SocketAddress address, GameProfile profile) {

@@ -86,9 +86,9 @@ public class Explosion {
             for (aZ = 0; aZ < 16; ++aZ) {
                 for (aY = 0; aY < 16; ++aY) {
                     if (aX == 0 || aX == 15 || aY == 0 || aY == 15 || aZ == 0 || aZ == 15) {
-                        float dX = aX / 15.0F * 2.0F - 1.0F;
-                        float dY = aY / 15.0F * 2.0F - 1.0F;
-                        float dZ = aZ / 15.0F * 2.0F - 1.0F;
+                        float dX = aX * 0.1333333F - 1.0F;
+                        float dY = aY * 0.1333333F - 1.0F;
+                        float dZ = aZ * 0.1333333f - 1.0F;
                         //todo check
                         fSize = (float)Math.sqrt(dX * dX + dY * dY + dZ * dZ);
                         dX = dX / fSize;
@@ -121,16 +121,18 @@ public class Explosion {
         }
         this.affectedBlockPositions.addAll(set);
         fSize = this.size * 2.0F;
+        xPos = fSize - 1;
+        zPos = fSize + 1;
 
         List<Entity> list = this.world.getEntitiesWithinAABBExcludingEntity(this.exploder,
                 new AxisAlignedBB(
-                        MathHelper.floor(this.x - (double)fSize - 1.0D),
-                        MathHelper.floor(this.y - (double)fSize - 1.0D),
-                        MathHelper.floor(this.z - (double)fSize - 1.0D),
+                        MathHelper.floor(this.x - xPos),
+                        MathHelper.floor(this.y - xPos),
+                        MathHelper.floor(this.z - xPos),
 
-                        MathHelper.floor(this.x + (double)fSize + 1.0D),
-                        MathHelper.floor(this.y + (double)fSize + 1.0D),
-                        MathHelper.floor(this.z + (double)fSize + 1.0D)
+                        MathHelper.floor(this.x + zPos),
+                        MathHelper.floor(this.y + zPos),
+                        MathHelper.floor(this.z + zPos)
                 )
         );
         if(ElcaCV.ENABLE_EXPLOSION_EVENT)
@@ -191,12 +193,11 @@ public class Explosion {
         if (this.damagesTerrain) {
             for (BlockPos blockpos : this.affectedBlockPositions) {
                 IBlockState state = selector.getBlockState(blockpos);
-                Block block = state.getBlock();
 
                 if (spawnParticles) {
-                    double d0 = (float)blockpos.getX() + this.world.rand.nextFloat();
-                    double d1 = (float)blockpos.getY() + this.world.rand.nextFloat();
-                    double d2 = (float)blockpos.getZ() + this.world.rand.nextFloat();
+                    double d0 = (float)blockpos.getX() + world.rand.nextFloat();
+                    double d1 = (float)blockpos.getY() + world.rand.nextFloat();
+                    double d2 = (float)blockpos.getZ() + world.rand.nextFloat();
                     double d3 = d0 - this.x;
                     double d4 = d1 - this.y;
                     double d5 = d2 - this.z;
@@ -209,11 +210,12 @@ public class Explosion {
                     d3 = d3 * d7;
                     d4 = d4 * d7;
                     d5 = d5 * d7;
-                    this.world.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, (d0 + this.x) / 2.0D, (d1 + this.y) / 2.0D, (d2 + this.z) / 2.0D, d3, d4, d5);
+                    this.world.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, (d0 + this.x) * 0.5D, (d1 + this.y) * 0.5D, (d2 + this.z) * 0.5D, d3, d4, d5);
                     this.world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, d0, d1, d2, d3, d4, d5);
                 }
 
                 if (state.getMaterial() != Material.AIR) {
+                    Block block = state.getBlock();
                     if (block.canDropFromExplosion(this)) {
                         block.dropBlockAsItemWithChance(this.world, blockpos, state, 1.0F / this.size, 0);
                     }
@@ -222,9 +224,10 @@ public class Explosion {
             }
         }
         if (this.causesFire) {
-            for (BlockPos blockpos1 : this.affectedBlockPositions) {
-                if (selector.getBlockState(blockpos1).getMaterial() == Material.AIR && this.world.getBlockState(blockpos1.down()).isFullBlock() && FastRandom.INST.nextInt(3) == 0) {
-                    selector.setBlockState(blockpos1, Blocks.FIRE.getDefaultState());
+            for (BlockPos pos : this.affectedBlockPositions) {
+                if (selector.getBlockState(pos).getMaterial() == Material.AIR
+                        && this.world.getBlockState(pos.down()).isFullBlock() && (world.rand.nextInt() & 3) == 0) {
+                    selector.setBlockState(pos, Blocks.FIRE.getDefaultState());
                 }
             }
         }

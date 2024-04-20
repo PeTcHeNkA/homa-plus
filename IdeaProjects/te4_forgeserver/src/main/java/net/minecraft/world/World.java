@@ -64,6 +64,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.server.timings.TimeTracker;
 import org.jetbrains.annotations.NotNull;
+import org.spongepowered.asm.mixin.Overwrite;
 import plus.fserver.ElcaConfig;
 import plus.fserver.api.IBlockEAccess;
 import plus.fserver.event.ElcaCV;
@@ -76,9 +77,11 @@ import plus.fserver.utls.ChunkSelector;
 import plus.fserver.utls.math.FastRandom;
 import plus.fserver.world.RedstoneEngine;
 import plus.fserver.utls.collections.HoleList;
+import plus.fserver.world.light.LightingEngine;
+import plus.fserver.world.light.api.ILightingEngineProvider;
 
 
-public abstract class World implements IBlockEAccess, net.minecraftforge.common.capabilities.ICapabilityProvider {
+public abstract class World implements IBlockEAccess, net.minecraftforge.common.capabilities.ICapabilityProvider, ILightingEngineProvider {
     /**
      * Used in the getEntitiesWithinAABB functions to expand the search area for entities.
      * Modders should change this variable to a higher value if it is less then the radius
@@ -142,9 +145,8 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public final BlockPos.MutableBlockPos localTempPos = new BlockPos.MutableBlockPos();
 
     public long tryUpdateNavigationLimit = 20L;
+    public final LightingEngine lightingEngine = new LightingEngine(this);
 
-//    private final Map<AABKey, List<AxisAlignedBB>> bbCache;
-//    private final Map<AABKey, List<Entity>>        eeCache;
     private final SyncAABBCache<List<AxisAlignedBB>> bbCache;
     private final SyncAABBCache<List<Entity>>        eeCache;
 
@@ -170,14 +172,6 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         if(ElcaCV.MORE_MOBS_OPTIMIZER) {
             eeCache = new SyncAABBCache<>(10);
             bbCache = new SyncAABBCache<>(10);
-//            if (server == null) {
-//                eeCache = CacheBuilder.buildEECache(null);
-//                bbCache = CacheBuilder.buildBBCache(null);
-//            } else {
-//                AsyWorldTickerV2 ticker = server.ticker();
-//                eeCache = CacheBuilder.buildEECache(ticker);
-//                bbCache = CacheBuilder.buildBBCache(ticker);
-//            }
         } else {
             eeCache = null;
             bbCache = null;
@@ -187,6 +181,12 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
     public World init() {
         return this;
+    }
+
+
+    @Override
+    public LightingEngine getLightingEngine() {
+        return lightingEngine;
     }
 
 
@@ -2564,124 +2564,9 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
-    //128 mb ???
-    int[] lightUpdateBlockList;
-    public boolean checkLightFor(EnumSkyBlock lightType, BlockPos pos) {
-        if (!this.isAreaLoaded(pos, 16, false)) {
-            return false;
-        } else {
-            int updateRange = this.isAreaLoaded(pos, 18, false) ? 17 : 15;
-            int j2 = 0;
-            int k2 = 0;
-            this.profiler.startSection("getBrightness");
-            int l2 = this.getLightFor(lightType, pos);
-            int i3 = this.getRawLight(pos, lightType);
-            int j3 = pos.getX();
-            int k3 = pos.getY();
-            int l3 = pos.getZ();
-
-            if(lightUpdateBlockList==null){
-                lightUpdateBlockList = new int[32768];
-            }
-
-            if (i3 > l2) {
-                this.lightUpdateBlockList[k2++] = 133152;
-            } else if (i3 < l2) {
-                this.lightUpdateBlockList[k2++] = 133152 | l2 << 18;
-
-                while (j2 < k2) {
-                    int i4 = this.lightUpdateBlockList[j2++];
-                    int j4 = (i4 & 63) - 32 + j3;
-                    int k4 = (i4 >> 6 & 63) - 32 + k3;
-                    int l4 = (i4 >> 12 & 63) - 32 + l3;
-                    int i5 = i4 >> 18 & 15;
-                    BlockPos blockpos1 = new BlockPos(j4, k4, l4);
-                    int j5 = this.getLightFor(lightType, blockpos1);
-
-                    if (j5 == i5) {
-                        this.setLightFor(lightType, blockpos1, 0);
-
-                        if (i5 > 0) {
-                            int k5 = MathHelper.abs(j4 - j3);
-                            int l5 = MathHelper.abs(k4 - k3);
-                            int i6 = MathHelper.abs(l4 - l3);
-
-                            if (k5 + l5 + i6 < updateRange) {
-                                BlockPos.PooledMutableBlockPos state = BlockPos.PooledMutableBlockPos.retain();
-
-                                for (EnumFacing enumfacing : EnumFacing.values()) {
-                                    int j6 = j4 + enumfacing.getXOffset();
-                                    int k6 = k4 + enumfacing.getYOffset();
-                                    int l6 = l4 + enumfacing.getZOffset();
-                                    state.setPos(j6, k6, l6);
-                                    IBlockState bs = this.getBlockState(state);
-                                    int i7 = Math.max(1, bs.getBlock().getLightOpacity(bs, this, state));
-                                    j5 = this.getLightFor(lightType, state);
-
-                                    if (j5 == i5 - i7 && k2 < this.lightUpdateBlockList.length) {
-                                        this.lightUpdateBlockList[k2++] = j6 - j3 + 32 | k6 - k3 + 32 << 6 | l6 - l3 + 32 << 12 | i5 - i7 << 18;
-                                    }
-                                }
-                                state.release();
-                            }
-                        }
-                    }
-                }
-                j2 = 0;
-            }
-
-            this.profiler.endSection();
-            this.profiler.startSection("checkedPosition < toCheckCount");
-
-            while (j2 < k2) {
-                int j7 = this.lightUpdateBlockList[j2++];
-                int k7 = (j7 & 63) - 32 + j3;
-                int l7 = (j7 >> 6 & 63) - 32 + k3;
-                int i8 = (j7 >> 12 & 63) - 32 + l3;
-                BlockPos blockpos2 = new BlockPos(k7, l7, i8);
-                int j8 = this.getLightFor(lightType, blockpos2);
-                int k8 = this.getRawLight(blockpos2, lightType);
-
-                if (k8 != j8) {
-                    this.setLightFor(lightType, blockpos2, k8);
-
-                    if (k8 > j8) {
-                        int l8 = Math.abs(k7 - j3);
-                        int i9 = Math.abs(l7 - k3);
-                        int j9 = Math.abs(i8 - l3);
-                        boolean flag = k2 < this.lightUpdateBlockList.length - 6;
-
-                        if (l8 + i9 + j9 < updateRange && flag) {
-                            if (this.getLightFor(lightType, blockpos2.west()) < k8) {
-                                this.lightUpdateBlockList[k2++] = k7 - 1 - j3 + 32 + (l7 - k3 + 32 << 6) + (i8 - l3 + 32 << 12);
-                            }
-
-                            if (this.getLightFor(lightType, blockpos2.east()) < k8) {
-                                this.lightUpdateBlockList[k2++] = k7 + 1 - j3 + 32 + (l7 - k3 + 32 << 6) + (i8 - l3 + 32 << 12);
-                            }
-
-                            if (this.getLightFor(lightType, blockpos2.down()) < k8) {
-                                this.lightUpdateBlockList[k2++] = k7 - j3 + 32 + (l7 - 1 - k3 + 32 << 6) + (i8 - l3 + 32 << 12);
-                            }
-
-                            if (this.getLightFor(lightType, blockpos2.up()) < k8) {
-                                this.lightUpdateBlockList[k2++] = k7 - j3 + 32 + (l7 + 1 - k3 + 32 << 6) + (i8 - l3 + 32 << 12);
-                            }
-
-                            if (this.getLightFor(lightType, blockpos2.north()) < k8) {
-                                this.lightUpdateBlockList[k2++] = k7 - j3 + 32 + (l7 - k3 + 32 << 6) + (i8 - 1 - l3 + 32 << 12);
-                            }
-
-                            if (this.getLightFor(lightType, blockpos2.south()) < k8) {
-                                this.lightUpdateBlockList[k2++] = k7 - j3 + 32 + (l7 - k3 + 32 << 6) + (i8 + 1 - l3 + 32 << 12);
-                            }
-                        }
-                    }
-                }
-            }
-            this.profiler.endSection();
-            return true;
-        }
+    public boolean checkLightFor(EnumSkyBlock lightType, BlockPos pos){
+        this.lightingEngine.scheduleLightUpdate(lightType, pos);
+        return true;
     }
 
 

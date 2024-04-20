@@ -14,6 +14,7 @@ public final class BlockIDIndexes {
     public static final EnumFacing[] FACING_VERTICAL   = EnumFacing.Plane.VERTICAL.facings();
 
     public static final IBlockState AIR_STATE   = Blocks.AIR.getDefaultState();
+    public static final int AIR_STATE_ID        = AIR_STATE.getId();
     public static final IBlockState STONE_STATE = Blocks.STONE.getDefaultState();
 
     //todo use this ONLY THEN SERVER STARTED

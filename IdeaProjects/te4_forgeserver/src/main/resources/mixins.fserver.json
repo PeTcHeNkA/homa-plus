@@ -14,7 +14,6 @@
     "light.MixinChunkProviderServer",
     "light.MixinExtendedBlockStorage",
     "light.MixinSPacketChunkData",
-    "light.MixinWorld",
     "md.BlockLeavesPatch",
     "md.EntityAmbientCreaturePatch",
     "md.EntityAnimalPatch",
@@ -39,6 +38,7 @@
     "stabile.WorldTypePatch"
   ],
   "server": [
-    "stabile.ServerEulaPatch"
+    "server.ServerEulaPatch",
+    "server.SlotCli"
   ]
 }

@@ -38,10 +38,12 @@ import plus.asyutl.buf.FastBuffer;
 import plus.fserver.api.BiomeIndexes;
 import plus.fserver.api.PWorldServer;
 import plus.fserver.event.ElcaCV;
+import plus.fserver.world.light.api.ILightingEngine;
+import plus.fserver.world.light.api.ILightingEngineProvider;
 import plus.tson.utl.Te4HashMap;
 
 
-public class Chunk implements net.minecraftforge.common.capabilities.ICapabilityProvider {
+public class Chunk implements net.minecraftforge.common.capabilities.ICapabilityProvider, ILightingEngineProvider {
     public static final EnumFacing[] HORIZONTAL = EnumFacing.Plane.HORIZONTAL.facings();
     private static final Logger LOGGER = LogManager.getLogger();
     public static final ExtendedBlockStorage NULL_BLOCK_STORAGE = null;
@@ -120,6 +122,12 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
         Arrays.fill(this.precipitationHeightMap, (short) -999);
         Arrays.fill(this.blockBiomeArray, (byte) - 1);
         //capabilities = ForgeEventFactory.gatherCapabilities(this);
+    }
+
+
+    @Override
+    public ILightingEngine getLightingEngine() {
+        return world.lightingEngine;
     }
 
 

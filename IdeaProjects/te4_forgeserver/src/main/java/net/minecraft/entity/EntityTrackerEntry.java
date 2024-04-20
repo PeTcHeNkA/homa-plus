@@ -65,7 +65,6 @@ import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fml.common.network.internal.FMLNetworkHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import plus.fserver.utls.collections.IdentityTe4HashSet;
 import plus.tson.utl.Te4HashSet;
 import javax.annotation.Nullable;
 

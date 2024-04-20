@@ -1,7 +1,6 @@
 package net.minecraft.entity;
 
 import com.google.common.collect.Maps;
-
 import java.util.*;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -74,7 +73,6 @@ import org.apache.logging.log4j.Logger;
 import plus.fserver.ElcaConfig;
 import plus.fserver.server.SStrings;
 import plus.fserver.utls.collections.FixedItemList;
-
 import static plus.fserver.utls.math.Constants.F_180_PI;
 
 
