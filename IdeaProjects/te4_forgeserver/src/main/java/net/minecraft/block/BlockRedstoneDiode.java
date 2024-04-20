@@ -180,23 +180,26 @@ public abstract class BlockRedstoneDiode extends BlockHorizontal {
     }
 
 
+    @Override
     public boolean canProvidePower(IBlockState state) {
         return true;
     }
 
 
+    @Override
     public IBlockState getStateForPlacement(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer) {
         return this.getDefaultState().withProperty(FACING, placer.getHorizontalFacing().getOpposite());
     }
 
 
+    @Override
     public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
-        if (this.shouldBePowered(worldIn, pos, state)) {
+        if (this.shouldBePowered(worldIn, pos, state))
             worldIn.scheduleUpdate(pos, this, 1);
-        }
     }
 
 
+    @Override
     public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state) {
         this.notifyNeighbors(worldIn, pos, state);
     }

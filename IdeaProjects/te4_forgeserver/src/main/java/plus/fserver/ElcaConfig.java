@@ -2,6 +2,11 @@ package plus.fserver;
 
 
 public class ElcaConfig {
+    public static final String SERVER_ID            = "ElcaServer";
+    public static final String DEFAULT_REJECT_MSG   = "Connection rejected";
+    public static final String REJECT_SERVER_FULL   = "The server is full!";
+    public static final String REJECT_NON_WHITELIST = "You are not white-listed on this server!";
+
     public static int TIME_PACKET_RATE           = 20 * 3;
     public static int CHUNK_TICK_RADIUS_1        = 4 * 16;
     public static int CHUNK_TICK_RADIUS_2        = 5 * 16;

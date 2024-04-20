@@ -13,19 +13,22 @@ import static plus.fserver.event.ElcaCV.*;
 
 
 public class SSPatchLoader extends TweakEngine implements IClassTransformer, ITweaker{
-    public static final String ELCA_RELEASE = "Elaca Enterprise Edition";
+    public static final String ELCA_RELEASE = "Elca Enterprise Edition";
     public static final String ELCA_VERSION;
 
     static {
-        String version = "2.3.4";
+        String version = "2.3.7.04";
         boolean isDev = true;
 
         int num  = 0;
         boolean[] flags = {
-                ENABLE_COLLISION_EVENTS,
-                ENABLE_EXPLOSION_EVENT,
-                AABB_MEMORY_IMPROVEMENT,
-                ENABLE_NEIGHBOR_NOTIFY_EVENT
+            ENABLE_COLLISION_EVENTS       ,
+            ENABLE_EXPLOSION_EVENT        ,
+            AABB_MEMORY_IMPROVEMENT       ,
+            ENABLE_NEIGHBOR_NOTIFY_EVENT  ,
+            DEBUG_NO_SERVER               ,
+            CHECK_LEGAL_CHUNK_CHANGE      ,
+            MORE_MOBS_OPTIMIZER           ,
         };
         for (int i=0;i< flags.length;i++)
             if(flags[i]) num |= 1<<i;

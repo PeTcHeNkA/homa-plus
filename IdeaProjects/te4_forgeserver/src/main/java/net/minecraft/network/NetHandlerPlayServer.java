@@ -180,7 +180,7 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
 
 
     public void disconnect(final ITextComponent textComponent) {
-        this.netManager.sendPacket(new SPacketDisconnect(textComponent), p_operationComplete_1_ -> NetHandlerPlayServer.this.netManager.closeChannel(textComponent));
+        this.netManager.sendPacket(new SPacketDisconnect(textComponent), future -> NetHandlerPlayServer.this.netManager.closeChannel(textComponent));
         this.netManager.disableAutoRead();
         Futures.getUnchecked(this.server.addScheduledTask(NetHandlerPlayServer.this.netManager::handleDisconnection));
     }
@@ -272,11 +272,6 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
 
     public void onTickWorld(){
         if(locked)return;
-//        Runnable task = packetQueue.poll();
-//        while (task != null){
-//            task.run();
-//            task = packetQueue.poll();
-//        }
 
         this.captureCurrentPosition();
         this.player.onUpdateEntity();
@@ -1050,30 +1045,39 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
      * @author Te4hno
      */
     public void processTryUseItemOnBlock(CPacketPlayerTryUseItemOnBlock packetIn) {
-        WorldServer worldserver = this.server.getWorld(this.player.dimension);
+        WorldServer worldserver = server.getWorld(player.dimension);
         BlockPos blockpos = packetIn.getPos();
-        this.player.markPlayerActive();
+        player.markPlayerActive();
 
-        if (blockpos.getY() < this.server.getBuildLimit() - 1 || packetIn.getDirection() != EnumFacing.UP && blockpos.getY() < this.server.getBuildLimit()) {
+        if (blockpos.getY() < this.server.getBuildLimit() - 1 || packetIn.getDirection() != EnumFacing.UP && blockpos.getY() < server.getBuildLimit()) {
             double dist = player.getEntityAttribute(EntityPlayer.REACH_DISTANCE).getAttributeValue() + 3;
             dist *= dist;
-            if (this.targetPos == null && this.player.getDistanceSq((double)blockpos.getX() + 0.5D, (double)blockpos.getY() + 0.5D, (double)blockpos.getZ() + 0.5D) < dist &&
-                    !this.server.isBlockProtected(worldserver, blockpos, this.player)
+            if (targetPos == null && player.getDistanceSq(blockpos.getX() + 0.5, blockpos.getY() + 0.5, blockpos.getZ() + 0.5) < dist &&
+                    !server.isBlockProtected(worldserver, blockpos, player)
                     && worldserver.getWorldBorder().contains(blockpos)) {
-                addToQueue(() -> player.interactionManager.processRightClickBlock(
-                        player, worldserver, player.getHeldItem(packetIn.getHand()),
-                        packetIn.getHand(), blockpos, packetIn.getDirection(), packetIn.getFacingX(),
-                        packetIn.getFacingY(), packetIn.getFacingZ()
-                ));
+
+                addToQueue(() -> {
+                    player.interactionManager.processRightClickBlock(
+                            player, worldserver, player.getHeldItem(packetIn.getHand()),
+                            packetIn.getHand(), blockpos, packetIn.getDirection(), packetIn.getFacingX(),
+                            packetIn.getFacingY(), packetIn.getFacingZ()
+                    );
+                    netManager.exec(() -> afterPlace(worldserver, blockpos, packetIn.getDirection()));
+                });
             }
         } else {
-            TextComponentTranslation textcomponenttranslation = new TextComponentTranslation("build.tooHigh", this.server.getBuildLimit());
-            textcomponenttranslation.getStyle().setColor(TextFormatting.RED);
-            sendPacket(new SPacketChat(textcomponenttranslation, ChatType.GAME_INFO));
-        }
+            TextComponentTranslation msg = new TextComponentTranslation("build.tooHigh", this.server.getBuildLimit());
+            msg.getStyle().setColor(TextFormatting.RED);
+            sendPacket(new SPacketChat(msg, ChatType.GAME_INFO));
 
-        netManager.sendPacket(new SPacketBlockChange(worldserver, blockpos));
-        netManager.sendPacket(new SPacketBlockChange(worldserver, blockpos.offset(packetIn.getDirection())));
+            afterPlace(worldserver, blockpos, packetIn.getDirection());
+        }
+    }
+
+
+    private void afterPlace(WorldServer worldserver, BlockPos blockpos, EnumFacing facing){
+        netManager.sendPacketSync(new SPacketBlockChange(worldserver, blockpos));
+        netManager.sendPacketSync(new SPacketBlockChange(worldserver, blockpos.offset(facing)));
     }
 
 

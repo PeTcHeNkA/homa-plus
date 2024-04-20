@@ -1,0 +1,263 @@
+package net.minecraft.server.network;
+
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.exceptions.AuthenticationUnavailableException;
+import io.netty.channel.ChannelFutureListener;
+import java.math.BigInteger;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.security.PrivateKey;
+import java.util.Arrays;
+import java.util.UUID;
+import javax.crypto.SecretKey;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.login.INetHandlerLoginServer;
+import net.minecraft.network.login.client.CPacketEncryptionResponse;
+import net.minecraft.network.login.client.CPacketLoginStart;
+import net.minecraft.network.login.server.SPacketDisconnect;
+import net.minecraft.network.login.server.SPacketEnableCompression;
+import net.minecraft.network.login.server.SPacketEncryptionRequest;
+import net.minecraft.network.login.server.SPacketLoginSuccess;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.CryptManager;
+import net.minecraft.util.ITickable;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.network.internal.FMLNetworkHandler;
+import org.apache.commons.lang3.Validate;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import plus.fserver.ElcaConfig;
+import plus.fserver.event.ElcaConnectEvent;
+import plus.fserver.utls.math.FastRandom;
+
+
+public class NetHandlerLoginServer implements INetHandlerLoginServer, ITickable {
+    private static final Logger LOGGER = LogManager.getLogger();
+    private final byte[] verifyToken = new byte[4];
+    private final MinecraftServer server;
+    public final NetworkManager networkManager;
+    private NetHandlerLoginServer.LoginState currentLoginState = NetHandlerLoginServer.LoginState.HELLO;
+    private int connectionTimer;
+    private GameProfile loginGameProfile;
+    private SecretKey secretKey;
+    private EntityPlayerMP player;
+    private final ElcaConnectEvent event;
+
+    public NetHandlerLoginServer(MinecraftServer serverIn, NetworkManager networkManagerIn) {
+        this.server = serverIn;
+        this.networkManager = networkManagerIn;
+        FastRandom.INST.nextBytes(this.verifyToken);
+        event = new ElcaConnectEvent(serverIn.getPlayerList(), this.networkManager.getRemoteAddress(), this.loginGameProfile);
+    }
+
+
+    @Override
+    public void update() {
+        if (this.currentLoginState == NetHandlerLoginServer.LoginState.READY_TO_ACCEPT) {
+            this.tryAcceptPlayer();
+        } else if (this.currentLoginState == NetHandlerLoginServer.LoginState.DELAY_ACCEPT) {
+            EntityPlayerMP entityplayermp = this.server.getPlayerList().getPlayerByUUID(this.loginGameProfile.getId());
+
+            if (entityplayermp == null) {
+                this.currentLoginState = NetHandlerLoginServer.LoginState.READY_TO_ACCEPT;
+                FMLNetworkHandler.fmlServerHandshake(this.server.getPlayerList(), this.networkManager, this.player);
+                this.player = null;
+            }
+        }
+
+        if (this.connectionTimer++ >= 600) {
+            event.setStatus(ElcaConnectEvent.Status.REJECT_TIME_OUT);
+            event.reject("multiplayer.disconnect.slow_login");
+            event.setData(connectionTimer);
+            if(!event.canJoin()) {
+                this.disconnect(new TextComponentTranslation(event.getMessage()));
+            } else {
+                Object data = event.getData();
+                if(data instanceof Integer){
+                    this.connectionTimer = (int) data;
+                }
+            }
+        }
+    }
+
+
+    public void disconnect(ITextComponent reason) {
+        try {
+            LOGGER.info("Disconnecting {}: {}", this.getConnectionInfo(), reason.getUnformattedText());
+            this.networkManager.sendPacket(new SPacketDisconnect(reason));
+            this.networkManager.closeChannel(reason);
+        } catch (Exception exception) {
+            LOGGER.error("Error whilst disconnecting player", exception);
+        }
+    }
+
+
+    public void tryAcceptPlayer() {
+        if (!this.loginGameProfile.isComplete()) {
+            this.loginGameProfile = this.getOfflineProfile(this.loginGameProfile);
+        }
+
+        event.setStatus(ElcaConnectEvent.Status.TRY_ACCEPT);
+        String s = this.server.getPlayerList().allowUserToConnect(event, this.networkManager.getRemoteAddress(), this.loginGameProfile);
+
+        if (s != null) {
+            this.disconnect(new TextComponentTranslation(s));
+        } else {
+            this.currentLoginState = NetHandlerLoginServer.LoginState.ACCEPTED;
+
+            if (this.server.getNetworkCompressionThreshold() >= 0 && !this.networkManager.isLocalChannel()) {
+                this.networkManager.sendPacket(new SPacketEnableCompression(
+                        this.server.getNetworkCompressionThreshold()), (ChannelFutureListener) p_operationComplete_1_ -> NetHandlerLoginServer.this.networkManager.setCompressionThreshold(NetHandlerLoginServer.this.server.getNetworkCompressionThreshold()));
+            }
+
+            this.networkManager.sendPacket(new SPacketLoginSuccess(this.loginGameProfile));
+            EntityPlayerMP entityplayermp = this.server.getPlayerList().getPlayerByUUID(this.loginGameProfile.getId());
+
+            if (entityplayermp != null) {
+                this.currentLoginState = NetHandlerLoginServer.LoginState.DELAY_ACCEPT;
+                this.player = this.server.getPlayerList().createPlayerForUser(this.loginGameProfile);
+            } else {
+                FMLNetworkHandler.fmlServerHandshake(this.server.getPlayerList(), this.networkManager, this.server.getPlayerList().createPlayerForUser(this.loginGameProfile));
+            }
+        }
+    }
+
+
+    @Override
+    public void onDisconnect(ITextComponent reason) {
+        LOGGER.info("{} lost connection: {}", this.getConnectionInfo(), reason.getUnformattedText());
+    }
+
+
+    public String getConnectionInfo() {
+        return this.loginGameProfile != null ? this.loginGameProfile + " (" + this.networkManager.getRemoteAddress() + ")" : String.valueOf(this.networkManager.getRemoteAddress());
+    }
+
+
+    @Override
+    public void processLoginStart(CPacketLoginStart packetIn) {
+        Validate.validState(this.currentLoginState == NetHandlerLoginServer.LoginState.HELLO, "Unexpected hello packet");
+        this.loginGameProfile = packetIn.getProfile();
+
+        if (this.server.isServerInOnlineMode() && !this.networkManager.isLocalChannel()) {
+            this.currentLoginState = NetHandlerLoginServer.LoginState.KEY;
+            this.networkManager.sendPacket(new SPacketEncryptionRequest(ElcaConfig.SERVER_ID, this.server.getKeyPair().getPublic(), this.verifyToken));
+        } else {
+            this.currentLoginState = NetHandlerLoginServer.LoginState.READY_TO_ACCEPT;
+        }
+    }
+
+
+    @Override
+    public void processEncryptionResponse(CPacketEncryptionResponse packetIn) {
+        Validate.validState(this.currentLoginState == NetHandlerLoginServer.LoginState.KEY, "Unexpected key packet");
+        PrivateKey privatekey = this.server.getKeyPair().getPrivate();
+
+        if (!Arrays.equals(this.verifyToken, packetIn.getVerifyToken(privatekey))) {
+            throw new IllegalStateException("Invalid nonce!");
+        } else {
+            this.secretKey = packetIn.getSecretKey(privatekey);
+            this.currentLoginState = NetHandlerLoginServer.LoginState.AUTHENTICATING;
+            this.networkManager.enableEncryption(this.secretKey);
+            server.ticker().runAsync(this::checkAuth);
+        }
+    }
+
+
+    private InetAddress getAddress() {
+        SocketAddress socketaddress = NetHandlerLoginServer.this.networkManager.getRemoteAddress();
+        return NetHandlerLoginServer.this.server.getPreventProxyConnections() && socketaddress instanceof InetSocketAddress ? ((InetSocketAddress)socketaddress).getAddress() : null;
+    }
+
+
+    private void checkAuth(){
+        GameProfile gameprofile = loginGameProfile;
+
+        try {
+            String svId = (new BigInteger(CryptManager.getServerIdHash(ElcaConfig.SERVER_ID, this.server.getKeyPair().getPublic(), this.secretKey))).toString(16);
+
+            this.loginGameProfile =
+                    server.getMinecraftSessionService().hasJoinedServer(new GameProfile(null, gameprofile.getName()), svId,
+                    getAddress());
+
+            if (loginGameProfile != null) {
+                LOGGER.info("UUID of player {} is {}", this.loginGameProfile.getName(), this.loginGameProfile.getId());
+                this.currentLoginState = NetHandlerLoginServer.LoginState.READY_TO_ACCEPT;
+
+                event.setProfile(loginGameProfile);
+                event.setStatus(ElcaConnectEvent.Status.SUCCESS_AUTH);
+                event.accept();
+                MinecraftForge.EVENT_BUS.postF(event);
+                if(!event.canJoin()){
+                    disconnect(new TextComponentTranslation(event.getMessage()));
+                }
+                return;
+            } else if (server.isSinglePlayer()) {
+                loginGameProfile = getOfflineProfile(gameprofile);
+                currentLoginState = NetHandlerLoginServer.LoginState.READY_TO_ACCEPT;
+                return;
+            } else {
+                event.setStatus(ElcaConnectEvent.Status.REJECT_NO_AUTH);
+                event.reject("multiplayer.disconnect.unverified_username");
+                MinecraftForge.EVENT_BUS.postF(event);
+                if(!event.canJoin()) {
+                    disconnect(new TextComponentTranslation("multiplayer.disconnect.unverified_username"));
+                    LOGGER.error("Username '{}' tried to join with an invalid session", gameprofile.getName());
+                } else {
+                    loginGameProfile = getOfflineProfile(gameprofile);
+                }
+                return;
+            }
+        } catch (AuthenticationUnavailableException var3) {
+            if (server.isSinglePlayer()) {
+                LOGGER.warn("Authentication servers are down but will let them in anyway!");
+                loginGameProfile = getOfflineProfile(gameprofile);
+                currentLoginState = NetHandlerLoginServer.LoginState.READY_TO_ACCEPT;
+            } else {
+                event.setStatus(ElcaConnectEvent.Status.REJECT_NO_AUTH_SERVER);
+                event.reject("multiplayer.disconnect.authservers_down");
+                MinecraftForge.EVENT_BUS.postF(event);
+                if(!event.canJoin()) {
+                    disconnect(new TextComponentTranslation(event.getMessage()));
+                    LOGGER.error("Couldn't verify username because servers are unavailable");
+                    return;
+                }
+                loginGameProfile = getOfflineProfile(gameprofile);
+            }
+            return;
+        } catch (Exception e){
+            event.setStatus(ElcaConnectEvent.Status.REJECT_ERROR);
+            event.reject("Exception: "+e.getMessage());
+            event.setData(e);
+            if(loginGameProfile != null)event.setProfile(loginGameProfile);
+            MinecraftForge.EVENT_BUS.postF(event);
+            if(!event.canJoin()) {
+                disconnect(new TextComponentTranslation(event.getMessage()));
+                return;
+            }
+            if(loginGameProfile == null)loginGameProfile = getOfflineProfile(gameprofile);;
+            return;
+        }
+    }
+
+
+    protected GameProfile getOfflineProfile(GameProfile original) {
+        UUID uuid = UUID.nameUUIDFromBytes(("OfflinePlayer:" + original.getName()).getBytes(StandardCharsets.UTF_8));
+        return new GameProfile(uuid, original.getName());
+    }
+
+
+    static enum LoginState {
+        HELLO,
+        KEY,
+        AUTHENTICATING,
+        READY_TO_ACCEPT,
+        DELAY_ACCEPT,
+        ACCEPTED;
+    }
+}

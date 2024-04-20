@@ -46,13 +46,16 @@ import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
 import net.minecraft.world.storage.IPlayerFileData;
 import net.minecraft.world.storage.WorldInfo;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.ITeleporter;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import plus.fserver.ElcaConfig;
 import plus.fserver.api.PWorldServer;
+import plus.fserver.event.ElcaConnectEvent;
 import plus.fserver.server.chunk.io.TChunkExecutor;
 import plus.tson.utl.Te4HashSet;
 
@@ -329,11 +332,17 @@ public abstract class PlayerList {
             this.playerStatFiles.remove(uuid);
             this.advancements.remove(uuid);
         }
-        this.sendPacketToAllPlayersE(new SPacketPlayerListItem(SPacketPlayerListItem.Action.REMOVE_PLAYER, new EntityPlayerMP[] {playerIn}));
+        this.sendPacketToAllPlayersE(new SPacketPlayerListItem(SPacketPlayerListItem.Action.REMOVE_PLAYER, playerIn));
     }
 
 
+    @Deprecated
     public String allowUserToConnect(SocketAddress address, GameProfile profile) {
+        return allowUserToConnect(new ElcaConnectEvent(this, address, profile), address, profile);
+    }
+
+
+    public String allowUserToConnect(ElcaConnectEvent event, SocketAddress address, GameProfile profile) {
         if (this.bannedPlayers.isBanned(profile)) {
             UserListBansEntry userlistbansentry = this.bannedPlayers.getEntry(profile);
             String s1 = "You are banned from this server!\nReason: " + userlistbansentry.getBanReason();
@@ -341,10 +350,11 @@ public abstract class PlayerList {
             if (userlistbansentry.getBanEndDate() != null) {
                 s1 = s1 + "\nYour ban will be removed on " + DATE_FORMAT.format(userlistbansentry.getBanEndDate());
             }
-
-            return s1;
+            event.setStatus(ElcaConnectEvent.Status.REJECT_BANNED);
+            event.reject(s1);
         } else if (!this.canJoin(profile)) {
-            return "You are not white-listed on this server!";
+            event.setStatus(ElcaConnectEvent.Status.REJECT_NON_WHITELIST);
+            event.reject(ElcaConfig.REJECT_NON_WHITELIST);
         } else if (this.bannedIPs.isBanned(address)) {
             UserListIPBansEntry userlistipbansentry = this.bannedIPs.getBanEntry(address);
             String s = "Your IP address is banned from this server!\nReason: " + userlistipbansentry.getBanReason();
@@ -352,11 +362,17 @@ public abstract class PlayerList {
             if (userlistipbansentry.getBanEndDate() != null) {
                 s = s + "\nYour ban will be removed on " + DATE_FORMAT.format(userlistipbansentry.getBanEndDate());
             }
-
-            return s;
+            event.setStatus(ElcaConnectEvent.Status.REJECT_BANNED_IP);
+            event.reject(s);
         } else {
-            return this.playerEntityList.size() >= this.maxPlayers && !this.bypassesPlayerLimit(profile) ? "The server is full!" : null;
+            String msg = this.playerEntityList.size() >= this.maxPlayers && !this.bypassesPlayerLimit(profile) ? ElcaConfig.REJECT_SERVER_FULL : null;
+            if(msg != null){
+                event.setStatus(ElcaConnectEvent.Status.REJECT_SERVER_FULL);
+                event.reject(msg);
+            }
         }
+        MinecraftForge.EVENT_BUS.post(event);
+        return event.getMessage();
     }
 
 
@@ -372,24 +388,26 @@ public abstract class PlayerList {
             }
         }
 
-        EntityPlayerMP entityplayermp2 = this.uuidToPlayerMap.get(profile.getId());
+        EntityPlayerMP player = this.uuidToPlayerMap.get(profile.getId());
 
-        if (entityplayermp2 != null && !list.contains(entityplayermp2)) {
-            list.add(entityplayermp2);
+        if (player != null && !list.contains(player)) {
+            list.add(player);
         }
 
         for (EntityPlayerMP entityplayermp1 : list) {
-            entityplayermp1.connection.disconnect(new TextComponentTranslation("multiplayer.disconnect.duplicate_login", new Object[0]));
+            entityplayermp1.connection.disconnect(new TextComponentTranslation("multiplayer.disconnect.duplicate_login"));
         }
 
         PlayerInteractionManager playerinteractionmanager;
 
+        WorldServer world = this.server.getWorld(0);
+
         if (this.server.isDemo()) {
-            playerinteractionmanager = new DemoPlayerInteractionManager(this.server.getWorld(0));
+            playerinteractionmanager = new DemoPlayerInteractionManager(world);
         } else {
-            playerinteractionmanager = new PlayerInteractionManager(this.server.getWorld(0));
+            playerinteractionmanager = new PlayerInteractionManager(world);
         }
-        return new EntityPlayerMP(this.server, this.server.getWorld(0), profile, playerinteractionmanager);
+        return new EntityPlayerMP(this.server, world, profile, playerinteractionmanager);
     }
 
 
@@ -503,7 +521,6 @@ public abstract class PlayerList {
         double d0 = MathHelper.clamp(entityIn.posX * moveFactor, toWorldIn.getWorldBorder().minX() + 16.0D, toWorldIn.getWorldBorder().maxX() - 16.0D);
         double d1 = MathHelper.clamp(entityIn.posZ * moveFactor, toWorldIn.getWorldBorder().minZ() + 16.0D, toWorldIn.getWorldBorder().maxZ() - 16.0D);
         float f = entityIn.rotationYaw;
-        oldWorldIn.profiler.startSection("moving");
 
         if (entityIn.dimension == 1 && teleporter.isVanilla()) {
             BlockPos blockpos;
@@ -523,10 +540,7 @@ public abstract class PlayerList {
             }
         }
 
-        oldWorldIn.profiler.endSection();
-
         if (lastDimension != 1 || !teleporter.isVanilla()) {
-            oldWorldIn.profiler.startSection("placing");
             d0 = MathHelper.clamp((int)d0, -29999872, 29999872);
             d1 = MathHelper.clamp((int)d1, -29999872, 29999872);
 
@@ -537,8 +551,6 @@ public abstract class PlayerList {
                 toWorldIn.spawnEntity(entityIn);
                 toWorldIn.updateEntityWithOptionalForce(entityIn, false);
             }
-
-            oldWorldIn.profiler.endSection();
         }
 
         entityIn.setWorld(toWorldIn);
@@ -988,13 +1000,17 @@ public abstract class PlayerList {
     /**
      * @author Te4hno
      */
-    public void playerLoggedIn(EntityPlayerMP playerIn) {
+    public void playerLoggedIn(final EntityPlayerMP playerIn) {
         this.playerEntityList.add(playerIn);
         this.uuidToPlayerMap.put(playerIn.getUniqueID(), playerIn);
 
         playerIn.connection.netManager.exec(() -> {
+            SPacketPlayerListItem packet = new SPacketPlayerListItem(SPacketPlayerListItem.Action.ADD_PLAYER, playerIn);
+
             for (int i = 0; i < playerEntityList.size(); ++i) {
-                playerIn.connection.netManager.sendPacketE(new SPacketPlayerListItem(SPacketPlayerListItem.Action.ADD_PLAYER, playerEntityList.get(i)));
+                EntityPlayerMP cur = playerEntityList.get(i);
+                cur.connection.netManager.sendPacketSync(packet);
+                playerIn.connection.netManager.sendPacketSync(new SPacketPlayerListItem(SPacketPlayerListItem.Action.ADD_PLAYER, cur));
             }
             TChunkExecutor.adjustPoolSize(this.getCurrentPlayerCount());
         });
