@@ -17,8 +17,8 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
     static final int MIN_TREEIFY_CAPACITY = 64;
 
     public static class Node<K,V> implements Entry<K,V> {
-        final int hash, stamp;
-        final K key;
+        int hash, stamp;
+        K key;
         V value;
         Node<K,V> next;
 
@@ -27,6 +27,20 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
             this.key = key;
             this.value = value;
             this.next = next;
+            this.stamp = stamp;
+        }
+
+        void clean(){
+            this.key = null;
+            this.value = null;
+            this.next = null;
+        }
+
+        void init(int hash, K key, V value, int stamp){
+            this.hash = hash;
+            this.key = key;
+            this.value = value;
+            this.next = null;
             this.stamp = stamp;
         }
 
@@ -90,16 +104,22 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
         return (n < 0) ? 1 : (n >= MAXIMUM_CAPACITY) ? MAXIMUM_CAPACITY : n + 1;
     }
 
+    private static final Node[] EMPTY = new Node[]{};
+    private static final Object[] EMPTY_O = new Object[]{};
 
-    private Node<K,V>[] table;
+    Node<K,V>[] table;
+
     private EntrySet entrySet;
-    private int size;
+    int size;
     protected int modCount;
     private KeySet keySet;
     private Collection<V> values;
-    private int threshold;
-    private final float loadFactor;
+    int threshold;
+    final float loadFactor;
 
+    Node<K,V>[] emptyNodes = EMPTY;
+    Object[] vals = EMPTY_O;
+    int nCursor = -1, kCursor = -1;
 
     public SyncTe4Cache(int initialCapacity, float loadFactor) {
         if (loadFactor <= 0)
@@ -122,6 +142,60 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
     }
 
 
+    final Node<K,V> alloc(int hash, K key, V value, int stamp){
+        if(nCursor > 0){
+            Node<K,V> node = emptyNodes[nCursor--];
+            node.init(hash, key, value, stamp);
+            return node;
+        }
+        return new Node<>(hash, key, value, null, stamp);
+    }
+
+
+    final void free(Node<K,V> node){
+        if(emptyNodes.length == ++nCursor){
+            int newSize = emptyNodes.length == 0?table.length:emptyNodes.length<<1;
+            Node[] newNodes = new Node[newSize];
+            System.arraycopy(emptyNodes, 0, newNodes, 1, emptyNodes.length);
+            newNodes[0] = node;
+            emptyNodes = newNodes;
+        }
+        else emptyNodes[nCursor] = node;
+        freeVal(node.value);
+    }
+
+
+    final V tryAllocVal(){
+        return kCursor > 0 ? (V) vals[kCursor--] : null;
+    }
+
+
+    final void freeVal(V key){
+        if(vals.length == ++kCursor){
+            int newSize = vals.length == 0?table.length: vals.length<<1;
+            Object[] newNodes = new Object[newSize];
+            System.arraycopy(vals, 0, newNodes, 1, vals.length);
+            newNodes[0] = key;
+            vals = newNodes;
+        }
+        else vals[kCursor] = key;
+    }
+
+
+    public final void freeCache(){
+        emptyNodes = EMPTY;
+        vals       = EMPTY_O;
+    }
+
+
+    public final void cleanCache(){
+        for (int i=0;i<emptyNodes.length;i++){
+            Node node = emptyNodes[i];
+            node.clean();
+        }
+    }
+
+
     public SyncTe4Cache(Map<? extends K, ? extends V> m) {
         this.loadFactor = DEFAULT_LOAD_FACTOR;
         table = resize();
@@ -135,7 +209,7 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
             while (s > threshold && table.length < MAXIMUM_CAPACITY)
                 resize();
             for (Entry<? extends K, ? extends V> e : m.entrySet())
-                fput(e.getKey(), e.getValue(), -1);
+                put(e.getKey(), e.getValue(), -1);
         }
     }
 
@@ -205,45 +279,10 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
     }
 
 
-    public void fput(K key, V value, int stamp) {
-        int hash = key.hashCode();
-        Node<K,V>[] tab = table; Node<K,V> node; int i;
-        if ((node = tab[i = (tab.length - 1) & hash]) == null) {
-            tab[i] = new Node<>(hash, key, value, null, stamp);
-        } else {
-            Node<K,V> e; K k;
-            if (node.hash == hash && ((k = node.key) == key || key.equals(k)))
-                e = node;
-            else if (node instanceof TreeNode)
-                e = ((TreeNode<K,V>)node).putTreeVal(tab, hash, key, value, stamp);
-            else {
-                for (i = 0; ; ++i) {
-                    if ((e = node.next) == null) {
-                        node.next = new Node<>(hash, key, value, null, stamp);
-                        if (i >= 7) // -1 for 1st
-                            treeifyBin(tab, hash);
-                        break;
-                    }
-                    if (e.hash == hash && ((k = e.key) == key || key.equals(k)))
-                        break;
-                    node = e;
-                }
-            }
-            if (e != null) { // existing mapping for key
-                e.value = value;
-                return;
-            }
-        }
-        ++modCount;
-        if (++size > threshold)
-            resize();
-    }
-
-
     private Node<K,V> putValN(int hash, K key, V value, boolean onlyIfAbsent, int stamp) {
         Node<K,V>[] tab = table; Node<K,V> node; int i;
         if ((node = tab[i = (tab.length - 1) & hash]) == null) {
-            tab[i] = new Node<>(hash, key, value, null, stamp);
+            tab[i] = alloc(hash, key, value, stamp);
         } else {
             Node<K,V> e; K k;
             if (node.hash == hash && ((k = node.key) == key || (key != null && key.equals(k))))
@@ -253,7 +292,7 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
             else {
                 for (i = 0; ; ++i) {
                     if ((e = node.next) == null) {
-                        node.next = new Node<>(hash, key, value, null, stamp);
+                        node.next = alloc(hash, key, value, stamp);
                         if (i >= 7) // -1 for 1st
                             treeifyBin(tab, hash);
                         break;
@@ -281,6 +320,39 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
     final V putVal(int hash, K key, V value, boolean onlyIfAbsent, int stamp) {
         Node<K, V> node = putValN(hash, key, value, onlyIfAbsent, stamp);
         return node==null?null:node.getValue();
+    }
+
+
+    public final void fput(K key, V value, int stamp) {
+        Node<K,V>[] tab = table; Node<K,V> node; int i, hash = key.hashCode();
+        if ((node = tab[i = (tab.length - 1) & hash]) == null) {
+            tab[i] = alloc(hash, key, value, stamp);
+        } else {
+            Node<K,V> e; K k;
+            if (node.hash == hash && ((k = node.key) == key || key.equals(k)))
+                e = node;
+            else if (node instanceof TreeNode)
+                e = ((TreeNode<K,V>)node).putTreeVal(tab, hash, key, value, stamp);
+            else {
+                for (i = 0; ; ++i) {
+                    if ((e = node.next) == null) {
+                        node.next = alloc(hash, key, value, stamp);
+                        if (i >= 7) // -1 for 1st
+                            treeifyBin(tab, hash);
+                        break;
+                    }
+                    if (e.hash == hash && ((k = e.key) == key || key.equals(k)))
+                        break;
+                    node = e;
+                }
+            }
+            if (e != null) {
+                e.value = value;
+                return;
+            }
+        }
+        ++modCount;
+        if (++size > threshold) resize();
     }
 
 
@@ -321,7 +393,7 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
                     if (e.next == null)
                         newTab[e.hash & (newCap - 1)] = e;
                     else if (e instanceof TreeNode)
-                        ((TreeNode<K,V>)e).split(newTab, j, oldCap);
+                        ((TreeNode<K,V>)e).split(this, newTab, j, oldCap);
                     else { // preserve order
                         Node<K,V> loHead = null, loTail = null;
                         Node<K,V> hiHead = null, hiTail = null;
@@ -387,9 +459,12 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
 
 
     public V remove(Object key) {
-        Node<K,V> e;
-        return (e = removeNode(key.hashCode(), key, null, false, true)) == null ?
-                null : e.value;
+        Node<K,V> e = removeNode(key.hashCode(), key, null, false);
+        if(e != null){
+            free(e);
+            return e.value;
+        }
+        return null;
     }
 
 
@@ -404,18 +479,9 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
         while (next != null){
             Node<K,V> e = next;
 
-            if ((next = (node = e).next) == null) {
-                do {} while (index < tab.length && (next = tab[index++]) == null);
-            }
+            if((next = (node = e).next) == null) do {} while (index < tab.length && (next = tab[index++]) == null);
 
-            if(node.stamp == stamp){
-//                int pid;
-//                if(tab[pid = (n - 1) & node.hash] == node){
-//                    tab[pid] = node.next;
-//                    --size;
-//                } else
-                removeNodeF(node.hash, node.key);
-            }
+            if(node.stamp == stamp) removeNodeF(node.hash, node.key);
         }
     }
 
@@ -444,11 +510,11 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
             }
             if (node != null) {
                 if (node instanceof TreeNode)
-                    ((TreeNode<K,V>)node).removeTreeNode(tab, false);
-                else if (node == p)
+                    ((TreeNode<K,V>)node).removeTreeNode(this, tab, false);
+                else if (node == p){
+                    free(node);
                     tab[index] = node.next;
-                else
-                    p.next = node.next;
+                } else p.next = node.next;
                 --size;
             }
         }
@@ -456,7 +522,7 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
 
 
     protected final Node<K,V> removeNode(int hash, Object key, Object value,
-                               boolean matchValue, boolean movable) {
+                                         boolean matchValue) {
         Node<K,V>[] tab; Node<K,V> p; int n, index;
         if ((tab = table) != null && (n = tab.length) > 0 &&
                 (p = tab[index = (n - 1) & hash]) != null) {
@@ -482,11 +548,11 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
             if (node != null && (!matchValue || (v = node.value) == value ||
                     (value != null && value.equals(v)))) {
                 if (node instanceof TreeNode)
-                    ((TreeNode<K,V>)node).removeTreeNode(tab, movable);
-                else if (node == p)
+                    ((TreeNode<K,V>)node).removeTreeNode(this, tab, true);
+                else if (node == p){
+                    free(node);
                     tab[index] = node.next;
-                else
-                    p.next = node.next;
+                } else p.next = node.next;
                 ++modCount;
                 --size;
                 return node;
@@ -580,7 +646,7 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
         public KeyIterator iterator()     { return new KeyIterator(); }
         public boolean contains(Object o) { return containsKey(o); }
         public boolean remove(Object key) {
-            return removeNode(key.hashCode(), key, null, false, true) != null;
+            return removeNode(key.hashCode(), key, null, false) != null;
         }
         public Spliterator<K> spliterator() {
             return new KeySpliterator<>(SyncTe4Cache.this, 0, -1, 0, 0);
@@ -680,7 +746,7 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
                 Entry<?,?> e = (Entry<?,?>) o;
                 Object key = e.getKey();
                 Object value = e.getValue();
-                return removeNode(key.hashCode(), key, value, true, true) != null;
+                return removeNode(key.hashCode(), key, value, true) != null;
             }
             return false;
         }
@@ -724,7 +790,7 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
 
     @Override
     public boolean remove(Object key, Object value) {
-        return removeNode(key.hashCode(), key, value, true, true) != null;
+        return removeNode(key.hashCode(), key, value, true) != null;
     }
 
 
@@ -773,7 +839,8 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
                 return v;
             }
             else {
-                removeNode(key.hashCode(), key, null, false, true);
+                e = removeNode(key.hashCode(), key, null, false);
+                if(e != null)free(e);
             }
         }
         return null;
@@ -854,9 +921,11 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
             }
         }
 
+
         public final boolean hasNext() {
             return next != null;
         }
+
 
         final Node<K,V> nextNode() {
             Node<K,V> e = next;
@@ -870,6 +939,7 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
             }
             return e;
         }
+
 
         public final void remove() {
             Node<K,V> p = current;
@@ -1286,10 +1356,10 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
         }
 
 
-        Node<K,V> untreeify() {
+        Node<K,V> untreeify(SyncTe4Cache<K,V> cache) {
             Node<K,V> hd = null, tl = null;
             for (Node<K,V> q = this; q != null; q = q.next) {
-                Node<K,V> p = new Node<>(q.hash, q.key, q.value, null, q.stamp);
+                Node<K,V> p = cache.alloc(q.hash, q.key, q.value, q.stamp);
                 if (tl == null)
                     hd = p;
                 else
@@ -1300,7 +1370,7 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
         }
 
 
-        private TreeNode<K,V> putTreeVal(Node<K,V>[] tab, int h, K k, V v, int stamp) {
+        final TreeNode<K,V> putTreeVal(Node<K,V>[] tab, int h, K k, V v, int stamp) {
             Class<?> kc = null;
             boolean searched = false;
             TreeNode<K,V> root = (parent != null) ? root() : this;
@@ -1346,10 +1416,10 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
         }
 
 
-        void removeTreeNode(Node<K,V>[] tab, boolean movable) {
+        void removeTreeNode(SyncTe4Cache<K,V> cachce, Node<K,V>[] tab, boolean movable) {
             int index = (tab.length - 1) & hash;
             TreeNode<K,V> first = (TreeNode<K,V>)tab[index], root = first, rl,
-                          succ = (TreeNode<K,V>)next, pred = prev;
+                    succ = (TreeNode<K,V>)next, pred = prev;
             if (pred == null)
                 tab[index] = first = succ;
             else
@@ -1361,7 +1431,7 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
             if (root.parent != null)
                 root = root.root();
             if (movable && (root.right == null || (rl = root.left) == null || rl.left == null)) {
-                tab[index] = first.untreeify();
+                tab[index] = first.untreeify(cachce);
                 return;
             }
             TreeNode<K,V> p = this, pl = left, pr = right, replacement;
@@ -1436,9 +1506,9 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
         }
 
 
-        void split(Node<K,V>[] tab, int index, int bit) {
+        void split(SyncTe4Cache<K,V> cache, Node<K,V>[] tab, int index, int bit) {
             TreeNode<K,V> loHead = null, loTail = null,
-                          hiHead = null, hiTail = null;
+                    hiHead = null, hiTail = null;
             int lc = 0, hc = 0;
             for (TreeNode<K,V> e = this, next; e != null; e = next) {
                 next = (TreeNode<K,V>)e.next;
@@ -1463,7 +1533,7 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
 
             if (loHead != null) {
                 if (lc <= UNTREEIFY_THRESHOLD)
-                    tab[index] = loHead.untreeify();
+                    tab[index] = loHead.untreeify(cache);
                 else {
                     tab[index] = loHead;
                     if (hiHead != null) // (else is already treeified)
@@ -1472,7 +1542,7 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
             }
             if (hiHead != null) {
                 if (hc <= UNTREEIFY_THRESHOLD)
-                    tab[index + bit] = hiHead.untreeify();
+                    tab[index + bit] = hiHead.untreeify(cache);
                 else {
                     tab[index + bit] = hiHead;
                     if (loHead != null)

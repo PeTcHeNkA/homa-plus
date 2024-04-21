@@ -1610,13 +1610,13 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
 
 
     @Override
-    protected <T extends Entity> List<T> getEntitiesWithinAABB0(Class <? extends T > clazz,
+    protected <T extends Entity> void getEntitiesWithinAABB0(List<T> list, Class <? extends T > clazz,
                                                                 AxisAlignedBB aabb, @Nullable Predicate<? super T > filter) {
         int k2 = MathHelper.ceil(aabb.maxX + MAX_ENTITY_RADIUS)>>4;
         int l2 = MathHelper.floor(aabb.minZ - MAX_ENTITY_RADIUS)>>4;
         int i3 = MathHelper.ceil(aabb.maxZ + MAX_ENTITY_RADIUS)>>4;
 
-        List<T> list = new ArrayListE6<>();
+        //List<T> list = new ArrayListE6<>();
         Chunk chunk;
 
         for (int xPos = MathHelper.floor(aabb.minX - MAX_ENTITY_RADIUS)>>4; xPos < k2; ++xPos) {
@@ -1626,18 +1626,18 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
                 }
             }
         }
-        return list;
+        //return list;
     }
 
 
-    private ArrayListE6<Entity> lastList = ElcaCV.AABB_MEMORY_IMPROVEMENT?new ArrayListE6<>():null;
+    //private ArrayListE6<Entity> lastList = ElcaCV.AABB_MEMORY_IMPROVEMENT?new ArrayListE6<>():null;
     @Override //synchronized, improved memory management
-    public List<Entity> getEntitiesInAABBexcludingNoCache(@Nullable Entity entityIn, AxisAlignedBB boundingBox, @Nullable Predicate <? super Entity > predicate) {
+    public void getEntitiesInAABBexcludingNoCache(List<Entity> list, @Nullable Entity entityIn, AxisAlignedBB boundingBox, @Nullable Predicate <? super Entity > predicate) {
         int k2 = MathHelper.floor(boundingBox.maxX + MAX_ENTITY_RADIUS)>>4;
         int l2 = MathHelper.floor(boundingBox.minZ - MAX_ENTITY_RADIUS)>>4;
         int i3 = MathHelper.floor(boundingBox.maxZ + MAX_ENTITY_RADIUS)>>4;
 
-        ArrayListE6<Entity> list = ElcaCV.AABB_MEMORY_IMPROVEMENT?lastList:new ArrayListE6<>();
+        //ArrayListE6<Entity> list = ElcaCV.AABB_MEMORY_IMPROVEMENT?lastList:new ArrayListE6<>();
         Chunk chunk;
 
         for (int xPos = MathHelper.floor(boundingBox.minX - MAX_ENTITY_RADIUS)>>4; xPos <= k2; ++xPos) {
@@ -1647,20 +1647,20 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
                 }
             }
         }
-        if(list.isEmpty())return Collections.EMPTY_LIST;
-        if(ElcaCV.AABB_MEMORY_IMPROVEMENT) lastList = new ArrayListE6<>();
-        return list;
+//        if(list.isEmpty())return Collections.EMPTY_LIST;
+//        if(ElcaCV.AABB_MEMORY_IMPROVEMENT) lastList = new ArrayListE6<>();
+//        return list;
     }
 
 
     @Override //synchronized, improved memory management
-    protected List<Entity> getEntitiesInAABBexcludingNoCacheLimited(@Nullable Entity entityIn, AxisAlignedBB boundingBox, @Nullable Predicate <? super Entity > predicate, int lim) {
-        if(lim==0)return Collections.EMPTY_LIST;
+    protected void getEntitiesInAABBexcludingNoCacheLimited(List<Entity> list, @Nullable Entity entityIn, AxisAlignedBB boundingBox, @Nullable Predicate <? super Entity > predicate, int lim) {
+        if(lim==0)return;
         int k2 = MathHelper.floor(boundingBox.maxX + MAX_ENTITY_RADIUS)>>4;
         int l2 = MathHelper.floor(boundingBox.minZ - MAX_ENTITY_RADIUS)>>4;
         int i3 = MathHelper.floor(boundingBox.maxZ + MAX_ENTITY_RADIUS)>>4;
 
-        ArrayListE6<Entity> list = ElcaCV.AABB_MEMORY_IMPROVEMENT?lastList:new ArrayListE6<>();
+        //ArrayListE6<Entity> list = ElcaCV.AABB_MEMORY_IMPROVEMENT?lastList:new ArrayListE6<>();
         Chunk chunk;
 
         for (int xPos = MathHelper.floor(boundingBox.minX - MAX_ENTITY_RADIUS)>>4; xPos <= k2; ++xPos) {
@@ -1670,9 +1670,9 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
                 }
             }
         }
-        if(list.isEmpty())return Collections.EMPTY_LIST;
-        if(ElcaCV.AABB_MEMORY_IMPROVEMENT) lastList = new ArrayListE6<>();
-        return list;
+        //if(list.isEmpty())return Collections.EMPTY_LIST;
+        //if(ElcaCV.AABB_MEMORY_IMPROVEMENT) lastList = new ArrayListE6<>();
+        //return list;
     }
 
 

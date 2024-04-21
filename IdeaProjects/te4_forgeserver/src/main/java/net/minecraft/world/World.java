@@ -71,6 +71,7 @@ import plus.fserver.event.ElcaCV;
 import plus.fserver.server.AsyWorldTickerV2;
 import plus.fserver.server.CacheBuilder;
 import plus.fserver.utls.AABKey;
+import plus.fserver.utls.collections.ArrayListE6;
 import plus.fserver.utls.collections.SyncAABBCache;
 import plus.fserver.utls.math.BlockPosDelta;
 import plus.fserver.utls.ChunkSelector;
@@ -147,8 +148,8 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public long tryUpdateNavigationLimit = 20L;
     public final LightingEngine lightingEngine = new LightingEngine(this);
 
-    private final SyncAABBCache<List<AxisAlignedBB>> bbCache;
-    private final SyncAABBCache<List<Entity>>        eeCache;
+    final SyncAABBCache<AxisAlignedBB> bbCache;
+    final SyncAABBCache<Entity>        eeCache;
 
     protected World(ISaveHandler saveHandlerIn, WorldInfo info, WorldProvider providerIn, Profiler profilerIn, boolean client) {
         this(null, saveHandlerIn, info, providerIn, profilerIn, client);
@@ -3466,16 +3467,20 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     /**
      * @author Te4hno
      */
-    public List<AxisAlignedBB> getCollisionBoxes(@Nullable Entity entityIn, @NotNull AxisAlignedBB bb) {
+    public List<AxisAlignedBB> getCollisionBoxes(@Nullable Entity entityIn, @NotNull AxisAlignedBB aabb) {
         if(ElcaCV.MORE_MOBS_OPTIMIZER) {
-            AABKey key = new AABKey(bb);
-            List<AxisAlignedBB> res = this.bbCache.get(key);
+            AABKey key = bbCache.key(aabb);
+            //AABKey key = new AABKey(aabb);
+            ArrayListE6<AxisAlignedBB> res = this.bbCache.get(key);
             if (res != null) return res;
-            res = getCollisionBoxes0(entityIn, bb);
-            this.bbCache.put(key, res);
+            res = bbCache.allocArr();
+            getCollisionBoxes0(res, entityIn, aabb);
+            this.bbCache.add(key, res);
             return res;
         } else {
-            return getCollisionBoxes0(entityIn, bb);
+            ArrayListE6<AxisAlignedBB> res = new ArrayListE6<>();
+            getCollisionBoxes0(res, entityIn, aabb);
+            return res;
         }
     }
 
@@ -3483,16 +3488,18 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     /**
      * @author Te4hno
      */
-    public List<AxisAlignedBB> getCollisionBoxesLimited(@Nullable Entity entityIn, @NotNull AxisAlignedBB bb, int lim) {
+    public List<AxisAlignedBB> getCollisionBoxesLimited(@Nullable Entity entityIn, @NotNull AxisAlignedBB aabb, int lim) {
         if(ElcaCV.MORE_MOBS_OPTIMIZER) {
-            AABKey key = new AABKey(bb);
-            List<AxisAlignedBB> res = this.bbCache.get(key);
+            AABKey key = bbCache.key(aabb);
+            ArrayListE6<AxisAlignedBB> res = bbCache.get(key);
             if (res != null) return res;
-            res = getCollisionBoxes0Limited(entityIn, bb, lim);
-            this.bbCache.put(key, res);
+            getCollisionBoxes0Limited(res = bbCache.allocArr(), entityIn, aabb, lim);
+            bbCache.add(key, res);
             return res;
         } else {
-            return getCollisionBoxes0Limited(entityIn, bb, lim);
+            ArrayListE6<AxisAlignedBB> list;
+            getCollisionBoxes0Limited(list = new ArrayListE6<>(), entityIn, aabb, lim);
+            return list;
         }
     }
 
@@ -3501,29 +3508,34 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
      * @author Te4hno
      */
     @NotNull
-    public List<Entity> getEntitiesInAABBexcluding(@Nullable Entity entityIn, @NotNull AxisAlignedBB boundingBox,
+    public List<Entity> getEntitiesInAABBexcluding(@Nullable Entity entityIn, @NotNull AxisAlignedBB aabb,
                                                    @Nullable Predicate<? super Entity > predicate){
         if(ElcaCV.MORE_MOBS_OPTIMIZER) {
-            AABKey key = new AABKey(boundingBox);
-            final List<Entity> entities = this.eeCache.get(key);
+            AABKey key = eeCache.key(aabb);
+
+            final ArrayListE6<Entity> entities = this.eeCache.get(key);
             if (entities != null) {
                 if (predicate != null && !entities.isEmpty()) {
                     for (final Entity entity : entities) {
                         if (!predicate.apply(entity)) {
-                            List<Entity> res = getEntitiesInAABBexcludingNoCache(entityIn, boundingBox, predicate);
-                            this.eeCache.put(key, res);
+                            ArrayListE6<Entity> res = eeCache.allocArr();
+                            getEntitiesInAABBexcludingNoCache(res, entityIn, aabb, predicate);
+                            this.eeCache.add(key, res);
                             return res;
                         }
                     }
                 }
                 return entities;
             } else {
-                final List<Entity> res = getEntitiesInAABBexcludingNoCache(entityIn, boundingBox, predicate);
-                this.eeCache.put(key, res);
+                ArrayListE6<Entity> res = eeCache.allocArr();
+                getEntitiesInAABBexcludingNoCache(res, entityIn, aabb, predicate);
+                this.eeCache.add(key, res);
                 return res;
             }
         } else {
-            return getEntitiesInAABBexcludingNoCache(entityIn, boundingBox, predicate);
+            ArrayListE6<Entity> res = new ArrayListE6<>();
+            getEntitiesInAABBexcludingNoCache(res, entityIn, aabb, predicate);
+            return res;
         }
     }
 
@@ -3535,35 +3547,41 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public <T extends Entity> List<T> getEntitiesWithinAABB(@NotNull Class <? extends T > clazz, @NotNull AxisAlignedBB aabb,
                                                             @Nullable Predicate<? super T > filter){
         if(ElcaCV.MORE_MOBS_OPTIMIZER) {
-            AABKey key = new AABKey(aabb);
+            AABKey key = eeCache.key(aabb);
+            //AABKey key = new AABKey(aabb);
             final List<Entity> entities = this.eeCache.get(key);
             if (entities != null) {
                 if (entities.isEmpty()) return (List<T>) entities;
                 for (final Entity entity : entities) {
                     if (!clazz.isInstance(entity) || filter != null && !filter.apply((T) entity)) {
-                        List<T> res = getEntitiesWithinAABB0(clazz, aabb, filter);
-                        eeCache.put(key, (List<Entity>) res);
+                        ArrayListE6<T> res = (ArrayListE6<T>) eeCache.allocArr();
+
+                                //List<T> res = getEntitiesWithinAABB0(clazz, aabb, filter);
+                        eeCache.add(key, (ArrayListE6<Entity>) res);
                         return res;
                     }
                 }
                 return (List<T>) entities;
             } else {
-                final List<T> res = getEntitiesWithinAABB0(clazz, aabb, filter);
-                eeCache.put(key, (List<Entity>) res);
+                ArrayListE6<T> res = (ArrayListE6<T>) eeCache.allocArr();
+                getEntitiesWithinAABB0(res, clazz, aabb, filter);
+                eeCache.add(key, (ArrayListE6<Entity>) res);
                 return res;
             }
         } else {
-            return getEntitiesWithinAABB0(clazz, aabb, filter);
+            ArrayListE6<T> res = new ArrayListE6<>();
+            getEntitiesWithinAABB0(res, clazz, aabb, filter);
+            return res;
         }
     }
 
 
-    protected <T extends Entity> List<T> getEntitiesWithinAABB0(Class <? extends T > clazz, AxisAlignedBB aabb, @Nullable Predicate <? super T > filter) {
+    protected <T extends Entity> void getEntitiesWithinAABB0(List<T> list, Class <? extends T > clazz, AxisAlignedBB aabb, @Nullable Predicate <? super T > filter) {
         int j2 = MathHelper.floor((aabb.minX - MAX_ENTITY_RADIUS) / 16.0D);
         int k2 = MathHelper.ceil((aabb.maxX + MAX_ENTITY_RADIUS) / 16.0D);
         int l2 = MathHelper.floor((aabb.minZ - MAX_ENTITY_RADIUS) / 16.0D);
         int i3 = MathHelper.ceil((aabb.maxZ + MAX_ENTITY_RADIUS) / 16.0D);
-        List<T> list = new ArrayList<>();
+        //List<T> list = new ArrayList<>();
 
         for (int j3 = j2; j3 < k2; ++j3) {
             for (int k3 = l2; k3 < i3; ++k3) {
@@ -3572,7 +3590,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
                 }
             }
         }
-        return list;
+        //return list;
     }
 
 
@@ -3580,8 +3598,9 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             ElcaCV.ENABLE_COLLISION_EVENTS?
             new GetCollisionBoxesEvent(this):null;
 
-    private List<AxisAlignedBB> getCollisionBoxes0(@Nullable Entity entityIn, AxisAlignedBB aabb) {
-        List<AxisAlignedBB> list = new ArrayList<>();
+
+    private void getCollisionBoxes0(List<AxisAlignedBB> list, @Nullable Entity entityIn, AxisAlignedBB aabb) {
+        //List<AxisAlignedBB> list = new ArrayList<>();
         this.getCollisionBoxes(entityIn, aabb, false, list);
         if (entityIn != null) {
             List<Entity> list1 = getEntitiesInAABBexcluding(entityIn, aabb.grow(0.25D), EntitySelectors.NOT_SPECTATING);
@@ -3589,12 +3608,11 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         }
         if(ElcaCV.ENABLE_COLLISION_EVENTS)
             MinecraftForge.EVENT_BUS.post(collisionEvent.init(entityIn, aabb, list));
-        return list;
+        //return list;
     }
 
 
-    private List<AxisAlignedBB> getCollisionBoxes0Limited(@Nullable Entity entityIn, AxisAlignedBB aabb, int lim) {
-        List<AxisAlignedBB> list = new ArrayList<>();
+    private void getCollisionBoxes0Limited(List<AxisAlignedBB> list, @Nullable Entity entityIn, AxisAlignedBB aabb, int lim) {
         this.getCollisionBoxes(entityIn, aabb, false, list);
         if (entityIn != null && lim > 0) {
             List<Entity> list1 = getEntitiesInAABBexcludingLimited(entityIn, aabb.grow(0.25D), EntitySelectors.NOT_SPECTATING, lim);
@@ -3602,34 +3620,43 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         }
         if(ElcaCV.ENABLE_COLLISION_EVENTS)
             MinecraftForge.EVENT_BUS.post(collisionEvent.init(entityIn, aabb, list));
-        return list;
+        //return list;
     }
 
 
+    //private List<Entity> lastList = ElcaCV.AABB_MEMORY_IMPROVEMENT?new ArrayListE6<>():null;
     @NotNull
-    public List<Entity> getEntitiesInAABBexcludingLimited(@Nullable Entity entityIn, @NotNull AxisAlignedBB boundingBox,
+    public List<Entity> getEntitiesInAABBexcludingLimited(@Nullable Entity entityIn, @NotNull AxisAlignedBB aabb,
                                                           @Nullable Predicate<? super Entity > predicate, int lim){
         if(ElcaCV.MORE_MOBS_OPTIMIZER) {
-            AABKey key = new AABKey(boundingBox);
+            AABKey key = eeCache.key(aabb);
+            //AABKey key = new AABKey(aabb);
             final List<Entity> entities = this.eeCache.get(key);
             if (entities != null) {
                 if (predicate != null && !entities.isEmpty()) {
                     for (final Entity entity : entities) {
                         if (!predicate.apply(entity)) {
-                            List<Entity> res = getEntitiesInAABBexcludingNoCacheLimited(entityIn, boundingBox, predicate, lim);
-                            this.eeCache.put(key, res);
+                            ArrayListE6<Entity> res = eeCache.allocArr();
+
+                            getEntitiesInAABBexcludingNoCacheLimited(res, entityIn, aabb, predicate, lim);
+
+                            this.eeCache.add(key, res);
                             return res;
                         }
                     }
                 }
                 return entities;
             } else {
-                final List<Entity> res = getEntitiesInAABBexcludingNoCacheLimited(entityIn, boundingBox, predicate, lim);
-                this.eeCache.put(key, res);
+                ArrayListE6<Entity> res = eeCache.allocArr();
+                getEntitiesInAABBexcludingNoCacheLimited(res, entityIn, aabb, predicate, lim);
+
+                this.eeCache.add(key, res);
                 return res;
             }
         } else {
-            return getEntitiesInAABBexcludingNoCacheLimited(entityIn, boundingBox, predicate, lim);
+            List<Entity> res = new ArrayListE6<>();
+            getEntitiesInAABBexcludingNoCacheLimited(res, entityIn, aabb, predicate, lim);
+            return res;
         }
     }
 
@@ -3649,8 +3676,8 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
-    public List<Entity> getEntitiesInAABBexcludingNoCache(@Nullable Entity entityIn, AxisAlignedBB boundingBox, @Nullable Predicate <? super Entity > predicate) {
-        List<Entity> list = new ArrayList<>();
+    public void getEntitiesInAABBexcludingNoCache(List<Entity> list, @Nullable Entity entityIn, AxisAlignedBB boundingBox, @Nullable Predicate <? super Entity > predicate) {
+        //List<Entity> list = new ArrayList<>();
         int k2 = MathHelper.floor((boundingBox.maxX + MAX_ENTITY_RADIUS) / 16.0D);
         int l2 = MathHelper.floor((boundingBox.minZ - MAX_ENTITY_RADIUS) / 16.0D);
         int i3 = MathHelper.floor((boundingBox.maxZ + MAX_ENTITY_RADIUS) / 16.0D);
@@ -3662,12 +3689,13 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
                 }
             }
         }
-        return list;
+        //return list;
     }
 
 
-    protected List<Entity> getEntitiesInAABBexcludingNoCacheLimited(@Nullable Entity entityIn, AxisAlignedBB boundingBox, @Nullable Predicate <? super Entity > predicate, int lim) {
-        List<Entity> list = new ArrayList<>();
+    protected void getEntitiesInAABBexcludingNoCacheLimited(List<Entity> list, @Nullable Entity entityIn, AxisAlignedBB boundingBox,
+                                                                    @Nullable Predicate <? super Entity > predicate, int lim) {
+        //List<Entity> list = new ArrayList<>();
         int k2 = MathHelper.floor((boundingBox.maxX + MAX_ENTITY_RADIUS) / 16.0D);
         int l2 = MathHelper.floor((boundingBox.minZ - MAX_ENTITY_RADIUS) / 16.0D);
         int i3 = MathHelper.floor((boundingBox.maxZ + MAX_ENTITY_RADIUS) / 16.0D);
@@ -3679,7 +3707,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
                 }
             }
         }
-        return list;
+        //return list;
     }
 
 
