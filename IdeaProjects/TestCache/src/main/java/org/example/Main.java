@@ -33,11 +33,13 @@ public class Main {
         testMap(cache2k);
         testMap2(caffeine);
 
-        int count = 500;
+        int count = 1200;
         String[] keys = new String[]{
-                "a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","r","s","t",
+                "a","b","c","d","e","f","aag","h","i","j","k","l","m","n","o","p","r","s","t",
                 "a1","b2","c3","d4","4e","4f","4g","h5","1i","j","k7","l5","1m","3n","1o","1p","r99","5s","3t",
-                "sa1","b2s","cs3","d4","4se","s4f","4g","hs5","1si","sj","sk7","ls5","1sm","s3n","1so","s1p","rs99","5ss","s3t"
+                "sa1","b2s","cs3","d4","4se","s4f","4g","hs5","1si","sj","sk7","ls5","1sm","s3n","1so","s1p","rs99","5ss","s3t",
+                "saa1","ab2s","cds3","d4d","4sed","sd4f","d4g","dhs5","1si","sj","s9k7","l8s5","19sm","s3n",
+                "1so1","s13p","ars99","5dss","sfg3t"
         };
 
         for (int i=0;i<10;i++){
