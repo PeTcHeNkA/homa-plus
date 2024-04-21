@@ -57,12 +57,6 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
     }
 
 
-    protected static int hash(Object key) {
-        int h;
-        return (h = key.hashCode()) ^ (h >>> 16);
-    }
-
-
     static Class<?> comparableClassFor(Object x) {
         if (x instanceof Comparable) {
             Class<?> c;
@@ -158,7 +152,7 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
 
     public V get(Object key) {
         Node<K,V>[] tab = table; Node<K,V> first, e; int n, hash; K k;
-        if ((n = tab.length) > 0 && (first = tab[(n - 1) & (hash = hash(key))]) != null) {
+        if ((n = tab.length) > 0 && (first = tab[(n - 1) & (hash = key.hashCode())]) != null) {
             if (first.hash == hash && // always check first node
                     ((k = first.key) == key || (k.equals(key))))
                 return first.value;
@@ -184,7 +178,7 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
 
     public final Node<K,V> getNode(Object key) {
         Node<K,V>[] tab = table; Node<K,V> first, e; int n, hash; K k;
-        if ((n = tab.length) > 0 && (first = tab[(n - 1) & (hash = hash(key))]) != null) {
+        if ((n = tab.length) > 0 && (first = tab[(n - 1) & (hash = key.hashCode())]) != null) {
             if (first.hash == hash && // always check first node
                     ((k = first.key) == key || (k.equals(key))))
                 return first;
@@ -207,35 +201,37 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
 
 
     public V put(K key, V value, int stamp) {
-        return putVal(hash(key), key, value, false, stamp);
+        return putVal(key.hashCode(), key, value, false, stamp);
     }
 
 
-    public final void fput(K key, V value, int stamp){
-        int hash = hash(key);
+    public void fput(K key, V value, int stamp) {
+        int hash = key.hashCode();
         Node<K,V>[] tab = table; Node<K,V> node; int i;
-        if ((node = tab[i = (tab.length - 1) & hash]) == null)
+        if ((node = tab[i = (tab.length - 1) & hash]) == null) {
             tab[i] = new Node<>(hash, key, value, null, stamp);
-        else {
-            if (node.hash == hash && key.equals(node.key))
-                node.value = value;
+        } else {
+            Node<K,V> e; K k;
+            if (node.hash == hash && ((k = node.key) == key || key.equals(k)))
+                e = node;
             else if (node instanceof TreeNode)
-                ((TreeNode<K,V>)node).putTreeValNR(tab, hash, key, value, stamp);
+                e = ((TreeNode<K,V>)node).putTreeVal(tab, hash, key, value, stamp);
             else {
-                Node<K,V> e;
                 for (i = 0; ; ++i) {
                     if ((e = node.next) == null) {
                         node.next = new Node<>(hash, key, value, null, stamp);
-                        if (i >= 7)
+                        if (i >= 7) // -1 for 1st
                             treeifyBin(tab, hash);
                         break;
                     }
-                    if (e.hash == hash && key.equals(e.key)){
-                        e.value = value;
+                    if (e.hash == hash && ((k = e.key) == key || key.equals(k)))
                         break;
-                    }
                     node = e;
                 }
+            }
+            if (e != null) { // existing mapping for key
+                e.value = value;
+                return;
             }
         }
         ++modCount;
@@ -392,22 +388,69 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
 
     public V remove(Object key) {
         Node<K,V> e;
-        return (e = removeNode(hash(key), key, null, false, true)) == null ?
+        return (e = removeNode(key.hashCode(), key, null, false, true)) == null ?
                 null : e.value;
     }
 
 
     public final void removeByStamp(int stamp){
-        KeySet ks = keySet;
-        if (ks == null) {
-            ks = new KeySet();
-            keySet = ks;
-        }
-        KeyIterator itr = keySet.iterator();
+        if(size == 0)return;
+        Node<K,V> next = null, node;
+        Node<K,V>[] tab = table;
+        int index = 0, n = tab.length;
 
-        while (itr.hasNext()){
-            Node<K, V> node = itr.nextNode();
-            if(node.stamp == stamp)itr.remove();
+        do {} while (index < n && (next = tab[index++]) == null);
+
+        while (next != null){
+            Node<K,V> e = next;
+
+            if ((next = (node = e).next) == null) {
+                do {} while (index < tab.length && (next = tab[index++]) == null);
+            }
+
+            if(node.stamp == stamp){
+//                int pid;
+//                if(tab[pid = (n - 1) & node.hash] == node){
+//                    tab[pid] = node.next;
+//                    --size;
+//                } else
+                removeNodeF(node.hash, node.key);
+            }
+        }
+    }
+
+
+    private void removeNodeF(int hash, Object key) {
+        Node<K,V>[] tab; Node<K,V> p; int n, index;
+        if ((tab = table) != null && (n = tab.length) > 0 &&
+                (p = tab[index = (n - 1) & hash]) != null) {
+            Node<K,V> node = null, e; K k;
+            if (p.hash == hash &&
+                    ((k = p.key) == key || (key != null && key.equals(k))))
+                node = p;
+            else if ((e = p.next) != null) {
+                if (p instanceof TreeNode)
+                    node = ((TreeNode<K,V>)p).getTreeNode(hash, key);
+                else {
+                    do {
+                        if (e.hash == hash && ((k = e.key) == key ||
+                                (key != null && key.equals(k)))) {
+                            node = e;
+                            break;
+                        }
+                        p = e;
+                    } while ((e = e.next) != null);
+                }
+            }
+            if (node != null) {
+                if (node instanceof TreeNode)
+                    ((TreeNode<K,V>)node).removeTreeNode(tab, false);
+                else if (node == p)
+                    tab[index] = node.next;
+                else
+                    p.next = node.next;
+                --size;
+            }
         }
     }
 
@@ -537,7 +580,7 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
         public KeyIterator iterator()     { return new KeyIterator(); }
         public boolean contains(Object o) { return containsKey(o); }
         public boolean remove(Object key) {
-            return removeNode(hash(key), key, null, false, true) != null;
+            return removeNode(key.hashCode(), key, null, false, true) != null;
         }
         public Spliterator<K> spliterator() {
             return new KeySpliterator<>(SyncTe4Cache.this, 0, -1, 0, 0);
@@ -637,7 +680,7 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
                 Entry<?,?> e = (Entry<?,?>) o;
                 Object key = e.getKey();
                 Object value = e.getValue();
-                return removeNode(hash(key), key, value, true, true) != null;
+                return removeNode(key.hashCode(), key, value, true, true) != null;
             }
             return false;
         }
@@ -670,18 +713,18 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
 
     @Override
     public V putIfAbsent(K key, V value) {
-        return putVal(hash(key), key, value, true, -1);
+        return putVal(key.hashCode(), key, value, true, -1);
     }
 
 
     public V putIfAbsent(K key, V value, int stamp) {
-        return putVal(hash(key), key, value, true, stamp);
+        return putVal(key.hashCode(), key, value, true, stamp);
     }
 
 
     @Override
     public boolean remove(Object key, Object value) {
-        return removeNode(hash(key), key, value, true, true) != null;
+        return removeNode(key.hashCode(), key, value, true, true) != null;
     }
 
 
@@ -730,8 +773,7 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
                 return v;
             }
             else {
-                int hash = hash(key);
-                removeNode(hash, key, null, false, true);
+                removeNode(key.hashCode(), key, null, false, true);
             }
         }
         return null;
@@ -836,7 +878,7 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
             if (modCount != expectedModCount)
                 throw new ConcurrentModificationException();
             current = null;
-            removeNode(p.hash, p.key, null, false, false);
+            removeNodeF(p.hash, p.key);
             expectedModCount = modCount;
         }
     }
@@ -1299,51 +1341,6 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
                         ((TreeNode<K,V>)xpn).prev = x;
                     moveRootToFront(tab, balanceInsertion(root, x));
                     return null;
-                }
-            }
-        }
-
-
-        private void putTreeValNR(Node<K,V>[] tab, int h, K k, V v, int stamp) {
-            Class<?> kc = null;
-            boolean search = true;
-            for (TreeNode<K,V> root = (parent != null) ? root() : this, p = root;;) {
-                int dir, ph; K pk;
-                if ((ph = p.hash) > h)
-                    dir = -1;
-                else if (ph < h)
-                    dir = 1;
-                else if ((pk = p.key) == k || (k != null && k.equals(pk)))
-                    return;
-                else if ((kc == null &&
-                        (kc = comparableClassFor(k)) == null) ||
-                        (dir = compareComparables(kc, k, pk)) == 0) {
-                    if (search) {
-                        TreeNode<K,V> ch;
-                        if (((ch = p.left) != null &&
-                                ch.find(h, k, kc) != null) ||
-                                ((ch = p.right) != null &&
-                                        ch.find(h, k, kc) != null))
-                            return;
-                        search = false;
-                    }
-                    dir = tieBreakOrder(k, pk);
-                }
-
-                TreeNode<K,V> xp = p;
-                if ((p = (dir <= 0) ? p.left : p.right) == null) {
-                    Node<K,V> xpn = xp.next;
-                    TreeNode<K,V> x = new TreeNode<>(h, k, v, xpn, stamp);
-                    if (dir <= 0)
-                        xp.left = x;
-                    else
-                        xp.right = x;
-                    xp.next = x;
-                    x.parent = x.prev = xp;
-                    if (xpn != null)
-                        ((TreeNode<K,V>)xpn).prev = x;
-                    moveRootToFront(tab, balanceInsertion(root, x));
-                    return;
                 }
             }
         }
