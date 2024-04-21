@@ -76,7 +76,6 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.event.HoverEvent;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.Explosion;
-import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
@@ -90,6 +89,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import plus.fserver.ElcaConfig;
+import plus.fserver.api.IBlockEAccess;
 import plus.fserver.server.SStrings;
 import plus.fserver.utls.ChunkSelector;
 import plus.tson.utl.Te4HashSet;
@@ -1290,39 +1290,39 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
 
     protected void doBlockCollisions() {
-        AxisAlignedBB axisalignedbb = this.getEntityBoundingBox();
+        AxisAlignedBB aabb = this.getEntityBoundingBox();
 
-        int  pos1X = MathHelper.floor(axisalignedbb.minX + 0.001D),
-             pos1Y = MathHelper.floor(axisalignedbb.minY + 0.001D),
-             pos1Z = MathHelper.floor(axisalignedbb.minZ + 0.001D),
+        int  pos1X = MathHelper.floor(aabb.minX + 0.001D),
+             pos1Y = MathHelper.floor(aabb.minY + 0.001D),
+             pos1Z = MathHelper.floor(aabb.minZ + 0.001D),
 
-             pos2X = MathHelper.floor(axisalignedbb.maxX - 0.001D),
-             pos2Y = MathHelper.floor(axisalignedbb.maxY - 0.001D),
-             pos2Z = MathHelper.floor(axisalignedbb.maxZ - 0.001D);
+             pos2X = MathHelper.floor(aabb.maxX - 0.001D),
+             pos2Y = MathHelper.floor(aabb.maxY - 0.001D),
+             pos2Z = MathHelper.floor(aabb.maxZ - 0.001D);
 
 
         if (this.world.isAreaLoaded(pos1X, pos1Y, pos1Z, pos2X, pos2Y, pos2Z, true)) {
-            BlockPos.MutableBlockPos blockPos = world.localTempPos;
-            Chunk chunk = null;
-            for (; pos1X <= pos2X; ++pos1X) {
+            BlockPos.MutableBlockPos pos = world.localTempPos;
+            for (Chunk chunk = null; pos1X <= pos2X; ++pos1X)
                 for (; pos1Z <= pos2Z; ++pos1Z) {
                     if(chunk == null || chunk.x != pos1X>>4 || chunk.z != pos1Z>>4)
                         chunk = world.getChunk(pos1X>>4, pos1Z>>4);
                     for (; pos1Y <= pos2Y; ++pos1Y) {
-                        IBlockState iblockstate = chunk.getBlockState(blockPos.setPos(pos1X, pos1Y, pos1Z));
+                        IBlockState iblockstate = chunk.getBlockState(pos1X, pos1Y, pos1Z);
 
                         try {
-                            iblockstate.getBlock().onEntityCollision(this.world, blockPos, iblockstate, this);
+                            iblockstate.getBlock().onEntityCollision(this.world, pos.setPos(pos1X, pos1Y, pos1Z), iblockstate, this);
                             this.onInsideBlock(iblockstate);
                         } catch (Throwable throwable) {
                             CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Colliding entity with block");
                             CrashReportCategory crashreportcategory = crashreport.makeCategory("Block being collided with");
-                            CrashReportCategory.addBlockInfo(crashreportcategory, blockPos, iblockstate);
-                            throw new ReportedException(crashreport);
+                            CrashReportCategory.addBlockInfo(crashreportcategory, pos, iblockstate);
+                            if(world instanceof WorldServer)
+                                world.getMinecraftServer().ticker().onError((WorldServer) world, new ReportedException(crashreport));
+                            else throw new ReportedException(crashreport);
                         }
                     }
                 }
-            }
         }
     }
 
@@ -2091,27 +2091,24 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         return nbttaglist;
     }
 
+
     @Nullable
-    public EntityItem dropItem(Item itemIn, int size)
-    {
+    public EntityItem dropItem(Item itemIn, int size) {
         return this.dropItemWithOffset(itemIn, size, 0.0F);
     }
 
+
     @Nullable
-    public EntityItem dropItemWithOffset(Item itemIn, int size, float offsetY)
-    {
+    public EntityItem dropItemWithOffset(Item itemIn, int size, float offsetY) {
         return this.entityDropItem(new ItemStack(itemIn, size, 0), offsetY);
     }
 
+
     @Nullable
-    public EntityItem entityDropItem(ItemStack stack, float offsetY)
-    {
-        if (stack.isEmpty())
-        {
+    public EntityItem entityDropItem(ItemStack stack, float offsetY) {
+        if (stack.isEmpty()) {
             return null;
-        }
-        else
-        {
+        } else {
             EntityItem entityitem = new EntityItem(this.world, this.posX, this.posY + (double)offsetY, this.posZ, stack);
             entityitem.setDefaultPickupDelay();
             if (captureDrops)
@@ -2131,30 +2128,29 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
     //todo check
     public boolean isEntityInsideOpaqueBlock() {
         if (!this.noClip) {
-            IBlockAccess access = world.isRemote?world:((WorldServer)world).localSelector;
-            BlockPos.MutableBlockPos pos = world.localTempPos;
+            IBlockEAccess access = world.isRemote?world:((WorldServer)world).localSelector;
+            float w08 = this.width * 0.8f, yeeH = this.getEyeHeight();
 
-            for (int i = 0; i < 8; ++i) {
-                int j = MathHelper.floor(this.posY +  (( ((i) % 2) - 0.5F) * 0.1F) + this.getEyeHeight());
-                int k = MathHelper.floor(this.posX +  (( ((i >> 1) % 2) - 0.5F) * this.width * 0.8F));
-                int l = MathHelper.floor(this.posZ +  (( ((i >> 2) % 2) - 0.5F) * this.width * 0.8F));
+            for (int i = 0, px = 0, py = -999999, pz = 0; i < 8; ++i) {
+                int y = MathHelper.floor(this.posY +  (( ((i) & 1) - 0.5F) * 0.1F) + yeeH);
+                int x = MathHelper.floor(this.posX +  (( ((i >> 1) & 1) - 0.5F) * w08));
+                int z = MathHelper.floor(this.posZ +  (( ((i >> 2) & 1) - 0.5F) * w08));
 
-                if (pos.getX() != k || pos.getY() != j || pos.getZ() != l) {
-                    if (access.getBlockState(pos.setPos(k, j, l)).causesSuffocation()) return true;
-                }
+                if (px != x || py != y || pz != z)
+                    if (access.getBlockState(px = x, py = y, pz = z).causesSuffocation()) return true;
             }
         }
         return false;
     }
 
-    public boolean processInitialInteract(EntityPlayer player, EnumHand hand)
-    {
+
+    public boolean processInitialInteract(EntityPlayer player, EnumHand hand) {
         return false;
     }
 
+
     @Nullable
-    public AxisAlignedBB getCollisionBox(Entity entityIn)
-    {
+    public AxisAlignedBB getCollisionBox(Entity entityIn) {
         return null;
     }
 
@@ -3040,10 +3036,8 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
      * It will be written, and read from disc, so it persists over world saves.
      * @return A NBTTagCompound
      */
-    public NBTTagCompound getEntityData()
-    {
-        if (customEntityData == null)
-        {
+    public NBTTagCompound getEntityData() {
+        if (customEntityData == null) {
             customEntityData = new NBTTagCompound();
         }
         return customEntityData;
@@ -3157,8 +3151,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
      *
      * @return if the entity can be interacted with from a rider
      */
-    public boolean canRiderInteract()
-    {
+    public boolean canRiderInteract() {
         return false;
     }
 
@@ -3168,31 +3161,29 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
      * @param rider The entity that is riding
      * @return if the entity should be dismounted when under water
      */
-    public boolean shouldDismountInWater(Entity rider)
-    {
+    public boolean shouldDismountInWater(Entity rider) {
         return this instanceof EntityLivingBase;
     }
 
+
     @Override
-    public boolean hasCapability(net.minecraftforge.common.capabilities.Capability<?> capability, @Nullable net.minecraft.util.EnumFacing facing)
-    {
+    public boolean hasCapability(net.minecraftforge.common.capabilities.Capability<?> capability, @Nullable net.minecraft.util.EnumFacing facing) {
         return capabilities != null && capabilities.hasCapability(capability, facing);
     }
 
+
     @Override
     @Nullable
-    public <T> T getCapability(net.minecraftforge.common.capabilities.Capability<T> capability, @Nullable net.minecraft.util.EnumFacing facing)
-    {
+    public <T> T getCapability(net.minecraftforge.common.capabilities.Capability<T> capability, @Nullable net.minecraft.util.EnumFacing facing) {
         return capabilities == null ? null : capabilities.getCapability(capability, facing);
     }
 
-    public void deserializeNBT(NBTTagCompound nbt)
-    {
+    public void deserializeNBT(NBTTagCompound nbt) {
         this.readFromNBT(nbt);
     }
 
-    public NBTTagCompound serializeNBT()
-    {
+
+    public NBTTagCompound serializeNBT() {
         NBTTagCompound ret = new NBTTagCompound();
         ret.setString("id", this.getEntityString());
         return this.writeToNBT(ret);

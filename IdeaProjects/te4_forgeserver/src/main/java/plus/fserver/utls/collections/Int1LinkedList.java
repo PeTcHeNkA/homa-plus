@@ -17,6 +17,13 @@ public final class Int1LinkedList {
     }
 
 
+    public Node getListAndRem(){
+        Node result = root;
+        root = null;
+        return result;
+    }
+
+
     public void resetIter(){
         prev = null;
         cur = root;
@@ -79,12 +86,22 @@ public final class Int1LinkedList {
     }
 
 
-    private static final class Node{
+    public static final class Node{
         private final int value;
         private Node parent;
         Node(Node parent, int value) {
             this.parent = parent;
             this.value = value;
+        }
+
+
+        public int getValue() {
+            return value;
+        }
+
+
+        public Node getParent() {
+            return parent;
         }
 
 

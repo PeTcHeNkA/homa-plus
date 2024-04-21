@@ -310,11 +310,15 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
             this.openContainer = this.inventoryContainer;
         }
 
-        entityRemoveQueue.resetIter();
-        while (entityRemoveQueue.hasCur()){
-            int toRem = entityRemoveQueue.getCur();
-            this.connection.netManager.sendPacketE(new SPacketDestroyEntities(toRem));
-            entityRemoveQueue.removeCur();
+        Int1LinkedList.Node node = entityRemoveQueue.getListAndRem();
+        if(node != null){
+            connection.netManager.exec(() -> {
+                Int1LinkedList.Node node0 = node;
+                while (node0 != null){
+                    connection.netManager.sendPacketSync(new SPacketDestroyEntities(node0.getValue()));
+                    node0 = node0.getParent();
+                }
+            });
         }
 
         Entity entity = this.getSpectatingEntity();
