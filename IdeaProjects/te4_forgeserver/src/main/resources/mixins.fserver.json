@@ -17,7 +17,6 @@
     "md.BlockLeavesPatch",
     "md.EntityAmbientCreaturePatch",
     "md.EntityAnimalPatch",
-    "md.EntityLivingBasePatch",
     "md.EntityMobPatch",
     "md.EntityPlayerPatch",
     "md.EntityWaterMobPatch",

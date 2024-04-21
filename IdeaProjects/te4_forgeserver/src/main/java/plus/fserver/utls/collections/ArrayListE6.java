@@ -45,6 +45,11 @@ public class ArrayListE6<T> implements List<T> {
     }
 
 
+    public void fclear(){
+        size = 0;
+    }
+
+
     @Override
     public boolean contains(Object o) {
         for (int i=0;i<size;i++) if(data[i] != null && o.equals(data[i]))return true;

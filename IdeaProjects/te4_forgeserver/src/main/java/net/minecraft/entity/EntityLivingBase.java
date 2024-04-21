@@ -1924,7 +1924,7 @@ public abstract class EntityLivingBase extends Entity {
 
 
     private void updateElytra() {
-        boolean flag = this.getFlag(7);
+        boolean flag = isElytraFlying();
         if (flag && !this.onGround && !this.isRiding()) {
             ItemStack itemstack = this.getItemStackFromSlot(EntityEquipmentSlot.CHEST);
             if (itemstack.getItem() == Items.ELYTRA && ItemElytra.isUsable(itemstack)) {
@@ -1934,11 +1934,13 @@ public abstract class EntityLivingBase extends Entity {
             } else {
                 flag = false;
             }
+            if (!this.world.isRemote) {
+                this.setFlag(7, flag);
+            }
         } else {
-            flag = false;
-        }
-        if (!this.world.isRemote) {
-            this.setFlag(7, flag);
+            if (!this.world.isRemote && ticksSinceLastSwing != 0) {
+                this.setFlag(7, false);
+            }
         }
     }
 
@@ -2312,7 +2314,8 @@ public abstract class EntityLivingBase extends Entity {
 
 
     public boolean isElytraFlying() {
-        return this.getFlag(7);
+        return false;
+        //return this.getFlag(7);
     }
 
 
