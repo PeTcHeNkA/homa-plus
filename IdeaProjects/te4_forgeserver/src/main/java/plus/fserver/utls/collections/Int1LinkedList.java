@@ -73,6 +73,7 @@ public final class Int1LinkedList {
         list.resetIter();
         while (list.hasCur()){
             add(list.getCur());
+            list.next();
         }
         list.resetIter();
     }

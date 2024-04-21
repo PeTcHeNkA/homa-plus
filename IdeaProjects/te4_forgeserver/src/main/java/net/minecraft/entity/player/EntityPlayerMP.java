@@ -999,7 +999,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
             this.lastPortalPos = that.lastPortalPos;
             this.lastPortalVec = that.lastPortalVec;
             this.teleportDirection = that.teleportDirection;
-        } else if (this.world.getGameRules().getBoolean("keepInventory") || that.isSpectator()) {
+        } else if (this.world.getGameRules().keepInventory.getBoolean() || that.isSpectator()) {
             this.inventory.copyInventory(that.inventory);
             this.experienceLevel = that.experienceLevel;
             this.experienceTotal = that.experienceTotal;
@@ -1022,6 +1022,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
 
         this.spawnChunkMap = that.spawnChunkMap;
         this.spawnForcedMap = that.spawnForcedMap;
+
         if(that.dimension != 0) {
             this.spawnPos = that.spawnPos;
             this.spawnForced = that.spawnForced;
