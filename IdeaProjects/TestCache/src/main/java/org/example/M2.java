@@ -19,6 +19,8 @@ public class M2 {
 
         testMap3(cache, keys2);
         cache.removeByStamp(0);
+        testMap3(cache, keys2);
+        cache.removeByStamp(0);
 
 //        testErr(cache, keys);
 //        testErr(cache, keys2);
