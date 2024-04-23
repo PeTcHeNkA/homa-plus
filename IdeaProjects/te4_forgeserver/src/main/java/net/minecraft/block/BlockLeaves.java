@@ -80,7 +80,6 @@ public abstract class BlockLeaves extends BlockFs implements net.minecraftforge.
 
                     for (int dx = -4; dx <= 4; ++dx) {
                         for (int dz = -4; dz <= 4; ++dz) {
-
                             for (int dy = -4; dy <= 4; ++dy) {
                                 IBlockState iblockstate = access.getBlockState(blockPos.setPos(k + dx, l + dy, i1 + dz));
                                 Block block = iblockstate.getBlock();
@@ -102,34 +101,45 @@ public abstract class BlockLeaves extends BlockFs implements net.minecraftforge.
                     }
 
                     for (int cursor, factor = 3; factor <= 6; ++factor) {
-                        for (int dx = -3; dx <= 3; ++dx) {
-                            for (int dy = -3; dy <= 3; ++dy) {
-                                for (int dz = -3; dz <= 3; ++dz) {
-                                    if (cache.get(dx, dy, dz) == factor - 1) {
-
-                                        cursor = LeavesCache.cursor(dx-1, dy, dz);
-                                        if (cache.get(cursor) == 0) {
-                                            cache.set(cursor, factor);
+                        for (int dx = -4; dx <= 4; ++dx) {
+                            for (int dy = -4; dy <= 4; ++dy) {
+                                for (int dz = -4; dz <= 4; ++dz) {
+                                    if (cache.get(dx, dy, dz) == factor - 3) {
+                                        if(dx != -4) {
+                                            cursor = LeavesCache.cursor(dx - 1, dy, dz);
+                                            if (cache.get(cursor) == 0) {
+                                                cache.set(cursor, factor);
+                                            }
                                         }
-                                        cursor = LeavesCache.cursor(dx+1, dy, dz);
-                                        if (cache.get(cursor) == 0) {
-                                            cache.set(cursor, factor);
+                                        if(dx != 4) {
+                                            cursor = LeavesCache.cursor(dx + 1, dy, dz);
+                                            if (cache.get(cursor) == 0) {
+                                                cache.set(cursor, factor);
+                                            }
                                         }
-                                        cursor = LeavesCache.cursor(dx, dy-1, dz);
-                                        if (cache.get(cursor) == 0) {
-                                            cache.set(cursor, factor);
+                                        if(dy != -4) {
+                                            cursor = LeavesCache.cursor(dx, dy - 1, dz);
+                                            if (cache.get(cursor) == 0) {
+                                                cache.set(cursor, factor);
+                                            }
                                         }
-                                        cursor = LeavesCache.cursor(dx, dy+1, dz);
-                                        if (cache.get(cursor) == 0) {
-                                            cache.set(cursor, factor);
+                                        if(dy != 4) {
+                                            cursor = LeavesCache.cursor(dx, dy + 1, dz);
+                                            if (cache.get(cursor) == 0) {
+                                                cache.set(cursor, factor);
+                                            }
                                         }
-                                        cursor = LeavesCache.cursor(dx, dy, dz+1);
-                                        if (cache.get(cursor) == 0) {
-                                            cache.set(cursor, factor);
+                                        if(dz != -4) {
+                                            cursor = LeavesCache.cursor(dx, dy, dz - 1);
+                                            if (cache.get(cursor) == 0) {
+                                                cache.set(cursor, factor);
+                                            }
                                         }
-                                        cursor = LeavesCache.cursor(dx, dy, dz-1);
-                                        if (cache.get(cursor) == 0) {
-                                            cache.set(cursor, factor);
+                                        if(dz != 4) {
+                                            cursor = LeavesCache.cursor(dx, dy, dz + 1);
+                                            if (cache.get(cursor) == 0) {
+                                                cache.set(cursor, factor);
+                                            }
                                         }
                                     }
                                 }
@@ -140,7 +150,7 @@ public abstract class BlockLeaves extends BlockFs implements net.minecraftforge.
 
                 int l2 = cache.get(0,0,0);
 
-                if (l2 >= 2) {
+                if (l2 >= 3) {
                     worldIn.setBlockState(pos, state.withProperty(CHECK_DECAY, Boolean.FALSE), 4);
                 } else {
                     this.destroy(worldIn, pos);
@@ -148,6 +158,16 @@ public abstract class BlockLeaves extends BlockFs implements net.minecraftforge.
             }
         }
     }
+//
+//    public static void main(String[] args) {
+//        LeavesCache cache = new LeavesCache();
+//        int index = LeavesCache.cursor(0, 0, 0);
+//        int index1 = LeavesCache.cursor(0, 0, 1);
+//        cache.set(index, 1);
+//        cache.set(index1, 5);
+//        System.out.println(cache.get(index));
+//        System.out.println(cache.get(index1));
+//    }
 
 
     private void destroy(World worldIn, BlockPos pos) {
