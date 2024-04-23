@@ -41,17 +41,6 @@ public class SyncAABBCache<V> extends SyncTe4Cache<AABKey, ArrayListE6<V>>{
             list.fclear();
             return list;
         }
-//        if(nCursor > 0){
-//            Node<AABKey,List<V>> node = emptyNodes[nCursor-1];
-//            if(node.value != null){
-//                List<V> list = node.value;
-//                node.value = null;
-//                list.clear();
-//                ++c;
-//                return list;
-//            }
-//            ++c2;
-//        }
         //++c3;
         //System.out.println("NEN1");
         return new ArrayListE6<>();
