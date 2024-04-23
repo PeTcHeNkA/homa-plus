@@ -297,7 +297,7 @@ public class PlayerChunkMapEntry extends ArrayListE6<EntityPlayerMP> implements 
 
 
     public double getDistanceSq(Entity entityIn) {
-        double d2 = ((posZ << 4) + 8) - entityIn.posX;
+        double d2 = ((posX << 4) + 8) - entityIn.posX;
         double d3 = ((posZ << 4) + 8) - entityIn.posZ;
         return d2 * d2 + d3 * d3;
     }
