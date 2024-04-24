@@ -1,13 +1,7 @@
 package net.minecraft.util.math;
 
-import com.google.common.collect.AbstractIterator;
-import com.google.common.collect.Lists;
-
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.annotation.concurrent.Immutable;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.EnumFacing;
@@ -16,6 +10,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import plus.fserver.utls.collections.SelfIterableAbs;
 
 
 @Immutable
@@ -196,42 +191,43 @@ public class BlockPos extends Vec3i {
     }
 
 
+    public static Iterable<BlockPos.MutableBlockPos> getAllInBoxMutable(BlockPos.MutableBlockPos pooled, BlockPos from, BlockPos to) {
+        return getAllInBoxMutable(pooled, Math.min(from.getX(), to.getX()), Math.min(from.getY(), to.getY()), Math.min(from.getZ(), to.getZ()), Math.max(from.getX(), to.getX()), Math.max(from.getY(), to.getY()), Math.max(from.getZ(), to.getZ()));
+    }
+
+
     public static Iterable<BlockPos> getAllInBox(final int x1, final int y1, final int z1, final int x2, final int y2, final int z2) {
-        return new Iterable<BlockPos>() {
-            public Iterator<BlockPos> iterator() {
-                return new AbstractIterator<BlockPos>() {
-                    private boolean first = true;
-                    private int lastPosX;
-                    private int lastPosY;
-                    private int lastPosZ;
-                    protected BlockPos computeNext() {
-                        if (this.first) {
-                            this.first = false;
-                            this.lastPosX = x1;
-                            this.lastPosY = y1;
-                            this.lastPosZ = z1;
-                            return new BlockPos(x1, y1, z1);
-                        }
-                        else if (this.lastPosX == x2 && this.lastPosY == y2 && this.lastPosZ == z2) {
-                            return this.endOfData();
-                        }
-                        else {
-                            if (this.lastPosX < x2) {
-                                ++this.lastPosX;
-                            }
-                            else if (this.lastPosY < y2) {
-                                this.lastPosX = x1;
-                                ++this.lastPosY;
-                            }
-                            else if (this.lastPosZ < z2) {
-                                this.lastPosX = x1;
-                                this.lastPosY = y1;
-                                ++this.lastPosZ;
-                            }
-                            return new BlockPos(this.lastPosX, this.lastPosY, this.lastPosZ);
-                        }
+        return new SelfIterableAbs<BlockPos>() {
+            private boolean first = true;
+            private int lastPosX;
+            private int lastPosY;
+            private int lastPosZ;
+            protected BlockPos computeNext() {
+                if (this.first) {
+                    this.first = false;
+                    this.lastPosX = x1;
+                    this.lastPosY = y1;
+                    this.lastPosZ = z1;
+                    return new BlockPos(x1, y1, z1);
+                }
+                else if (this.lastPosX == x2 && this.lastPosY == y2 && this.lastPosZ == z2) {
+                    return this.endOfData();
+                }
+                else {
+                    if (this.lastPosX < x2) {
+                        ++this.lastPosX;
                     }
-                };
+                    else if (this.lastPosY < y2) {
+                        this.lastPosX = x1;
+                        ++this.lastPosY;
+                    }
+                    else if (this.lastPosZ < z2) {
+                        this.lastPosX = x1;
+                        this.lastPosY = y1;
+                        ++this.lastPosZ;
+                    }
+                    return new BlockPos(this.lastPosX, this.lastPosY, this.lastPosZ);
+                }
             }
         };
     }
@@ -248,37 +244,32 @@ public class BlockPos extends Vec3i {
 
 
     public static Iterable<BlockPos.MutableBlockPos> getAllInBoxMutable(final int x1, final int y1, final int z1, final int x2, final int y2, final int z2) {
-        return new Iterable<BlockPos.MutableBlockPos>() {
-            public Iterator<BlockPos.MutableBlockPos> iterator() {
-                return new AbstractIterator<BlockPos.MutableBlockPos>() {
-                    private BlockPos.MutableBlockPos pos;
-                    protected BlockPos.MutableBlockPos computeNext() {
-                        if (this.pos == null) {
-                            this.pos = new BlockPos.MutableBlockPos(x1, y1, z1);
-                            return this.pos;
-                        } else if (this.pos.getX() == x2 && this.pos.getY() == y2 && this.pos.getZ() == z2) {
-                            return this.endOfData();
-                        } else {
-                            if (this.pos.getX() < x2) {
-                                pos.editRootX(this.pos.getX()+1);
-                                //++this.pos.getX();
-                            } else if (this.pos.getY() < y2) {
-                                pos.editRootX(x1);
-                                pos.editRootY(pos.getY()+1);
-                                //this.pos.x = x1;
-                                //++this.pos.y;
-                            } else if (this.pos.getZ() < z2) {
-                                pos.editRoot(
-                                        x1, y1, pos.getZ()+1
-                                );
-//                                this.pos.x = x1;
-//                                this.pos.y = y1;
-//                                ++this.pos.z;
-                            }
-                            return this.pos;
-                        }
+        return getAllInBoxMutable(new MutableBlockPos(), x1, y1, z1, x2, y2, z2);
+    }
+
+
+    public static Iterable<BlockPos.MutableBlockPos> getAllInBoxMutable(BlockPos.MutableBlockPos src, final int x1, final int y1, final int z1, final int x2, final int y2, final int z2) {
+        return new SelfIterableAbs<MutableBlockPos>() {
+            private BlockPos.MutableBlockPos pos;
+            protected BlockPos.MutableBlockPos computeNext() {
+                if (this.pos == null) {
+                    this.pos = src.setPos(x1, y1, z1);
+                    return this.pos;
+                } else if (this.pos.getX() == x2 && this.pos.getY() == y2 && this.pos.getZ() == z2) {
+                    return this.endOfData();
+                } else {
+                    if (this.pos.getX() < x2) {
+                        pos.editRootX(this.pos.getX()+1);
+                    } else if (this.pos.getY() < y2) {
+                        pos.editRootX(x1);
+                        pos.editRootY(pos.getY()+1);
+                    } else if (this.pos.getZ() < z2) {
+                        pos.editRoot(
+                                x1, y1, pos.getZ()+1
+                        );
                     }
-                };
+                    return this.pos;
+                }
             }
         };
     }
@@ -312,6 +303,11 @@ public class BlockPos extends Vec3i {
 
         public BlockPos add(int x, int y, int z) {
             return super.add(x, y, z).toImmutable();
+        }
+
+
+        public void addMut(int x, int y, int z){
+            editRoot(getX()+x, getY()+y, getZ()+z);
         }
 
 
