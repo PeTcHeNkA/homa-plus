@@ -1,9 +1,11 @@
 package plus.fserver.utls.collections;
 
+import java.util.Arrays;
+
 
 public class ArrayListE10<T> extends ArrayListE6<T>{
     @Override
-    public int newSizeAuto() {
-        return data.length + 10;
+    public Object[] newArrayAuto() {
+        return Arrays.copyOf(data, data.length + 10);
     }
 }

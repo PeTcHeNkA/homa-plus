@@ -1,5 +1,7 @@
 package plus.fserver.utls.collections;
 
+import java.util.Arrays;
+
 
 public class ArrayListEV<T> extends ArrayListE6<T>{
     private final int exp;
@@ -8,8 +10,9 @@ public class ArrayListEV<T> extends ArrayListE6<T>{
         this.exp = exp;
     }
 
+
     @Override
-    public int newSizeAuto() {
-        return data.length + exp;
+    public Object[] newArrayAuto() {
+        return Arrays.copyOf(data, data.length + exp);
     }
 }

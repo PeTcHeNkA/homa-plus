@@ -42,6 +42,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.utls.FastValidators;
+import plus.fserver.utls.collections.ArrayListE6;
 
 
 public class BlockStateContainer {
@@ -447,6 +448,12 @@ public class BlockStateContainer {
         @Override
         public void addCollisionBoxToList(World worldIn, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes, @Nullable Entity entityIn, boolean p_185908_6_) {
             this.block.addCollisionBoxToList(this, worldIn, pos, entityBox, collidingBoxes, entityIn, p_185908_6_);
+        }
+
+
+        @Override
+        public void addCollisionBoxToListF(World worldIn, BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> collidingBoxes, @Nullable Entity entityIn, boolean p_185908_6_) {
+            this.block.addCollisionBoxToListF(this, worldIn, pos, entityBox, collidingBoxes);
         }
 
 

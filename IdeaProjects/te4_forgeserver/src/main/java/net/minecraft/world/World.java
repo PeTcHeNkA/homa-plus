@@ -5,11 +5,11 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import java.util.*;
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.AdvancementManager;
 import net.minecraft.advancements.FunctionManager;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -64,20 +64,17 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.server.timings.TimeTracker;
 import org.jetbrains.annotations.NotNull;
-import org.spongepowered.asm.mixin.Overwrite;
 import plus.fserver.ElcaConfig;
 import plus.fserver.api.IBlockEAccess;
 import plus.fserver.event.ElcaCV;
-import plus.fserver.server.AsyWorldTickerV2;
-import plus.fserver.server.CacheBuilder;
 import plus.fserver.utls.AABKey;
 import plus.fserver.utls.collections.ArrayListE6;
+import plus.fserver.utls.collections.HoleListE6;
 import plus.fserver.utls.collections.SyncAABBCache;
 import plus.fserver.utls.math.BlockPosDelta;
 import plus.fserver.utls.ChunkSelector;
 import plus.fserver.utls.math.FastRandom;
 import plus.fserver.world.RedstoneEngine;
-import plus.fserver.utls.collections.HoleList;
 import plus.fserver.world.light.LightingEngine;
 import plus.fserver.world.light.api.ILightingEngineProvider;
 
@@ -147,6 +144,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
     public long tryUpdateNavigationLimit = 20L;
     public final LightingEngine lightingEngine = new LightingEngine(this);
+    private BlockLeaves.LeavesCache leavesCache;
 
     final SyncAABBCache<AxisAlignedBB> bbCache;
     final SyncAABBCache<Entity>        eeCache;
@@ -177,6 +175,11 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             eeCache = null;
             bbCache = null;
         }
+    }
+
+
+    public BlockLeaves.LeavesCache getLeavesCache(){
+        return leavesCache == null? leavesCache = new BlockLeaves.LeavesCache() : leavesCache;
     }
 
 
@@ -508,6 +511,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
+    //todo not optimal
     public void notifyNeighborsOfStateChange(BlockPos pos, Block blockType, boolean updateObservers) {
         if(ElcaCV.ENABLE_NEIGHBOR_NOTIFY_EVENT) {
             if (onNeighborNotify(pos, this.getBlockState(pos), java.util.EnumSet.allOf(EnumFacing.class), updateObservers).isCanceled())
@@ -3459,8 +3463,9 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     /**
      * @author Te4hno
      */
+    private final HoleListE6 hole = new HoleListE6();
     public boolean collidesWithAnyBlock(AxisAlignedBB bbox) {
-        return getCollisionBoxes(null, bbox, true, new HoleList<>());
+        return getCollisionBoxes(null, bbox, true, hole.free());
     }
 
 
@@ -3599,7 +3604,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             new GetCollisionBoxesEvent(this):null;
 
 
-    private void getCollisionBoxes0(List<AxisAlignedBB> list, @Nullable Entity entityIn, AxisAlignedBB aabb) {
+    private void getCollisionBoxes0(ArrayListE6<AxisAlignedBB> list, @Nullable Entity entityIn, AxisAlignedBB aabb) {
         //List<AxisAlignedBB> list = new ArrayList<>();
         this.getCollisionBoxes(entityIn, aabb, false, list);
         if (entityIn != null) {
@@ -3612,7 +3617,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
-    private void getCollisionBoxes0Limited(List<AxisAlignedBB> list, @Nullable Entity entityIn, AxisAlignedBB aabb, int lim) {
+    private void getCollisionBoxes0Limited(ArrayListE6<AxisAlignedBB> list, @Nullable Entity entityIn, AxisAlignedBB aabb, int lim) {
         this.getCollisionBoxes(entityIn, aabb, false, list);
         if (entityIn != null && lim > 0) {
             List<Entity> list1 = getEntitiesInAABBexcludingLimited(entityIn, aabb.grow(0.25D), EntitySelectors.NOT_SPECTATING, lim);
@@ -3721,7 +3726,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
-    protected boolean getCollisionBoxes(@Nullable Entity entityIn, AxisAlignedBB aabb, boolean fastCheck, List<AxisAlignedBB> outList) {
+    protected boolean getCollisionBoxes(@Nullable Entity entityIn, AxisAlignedBB aabb, boolean fastCheck, ArrayListE6<AxisAlignedBB> outList) {
         if (fastCheck){
             if(ElcaCV.ENABLE_COLLISION_EVENTS){
                 MinecraftForge.EVENT_BUS.post(collisionEvent.init(entityIn, aabb, outList));
@@ -3766,7 +3771,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
                                     state = chunk.getBlockState(xPos, i2, zPos);
                                 }
 
-                                state.addCollisionBoxToList(this, pos.setPos(xPos, i2, zPos), aabb, outList, entityIn, false);
+                                state.addCollisionBoxToListF(this, pos.setPos(xPos, i2, zPos), aabb, outList, entityIn, false);
 
                                 if (fastCheck) {
                                     if(ElcaCV.ENABLE_COLLISION_EVENTS){
@@ -3796,6 +3801,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public  final ChunkWatchEvent             chunkWatchEvent = new ChunkWatchEvent.Watch().forBus(MinecraftForge.EVENT_BUS);
     public  final ChunkWatchEvent           chunkUnWatchEvent = new ChunkWatchEvent.UnWatch().forBus(MinecraftForge.EVENT_BUS);
     public  final Random              commonWorldEntityRandom = new FastRandom();
+    public  final AxisAlignedBB         commonWorldEntityAABB = new AxisAlignedBB(0,0,0,0,0,0);
 
     protected void clearEvents(){
         jumpEvent.setEntity(null);

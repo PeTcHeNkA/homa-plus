@@ -20,7 +20,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.utls.ChunkSelector;
 
 
-public class BlockGrass extends Block implements IGrowable {
+public class BlockGrass extends BlockFs implements IGrowable {
     public static final PropertyBool SNOWY = PropertyBool.create("snowy");
 
     protected BlockGrass() {

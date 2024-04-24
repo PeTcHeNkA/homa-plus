@@ -25,7 +25,8 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import plus.fserver.api.IBlockEAccess;
-import plus.fserver.utls.ChunkSelector;
+import plus.fserver.utls.collections.ArrayListE6;
+import static net.minecraft.block.BlockFs.addCollisionBoxToListFs;
 
 
 public class BlockPistonBase extends BlockDirectional {
@@ -45,6 +46,12 @@ public class BlockPistonBase extends BlockDirectional {
         this.setSoundType(SoundType.STONE);
         this.setHardness(0.5F);
         this.setCreativeTab(CreativeTabs.REDSTONE);
+    }
+
+
+    @Override
+    public void addCollisionBoxToListF(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> collidingBoxes) {
+        addCollisionBoxToListFs(pos, entityBox, collidingBoxes, state.getCollisionBoundingBox(worldIn, pos));
     }
 
 

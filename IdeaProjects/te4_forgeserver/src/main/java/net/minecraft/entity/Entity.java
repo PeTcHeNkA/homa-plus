@@ -648,8 +648,14 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
                 }
             }
 
-            List<AxisAlignedBB> boxes = this.world.getCollisionBoxesLimited(this, this.getEntityBoundingBox().expand(x, y, z), ElcaConfig.MAX_ENTITY_COLLISIONS_MOVE);
-            AxisAlignedBB axisalignedbb = this.getEntityBoundingBox();
+            AxisAlignedBB axisalignedbb = world.commonWorldEntityAABB;
+            getEntityBoundingBox().expandTo(x, y, z, axisalignedbb);
+
+            List<AxisAlignedBB> boxes = this.world.getCollisionBoxesLimited(this,
+                    axisalignedbb, ElcaConfig.MAX_ENTITY_COLLISIONS_MOVE
+            );
+
+            axisalignedbb = this.getEntityBoundingBox();
             boolean flag;
             int temp;
             if (flag = y != 0.0D) {
@@ -674,7 +680,10 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
                 }
                 flag = true;
             }
-            if(flag) this.setEntityBoundingBox(this.getEntityBoundingBox().offset(x, y, z));
+            if(flag) {
+                this.getEntityBoundingBox().offsetMut(x, y, z);
+                //this.setEntityBoundingBox(this.getEntityBoundingBox().offset(x, y, z));
+            }
 
             flag = this.onGround || dy1 != y && dy1 < 0.0D;
 
@@ -688,7 +697,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
                 //todo check remove impact
                 //boxes = this.world.getCollisionBoxes(this, this.getEntityBoundingBox().expand(dx1, y, dz1));
 
-                AxisAlignedBB aab2 = this.getEntityBoundingBox();
+                final AxisAlignedBB aab2 = this.getEntityBoundingBox();
                 AxisAlignedBB aab3 = aab2.expand(dx1, 0.0D, dz1);
                 double d8 = y;
                 temp = 0;
@@ -697,7 +706,8 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
                     d8 = boxes.get(temp).calculateYOffset(aab3, d8);
                 }
 
-                aab2 = aab2.offset(0.0D, d8, 0.0D);
+                aab2.offsetMut(0.0D, d8, 0.0D);
+                //aab2 = aab2.offset(0.0D, d8, 0.0D);
                 double d18 = dx1;
                 temp = 0;
 
@@ -705,7 +715,8 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
                     d18 = boxes.get(temp).calculateXOffset(aab2, d18);
                 }
 
-                aab2 = aab2.offset(d18, 0.0D, 0.0D);
+                aab2.offsetMut(d18, 0.0D, 0.0D);
+                //aab2 = aab2.offset(d18, 0.0D, 0.0D);
                 double d19 = dz1;
                 temp = 0;
 
@@ -713,7 +724,8 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
                     d19 = boxes.get(temp).calculateZOffset(aab2, d19);
                 }
 
-                aab2 = aab2.offset(0.0D, 0.0D, d19);
+                aab2.offsetMut(0.0D, 0.0D, d19);
+                //aab2 = aab2.offset(0.0D, 0.0D, d19);
 
                 double d20 = y;
                 temp = 0;
@@ -742,7 +754,8 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
                     y = -d8;
                     this.setEntityBoundingBox(aab2);
                 } else {
-                    this.setEntityBoundingBox(boundingBox.offset(x = d21, y = -d20, z = d22));
+                    boundingBox.offsetMut(x = d21, y = -d20, z = d22);
+                    //this.setEntityBoundingBox(boundingBox.offset(x = d21, y = -d20, z = d22));
                 }
 
                 int j4 = 0;
@@ -767,21 +780,22 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
             this.onGround = this.collidedVertically && dy1 < 0.0D;
             this.collided = this.collidedHorizontally || this.collidedVertically;
 
-            BlockPos blockpos = new BlockPos(this.posX, this.posY - 0.20000000298023224D, this.posZ);
-            IBlockState iblockstate = this.world.getBlockState(blockpos);
+            BlockPos.MutableBlockPos blockpos = this.world.localTempPos.setPos(this.posX, this.posY - 0.20000000298023224D, this.posZ);
+            //BlockPos blockpos = new BlockPos(this.posX, this.posY - 0.20000000298023224D, this.posZ);
+            IBlockState state = this.world.getBlockState(blockpos);
 
-            if (iblockstate.getMaterial() == Material.AIR) {
-                BlockPos blockpos1 = blockpos.down();
-                IBlockState iblockstate1 = this.world.getBlockState(blockpos1);
-                Block block1 = iblockstate1.getBlock();
+            if (state.getMaterial() == Material.AIR) {
+                //BlockPos blockpos1 = blockpos.down();
+                IBlockState state1 = this.world.getBlockState(blockpos.getX(), blockpos.getY()-1, blockpos.getZ());
+                Block block1 = state1.getBlock();
 
                 if (block1 instanceof BlockFence || block1 instanceof BlockWall || block1 instanceof BlockFenceGate) {
-                    iblockstate = iblockstate1;
-                    blockpos = blockpos1;
+                    state = state1;
+                    BlockPos.unsafeEdit(blockpos, blockpos.getX(), blockpos.getY()-1, blockpos.getZ());
                 }
             }
 
-            this.updateFallState(y, this.onGround, iblockstate, blockpos);
+            this.updateFallState(y, this.onGround, state, blockpos);
 
             if (dx1 != x) {
                 this.motionX = 0.0D;
@@ -790,7 +804,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
             if (dz1 != z) {
                 this.motionZ = 0.0D;
             }
-            Block block = iblockstate.getBlock();
+            Block block = state.getBlock();
 
             if (collidedVertically) block.onLanded(this.world, this);
 
@@ -811,7 +825,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
                 this.distanceWalkedModified = (float)((double)this.distanceWalkedModified + (double)MathHelper.sqrt(d15 * d15 + d17 * d17) * 0.6D);
                 this.distanceWalkedOnStepModified = (float)((double)this.distanceWalkedOnStepModified + (double)MathHelper.sqrt(d15 * d15 + d16 * d16 + d17 * d17) * 0.6D);
 
-                if (this.distanceWalkedOnStepModified > (float)this.nextStepDistance && iblockstate.getMaterial() != Material.AIR) {
+                if (this.distanceWalkedOnStepModified > (float)this.nextStepDistance && state.getMaterial() != Material.AIR) {
                     this.nextStepDistance = (int)this.distanceWalkedOnStepModified + 1;
 
                     if (this.isInWater()) {
@@ -827,7 +841,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
                     } else {
                         this.playStepSound(blockpos, block);
                     }
-                } else if (this.distanceWalkedOnStepModified > this.nextFlap && this.makeFlySound() && iblockstate.getMaterial() == Material.AIR) {
+                } else if (this.distanceWalkedOnStepModified > this.nextFlap && this.makeFlySound() && state.getMaterial() == Material.AIR) {
                     this.nextFlap = this.playFlySound(this.distanceWalkedOnStepModified);
                 }
             }
@@ -842,7 +856,10 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
             boolean flag1 = this.isWet();
 
-            if (this.world.isFlammableWithin(this.getEntityBoundingBox().shrink(0.001D))) {
+            AxisAlignedBB box;
+            getEntityBoundingBox().growTo(-0.001D,-0.001D,-0.001D, box = world.commonWorldEntityAABB);
+
+            if (this.world.isFlammableWithin(box)) {
                 this.dealFireDamage(1);
                 if (!flag1) {
                     ++this.fire;
@@ -1458,15 +1475,19 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
     public boolean handleWaterMovement() {
         if (this.getRidingEntity() instanceof EntityBoat) {
             this.inWater = false;
-        } else if (this.world.handleMaterialAcceleration(this.getEntityBoundingBox().grow(0.0D, -0.4000000059604645D, 0.0D).shrink(0.001D), Material.WATER, this)) {
-            if (!this.inWater && !this.firstUpdate) {
-                this.doWaterSplashEffect();
-            }
-            this.fallDistance = 0.0F;
-            this.inWater = true;
-            this.extinguish();
         } else {
-            this.inWater = false;
+            AxisAlignedBB box;
+            getEntityBoundingBox().growTo(-0.001D, -0.4010000059604645D, -0.001D, box = world.commonWorldEntityAABB);
+            if (world.handleMaterialAcceleration(box, Material.WATER, this)) {
+                if (!this.inWater && !this.firstUpdate) {
+                    this.doWaterSplashEffect();
+                }
+                this.fallDistance = 0.0F;
+                this.inWater = true;
+                this.extinguish();
+            } else {
+                this.inWater = false;
+            }
         }
         return this.inWater;
     }
@@ -1538,7 +1559,9 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
 
     public boolean isInLava() {
-        return this.world.isMaterialInBB(this.getEntityBoundingBox().grow(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D), Material.LAVA);
+        AxisAlignedBB box;
+        getEntityBoundingBox().growTo(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D, box = world.commonWorldEntityAABB);
+        return world.isMaterialInBB(box, Material.LAVA);
     }
 
 

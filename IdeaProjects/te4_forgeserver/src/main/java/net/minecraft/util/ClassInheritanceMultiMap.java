@@ -151,8 +151,8 @@ final class ArrayListE1V<T> extends ArrayListEA<T>{
         this.size = 1;
     }
     @Override
-    public int newSizeAuto() {
-        return data.length == 1?5:data.length+7;
+    public Object[] newArrayAuto() {
+        return Arrays.copyOf(data, data.length == 1?5:data.length+7);
     }
 }
 

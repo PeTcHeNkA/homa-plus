@@ -8,17 +8,13 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.Rotation;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import plus.fserver.api.IBlockEAccess;
-import plus.fserver.utls.collections.ArrayListE6;
-
-import static net.minecraft.block.BlockFs.addCollisionBoxToListFs;
 
 
-public abstract class BlockLog extends BlockRotatedPillar {
+public abstract class BlockLog extends BlockRotatedPillarFs {
     public static final PropertyEnum<BlockLog.EnumAxis> LOG_AXIS = PropertyEnum.create("axis", BlockLog.EnumAxis.class);
 
     public BlockLog() {
@@ -26,12 +22,6 @@ public abstract class BlockLog extends BlockRotatedPillar {
         this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
         this.setHardness(2.0F);
         this.setSoundType(SoundType.WOOD);
-    }
-
-
-    @Override
-    public void addCollisionBoxToListF(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> collidingBoxes) {
-        addCollisionBoxToListFs(pos, entityBox, collidingBoxes, state.getCollisionBoundingBox(worldIn, pos));
     }
 
 
@@ -45,7 +35,7 @@ public abstract class BlockLog extends BlockRotatedPillar {
             pos2.addMut(-1, -1, -1);
 
             IBlockEAccess access = worldIn.isRemote?worldIn:((WorldServer)worldIn).localSelector;
-            for (BlockPos blockpos : BlockPos.getAllInBoxFast(pos1, pos1, pos2)) {
+            for (BlockPos blockpos : BlockPos.getAllInBoxMutable(pos1, pos1, pos2)) {
                 IBlockState iblockstate = access.getBlockState(blockpos);
 
                 if (iblockstate.getBlock().isLeaves(iblockstate, worldIn, blockpos)) {

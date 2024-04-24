@@ -1678,7 +1678,7 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
 
     private final BlockPos.MutableBlockPos tempPooledLocalPos = new BlockPos.MutableBlockPos();
     @Override
-    protected boolean getCollisionBoxes(@Nullable Entity entityIn, AxisAlignedBB aabb, boolean fastCheck, List<AxisAlignedBB> outList) {
+    protected boolean getCollisionBoxes(@Nullable Entity entityIn, AxisAlignedBB aabb, boolean fastCheck, ArrayListE6<AxisAlignedBB> outList) {
         if (fastCheck){
             if(ElcaCV.ENABLE_COLLISION_EVENTS){
                 MinecraftForge.EVENT_BUS.post(collisionEvent.init(entityIn, aabb, outList));
@@ -1721,7 +1721,7 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
                                     state = chunk.getBlockState(xPos, i2, zPos);
                                 }
 
-                                state.addCollisionBoxToList(this, tempPooledLocalPos.setPos(xPos, i2, zPos), aabb, outList, entityIn, false);
+                                state.addCollisionBoxToListF(this, tempPooledLocalPos.setPos(xPos, i2, zPos), aabb, outList, entityIn, false);
 
                                 if (fastCheck) {
                                     if(ElcaCV.ENABLE_COLLISION_EVENTS){

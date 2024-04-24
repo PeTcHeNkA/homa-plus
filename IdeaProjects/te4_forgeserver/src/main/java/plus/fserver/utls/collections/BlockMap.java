@@ -5,6 +5,7 @@ import net.minecraft.util.math.BlockPos;
 
 
 //is really long
+@Deprecated
 public class BlockMap<T> extends Object2ObjectLinkedOpenCustomHashMap<BlockPos,T> {
     public static final Strategy<BlockPos> strategy = new BlockHashStrategy();
 

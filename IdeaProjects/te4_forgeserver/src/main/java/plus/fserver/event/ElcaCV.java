@@ -11,4 +11,8 @@ public class ElcaCV {
     public static final boolean DEBUG_NO_SERVER               = false;
     public static final boolean CHECK_LEGAL_CHUNK_CHANGE      = false;
     public static final boolean MORE_MOBS_OPTIMIZER           = true;
+
+
+    public static final boolean DISABLE_FORGE_FARMLAND        = true;
+    public static final boolean ALLOW_ANY_PROJECTIVE_TNT      = false;
 }

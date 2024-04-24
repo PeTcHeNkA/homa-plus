@@ -7,6 +7,8 @@ public class ElcaConfig {
     public static final String REJECT_SERVER_FULL   = "The server is full!";
     public static final String REJECT_NON_WHITELIST = "You are not white-listed on this server!";
 
+    public static int END_PORTAL_TRANSFER_DIM    = 1;
+
     public static int TIME_PACKET_RATE           = 20 * 3;
     public static int CHUNK_TICK_RADIUS_1        = 4 * 16;
     public static int CHUNK_TICK_RADIUS_2        = 5 * 16;
@@ -31,6 +33,7 @@ public class ElcaConfig {
     //Statistic: 0: 33%, 1: 50%, 2: 65%, 3: 75%, 4:80%, 5: 90%, 6: 98%. lower -> faster
     public static int MAX_ENTITY_COLLISIONS      = 3;
     public static int MAX_ENTITY_COLLISIONS_MOVE = 1;
+    public static int MAX_SPONGE_POWER           = 64;
 
     public static int MIN_CHANGED_BLOCKS_BUF     = 24;
 

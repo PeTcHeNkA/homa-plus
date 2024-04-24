@@ -26,7 +26,7 @@ import plus.fserver.utls.math.BlockPosDelta;
 import plus.fserver.world.RedstoneEngine;
 
 
-public class BlockRedstoneWire extends Block {
+public class BlockRedstoneWire extends BlockFs {
     public static final PropertyEnum<BlockRedstoneWire.EnumAttachPosition> NORTH = PropertyEnum.create("north", BlockRedstoneWire.EnumAttachPosition.class);
     public static final PropertyEnum<BlockRedstoneWire.EnumAttachPosition> EAST = PropertyEnum.create("east", BlockRedstoneWire.EnumAttachPosition.class);
     public static final PropertyEnum<BlockRedstoneWire.EnumAttachPosition> SOUTH = PropertyEnum.create("south", BlockRedstoneWire.EnumAttachPosition.class);

@@ -8,12 +8,12 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 
 public final class AxisAlignedBB {
-    public final double minX;
-    public final double minY;
-    public final double minZ;
-    public final double maxX;
-    public final double maxY;
-    public final double maxZ;
+    public double minX;
+    public double minY;
+    public double minZ;
+    public double maxX;
+    public double maxY;
+    public double maxZ;
 
     public AxisAlignedBB(double x1, double y1, double z1, double x2, double y2, double z2) {
         if(x1 > x2){
@@ -37,6 +37,41 @@ public final class AxisAlignedBB {
             minZ = z1;
             maxZ = z2;
         }
+    }
+
+
+    public void init(double x1, double y1, double z1, double x2, double y2, double z2){
+        if(x1 > x2){
+            minX = x2;
+            maxX = x1;
+        } else {
+            minX = x1;
+            maxX = x2;
+        }
+        if(y1 > y2){
+            minY = y2;
+            maxY = y1;
+        } else {
+            minY = y1;
+            maxY = y2;
+        }
+        if(z1 > z2){
+            minZ = z2;
+            maxZ = z1;
+        } else {
+            minZ = z1;
+            maxZ = z2;
+        }
+    }
+
+
+    public void initSafe(double x1, double y1, double z1, double x2, double y2, double z2){
+        minX = x1;
+        maxX = x2;
+        minY = y1;
+        maxY = y2;
+        minZ = z1;
+        maxZ = z2;
     }
 
 
@@ -161,8 +196,51 @@ public final class AxisAlignedBB {
     }
 
 
+    public void expandTo(double x, double y, double z, AxisAlignedBB src) {
+        double d0 = this.minX;
+        double d1 = this.minY;
+        double d2 = this.minZ;
+        double d3 = this.maxX;
+        double d4 = this.maxY;
+        double d5 = this.maxZ;
+
+        if (x < 0.0D) {
+            d0 += x;
+        }
+        else if (x > 0.0D) {
+            d3 += x;
+        }
+
+        if (y < 0.0D) {
+            d1 += y;
+        }
+        else if (y > 0.0D) {
+            d4 += y;
+        }
+        if (z < 0.0D) {
+            d2 += z;
+        }
+        else if (z > 0.0D) {
+            d5 += z;
+        }
+        src.initSafe(d0, d1, d2, d3, d4, d5);
+    }
+
+
     public AxisAlignedBB grow(double x, double y, double z) {
         return new AxisAlignedBB(
+                this.minX - x,
+                this.minY - y,
+                this.minZ - z,
+                this.maxX + x,
+                this.maxY + y,
+                this.maxZ + z
+        );
+    }
+
+
+    public void growTo(double x, double y, double z, AxisAlignedBB src) {
+        src.initSafe(
                 this.minX - x,
                 this.minY - y,
                 this.minZ - z,
@@ -205,8 +283,18 @@ public final class AxisAlignedBB {
     }
 
 
+    public void offsetMut(double x, double y, double z) {
+        initSafe(this.minX + x, this.minY + y, this.minZ + z, this.maxX + x, this.maxY + y, this.maxZ + z);
+    }
+
+
     public AxisAlignedBB offset(BlockPos pos) {
         return new AxisAlignedBB(this.minX + (double)pos.getX(), this.minY + (double)pos.getY(), this.minZ + (double)pos.getZ(), this.maxX + (double)pos.getX(), this.maxY + (double)pos.getY(), this.maxZ + (double)pos.getZ());
+    }
+
+
+    public void offsetTo(BlockPos pos, AxisAlignedBB flush) {
+        flush.initSafe(this.minX + (double)pos.getX(), this.minY + (double)pos.getY(), this.minZ + (double)pos.getZ(), this.maxX + (double)pos.getX(), this.maxY + (double)pos.getY(), this.maxZ + (double)pos.getZ());
     }
 
 

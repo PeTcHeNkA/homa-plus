@@ -14,7 +14,7 @@
     "light.MixinChunkProviderServer",
     "light.MixinExtendedBlockStorage",
     "light.MixinSPacketChunkData",
-    "md.BlockLeavesPatch",
+
     "md.EntityAmbientCreaturePatch",
     "md.EntityAnimalPatch",
     "md.EntityMobPatch",

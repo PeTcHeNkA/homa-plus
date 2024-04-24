@@ -236,7 +236,7 @@ public class ArrayListE6<T> implements List<T> {
 
     @Override
     public boolean add(T obj){
-        if(data.length<=size)data = Arrays.copyOf(data, newSizeAuto());
+        if(data.length<=size)data = newArrayAuto();
         data[size++] = obj;
         return true;
     }
@@ -244,7 +244,7 @@ public class ArrayListE6<T> implements List<T> {
 
     @Override
     public void add(int index, T element) {
-        if(data.length<=size)data = Arrays.copyOf(data, newSizeAuto());
+        if(data.length<=size)data = newArrayAuto();
         System.arraycopy(data, index, data, index + 1, size - index);
         data[index] = element;
         size++;
@@ -252,18 +252,24 @@ public class ArrayListE6<T> implements List<T> {
 
 
     public void addF(Object obj){
-        if(data.length<=size)data = Arrays.copyOf(data, newSizeAuto());
+        if(data.length<=size)data = newArrayAuto();
         data[size++] = obj;
     }
 
 
-    public int newSizeAuto(){
-        return data == EMPTY_ARR ?6: data.length+10;
+    public Object[] newArrayAuto(){
+        return Arrays.copyOf(data, data == EMPTY_ARR ?6: data.length+10);
     }
 
 
     @Override
     public T get(int index) {
+        return (T) data[index];
+    }
+
+
+    public T getSafe(int index){
+        if(index >= data.length) return null;
         return (T) data[index];
     }
 
