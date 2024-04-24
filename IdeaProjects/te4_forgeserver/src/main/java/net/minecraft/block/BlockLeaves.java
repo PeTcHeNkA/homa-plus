@@ -11,6 +11,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -63,81 +64,75 @@ public abstract class BlockLeaves extends BlockFs implements net.minecraftforge.
     public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand) {
         if (!worldIn.isRemote) {
             if (state.getValue(CHECK_DECAY) && state.getValue(DECAYABLE)) {
-
-                int k = pos.getX();
-                int l = pos.getY();
-                int i1 = pos.getZ();
-
-                LeavesCache cache = worldIn.getLeavesCache();
-
                 // Forge: prevent decaying leaves from updating neighbors and loading unloaded chunks
                 if (!worldIn.isAreaLoaded(pos, 1)) return;
                 // Forge: extend range from 5 to 6 to account for neighbor checks in world.markAndNotifyBlock -> world.updateObservingBlocksAt
                 if (worldIn.isAreaLoaded(pos, 6)) {
-                    BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos();
+                    int cX = pos.getX();
+                    int cY = pos.getY();
+                    int cZ = pos.getZ();
 
+                    LeavesCache cache = worldIn.getLeavesCache();
                     IBlockEAccess access = ((WorldServer)worldIn).localSelector;
 
                     for (int dx = -4; dx <= 4; ++dx) {
                         for (int dz = -4; dz <= 4; ++dz) {
                             for (int dy = -4; dy <= 4; ++dy) {
-                                IBlockState iblockstate = access.getBlockState(blockPos.setPos(k + dx, l + dy, i1 + dz));
+                                IBlockState iblockstate = access.getBlockState(cache.setPos(cX + dx, cY + dy, cZ + dz));
                                 Block block = iblockstate.getBlock();
 
-                                if (!block.canSustainLeaves(iblockstate, worldIn, blockPos.setPos(k + dx, l + dy, i1 + dz))) {
-                                    if (block.isLeaves(iblockstate, worldIn, blockPos.setPos(k + dx, l + dy, i1 + dz))) {
-                                        cache.set(dx, dy, dz, 0);
-                                        //surroundings[(dx + 16) * 1024 + (dy + 16) * 32 + dz + 16] = -2;
+                                if (!block.canSustainLeaves(iblockstate, worldIn, cache)) {
+                                    if (block.isLeaves(iblockstate, worldIn, cache)) {
+                                        cache.set(dx, dy, dz, -2);
+
                                     } else {
-                                        cache.set(dx, dy, dz, 1);
-                                        //surroundings[(dx + 16) * 1024 + (dy + 16) * 32 + dz + 16] = -1;
+                                        cache.set(dx, dy, dz, -1);
                                     }
                                 } else {
-                                    cache.set(dx, dy, dz, 2);
-                                    //surroundings[(dx + 16) * 1024 + (dy + 16) * 32 + dz + 16] = 0;
+                                    cache.set(dx, dy, dz, 0);
                                 }
                             }
                         }
                     }
 
-                    for (int cursor, factor = 3; factor <= 6; ++factor) {
+                    for (int cursor, factor = 1; factor <= 4; ++factor) {
                         for (int dx = -4; dx <= 4; ++dx) {
                             for (int dy = -4; dy <= 4; ++dy) {
                                 for (int dz = -4; dz <= 4; ++dz) {
-                                    if (cache.get(dx, dy, dz) == factor - 3) {
+                                    if (cache.get(dx, dy, dz) == factor - 1) {
                                         if(dx != -4) {
                                             cursor = LeavesCache.cursor(dx - 1, dy, dz);
-                                            if (cache.get(cursor) == 0) {
+                                            if (cache.get(cursor) == -2) {
                                                 cache.set(cursor, factor);
                                             }
                                         }
                                         if(dx != 4) {
                                             cursor = LeavesCache.cursor(dx + 1, dy, dz);
-                                            if (cache.get(cursor) == 0) {
+                                            if (cache.get(cursor) == -2) {
                                                 cache.set(cursor, factor);
                                             }
                                         }
                                         if(dy != -4) {
                                             cursor = LeavesCache.cursor(dx, dy - 1, dz);
-                                            if (cache.get(cursor) == 0) {
+                                            if (cache.get(cursor) == -2) {
                                                 cache.set(cursor, factor);
                                             }
                                         }
                                         if(dy != 4) {
                                             cursor = LeavesCache.cursor(dx, dy + 1, dz);
-                                            if (cache.get(cursor) == 0) {
+                                            if (cache.get(cursor) == -2) {
                                                 cache.set(cursor, factor);
                                             }
                                         }
                                         if(dz != -4) {
                                             cursor = LeavesCache.cursor(dx, dy, dz - 1);
-                                            if (cache.get(cursor) == 0) {
+                                            if (cache.get(cursor) == -2) {
                                                 cache.set(cursor, factor);
                                             }
                                         }
                                         if(dz != 4) {
                                             cursor = LeavesCache.cursor(dx, dy, dz + 1);
-                                            if (cache.get(cursor) == 0) {
+                                            if (cache.get(cursor) == -2) {
                                                 cache.set(cursor, factor);
                                             }
                                         }
@@ -146,43 +141,33 @@ public abstract class BlockLeaves extends BlockFs implements net.minecraftforge.
                             }
                         }
                     }
-                }
 
-                int l2 = cache.get(0,0,0);
+                    //int center = cache.get(0,0,0);
 
-                if (l2 >= 3) {
-                    worldIn.setBlockState(pos, state.withProperty(CHECK_DECAY, Boolean.FALSE), 4);
-                } else {
-                    this.destroy(worldIn, pos);
+                    if (cache.get(0,0,0) >= 0) {
+                        worldIn.setBlockState(pos, state.withProperty(CHECK_DECAY, Boolean.FALSE), 4);
+                    } else {
+                        this.destroy(worldIn, access, pos);
+                    }
                 }
             }
         }
     }
-//
-//    public static void main(String[] args) {
-//        LeavesCache cache = new LeavesCache();
-//        int index = LeavesCache.cursor(0, 0, 0);
-//        int index1 = LeavesCache.cursor(0, 0, 1);
-//        cache.set(index, 1);
-//        cache.set(index1, 5);
-//        System.out.println(cache.get(index));
-//        System.out.println(cache.get(index1));
-//    }
 
 
-    private void destroy(World worldIn, BlockPos pos) {
-        this.dropBlockAsItem(worldIn, pos, worldIn.getBlockState(pos), 0);
+    private void destroy(World worldIn, IBlockEAccess access, BlockPos pos) {
+        this.dropBlockAsItem(worldIn, pos, access.getBlockState(pos), 0);
         worldIn.setBlockToAir(pos);
     }
 
 
-    public static class LeavesCache{
+    public static final class LeavesCache extends BlockPos.MutableBlockPos {
         private final byte[] updates = new byte[1093];
 
         public int get(int dx, int dy, int dz){
             int cursor = ((dx + 4) << 7) | ((dy + 4) << 3) | ((dz + 4) >> 1);
             int result = updates[cursor];
-            return (dz & 1) == 1? (result >> 4) & 0xF : (result & 0xF);
+            return ((dz & 1) == 1? (result >> 4) & 0xF : (result & 0xF)) - 3;
         }
 
 
@@ -193,11 +178,12 @@ public abstract class BlockLeaves extends BlockFs implements net.minecraftforge.
 
         public int get(int cursor){
             int result = updates[cursor>>1];
-            return (cursor & 1) == 1 ? (result >> 4) & 0xF: (result & 0xF);
+            return ((cursor & 1) == 1 ? (result >> 4) & 0xF: (result & 0xF)) - 3;
         }
 
 
         public void set(int cursor, int value){
+            value += 3;
             int mask, pre;
             if((cursor & 1) == 1){
                 mask = 0x0F;
@@ -212,6 +198,7 @@ public abstract class BlockLeaves extends BlockFs implements net.minecraftforge.
 
 
         public void set(int dx, int dy, int dz, int value){
+            value += 3;
             int cursor = ((dx + 4) << 7) | ((dy + 4) << 3) | ((dz + 4) >> 1),
                 mask, pre;
 
@@ -295,14 +282,14 @@ public abstract class BlockLeaves extends BlockFs implements net.minecraftforge.
 
     @Override
     public void beginLeavesDecay(IBlockState state, World world, BlockPos pos) {
-        if (!(Boolean)state.getValue(CHECK_DECAY)) {
+        if (!state.getValue(CHECK_DECAY)) {
             world.setBlockState(pos, state.withProperty(CHECK_DECAY, true), 4);
         }
     }
 
 
     @Override
-    public void getDrops(net.minecraft.util.NonNullList<ItemStack> drops, IBlockAccess world, BlockPos pos, IBlockState state, int fortune) {
+    public void getDrops(NonNullList<ItemStack> drops, IBlockAccess world, BlockPos pos, IBlockState state, int fortune) {
         Random rand = world instanceof World ? ((World)world).rand : new Random();
         int chance = this.getSaplingDropChance(state);
 
@@ -323,10 +310,9 @@ public abstract class BlockLeaves extends BlockFs implements net.minecraftforge.
             if (chance < 40) chance = 40;
         }
 
-        this.captureDrops(true);
-        if (world instanceof World)
-            this.dropApple((World)world, pos, state, chance); // Dammet mojang
-        drops.addAll(this.captureDrops(false));
+        captureDropsTrue();
+        if (world instanceof World) dropApple((World)world, pos, state, chance); // Dammet mojang
+        drops.addAll(captureDrops(false));
     }
 
 
