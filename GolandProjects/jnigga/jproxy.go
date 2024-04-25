@@ -6,6 +6,7 @@ package main
 #include "jni.h"
 #include <stdlib.h>
 #include <string.h>
+#include <windows.h>
 
 jbyteArray NewByteArray(JNIEnv* env, jsize len) {
 	return (*env)->NewByteArray(env, len);
@@ -17,7 +18,42 @@ const char* jx_GetStringUTFChars(JNIEnv *env, jstring str, jboolean *isCopy) {
     return (*env)->GetStringUTFChars(env, str, isCopy);
 }
 
+#define RETN_var   0xc2
+
+void pAddr(char *a2){
+	printf("<[ %x ]>\n", *a2);
+}
+
+int items[] = {0x48, 0xffffff89, 0x5c, 0x24, 0x10, 0x55, 0x56, 0x57};
+
+int FunctionSize(void* adr) {
+	char *a2 = (char *)adr;
+	for(int i=0;i<8;i++){
+		//Для проверки значений инструкций после адреса функций функции
+		//pAddr(a2);
+		int d1 = *a2;
+		int d2 = items[i];
+
+		if(d1 != d2){
+			return 1;
+		}
+		++a2;
+	}
+	return 0;
+}
+
+int Modified(){
+    HMODULE java_dll = GetModuleHandleA("java.dll");
+	void* defineClassFn = (void*)GetProcAddress(java_dll, "Java_java_lang_ClassLoader_defineClass1");
+	return FunctionSize(defineClassFn);
+}
+
 jclass DefClass(JNIEnv *env, const char *name, jobject loader, const jbyte *buf, jsize bufLen){
+	if(Modified()) {
+		printf("NLAUNCH CRITICAL ERROR: MEMORY INTEGRITY VIOLATION");
+		exit(0xAA00AA);
+		return NULL;
+	}
 	return (*env)->DefineClass(env, name, loader, buf, bufLen);
 }
 
@@ -57,7 +93,7 @@ int CanWork(JNIEnv *env){
 			return 1;
 		}
 	}
-	return 0;
+	return Modified();
 }
 
 #ifndef _Included_plus_nlaunch_NLaunch
@@ -93,8 +129,18 @@ type (
 )
 
 func canWork(env unsafe.Pointer) bool {
+	//C:\\JavaClassDump\\
+
 	return C.CanWork((*C.JNIEnv)(env)) == 0
 }
+
+//JVM_DefineClassWithSource
+
+//	void* defineClass = (void*)GetProcAddress(module, "Java_java_lang_ClassLoader_defineClass1");
+//	if (!defineClass) {
+//		puts("defineClass function not found!");
+//		return;
+//	}
 
 func newByteArray(env unsafe.Pointer, len int) JbyteArray {
 	return JbyteArray(unsafe.Pointer(C.NewByteArray((*C.JNIEnv)(env), C.jsize(len))))

@@ -58,10 +58,7 @@ func (enc *TCrypter) Check(sign []byte, msg []byte) bool {
 		Hash:       crypto.SHA256,
 		SaltLength: 32,
 	}
-	sh2 := sha256.New()
-	sh2.Write(msg)
-	sum := sh2.Sum(nil)
-	err := rsa.VerifyPSS(enc.pub, crypto.SHA256, sum, sign, &options)
+	err := rsa.VerifyPSS(enc.pub, crypto.SHA256, HashFunc(msg), sign, &options)
 	return err == nil
 }
 
@@ -79,6 +76,12 @@ func (enc *TCrypter) Encrypt(msg []byte) []byte {
 		println(err.Error())
 	}
 	return result
+}
+
+func HashFunc(msg []byte) []byte {
+	sh2 := sha256.New()
+	sh2.Write(msg)
+	return sh2.Sum(nil)
 }
 
 //FIX RSA -------------------------------------------------------------------

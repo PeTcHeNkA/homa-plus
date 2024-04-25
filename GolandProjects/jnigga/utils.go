@@ -4,6 +4,7 @@ import "C"
 import (
 	"archive/zip"
 	"bytes"
+	"errors"
 	"io"
 	"main/tutil"
 	"os"
@@ -78,7 +79,7 @@ func packDecode(files []string, table map[string][]byte, tcr *tutil.TCrypter) er
 		group.Add(1)
 		go func(file string) {
 			defer group.Done()
-			err = decode(file, table, tcr, &group, &mutex)
+			err = decode(strings.ReplaceAll(file, "\\", "/"), table, tcr, &group, &mutex)
 			if err != nil {
 				return
 			}
@@ -156,33 +157,22 @@ func decodeDf(bytesSrc []byte, tcr *tutil.TCrypter) ([]byte, error) {
 	return buffer, nil
 }
 
-//    ks = 512
-//    maxS = len(bs0)
-//    ms = min(ks, maxS)
-//
-//    fchunk = decode(bs0[0:ms])
-//    buffer = fchunk
-//
-//    hs = hashFunc(fchunk)
-//    fchunk = hs + fchunk
-//    fdl = len(fchunk)-512
-//    fchunk = fchunk + fchunk[0:fdl]
-//
-//    e2 = list(bs0[ms:maxS])
-//
-//    for i in range(len(e2)):
-//        m2 = fchunk[i & 511]
-//        e2[i] = e2[i] ^ m2
-//
-//
-//    writeBytes(to, buffer+bytes(e2))
-
 func decodeLazy(bytesSrc []byte, tcr *tutil.TCrypter) ([]byte, error) {
 	const ks = 512
-	key := bytesSrc[0:ks]
-	data := bytesSrc[ks:]
-	for i, b := range data {
-		data[i] = b ^ key[i&511]
+	fchunk := tcr.Decrypt(bytesSrc[0:ks])
+	buffer := fchunk
+	hs := tutil.HashFunc(fchunk)
+	fchunk = append(hs, fchunk...)
+	fdl := len(fchunk) - 512
+	if fdl < 0 {
+		return nil, errors.New("???")
 	}
-	return append(tcr.Decrypt(key), data...), nil
+	fchunk = append(fchunk, fchunk[0:fdl]...)
+
+	data := bytesSrc[ks:]
+
+	for i, b := range data {
+		data[i] = b ^ fchunk[i&511]
+	}
+	return append(buffer, data...), nil
 }
