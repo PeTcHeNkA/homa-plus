@@ -174,18 +174,24 @@ public class TweakEngine implements IClassTransformer, Set<String> {
         if(debug){
             System.out.println("ATTEMPT TWEAK "+name);
         }
-        InputStream stream = loader.getResourceAsStream(prepareName(name));
-        if (stream == null) {
-            return notFound(name);
-        }
+        return getFastSrc(prepareName(name));
+    }
+
+
+    protected byte[] getFastSrc(String name){
+        InputStream stream = loader.getResourceAsStream(name);
+        if (stream == null)return notFound(name);
+        byte[] result = null;
         try {
-            byte[] result = IOUtils.toByteArray(stream);
-            stream.close();
-            return result;
+            result = IOUtils.toByteArray(stream);
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            try {
+                stream.close();
+            } catch (IOException ignored) {}
         }
-        return null;
+        return result;
     }
 
 
@@ -201,7 +207,12 @@ public class TweakEngine implements IClassTransformer, Set<String> {
         if(debug){
             System.out.println("ATTEMPT SAFE TWEAK "+name);
         }
-        Enumeration<URL> urls = urls(prepareName(name));
+        return getSafeSrc(prepareName(name));
+    }
+
+
+    protected final byte[] getSafeSrc(String name){
+        Enumeration<URL> urls = urls(name);
         URL usedUrl = null;
         while (urls.hasMoreElements()) {
             URL cur = urls.nextElement();
