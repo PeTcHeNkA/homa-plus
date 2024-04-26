@@ -351,9 +351,8 @@ public class BlockPos extends Vec3i {
         }
 
 
-        public BlockPos.MutableBlockPos move(EnumFacing facing)
-        {
-            return this.move(facing, 1);
+        public BlockPos.MutableBlockPos move(EnumFacing facing) {
+            return setPos(getX() + facing.getXOffset(), getY() + facing.getYOffset(), getZ() + facing.getZOffset());
         }
 
 

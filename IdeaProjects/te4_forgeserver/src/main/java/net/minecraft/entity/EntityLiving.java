@@ -274,6 +274,7 @@ public abstract class EntityLiving extends EntityLivingBase {
     }
 
 
+    @Override
     public void onUpdate() {
         super.onUpdate();
         if (!this.world.isRemote) {

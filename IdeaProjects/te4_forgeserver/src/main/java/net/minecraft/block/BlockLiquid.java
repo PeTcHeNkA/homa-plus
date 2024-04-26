@@ -20,11 +20,14 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.fserver.api.IBlockEAccess;
 import plus.fserver.utls.ChunkSelector;
 import plus.fserver.utls.collections.ArrayListE6;
+import plus.fserver.utls.math.Vec3dMut;
 
 
 public abstract class BlockLiquid extends Block {
@@ -100,8 +103,8 @@ public abstract class BlockLiquid extends Block {
     }
 
 
-    private boolean causesDownwardCurrent(IBlockAccess worldIn, BlockPos pos, EnumFacing side) {
-        IBlockState iblockstate = worldIn.getBlockState(pos);
+    private boolean causesDownwardCurrent(IBlockAccess access, BlockPos pos, EnumFacing side) {
+        IBlockState iblockstate = access.getBlockState(pos);
         Block block = iblockstate.getBlock();
         Material material = iblockstate.getMaterial();
 
@@ -113,7 +116,7 @@ public abstract class BlockLiquid extends Block {
             return false;
         } else {
             boolean flag = isExceptBlockForAttachWithPiston(block) || block instanceof BlockStairs;
-            return !flag && iblockstate.getBlockFaceShape(worldIn, pos, side) == BlockFaceShape.SOLID;
+            return !flag && iblockstate.getBlockFaceShape(access, pos, side) == BlockFaceShape.SOLID;
         }
     }
 
@@ -196,7 +199,59 @@ public abstract class BlockLiquid extends Block {
 
     @Override
     public Vec3d modifyAcceleration(World worldIn, BlockPos pos, Entity entityIn, Vec3d motion) {
-        return motion.add(this.getFlow(worldIn, pos, worldIn.getBlockState(pos)));
+        IBlockEAccess access = worldIn.isRemote?worldIn:((WorldServer)worldIn).localSelector;
+        IBlockState state = access.getBlockState(pos);
+        double x = 0.0D, y = 0.0D, z = 0.0D;
+
+        int i = this.getRenderedDepth(state);
+        BlockPos.MutableBlockPos blockPos = worldIn.localTempPos;
+
+        for (EnumFacing facing : BlockIDIndexes.FACING_HORIZONTAL) {
+            blockPos.setPos(pos).move(facing);
+            int j = this.getRenderedDepth(access.getBlockState(blockPos));
+
+            if (j < 0) {
+                if (!access.getBlockState(blockPos).getMaterial().blocksMovement()) {
+                    j = this.getRenderedDepth(access.getBlockState(blockPos.getX(), blockPos.getY()-1, blockPos.getZ()));
+
+                    if (j >= 0) {
+                        int k = j - (i - 8);
+                        x += facing.getXOffset() * k;
+                        y += facing.getYOffset() * k;
+                        z += facing.getZOffset() * k;
+                    }
+                }
+            } else {
+                int l = j - i;
+                x += facing.getXOffset() * l;
+                y += facing.getYOffset() * l;
+                z += facing.getZOffset() * l;
+            }
+        }
+
+        if (state.getValue(LEVEL) >= 8) {
+            Vec3dMut mut = worldIn.commonEntityVec3d1.init(x, y, z);
+            //Vec3d vec3d = new Vec3d(x, y, z);
+            for (EnumFacing facing : BlockIDIndexes.FACING_HORIZONTAL) {
+                blockPos.setPos(pos).move(facing);
+
+                if (this.causesDownwardCurrent(access, blockPos, facing)) {
+                    mut.normalize().add(0.0D, -6.0D, 0.0D);
+                    break;
+                } else {
+                    blockPos.setY(blockPos.getY() + 1);
+                    if(this.causesDownwardCurrent(access, blockPos, facing)){
+                        mut.normalize().add(0.0D, -6.0D, 0.0D);
+                        break;
+                    }
+                }
+            }
+
+            return mut.normalize().vec();
+        } else {
+            double d0 = MathHelper.sqrt(x * x + y * y + z * z);
+            return d0 < 1.0E-4D ? Vec3d.ZERO : new Vec3d(x / d0, y / d0, z / d0);
+        }
     }
 
 

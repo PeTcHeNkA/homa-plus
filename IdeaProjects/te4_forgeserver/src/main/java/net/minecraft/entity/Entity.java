@@ -1802,35 +1802,32 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
     @Nullable
     @SideOnly(Side.CLIENT)
-    public RayTraceResult rayTrace(double blockReachDistance, float partialTicks)
-    {
+    public RayTraceResult rayTrace(double blockReachDistance, float partialTicks) {
         Vec3d vec3d = this.getPositionEyes(partialTicks);
         Vec3d vec3d1 = this.getLook(partialTicks);
         Vec3d vec3d2 = vec3d.add(vec3d1.x * blockReachDistance, vec3d1.y * blockReachDistance, vec3d1.z * blockReachDistance);
         return this.world.rayTraceBlocks(vec3d, vec3d2, false, false, true);
     }
 
-    public boolean canBeCollidedWith()
-    {
+
+    public boolean canBeCollidedWith() {
         return false;
     }
 
-    public boolean canBePushed()
-    {
+
+    public boolean canBePushed() {
         return false;
     }
 
-    public void awardKillScore(Entity p_191956_1_, int p_191956_2_, DamageSource p_191956_3_)
-    {
-        if (p_191956_1_ instanceof EntityPlayerMP)
-        {
+    public void awardKillScore(Entity p_191956_1_, int p_191956_2_, DamageSource p_191956_3_) {
+        if (p_191956_1_ instanceof EntityPlayerMP) {
             CriteriaTriggers.ENTITY_KILLED_PLAYER.trigger((EntityPlayerMP)p_191956_1_, this, p_191956_3_);
         }
     }
 
+
     @SideOnly(Side.CLIENT)
-    public boolean isInRangeToRender3d(double x, double y, double z)
-    {
+    public boolean isInRangeToRender3d(double x, double y, double z) {
         double d0 = this.posX - x;
         double d1 = this.posY - y;
         double d2 = this.posZ - z;

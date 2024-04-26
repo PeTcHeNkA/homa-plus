@@ -74,6 +74,7 @@ import plus.fserver.utls.collections.SyncAABBCache;
 import plus.fserver.utls.math.BlockPosDelta;
 import plus.fserver.utls.ChunkSelector;
 import plus.fserver.utls.math.FastRandom;
+import plus.fserver.utls.math.Vec3dMut;
 import plus.fserver.world.RedstoneEngine;
 import plus.fserver.world.light.LightingEngine;
 import plus.fserver.world.light.api.ILightingEngineProvider;
@@ -1285,13 +1286,11 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
-    public void removeEntityDangerously(Entity entityIn)
-    {
+    public void removeEntityDangerously(Entity entityIn) {
         entityIn.setDropItemsWhenDead(false);
         entityIn.setDead();
 
-        if (entityIn instanceof EntityPlayer)
-        {
+        if (entityIn instanceof EntityPlayer) {
             this.playerEntities.remove(entityIn);
             this.updateAllPlayersSleepingFlag();
         }
@@ -1299,8 +1298,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         int i = entityIn.chunkCoordX;
         int j = entityIn.chunkCoordZ;
 
-        if (entityIn.addedToChunk && this.isChunkLoaded(i, j, true))
-        {
+        if (entityIn.addedToChunk && this.isChunkLoaded(i, j, true)) {
             this.getChunk(i, j).removeEntity(entityIn);
         }
 
@@ -1596,6 +1594,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             if (entity2.isDead) {
                 int l1 = entity2.chunkCoordX;
                 int i2 = entity2.chunkCoordZ;
+                //todo
                 if (entity2.addedToChunk && this.isChunkLoaded(l1, i2, true)) {
                     this.getChunk(l1, i2).removeEntity(entity2);
                 }
@@ -3802,6 +3801,9 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public  final ChunkWatchEvent           chunkUnWatchEvent = new ChunkWatchEvent.UnWatch().forBus(MinecraftForge.EVENT_BUS);
     public  final Random              commonWorldEntityRandom = new FastRandom();
     public  final AxisAlignedBB         commonWorldEntityAABB = new AxisAlignedBB(0,0,0,0,0,0);
+    public  final EntitySelectors.CollisionPredicate entityCP = new EntitySelectors.CollisionPredicate();
+    public  final Vec3dMut                 commonEntityVec3d1 = new Vec3dMut(0,0,0);
+    public  final Vec3dMut                 commonEntityVec3d2 = new Vec3dMut(0,0,0);
 
     protected void clearEvents(){
         jumpEvent.setEntity(null);

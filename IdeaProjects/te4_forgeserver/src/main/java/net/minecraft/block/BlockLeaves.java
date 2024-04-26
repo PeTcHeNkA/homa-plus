@@ -24,7 +24,6 @@ import plus.fserver.api.IBlockEAccess;
 public abstract class BlockLeaves extends BlockFs implements net.minecraftforge.common.IShearable {
     public static final PropertyBool DECAYABLE = PropertyBool.create("decayable");
     public static final PropertyBool CHECK_DECAY = PropertyBool.create("check_decay");
-    @SideOnly(Side.CLIENT)
     protected boolean leavesFancy;
 
     public BlockLeaves() {

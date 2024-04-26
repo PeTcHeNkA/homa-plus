@@ -73,6 +73,8 @@ import org.apache.logging.log4j.Logger;
 import plus.fserver.ElcaConfig;
 import plus.fserver.server.SStrings;
 import plus.fserver.utls.collections.FixedItemList;
+import plus.fserver.utls.math.Vec3dMut;
+
 import static plus.fserver.utls.math.Constants.F_180_PI;
 
 
@@ -894,12 +896,13 @@ public abstract class EntityLivingBase extends Entity {
 
     private boolean canBlockDamageSource(DamageSource damageSourceIn) {
         if (!damageSourceIn.isUnblockable() && this.isActiveItemStackBlocking()) {
-            Vec3d vec3d = damageSourceIn.getDamageLocation();
-            if (vec3d != null) {
+            Entity src = damageSourceIn.getImmediateSource();
+
+            if (src != null) {
                 Vec3d vec3d1 = this.getLook(1.0F);
-                Vec3d vec3d2 = vec3d.subtractReverse(new Vec3d(this.posX, this.posY, this.posZ)).normalize();
-                vec3d2 = new Vec3d(vec3d2.x, 0.0D, vec3d2.z);
-                return vec3d2.dotProduct(vec3d1) < 0.0D;
+
+                return world.commonEntityVec3d1.init(src.posX, src.posY, src.posZ)
+                        .subtractReverse(this.posX, this.posY, this.posZ).normalize().dotProduct(vec3d1.x, vec3d1.y, vec3d1.z) < 0.0D;
             }
         }
         return false;
@@ -1952,11 +1955,11 @@ public abstract class EntityLivingBase extends Entity {
         List<Entity> list = (ticksExisted & 7) == 7?
             this.world.getEntitiesInAABBexcluding(
                     this, this.getEntityBoundingBox(),
-                    EntitySelectors.getTeamCollisionPredicate(this)
+                    world.entityCP.forEntity(this)
             ):
             this.world.getEntitiesInAABBexcludingLimited(
                     this, this.getEntityBoundingBox(),
-                    EntitySelectors.getTeamCollisionPredicate(this),
+                    world.entityCP.forEntity(this),
                     ElcaConfig.MAX_ENTITY_COLLISIONS
             );
         if (!list.isEmpty()) {
@@ -2231,14 +2234,16 @@ public abstract class EntityLivingBase extends Entity {
             }
             if (stack.getItemUseAction() == EnumAction.EAT) {
                 for (int i = 0; i < eatingParticleCount; ++i) {
-                    Vec3d vec3d = new Vec3d(((double)this.rand.nextFloat() - 0.5D) * 0.1D, Math.random() * 0.1D + 0.1D, 0.0D);
-                    vec3d = vec3d.rotatePitch(-this.rotationPitch * 0.017453292F);
-                    vec3d = vec3d.rotateYaw(-this.rotationYaw * 0.017453292F);
+                    Vec3dMut vec3d = world.commonEntityVec3d1.init(((double)this.rand.nextFloat() - 0.5D) * 0.1D, Math.random() * 0.1D + 0.1D, 0.0D)
+                            .rotatePitch(-this.rotationPitch * 0.017453292F)
+                            .rotateYaw(-this.rotationYaw * 0.017453292F);
+
                     double d0 = (double)(-this.rand.nextFloat()) * 0.6D - 0.3D;
-                    Vec3d vec3d1 = new Vec3d(((double)this.rand.nextFloat() - 0.5D) * 0.3D, d0, 0.6D);
-                    vec3d1 = vec3d1.rotatePitch(-this.rotationPitch * 0.017453292F);
-                    vec3d1 = vec3d1.rotateYaw(-this.rotationYaw * 0.017453292F);
-                    vec3d1 = vec3d1.add(this.posX, this.posY + (double)this.getEyeHeight(), this.posZ);
+
+                    Vec3dMut vec3d1 = world.commonEntityVec3d2.init(((double)this.rand.nextFloat() - 0.5D) * 0.3D, d0, 0.6D)
+                            .rotatePitch(-this.rotationPitch * 0.017453292F)
+                            .rotateYaw(-this.rotationYaw * 0.017453292F)
+                            .add(this.posX, this.posY + (double)this.getEyeHeight(), this.posZ);
 
                     if (stack.getHasSubtypes()) {
                         this.world.spawnParticle(EnumParticleTypes.ITEM_CRACK, vec3d1.x, vec3d1.y, vec3d1.z, vec3d.x, vec3d.y + 0.05D, vec3d.z, Item.getIdFromItem(stack.getItem()), stack.getMetadata());
