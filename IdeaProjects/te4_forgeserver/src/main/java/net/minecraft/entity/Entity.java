@@ -154,11 +154,11 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
     protected boolean isImmuneToFire;
     protected EntityDataManager dataManager;
     protected static final DataParameter<Byte> FLAGS = EntityDataManager.createKey(Entity.class, DataSerializers.BYTE);
-    private static final DataParameter<Integer> AIR = EntityDataManager.createKey(Entity.class, DataSerializers.VARINT);
-    private static final DataParameter<String> CUSTOM_NAME = EntityDataManager.createKey(Entity.class, DataSerializers.STRING);
-    private static final DataParameter<Boolean> CUSTOM_NAME_VISIBLE = EntityDataManager.createKey(Entity.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> SILENT = EntityDataManager.createKey(Entity.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> NO_GRAVITY = EntityDataManager.createKey(Entity.class, DataSerializers.BOOLEAN);
+    static final DataParameter<Integer> AIR = EntityDataManager.createKey(Entity.class, DataSerializers.VARINT);
+    static final DataParameter<String> CUSTOM_NAME = EntityDataManager.createKey(Entity.class, DataSerializers.STRING);
+    static final DataParameter<Boolean> CUSTOM_NAME_VISIBLE = EntityDataManager.createKey(Entity.class, DataSerializers.BOOLEAN);
+    static final DataParameter<Boolean> SILENT = EntityDataManager.createKey(Entity.class, DataSerializers.BOOLEAN);
+    static final DataParameter<Boolean> NO_GRAVITY = EntityDataManager.createKey(Entity.class, DataSerializers.BOOLEAN);
     public boolean addedToChunk;
     public int chunkCoordX;
     public int chunkCoordY;
@@ -196,6 +196,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
     public Entity(World worldIn) {
         this.entityId = nextEntityID++;
         this.riddenByEntities = Lists.newArrayList();
+        //use zero AABB is safe
         this.boundingBox = ZERO_AABB;
         this.width = 0.6F;
         this.height = 1.8F;
@@ -219,8 +220,8 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         this.tags = new Te4HashSet<>(2);
         this.pistonDeltas = new float[] {0.0f, 0.0f, 0.0f};
         this.world = worldIn;
+        //replace zero AABB to self
         this.setPosition(0.0D, 0.0D, 0.0D);
-
 
         //if(ElcaCV.DEBUG_NO_SERVER)return;
 
@@ -253,8 +254,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
     }
 
 
-    public void setEntityId(int id)
-    {
+    public void setEntityId(int id) {
         this.entityId = id;
     }
 
@@ -287,10 +287,10 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
     protected abstract void entityInit();
 
 
-    public EntityDataManager getDataManager()
-    {
+    public EntityDataManager getDataManager() {
         return this.dataManager;
     }
+
 
     public boolean equals(Object p_equals_1_) {
         if (p_equals_1_ instanceof Entity) {
@@ -300,28 +300,24 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         }
     }
 
-    public int hashCode()
-    {
+
+    public int hashCode() {
         return this.entityId;
     }
 
+
     @SideOnly(Side.CLIENT)
-    protected void preparePlayerToSpawn()
-    {
-        if (this.world != null)
-        {
-            while (this.posY > 0.0D && this.posY < 256.0D)
-            {
+    protected void preparePlayerToSpawn() {
+        if (this.world != null) {
+            while (this.posY > 0.0D && this.posY < 256.0D) {
                 this.setPosition(this.posX, this.posY, this.posZ);
 
-                if (this.world.getCollisionBoxes(this, this.getEntityBoundingBox()).isEmpty())
-                {
+                if (this.world.getCollisionBoxes(this, this.getEntityBoundingBox()).isEmpty()) {
                     break;
                 }
 
                 ++this.posY;
             }
-
             this.motionX = 0.0D;
             this.motionY = 0.0D;
             this.motionZ = 0.0D;
@@ -370,10 +366,29 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         this.posX = x;
         this.posY = y;
         this.posZ = z;
-        if (this.isAddedToWorld() && !this.world.isRemote) this.world.updateEntityWithOptionalForce(this, false); // Forge - Process chunk registration after moving.
+        // Forge - Process chunk registration after moving.
+        if (this.isAddedToWorld() && !this.world.isRemote)
+            this.world.updateEntityWithOptionalForce(this, false);
         float f = this.width / 2.0F;
         float f1 = this.height;
+        //NOT EDIT THIS! CRITICAL ERROR
         this.setEntityBoundingBox(new AxisAlignedBB(x - (double)f, y, z - (double)f, x + (double)f, y + (double)f1, z + (double)f));
+    }
+
+
+    public void mutPosition(double x, double y, double z){
+        this.posX = x;
+        this.posY = y;
+        this.posZ = z;
+        // Forge - Process chunk registration after moving.
+        if (this.isAddedToWorld() && !this.world.isRemote)
+            this.world.updateEntityWithOptionalForce(this, false);
+        float f = this.width / 2.0F;
+        float f1 = this.height;
+
+        AxisAlignedBB box = this.getEntityBoundingBox();
+        box.init(x - (double)f, y, z - (double)f, x + (double)f, y + (double)f1, z + (double)f);
+        this.setEntityBoundingBox(box);
     }
 
 
@@ -515,18 +530,17 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
     }
 
 
-    public void extinguish()
-    {
+    public void extinguish() {
         this.fire = 0;
     }
 
-    protected void outOfWorld()
-    {
+
+    protected void outOfWorld() {
         this.setDead();
     }
 
-    public boolean isOffsetPositionInLiquid(double x, double y, double z)
-    {
+
+    public boolean isOffsetPositionInLiquid(double x, double y, double z) {
         AxisAlignedBB axisalignedbb = this.getEntityBoundingBox().offset(x, y, z);
         return this.isLiquidPresentInAABB(axisalignedbb);
     }
@@ -541,7 +555,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
     public void move(MoverType type, double x, double y, double z) {
         if (this.noClip) {
-            this.setEntityBoundingBox(this.getEntityBoundingBox().offset(x, y, z));
+            getEntityBoundingBox().offsetMut(x, y, z);
             this.resetPositionToBB();
         } else {
             if (type == MoverType.PISTON) {
@@ -770,7 +784,9 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
                     z = dz2;
                     this.setEntityBoundingBox(prev);
                 } else {
-                    this.setEntityBoundingBox(this.getEntityBoundingBox().offset(0.0D, y, 0.0D));
+                    AxisAlignedBB box = this.getEntityBoundingBox();
+                    box.offsetMut(0.0D, y, 0.0D);
+                    this.setEntityBoundingBox(box);
                 }
             }
 
@@ -1416,6 +1432,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         return false;
     }
 
+
     public void awardKillScore(Entity p_191956_1_, int p_191956_2_, DamageSource p_191956_3_) {
         if (p_191956_1_ instanceof EntityPlayerMP) {
             CriteriaTriggers.ENTITY_KILLED_PLAYER.trigger((EntityPlayerMP)p_191956_1_, this, p_191956_3_);
@@ -1432,13 +1449,12 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         return this.isInRangeToRenderDist(d3);
     }
 
+
     @SideOnly(Side.CLIENT)
-    public boolean isInRangeToRenderDist(double distance)
-    {
+    public boolean isInRangeToRenderDist(double distance) {
         double d0 = this.getEntityBoundingBox().getAverageEdgeLength();
 
-        if (Double.isNaN(d0))
-        {
+        if (Double.isNaN(d0)) {
             d0 = 1.0D;
         }
 
@@ -1446,18 +1462,15 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         return distance < d0 * d0;
     }
 
-    public boolean writeToNBTAtomically(NBTTagCompound compound)
-    {
+
+    public boolean writeToNBTAtomically(NBTTagCompound compound) {
         String s = this.getEntityString();
 
-        if (!this.isDead && s != null)
-        {
+        if (!this.isDead && s != null) {
             compound.setString("id", s);
             this.writeToNBT(compound);
             return true;
-        }
-        else
-        {
+        } else {
             return false;
         }
     }
@@ -1492,55 +1505,55 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
     }
 
 
-    public NBTTagCompound writeToNBT(NBTTagCompound compound) {
+    public NBTTagCompound writeToNBT(NBTTagCompound tag) {
         try {
-            compound.setTag(SStrings.Pos,                this.newDoubleNBTList(this.posX, this.posY, this.posZ));
-            compound.setTag(SStrings.Motion,             this.newDoubleNBTList(this.motionX, this.motionY, this.motionZ));
-            compound.setTag(SStrings.Rotation,           this.newFloatNBTList(this.rotationYaw, this.rotationPitch));
-            compound.setFloat(SStrings.FallDistance,     this.fallDistance);
-            compound.setShort(SStrings.Fire, (short)     this.fire);
-            compound.setShort(SStrings.Air, (short)      this.getAir());
-            compound.setBoolean(SStrings.OnGround,       this.onGround);
-            compound.setInteger(SStrings.Dimension,      this.dimension);
-            compound.setBoolean(SStrings.Invulnerable,   this.invulnerable);
-            compound.setInteger(SStrings.PortalCooldown, this.timeUntilPortal);
-            compound.setUniqueId(SStrings.UUID,          this.getUniqueID());
+            tag.setTag(SStrings.Pos,                this.newDoubleNBTList(this.posX, this.posY, this.posZ));
+            tag.setTag(SStrings.Motion,             this.newDoubleNBTList(this.motionX, this.motionY, this.motionZ));
+            tag.setTag(SStrings.Rotation,           this.newFloatNBTList(this.rotationYaw, this.rotationPitch));
+            tag.setFloat(SStrings.FallDistance,     this.fallDistance);
+            tag.setShort(SStrings.Fire, (short)     this.fire);
+            tag.setShort(SStrings.Air, (short)      this.getAir());
+            tag.setBoolean(SStrings.OnGround,       this.onGround);
+            tag.setInteger(SStrings.Dimension,      this.dimension);
+            tag.setBoolean(SStrings.Invulnerable,   this.invulnerable);
+            tag.setInteger(SStrings.PortalCooldown, this.timeUntilPortal);
+            tag.setUniqueId(SStrings.UUID,          this.getUniqueID());
 
             if (this.hasCustomName()) {
-                compound.setString(SStrings.CustomName, this.getCustomNameTag());
+                tag.setString(SStrings.CustomName, this.getCustomNameTag());
             }
 
             if (this.getAlwaysRenderNameTag()) {
-                compound.setBoolean(SStrings.CustomNameVisible, this.getAlwaysRenderNameTag());
+                tag.setBoolean(SStrings.CustomNameVisible, this.getAlwaysRenderNameTag());
             }
 
-            if(cmdResultStats != null) this.cmdResultStats.writeStatsToNBT(compound);
+            if(cmdResultStats != null) this.cmdResultStats.writeStatsToNBT(tag);
 
             if (this.isSilent()) {
-                compound.setBoolean(SStrings.Silent, this.isSilent());
+                tag.setBoolean(SStrings.Silent, this.isSilent());
             }
 
             if (this.hasNoGravity()) {
-                compound.setBoolean(SStrings.NoGravity, this.hasNoGravity());
+                tag.setBoolean(SStrings.NoGravity, this.hasNoGravity());
             }
 
             if (this.glowing) {
-                compound.setBoolean(SStrings.Glowing, this.glowing);
+                tag.setBoolean(SStrings.Glowing, this.glowing);
             }
-            compound.setBoolean(SStrings.UpdateBlocked, updateBlocked);
+            tag.setBoolean(SStrings.UpdateBlocked, updateBlocked);
 
             if (!this.tags.isEmpty()) {
                 NBTTagList nbttaglist = new NBTTagList();
                 for (String s : this.tags) {
                     nbttaglist.appendTag(new NBTTagString(s));
                 }
-                compound.setTag(SStrings.Tags, nbttaglist);
+                tag.setTag(SStrings.Tags, nbttaglist);
             }
 
-            if (customEntityData != null) compound.setTag(SStrings.ForgeData, customEntityData);
-            if (this.capabilities != null) compound.setTag(SStrings.ForgeCaps, this.capabilities.serializeNBT());
+            if (customEntityData != null) tag.setTag(SStrings.ForgeData, customEntityData);
+            if (this.capabilities != null) tag.setTag(SStrings.ForgeCaps, this.capabilities.serializeNBT());
 
-            this.writeEntityToNBT(compound);
+            this.writeEntityToNBT(tag);
 
             if (this.isBeingRidden()) {
                 NBTTagList nbttaglist1 = new NBTTagList();
@@ -1552,10 +1565,10 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
                     }
                 }
                 if (!nbttaglist1.isEmpty()) {
-                    compound.setTag(SStrings.Passengers, nbttaglist1);
+                    tag.setTag(SStrings.Passengers, nbttaglist1);
                 }
             }
-            return compound;
+            return tag;
         } catch (Throwable throwable) {
             CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Saving entity NBT");
             CrashReportCategory crashreportcategory = crashreport.makeCategory("Entity being saved");
@@ -1567,12 +1580,12 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
     public void readFromNBT(NBTTagCompound compound) {
         try {
-            NBTTagList nbttaglist = compound.getTagList("Pos", 6);
-            NBTTagList nbttaglist2 = compound.getTagList("Motion", 6);
-            NBTTagList nbttaglist3 = compound.getTagList("Rotation", 5);
-            this.motionX = nbttaglist2.getDoubleAt(0);
-            this.motionY = nbttaglist2.getDoubleAt(1);
-            this.motionZ = nbttaglist2.getDoubleAt(2);
+            NBTTagList pos = compound.getTagList("Pos", 6);
+            NBTTagList motion = compound.getTagList("Motion", 6);
+            NBTTagList rotation = compound.getTagList("Rotation", 5);
+            this.motionX = motion.getDoubleAt(0);
+            this.motionY = motion.getDoubleAt(1);
+            this.motionZ = motion.getDoubleAt(2);
 
             if (Math.abs(this.motionX) > 10.0D) {
                 this.motionX = 0.0D;
@@ -1586,17 +1599,17 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
                 this.motionZ = 0.0D;
             }
 
-            this.posX = nbttaglist.getDoubleAt(0);
-            this.posY = nbttaglist.getDoubleAt(1);
-            this.posZ = nbttaglist.getDoubleAt(2);
+            this.posX = pos.getDoubleAt(0);
+            this.posY = pos.getDoubleAt(1);
+            this.posZ = pos.getDoubleAt(2);
             this.lastTickPosX = this.posX;
             this.lastTickPosY = this.posY;
             this.lastTickPosZ = this.posZ;
             this.prevPosX = this.posX;
             this.prevPosY = this.posY;
             this.prevPosZ = this.posZ;
-            this.rotationYaw = nbttaglist3.getFloatAt(0);
-            this.rotationPitch = nbttaglist3.getFloatAt(1);
+            this.rotationYaw = rotation.getFloatAt(0);
+            this.rotationPitch = rotation.getFloatAt(1);
             this.prevRotationYaw = this.rotationYaw;
             this.prevRotationPitch = this.rotationPitch;
             this.setRotationYawHead(this.rotationYaw);
@@ -1618,7 +1631,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
                 this.cachedUniqueIdString = this.entityUniqueID.toString();
             }
 
-            this.setPosition(this.posX, this.posY, this.posZ);
+            this.mutPosition(this.posX, this.posY, this.posZ);
             this.setRotation(this.rotationYaw, this.rotationPitch);
 
             if (compound.hasKey("CustomName", 8)) {
@@ -1640,27 +1653,23 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
             if (compound.hasKey("ForgeData")) customEntityData = compound.getCompoundTag("ForgeData");
             if (this.capabilities != null && compound.hasKey("ForgeCaps")) this.capabilities.deserializeNBT(compound.getCompoundTag("ForgeCaps"));
 
-            if (compound.hasKey("Tags", 9))
-            {
+            if (compound.hasKey("Tags", 9)) {
                 this.tags.clear();
                 NBTTagList nbttaglist1 = compound.getTagList("Tags", 8);
                 int i = Math.min(nbttaglist1.tagCount(), 1024);
 
-                for (int j = 0; j < i; ++j)
-                {
+                for (int j = 0; j < i; ++j) {
                     this.tags.add(nbttaglist1.getStringTagAt(j));
                 }
             }
 
             this.readEntityFromNBT(compound);
 
-            if (this.shouldSetPosAfterLoading())
-            {
-                this.setPosition(this.posX, this.posY, this.posZ);
+            if (this.shouldSetPosAfterLoading()) {
+                this.mutPosition(this.posX, this.posY, this.posZ);
             }
         }
-        catch (Throwable throwable)
-        {
+        catch (Throwable throwable) {
             CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Loading entity NBT");
             CrashReportCategory crashreportcategory = crashreport.makeCategory("Entity being loaded");
             this.addEntityCrashInfo(crashreportcategory);
@@ -1668,43 +1677,39 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         }
     }
 
-    protected boolean shouldSetPosAfterLoading()
-    {
+
+    protected boolean shouldSetPosAfterLoading() {
         return true;
     }
 
+
     @Nullable
-    protected final String getEntityString()
-    {
+    protected final String getEntityString() {
         ResourceLocation resourcelocation = EntityList.getKey(this);
         return resourcelocation == null ? null : resourcelocation.toString();
     }
 
+
     protected abstract void readEntityFromNBT(NBTTagCompound compound);
+
 
     protected abstract void writeEntityToNBT(NBTTagCompound compound);
 
-    protected NBTTagList newDoubleNBTList(double... numbers)
-    {
-        NBTTagList nbttaglist = new NBTTagList();
 
-        for (double d0 : numbers)
-        {
+    protected NBTTagList newDoubleNBTList(double... numbers) {
+        NBTTagList nbttaglist = new NBTTagList(numbers.length);
+        for (double d0 : numbers) {
             nbttaglist.appendTag(new NBTTagDouble(d0));
         }
-
         return nbttaglist;
     }
 
-    protected NBTTagList newFloatNBTList(float... numbers)
-    {
-        NBTTagList nbttaglist = new NBTTagList();
 
-        for (float f : numbers)
-        {
+    protected NBTTagList newFloatNBTList(float... numbers) {
+        NBTTagList nbttaglist = new NBTTagList(numbers.length);
+        for (float f : numbers) {
             nbttaglist.appendTag(new NBTTagFloat(f));
         }
-
         return nbttaglist;
     }
 

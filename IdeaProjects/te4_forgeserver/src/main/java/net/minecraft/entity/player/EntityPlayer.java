@@ -259,7 +259,8 @@ public abstract class EntityPlayer extends EntityLivingBase {
         double d1 = MathHelper.clamp(this.posZ, -2.9999999E7D, 2.9999999E7D);
 
         if (d0 != this.posX || d1 != this.posZ) {
-            this.setPosition(d0, this.posY, d1);
+            mutPosition(d0, this.posY, d1);
+            //this.setPosition(d0, this.posY, d1);
         }
 
         ++this.ticksSinceLastSwing;

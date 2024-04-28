@@ -63,7 +63,9 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
+import net.minecraftforge.event.entity.living.PotionEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.IItemHandlerModifiable;
@@ -245,7 +247,9 @@ public abstract class EntityLivingBase extends Entity {
             }
 
             if (!this.isInsideOfMaterial(Material.WATER)) {
-                this.setAir(300);
+                EntityDataManager.DataEntry<Integer> entry = dataManager.getEntry(AIR);
+                if(entry.getValue() != 300) entry.updateAndNotify(dataManager, 300);
+                //this.setAir(300);
             } else {
                 if (!this.canBreatheUnderwater() && !this.isPotionActive(MobEffects.WATER_BREATHING) && !(flag && ((EntityPlayer)this).capabilities.disableDamage)) {
                     int air = decreaseAirSupply(this.getAir());
@@ -441,20 +445,20 @@ public abstract class EntityLivingBase extends Entity {
         compound.setShort(SStrings.DeathTime, (short)this.deathTime);
         compound.setFloat(SStrings.AbsorptionAmount, this.getAbsorptionAmount());
 
-        for (EntityEquipmentSlot entityequipmentslot : EntityEquipmentSlot.values()) {
-            ItemStack itemstack = this.getItemStackFromSlot(entityequipmentslot);
+        for (EntityEquipmentSlot slot : EntityEquipmentSlot.VALUES) {
+            ItemStack itemstack = this.getItemStackFromSlot(slot);
 
             if (!itemstack.isEmpty()) {
-                this.getAttributeMap().removeAttributeModifiers(itemstack.getAttributeModifiers(entityequipmentslot));
+                this.getAttributeMap().removeAttributeModifiers(itemstack.getAttributeModifiers(slot));
             }
         }
         compound.setTag(SStrings.Attributes, SharedMonsterAttributes.writeBaseAttributeMapToNBT(this.getAttributeMap()));
 
-        for (EntityEquipmentSlot entityequipmentslot1 : EntityEquipmentSlot.values()) {
-            ItemStack itemstack1 = this.getItemStackFromSlot(entityequipmentslot1);
+        for (EntityEquipmentSlot slot : EntityEquipmentSlot.VALUES) {
+            ItemStack itemstack1 = this.getItemStackFromSlot(slot);
 
             if (!itemstack1.isEmpty()) {
-                this.getAttributeMap().applyAttributeModifiers(itemstack1.getAttributeModifiers(entityequipmentslot1));
+                this.getAttributeMap().applyAttributeModifiers(itemstack1.getAttributeModifiers(slot));
             }
         }
 
@@ -512,6 +516,7 @@ public abstract class EntityLivingBase extends Entity {
 
 
     protected void updatePotionEffects() {
+        if(activePotionsMap.isEmpty())return;
         Iterator<Potion> iterator = this.activePotionsMap.keySet().iterator();
 
         try {
@@ -520,7 +525,8 @@ public abstract class EntityLivingBase extends Entity {
                 PotionEffect potioneffect = this.activePotionsMap.get(potion);
 
                 if (!potioneffect.onUpdate(this)) {
-                    if (!this.world.isRemote && !net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.living.PotionEvent.PotionExpiryEvent(this, potioneffect))) {
+                    if (!this.world.isRemote && !MinecraftForge.EVENT_BUS.post(
+                            new PotionEvent.PotionExpiryEvent(this, potioneffect))) {
                         iterator.remove();
                         this.onFinishedPotionEffect(potioneffect);
                     }
@@ -1714,7 +1720,7 @@ public abstract class EntityLivingBase extends Entity {
             }
 
 
-            for (EntityEquipmentSlot entityequipmentslot : EntityEquipmentSlot.values()) {
+            for (EntityEquipmentSlot entityequipmentslot : EntityEquipmentSlot.VALUES) {
                 ItemStack itemstack;
 
                 switch (entityequipmentslot.getSlotType()) {
@@ -1875,7 +1881,7 @@ public abstract class EntityLivingBase extends Entity {
             this.rotationYaw = (float)((double)this.rotationYaw + d3 / (double)this.newPosRotationIncrements);
             this.rotationPitch = (float)((double)this.rotationPitch + (this.interpTargetPitch - (double)this.rotationPitch) / (double)this.newPosRotationIncrements);
             --this.newPosRotationIncrements;
-            this.setPosition(d0, d1, d2);
+            this.mutPosition(d0, d1, d2);
             this.setRotation(this.rotationYaw, this.rotationPitch);
         }
         else if (!this.isServerWorld()) {

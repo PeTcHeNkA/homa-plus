@@ -653,31 +653,30 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
         }
     }
 
-    protected void applyDrag()
-    {
-        if (this.isBeingRidden())
-        {
+
+    protected void applyDrag() {
+        if (this.isBeingRidden()) {
             this.motionX *= 0.996999979019165D;
             this.motionY *= 0.0D;
             this.motionZ *= 0.996999979019165D;
-        }
-        else
-        {
+        } else {
             this.motionX *= 0.9599999785423279D;
             this.motionY *= 0.0D;
             this.motionZ *= 0.9599999785423279D;
         }
     }
 
-    public void setPosition(double x, double y, double z)
-    {
+
+    public void setPosition(double x, double y, double z) {
         this.posX = x;
         this.posY = y;
         this.posZ = z;
         float f = this.width / 2.0F;
         float f1 = this.height;
-        this.setEntityBoundingBox(new AxisAlignedBB(x - (double)f, y, z - (double)f, x + (double)f, y + (double)f1, z + (double)f));
+        this.setEntityBoundingBox(
+                new AxisAlignedBB(x - (double)f, y, z - (double)f, x + (double)f, y + (double)f1, z + (double)f));
     }
+
 
     @Nullable
     @SideOnly(Side.CLIENT)

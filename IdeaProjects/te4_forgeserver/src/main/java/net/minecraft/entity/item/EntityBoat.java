@@ -329,7 +329,7 @@ public class EntityBoat extends Entity {
             this.rotationYaw = (float)((double)this.rotationYaw + d3 / (double)this.lerpSteps);
             this.rotationPitch = (float)((double)this.rotationPitch + (this.lerpPitch - (double)this.rotationPitch) / (double)this.lerpSteps);
             --this.lerpSteps;
-            this.setPosition(d0, d1, d2);
+            this.mutPosition(d0, d1, d2);
             this.setRotation(this.rotationYaw, this.rotationPitch);
         }
     }

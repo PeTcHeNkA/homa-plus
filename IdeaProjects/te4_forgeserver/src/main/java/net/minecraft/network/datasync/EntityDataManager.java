@@ -101,7 +101,7 @@ public class EntityDataManager {
     }
 
 
-    private <T> DataEntry<T> getEntry(DataParameter<T> key) {
+    public <T> DataEntry<T> getEntry(DataParameter<T> key) {
         this.lock.readLock().lock();
         DataEntry dataentry;
         try {
@@ -292,6 +292,13 @@ public class EntityDataManager {
             this.key = keyIn;
             this.value = valueIn;
             this.dirty = true;
+        }
+
+
+        public void updateAndNotify(EntityDataManager manager, T value){
+            manager.entity.notifyDataManagerChange(key);
+            setDirty(true);
+            manager.dirty = true;
         }
 
 

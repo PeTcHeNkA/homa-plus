@@ -240,7 +240,7 @@ public class PathNavigateGround extends PathNavigate {
     private boolean isPositionClear(IBlockAccess access, int x, int y, int z, int sizeX, int sizeY, int sizeZ, Vec3d vec, double p1, double p2) {
         int fx = x + sizeX -1, fy = y + sizeY - 1, fz = z + sizeZ - 1;
         //todo move to pool
-        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+        BlockPos.MutableBlockPos pos = access.getWorld().localTempPos2;
         for (;x<fx;++x)
             for (;z<fz;++z)
                 for (;y<fy;++y){
