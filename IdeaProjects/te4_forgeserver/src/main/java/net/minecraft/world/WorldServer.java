@@ -82,6 +82,7 @@ import plus.fserver.event.ElcaCV;
 import plus.fserver.server.chunk.io.TChunkTask;
 import plus.fserver.server.chunk.io.TQueuedChunk;
 import plus.fserver.utls.ChunkSelector;
+import plus.fserver.utls.math.MathUtls;
 import plus.fserver.world.NavigationCache;
 import plus.fserver.utls.collections.ArrayListE6;
 import plus.fserver.utls.math.BlockPosDelta;
@@ -494,23 +495,23 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
             server.ticker().onError(this, onEntityError(entityIn, exception));
         }
 
-        if (Double.isNaN(entityIn.posX) || Double.isInfinite(entityIn.posX)) {
+        if (MathUtls.isInvalidDouble(entityIn.posX)) {
             entityIn.posX = entityIn.lastTickPosX;
         }
 
-        if (Double.isNaN(entityIn.posY) || Double.isInfinite(entityIn.posY)) {
+        if (MathUtls.isInvalidDouble(entityIn.posY)) {
             entityIn.posY = entityIn.lastTickPosY;
         }
 
-        if (Double.isNaN(entityIn.posZ) || Double.isInfinite(entityIn.posZ)) {
+        if (MathUtls.isInvalidDouble(entityIn.posZ)) {
             entityIn.posZ = entityIn.lastTickPosZ;
         }
 
-        if (Double.isNaN(entityIn.rotationPitch) || Double.isInfinite(entityIn.rotationPitch)) {
+        if (MathUtls.isInvalidDouble(entityIn.rotationPitch)) {
             entityIn.rotationPitch = entityIn.prevRotationPitch;
         }
 
-        if (Double.isNaN(entityIn.rotationYaw) || Double.isInfinite(entityIn.rotationYaw)) {
+        if (MathUtls.isInvalidDouble(entityIn.rotationYaw)) {
             entityIn.rotationYaw = entityIn.prevRotationYaw;
         }
 
@@ -520,9 +521,10 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
 
     @Override
     protected void updateEntityChunkSection(Entity entityIn, boolean forceUpdate){
-        int cXpos = MathHelper.floor(entityIn.posX / 16.0D);
-        int cYpos = MathHelper.floor(entityIn.posY / 16.0D);
-        int cZpos = MathHelper.floor(entityIn.posZ / 16.0D);
+        //  1 / 16 = 0,0625
+        int cXpos = MathHelper.floor(entityIn.posX * 0.0625);
+        int cYpos = MathHelper.floor(entityIn.posY * 0.0625);
+        int cZpos = MathHelper.floor(entityIn.posZ * 0.0625);
 
         if (!entityIn.addedToChunk || entityIn.chunkCoordX != cXpos || entityIn.chunkCoordY != cYpos || entityIn.chunkCoordZ != cZpos) {
             ChunkProviderServer cps = getChunkProvider();
@@ -1685,56 +1687,54 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
             }
             if(!outList.isEmpty())return true;
         }
-        try {
-            int minX = MathHelper.floor(aabb.minX) - 1;
-            int maxX = MathHelper.ceil(aabb.maxX) + 1;
-            int minY = MathHelper.floor(aabb.minY) - 1;
-            int maxY = MathHelper.ceil(aabb.maxY) + 1;
-            int minZ = MathHelper.floor(aabb.minZ) - 1;
-            int maxZ = MathHelper.ceil(aabb.maxZ) + 1;
+        int minX = MathHelper.floor(aabb.minX) - 1;
+        int maxX = MathHelper.ceil(aabb.maxX) + 1;
+        int minY = MathHelper.floor(aabb.minY) - 1;
+        int maxY = MathHelper.ceil(aabb.maxY) + 1;
+        int minZ = MathHelper.floor(aabb.minZ) - 1;
+        int maxZ = MathHelper.ceil(aabb.maxZ) + 1;
 
-            WorldBorder worldborder = this.getWorldBorder();
-            boolean flag = entityIn != null && entityIn.isOutsideBorder();
-            boolean flag1 = entityIn != null && this.isInsideWorldBorder(entityIn);
-            IBlockState state;
-            for (int xPos = minX; xPos < maxX; ++xPos) {
-                for (int zPos = minZ; zPos < maxZ; ++zPos) {
-                    boolean flag2 = xPos == minX || xPos == maxX - 1;
-                    boolean flag3 = zPos == minZ || zPos == maxZ - 1;
-                    Chunk chunk;
+        WorldBorder worldborder = this.getWorldBorder();
+        boolean flag = entityIn != null && entityIn.isOutsideBorder();
+        boolean flag1 = entityIn != null && this.isInsideWorldBorder(entityIn);
+        IBlockState state;
+        for (int xPos = minX; xPos < maxX; ++xPos) {
+            for (int zPos = minZ; zPos < maxZ; ++zPos) {
+                boolean flag2 = xPos == minX || xPos == maxX - 1;
+                boolean flag3 = zPos == minZ || zPos == maxZ - 1;
+                Chunk chunk;
 
-                    if ((!flag2 || !flag3) && (chunk = localSelector.getLoadedE(xPos>>4, zPos>>4))!=null) {
+                if ((!flag2 || !flag3) && (chunk = localSelector.getLoadedE(xPos>>4, zPos>>4))!=null) {
 
-                        for (int i2 = minY; i2 < maxY; ++i2) {
-                            if (!flag2 && !flag3 || i2 != maxY - 1) {
-                                if (fastCheck) {
-                                    if (xPos < -30000000 || xPos >= 30000000 || zPos < -30000000 || zPos >= 30000000) {
-                                        return true;
-                                    }
-                                } else if (entityIn != null && flag == flag1) {
-                                    entityIn.setOutsideBorder(!flag1);
+                    for (int i2 = minY; i2 < maxY; ++i2) {
+                        if (!flag2 && !flag3 || i2 != maxY - 1) {
+                            if (fastCheck) {
+                                if (xPos < -30000000 || xPos >= 30000000 || zPos < -30000000 || zPos >= 30000000) {
+                                    return true;
                                 }
+                            } else if (entityIn != null && flag == flag1) {
+                                entityIn.setOutsideBorder(!flag1);
+                            }
 
-                                if (!fastCheck && flag1 && !worldborder.contains(xPos, zPos)) {
-                                    state = BlockIDIndexes.STONE_STATE;
-                                } else {;
-                                    state = chunk.getBlockState(xPos, i2, zPos);
-                                }
+                            if (!fastCheck && flag1 && !worldborder.contains(xPos, zPos)) {
+                                state = BlockIDIndexes.STONE_STATE;
+                            } else {;
+                                state = chunk.getBlockState(xPos, i2, zPos);
+                            }
 
-                                state.addCollisionBoxToListF(this, tempPooledLocalPos.setPos(xPos, i2, zPos), aabb, outList, entityIn, false);
+                            state.addCollisionBoxToListF(this, tempPooledLocalPos.setPos(xPos, i2, zPos), aabb, outList, entityIn, false);
 
-                                if (fastCheck) {
-                                    if(ElcaCV.ENABLE_COLLISION_EVENTS){
-                                        MinecraftForge.EVENT_BUS.post(collisionEvent.init(entityIn, aabb, outList));
-                                        if(!outList.isEmpty())return true;
-                                    }else return true;
-                                }
+                            if (fastCheck) {
+                                if(ElcaCV.ENABLE_COLLISION_EVENTS){
+                                    MinecraftForge.EVENT_BUS.post(collisionEvent.init(entityIn, aabb, outList));
+                                    if(!outList.isEmpty())return true;
+                                }else return true;
                             }
                         }
                     }
                 }
             }
-        } finally {}
+        }
         return !outList.isEmpty();
     }
 

@@ -79,25 +79,25 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
     }
 
 
-    static Class<?> comparableClassFor(Object x) {
-        if (x instanceof Comparable) {
-            Class<?> c;
-            if ((c = x.getClass()) == String.class)
-                return c;
-
-            ParameterizedType p;
-            Type[] ts = c.getGenericInterfaces(), as;
-            for (Type t : ts) {
-                if ((t instanceof ParameterizedType) &&
-                        ((p = (ParameterizedType) t).getRawType() ==
-                                Comparable.class) &&
-                        (as = p.getActualTypeArguments()) != null &&
-                        as.length == 1 && as[0] == c) // type arg is c
-                    return c;
-            }
-        }
-        return null;
-    }
+//    static Class<?> comparableClassFor(Object x) {
+//        if (x instanceof Comparable) {
+//            Class<?> c;
+//            if ((c = x.getClass()) == String.class)
+//                return c;
+//
+//            ParameterizedType p;
+//            Type[] ts = c.getGenericInterfaces(), as;
+//            for (Type t : ts) {
+//                if ((t instanceof ParameterizedType) &&
+//                        ((p = (ParameterizedType) t).getRawType() ==
+//                                Comparable.class) &&
+//                        (as = p.getActualTypeArguments()) != null &&
+//                        as.length == 1 && as[0] == c) // type arg is c
+//                    return c;
+//            }
+//        }
+//        return null;
+//    }
 
 
     @SuppressWarnings({"rawtypes","unchecked"}) // for cast to Comparable
@@ -1306,7 +1306,8 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
         TreeNode<K,V> find(int h, Object k, Class<?> kc) {
             TreeNode<K,V> p = this;
             do {
-                int ph, dir; K pk;
+                int ph;
+                K pk;
                 TreeNode<K,V> pl = p.left, pr = p.right, q;
                 if ((ph = p.hash) > h)
                     p = pl;
@@ -1318,10 +1319,6 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
                     p = pr;
                 else if (pr == null)
                     p = pl;
-                else if ((kc != null ||
-                        (kc = comparableClassFor(k)) != null) &&
-                        (dir = compareComparables(kc, k, pk)) != 0)
-                    p = (dir < 0) ? pl : pr;
                 else if ((q = pr.find(h, k, kc)) != null)
                     return q;
                 else
@@ -1368,10 +1365,7 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
                             dir = -1;
                         else if (ph < h)
                             dir = 1;
-                        else if ((kc == null &&
-                                (kc = comparableClassFor(k)) == null) ||
-                                (dir = compareComparables(kc, k, pk)) == 0)
-                            dir = tieBreakOrder(k, pk);
+                        else dir = tieBreakOrder(k, pk);
 
                         TreeNode<K,V> xp = p;
                         if ((p = (dir <= 0) ? p.left : p.right) == null) {
@@ -1416,9 +1410,7 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
                     dir = 1;
                 else if ((pk = p.key) == k || (k != null && k.equals(pk)))
                     return p;
-                else if ((kc == null &&
-                        (kc = comparableClassFor(k)) == null) ||
-                        (dir = compareComparables(kc, k, pk)) == 0) {
+                else {
                     if (!searched) {
                         TreeNode<K,V> q, ch;
                         searched = true;

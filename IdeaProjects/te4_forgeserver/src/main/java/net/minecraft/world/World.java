@@ -142,6 +142,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public final RedstoneEngine.Cache redstoneCache = new RedstoneEngine.Cache();
     //todo warning ensure there will be no simultaneous use
     public final BlockPos.MutableBlockPos localTempPos = new BlockPos.MutableBlockPos();
+    public final BlockPos.MutableBlockPos localTempPos2 = new BlockPos.MutableBlockPos();
 
     public long tryUpdateNavigationLimit = 20L;
     public final LightingEngine lightingEngine = new LightingEngine(this);
@@ -1664,43 +1665,6 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
         //entities
         tickLoadedEntities();
-//        for (int i1 = 0; i1 < this.loadedEntityList.size(); ++i1) {
-//            Entity entity2 = this.loadedEntityList.get(i1);
-//            Entity entity3 = entity2.getRidingEntity();
-//
-//            if (entity3 != null) {
-//                if (!entity3.isDead && entity3.isPassenger(entity2)) {
-//                    continue;
-//                }
-//                entity2.dismountRidingEntity();
-//            }
-//
-//            if (!entity2.isDead && !(entity2 instanceof EntityPlayerMP)) {
-//                try {
-//                    TimeTracker.ENTITY_UPDATE.trackStart(entity2);
-//                    this.updateEntity(entity2);
-//                    TimeTracker.ENTITY_UPDATE.trackEnd(entity2);
-//                } catch (Throwable throwable1) {
-//                    CrashReport crashreport1 = CrashReport.makeCrashReport(throwable1, "Ticking entity");
-//                    CrashReportCategory crashreportcategory1 = crashreport1.makeCategory("Entity being ticked");
-//                    entity2.addEntityCrashInfo(crashreportcategory1);
-//                    if (ElcaConfig.REMOVE_ERROR_ENTITIES) {
-//                        FMLLog.log.fatal("{}", crashreport1.getCompleteReport());
-//                        removeEntity(entity2);
-//                    } else throw new ReportedException(crashreport1);
-//                }
-//            }
-//
-//            if (entity2.isDead) {
-//                int l1 = entity2.chunkCoordX;
-//                int i2 = entity2.chunkCoordZ;
-//                if (entity2.addedToChunk && this.isChunkLoaded(l1, i2, true)) {
-//                    this.getChunk(l1, i2).removeEntity(entity2);
-//                }
-//                this.loadedEntityList.remove(i1--);
-//                this.onEntityRemoved(entity2);
-//            }
-//        }
 
         this.profiler.endStartSection("blockEntities");
         this.processingLoadedTiles = true; //FML Move above remove to prevent CMEs
@@ -3603,23 +3567,27 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             new GetCollisionBoxesEvent(this):null;
 
 
+    private final AxisAlignedBB localTempAABB = new AxisAlignedBB(0,0,0,0,0,0);
+
     private void getCollisionBoxes0(ArrayListE6<AxisAlignedBB> list, @Nullable Entity entityIn, AxisAlignedBB aabb) {
-        //List<AxisAlignedBB> list = new ArrayList<>();
         this.getCollisionBoxes(entityIn, aabb, false, list);
         if (entityIn != null) {
-            List<Entity> list1 = getEntitiesInAABBexcluding(entityIn, aabb.grow(0.25D), EntitySelectors.NOT_SPECTATING);
+            AxisAlignedBB temp;
+            aabb.growTo(0.25D,0.25D,0.25D, temp = localTempAABB);
+            List<Entity> list1 = getEntitiesInAABBexcluding(entityIn, temp, EntitySelectors.NOT_SPECTATING);
             addIfNeed(list1, list, entityIn, aabb);
         }
         if(ElcaCV.ENABLE_COLLISION_EVENTS)
             MinecraftForge.EVENT_BUS.post(collisionEvent.init(entityIn, aabb, list));
-        //return list;
     }
 
 
     private void getCollisionBoxes0Limited(ArrayListE6<AxisAlignedBB> list, @Nullable Entity entityIn, AxisAlignedBB aabb, int lim) {
         this.getCollisionBoxes(entityIn, aabb, false, list);
         if (entityIn != null && lim > 0) {
-            List<Entity> list1 = getEntitiesInAABBexcludingLimited(entityIn, aabb.grow(0.25D), EntitySelectors.NOT_SPECTATING, lim);
+            AxisAlignedBB temp;
+            aabb.growTo(0.25D,0.25D,0.25D, temp = localTempAABB);
+            List<Entity> list1 = getEntitiesInAABBexcludingLimited(entityIn, temp, EntitySelectors.NOT_SPECTATING, lim);
             addIfNeed(list1, list, entityIn, aabb);
         }
         if(ElcaCV.ENABLE_COLLISION_EVENTS)

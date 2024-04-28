@@ -1180,13 +1180,15 @@ public abstract class EntityPlayer extends EntityLivingBase {
                         flag1 = true;
                     }
 
-                    boolean flag2 = flag && this.fallDistance > 0.0F && !this.onGround && !this.isOnLadder() && !this.isInWater() && !this.isPotionActive(MobEffects.BLINDNESS) && !this.isRiding() && targetEntity instanceof EntityLivingBase;
+                    boolean flag2 = flag && this.fallDistance > 0.0F && !this.onGround
+                            && !this.isOnLadder() && !this.isInWater()
+                            && !this.isPotionActive(MobEffects.BLINDNESS) && !this.isRiding() && targetEntity instanceof EntityLivingBase;
+
                     flag2 = flag2 && !this.isSprinting();
 
                     net.minecraftforge.event.entity.player.CriticalHitEvent hitResult = net.minecraftforge.common.ForgeHooks.getCriticalHit(this, targetEntity, flag2, flag2 ? 1.5F : 1.0F);
                     flag2 = hitResult != null;
-                    if (flag2)
-                    {
+                    if (flag2) {
                         f *= hitResult.getDamageModifier();
                     }
 
@@ -1194,12 +1196,10 @@ public abstract class EntityPlayer extends EntityLivingBase {
                     boolean flag3 = false;
                     double d0 = this.distanceWalkedModified - this.prevDistanceWalkedModified;
 
-                    if (flag && !flag2 && !flag1 && this.onGround && d0 < (double)this.getAIMoveSpeed())
-                    {
+                    if (flag && !flag2 && !flag1 && this.onGround && d0 < (double)this.getAIMoveSpeed()) {
                         ItemStack itemstack = this.getHeldItem(EnumHand.MAIN_HAND);
 
-                        if (itemstack.getItem() instanceof ItemSword)
-                        {
+                        if (itemstack.getItem() instanceof ItemSword) {
                             flag3 = true;
                         }
                     }

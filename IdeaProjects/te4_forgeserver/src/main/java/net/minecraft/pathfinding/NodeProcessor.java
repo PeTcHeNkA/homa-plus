@@ -5,13 +5,14 @@ import net.minecraft.util.IntHashMap;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.IBlockAccess;
+import plus.fserver.utls.collections.EPooledIntVHashMap;
 
 
 public abstract class NodeProcessor {
     protected final BlockPos.MutableBlockPos pooledPos = new BlockPos.MutableBlockPos();
     protected IBlockAccess blockaccess;
     protected EntityLiving entity;
-    protected final IntHashMap<PathPoint> pointMap = new IntHashMap<>();
+    protected final EPooledIntVHashMap<PathPoint> pointMap = new EPooledIntVHashMap<>();
     protected int entitySizeX;
     protected int entitySizeY;
     protected int entitySizeZ;
@@ -36,11 +37,16 @@ public abstract class NodeProcessor {
 
 
     protected PathPoint openPoint(int x, int y, int z) {
-        int i = PathPoint.makeHash(x, y, z);
-        PathPoint pathpoint = this.pointMap.lookup(i);
+        int hash = PathPoint.makeHash(x, y, z);
+        PathPoint pathpoint = this.pointMap.lookup(hash);
         if (pathpoint == null) {
-            pathpoint = new PathPoint(x, y, z);
-            this.pointMap.addKey(i, pathpoint);
+            pathpoint = pointMap.tryGetValueOnInsert();
+            if(pathpoint == null) {
+                pathpoint = new PathPoint(x, y, z, hash);
+            } else {
+                pathpoint.init(x, y, z, hash);
+            }
+            this.pointMap.addKey(hash, pathpoint);
         }
         return pathpoint;
     }
@@ -61,38 +67,32 @@ public abstract class NodeProcessor {
     public abstract PathNodeType getPathNodeType(IBlockAccess blockaccessIn, int x, int y, int z);
 
 
-    public void setCanEnterDoors(boolean canEnterDoorsIn)
-    {
+    public void setCanEnterDoors(boolean canEnterDoorsIn) {
         this.canEnterDoors = canEnterDoorsIn;
     }
 
 
-    public void setCanOpenDoors(boolean canOpenDoorsIn)
-    {
+    public void setCanOpenDoors(boolean canOpenDoorsIn) {
         this.canOpenDoors = canOpenDoorsIn;
     }
 
 
-    public void setCanSwim(boolean canSwimIn)
-    {
+    public void setCanSwim(boolean canSwimIn) {
         this.canSwim = canSwimIn;
     }
 
 
-    public boolean getCanEnterDoors()
-    {
+    public boolean getCanEnterDoors() {
         return this.canEnterDoors;
     }
 
 
-    public boolean getCanOpenDoors()
-    {
+    public boolean getCanOpenDoors() {
         return this.canOpenDoors;
     }
 
 
-    public boolean getCanSwim()
-    {
+    public boolean getCanSwim() {
         return this.canSwim;
     }
 }

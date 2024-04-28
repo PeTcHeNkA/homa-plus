@@ -650,38 +650,20 @@ public abstract class EntityLiving extends EntityLivingBase {
     @Override
     protected final void updateEntityActionState() {
         ++this.idleTime;
-        this.world.profiler.startSection("checkDespawn");
         this.despawnEntity();
-        this.world.profiler.endSection();
-        this.world.profiler.startSection("sensing");
         this.senses.clearSensingCache();
-        this.world.profiler.endSection();
-        this.world.profiler.startSection("targetSelector");
         this.targetTasks.onUpdateTasks();
-        this.world.profiler.endSection();
-        this.world.profiler.startSection("goalSelector");
         this.tasks.onUpdateTasks();
-        this.world.profiler.endSection();
-        this.world.profiler.startSection("navigation");
         this.navigator.onUpdateNavigation();
-        this.world.profiler.endSection();
-        this.world.profiler.startSection("mob tick");
         this.updateAITasks();
-        this.world.profiler.endSection();
         if (this.isRiding() && this.getRidingEntity() instanceof EntityLiving) {
             EntityLiving entityliving = (EntityLiving)this.getRidingEntity();
             entityliving.getNavigator().setPath(this.getNavigator().getPath(), 1.5D);
             entityliving.getMoveHelper().read(this.getMoveHelper());
         }
-        this.world.profiler.startSection("controls");
-        this.world.profiler.startSection("move");
         this.moveHelper.onUpdateMoveHelper();
-        this.world.profiler.endStartSection("look");
         this.lookHelper.onUpdateLook();
-        this.world.profiler.endStartSection("jump");
         this.jumpHelper.doJump();
-        this.world.profiler.endSection();
-        this.world.profiler.endSection();
     }
 
 

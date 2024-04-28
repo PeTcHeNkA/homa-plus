@@ -51,7 +51,6 @@ import net.minecraft.util.CombatRules;
 import net.minecraft.util.CombatTracker;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
-import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumHandSide;
@@ -75,7 +74,7 @@ import plus.fserver.server.SStrings;
 import plus.fserver.utls.collections.FixedItemList;
 import plus.fserver.utls.math.Vec3dMut;
 
-import static plus.fserver.utls.math.Constants.F_180_PI;
+import static plus.fserver.utls.math.MathUtls.F_180_PI;
 
 
 public abstract class EntityLivingBase extends Entity {
@@ -229,6 +228,7 @@ public abstract class EntityLivingBase extends Entity {
         if (isEntityAlive()) {
             boolean flag = this instanceof EntityPlayer;
             if (this.isEntityInsideOpaqueBlock()) {
+                //TODO try fix position
                 this.attackEntityFrom(DamageSource.IN_WALL, 1.0F);
             } else if (flag && !this.world.getWorldBorder().contains(this.getEntityBoundingBox())) {
                 double d0 = this.world.getWorldBorder().getClosestDistance(this) + this.world.getWorldBorder().getDamageBuffer();
@@ -248,17 +248,19 @@ public abstract class EntityLivingBase extends Entity {
                 this.setAir(300);
             } else {
                 if (!this.canBreatheUnderwater() && !this.isPotionActive(MobEffects.WATER_BREATHING) && !(flag && ((EntityPlayer)this).capabilities.disableDamage)) {
-                    this.setAir(this.decreaseAirSupply(this.getAir()));
+                    int air = decreaseAirSupply(this.getAir());
 
-                    if (this.getAir() == -20) {
+                    if (air == -20) {
                         this.setAir(0);
                         for (int i = 0; i < 8; ++i) {
                             float f2 = this.rand.nextFloat() - this.rand.nextFloat();
-                            float f = this.rand.nextFloat() - this.rand.nextFloat();
+                            float f  = this.rand.nextFloat() - this.rand.nextFloat();
                             float f1 = this.rand.nextFloat() - this.rand.nextFloat();
                             this.world.spawnParticle(EnumParticleTypes.WATER_BUBBLE, this.posX + (double)f2, this.posY + (double)f, this.posZ + (double)f1, this.motionX, this.motionY, this.motionZ);
                         }
                         this.attackEntityFrom(DamageSource.DROWN, 2.0F);
+                    } else {
+                        this.setAir(air);
                     }
                 }
                 if (!this.world.isRemote && this.isRiding() && this.getRidingEntity() != null && this.getRidingEntity().shouldDismountInWater(this)) {
@@ -266,11 +268,10 @@ public abstract class EntityLivingBase extends Entity {
                 }
             }
             if (!this.world.isRemote) {
-                BlockPos blockpos = new BlockPos(this);
+                BlockPos temp = world.localTempPos2.setPos(this);
 
-                if (!Objects.equals(this.prevBlockpos, blockpos)) {
-                    this.prevBlockpos = blockpos;
-                    this.frostWalk(blockpos);
+                if (this.prevBlockpos == null || !this.prevBlockpos.equals(temp)) {
+                    this.frostWalk(this.prevBlockpos = new BlockPos(temp.getX(), temp.getY(), temp.getZ()));
                 }
             }
             if (this.isWet()) this.extinguish();
@@ -1021,16 +1022,16 @@ public abstract class EntityLivingBase extends Entity {
 
 
     public boolean isOnLadder() {
-        int i = MathHelper.floor(this.posX);
-        int j = MathHelper.floor(this.getEntityBoundingBox().minY);
-        int k = MathHelper.floor(this.posZ);
-
         if (this instanceof EntityPlayer && ((EntityPlayer)this).isSpectator()) {
             return false;
         } else {
-            BlockPos blockpos = new BlockPos(i, j, k);
-            IBlockState iblockstate = this.world.getBlockState(blockpos);
-            return net.minecraftforge.common.ForgeHooks.isLivingOnLadder(iblockstate, world, new BlockPos(i, j, k), this);
+            BlockPos blockpos;
+            IBlockState iblockstate = this.world.getBlockState(blockpos = world.localTempPos2.setPos(
+                    MathHelper.floor(this.posX),
+                    MathHelper.floor(this.getEntityBoundingBox().minY),
+                    MathHelper.floor(this.posZ)
+            ));
+            return net.minecraftforge.common.ForgeHooks.isLivingOnLadder(iblockstate, world, blockpos, this);
         }
     }
 

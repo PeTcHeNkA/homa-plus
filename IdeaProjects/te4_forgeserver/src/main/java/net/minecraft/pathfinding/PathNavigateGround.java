@@ -54,10 +54,10 @@ public class PathNavigateGround extends PathNavigate {
                 ;
             }
             if (blockpos.getY() > 0) {
-                return super.getPathToPos(blockpos.up());
+                BlockPos.unsafeEdit(blockpos, pos.getX(), pos.getY()+1, pos.getZ());
+                return super.getPathToPos(blockpos);
             }
-            while (blockpos.getY() < this.world.getHeight() && chunk.getBlockState(blockpos).getMaterial() == Material.AIR)
-            {
+            while (blockpos.getY() < this.world.getHeight() && chunk.getBlockState(blockpos).getMaterial() == Material.AIR) {
                 blockpos = blockpos.up();
             }
             pos = blockpos;
@@ -146,7 +146,7 @@ public class PathNavigateGround extends PathNavigate {
             IBlockAccess access = ((WorldServer)world).localSelector;
             PntMatrix matrix = ((WalkNodeProcessor)nodeProcessor).matrix;
             //todo maybe this equal "if false"
-            if(matrix==null){
+            if(matrix == null){
                 matrix = ((WorldServer)world).navCache.getBy(entity);
             }
             PntMatrix.Chunked chunked = matrix.getChunked(fX, fZ);

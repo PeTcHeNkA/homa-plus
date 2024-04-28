@@ -64,6 +64,13 @@ public abstract class EntityItemPatch extends Entity {
     }
 
 
+    private List<AxisAlignedBB> defBoxes(double x, double y, double z){
+        AxisAlignedBB box = world.commonWorldEntityAABB;
+        getEntityBoundingBox().expandTo(x, y, z, box);
+        return this.world.getCollisionBoxes(null, box);
+    }
+
+
     @Override
     public void move(MoverType type, double x, double y, double z) {
         if (this.noClip) {
@@ -85,48 +92,35 @@ public abstract class EntityItemPatch extends Entity {
             double oldZ = z;
 
             List<AxisAlignedBB> boxes = null;
-
+            int temp;
             if (y != 0.0D) {
-                int k = 0;
-                boxes = this.world.getCollisionBoxes(null,
-                                this.getEntityBoundingBox().expand(x, y, z)
-                        );
-
-                for (int l = boxes.size(); k < l; ++k) {
-                    y = boxes.get(k).calculateYOffset(this.getEntityBoundingBox(), y);
+                boxes = defBoxes(x, y, z);
+                temp = 0;
+                for (int l = boxes.size(); temp < l; ++temp) {
+                    y = boxes.get(temp).calculateYOffset(this.getEntityBoundingBox(), y);
                 }
-                this.setEntityBoundingBox(this.getEntityBoundingBox().offset(0.0D, y, 0.0D));
             }
-
             if (x != 0.0D) {
-                if(boxes == null) boxes = this.world.getCollisionBoxes(null,
-                        this.getEntityBoundingBox().expand(x, y, z)
-                );
+                temp = 0;
+                if(boxes == null)boxes = defBoxes(x, y, z);
 
-                int j5 = 0;
-                for (int l5 = boxes.size(); j5 < l5; ++j5) {
-                    x = boxes.get(j5).calculateXOffset(this.getEntityBoundingBox(), x);
-                }
-                if (x != 0.0D) {
-                    this.setEntityBoundingBox(this.getEntityBoundingBox().offset(x, 0.0D, 0.0D));
+                for (int l5 = boxes.size(); temp < l5; ++temp) {
+                    x = boxes.get(temp).calculateXOffset(this.getEntityBoundingBox(), x);
                 }
             }
 
             if (z != 0.0D) {
-                if(boxes == null) boxes = this.world.getCollisionBoxes(null,
-                        this.getEntityBoundingBox().expand(x, y, z)
-                );
+                temp = 0;
+                if(boxes == null)boxes = defBoxes(x, y, z);
 
-                int k5 = 0;
-
-                for (int i6 = boxes.size(); k5 < i6; ++k5) {
-                    z = boxes.get(k5).calculateZOffset(this.getEntityBoundingBox(), z);
-                }
-                if (z != 0.0D) {
-                    this.setEntityBoundingBox(this.getEntityBoundingBox().offset(0.0D, 0.0D, z));
+                for (int i6 = boxes.size(); temp < i6; ++temp) {
+                    z = boxes.get(temp).calculateZOffset(this.getEntityBoundingBox(), z);
                 }
             }
-            if(boxes != null) this.resetPositionToBB();
+            if(boxes != null) {
+                this.getEntityBoundingBox().offsetMut(x, y, z);
+                this.resetPositionToBB();
+            }
 
             this.collidedHorizontally = oldX != x || oldZ != z;
             this.collidedVertically = oldY != y;

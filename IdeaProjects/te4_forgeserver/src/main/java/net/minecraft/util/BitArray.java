@@ -2,6 +2,7 @@ package net.minecraft.util;
 
 import net.minecraft.util.math.MathHelper;
 import org.apache.commons.lang3.Validate;
+import plus.fserver.event.ElcaCV;
 
 
 public class BitArray {
@@ -20,8 +21,9 @@ public class BitArray {
 
 
     public void setAt(int index, int value) {
-        if(index<0 || index>=this.arraySize || value>maxEntryValue)
-            throw new IllegalArgumentException("Index ["+index+"] should be in [0, "+this.arraySize+"] and value ["+value+"] in [0, "+maxEntryValue+"]");
+        if(ElcaCV.CHECK_BI_ARRAY)
+            if(index<0 || index>=this.arraySize || value>maxEntryValue)
+                throw new IllegalArgumentException("Index ["+index+"] should be in [0, "+this.arraySize+"] and value ["+value+"] in [0, "+maxEntryValue+"]");
 
         int i = index * this.bitsPerEntry;
         int j = i >> 6;
@@ -38,8 +40,9 @@ public class BitArray {
 
 
     public int getAt(int index) {
-        if(index<0 || index>=this.arraySize)
-            throw new IllegalArgumentException("Index should be in range [0, "+this.arraySize+"]");
+        if(ElcaCV.CHECK_BI_ARRAY)
+            if(index<0 || index>=this.arraySize)
+                throw new IllegalArgumentException("Index should be in range [0, "+this.arraySize+"]");
 
         int i = index * this.bitsPerEntry;
         int j = i >> 6;

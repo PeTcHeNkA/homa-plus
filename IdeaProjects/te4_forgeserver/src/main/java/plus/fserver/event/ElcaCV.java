@@ -15,4 +15,7 @@ public class ElcaCV {
 
     public static final boolean DISABLE_FORGE_FARMLAND        = true;
     public static final boolean ALLOW_ANY_PROJECTIVE_TNT      = false;
+
+
+    public static final boolean CHECK_BI_ARRAY                = false;
 }

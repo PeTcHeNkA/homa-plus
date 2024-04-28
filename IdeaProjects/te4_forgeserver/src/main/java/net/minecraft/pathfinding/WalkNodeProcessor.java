@@ -214,6 +214,7 @@ public class WalkNodeProcessor extends NodeProcessor {
             float priority = this.entity.getPathPriority(type);
 
             if (priority >= 0.0F) {
+                //todo
                 pathpoint = this.openPoint(x, y, z);
                 pathpoint.nodeType = type;
                 pathpoint.costMalus = Math.max(pathpoint.costMalus, priority);
@@ -229,21 +230,34 @@ public class WalkNodeProcessor extends NodeProcessor {
 
                         double d2 = (double) (x - facing.getXOffset()) + 0.5D;
                         double d3 = (double) (z - facing.getZOffset()) + 0.5D;
-                        AxisAlignedBB axisalignedbb = new AxisAlignedBB(d2 - num1, (double) y + 0.001D, d3 - num1, d2 + num1, (float) y + this.entity.height, d3 + num1);
 
-                        if (this.entity.world.collidesWithAnyBlock(axisalignedbb.expand(0.0D,
-                                this.blockaccess.getBlockState(pooledPos.setPos(x, y, z)).getBoundingBox(this.blockaccess, pooledPos).maxY - 0.002D,
-                                0.0D))
-                        ) {
+                        AxisAlignedBB box = this.entity.world.commonWorldEntityAABB;
+                        box.init(
+                                d2 - num1, (double) y + 0.001D,
+                                d3 - num1, d2 + num1,
+                                (float) y + this.entity.height, d3 + num1
+                        );
+
+                        box.expandTo(0.0D,
+                                this.blockaccess.getBlockState(pooledPos.setPos(x, y, z))
+                                        .getBoundingBox(this.blockaccess, pooledPos).maxY - 0.002D,
+                                0.0D, box);
+
+                        if (this.entity.world.collidesWithAnyBlock(box)) {
                             pathpoint = null;
                         }
                     }
                 }
 
                 if (type == PathNodeType.OPEN) {
-                    AxisAlignedBB axisalignedbb3 = new AxisAlignedBB((double) x - num1 + 0.5D, (double) y + 0.001D, (double) z - num1 + 0.5D, (double) x + num1 + 0.5D, (double) ((float) y + this.entity.height), (double) z + num1 + 0.5D);
+                    AxisAlignedBB box = this.entity.world.commonWorldEntityAABB;
+                    box.init(
+                            (double) x - num1 + 0.5D, (double) y + 0.001D,
+                            (double) z - num1 + 0.5D, (double) x + num1 + 0.5D,
+                            (float) y + this.entity.height, (double) z + num1 + 0.5D
+                    );
 
-                    if (this.entity.world.collidesWithAnyBlock(axisalignedbb3)) {
+                    if (this.entity.world.collidesWithAnyBlock(box)) {
                         return null;
                     }
 
