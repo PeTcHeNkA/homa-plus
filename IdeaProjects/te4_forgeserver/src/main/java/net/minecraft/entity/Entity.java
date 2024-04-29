@@ -2964,6 +2964,12 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
     }
 
 
+    //mapped updateDistance
+    protected float func_110146_f(float f1, float f2){
+        return f2;
+    }
+
+
     @Nullable
     public Entity getRidingEntity() {
         return this.ridingEntity;

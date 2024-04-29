@@ -22,7 +22,7 @@ apply plugin: "org.spongepowered.mixin"
 
 def name = 'elca_server'
 
-version = "2.3"
+version = "2.7"
 group = "plus"
 archivesBaseName = name
 sourceCompatibility = targetCompatibility = 1.8
