@@ -48,7 +48,8 @@ public class ElcaConfig {
 
     public static boolean TICK_ONLY_TRACKED_ENTITIES = true;
 
-    public static boolean REMOVE_SERVER_THREAD       = true;
+    public static boolean REMOVE_SERVER_THREAD       = false;
 
     public static boolean SKIP_CHECK_NETWORK         = true;
+    public static boolean PRINT_CAUSE_SERVER_STOP    = true;
 }

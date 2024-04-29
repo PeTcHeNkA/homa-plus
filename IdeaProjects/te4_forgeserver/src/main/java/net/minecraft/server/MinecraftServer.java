@@ -277,6 +277,8 @@ public abstract class MinecraftServer implements PMinecraftServer, ICommandSende
 
     public void stopServer() {
         LOGGER.info("Stopping server");
+        if(ElcaConfig.PRINT_CAUSE_SERVER_STOP)
+            LOGGER.info(new Throwable("Stop cause: ").fillInStackTrace());
         ticker.stop();
 
         if (this.getNetworkSystem() != null) {
@@ -1122,12 +1124,13 @@ public abstract class MinecraftServer implements PMinecraftServer, ICommandSende
             }
 
             dedicatedserver.startServerThread();
-            Runtime.getRuntime().addShutdownHook(new Thread("Server Shutdown Thread") {
-                public void run()
-                {
-                    dedicatedserver.stopServer();
-                }
-            });
+            if(!ElcaConfig.REMOVE_SERVER_THREAD) {
+                Runtime.getRuntime().addShutdownHook(new Thread("Server Shutdown Thread") {
+                    public void run() {
+                        dedicatedserver.stopServer();
+                    }
+                });
+            }
         }
         catch (Exception exception)
         {

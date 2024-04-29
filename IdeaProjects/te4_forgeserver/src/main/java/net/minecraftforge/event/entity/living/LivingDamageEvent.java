@@ -38,4 +38,10 @@ public class LivingDamageEvent extends LivingEvent {
     public void setAmount(float amount) {
         this.amount = amount;
     }
+
+
+    @Override
+    public boolean isCancelable() {
+        return true;
+    }
 }

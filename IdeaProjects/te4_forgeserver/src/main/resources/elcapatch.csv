@@ -380,41 +380,41 @@
 "net.minecraft.world.WorldServer$1"
 "net.minecraft.world.WorldServer$ServerBlockEventList"
 "net.minecraft.world.WorldServer"
-"net.minecraftforge.common.chunkio.ChunkIOExecutor"
-"net.minecraftforge.common.DimensionManager$1"
-"net.minecraftforge.common.DimensionManager$Dimension"
-"net.minecraftforge.common.DimensionManager"
-"net.minecraftforge.event.entity.EntityEvent$CanUpdate"
-"net.minecraftforge.event.entity.EntityEvent$EnteringChunk"
-"net.minecraftforge.event.entity.EntityEvent$EntityConstructing"
-"net.minecraftforge.event.entity.EntityEvent"
-"net.minecraftforge.event.entity.living.LivingAttackEvent"
-"net.minecraftforge.event.entity.living.LivingDamageEvent"
-"net.minecraftforge.event.entity.living.LivingEvent$LivingJumpEvent"
-"net.minecraftforge.event.entity.living.LivingEvent$LivingUpdateEvent"
-"net.minecraftforge.event.entity.living.LivingEvent"
-"net.minecraftforge.event.entity.living.LivingHurtEvent"
-"net.minecraftforge.event.entity.living.LivingSpawnEvent$AllowDespawn"
-"net.minecraftforge.event.entity.living.LivingSpawnEvent$CheckSpawn"
-"net.minecraftforge.event.entity.living.LivingSpawnEvent$SpecialSpawn"
-"net.minecraftforge.event.entity.living.LivingSpawnEvent"
-"net.minecraftforge.event.world.BlockEvent$BreakEvent"
-"net.minecraftforge.event.world.BlockEvent$CreateFluidSourceEvent"
-"net.minecraftforge.event.world.BlockEvent$CropGrowEvent$Post"
-"net.minecraftforge.event.world.BlockEvent$CropGrowEvent$Pre"
-"net.minecraftforge.event.world.BlockEvent$CropGrowEvent"
-"net.minecraftforge.event.world.BlockEvent$EntityMultiPlaceEvent"
-"net.minecraftforge.event.world.BlockEvent$EntityPlaceEvent"
-"net.minecraftforge.event.world.BlockEvent$FarmlandTrampleEvent"
-"net.minecraftforge.event.world.BlockEvent$FluidPlaceBlockEvent"
-"net.minecraftforge.event.world.BlockEvent$HarvestDropsEvent"
-"net.minecraftforge.event.world.BlockEvent$MultiPlaceEvent"
-"net.minecraftforge.event.world.BlockEvent$NeighborNotifyEvent"
-"net.minecraftforge.event.world.BlockEvent$PlaceEvent"
-"net.minecraftforge.event.world.BlockEvent$PortalSpawnEvent"
-"net.minecraftforge.event.world.BlockEvent"
-"net.minecraftforge.event.world.ChunkWatchEvent$UnWatch"
-"net.minecraftforge.event.world.ChunkWatchEvent$Watch"
-"net.minecraftforge.event.world.ChunkWatchEvent"
-"net.minecraftforge.event.world.GetCollisionBoxesEvent"
-"net.minecraftforge.fml.common.eventhandler.EventBus"
+"net.minecraftforge.common.chunkio.ChunkIOExecutor", (true)
+"net.minecraftforge.common.DimensionManager$1", (true)
+"net.minecraftforge.common.DimensionManager$Dimension", (true)
+"net.minecraftforge.common.DimensionManager", (true)
+"net.minecraftforge.event.entity.EntityEvent$CanUpdate", (true)
+"net.minecraftforge.event.entity.EntityEvent$EnteringChunk", (true)
+"net.minecraftforge.event.entity.EntityEvent$EntityConstructing", (true)
+"net.minecraftforge.event.entity.EntityEvent", (true)
+"net.minecraftforge.event.entity.living.LivingAttackEvent", (true)
+"net.minecraftforge.event.entity.living.LivingDamageEvent", (true)
+"net.minecraftforge.event.entity.living.LivingEvent$LivingJumpEvent", (true)
+"net.minecraftforge.event.entity.living.LivingEvent$LivingUpdateEvent", (true)
+"net.minecraftforge.event.entity.living.LivingEvent", (true)
+"net.minecraftforge.event.entity.living.LivingHurtEvent", (true)
+"net.minecraftforge.event.entity.living.LivingSpawnEvent$AllowDespawn", (true)
+"net.minecraftforge.event.entity.living.LivingSpawnEvent$CheckSpawn", (true)
+"net.minecraftforge.event.entity.living.LivingSpawnEvent$SpecialSpawn", (true)
+"net.minecraftforge.event.entity.living.LivingSpawnEvent", (true)
+"net.minecraftforge.event.world.BlockEvent$BreakEvent", (true)
+"net.minecraftforge.event.world.BlockEvent$CreateFluidSourceEvent", (true)
+"net.minecraftforge.event.world.BlockEvent$CropGrowEvent$Post", (true)
+"net.minecraftforge.event.world.BlockEvent$CropGrowEvent$Pre", (true)
+"net.minecraftforge.event.world.BlockEvent$CropGrowEvent", (true)
+"net.minecraftforge.event.world.BlockEvent$EntityMultiPlaceEvent", (true)
+"net.minecraftforge.event.world.BlockEvent$EntityPlaceEvent", (true)
+"net.minecraftforge.event.world.BlockEvent$FarmlandTrampleEvent", (true)
+"net.minecraftforge.event.world.BlockEvent$FluidPlaceBlockEvent", (true)
+"net.minecraftforge.event.world.BlockEvent$HarvestDropsEvent", (true)
+"net.minecraftforge.event.world.BlockEvent$MultiPlaceEvent", (true)
+"net.minecraftforge.event.world.BlockEvent$NeighborNotifyEvent", (true)
+"net.minecraftforge.event.world.BlockEvent$PlaceEvent", (true)
+"net.minecraftforge.event.world.BlockEvent$PortalSpawnEvent", (true)
+"net.minecraftforge.event.world.BlockEvent", (true)
+"net.minecraftforge.event.world.ChunkWatchEvent$UnWatch", (true)
+"net.minecraftforge.event.world.ChunkWatchEvent$Watch", (true)
+"net.minecraftforge.event.world.ChunkWatchEvent", (true)
+"net.minecraftforge.event.world.GetCollisionBoxesEvent", (true)
+"net.minecraftforge.fml.common.eventhandler.EventBus", (true)

@@ -663,6 +663,7 @@ public class DedicatedServer extends MinecraftServer implements IServer {
     @Override
     public void startServerThread() {
         if(ElcaConfig.REMOVE_SERVER_THREAD) {
+            StartupQuery.reset();
             ticker().addDedicatedServerToTasks();
         } else {
             super.startServerThread();

@@ -11,13 +11,19 @@ public class EntityEvent extends Event {
         this.entity = entity;
     }
 
+
+    public EntityEvent(){}
+
+
     public Entity getEntity() {
         return entity;
     }
 
+
     public void setEntity(Entity entity) {
         this.entity = entity;
     }
+
 
     public static class EntityConstructing extends EntityEvent {
         public EntityConstructing(Entity entity) {

@@ -21,9 +21,11 @@ public class LivingSpawnEvent extends LivingEvent {
         this.z = z;
     }
 
+
     public LivingSpawnEvent(){
         super(null);
     }
+
 
     public void initLivingSpawnEvent(EntityLiving entity, World world, float x, float y, float z){
         initLiving(entity);
@@ -38,6 +40,7 @@ public class LivingSpawnEvent extends LivingEvent {
     public float getX() { return x; }
     public float getY() { return y; }
     public float getZ() { return z; }
+
 
     @HasResult
     public static class CheckSpawn extends LivingSpawnEvent {

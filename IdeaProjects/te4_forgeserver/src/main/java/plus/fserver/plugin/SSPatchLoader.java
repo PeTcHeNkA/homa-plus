@@ -59,8 +59,15 @@ public class SSPatchLoader extends TweakEngine implements IClassTransformer, ITw
         for (TsonObj obj:list){
             TsonList line = obj.getList();
             String clazz = line.getStr(0);
-            TsonObj safe = line.size()>1?line.get(1):null;
-            add(clazz, safe != null && safe.getBool());
+            boolean safe = false;
+            if(line.size()>1){
+                safe = line.getBool(1);
+            } else {
+//                if(clazz.startsWith("net.minecraftforge")){
+//                    safe = true;
+//                }
+            }
+            add(clazz, safe);
         }
     }
 
@@ -72,8 +79,6 @@ public class SSPatchLoader extends TweakEngine implements IClassTransformer, ITw
         add("net.minecraft.server.dedicated.DedicatedServer", true);
         add("net.minecraft.server.dedicated.DedicatedServer$1", true);
         add("net.minecraft.server.dedicated.DedicatedServer$2", true);
-        add("net.minecraftforge.common.DimensionManager", true);
-        add("net.minecraftforge.common.chunkio.ChunkIOExecutor", true);
     }
 
 

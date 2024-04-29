@@ -1,6 +1,5 @@
 package net.minecraftforge.event.entity.living;
 
-import net.minecraftforge.event.world.ChunkWatchEvent;
 import net.minecraftforge.fml.common.eventhandler.Cancelable;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraftforge.event.entity.EntityEvent;
@@ -14,6 +13,11 @@ public class LivingEvent extends EntityEvent {
     public LivingEvent(EntityLivingBase entity) {
         super(entity);
         entityLiving = entity;
+    }
+
+
+    public LivingEvent(){
+        super();
     }
 
 
@@ -52,7 +56,13 @@ public class LivingEvent extends EntityEvent {
         }
 
 
-        public LivingUpdateEvent(){ super(null); }
+        @Override
+        public boolean isCancelable() {
+            return true;
+        }
+
+
+        public LivingUpdateEvent(){ super(); }
 
 
         @Deprecated
@@ -62,5 +72,8 @@ public class LivingEvent extends EntityEvent {
 
     public static class LivingJumpEvent extends LivingEvent {
         public LivingJumpEvent(EntityLivingBase e){ super(e); }
+
+
+        public LivingJumpEvent(){}
     }
 }

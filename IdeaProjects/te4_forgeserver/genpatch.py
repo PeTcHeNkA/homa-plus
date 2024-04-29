@@ -61,8 +61,10 @@ def makePathFile():
     s = ""
     for item in getDeepFiles(dir+"build/classes/java/main/net"):
         name = "net."+item.replace("/",".")[0:-6]
-        s += f"\"{name}\"\n"
-
+        if(name.startswith("net.minecraftforge")):
+            s += f"\"{name}\", (true)\n"
+        else:
+            s += f"\"{name}\"\n"
     createFile("src/main/resources/elcapatch.csv", s, )
     print("Completed.")
 

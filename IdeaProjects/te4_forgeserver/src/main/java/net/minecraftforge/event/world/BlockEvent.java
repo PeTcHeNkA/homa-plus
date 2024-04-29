@@ -20,7 +20,6 @@ import net.minecraftforge.fml.common.eventhandler.Event;
 import com.google.common.collect.ImmutableList;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import net.minecraftforge.fml.common.eventhandler.Event.HasResult;
 
 
 public class BlockEvent extends Event {
@@ -58,17 +57,7 @@ public class BlockEvent extends Event {
         return state;
     }
 
-    /**
-     * Fired when a block is about to drop it's harvested items. The {@link #drops} array can be amended, as can the {@link #dropChance}.
-     * <strong>Note well:</strong> the {@link #harvester} player field is null in a variety of scenarios. Code expecting null.
-     *
-     * The {@link #dropChance} is used to determine which items in this array will actually drop, compared to a random number. If you wish, you
-     * can pre-filter yourself, and set {@link #dropChance} to 1.0f to always drop the contents of the {@link #drops} array.
-     *
-     * {@link #isSilkTouching} is set if this is considered a silk touch harvesting operation, vs a normal harvesting operation. Act accordingly.
-     *
-     * @author cpw
-     */
+
     public static class HarvestDropsEvent extends BlockEvent {
         private final int fortuneLevel;
         private final List<ItemStack> drops;
@@ -94,10 +83,7 @@ public class BlockEvent extends Event {
         public EntityPlayer getHarvester() { return harvester; }
     }
 
-    /**
-     * Event that is fired when an Block is about to be broken by a player
-     * Canceling this event will prevent the Block from being broken.
-     */
+
     @Cancelable
     public static class BreakEvent extends BlockEvent {
         /** Reference to the Player who broke the block. If no player is available, use a EntityFakePlayer */
@@ -122,30 +108,24 @@ public class BlockEvent extends Event {
             return player;
         }
 
-        /**
-         * Get the experience dropped by the block after the event has processed
-         *
-         * @return The experience to drop or 0 if the event was canceled
-         */
+
         public int getExpToDrop() {
             return this.isCanceled() ? 0 : exp;
         }
 
-        /**
-         * Set the amount of experience dropped by the block after the event has processed
-         *
-         * @param exp 1 or higher to drop experience, else nothing will drop
-         */
+
         public void setExpToDrop(int exp) {
             this.exp = exp;
         }
+
+
+        @Override
+        public boolean isCancelable() {
+            return true;
+        }
     }
 
-    /**
-     * Called when a block is placed.
-     *
-     * If a Block Place event is cancelled, the block will not be placed.
-     */
+
     @Cancelable
     public static class EntityPlaceEvent extends BlockEvent {
         private Entity entity;
@@ -180,18 +160,35 @@ public class BlockEvent extends Event {
             }
         }
 
+
         @Nullable
-        public Entity getEntity() { return entity; }
-        public BlockSnapshot getBlockSnapshot() { return blockSnapshot; }
-        public IBlockState getPlacedBlock() { return placedBlock; }
-        public IBlockState getPlacedAgainst() { return placedAgainst; }
+        public Entity getEntity() {
+            return entity;
+        }
+
+
+        public BlockSnapshot getBlockSnapshot() {
+            return blockSnapshot;
+        }
+
+
+        public IBlockState getPlacedBlock() {
+            return placedBlock;
+        }
+
+
+        public IBlockState getPlacedAgainst() {
+            return placedAgainst;
+        }
+
+
+        @Override
+        public boolean isCancelable() {
+            return true;
+        }
     }
 
-    /**
-     * Called when a block is placed by a player.
-     *
-     * If a Block Place event is cancelled, the block will not be placed.
-     */
+
     @Cancelable
     @Deprecated // Remove in 1.13
     public static class PlaceEvent extends EntityPlaceEvent {
@@ -207,21 +204,31 @@ public class BlockEvent extends Event {
             }
         }
 
-        public EntityPlayer getPlayer() { return player; }
+
+        public EntityPlayer getPlayer() {
+            return player;
+        }
+
+
         @Nonnull
         @Deprecated
-        public ItemStack getItemInHand() { return player.getHeldItem(hand); }
-        public EnumHand getHand() { return hand; }
+        public ItemStack getItemInHand() {
+            return player.getHeldItem(hand);
+        }
+
+
+        public EnumHand getHand() {
+            return hand;
+        }
+
+
+        @Override
+        public boolean isCancelable() {
+            return true;
+        }
     }
 
 
-    /**
-     * Fired when a single block placement triggers the
-     * creation of multiple blocks(e.g. placing a bed block). The block returned
-     * by {@link #state} and its related methods is the block where
-     * the placed block would exist if the placement only affected a single
-     * block.
-     */
     @Cancelable
     public static class EntityMultiPlaceEvent extends EntityPlaceEvent {
         private final List<BlockSnapshot> blockSnapshots;
@@ -234,25 +241,19 @@ public class BlockEvent extends Event {
             }
         }
 
-        /**
-         * Gets a list of BlockSnapshots for all blocks which were replaced by the
-         * placement of the new blocks. Most of these blocks will just be of type AIR.
-         *
-         * @return immutable list of replaced BlockSnapshots
-         */
+
         public List<BlockSnapshot> getReplacedBlockSnapshots() {
             return blockSnapshots;
+        }
+
+
+        @Override
+        public boolean isCancelable() {
+            return true;
         }
     }
 
 
-    /**
-     * Fired when a single block placement action of a player triggers the
-     * creation of multiple blocks(e.g. placing a bed block). The block returned
-     * by {@link #state} and its related methods is the block where
-     * the placed block would exist if the placement only affected a single
-     * block.
-     */
     @Cancelable
     public static class MultiPlaceEvent extends PlaceEvent {
         private final List<BlockSnapshot> blockSnapshots;
@@ -265,12 +266,7 @@ public class BlockEvent extends Event {
             }
         }
 
-        /**
-         * Gets a list of BlockSnapshots for all blocks which were replaced by the
-         * placement of the new blocks. Most of these blocks will just be of type AIR.
-         *
-         * @return immutable list of replaced BlockSnapshots
-         */
+
         public List<BlockSnapshot> getReplacedBlockSnapshots() {
             return blockSnapshots;
         }
@@ -314,32 +310,24 @@ public class BlockEvent extends Event {
             setCanceled(false);
         }
 
-        /**
-         * Gets a list of directions from the base block that updates will occur upon.
-         *
-         * @return list of notified directions
-         */
-        public EnumSet<EnumFacing> getNotifiedSides()
-        {
+
+        public EnumSet<EnumFacing> getNotifiedSides() {
             return notifiedSides;
         }
 
-        /**
-         * Get if redstone update was forced during setBlock call (0x16 to flags)
-         * @return if the flag was set
-         */
-        public boolean getForceRedstoneUpdate()
-        {
+
+        public boolean getForceRedstoneUpdate() {
             return forceRedstoneUpdate;
+        }
+
+
+        @Override
+        public boolean isCancelable() {
+            return true;
         }
     }
 
-    /**
-     * Fired to check whether a non-source block can turn into a source block.
-     * A result of ALLOW causes a source block to be created even if the liquid
-     * usually doesn't do that (like lava), and a result of DENY prevents creation
-     * even if the liquid usually does do that (like water).
-     */
+
     @HasResult
     public static class CreateFluidSourceEvent extends BlockEvent {
         public CreateFluidSourceEvent(World world, BlockPos pos, IBlockState state) {
@@ -347,14 +335,7 @@ public class BlockEvent extends Event {
         }
     }
 
-    /**
-     * Fired when a liquid places a block. Use {@link #setNewState(IBlockState)} to change the result of
-     * a cobblestone generator or add variants of obsidian. Alternatively, you  could execute
-     * arbitrary code when lava sets blocks on fire, even preventing it.
-     *
-     * {@link #getState()} will return the block that was originally going to be placed.
-     * {@link #getPos()} will return the position of the block to be changed.
-     */
+
     @Cancelable
     public static class FluidPlaceBlockEvent extends BlockEvent {
         private final BlockPos liquidPos;
@@ -369,29 +350,29 @@ public class BlockEvent extends Event {
         }
 
 
-        /**
-         * @return The position of the liquid this event originated from. This may be the same as {@link #getPos()}.
-         */
         public BlockPos getLiquidPos() {
             return liquidPos;
         }
 
-        /**
-         * @return The block state that will be placed after this event resolves.
-         */
+
         public IBlockState getNewState() {
             return newState;
         }
+
 
         public void setNewState(IBlockState state) {
             this.newState = state;
         }
 
-        /**
-         * @return The state of the block to be changed before the event was fired.
-         */
+
         public IBlockState getOriginalState() {
             return origState;
+        }
+
+
+        @Override
+        public boolean isCancelable() {
+            return true;
         }
     }
 
@@ -476,11 +457,7 @@ public class BlockEvent extends Event {
         }
     }
 
-    /* Fired when an attempt is made to spawn a nether portal from
-     * {@link net.minecraft.block.BlockPortal#trySpawnPortal(World, BlockPos)}.
-     *
-     * If cancelled, the portal will not be spawned.
-     */
+
     @Cancelable
     public static class PortalSpawnEvent extends BlockEvent {
         private final BlockPortal.Size size;
@@ -489,6 +466,13 @@ public class BlockEvent extends Event {
             super(world, pos, state);
             this.size = size;
         }
+
+
+        @Override
+        public boolean isCancelable() {
+            return true;
+        }
+
 
         public BlockPortal.Size getPortalSize() {
             return size;

@@ -38,4 +38,10 @@ public class LivingAttackEvent extends LivingEvent {
     public float getAmount() {
         return amount;
     }
+
+
+    @Override
+    public boolean isCancelable() {
+        return true;
+    }
 }
