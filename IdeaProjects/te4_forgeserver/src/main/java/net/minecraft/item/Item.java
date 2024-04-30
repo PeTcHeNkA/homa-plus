@@ -118,36 +118,31 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
     }
 
 
-    public static Item getItemFromBlock(Block blockIn)
-    {
+    public static Item getItemFromBlock(Block blockIn) {
         Item item = BLOCK_TO_ITEM.get(blockIn);
         return item == null ? Items.AIR : item;
     }
 
+
     @Nullable
-    public static Item getByNameOrId(String id)
-    {
+    public static Item getByNameOrId(String id) {
         Item item = REGISTRY.getObject(new ResourceLocation(id));
 
-        if (item == null)
-        {
-            try
-            {
+        if (item == null) {
+            try {
                 return getItemById(Integer.parseInt(id));
-            }
-            catch (NumberFormatException var3)
-            {
+            } catch (NumberFormatException var3) {
                 ;
             }
         }
-
         return item;
     }
 
-    public final void addPropertyOverride(ResourceLocation key, IItemPropertyGetter getter)
-    {
+
+    public final void addPropertyOverride(ResourceLocation key, IItemPropertyGetter getter) {
         this.properties.putObject(key, getter);
     }
+
 
     @Nullable
     @SideOnly(Side.CLIENT)
@@ -156,233 +151,226 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
         return this.properties.getObject(key);
     }
 
-    public boolean updateItemStackNBT(NBTTagCompound nbt)
-    {
+
+    public boolean updateItemStackNBT(NBTTagCompound nbt) {
         return false;
     }
 
+
     @SideOnly(Side.CLIENT)
-    public boolean hasCustomProperties()
-    {
+    public boolean hasCustomProperties() {
         return !this.properties.getKeys().isEmpty();
     }
 
-    public Item()
-    {
+
+    public Item() {
         this.addPropertyOverride(new ResourceLocation("lefthanded"), LEFTHANDED_GETTER);
         this.addPropertyOverride(new ResourceLocation("cooldown"), COOLDOWN_GETTER);
     }
 
-    public Item setMaxStackSize(int maxStackSize)
-    {
+
+    public Item setMaxStackSize(int maxStackSize) {
         this.maxStackSize = maxStackSize;
         return this;
     }
 
-    public EnumActionResult onItemUse(EntityPlayer player, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
-    {
+
+    public EnumActionResult onItemUse(EntityPlayer player, World worldIn, BlockPos pos, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
         return EnumActionResult.PASS;
     }
 
-    public float getDestroySpeed(ItemStack stack, IBlockState state)
-    {
+
+    public float getDestroySpeed(ItemStack stack, IBlockState state) {
         return 1.0F;
     }
 
-    public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn)
-    {
+
+    public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
         return new ActionResult<ItemStack>(EnumActionResult.PASS, playerIn.getHeldItem(handIn));
     }
 
-    public ItemStack onItemUseFinish(ItemStack stack, World worldIn, EntityLivingBase entityLiving)
-    {
+
+    public ItemStack onItemUseFinish(ItemStack stack, World worldIn, EntityLivingBase entityLiving) {
         return stack;
     }
 
+
     @Deprecated // Use ItemStack sensitive version below.
-    public int getItemStackLimit()
-    {
+    public int getItemStackLimit() {
         return this.maxStackSize;
     }
 
-    public int getMetadata(int damage)
-    {
+
+    public int getMetadata(int damage) {
         return 0;
     }
 
-    public boolean getHasSubtypes()
-    {
+
+    public boolean getHasSubtypes() {
         return this.hasSubtypes;
     }
 
-    public Item setHasSubtypes(boolean hasSubtypes)
-    {
+
+    public Item setHasSubtypes(boolean hasSubtypes) {
         this.hasSubtypes = hasSubtypes;
         return this;
     }
 
+
     @Deprecated
-    public int getMaxDamage()
-    {
+    public int getMaxDamage() {
         return this.maxDamage;
     }
 
-    public Item setMaxDamage(int maxDamageIn)
-    {
-        this.maxDamage = maxDamageIn;
 
-        if (maxDamageIn > 0)
-        {
+    public Item setMaxDamage(int maxDamageIn) {
+        this.maxDamage = maxDamageIn;
+        if (maxDamageIn > 0) {
             this.addPropertyOverride(new ResourceLocation("damaged"), DAMAGED_GETTER);
             this.addPropertyOverride(new ResourceLocation("damage"), DAMAGE_GETTER);
         }
-
         return this;
     }
 
-    public boolean isDamageable()
-    {
+
+    public boolean isDamageable() {
         return this.maxDamage > 0 && (!this.hasSubtypes || this.maxStackSize == 1);
     }
 
-    public boolean hitEntity(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker)
-    {
+
+    public boolean hitEntity(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker) {
         return false;
     }
 
-    public boolean onBlockDestroyed(ItemStack stack, World worldIn, IBlockState state, BlockPos pos, EntityLivingBase entityLiving)
-    {
+
+    public boolean onBlockDestroyed(ItemStack stack, World worldIn, IBlockState state, BlockPos pos, EntityLivingBase entityLiving) {
         return false;
     }
 
-    public boolean canHarvestBlock(IBlockState blockIn)
-    {
+
+    public boolean canHarvestBlock(IBlockState blockIn) {
         return false;
     }
 
-    public boolean itemInteractionForEntity(ItemStack stack, EntityPlayer playerIn, EntityLivingBase target, EnumHand hand)
-    {
+
+    public boolean itemInteractionForEntity(ItemStack stack, EntityPlayer playerIn, EntityLivingBase target, EnumHand hand) {
         return false;
     }
 
-    public Item setFull3D()
-    {
+
+    public Item setFull3D() {
         this.bFull3D = true;
         return this;
     }
 
+
     @SideOnly(Side.CLIENT)
-    public boolean isFull3D()
-    {
+    public boolean isFull3D() {
         return this.bFull3D;
     }
 
+
     @SideOnly(Side.CLIENT)
-    public boolean shouldRotateAroundWhenRendering()
-    {
+    public boolean shouldRotateAroundWhenRendering() {
         return false;
     }
 
-    public Item setTranslationKey(String key)
-    {
+
+    public Item setTranslationKey(String key) {
         this.translationKey = key;
         return this;
     }
 
-    public String getUnlocalizedNameInefficiently(ItemStack stack)
-    {
+
+    public String getUnlocalizedNameInefficiently(ItemStack stack) {
         return I18n.translateToLocal(this.getTranslationKey(stack));
     }
 
-    public String getTranslationKey()
-    {
+
+    public String getTranslationKey() {
         return "item." + this.translationKey;
     }
 
-    public String getTranslationKey(ItemStack stack)
-    {
+
+    public String getTranslationKey(ItemStack stack) {
         return "item." + this.translationKey;
     }
 
-    public Item setContainerItem(Item containerItem)
-    {
+
+    public Item setContainerItem(Item containerItem) {
         this.containerItem = containerItem;
         return this;
     }
 
-    public boolean getShareTag()
-    {
+
+    public boolean getShareTag() {
         return true;
     }
 
+
     @Nullable
-    public Item getContainerItem()
-    {
+    public Item getContainerItem() {
         return this.containerItem;
     }
 
+
     @Deprecated // Use ItemStack sensitive version below.
-    public boolean hasContainerItem()
-    {
+    public boolean hasContainerItem() {
         return this.containerItem != null;
     }
 
-    public void onUpdate(ItemStack stack, World worldIn, Entity entityIn, int itemSlot, boolean isSelected)
-    {
-    }
 
-    public void onCreated(ItemStack stack, World worldIn, EntityPlayer playerIn)
-    {
-    }
+    public void onUpdate(ItemStack stack, World worldIn, Entity entityIn, int itemSlot, boolean isSelected) {}
 
-    public boolean isMap()
-    {
+
+    public void onCreated(ItemStack stack, World worldIn, EntityPlayer playerIn) {}
+
+
+    public boolean isMap() {
         return false;
     }
 
-    public EnumAction getItemUseAction(ItemStack stack)
-    {
+
+    public EnumAction getItemUseAction(ItemStack stack) {
         return EnumAction.NONE;
     }
 
-    public int getMaxItemUseDuration(ItemStack stack)
-    {
+
+    public int getMaxItemUseDuration(ItemStack stack) {
         return 0;
     }
 
-    public void onPlayerStoppedUsing(ItemStack stack, World worldIn, EntityLivingBase entityLiving, int timeLeft)
-    {
-    }
+
+    public void onPlayerStoppedUsing(ItemStack stack, World worldIn, EntityLivingBase entityLiving, int timeLeft) {}
+
 
     @SideOnly(Side.CLIENT)
-    public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn)
-    {
-    }
+    public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {}
 
-    public String getItemStackDisplayName(ItemStack stack)
-    {
+
+    public String getItemStackDisplayName(ItemStack stack) {
         return I18n.translateToLocal(this.getUnlocalizedNameInefficiently(stack) + ".name").trim();
     }
 
+
     @SideOnly(Side.CLIENT)
-    public boolean hasEffect(ItemStack stack)
-    {
+    public boolean hasEffect(ItemStack stack) {
         return stack.isItemEnchanted();
     }
 
+
     @Deprecated // use Forge version
-    public EnumRarity getRarity(ItemStack stack)
-    {
+    public EnumRarity getRarity(ItemStack stack) {
         return stack.isItemEnchanted() ? EnumRarity.RARE : EnumRarity.COMMON;
     }
 
-    public boolean isEnchantable(ItemStack stack)
-    {
+
+    public boolean isEnchantable(ItemStack stack) {
         return this.getItemStackLimit(stack) == 1 && this.isDamageable();
     }
 
-    protected RayTraceResult rayTrace(World worldIn, EntityPlayer playerIn, boolean useLiquids)
-    {
+
+    protected RayTraceResult rayTrace(World worldIn, EntityPlayer playerIn, boolean useLiquids) {
         float f = playerIn.rotationPitch;
         float f1 = playerIn.rotationYaw;
         double d0 = playerIn.posX;
@@ -400,21 +388,20 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
         return worldIn.rayTraceBlocks(vec3d, vec3d1, useLiquids, !useLiquids, false);
     }
 
-    public int getItemEnchantability()
-    {
+
+    public int getItemEnchantability() {
         return 0;
     }
 
-    public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items)
-    {
-        if (this.isInCreativeTab(tab))
-        {
+
+    public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items) {
+        if (this.isInCreativeTab(tab)) {
             items.add(new ItemStack(this));
         }
     }
 
-    protected boolean isInCreativeTab(CreativeTabs targetTab)
-    {
+
+    protected boolean isInCreativeTab(CreativeTabs targetTab) {
         for (CreativeTabs tab : this.getCreativeTabs())
             if (tab == targetTab)
                 return true;
@@ -422,40 +409,38 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
         return creativetabs != null && (targetTab == CreativeTabs.SEARCH || targetTab == creativetabs);
     }
 
+
     @Nullable
-    public CreativeTabs getCreativeTab()
-    {
+    public CreativeTabs getCreativeTab() {
         return this.tabToDisplayOn;
     }
 
-    public Item setCreativeTab(CreativeTabs tab)
-    {
+
+    public Item setCreativeTab(CreativeTabs tab) {
         this.tabToDisplayOn = tab;
         return this;
     }
 
-    public boolean canItemEditBlocks()
-    {
+
+    public boolean canItemEditBlocks() {
         return false;
     }
 
-    public boolean getIsRepairable(ItemStack toRepair, ItemStack repair)
-    {
+    public boolean getIsRepairable(ItemStack toRepair, ItemStack repair) {
         return false;
     }
+
 
     @Deprecated // Use ItemStack sensitive version below.
-    public Multimap<String, AttributeModifier> getItemAttributeModifiers(EntityEquipmentSlot equipmentSlot)
-    {
-        return HashMultimap.<String, AttributeModifier>create();
+    public Multimap<String, AttributeModifier> getItemAttributeModifiers(EntityEquipmentSlot equipmentSlot) {
+        return HashMultimap.create();
     }
 
     /* ======================================== FORGE START =====================================*/
     /**
      * ItemStack sensitive version of getItemAttributeModifiers
      */
-    public Multimap<String, AttributeModifier> getAttributeModifiers(EntityEquipmentSlot slot, ItemStack stack)
-    {
+    public Multimap<String, AttributeModifier> getAttributeModifiers(EntityEquipmentSlot slot, ItemStack stack) {
         return this.getItemAttributeModifiers(slot);
     }
 

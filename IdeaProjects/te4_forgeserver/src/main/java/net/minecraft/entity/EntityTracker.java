@@ -213,6 +213,7 @@ public class EntityTracker {
                 }
             }
         }
+        if(list.isEmpty()||list1.isEmpty())return;
         NetworkManager manager = player.connection.netManager;
         manager.exec(() -> {
             if (!list.isEmpty()) {
@@ -220,7 +221,6 @@ public class EntityTracker {
                     manager.sendPacketSync(new SPacketEntityAttach(entity1, ((EntityLiving)entity1).getLeashHolder()));
                 }
             }
-
             if (!list1.isEmpty()) {
                 for (Entity entity2 : list1) {
                     manager.sendPacketSync(new SPacketSetPassengers(entity2));

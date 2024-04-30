@@ -1,23 +1,20 @@
 package net.minecraft.util;
 
 import com.google.common.collect.Iterators;
-import com.google.common.collect.Sets;
 import io.netty.util.collection.IntObjectHashMap;
 import org.jetbrains.annotations.NotNull;
-import plus.fserver.utls.collections.ArrayListE6;
-import plus.fserver.utls.collections.IdentityTe4HashSet;
-
+import plus.fserver.utls.collections.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 
 public class ClassInheritanceMultiMap<T> extends AbstractSet<T> {
-    private static final EmptyByClass EMPTY_BY_CLASS = new EmptyByClass();
+    private static final EmptySelfIter EMPTY_BY_CLASS = new EmptySelfIter();
     private static final Set<Class<?>> ALL_KNOWN = Collections.newSetFromMap(new ConcurrentHashMap<>());
-    private final IntObjectHashMap<ArrayListEA<T>> map = new IntObjectHashMap<>();
+    private final IntObjectHashMap<ArrayRemSwapListE6<T>> map = new IntObjectHashMap<>();
     private final Set<Class<?>> knownKeys = new IdentityTe4HashSet<>();
     private final Class<T> baseClass;
-    private final ArrayListEA<T> values = new ArrayListEA<>();
+    private final ArrayRemSwapListE6<T> values = new ArrayRemSwapListE6<>();
 
     public ClassInheritanceMultiMap(Class<T> baseClassIn) {
         this.baseClass = baseClassIn;
@@ -79,7 +76,7 @@ public class ClassInheritanceMultiMap<T> extends AbstractSet<T> {
         int key = parentClass.hashCode();
         ArrayListE6<T> list = this.map.get(key);
         if (list == null) {
-            this.map.put(key, new ArrayListE1V<>(value));
+            this.map.put(key, new ArrayRemSwapListE1V<>(value));
         } else {
             list.addF(value);
         }
@@ -88,13 +85,12 @@ public class ClassInheritanceMultiMap<T> extends AbstractSet<T> {
 
     @Override
     public boolean remove(Object obj) {
-        //T toRemove = (T)obj;
         boolean flag = false;
         for (Class<?> oclass : this.knownKeys) {
             if (oclass.isAssignableFrom(obj.getClass())) {
-                ArrayListEA<T> list = this.map.get(oclass.hashCode());
+                ArrayRemSwapListE6<T> list = this.map.get(oclass.hashCode());
 
-                if (list != null && list.removeF(obj)) {
+                if (list != null && list.remove(obj)) {
                     flag = true;
                 }
             }
@@ -106,6 +102,17 @@ public class ClassInheritanceMultiMap<T> extends AbstractSet<T> {
     @Override
     public Iterator<T> iterator() {
         return values.iterator();
+    }
+
+
+    @Override
+    public boolean isEmpty() {
+        return values.isEmpty();
+    }
+
+
+    public boolean isEmptyC(){
+        return values.isEmptyC();
     }
 
 
@@ -130,9 +137,11 @@ public class ClassInheritanceMultiMap<T> extends AbstractSet<T> {
 
     public class FastIter{
         private int cursor = 0;
+
         public boolean hasNext(){
-            return cursor < values.size();
+            return cursor < values.sizeC();
         }
+
         public T readAndNext(){
             return values.get(cursor++);
         }
@@ -141,49 +150,6 @@ public class ClassInheritanceMultiMap<T> extends AbstractSet<T> {
 
     public FastIter fastIter(){
         return new FastIter();
-    }
-}
-
-
-final class ArrayListE1V<T> extends ArrayListEA<T>{
-    public ArrayListE1V(T v){
-        this.data = new Object[]{v};
-        this.size = 1;
-    }
-    @Override
-    public Object[] newArrayAuto() {
-        return Arrays.copyOf(data, data.length == 1?5:data.length+7);
-    }
-}
-
-
-class ArrayListEA<T> extends ArrayListE6<T>{
-    boolean removeF(Object o) {
-        for (int index = 0; index < size; index++)
-            if (o.equals(data[index])) {
-                int numMoved = size - index - 1;
-                if (numMoved > 0) System.arraycopy(data, index+1, data, index, numMoved);
-                data[--size] = null;
-                return true;
-            }
-        return false;
-    }
-}
-
-
-final class EmptyByClass<S> implements Iterable<S>, Iterator<S>{
-    @NotNull
-    @Override
-    public Iterator<S> iterator() {
-        return this;
-    }
-    @Override
-    public boolean hasNext() {
-        return false;
-    }
-    @Override
-    public S next() {
-        return null;
     }
 }
 

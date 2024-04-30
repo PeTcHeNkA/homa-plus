@@ -4,6 +4,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import javax.annotation.Nullable;
@@ -22,6 +23,7 @@ import net.minecraft.entity.IMerchant;
 import net.minecraft.entity.MultiPartEntityPart;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
+import net.minecraft.entity.ai.attributes.RangedAttribute;
 import net.minecraft.entity.item.EntityBoat;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityMinecart;
@@ -73,8 +75,6 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.datafix.DataFixesManager;
 import net.minecraft.util.datafix.FixTypes;
-import net.minecraft.util.datafix.IDataFixer;
-import net.minecraft.util.datafix.IDataWalker;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -92,22 +92,24 @@ import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.fserver.ElcaCV;
 
 
 @SuppressWarnings("incomplete-switch")
 public abstract class EntityPlayer extends EntityLivingBase {
     public static final String PERSISTED_NBT_TAG = "PlayerPersisted";
-    protected java.util.HashMap<Integer, BlockPos> spawnChunkMap = new java.util.HashMap<Integer, BlockPos>();
-    protected java.util.HashMap<Integer, Boolean> spawnForcedMap = new java.util.HashMap<Integer, Boolean>();
+    protected HashMap<Integer, BlockPos> spawnChunkMap = new HashMap<>();
+    protected HashMap<Integer, Boolean> spawnForcedMap = new HashMap<>();
     public float eyeHeight = this.getDefaultEyeHeight();
-    public static final net.minecraft.entity.ai.attributes.IAttribute REACH_DISTANCE = new net.minecraft.entity.ai.attributes.RangedAttribute(null, "generic.reachDistance", 5.0D, 0.0D, 1024.0D).setShouldWatch(true);
+    public static final net.minecraft.entity.ai.attributes.IAttribute REACH_DISTANCE
+            = new RangedAttribute(null, "generic.reachDistance", 5.0D, 0.0D, 1024.0D).setShouldWatch(true);
 
-    private static final DataParameter<Float> ABSORPTION = EntityDataManager.<Float>createKey(EntityPlayer.class, DataSerializers.FLOAT);
-    private static final DataParameter<Integer> PLAYER_SCORE = EntityDataManager.<Integer>createKey(EntityPlayer.class, DataSerializers.VARINT);
-    protected static final DataParameter<Byte> PLAYER_MODEL_FLAG = EntityDataManager.<Byte>createKey(EntityPlayer.class, DataSerializers.BYTE);
-    protected static final DataParameter<Byte> MAIN_HAND = EntityDataManager.<Byte>createKey(EntityPlayer.class, DataSerializers.BYTE);
-    protected static final DataParameter<NBTTagCompound> LEFT_SHOULDER_ENTITY = EntityDataManager.<NBTTagCompound>createKey(EntityPlayer.class, DataSerializers.COMPOUND_TAG);
-    protected static final DataParameter<NBTTagCompound> RIGHT_SHOULDER_ENTITY = EntityDataManager.<NBTTagCompound>createKey(EntityPlayer.class, DataSerializers.COMPOUND_TAG);
+    private static final DataParameter<Float> ABSORPTION = EntityDataManager.createKey(EntityPlayer.class, DataSerializers.FLOAT);
+    private static final DataParameter<Integer> PLAYER_SCORE = EntityDataManager.createKey(EntityPlayer.class, DataSerializers.VARINT);
+    protected static final DataParameter<Byte> PLAYER_MODEL_FLAG = EntityDataManager.createKey(EntityPlayer.class, DataSerializers.BYTE);
+    protected static final DataParameter<Byte> MAIN_HAND = EntityDataManager.createKey(EntityPlayer.class, DataSerializers.BYTE);
+    protected static final DataParameter<NBTTagCompound> LEFT_SHOULDER_ENTITY = EntityDataManager.createKey(EntityPlayer.class, DataSerializers.COMPOUND_TAG);
+    protected static final DataParameter<NBTTagCompound> RIGHT_SHOULDER_ENTITY = EntityDataManager.createKey(EntityPlayer.class, DataSerializers.COMPOUND_TAG);
     public InventoryPlayer inventory = new InventoryPlayer(this);
     protected InventoryEnderChest enderChest = new InventoryEnderChest();
     public Container inventoryContainer;
@@ -254,7 +256,6 @@ public abstract class EntityPlayer extends EntityLivingBase {
             }
         }
 
-        int i = 29999999;
         double d0 = MathHelper.clamp(this.posX, -2.9999999E7D, 2.9999999E7D);
         double d1 = MathHelper.clamp(this.posZ, -2.9999999E7D, 2.9999999E7D);
 
@@ -278,6 +279,7 @@ public abstract class EntityPlayer extends EntityLivingBase {
     }
 
 
+    //todo maybe remove?
     private void updateCape() {
         this.prevChasingPosX = this.chasingPosX;
         this.prevChasingPosY = this.chasingPosY;
@@ -486,7 +488,7 @@ public abstract class EntityPlayer extends EntityLivingBase {
         IAttributeInstance iattributeinstance = this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED);
 
         if (!this.world.isRemote) {
-            iattributeinstance.setBaseValue((double)this.capabilities.getWalkSpeed());
+            iattributeinstance.setBaseValue(this.capabilities.getWalkSpeed());
         }
 
         this.jumpMovementFactor = this.speedInAir;
@@ -543,9 +545,9 @@ public abstract class EntityPlayer extends EntityLivingBase {
     }
 
 
-    private void playShoulderEntityAmbientSound(@Nullable NBTTagCompound p_192028_1_) {
-        if (p_192028_1_ != null && !p_192028_1_.hasKey("Silent") || !p_192028_1_.getBoolean("Silent")) {
-            String s = p_192028_1_.getString("id");
+    private void playShoulderEntityAmbientSound(@Nullable NBTTagCompound tag) {
+        if (tag != null && !tag.hasKey("Silent") || !tag.getBoolean("Silent")) {
+            String s = tag.getString("id");
 
             if (s.equals(EntityList.getKey(EntityParrot.class).toString())) {
                 EntityParrot.playAmbientSound(this.world, this);
@@ -586,17 +588,18 @@ public abstract class EntityPlayer extends EntityLivingBase {
         captureDrops = true;
         capturedDrops.clear();
 
-        if ("Notch".equals(this.getName())) {
-            this.dropItem(new ItemStack(Items.APPLE, 1), true, false);
-        }
+        if(ElcaCV.ENABLE_NOTCH_SECRET)
+            if ("Notch".equals(this.getName())) {
+                this.dropItem(new ItemStack(Items.APPLE, 1), true, false);
+            }
 
-        if (!this.world.getGameRules().getBoolean("keepInventory") && !this.isSpectator()) {
+        if (!this.world.getGameRules().keepInventory.getBoolean() && !this.isSpectator()) {
             this.destroyVanishingCursedItems();
             this.inventory.dropAllItems();
         }
 
         captureDrops = false;
-        if (!world.isRemote) net.minecraftforge.event.ForgeEventFactory.onPlayerDrops(this, cause, capturedDrops, recentlyHit > 0);
+        if (!world.isRemote) ForgeEventFactory.onPlayerDrops(this, cause, capturedDrops, recentlyHit > 0);
 
         if (cause != null) {
             this.motionX = -MathHelper.cos((this.attackedAtYaw + this.rotationYaw) * 0.017453292F) * 0.1F;
@@ -704,11 +707,11 @@ public abstract class EntityPlayer extends EntityLivingBase {
     }
 
 
-    public ItemStack dropItemAndGetStack(EntityItem p_184816_1_) {
-        if (captureDrops) capturedDrops.add(p_184816_1_);
+    public ItemStack dropItemAndGetStack(EntityItem item) {
+        if (captureDrops) capturedDrops.add(item);
         else // Forge: Don't indent to keep patch smaller.
-            this.world.spawnEntity(p_184816_1_);
-        return p_184816_1_.getItem();
+            this.world.spawnEntity(item);
+        return item.getItem();
     }
 
 
@@ -754,51 +757,42 @@ public abstract class EntityPlayer extends EntityLivingBase {
             f *= f1;
         }
 
-        if (this.isInsideOfMaterial(Material.WATER) && !EnchantmentHelper.getAquaAffinityModifier(this))
-        {
+        if (this.isInsideOfMaterial(Material.WATER) && !EnchantmentHelper.getAquaAffinityModifier(this)) {
             f /= 5.0F;
         }
 
-        if (!this.onGround)
-        {
+        if (!this.onGround) {
             f /= 5.0F;
         }
 
-        f = net.minecraftforge.event.ForgeEventFactory.getBreakSpeed(this, state, f, pos);
+        f = world.getBreakSpeed(this, state, f, pos);
         return (f < 0 ? 0 : f);
     }
 
-    public boolean canHarvestBlock(IBlockState state)
-    {
-        return net.minecraftforge.event.ForgeEventFactory.doPlayerHarvestCheck(this, state, this.inventory.canHarvestBlock(state));
+
+    public boolean canHarvestBlock(IBlockState state) {
+        return world.doPlayerHarvestCheck(this, state, this.inventory.canHarvestBlock(state));
     }
 
-    public static void registerFixesPlayer(DataFixer fixer)
-    {
-        fixer.registerWalker(FixTypes.PLAYER, new IDataWalker()
-        {
-            public NBTTagCompound process(IDataFixer fixer, NBTTagCompound compound, int versionIn)
-            {
-                DataFixesManager.processInventory(fixer, compound, versionIn, "Inventory");
-                DataFixesManager.processInventory(fixer, compound, versionIn, "EnderItems");
 
-                if (compound.hasKey("ShoulderEntityLeft", 10))
-                {
-                    compound.setTag("ShoulderEntityLeft", fixer.process(FixTypes.ENTITY, compound.getCompoundTag("ShoulderEntityLeft"), versionIn));
-                }
+    public static void registerFixesPlayer(DataFixer fixer) {
+        fixer.registerWalker(FixTypes.PLAYER, (fixer1, compound, versionIn) -> {
+            DataFixesManager.processInventory(fixer1, compound, versionIn, "Inventory");
+            DataFixesManager.processInventory(fixer1, compound, versionIn, "EnderItems");
 
-                if (compound.hasKey("ShoulderEntityRight", 10))
-                {
-                    compound.setTag("ShoulderEntityRight", fixer.process(FixTypes.ENTITY, compound.getCompoundTag("ShoulderEntityRight"), versionIn));
-                }
-
-                return compound;
+            if (compound.hasKey("ShoulderEntityLeft", 10)) {
+                compound.setTag("ShoulderEntityLeft", fixer1.process(FixTypes.ENTITY, compound.getCompoundTag("ShoulderEntityLeft"), versionIn));
             }
+
+            if (compound.hasKey("ShoulderEntityRight", 10)) {
+                compound.setTag("ShoulderEntityRight", fixer1.process(FixTypes.ENTITY, compound.getCompoundTag("ShoulderEntityRight"), versionIn));
+            }
+            return compound;
         });
     }
 
-    public void readEntityFromNBT(NBTTagCompound compound)
-    {
+
+    public void readEntityFromNBT(NBTTagCompound compound) {
         super.readEntityFromNBT(compound);
         this.setUniqueId(getUUID(this.gameProfile));
         NBTTagList nbttaglist = compound.getTagList("Inventory", 10);
@@ -811,30 +805,26 @@ public abstract class EntityPlayer extends EntityLivingBase {
         this.experienceTotal = compound.getInteger("XpTotal");
         this.xpSeed = compound.getInteger("XpSeed");
 
-        if (this.xpSeed == 0)
-        {
+        if (this.xpSeed == 0) {
             this.xpSeed = this.rand.nextInt();
         }
 
         this.setScore(compound.getInteger("Score"));
 
-        if (this.sleeping)
-        {
+        if (this.sleeping) {
             this.bedLocation = new BlockPos(this);
             this.wakeUpPlayer(true, true, false);
         }
 
-        if (compound.hasKey("SpawnX", 99) && compound.hasKey("SpawnY", 99) && compound.hasKey("SpawnZ", 99))
-        {
+        if (compound.hasKey("SpawnX", 99) && compound.hasKey("SpawnY", 99) && compound.hasKey("SpawnZ", 99)) {
             this.spawnPos = new BlockPos(compound.getInteger("SpawnX"), compound.getInteger("SpawnY"), compound.getInteger("SpawnZ"));
             this.spawnForced = compound.getBoolean("SpawnForced");
         }
 
         NBTTagList spawnlist = null;
         spawnlist = compound.getTagList("Spawns", 10);
-        for (int i = 0; i < spawnlist.tagCount(); i++)
-        {
-            NBTTagCompound spawndata = (NBTTagCompound)spawnlist.getCompoundTagAt(i);
+        for (int i = 0; i < spawnlist.tagCount(); i++) {
+            NBTTagCompound spawndata = spawnlist.getCompoundTagAt(i);
             int spawndim = spawndata.getInteger("Dim");
             this.spawnChunkMap.put(spawndim, new BlockPos(spawndata.getInteger("SpawnX"), spawndata.getInteger("SpawnY"), spawndata.getInteger("SpawnZ")));
             this.spawnForcedMap.put(spawndim, spawndata.getBoolean("SpawnForced"));
@@ -844,25 +834,22 @@ public abstract class EntityPlayer extends EntityLivingBase {
         this.foodStats.readNBT(compound);
         this.capabilities.readCapabilitiesFromNBT(compound);
 
-        if (compound.hasKey("EnderItems", 9))
-        {
+        if (compound.hasKey("EnderItems", 9)) {
             NBTTagList nbttaglist1 = compound.getTagList("EnderItems", 10);
             this.enderChest.loadInventoryFromNBT(nbttaglist1);
         }
 
-        if (compound.hasKey("ShoulderEntityLeft", 10))
-        {
+        if (compound.hasKey("ShoulderEntityLeft", 10)) {
             this.setLeftShoulderEntity(compound.getCompoundTag("ShoulderEntityLeft"));
         }
 
-        if (compound.hasKey("ShoulderEntityRight", 10))
-        {
+        if (compound.hasKey("ShoulderEntityRight", 10)) {
             this.setRightShoulderEntity(compound.getCompoundTag("ShoulderEntityRight"));
         }
     }
 
-    public void writeEntityToNBT(NBTTagCompound compound)
-    {
+
+    public void writeEntityToNBT(NBTTagCompound compound) {
         super.writeEntityToNBT(compound);
         compound.setInteger("DataVersion", 1343);
         compound.setTag("Inventory", this.inventory.writeToNBT(new NBTTagList()));
@@ -876,8 +863,7 @@ public abstract class EntityPlayer extends EntityLivingBase {
         compound.setInteger("Score", this.getScore());
         net.minecraftforge.fml.common.FMLCommonHandler.instance().getDataFixer().writeVersionData(compound); //Moved down so it doesn't keep missing every MC update.
 
-        if (this.spawnPos != null)
-        {
+        if (this.spawnPos != null) {
             compound.setInteger("SpawnX", this.spawnPos.getX());
             compound.setInteger("SpawnY", this.spawnPos.getY());
             compound.setInteger("SpawnZ", this.spawnPos.getZ());
@@ -885,8 +871,7 @@ public abstract class EntityPlayer extends EntityLivingBase {
         }
 
         NBTTagList spawnlist = new NBTTagList();
-        for (java.util.Map.Entry<Integer, BlockPos> entry : this.spawnChunkMap.entrySet())
-        {
+        for (java.util.Map.Entry<Integer, BlockPos> entry : this.spawnChunkMap.entrySet()) {
             BlockPos spawn = entry.getValue();
             if (spawn == null) continue;
             Boolean forced = spawnForcedMap.get(entry.getKey());
@@ -909,117 +894,97 @@ public abstract class EntityPlayer extends EntityLivingBase {
         this.capabilities.writeCapabilitiesToNBT(compound);
         compound.setTag("EnderItems", this.enderChest.saveInventoryToNBT());
 
-        if (!this.getLeftShoulderEntity().isEmpty())
-        {
+        if (!this.getLeftShoulderEntity().isEmpty()) {
             compound.setTag("ShoulderEntityLeft", this.getLeftShoulderEntity());
         }
 
-        if (!this.getRightShoulderEntity().isEmpty())
-        {
+        if (!this.getRightShoulderEntity().isEmpty()) {
             compound.setTag("ShoulderEntityRight", this.getRightShoulderEntity());
         }
     }
 
-    public boolean attackEntityFrom(DamageSource source, float amount)
-    {
+
+    public boolean attackEntityFrom(DamageSource source, float amount) {
         if (!net.minecraftforge.common.ForgeHooks.onPlayerAttack(this, source, amount)) return false;
-        if (this.isEntityInvulnerable(source))
-        {
+
+        if (this.isEntityInvulnerable(source)) {
             return false;
         }
-        else if (this.capabilities.disableDamage && !source.canHarmInCreative())
-        {
+        else if (this.capabilities.disableDamage && !source.canHarmInCreative()) {
             return false;
-        }
-        else
-        {
+        } else {
             this.idleTime = 0;
 
-            if (this.getHealth() <= 0.0F)
-            {
+            if (this.getHealth() <= 0.0F) {
                 return false;
-            }
-            else
-            {
-                if (this.isPlayerSleeping() && !this.world.isRemote)
-                {
+            } else {
+                if (this.isPlayerSleeping() && !this.world.isRemote) {
                     this.wakeUpPlayer(true, true, false);
                 }
 
                 this.spawnShoulderEntities();
 
-                if (source.isDifficultyScaled())
-                {
-                    if (this.world.getDifficulty() == EnumDifficulty.PEACEFUL)
-                    {
+                if (source.isDifficultyScaled()) {
+                    if (this.world.getDifficulty() == EnumDifficulty.PEACEFUL) {
                         amount = 0.0F;
                     }
 
-                    if (this.world.getDifficulty() == EnumDifficulty.EASY)
-                    {
+                    if (this.world.getDifficulty() == EnumDifficulty.EASY) {
                         amount = Math.min(amount / 2.0F + 1.0F, amount);
                     }
 
-                    if (this.world.getDifficulty() == EnumDifficulty.HARD)
-                    {
+                    if (this.world.getDifficulty() == EnumDifficulty.HARD) {
                         amount = amount * 3.0F / 2.0F;
                     }
                 }
-
                 return amount == 0.0F ? false : super.attackEntityFrom(source, amount);
             }
         }
     }
 
-    protected void blockUsingShield(EntityLivingBase p_190629_1_)
-    {
-        super.blockUsingShield(p_190629_1_);
 
-        if (p_190629_1_.getHeldItemMainhand().getItem().canDisableShield(p_190629_1_.getHeldItemMainhand(), this.getActiveItemStack(), this, p_190629_1_))
-        {
+    @Override
+    protected void blockUsingShield(EntityLivingBase entity) {
+        super.blockUsingShield(entity);
+
+        if (entity.getHeldItemMainhand().getItem().canDisableShield(entity.getHeldItemMainhand(), this.getActiveItemStack(), this, entity)) {
             this.disableShield(true);
         }
     }
 
-    public boolean canAttackPlayer(EntityPlayer other)
-    {
+
+    public boolean canAttackPlayer(EntityPlayer other) {
         Team team = this.getTeam();
         Team team1 = other.getTeam();
 
-        if (team == null)
-        {
+        if (team == null) {
             return true;
-        }
-        else
-        {
+        } else {
             return !team.isSameTeam(team1) ? true : team.getAllowFriendlyFire();
         }
     }
 
-    protected void damageArmor(float damage)
-    {
+
+    @Override
+    protected void damageArmor(float damage) {
         this.inventory.damageArmor(damage);
     }
 
-    protected void damageShield(float damage)
-    {
-        if (damage >= 3.0F && this.activeItemStack.getItem().isShield(this.activeItemStack, this))
-        {
+
+    @Override
+    protected void damageShield(float damage) {
+        if (damage >= 3.0F && this.activeItemStack.getItem().isShield(this.activeItemStack, this)) {
             ItemStack copyBeforeUse = this.activeItemStack.copy();
             int i = 1 + MathHelper.floor(damage);
             this.activeItemStack.damageItem(i, this);
 
-            if (this.activeItemStack.isEmpty())
-            {
+            if (this.activeItemStack.isEmpty()) {
                 EnumHand enumhand = this.getActiveHand();
                 net.minecraftforge.event.ForgeEventFactory.onPlayerDestroyItem(this, copyBeforeUse, enumhand);
 
-                if (enumhand == EnumHand.MAIN_HAND)
-                {
+                if (enumhand == EnumHand.MAIN_HAND) {
                     this.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, ItemStack.EMPTY);
-                }
-                else
-                {
+                } else {
                     this.setItemStackToSlot(EntityEquipmentSlot.OFFHAND, ItemStack.EMPTY);
                 }
 
@@ -1029,25 +994,22 @@ public abstract class EntityPlayer extends EntityLivingBase {
         }
     }
 
-    public float getArmorVisibility()
-    {
+
+    public float getArmorVisibility() {
         int i = 0;
 
-        for (ItemStack itemstack : this.inventory.armorInventory)
-        {
-            if (!itemstack.isEmpty())
-            {
+        for (ItemStack itemstack : this.inventory.armorInventory) {
+            if (!itemstack.isEmpty()) {
                 ++i;
             }
         }
-
         return (float)i / (float)this.inventory.armorInventory.size();
     }
 
-    protected void damageEntity(DamageSource damageSrc, float damageAmount)
-    {
-        if (!this.isEntityInvulnerable(damageSrc))
-        {
+
+    @Override
+    protected void damageEntity(DamageSource damageSrc, float damageAmount) {
+        if (!this.isEntityInvulnerable(damageSrc)) {
             damageAmount = net.minecraftforge.common.ForgeHooks.onLivingHurt(this, damageSrc, damageAmount);
             if (damageAmount <= 0) return;
             damageAmount = net.minecraftforge.common.ISpecialArmor.ArmorProperties.applyArmor(this, inventory.armorInventory, damageSrc, damageAmount);
@@ -1058,45 +1020,46 @@ public abstract class EntityPlayer extends EntityLivingBase {
             this.setAbsorptionAmount(this.getAbsorptionAmount() - (f - damageAmount));
             damageAmount = net.minecraftforge.common.ForgeHooks.onLivingDamage(this, damageSrc, damageAmount);
 
-            if (damageAmount != 0.0F)
-            {
+            if (damageAmount != 0.0F) {
                 this.addExhaustion(damageSrc.getHungerDamage());
                 float f1 = this.getHealth();
                 this.setHealth(this.getHealth() - damageAmount);
                 this.getCombatTracker().trackDamage(damageSrc, f1, damageAmount);
 
-                if (damageAmount < 3.4028235E37F)
-                {
+                if (damageAmount < 3.4028235E37F) {
                     this.addStat(StatList.DAMAGE_TAKEN, Math.round(damageAmount * 10.0F));
                 }
             }
         }
     }
 
-    public void openEditSign(TileEntitySign signTile)
-    {
-    }
 
-    public void displayGuiEditCommandCart(CommandBlockBaseLogic commandBlock)
-    {
-    }
+    public void openEditSign(TileEntitySign signTile) {}
 
-    public void displayGuiCommandBlock(TileEntityCommandBlock commandBlock)
-    {
-    }
+
+    public void displayGuiEditCommandCart(CommandBlockBaseLogic commandBlock) {}
+
+
+    public void displayGuiCommandBlock(TileEntityCommandBlock commandBlock) {}
 
 
     public void openEditStructure(TileEntityStructure structure) {}
 
+
     public void displayVillagerTradeGui(IMerchant villager) {}
+
 
     public void displayGUIChest(IInventory chestInventory) {}
 
+
     public void openGuiHorseInventory(AbstractHorse horse, IInventory inventoryIn) {}
+
 
     public void displayGui(IInteractionObject guiOwner) {}
 
+
     public void openBook(ItemStack stack, EnumHand hand) {}
+
 
     public EnumActionResult interactOn(Entity entityToInteractOn, EnumHand hand) {
         if (this.isSpectator()) {
@@ -1853,225 +1816,193 @@ public abstract class EntityPlayer extends EntityLivingBase {
         return this.foodStats;
     }
 
-    public boolean canEat(boolean ignoreHunger)
-    {
+
+    public boolean canEat(boolean ignoreHunger) {
         return (ignoreHunger || this.foodStats.needFood()) && !this.capabilities.disableDamage;
     }
 
-    public boolean shouldHeal()
-    {
+
+    public boolean shouldHeal() {
         return this.getHealth() > 0.0F && this.getHealth() < this.getMaxHealth();
     }
 
-    public boolean isAllowEdit()
-    {
+
+    public boolean isAllowEdit() {
         return this.capabilities.allowEdit;
     }
 
-    public boolean canPlayerEdit(BlockPos pos, EnumFacing facing, ItemStack stack)
-    {
-        if (this.capabilities.allowEdit)
-        {
+
+    public boolean canPlayerEdit(BlockPos pos, EnumFacing facing, ItemStack stack) {
+        if (this.capabilities.allowEdit) {
             return true;
         }
-        else if (stack.isEmpty())
-        {
+        else if (stack.isEmpty()) {
             return false;
-        }
-        else
-        {
+        } else {
             BlockPos blockpos = pos.offset(facing.getOpposite());
             Block block = this.world.getBlockState(blockpos).getBlock();
             return stack.canPlaceOn(block) || stack.canEditBlocks();
         }
     }
 
-    protected int getExperiencePoints(EntityPlayer player)
-    {
-        if (!this.world.getGameRules().getBoolean("keepInventory") && !this.isSpectator())
-        {
+
+    protected int getExperiencePoints(EntityPlayer player) {
+        if (!this.world.getGameRules().keepInventory.getBoolean() && !this.isSpectator()) {
             int i = this.experienceLevel * 7;
             return i > 100 ? 100 : i;
-        }
-        else
-        {
+        } else {
             return 0;
         }
     }
 
-    protected boolean isPlayer()
-    {
+
+    protected boolean isPlayer() {
         return true;
     }
+
 
     @SideOnly(Side.CLIENT)
-    public boolean getAlwaysRenderNameTagForRender()
-    {
+    public boolean getAlwaysRenderNameTagForRender() {
         return true;
     }
 
-    protected boolean canTriggerWalking()
-    {
+
+    protected boolean canTriggerWalking() {
         return !this.capabilities.isFlying;
     }
 
-    public void sendPlayerAbilities()
-    {
-    }
 
-    public void setGameType(GameType gameType)
-    {
-    }
+    public void sendPlayerAbilities() {}
 
-    public String getName()
-    {
+
+    public void setGameType(GameType gameType) {}
+
+
+    public String getName() {
         return this.gameProfile.getName();
     }
 
-    public InventoryEnderChest getInventoryEnderChest()
-    {
+
+    public InventoryEnderChest getInventoryEnderChest() {
         return this.enderChest;
     }
 
-    public ItemStack getItemStackFromSlot(EntityEquipmentSlot slotIn)
-    {
-        if (slotIn == EntityEquipmentSlot.MAINHAND)
-        {
+
+    public ItemStack getItemStackFromSlot(EntityEquipmentSlot slotIn) {
+        if (slotIn == EntityEquipmentSlot.MAINHAND) {
             return this.inventory.getCurrentItem();
-        }
-        else if (slotIn == EntityEquipmentSlot.OFFHAND)
-        {
+        } else if (slotIn == EntityEquipmentSlot.OFFHAND) {
             return this.inventory.offHandInventory.get(0);
-        }
-        else
-        {
+        } else {
             return slotIn.getSlotType() == EntityEquipmentSlot.Type.ARMOR ? (ItemStack)this.inventory.armorInventory.get(slotIn.getIndex()) : ItemStack.EMPTY;
         }
     }
 
-    public void setItemStackToSlot(EntityEquipmentSlot slotIn, ItemStack stack)
-    {
-        if (slotIn == EntityEquipmentSlot.MAINHAND)
-        {
+
+    public void setItemStackToSlot(EntityEquipmentSlot slotIn, ItemStack stack) {
+        if (slotIn == EntityEquipmentSlot.MAINHAND) {
             this.playEquipSound(stack);
             this.inventory.mainInventory.set(this.inventory.currentItem, stack);
-        }
-        else if (slotIn == EntityEquipmentSlot.OFFHAND)
-        {
+        } else if (slotIn == EntityEquipmentSlot.OFFHAND) {
             this.playEquipSound(stack);
             this.inventory.offHandInventory.set(0, stack);
-        }
-        else if (slotIn.getSlotType() == EntityEquipmentSlot.Type.ARMOR)
-        {
+        } else if (slotIn.getSlotType() == EntityEquipmentSlot.Type.ARMOR) {
             this.playEquipSound(stack);
             this.inventory.armorInventory.set(slotIn.getIndex(), stack);
         }
     }
 
-    public boolean addItemStackToInventory(ItemStack p_191521_1_)
-    {
+
+    public boolean addItemStackToInventory(ItemStack p_191521_1_) {
         this.playEquipSound(p_191521_1_);
         return this.inventory.addItemStackToInventory(p_191521_1_);
     }
 
-    public Iterable<ItemStack> getHeldEquipment()
-    {
+
+    public Iterable<ItemStack> getHeldEquipment() {
         return Lists.newArrayList(this.getHeldItemMainhand(), this.getHeldItemOffhand());
     }
 
-    public Iterable<ItemStack> getArmorInventoryList()
-    {
+
+    public Iterable<ItemStack> getArmorInventoryList() {
         return this.inventory.armorInventory;
     }
 
-    public boolean addShoulderEntity(NBTTagCompound p_192027_1_)
-    {
-        if (!this.isRiding() && this.onGround && !this.isInWater())
-        {
-            if (this.getLeftShoulderEntity().isEmpty())
-            {
+
+    public boolean addShoulderEntity(NBTTagCompound p_192027_1_) {
+        if (!this.isRiding() && this.onGround && !this.isInWater()) {
+            if (this.getLeftShoulderEntity().isEmpty()) {
                 this.setLeftShoulderEntity(p_192027_1_);
                 return true;
-            }
-            else if (this.getRightShoulderEntity().isEmpty())
-            {
+            } else if (this.getRightShoulderEntity().isEmpty()) {
                 this.setRightShoulderEntity(p_192027_1_);
                 return true;
-            }
-            else
-            {
+            } else {
                 return false;
             }
-        }
-        else
-        {
+        } else {
             return false;
         }
     }
 
-    protected void spawnShoulderEntities()
-    {
+
+    protected void spawnShoulderEntities() {
         this.spawnShoulderEntity(this.getLeftShoulderEntity());
         this.setLeftShoulderEntity(new NBTTagCompound());
         this.spawnShoulderEntity(this.getRightShoulderEntity());
         this.setRightShoulderEntity(new NBTTagCompound());
     }
 
-    private void spawnShoulderEntity(@Nullable NBTTagCompound p_192026_1_)
-    {
-        if (!this.world.isRemote && !p_192026_1_.isEmpty())
-        {
-            Entity entity = EntityList.createEntityFromNBT(p_192026_1_, this.world);
 
-            if (entity instanceof EntityTameable)
-            {
+    private void spawnShoulderEntity(@Nullable NBTTagCompound tag) {
+        if (!this.world.isRemote && !tag.isEmpty()) {
+            Entity entity = EntityList.createEntityFromNBT(tag, this.world);
+
+            if (entity instanceof EntityTameable) {
                 ((EntityTameable)entity).setOwnerId(this.entityUniqueID);
             }
-
             entity.setPosition(this.posX, this.posY + 0.699999988079071D, this.posZ);
             this.world.spawnEntity(entity);
         }
     }
 
+
     @SideOnly(Side.CLIENT)
-    public boolean isInvisibleToPlayer(EntityPlayer player)
-    {
-        if (!this.isInvisible())
-        {
+    public boolean isInvisibleToPlayer(EntityPlayer player) {
+        if (!this.isInvisible()) {
             return false;
-        }
-        else if (player.isSpectator())
-        {
+        } else if (player.isSpectator()) {
             return false;
-        }
-        else
-        {
+        } else {
             Team team = this.getTeam();
             return team == null || player == null || player.getTeam() != team || !team.getSeeFriendlyInvisiblesEnabled();
         }
     }
 
+
     public abstract boolean isSpectator();
 
+
     public abstract boolean isCreative();
+
 
     public boolean isPushedByWater()
     {
         return !this.capabilities.isFlying;
     }
 
-    public Scoreboard getWorldScoreboard()
-    {
+
+    public Scoreboard getWorldScoreboard() {
         return this.world.getScoreboard();
     }
 
-    public Team getTeam()
-    {
+
+    public Team getTeam() {
         return this.getWorldScoreboard().getPlayersTeam(this.getName());
     }
 
-    public ITextComponent getDisplayName()
-    {
+
+    public ITextComponent getDisplayName() {
         ITextComponent itextcomponent = new TextComponentString("");
         if (!prefixes.isEmpty()) for (ITextComponent prefix : prefixes) itextcomponent.appendSibling(prefix);
         itextcomponent.appendSibling(new TextComponentString(ScorePlayerTeam.formatPlayerName(this.getTeam(), this.getDisplayNameString())));
@@ -2082,243 +2013,206 @@ public abstract class EntityPlayer extends EntityLivingBase {
         return itextcomponent;
     }
 
-    public float getEyeHeight()
-    {
+
+    public float getEyeHeight() {
         float f = eyeHeight;
 
-        if (this.isPlayerSleeping())
-        {
+        if (this.isPlayerSleeping()) {
             f = 0.2F;
-        }
-        else if (!this.isSneaking() && this.height != 1.65F)
-        {
+        } else if (!this.isSneaking() && this.height != 1.65F) {
             if (this.isElytraFlying() || this.height == 0.6F)
             {
                 f = 0.4F;
             }
-        }
-        else
-        {
+        } else {
             f -= 0.08F;
         }
-
         return f;
     }
 
-    public void setAbsorptionAmount(float amount)
-    {
-        if (amount < 0.0F)
-        {
+
+    @Override
+    public void setAbsorptionAmount(float amount) {
+        if (amount < 0.0F) {
             amount = 0.0F;
         }
-
         this.getDataManager().set(ABSORPTION, Float.valueOf(amount));
     }
 
-    public float getAbsorptionAmount()
-    {
-        return ((Float)this.getDataManager().get(ABSORPTION)).floatValue();
+
+    @Override
+    public float getAbsorptionAmount() {
+        return this.getDataManager().get(ABSORPTION).floatValue();
     }
 
-    public static UUID getUUID(GameProfile profile)
-    {
+
+    public static UUID getUUID(GameProfile profile) {
         UUID uuid = profile.getId();
 
-        if (uuid == null)
-        {
+        if (uuid == null) {
             uuid = getOfflineUUID(profile.getName());
         }
-
         return uuid;
     }
 
-    public static UUID getOfflineUUID(String username)
-    {
+
+    public static UUID getOfflineUUID(String username) {
         return UUID.nameUUIDFromBytes(("OfflinePlayer:" + username).getBytes(StandardCharsets.UTF_8));
     }
 
-    public boolean canOpen(LockCode code)
-    {
-        if (code.isEmpty())
-        {
+
+    public boolean canOpen(LockCode code) {
+        if (code.isEmpty()) {
             return true;
-        }
-        else
-        {
+        } else {
             ItemStack itemstack = this.getHeldItemMainhand();
             return !itemstack.isEmpty() && itemstack.hasDisplayName() ? itemstack.getDisplayName().equals(code.getLock()) : false;
         }
     }
 
+
     @SideOnly(Side.CLIENT)
-    public boolean isWearing(EnumPlayerModelParts part)
-    {
-        return (((Byte)this.getDataManager().get(PLAYER_MODEL_FLAG)).byteValue() & part.getPartMask()) == part.getPartMask();
+    public boolean isWearing(EnumPlayerModelParts part) {
+        return (this.getDataManager().get(PLAYER_MODEL_FLAG) & part.getPartMask()) == part.getPartMask();
     }
 
-    public boolean sendCommandFeedback()
-    {
+
+    @Override
+    public boolean sendCommandFeedback() {
         return this.getServer().worlds[0].getGameRules().getBoolean("sendCommandFeedback");
     }
 
-    public boolean replaceItemInInventory(int inventorySlot, ItemStack itemStackIn)
-    {
-        if (inventorySlot >= 0 && inventorySlot < this.inventory.mainInventory.size())
-        {
+
+    public boolean replaceItemInInventory(int inventorySlot, ItemStack itemStackIn) {
+        if (inventorySlot >= 0 && inventorySlot < this.inventory.mainInventory.size()) {
             this.inventory.setInventorySlotContents(inventorySlot, itemStackIn);
             return true;
-        }
-        else
-        {
-            EntityEquipmentSlot entityequipmentslot;
+        } else {
+            EntityEquipmentSlot slot;
 
-            if (inventorySlot == 100 + EntityEquipmentSlot.HEAD.getIndex())
-            {
-                entityequipmentslot = EntityEquipmentSlot.HEAD;
-            }
-            else if (inventorySlot == 100 + EntityEquipmentSlot.CHEST.getIndex())
-            {
-                entityequipmentslot = EntityEquipmentSlot.CHEST;
-            }
-            else if (inventorySlot == 100 + EntityEquipmentSlot.LEGS.getIndex())
-            {
-                entityequipmentslot = EntityEquipmentSlot.LEGS;
-            }
-            else if (inventorySlot == 100 + EntityEquipmentSlot.FEET.getIndex())
-            {
-                entityequipmentslot = EntityEquipmentSlot.FEET;
-            }
-            else
-            {
-                entityequipmentslot = null;
+            if (inventorySlot == 100 + EntityEquipmentSlot.HEAD.getIndex()) {
+                slot = EntityEquipmentSlot.HEAD;
+            } else if (inventorySlot == 100 + EntityEquipmentSlot.CHEST.getIndex()) {
+                slot = EntityEquipmentSlot.CHEST;
+            } else if (inventorySlot == 100 + EntityEquipmentSlot.LEGS.getIndex()) {
+                slot = EntityEquipmentSlot.LEGS;
+            } else if (inventorySlot == 100 + EntityEquipmentSlot.FEET.getIndex()) {
+                slot = EntityEquipmentSlot.FEET;
+            } else {
+                slot = null;
             }
 
-            if (inventorySlot == 98)
-            {
+            if (inventorySlot == 98) {
                 this.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, itemStackIn);
                 return true;
-            }
-            else if (inventorySlot == 99)
-            {
+            } else if (inventorySlot == 99) {
                 this.setItemStackToSlot(EntityEquipmentSlot.OFFHAND, itemStackIn);
                 return true;
-            }
-            else if (entityequipmentslot == null)
-            {
+            } else if (slot == null) {
                 int i = inventorySlot - 200;
 
-                if (i >= 0 && i < this.enderChest.getSizeInventory())
-                {
+                if (i >= 0 && i < this.enderChest.getSizeInventory()) {
                     this.enderChest.setInventorySlotContents(i, itemStackIn);
                     return true;
-                }
-                else
-                {
+                } else {
                     return false;
                 }
-            }
-            else
-            {
-                if (!itemStackIn.isEmpty())
-                {
-                    if (!(itemStackIn.getItem() instanceof ItemArmor) && !(itemStackIn.getItem() instanceof ItemElytra))
-                    {
-                        if (entityequipmentslot != EntityEquipmentSlot.HEAD)
-                        {
+            } else {
+                if (!itemStackIn.isEmpty()) {
+                    if (!(itemStackIn.getItem() instanceof ItemArmor) && !(itemStackIn.getItem() instanceof ItemElytra)) {
+                        if (slot != EntityEquipmentSlot.HEAD) {
                             return false;
                         }
-                    }
-                    else if (EntityLiving.getSlotForItemStack(itemStackIn) != entityequipmentslot)
-                    {
+                    } else if (EntityLiving.getSlotForItemStack(itemStackIn) != slot) {
                         return false;
                     }
                 }
 
-                this.inventory.setInventorySlotContents(entityequipmentslot.getIndex() + this.inventory.mainInventory.size(), itemStackIn);
+                this.inventory.setInventorySlotContents(slot.getIndex() + this.inventory.mainInventory.size(), itemStackIn);
                 return true;
             }
         }
     }
 
     @SideOnly(Side.CLIENT)
-    public boolean hasReducedDebug()
-    {
+    public boolean hasReducedDebug() {
         return this.hasReducedDebug;
     }
 
+
     @SideOnly(Side.CLIENT)
-    public void setReducedDebug(boolean reducedDebug)
-    {
+    public void setReducedDebug(boolean reducedDebug) {
         this.hasReducedDebug = reducedDebug;
     }
 
-    public EnumHandSide getPrimaryHand()
-    {
-        return ((Byte)this.dataManager.get(MAIN_HAND)).byteValue() == 0 ? EnumHandSide.LEFT : EnumHandSide.RIGHT;
+
+    @Override
+    public EnumHandSide getPrimaryHand() {
+        return this.dataManager.get(MAIN_HAND) == 0 ? EnumHandSide.LEFT : EnumHandSide.RIGHT;
     }
 
-    public void setPrimaryHand(EnumHandSide hand)
-    {
-        this.dataManager.set(MAIN_HAND, Byte.valueOf((byte)(hand == EnumHandSide.LEFT ? 0 : 1)));
+
+    public void setPrimaryHand(EnumHandSide hand) {
+        this.dataManager.set(MAIN_HAND, (byte) (hand == EnumHandSide.LEFT ? 0 : 1));
     }
 
-    public NBTTagCompound getLeftShoulderEntity()
-    {
-        return (NBTTagCompound)this.dataManager.get(LEFT_SHOULDER_ENTITY);
+
+    public NBTTagCompound getLeftShoulderEntity() {
+        return this.dataManager.get(LEFT_SHOULDER_ENTITY);
     }
 
-    protected void setLeftShoulderEntity(NBTTagCompound tag)
-    {
+
+    protected void setLeftShoulderEntity(NBTTagCompound tag) {
         this.dataManager.set(LEFT_SHOULDER_ENTITY, tag);
     }
 
-    public NBTTagCompound getRightShoulderEntity()
-    {
-        return (NBTTagCompound)this.dataManager.get(RIGHT_SHOULDER_ENTITY);
+
+    public NBTTagCompound getRightShoulderEntity() {
+        return this.dataManager.get(RIGHT_SHOULDER_ENTITY);
     }
 
-    protected void setRightShoulderEntity(NBTTagCompound tag)
-    {
+
+    protected void setRightShoulderEntity(NBTTagCompound tag) {
         this.dataManager.set(RIGHT_SHOULDER_ENTITY, tag);
     }
 
-    public float getCooldownPeriod()
-    {
+
+    public float getCooldownPeriod() {
         return (float)(1.0D / this.getEntityAttribute(SharedMonsterAttributes.ATTACK_SPEED).getAttributeValue() * 20.0D);
     }
 
-    public float getCooledAttackStrength(float adjustTicks)
-    {
+
+    public float getCooledAttackStrength(float adjustTicks) {
         return MathHelper.clamp(((float)this.ticksSinceLastSwing + adjustTicks) / this.getCooldownPeriod(), 0.0F, 1.0F);
     }
 
-    public void resetCooldown()
-    {
+
+    public void resetCooldown() {
         this.ticksSinceLastSwing = 0;
     }
 
-    public CooldownTracker getCooldownTracker()
-    {
+
+    public CooldownTracker getCooldownTracker() {
         return this.cooldownTracker;
     }
 
-    public void applyEntityCollision(Entity entityIn)
-    {
-        if (!this.isPlayerSleeping())
-        {
+
+    public void applyEntityCollision(Entity entityIn) {
+        if (!this.isPlayerSleeping()) {
             super.applyEntityCollision(entityIn);
         }
     }
 
-    public float getLuck()
-    {
+
+    public float getLuck() {
         return (float)this.getEntityAttribute(SharedMonsterAttributes.LUCK).getAttributeValue();
     }
 
-    public boolean canUseCommandBlock()
-    {
+
+    public boolean canUseCommandBlock() {
         return this.capabilities.isCreativeMode && this.canUseCommand(2, "");
     }
+
 
     /**
      * Opens a GUI with this player, uses FML's IGuiHandler system.
@@ -2331,8 +2225,7 @@ public abstract class EntityPlayer extends EntityLivingBase {
      * @param y Passed directly to IGuiHandler, data meaningless Typically world Y position
      * @param z Passed directly to IGuiHandler, data meaningless Typically world Z position
      */
-    public void openGui(Object mod, int modGuiId, World world, int x, int y, int z)
-    {
+    public void openGui(Object mod, int modGuiId, World world, int x, int y, int z) {
         net.minecraftforge.fml.common.network.internal.FMLNetworkHandler.openGui(this, mod, modGuiId, world, x, y, z);
     }
 
@@ -2369,30 +2262,21 @@ public abstract class EntityPlayer extends EntityLivingBase {
      * @param forced Whether or not the respawn code should check for a bed at this location (true means it won't check for a bed)
      * @param dimension Which dimension to apply the player-specific respawn point to
      */
-    public void setSpawnChunk(BlockPos pos, boolean forced, int dimension)
-    {
-        if (dimension == 0)
-        {
-            if (pos != null)
-            {
+    public void setSpawnChunk(BlockPos pos, boolean forced, int dimension) {
+        if (dimension == 0) {
+            if (pos != null) {
                 spawnPos = pos;
                 spawnForced = forced;
-            }
-            else
-            {
+            } else {
                 spawnPos = null;
                 spawnForced = false;
             }
             return;
         }
-
-        if (pos != null)
-        {
+        if (pos != null) {
             spawnChunkMap.put(dimension, pos);
             spawnForcedMap.put(dimension, forced);
-        }
-        else
-        {
+        } else {
             spawnChunkMap.remove(dimension);
             spawnForcedMap.remove(dimension);
         }
@@ -2404,8 +2288,7 @@ public abstract class EntityPlayer extends EntityLivingBase {
      * Returns the default eye height of the player
      * @return player default eye height
      */
-    public float getDefaultEyeHeight()
-    {
+    public float getDefaultEyeHeight() {
         return 1.62F;
     }
 
@@ -2413,10 +2296,8 @@ public abstract class EntityPlayer extends EntityLivingBase {
      * Get the currently computed display name, cached for efficiency.
      * @return the current display name
      */
-    public String getDisplayNameString()
-    {
-        if(this.displayname == null)
-        {
+    public String getDisplayNameString() {
+        if(this.displayname == null) {
             this.displayname = net.minecraftforge.event.ForgeEventFactory.getPlayerDisplayName(this, this.getName());
         }
         return this.displayname;

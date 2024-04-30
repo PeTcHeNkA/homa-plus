@@ -78,7 +78,7 @@ import org.jetbrains.annotations.NotNull;
 import plus.fserver.ElcaConfig;
 import plus.fserver.api.MeanTicker;
 import plus.fserver.api.PWorldServer;
-import plus.fserver.event.ElcaCV;
+import plus.fserver.ElcaCV;
 import plus.fserver.server.chunk.io.TChunkTask;
 import plus.fserver.server.chunk.io.TQueuedChunk;
 import plus.fserver.utls.ChunkSelector;
@@ -302,8 +302,8 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
         BlockPos blockpos = this.getPrecipitationHeight(pos);
         AxisAlignedBB axisalignedbb = (new AxisAlignedBB(blockpos, new BlockPos(blockpos.getX(), this.getHeight(), blockpos.getZ()))).grow(3.0D);
         List<EntityLivingBase> list = this.getEntitiesWithinAABB(EntityLivingBase.class, axisalignedbb, new com.google.common.base.Predicate<EntityLivingBase>() {
-            public boolean apply(@Nullable EntityLivingBase p_apply_1_) {
-                return p_apply_1_ != null && p_apply_1_.isEntityAlive() && WorldServer.this.canSeeSky(p_apply_1_.getPosition());
+            public boolean apply(@Nullable EntityLivingBase entity) {
+                return entity != null && entity.isEntityAlive() && WorldServer.this.canSeeSky(entity.getPosition());
             }
         });
 
@@ -1575,14 +1575,15 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
 
     @Override
     public boolean isFlammableWithin(AxisAlignedBB bb) {
-        int minY = MathHelper.floor(bb.minY);
-        int maxY = MathHelper.ceil(bb.maxY);
+        int minY = MathHelper.floor(bb.minY),
+            maxY = MathHelper.ceil(bb.maxY);
+
         if(minY < 0 || maxY > 255)return false;
 
-        int minX = MathHelper.floor(bb.minX);
-        int maxX = MathHelper.ceil(bb.maxX);
-        int minZ = MathHelper.floor(bb.minZ);
-        int maxZ = MathHelper.ceil(bb.maxZ);
+        int minX = MathHelper.floor(bb.minX),
+            maxX = MathHelper.ceil(bb.maxX),
+            minZ = MathHelper.floor(bb.minZ),
+            maxZ = MathHelper.ceil(bb.maxZ);
 
         if (this.isAreaLoaded0(minX, minZ, maxX, maxZ)) {
             Block block;

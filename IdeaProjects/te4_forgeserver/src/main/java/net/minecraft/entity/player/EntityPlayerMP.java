@@ -204,18 +204,16 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
     }
 
 
-    public static void registerFixesPlayerMP(DataFixer p_191522_0_) {
-        p_191522_0_.registerWalker(FixTypes.PLAYER, new IDataWalker() {
-            public NBTTagCompound process(IDataFixer fixer, NBTTagCompound compound, int versionIn) {
-                if (compound.hasKey("RootVehicle", 10)) {
-                    NBTTagCompound nbttagcompound = compound.getCompoundTag("RootVehicle");
+    public static void registerFixesPlayerMP(DataFixer dataFixer) {
+        dataFixer.registerWalker(FixTypes.PLAYER, (fixer, compound, versionIn) -> {
+            if (compound.hasKey("RootVehicle", 10)) {
+                NBTTagCompound nbttagcompound = compound.getCompoundTag("RootVehicle");
 
-                    if (nbttagcompound.hasKey("Entity", 10)) {
-                        nbttagcompound.setTag("Entity", fixer.process(FixTypes.ENTITY, nbttagcompound.getCompoundTag("Entity"), versionIn));
-                    }
+                if (nbttagcompound.hasKey("Entity", 10)) {
+                    nbttagcompound.setTag("Entity", fixer.process(FixTypes.ENTITY, nbttagcompound.getCompoundTag("Entity"), versionIn));
                 }
-                return compound;
             }
+            return compound;
         });
     }
 
@@ -956,6 +954,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
     public void resetRecipes(List<IRecipe> recipes) {
         this.recipeBook.remove(recipes, this);
     }
+
 
     public void mountEntityAndWakeUp() {
         this.disconnected = true;

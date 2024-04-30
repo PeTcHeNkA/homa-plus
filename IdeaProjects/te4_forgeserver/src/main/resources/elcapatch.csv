@@ -44,7 +44,6 @@
 "net.minecraft.block.BlockIce"
 "net.minecraft.block.BlockLadder$1"
 "net.minecraft.block.BlockLadder"
-"net.minecraft.block.BlockLeaves$LeavesCache"
 "net.minecraft.block.BlockLeaves"
 "net.minecraft.block.BlockLiquid"
 "net.minecraft.block.BlockLog$1"
@@ -174,12 +173,10 @@
 "net.minecraft.entity.item.EntityMinecart"
 "net.minecraft.entity.monster.EntityCreeper"
 "net.minecraft.entity.player.EntityPlayer$1"
-"net.minecraft.entity.player.EntityPlayer$2"
 "net.minecraft.entity.player.EntityPlayer$EnumChatVisibility"
 "net.minecraft.entity.player.EntityPlayer$SleepEnemyPredicate"
 "net.minecraft.entity.player.EntityPlayer$SleepResult"
 "net.minecraft.entity.player.EntityPlayer"
-"net.minecraft.entity.player.EntityPlayerMP$1"
 "net.minecraft.entity.player.EntityPlayerMP"
 "net.minecraft.inventory.Container"
 "net.minecraft.inventory.EntityEquipmentSlot$Type"
@@ -260,18 +257,14 @@
 "net.minecraft.server.network.NetHandlerLoginServer$ConnectEvent"
 "net.minecraft.server.network.NetHandlerLoginServer$LoginState"
 "net.minecraft.server.network.NetHandlerLoginServer"
-"net.minecraft.util.ArrayListE1V"
-"net.minecraft.util.ArrayListEA"
 "net.minecraft.util.BitArray"
-"net.minecraft.util.BlockIDIndexes$Index"
 "net.minecraft.util.BlockIDIndexes"
 "net.minecraft.util.ByClass"
 "net.minecraft.util.ClassInheritanceMultiMap$FastIter"
 "net.minecraft.util.ClassInheritanceMultiMap"
-"net.minecraft.util.EmptyByClass"
+"net.minecraft.util.CooldownTrackerServer"
 "net.minecraft.util.EntitySelectors$1"
 "net.minecraft.util.EntitySelectors$ArmoredMob"
-"net.minecraft.util.EntitySelectors$CollisionPredicate"
 "net.minecraft.util.EntitySelectors"
 "net.minecraft.util.math.AxisAlignedBB"
 "net.minecraft.util.math.BlockPos$1"
@@ -398,6 +391,16 @@
 "net.minecraftforge.event.entity.living.LivingSpawnEvent$CheckSpawn", (true)
 "net.minecraftforge.event.entity.living.LivingSpawnEvent$SpecialSpawn", (true)
 "net.minecraftforge.event.entity.living.LivingSpawnEvent", (true)
+"net.minecraftforge.event.entity.player.PlayerEvent$BreakSpeed", (true)
+"net.minecraftforge.event.entity.player.PlayerEvent$Clone", (true)
+"net.minecraftforge.event.entity.player.PlayerEvent$HarvestCheck", (true)
+"net.minecraftforge.event.entity.player.PlayerEvent$LoadFromFile", (true)
+"net.minecraftforge.event.entity.player.PlayerEvent$NameFormat", (true)
+"net.minecraftforge.event.entity.player.PlayerEvent$SaveToFile", (true)
+"net.minecraftforge.event.entity.player.PlayerEvent$StartTracking", (true)
+"net.minecraftforge.event.entity.player.PlayerEvent$StopTracking", (true)
+"net.minecraftforge.event.entity.player.PlayerEvent$Visibility", (true)
+"net.minecraftforge.event.entity.player.PlayerEvent", (true)
 "net.minecraftforge.event.world.BlockEvent$BreakEvent", (true)
 "net.minecraftforge.event.world.BlockEvent$CreateFluidSourceEvent", (true)
 "net.minecraftforge.event.world.BlockEvent$CropGrowEvent$Post", (true)

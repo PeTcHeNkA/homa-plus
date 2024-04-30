@@ -28,7 +28,6 @@ import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -37,7 +36,7 @@ import org.apache.logging.log4j.Logger;
 import plus.asyutl.buf.FastBuffer;
 import plus.fserver.api.BiomeIndexes;
 import plus.fserver.api.PWorldServer;
-import plus.fserver.event.ElcaCV;
+import plus.fserver.ElcaCV;
 import plus.fserver.world.light.api.ILightingEngine;
 import plus.fserver.world.light.api.ILightingEngineProvider;
 import plus.tson.utl.Te4HashMap;
@@ -758,20 +757,15 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
 
     public void getEntitiesWithinAABBForEntityLimited(@Nullable Entity entityIn, AxisAlignedBB aabb, List<Entity> listToFill, @Nullable Predicate <? super Entity > filter, int max) {
-        int i = MathHelper.clamp(
-                MathHelper.floor(aabb.minY - World.MAX_ENTITY_RADIUS)>>4,
-                0, 15
-        ),
-                j = MathHelper.clamp(
-                        MathHelper.floor(aabb.maxY + World.MAX_ENTITY_RADIUS)>>4,
-                        0, 15
-                );
+        int i = MathHelper.clamp(MathHelper.floor(aabb.minY - World.MAX_ENTITY_RADIUS)>>4, 0, 15),
+            j = MathHelper.clamp(MathHelper.floor(aabb.maxY + World.MAX_ENTITY_RADIUS)>>4, 0, 15);
+
         Entity[] parts;
         Entity entity;
 
         if(filter == null) {
             for (;i <= j; ++i)
-                if (!this.entityLists[i].isEmpty()) {
+                if (!this.entityLists[i].isEmptyC()) {
                     for (ClassInheritanceMultiMap<Entity>.FastIter iter = this.entityLists[i].fastIter();
                          iter.hasNext();
                     )
@@ -786,7 +780,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
                 }
         } else {
             for (;i <= j; ++i)
-                if (!this.entityLists[i].isEmpty()) {
+                if (!this.entityLists[i].isEmptyC()) {
                     for (ClassInheritanceMultiMap<Entity>.FastIter iter = this.entityLists[i].fastIter();
                          iter.hasNext();
                     )
@@ -815,7 +809,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
                     0, 15
             );
         if(filter == null) {
-            for (Entity entity;i <= j; ++i) if (!this.entityLists[i].isEmpty()) {
+            for (Entity entity;i <= j; ++i) if (!this.entityLists[i].isEmptyC()) {
                 for (ClassInheritanceMultiMap<Entity>.FastIter iter = this.entityLists[i].fastIter();
                      iter.hasNext();
                 )
@@ -828,7 +822,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
                     }
             }
         } else {
-            for (Entity entity;i <= j; ++i) if (!this.entityLists[i].isEmpty()) {
+            for (Entity entity;i <= j; ++i) if (!this.entityLists[i].isEmptyC()) {
                 for (ClassInheritanceMultiMap<Entity>.FastIter iter = this.entityLists[i].fastIter();
                      iter.hasNext();
                 )

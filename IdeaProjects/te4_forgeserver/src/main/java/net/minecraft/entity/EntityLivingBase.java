@@ -1292,6 +1292,11 @@ public abstract class EntityLivingBase extends Entity {
     }
 
 
+    public AbstractAttributeMap getAttributeMapOrNull(){
+        return attributeMap;
+    }
+
+
     public EnumCreatureAttribute getCreatureAttribute() {
         return EnumCreatureAttribute.UNDEFINED;
     }
@@ -1958,6 +1963,7 @@ public abstract class EntityLivingBase extends Entity {
     protected void updateEntityActionState() {}
 
 
+    //todo maybe async
     protected void collideWithNearbyEntities() {
         List<Entity> list = (ticksExisted & 7) == 7?
             this.world.getEntitiesInAABBexcluding(

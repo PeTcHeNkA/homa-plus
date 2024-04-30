@@ -14,7 +14,7 @@ import plus.tson.security.ClassManager;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.List;
-import static plus.fserver.event.ElcaCV.*;
+import static plus.fserver.ElcaCV.*;
 
 
 public class SSPatchLoader extends TweakEngine implements IClassTransformer, ITweaker{

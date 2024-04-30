@@ -85,7 +85,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import plus.fserver.ElcaConfig;
-import plus.fserver.api.PServer;
 import plus.fserver.api.PStartServer;
 import plus.fserver.api.PWorldServer;
 import plus.fserver.patch.PMinecraftServer;
@@ -93,7 +92,7 @@ import plus.fserver.server.AsyWorldTickerV2;
 import plus.fserver.server.ElcaCommands;
 
 
-public abstract class MinecraftServer implements PMinecraftServer, ICommandSender, Runnable, IThreadListener, ISnooperInfo, PServer {
+public abstract class MinecraftServer implements PMinecraftServer, ICommandSender, Runnable, IThreadListener, ISnooperInfo{
     private static final Logger LOGGER = LogManager.getLogger();
     public static final File USER_CACHE_FILE = new File("usercache.json");
     private final ISaveFormat anvilConverterForAnvilFile;
@@ -1258,7 +1257,6 @@ public abstract class MinecraftServer implements PMinecraftServer, ICommandSende
             worldinfo.setWorldName(worldNameIn);
             worldsettings = new WorldSettings(worldinfo);
         }
-        VARS.announceAdvancements = worldinfo.getGameRulesInstance().getBoolean("announceAdvancements");
 
         WorldServer overWorld = (WorldServer) new WorldServer(getServer(), saveHandler, worldinfo, 0, profiler).init();
         overWorld.initialize(worldsettings);

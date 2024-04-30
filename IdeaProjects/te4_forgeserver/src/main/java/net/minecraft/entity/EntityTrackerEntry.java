@@ -1,7 +1,6 @@
 package net.minecraft.entity;
 
 import java.util.*;
-
 import net.minecraft.block.Block;
 import net.minecraft.entity.ai.attributes.AttributeMap;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
@@ -61,15 +60,14 @@ import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.storage.MapData;
-import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fml.common.network.internal.FMLNetworkHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import plus.tson.utl.Te4HashSet;
 import javax.annotation.Nullable;
+import static plus.fserver.utls.math.MathUtls.F_256_T_360;
 
 
-//todo fix 1 player dont see 2 player
 public class EntityTrackerEntry {
     private static final Logger LOGGER = LogManager.getLogger();
     private final Entity trackedEntity;
@@ -107,17 +105,17 @@ public class EntityTrackerEntry {
         this.encodedPosX = EntityTracker.getPositionLong(entityIn.posX);
         this.encodedPosY = EntityTracker.getPositionLong(entityIn.posY);
         this.encodedPosZ = EntityTracker.getPositionLong(entityIn.posZ);
-        this.encodedRotationYaw = MathHelper.floor(entityIn.rotationYaw * 256.0F / 360.0F);
-        this.encodedRotationPitch = MathHelper.floor(entityIn.rotationPitch * 256.0F / 360.0F);
-        this.lastHeadMotion = MathHelper.floor(entityIn.getRotationYawHead() * 256.0F / 360.0F);
+        this.encodedRotationYaw = MathHelper.floor(entityIn.rotationYaw * F_256_T_360);
+        this.encodedRotationPitch = MathHelper.floor(entityIn.rotationPitch * F_256_T_360);
+        this.lastHeadMotion = MathHelper.floor(entityIn.getRotationYawHead() * F_256_T_360);
         this.onGround = entityIn.onGround;
     }
 
 
     @Override
-    public boolean equals(Object p_equals_1_) {
-        if (p_equals_1_ instanceof EntityTrackerEntry) {
-            return ((EntityTrackerEntry)p_equals_1_).trackedEntity.getEntityId() == this.trackedEntity.getEntityId();
+    public boolean equals(Object other) {
+        if (other instanceof EntityTrackerEntry) {
+            return ((EntityTrackerEntry)other).trackedEntity.getEntityId() == this.trackedEntity.getEntityId();
         } else {
             return false;
         }
@@ -177,10 +175,15 @@ public class EntityTrackerEntry {
                 if (!this.trackingPlayers.contains(playerMP) && (this.isPlayerWatchingThisChunk(playerMP) || this.trackedEntity.forceSpawn)) {
                     this.trackingPlayers.add(playerMP);
                     Packet<?> packet = this.createSpawnPacket();
-                    playerMP.connection.netManager.sendPacketE(packet);
 
                     if (!this.trackedEntity.getDataManager().isEmpty()) {
-                        playerMP.connection.netManager.sendPacketE(new SPacketEntityMetadata(this.trackedEntity.getEntityId(), this.trackedEntity.getDataManager(), true));
+                        playerMP.connection.netManager.exec(() -> {
+                            SPacketEntityMetadata packet2 = new SPacketEntityMetadata(trackedEntity.getEntityId(), trackedEntity.getDataManager(), true);
+                            playerMP.connection.netManager.sendPacketSync(packet);
+                            playerMP.connection.netManager.sendPacketSync(packet2);
+                        });
+                    } else {
+                        playerMP.connection.netManager.sendPacketE(packet);
                     }
 
                     boolean flag = this.sendVelocityUpdates;
@@ -241,12 +244,14 @@ public class EntityTrackerEntry {
 
                     this.trackedEntity.addTrackingPlayer(playerMP);
                     playerMP.addEntity(this.trackedEntity);
-                    ForgeEventFactory.onStartEntityTracking(trackedEntity, playerMP);
+                    this.trackedEntity.world.startTrackingEvent.post(playerMP, trackedEntity);
+                    //ForgeEventFactory.onStartEntityTracking(trackedEntity, playerMP);
                 }
             } else if (this.trackingPlayers.remove(playerMP)) {
                 this.trackedEntity.removeTrackingPlayer(playerMP);
                 playerMP.removeEntity(this.trackedEntity);
-                ForgeEventFactory.onStopEntityTracking(trackedEntity, playerMP);
+                this.trackedEntity.world.stopTrackingEvent.post(playerMP, trackedEntity);
+                //ForgeEventFactory.onStopEntityTracking(trackedEntity, playerMP);
             }
         }
     }
@@ -406,23 +411,21 @@ public class EntityTrackerEntry {
 
 
     public void updatePlayerList(List<EntityPlayer> players) {
-        this.playerEntitiesUpdated = false;
-
-        if (!this.updatedPlayerVisibility || this.trackedEntity.getDistanceSq(this.lastTrackedEntityPosX, this.lastTrackedEntityPosY, this.lastTrackedEntityPosZ) > 16.0D) {
+        if (this.playerEntitiesUpdated = (!this.updatedPlayerVisibility || this.trackedEntity.getDistanceSq(this.lastTrackedEntityPosX, this.lastTrackedEntityPosY, this.lastTrackedEntityPosZ) > 16.0D)) {
             this.lastTrackedEntityPosX = this.trackedEntity.posX;
             this.lastTrackedEntityPosY = this.trackedEntity.posY;
             this.lastTrackedEntityPosZ = this.trackedEntity.posZ;
             this.updatedPlayerVisibility = true;
-            this.playerEntitiesUpdated = true;
             this.updatePlayerEntities(players);
         }
 
         List<Entity> list = this.trackedEntity.getPassengers();
 
-        if (!list.equals(this.passengers)) {
-            this.passengers = list;
-            this.sendPacketToTrackedPlayers(new SPacketSetPassengers(this.trackedEntity));
-        }
+        if(!(list.isEmpty() && this.passengers.isEmpty()))
+            if (!list.equals(this.passengers)) {
+                this.passengers = list;
+                this.sendPacketToTrackedPlayers(new SPacketSetPassengers(this.trackedEntity));
+            }
         NetworkManager selfManager = (this.trackedEntity instanceof EntityPlayerMP)?
                 ((EntityPlayerMP)trackedEntity).connection.netManager:null;
 
@@ -447,8 +450,8 @@ public class EntityTrackerEntry {
 
         if (this.updateCounter % this.updateFrequency == 0 || this.trackedEntity.isAirBorne || this.trackedEntity.getDataManager().isDirty()) {
             if (this.trackedEntity.isRiding()) {
-                int j1 = MathHelper.floor(this.trackedEntity.rotationYaw * 256.0F / 360.0F);
-                int l1 = MathHelper.floor(this.trackedEntity.rotationPitch * 256.0F / 360.0F);
+                int j1 = MathHelper.floor(this.trackedEntity.rotationYaw * F_256_T_360);
+                int l1 = MathHelper.floor(this.trackedEntity.rotationPitch * F_256_T_360);
 
                 if (Math.abs(j1 - this.encodedRotationYaw) >= 1 || Math.abs(l1 - this.encodedRotationPitch) >= 1) {
                     this.sendPacketToTrackedPlayers(new SPacketEntity.S16PacketEntityLook(this.trackedEntity.getEntityId(), (byte)j1, (byte)l1, this.trackedEntity.onGround));
@@ -466,8 +469,8 @@ public class EntityTrackerEntry {
                 long i1 = EntityTracker.getPositionLong(this.trackedEntity.posX);
                 long i2 = EntityTracker.getPositionLong(this.trackedEntity.posY);
                 long j2 = EntityTracker.getPositionLong(this.trackedEntity.posZ);
-                int k2 = MathHelper.floor(this.trackedEntity.rotationYaw * 256.0F / 360.0F);
-                int i = MathHelper.floor(this.trackedEntity.rotationPitch * 256.0F / 360.0F);
+                int k2 = MathHelper.floor(this.trackedEntity.rotationYaw * F_256_T_360);
+                int i = MathHelper.floor(this.trackedEntity.rotationPitch * F_256_T_360);
                 long j = i1 - this.encodedPosX;
                 long k = i2 - this.encodedPosY;
                 long l = j2 - this.encodedPosZ;
@@ -529,7 +532,7 @@ public class EntityTrackerEntry {
                 this.ridingEntity = false;
             }
 
-            int k1 = MathHelper.floor(this.trackedEntity.getRotationYawHead() * 256.0F / 360.0F);
+            int k1 = MathHelper.floor(this.trackedEntity.getRotationYawHead() * F_256_T_360);
 
             if (Math.abs(k1 - this.lastHeadMotion) >= 1) {
                 this.sendPacketToTrackedPlayers(new SPacketEntityHeadLook(this.trackedEntity, (byte)k1));
@@ -581,16 +584,18 @@ public class EntityTrackerEntry {
             else sendPacketToTrackedPlayersAndSelf(manager, packet);
         }
         if (manager != null || this.trackedEntity instanceof EntityLivingBase) {
-            AttributeMap attributemap = (AttributeMap)((EntityLivingBase)this.trackedEntity).getAttributeMap();
-            Set<IAttributeInstance> set = attributemap.getDirtyInstances();
+            AttributeMap attributemap = (AttributeMap)((EntityLivingBase)this.trackedEntity).getAttributeMapOrNull();
+            if (attributemap != null) {
+                Set<IAttributeInstance> set = attributemap.getDirtyInstances();
 
-            if (!set.isEmpty()) {
-                packet = new SPacketEntityProperties(this.trackedEntity.getEntityId(), set);
+                if (!set.isEmpty()) {
+                    packet = new SPacketEntityProperties(this.trackedEntity.getEntityId(), set);
 
-                if(manager == null) sendPacketToTrackedPlayers(packet);
-                else sendPacketToTrackedPlayersAndSelf(manager,packet);
+                    if (manager == null) sendPacketToTrackedPlayers(packet);
+                    else sendPacketToTrackedPlayersAndSelf(manager, packet);
 
-                set.clear();
+                    set.clear();
+                }
             }
         }
     }

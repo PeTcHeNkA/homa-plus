@@ -45,6 +45,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.datafix.FixTypes;
 import net.minecraft.util.datafix.walkers.ItemStackDataLists;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.DifficultyInstance;
@@ -521,7 +522,9 @@ public abstract class EntityLiving extends EntityLivingBase {
         super.onLivingUpdate();
 
         if (!this.world.isRemote && this.canPickUpLoot() && !this.dead && world.getMobGrifering(this)) {
-            for (EntityItem entityitem : this.world.getEntitiesWithinAABB(EntityItem.class, this.getEntityBoundingBox().grow(1.0D, 0.0D, 1.0D))) {
+            AxisAlignedBB box;
+            getEntityBoundingBox().growTo(1d,0d,1d, box = world.commonWorldEntityAABB);
+            for (EntityItem entityitem : this.world.getEntitiesWithinAABB(EntityItem.class, box)) {
                 if (!entityitem.isDead && !entityitem.getItem().isEmpty() && !entityitem.cannotPickup()) {
                     this.updateEquipmentIfNeeded(entityitem);
                 }

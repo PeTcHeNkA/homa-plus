@@ -2,13 +2,14 @@ package plus.fserver.utls.collections;
 
 import net.minecraft.util.math.AxisAlignedBB;
 import plus.fserver.utls.AABKey;
-import java.util.List;
 
 
 public class SyncAABBCache<V> extends SyncTe4Cache<AABKey, ArrayListE6<V>>{
     private final int clearTime;//500ms = 10 ticks
     private int timer = 0;
     private AABKey swap = new AABKey(0,0,0,0,0,0);
+
+    //private final ReentrantLock lock = new ReentrantLock();
 
     public SyncAABBCache(int clearTime) {
         this.clearTime = clearTime;
@@ -19,7 +20,6 @@ public class SyncAABBCache<V> extends SyncTe4Cache<AABKey, ArrayListE6<V>>{
         removeByStamp(prev());
         ++timer;
         if(timer > clearTime){
-            //System.out.println("N:"+(c3-c2)+"+"+c2+",C:"+c);
             timer = 0;
         }
     }
@@ -33,16 +33,12 @@ public class SyncAABBCache<V> extends SyncTe4Cache<AABKey, ArrayListE6<V>>{
     }
 
 
-    //int c = 0, c2 = 0, c3 = 0;
     public ArrayListE6<V> allocArr(){
         ArrayListE6<V> list = tryAllocVal();
         if(list != null){
-            //++c;
             list.fclear();
             return list;
         }
-        //++c3;
-        //System.out.println("NEN1");
         return new ArrayListE6<>();
     }
 
@@ -65,7 +61,9 @@ public class SyncAABBCache<V> extends SyncTe4Cache<AABKey, ArrayListE6<V>>{
 
 
     public void add(AABKey key, ArrayListE6<V> v){
+        //lock.lock();
         putValN1(key.hashCode(), key, v, timer);
+        //lock.unlock();
     }
 
 

@@ -303,6 +303,11 @@ public class PlayerChunkMapEntry extends ArrayListE6<EntityPlayerMP> implements 
     }
 
 
+    @Override
+    public int hashCode() {
+        return posX ^ posZ;
+    }
+
     public List<EntityPlayerMP> getWatchingPlayers() {
         return isSentToPlayers() ? java.util.Collections.unmodifiableList(this) : java.util.Collections.emptyList();
     }

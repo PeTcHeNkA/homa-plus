@@ -18,11 +18,11 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeHooks;
 import org.jetbrains.annotations.NotNull;
+import plus.fserver.world.TargetSelector;
 
 
 public class EntityAINearestAttackableTarget<T extends EntityLivingBase> extends EntityAITarget {
@@ -48,14 +48,7 @@ public class EntityAINearestAttackableTarget<T extends EntityLivingBase> extends
         this.targetChance = chance;
         this.sorter = new EntityAINearestAttackableTarget.Sorter(creature);
         this.setMutexBits(1);
-        this.targetEntitySelector = (Predicate<T>) entity -> {
-            if (entity == null) {
-                return false;
-            } else if (targetSelector != null && !targetSelector.apply(entity)) {
-                return false;
-            }
-            return EntitySelectors.NOT_SPECTATING.apply(entity);
-        };
+        this.targetEntitySelector = targetSelector==null ? TargetSelector.NULL_TARGET_SELECTOR : new TargetSelector(targetSelector);
     }
 
 

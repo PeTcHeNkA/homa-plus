@@ -9,7 +9,6 @@ import javax.annotation.Nullable;
 import net.minecraft.advancements.AdvancementManager;
 import net.minecraft.advancements.FunctionManager;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -56,21 +55,20 @@ import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.EntityMobGriefingEvent;
 import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
 import net.minecraftforge.event.entity.living.*;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.event.world.ChunkWatchEvent;
 import net.minecraftforge.event.world.GetCollisionBoxesEvent;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import net.minecraftforge.server.timings.TimeTracker;
 import org.jetbrains.annotations.NotNull;
 import plus.fserver.ElcaConfig;
 import plus.fserver.api.IBlockEAccess;
-import plus.fserver.event.ElcaCV;
+import plus.fserver.ElcaCV;
+import plus.fserver.world.CollisionPredicate;
 import plus.fserver.utls.AABKey;
-import plus.fserver.utls.collections.ArrayListE6;
-import plus.fserver.utls.collections.HoleListE6;
-import plus.fserver.utls.collections.SyncAABBCache;
+import plus.fserver.utls.collections.*;
 import plus.fserver.utls.math.BlockPosDelta;
 import plus.fserver.utls.ChunkSelector;
 import plus.fserver.utls.math.FastRandom;
@@ -90,10 +88,10 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
     private int seaLevel = 63;
     protected boolean scheduledUpdatesAreImmediate;
-    public final List<Entity> loadedEntityList = Lists.newArrayList();
+    public final List<Entity> loadedEntityList = new ArrayRemSwapListE15<>();
     protected final List<Entity> unloadedEntityList = Lists.newArrayList();
-    public final List<TileEntity> loadedTileEntityList = Lists.newArrayList();
-    public final List<TileEntity> tickableTileEntities = Lists.newArrayList();
+    public final List<TileEntity> loadedTileEntityList= new ArrayRemSwapListE15<>();
+    public final List<TileEntity> tickableTileEntities = new ArrayRemSwapListE15<>();
     private final List<TileEntity> addedTileEntityList = Lists.newArrayList();
     private final List<TileEntity> tileEntitiesToBeRemoved = Lists.newArrayList();
     public final List<EntityPlayer> playerEntities = Lists.newArrayList();
@@ -146,7 +144,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
     public long tryUpdateNavigationLimit = 20L;
     public final LightingEngine lightingEngine = new LightingEngine(this);
-    private BlockLeaves.LeavesCache leavesCache;
+    private LeavesCache leavesCache;
 
     final SyncAABBCache<AxisAlignedBB> bbCache;
     final SyncAABBCache<Entity>        eeCache;
@@ -180,8 +178,8 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
-    public BlockLeaves.LeavesCache getLeavesCache(){
-        return leavesCache == null? leavesCache = new BlockLeaves.LeavesCache() : leavesCache;
+    public LeavesCache getLeavesCache(){
+        return leavesCache == null? leavesCache = new LeavesCache() : leavesCache;
     }
 
 
@@ -1571,8 +1569,8 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     public void tickLoadedEntities(){
-        for (int i1 = 0; i1 < this.loadedEntityList.size(); ++i1) {
-            Entity entity2 = this.loadedEntityList.get(i1);
+        for (int cursor = 0; cursor < this.loadedEntityList.size(); ++cursor) {
+            Entity entity2 = this.loadedEntityList.get(cursor);
             Entity entity3 = entity2.getRidingEntity();
 
             if (entity3 != null) {
@@ -1584,9 +1582,8 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
             if (!entity2.isDead && !(entity2 instanceof EntityPlayerMP)) {
                 try {
-                    TimeTracker.ENTITY_UPDATE.trackStart(entity2);
                     this.updateEntity(entity2);
-                    TimeTracker.ENTITY_UPDATE.trackEnd(entity2);
+
                 } catch (Throwable throwable1) {
                     onEntityError(entity2, throwable1);
                 }
@@ -1599,7 +1596,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
                 if (entity2.addedToChunk && this.isChunkLoaded(l1, i2, true)) {
                     this.getChunk(l1, i2).removeEntity(entity2);
                 }
-                this.loadedEntityList.remove(i1--);
+                this.loadedEntityList.remove(cursor--);
                 this.onEntityRemoved(entity2);
             }
         }
@@ -3439,7 +3436,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         if(ElcaCV.MORE_MOBS_OPTIMIZER) {
             AABKey key = bbCache.key(aabb);
             //AABKey key = new AABKey(aabb);
-            ArrayListE6<AxisAlignedBB> res = this.bbCache.get(key);
+            ArrayListE6<AxisAlignedBB> res = this.bbCache.getC(key);
             if (res != null) return res;
             res = bbCache.allocArr();
             getCollisionBoxes0(res, entityIn, aabb);
@@ -3459,7 +3456,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public List<AxisAlignedBB> getCollisionBoxesLimited(@Nullable Entity entityIn, @NotNull AxisAlignedBB aabb, int lim) {
         if(ElcaCV.MORE_MOBS_OPTIMIZER) {
             AABKey key = bbCache.key(aabb);
-            ArrayListE6<AxisAlignedBB> res = bbCache.get(key);
+            ArrayListE6<AxisAlignedBB> res = bbCache.getC(key);
             if (res != null) return res;
             getCollisionBoxes0Limited(res = bbCache.allocArr(), entityIn, aabb, lim);
             bbCache.add(key, res);
@@ -3481,9 +3478,9 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         if(ElcaCV.MORE_MOBS_OPTIMIZER) {
             AABKey key = eeCache.key(aabb);
 
-            final ArrayListE6<Entity> entities = this.eeCache.get(key);
+            final ArrayListE6<Entity> entities = this.eeCache.getC(key);
             if (entities != null) {
-                if (predicate != null && !entities.isEmpty()) {
+                if (predicate != null && !entities.isEmptyC()) {
                     for (final Entity entity : entities) {
                         if (!predicate.apply(entity)) {
                             ArrayListE6<Entity> res = eeCache.allocArr();
@@ -3517,9 +3514,9 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         if(ElcaCV.MORE_MOBS_OPTIMIZER) {
             AABKey key = eeCache.key(aabb);
             //AABKey key = new AABKey(aabb);
-            final List<Entity> entities = this.eeCache.get(key);
+            final ArrayListE6<Entity> entities = this.eeCache.getC(key);
             if (entities != null) {
-                if (entities.isEmpty()) return (List<T>) entities;
+                if (entities.isEmptyC()) return (List<T>) entities;
                 for (final Entity entity : entities) {
                     if (!clazz.isInstance(entity) || filter != null && !filter.apply((T) entity)) {
                         ArrayListE6<T> res = (ArrayListE6<T>) eeCache.allocArr();
@@ -3603,9 +3600,9 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         if(ElcaCV.MORE_MOBS_OPTIMIZER) {
             AABKey key = eeCache.key(aabb);
             //AABKey key = new AABKey(aabb);
-            final List<Entity> entities = this.eeCache.get(key);
+            final ArrayListE6<Entity> entities = this.eeCache.getC(key);
             if (entities != null) {
-                if (predicate != null && !entities.isEmpty()) {
+                if (predicate != null && !entities.isEmptyC()) {
                     for (final Entity entity : entities) {
                         if (!predicate.apply(entity)) {
                             ArrayListE6<Entity> res = eeCache.allocArr();
@@ -3769,7 +3766,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public  final ChunkWatchEvent           chunkUnWatchEvent = new ChunkWatchEvent.UnWatch().forBus(MinecraftForge.EVENT_BUS);
     public  final Random              commonWorldEntityRandom = new FastRandom();
     public  final AxisAlignedBB         commonWorldEntityAABB = new AxisAlignedBB(0,0,0,0,0,0);
-    public  final EntitySelectors.CollisionPredicate entityCP = new EntitySelectors.CollisionPredicate();
+    public  final CollisionPredicate entityCP = new CollisionPredicate();
     public  final Vec3dMut                 commonEntityVec3d1 = new Vec3dMut(0,0,0);
     public  final Vec3dMut                 commonEntityVec3d2 = new Vec3dMut(0,0,0);
 
@@ -3854,4 +3851,26 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public float onLivingDamage(EntityLivingBase entity, DamageSource src, float amount) {
         return (MinecraftForge.EVENT_BUS.post(damageEvent.initDamage(entity, src, amount)) ? 0 : damageEvent.getAmount());
     }
+
+
+    //player events
+    public  final PlayerEvent.StartTracking startTrackingEvent = new PlayerEvent.StartTracking().forBus(MinecraftForge.EVENT_BUS);
+    public  final PlayerEvent.StopTracking  stopTrackingEvent  = new PlayerEvent.StopTracking().forBus(MinecraftForge.EVENT_BUS);
+
+    private final PlayerEvent.BreakSpeed breakSpeedEvent = new PlayerEvent.BreakSpeed().forBus(MinecraftForge.EVENT_BUS);
+    private final PlayerEvent.HarvestCheck harvestCheck = new PlayerEvent.HarvestCheck().forBus(MinecraftForge.EVENT_BUS);
+
+
+    public float getBreakSpeed(EntityPlayer player, IBlockState state, float original, BlockPos pos) {
+        return breakSpeedEvent.post(player, state, original, pos) ? -1 : breakSpeedEvent.getNewSpeed();
+    }
+
+
+    public boolean doPlayerHarvestCheck(EntityPlayer player, IBlockState state, boolean success) {
+        return harvestCheck.post(player, state, success);
+    }
 }
+
+
+
+

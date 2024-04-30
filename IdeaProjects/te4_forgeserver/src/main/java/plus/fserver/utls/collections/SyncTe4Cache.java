@@ -1,7 +1,5 @@
 package plus.fserver.utls.collections;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -69,35 +67,13 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
         public final boolean equals(Object o) {
             if (o == this)
                 return true;
-            if (o instanceof Map.Entry) {
-                Entry<?,?> e = (Entry<?,?>)o;
-                return Objects.equals(key, e.getKey()) &&
-                        Objects.equals(value, e.getValue());
+            if (o instanceof Node) {
+                Node<?,?> e = (Node<?, ?>)o;
+                return Objects.equals(key, e.key) && Objects.equals(value, e.value);
             }
             return false;
         }
     }
-
-
-//    static Class<?> comparableClassFor(Object x) {
-//        if (x instanceof Comparable) {
-//            Class<?> c;
-//            if ((c = x.getClass()) == String.class)
-//                return c;
-//
-//            ParameterizedType p;
-//            Type[] ts = c.getGenericInterfaces(), as;
-//            for (Type t : ts) {
-//                if ((t instanceof ParameterizedType) &&
-//                        ((p = (ParameterizedType) t).getRawType() ==
-//                                Comparable.class) &&
-//                        (as = p.getActualTypeArguments()) != null &&
-//                        as.length == 1 && as[0] == c) // type arg is c
-//                    return c;
-//            }
-//        }
-//        return null;
-//    }
 
 
     @SuppressWarnings({"rawtypes","unchecked"}) // for cast to Comparable
@@ -150,29 +126,6 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
         this.loadFactor = DEFAULT_LOAD_FACTOR;
         table = resize();
     }
-
-
-//    TreeNode<K,V> allocTree(int hash, K key, V value, Node<K,V> next, int stamp){
-//        if(ntCursor > 0){
-//            TreeNode<K,V> node = emptyTree[ntCursor--];
-//            node.init(hash, key, value, next, stamp);
-//            return node;
-//        }
-//        return new TreeNode<>(hash, key, value, next, stamp);
-//    }
-
-
-//    final void freeTree(TreeNode<K,V> node){
-//        if(emptyTree.length == ++ntCursor){
-//            int newSize = emptyTree.length == 0?table.length:emptyTree.length<<1;
-//            TreeNode[] newNodes = new TreeNode[newSize];
-//            System.arraycopy(emptyTree, 0, newNodes, 1, emptyTree.length);
-//            newNodes[0] = node;
-//            emptyTree = newNodes;
-//        }
-//        else emptyTree[ntCursor] = node;
-//    }
-
 
 
     final Node<K,V> alloc(int hash, K key, V value, int stamp){
@@ -256,7 +209,12 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
     }
 
 
-    public V get(Object key) {
+    public V get(Object key){
+        return getC(key);
+    }
+
+
+    public V getC(Object key) {
         Node<K,V>[] tab = table; Node<K,V> first, e; int n, hash; K k;
         if ((n = tab.length) > 0 && (first = tab[(n - 1) & (hash = key.hashCode())]) != null) {
             if (first.hash == hash && // always check first node
@@ -1443,7 +1401,6 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
 
 
         void removeTreeNode(SyncTe4Cache<K,V> cachce, Node<K,V>[] tab, boolean movable) {
-            //cachce.freeTree(this);
             cachce.freeVal(value);
 
             int index = (tab.length - 1) & hash;

@@ -4,7 +4,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.AbstractIterator;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Lists;
-import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import java.util.Iterator;
@@ -13,14 +13,12 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import plus.fserver.ElcaConfig;
 import plus.fserver.server.chunk.PlayerCMapSelector;
-import plus.fserver.utls.collections.ArrayListE6;
-import plus.fserver.utls.collections.ArrayListEV;
+import plus.fserver.utls.collections.ArrayRemSwapListE15;
 import plus.tson.utl.Te4HashSet;
 
 
@@ -29,12 +27,12 @@ public class PlayerChunkMap {
     private static final Predicate<EntityPlayerMP> CAN_GENERATE_CHUNKS = player -> player != null && (!player.isSpectator() || player.getServerWorld().getGameRules().getBoolean("spectatorsGenerateChunks"));
 
     private final WorldServer world;
-    private final ArrayListE6<EntityPlayerMP> players = new ArrayListE6<>();
+    private final ArrayRemSwapListE15<EntityPlayerMP> players = new ArrayRemSwapListE15<>();
     private final Long2ObjectMap<PlayerChunkMapEntry> entryMap = new Long2ObjectOpenHashMap<>(4096);
     private Set<PlayerChunkMapEntry> dirtyEntries = new Te4HashSet<>();
     private final List<PlayerChunkMapEntry> pendingSendToPlayers = Lists.newLinkedList();
     private final List<PlayerChunkMapEntry> entriesWithoutChunks = Lists.newLinkedList();
-    private final ArrayListEV<PlayerChunkMapEntry> entries = new ArrayListEV<>(50);
+    private final ArrayRemSwapListE15<PlayerChunkMapEntry> entries = new ArrayRemSwapListE15<>();
 
     private int playerViewRadius;
     private long previousTotalWorldTime;
@@ -42,7 +40,7 @@ public class PlayerChunkMap {
     private boolean sortSendToPlayers = true;
     private int nextRadius = -1;
 
-    private final Int2ObjectArrayMap<PlayerCMapSelector> selectors = new Int2ObjectArrayMap<>();
+    private final Int2ObjectOpenHashMap<PlayerCMapSelector> selectors = new Int2ObjectOpenHashMap<>();
 
     public PlayerChunkMap(WorldServer serverWorld) {
         this.world = serverWorld;
@@ -200,7 +198,6 @@ public class PlayerChunkMap {
         if (entry == null) {
             entry = new PlayerChunkMapEntry(this, chunkX, chunkZ);
             this.entries.addF(entry);
-            //entry.id = entries.size()-1;
 
             this.entryMap.put(i, entry);
 
@@ -272,8 +269,8 @@ public class PlayerChunkMap {
 
 
     public boolean isPlayerWatchingChunk(EntityPlayerMP player, int chunkX, int chunkZ) {
-        PlayerChunkMapEntry playerchunkmapentry = this.getEntry(chunkX, chunkZ);
-        return playerchunkmapentry != null && playerchunkmapentry.containsRef(player) && playerchunkmapentry.isSentToPlayers();
+        PlayerChunkMapEntry entry = this.getEntry(chunkX, chunkZ);
+        return entry != null && entry.containsRef(player) && entry.isSentToPlayers();
     }
 
 
@@ -351,8 +348,7 @@ public class PlayerChunkMap {
 
 
     public void removeEntry(PlayerChunkMapEntry entry) {
-        ChunkPos chunkpos = entry.getPos();
-        long i = getIndex(chunkpos.x, chunkpos.z);
+        long i = getIndex(entry.posX, entry.posZ);
         entry.updateChunkInhabitedTime();
         this.entryMap.remove(i);
         this.entries.removeRef(entry);

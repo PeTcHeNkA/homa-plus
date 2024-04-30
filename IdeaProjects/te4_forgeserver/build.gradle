@@ -1,3 +1,5 @@
+import proguard.gradle.ProGuardTask
+
 buildscript {
     repositories {
         mavenCentral()
@@ -9,6 +11,8 @@ buildscript {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle',
                 version: '4.1.+', changing: true
         classpath "org.spongepowered:mixingradle:0.7-SNAPSHOT"
+
+        classpath 'com.guardsquare:proguard-gradle:7.4.2'
     }
 }
 
@@ -94,7 +98,7 @@ dependencies {
 
 
 
-    implementation("com.github.ben-manes.caffeine:jcache:2.9.3")
+    //implementation("com.github.ben-manes.caffeine:jcache:2.9.3")
     implementation 'xmlpull:xmlpull:1.1.3.1'
 
 
@@ -148,4 +152,26 @@ sourceSets {
     }
 }
 
-//shadowJar{}
+tasks.register('proguard', ProGuardTask) {
+
+    configuration file('proguard.pro')
+
+    injars 'build/libs/elca_server-2.7.jar'
+    outjars 'build/libs/elca_server-2.7-pro.jar'
+
+    libraryjars sourceSets.main.compileClasspath
+
+//    injars  '../../lib/proguard.jar'
+//    outjars 'proguard_out.jar'
+
+    // Automatically handle the Java version of this build.
+    if (System.getProperty('java.version').startsWith('1.')) {
+        // Before Java 9, the runtime classes were packaged in a single jar file.
+        libraryjars "${System.getProperty('java.home')}/lib/rt.jar"
+    } else {
+        // As of Java 9, the runtime classes are packaged in modular jmod files.
+        libraryjars "${System.getProperty('java.home')}/jmods/java.base.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
+        libraryjars "${System.getProperty('java.home')}/jmods/java.sql.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
+        //libraryjars "${System.getProperty('java.home')}/jmods/....."
+    }
+}

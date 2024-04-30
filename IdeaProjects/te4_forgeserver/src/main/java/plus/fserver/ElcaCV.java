@@ -1,4 +1,4 @@
-package plus.fserver.event;
+package plus.fserver;
 
 
 //used only on compile
@@ -18,4 +18,8 @@ public class ElcaCV {
 
 
     public static final boolean CHECK_BI_ARRAY                = false;
+
+    public static final boolean ENABLE_NOTCH_SECRET           = false;
+
+    public static final boolean ENTITY_FAST_WET               = true;
 }

@@ -24,8 +24,18 @@ public class ArrayListE6<T> implements List<T> {
     }
 
 
+    public int sizeC(){
+        return size;
+    }
+
+
     @Override
     public boolean isEmpty() {
+        return size == 0;
+    }
+
+
+    public boolean isEmptyC(){
         return size == 0;
     }
 

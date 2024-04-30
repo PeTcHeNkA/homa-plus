@@ -1,7 +1,6 @@
 package plus.fserver.mixins.pf;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryInternal;
 import net.minecraftforge.registries.RegistryManager;
@@ -9,7 +8,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import plus.fserver.patch.PBlockState;
 
 
 @Mixin(targets = {"net.minecraftforge.registries.GameData$BlockCallbacks"}, remap = false, priority = 0)

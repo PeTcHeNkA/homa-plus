@@ -29,7 +29,7 @@ public class BlockFs extends Block{
     public static void addCollisionBoxToListFs(BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> list, @Nullable AxisAlignedBB blockBox) {
         if (blockBox != NULL_AABB) {
             //Up to 30+ times faster
-            AxisAlignedBB src = list.getSafe(list.size());
+            AxisAlignedBB src = list.getSafe(list.sizeC());
             if(src != null) blockBox.offsetTo(pos, src);
             else src = blockBox.offset(pos);
 
