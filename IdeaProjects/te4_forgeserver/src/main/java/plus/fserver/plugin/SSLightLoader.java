@@ -22,7 +22,7 @@ public class SSLightLoader implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        if(mixinClassName.contains("plus.fserver.mixins.light"))return ElcaConfig.FAST_LIGHT;
+        //if(mixinClassName.contains("plus.fserver.mixins.light"))return ElcaConfig.FAST_LIGHT;
         return true;
     }
 

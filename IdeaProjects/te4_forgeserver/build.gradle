@@ -144,6 +144,7 @@ sourceSets {
     main {
         java {
             srcDir 'C:/Users/Te4hnoPlus/IdeaProjects/TsonConfigurations/core/src/main/java'
+            srcDir 'C:/Users/Te4hnoPlus/IdeaProjects/TsonConfigurations/extensions/src/main/java'
             srcDir 'C:/Users/Te4hnoPlus/IdeaProjects/te4_async_utls/src/main/java'
             srcDir 'lib2/performant-1.12.2'
             srcDir 'lib2/phosphor-1.12.2-0.2.9.3'
