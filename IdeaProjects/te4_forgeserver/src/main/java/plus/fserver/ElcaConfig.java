@@ -1,7 +1,10 @@
 package plus.fserver;
 
+import java.io.File;
+
 
 public class ElcaConfig {
+    public static final File NATIVES                = dir("elca_natives");
     public static final String SERVER_ID            = "ElcaServer";
     public static final String DEFAULT_REJECT_MSG   = "Connection rejected";
     public static final String REJECT_SERVER_FULL   = "The server is full!";
@@ -52,4 +55,11 @@ public class ElcaConfig {
 
     public static boolean SKIP_CHECK_NETWORK         = true;
     public static boolean PRINT_CAUSE_SERVER_STOP    = true;
+
+    private static File dir(String str){
+        File file = new File(str);
+        if(file.exists())return file;
+        file.mkdirs();
+        return file;
+    }
 }

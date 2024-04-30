@@ -1,5 +1,6 @@
 package plus.fserver.server;
 
+import com.github.luben.zstd.util.Native;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -36,6 +37,7 @@ public final class AsyWorldTickerV2 implements ThreadFactory, IAsyWorldTicker{
 
     static{
         System.out.printf("Async ticker V2 initialized\n");
+        Native.load(ElcaConfig.NATIVES);
     }
 
 

@@ -161,9 +161,6 @@ tasks.register('proguard', ProGuardTask) {
 
     libraryjars sourceSets.main.compileClasspath
 
-//    injars  '../../lib/proguard.jar'
-//    outjars 'proguard_out.jar'
-
     // Automatically handle the Java version of this build.
     if (System.getProperty('java.version').startsWith('1.')) {
         // Before Java 9, the runtime classes were packaged in a single jar file.
@@ -172,6 +169,5 @@ tasks.register('proguard', ProGuardTask) {
         // As of Java 9, the runtime classes are packaged in modular jmod files.
         libraryjars "${System.getProperty('java.home')}/jmods/java.base.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
         libraryjars "${System.getProperty('java.home')}/jmods/java.sql.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
-        //libraryjars "${System.getProperty('java.home')}/jmods/....."
     }
 }

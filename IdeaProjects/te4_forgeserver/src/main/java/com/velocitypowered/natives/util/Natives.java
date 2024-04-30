@@ -8,6 +8,9 @@ import com.velocitypowered.natives.compression.VelocityCompressorFactory;
 import com.velocitypowered.natives.encryption.JavaVelocityCipher;
 import com.velocitypowered.natives.encryption.NativeVelocityCipher;
 import com.velocitypowered.natives.encryption.VelocityCipherFactory;
+import plus.fserver.ElcaConfig;
+
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -55,9 +58,10 @@ public class Natives {
       if (temporaryFolderPath != null) {
           return Files.createTempFile(temporaryFolderPath, "native-" + ext);
       } else {
-          return Files.createTempFile("velocity-natives", "native-" + ext);
+          return File.createTempFile("velocity-natives", "native-" + ext, ElcaConfig.NATIVES).toPath();
       }
   }
+
 
   public static final NativeCodeLoader<VelocityCompressorFactory> compress = new NativeCodeLoader<>(
           ImmutableList.of(
@@ -77,6 +81,7 @@ public class Natives {
                   }, "Java", JavaVelocityCompressor.FACTORY)
           )
   );
+
 
   public static final NativeCodeLoader<VelocityCipherFactory> cipher = new NativeCodeLoader<>(
           ImmutableList.of(
