@@ -67,11 +67,11 @@ public class ElcaConfig {
     static {
         TsonFile file = new TsonFile("elca-config.tson");
 
-        NATIVES                    = new File(file.getOrDefaultStr("elca-natives", "elca_natives"));
+        NATIVES                    = dir(file.getOrDefaultStr("elca-natives", "elca_natives"));
 
         TIME_PACKET_RATE           = calc(file, "time-packet-rate"            ,  TIME_PACKET_RATE          );
-        CHUNK_TICK_RADIUS_1        = calc(file, "chunk-tick-radius"           , CHUNK_TICK_RADIUS_1        );
-        CHUNK_TICK_RADIUS_2        = calc(file, "chunk-tick-radius"           , CHUNK_TICK_RADIUS_2        );
+        CHUNK_TICK_RADIUS_1        = calc(file, "chunk-tick-radius-m"         , CHUNK_TICK_RADIUS_1        );
+        CHUNK_TICK_RADIUS_2        = calc(file, "chunk-tick-radius-s"         , CHUNK_TICK_RADIUS_2        );
 
         MEAN_BALANCE_MOB           = calc(file, "mean-balance-mob"            ,     40                 )*12;
         GOAL_TICK_RATE             = calc(file, "goal-tick-rate"              , GOAL_TICK_RATE             );
