@@ -1753,7 +1753,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
     //todo check
     public boolean isEntityInsideOpaqueBlock() {
         if (!this.noClip) {
-            IBlockEAccess access = world.isRemote?world:((WorldServer)world).localSelector;
+            IBlockEAccess access = world.access();
             float w08 = this.width * 0.8f, yeeH = this.getEyeHeight();
 
             for (int i = 0, px = 0, py = -999999, pz = 0; i < 8; ++i) {

@@ -142,7 +142,7 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
 
         DimensionManager.setWorld(dimensionId, this, server);
 
-        localSelector = new ChunkSelector(this);
+        effectiveAcces = localSelector = new ChunkSelector(this);
     }
 
 

@@ -61,19 +61,19 @@ public abstract class BlockLeaves extends BlockFs implements net.minecraftforge.
 
 
     @Override
-    public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand) {
-        if (!worldIn.isRemote) {
+    public void updateTick(World world, BlockPos pos, IBlockState state, Random rand) {
+        if (!world.isRemote) {
             if (state.getValue(CHECK_DECAY) && state.getValue(DECAYABLE)) {
                 // Forge: prevent decaying leaves from updating neighbors and loading unloaded chunks
-                if (!worldIn.isAreaLoaded(pos, 1)) return;
+                if (!world.isAreaLoaded(pos, 1)) return;
                 // Forge: extend range from 5 to 6 to account for neighbor checks in world.markAndNotifyBlock -> world.updateObservingBlocksAt
-                if (worldIn.isAreaLoaded(pos, 6)) {
+                if (world.isAreaLoaded(pos, 6)) {
                     int cX = pos.getX();
                     int cY = pos.getY();
                     int cZ = pos.getZ();
 
-                    LeavesCache cache = worldIn.getLeavesCache();
-                    IBlockEAccess access = ((WorldServer)worldIn).localSelector;
+                    LeavesCache cache = world.getLeavesCache();
+                    IBlockEAccess access = world.access();
 
                     for (int dx = -4; dx <= 4; ++dx) {
                         for (int dz = -4; dz <= 4; ++dz) {
@@ -81,8 +81,8 @@ public abstract class BlockLeaves extends BlockFs implements net.minecraftforge.
                                 IBlockState iblockstate = access.getBlockState(cache.setPos(cX + dx, cY + dy, cZ + dz));
                                 Block block = iblockstate.getBlock();
 
-                                if (!block.canSustainLeaves(iblockstate, worldIn, cache)) {
-                                    if (block.isLeaves(iblockstate, worldIn, cache)) {
+                                if (!block.canSustainLeaves(iblockstate, world, cache)) {
+                                    if (block.isLeaves(iblockstate, world, cache)) {
                                         cache.set(dx, dy, dz, -2);
 
                                     } else {
@@ -145,9 +145,9 @@ public abstract class BlockLeaves extends BlockFs implements net.minecraftforge.
                     //int center = cache.get(0,0,0);
 
                     if (cache.get(0,0,0) >= 0) {
-                        worldIn.setBlockState(pos, state.withProperty(CHECK_DECAY, Boolean.FALSE), 4);
+                        world.setBlockState(pos, state.withProperty(CHECK_DECAY, Boolean.FALSE), 4);
                     } else {
-                        this.destroy(worldIn, access, pos);
+                        this.destroy(world, access, pos);
                     }
                 }
             }

@@ -72,6 +72,7 @@ import net.minecraftforge.items.IItemHandlerModifiable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import plus.fserver.ElcaConfig;
+import plus.fserver.api.IBlockEAccess;
 import plus.fserver.server.SStrings;
 import plus.fserver.utls.collections.FixedItemList;
 import plus.fserver.utls.math.Vec3dMut;
@@ -1553,10 +1554,11 @@ public abstract class EntityLivingBase extends Entity {
                     } else {
                         float f6 = 0.91F;
                         BlockPos.MutableBlockPos blockPos = world.localTempPos;
+                        IBlockEAccess access = world.access();
 
                         if (this.onGround) {
-                            IBlockState underState = this.world.getBlockState(blockPos.setPos(this.posX, this.getEntityBoundingBox().minY - 1.0D, this.posZ));
-                            f6 = underState.getBlock().getSlipperiness(underState, this.world, blockPos, this) * 0.91F;
+                            IBlockState underState = access.getBlockState(blockPos.setPos(this.posX, this.getEntityBoundingBox().minY - 1.0D, this.posZ));
+                            f6 = underState.getBlock().getSlipperiness(underState, access, blockPos, this) * 0.91F;
                         }
 
                         float f7 = 0.16277136F / (f6 * f6 * f6);
@@ -1572,8 +1574,8 @@ public abstract class EntityLivingBase extends Entity {
                         f6 = 0.91F;
 
                         if (this.onGround) {
-                            IBlockState underState = this.world.getBlockState(blockPos.setPos(this.posX, this.getEntityBoundingBox().minY - 1.0D, this.posZ));
-                            f6 = underState.getBlock().getSlipperiness(underState, this.world, blockPos, this) * 0.91F;
+                            IBlockState underState = access.getBlockState(blockPos.setPos(this.posX, this.getEntityBoundingBox().minY - 1.0D, this.posZ));
+                            f6 = underState.getBlock().getSlipperiness(underState, access, blockPos, this) * 0.91F;
                         }
 
                         if (this.isOnLadder()) {
@@ -1603,8 +1605,7 @@ public abstract class EntityLivingBase extends Entity {
                             blockPos.setPos(this.posX, 0.0D, this.posZ);
 
                             if (!this.world.isRemote || this.world.isBlockLoaded(blockPos) && this.world.getChunk(blockPos).isLoaded()) {
-                                if (!this.hasNoGravity())
-                                {
+                                if (!this.hasNoGravity()) {
                                     this.motionY -= 0.08D;
                                 }
                             } else if (this.posY > 0.0D) {

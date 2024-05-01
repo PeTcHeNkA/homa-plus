@@ -37,7 +37,7 @@ public class BlockConcretePowder extends BlockFallingFs {
 
 
     protected boolean tryTouchWater(World worldIn, BlockPos pos, IBlockState state) {
-        IBlockEAccess access = worldIn.isRemote?worldIn:((WorldServer)worldIn).localSelector;
+        IBlockEAccess access = worldIn.access();
 
         for (EnumFacing enumfacing : EnumFacing.VALUES) {
             if (enumfacing != EnumFacing.DOWN) {

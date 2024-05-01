@@ -74,7 +74,7 @@ public class BlockSponge extends BlockFs {
     }
 
 
-    private boolean absorb(World worldIn, BlockPos pos) {
+    private boolean absorb(World world, BlockPos pos) {
         Queue<BlockPosIndex> queue = Lists.newLinkedList();
 
         ArrayListE10<BlockPos> list = new ArrayListE10<>();
@@ -82,7 +82,7 @@ public class BlockSponge extends BlockFs {
 
         int i = ElcaConfig.MAX_SPONGE_POWER;
 
-        IBlockEAccess access = worldIn.isRemote?worldIn:((WorldServer)worldIn).localSelector;
+        IBlockEAccess access = world.access();
 
         while (!queue.isEmpty()) {
             BlockPosIndex blockpos = queue.poll();
@@ -112,7 +112,7 @@ public class BlockSponge extends BlockFs {
             }
         }
         for (BlockPos pos1 : list) {
-            worldIn.notifyNeighborsOfStateChange(pos1, Blocks.AIR, false);
+            world.notifyNeighborsOfStateChange(pos1, Blocks.AIR, false);
         }
         return i > 0;
     }

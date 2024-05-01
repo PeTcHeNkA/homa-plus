@@ -199,7 +199,7 @@ public abstract class BlockLiquid extends Block {
 
     @Override
     public Vec3d modifyAcceleration(World worldIn, BlockPos pos, Entity entityIn, Vec3d motion) {
-        IBlockEAccess access = worldIn.isRemote?worldIn:((WorldServer)worldIn).localSelector;
+        IBlockEAccess access = worldIn.access();
         IBlockState state = access.getBlockState(pos);
         double x = 0.0D, y = 0.0D, z = 0.0D;
 

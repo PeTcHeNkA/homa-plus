@@ -183,7 +183,7 @@ public class BlockPistonBase extends BlockDirectional {
             if (!flag && id == 0) {
                 return false;
             }
-            access = ((WorldServer)worldIn).localSelector;
+            access = worldIn.access();
         } else {
             access = worldIn;
         }

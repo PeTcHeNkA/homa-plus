@@ -143,7 +143,7 @@ public class PathNavigateGround extends PathNavigate {
             d1 = d1 * d2;
 
             //todo maybe non-threadsafe
-            IBlockAccess access = ((WorldServer)world).localSelector;
+            IBlockAccess access = world.access();
             PntMatrix matrix = ((WalkNodeProcessor)nodeProcessor).matrix;
             //todo maybe this equal "if false"
             if(matrix == null){

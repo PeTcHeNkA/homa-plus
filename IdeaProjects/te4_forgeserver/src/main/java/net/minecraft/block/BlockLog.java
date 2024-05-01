@@ -26,20 +26,20 @@ public abstract class BlockLog extends BlockRotatedPillarFs {
 
 
     @Override
-    public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
+    public void breakBlock(World world, BlockPos pos, IBlockState state) {
         BlockPos.MutableBlockPos pos1 = new BlockPos.MutableBlockPos(pos.getX()-5, pos.getY()-5, pos.getZ()-5);
         BlockPos.MutableBlockPos pos2 = new BlockPos.MutableBlockPos(pos.getX()+5, pos.getY()+5, pos.getZ()+5);
 
-        if (worldIn.isAreaLoaded(pos1, pos2)) {
+        if (world.isAreaLoaded(pos1, pos2)) {
             pos1.addMut(1,1,1);
             pos2.addMut(-1, -1, -1);
 
-            IBlockEAccess access = worldIn.isRemote?worldIn:((WorldServer)worldIn).localSelector;
+            IBlockEAccess access = world.access();
             for (BlockPos blockpos : BlockPos.getAllInBoxMutable(pos1, pos1, pos2)) {
                 IBlockState iblockstate = access.getBlockState(blockpos);
 
-                if (iblockstate.getBlock().isLeaves(iblockstate, worldIn, blockpos)) {
-                    iblockstate.getBlock().beginLeavesDecay(iblockstate, worldIn, blockpos);
+                if (iblockstate.getBlock().isLeaves(iblockstate, world, blockpos)) {
+                    iblockstate.getBlock().beginLeavesDecay(iblockstate, world, blockpos);
                 }
             }
         }

@@ -299,7 +299,7 @@ public class RedstoneEngine {
         }
         if (!wire.canPlaceBlockAt(worldIn, pos)) {
             wire.dropBlockAsItem(worldIn, pos, oldState, 0);
-            ((WorldServer)worldIn).localSelector.setBlockState(pos, BlockIDIndexes.AIR_STATE, 3);
+            worldIn.access().setBlockState(pos, BlockIDIndexes.AIR_STATE, 3);
             upd1.type = UpdateNode.Type.OTHER;
             return;
         }

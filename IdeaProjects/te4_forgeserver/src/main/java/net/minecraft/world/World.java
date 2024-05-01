@@ -148,6 +148,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
     final SyncAABBCache<AxisAlignedBB> bbCache;
     final SyncAABBCache<Entity>        eeCache;
+    protected IBlockEAccess     effectiveAcces;
 
     protected World(ISaveHandler saveHandlerIn, WorldInfo info, WorldProvider providerIn, Profiler profilerIn, boolean client) {
         this(null, saveHandlerIn, info, providerIn, profilerIn, client);
@@ -175,6 +176,12 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             eeCache = null;
             bbCache = null;
         }
+        effectiveAcces = this;
+    }
+
+
+    public final IBlockEAccess access(){
+        return effectiveAcces;
     }
 
 
@@ -308,35 +315,6 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public boolean isAreaLoaded(StructureBoundingBox box, boolean allowEmpty) {
         return this.isAreaLoaded(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, allowEmpty);
     }
-
-//    public boolean isAreaLoaded(AxisAlignedBB axisalignedbb){
-//        //MathHelper.floor(axisalignedbb.maxX - 0.001D)
-//
-//        BlockPos.PooledMutableBlockPos pos1 =
-//                BlockPos.PooledMutableBlockPos.retain(
-//                        axisalignedbb.minX + 0.001D,
-//                        axisalignedbb.minY + 0.001D,
-//                        axisalignedbb.minZ + 0.001D
-//                );
-//
-//        BlockPos.PooledMutableBlockPos pos2 =
-//                BlockPos.PooledMutableBlockPos.retain(
-//                        axisalignedbb.maxX - 0.001D,
-//                        axisalignedbb.maxY - 0.001D,
-//                        axisalignedbb.maxZ - 0.001D
-//                );
-//        return isAreaLoaded(
-//                MathHelper.floor(axisalignedbb.minX + 0.001D),
-//                MathHelper.floor(axisalignedbb.minY + 0.001D),
-//                MathHelper.floor(axisalignedbb.minZ + 0.001D),
-//
-//                MathHelper.floor(axisalignedbb.minX - 0.001D),
-//                MathHelper.floor(axisalignedbb.minX - 0.001D),
-//                MathHelper.floor(axisalignedbb.minX - 0.001D),
-//
-//                true
-//        );
-//    }
 
 
     public boolean isAreaLoaded(int xStart, int yStart, int zStart, int xEnd, int yEnd, int zEnd, boolean allowEmpty) {

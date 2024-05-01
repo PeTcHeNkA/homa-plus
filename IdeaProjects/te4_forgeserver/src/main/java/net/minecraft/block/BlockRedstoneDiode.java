@@ -40,17 +40,19 @@ public abstract class BlockRedstoneDiode extends BlockHorizontal {
 
 
     @Override
-    public boolean canPlaceBlockAt(World worldIn, BlockPos pos) {
-        IBlockAccess access = worldIn.isRemote?worldIn:((WorldServer)worldIn).localSelector;
-        IBlockState state = access.getBlockState(pos.down());
-        return (state.isTopSolid() || state.getBlockFaceShape(worldIn, pos.down(), EnumFacing.UP)
+    public boolean canPlaceBlockAt(World world, BlockPos pos) {
+        IBlockAccess access = world.access();
+        BlockPos down;
+        IBlockState state = access.getBlockState(down = pos.down());
+        return (state.isTopSolid() || state.getBlockFaceShape(access, down, EnumFacing.UP)
                 == BlockFaceShape.SOLID) && access.getBlockState(pos).getMaterial().isReplaceable();
     }
 
 
-    public boolean canBlockStay(World worldIn, BlockPos pos) {
-        IBlockState downState = worldIn.getBlockState(pos.down());
-        return downState.isTopSolid() || downState.getBlockFaceShape(worldIn, pos.down(), EnumFacing.UP) == BlockFaceShape.SOLID;
+    public boolean canBlockStay(World world, BlockPos pos) {
+        BlockPos down = pos.down();
+        IBlockState downState = world.access().getBlockState(down);
+        return downState.isTopSolid() || downState.getBlockFaceShape(world.access(), down, EnumFacing.UP) == BlockFaceShape.SOLID;
     }
 
 

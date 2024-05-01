@@ -42,7 +42,7 @@ public class BlockMycelium extends BlockFs {
         if (!worldIn.isRemote) {
             if (!worldIn.isAreaLoaded(pos, 2)) return; // Forge: prevent loading unloaded chunks when checking neighbor's light and spreading
             BlockPos.MutableBlockPos temp = new BlockPos.MutableBlockPos(pos.getX(), pos.getY()+1, pos.getZ());
-            IBlockEAccess access = ((WorldServer)worldIn).localSelector;
+            IBlockEAccess access = worldIn.access();
 
             if (worldIn.getLightFromNeighbors(temp) < 4 && access.getBlockState(temp).getLightOpacity(worldIn, temp) > 2) {
                 access.setBlockState(pos, Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.DIRT));
