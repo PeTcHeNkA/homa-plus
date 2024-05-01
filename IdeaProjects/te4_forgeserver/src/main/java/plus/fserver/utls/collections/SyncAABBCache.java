@@ -43,14 +43,17 @@ public class SyncAABBCache<V> extends SyncTe4Cache<AABKey, ArrayListE6<V>>{
         l1: if(maxV > vCursor){
             int usages = (maxV - vCursor) * 20;
 
-            Object[] vals = this.vals;
+            //Object[] vals = this.vals;
             maxV = Math.min(maxV, vals.length);
 
             if(usages >= maxN)break l1;
 
-            for(int cursor = usages; cursor < maxV; ++cursor){
-                vals[cursor] = null;
-            }
+            Object[] newVals = new Object[usages];
+            System.arraycopy(vals, 0, newVals, 0, usages);
+            vals = newVals;
+//            for(int cursor = usages; cursor < maxV; ++cursor){
+//                vals[cursor] = null;
+//            }
             vCursor = usages-1;
             //System.out.println("FREE "+(maxV-usages)+" values");
             maxV = 0;
@@ -59,14 +62,18 @@ public class SyncAABBCache<V> extends SyncTe4Cache<AABKey, ArrayListE6<V>>{
         l2: if(maxN > nCursor){
             int usages = (maxN - nCursor) * 20;
 
-            Object[] vals = this.emptyNodes;
+            //Object[] vals = this.emptyNodes;
             maxN = Math.min(maxN, vals.length);
 
             if(usages >= maxN)break l2;
 
-            for(int cursor = usages; cursor < maxN; ++cursor){
-                vals[cursor] = null;
-            }
+            Node[] nodes = new Node[usages];
+            System.arraycopy(emptyNodes, 0, nodes, 0, usages);
+            emptyNodes = nodes;
+
+//            for(int cursor = usages; cursor < maxN; ++cursor){
+//                vals[cursor] = null;
+//            }
             nCursor = usages-1;
             //System.out.println("FREE "+(maxN-usages)+" nodes");
             maxN = 0;
