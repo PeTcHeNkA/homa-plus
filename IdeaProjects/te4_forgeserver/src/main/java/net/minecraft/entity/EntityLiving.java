@@ -714,8 +714,10 @@ public abstract class EntityLiving extends EntityLivingBase {
 
 
     public boolean getCanSpawnHere() {
-        IBlockState iblockstate = this.world.getBlockState((new BlockPos(this)).down());
-        return iblockstate.canEntitySpawn(this);
+        IBlockState state = this.world.access().getBlockState(
+                MathHelper.floor(posX), MathHelper.floor(posY)-1, MathHelper.floor(posZ)
+        );
+        return state.canEntitySpawn(this);
     }
 
 

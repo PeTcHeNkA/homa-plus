@@ -1079,8 +1079,8 @@ public class Block extends net.minecraftforge.registries.IForgeRegistryEntry.Imp
         {
             IBlockState state = this.getActualState(base_state, world, pos);
             boolean flipped = state.getValue(BlockStairs.HALF) == BlockStairs.EnumHalf.TOP;
-            BlockStairs.EnumShape shape = (BlockStairs.EnumShape)state.getValue(BlockStairs.SHAPE);
-            EnumFacing facing = (EnumFacing)state.getValue(BlockStairs.FACING);
+            BlockStairs.EnumShape shape = state.getValue(BlockStairs.SHAPE);
+            EnumFacing facing = state.getValue(BlockStairs.FACING);
             if (side == EnumFacing.UP) return flipped;
             if (side == EnumFacing.DOWN) return !flipped;
             if (facing == side) return true;

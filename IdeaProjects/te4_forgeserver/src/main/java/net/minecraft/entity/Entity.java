@@ -798,11 +798,11 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
             BlockPos.MutableBlockPos blockpos = this.world.localTempPos.setPos(this.posX, this.posY - 0.20000000298023224D, this.posZ);
             //BlockPos blockpos = new BlockPos(this.posX, this.posY - 0.20000000298023224D, this.posZ);
-            IBlockState state = this.world.getBlockState(blockpos);
+            IBlockState state = world.access().getBlockState(blockpos);
 
             if (state.getMaterial() == Material.AIR) {
                 //BlockPos blockpos1 = blockpos.down();
-                IBlockState state1 = this.world.getBlockState(blockpos.getX(), blockpos.getY()-1, blockpos.getZ());
+                IBlockState state1 = world.access().getBlockState(blockpos.getX(), blockpos.getY()-1, blockpos.getZ());
                 Block block1 = state1.getBlock();
 
                 if (block1 instanceof BlockFence || block1 instanceof BlockWall || block1 instanceof BlockFenceGate) {
@@ -961,7 +961,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
     protected void playStepSound(BlockPos pos, Block blockIn) {
         SoundType soundtype = blockIn.getSoundType(world.getBlockState(pos), world, pos, this);
 
-        if (this.world.getBlockState(pos.up()).getBlock() == Blocks.SNOW_LAYER) {
+        if (this.world.access().getBlockState(pos.getX(), pos.getY()+1, pos.getZ()).getBlock() == Blocks.SNOW_LAYER) {
             soundtype = Blocks.SNOW_LAYER.getSoundType();
             this.playSound(soundtype.getStepSound(), soundtype.getVolume() * 0.15F, soundtype.getPitch());
         } else if (!blockIn.getDefaultState().getMaterial().isLiquid()) {
@@ -1159,10 +1159,10 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
             double d0 = this.posY + (double)this.getEyeHeight();
             BlockPos blockpos;
 
-            IBlockState state = world.getBlockState(
+            IBlockState state = world.access().getBlockState(
                     blockpos = world.localTempPos2.setPos(this.posX, d0, this.posZ)
             );
-            Boolean result = state.getBlock().isEntityInsideMaterial(this.world, blockpos, state, this, d0, materialIn, true);
+            Boolean result = state.getBlock().isEntityInsideMaterial(world.access(), blockpos, state, this, d0, materialIn, true);
             if (result != null) return result;
 
             if (state.getMaterial() == materialIn) {
@@ -2118,7 +2118,8 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
             EnumFacing enumfacing = EnumFacing.UP;
             double d3 = Double.MAX_VALUE;
-            ChunkSelector selector = new ChunkSelector(world);
+            //is safe?
+            ChunkSelector selector = (ChunkSelector) world.access();
 
             BlockPos.MutableBlockPos pos = world.localTempPos;
 

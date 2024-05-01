@@ -1033,7 +1033,7 @@ public abstract class EntityLivingBase extends Entity {
             return false;
         } else {
             BlockPos blockpos;
-            IBlockState iblockstate = this.world.getBlockState(blockpos = world.localTempPos2.setPos(
+            IBlockState iblockstate = this.world.access().getBlockState(blockpos = world.localTempPos2.setPos(
                     MathHelper.floor(this.posX),
                     MathHelper.floor(this.getEntityBoundingBox().minY),
                     MathHelper.floor(this.posZ)
@@ -1402,20 +1402,22 @@ public abstract class EntityLivingBase extends Entity {
                     AxisAlignedBB axisalignedbb1 = axisalignedbb.offset(d9, 0.0D, d10);
 
                     if (!this.world.collidesWithAnyBlock(axisalignedbb1)) {
-                        if (this.world.getBlockState(new BlockPos(d11, this.posY, d12)).isSideSolid(world, new BlockPos(d11, this.posY, d12), EnumFacing.UP)) {
+                        if (this.world.access().getBlockState(new BlockPos(d11, this.posY, d12)).isSideSolid(world, new BlockPos(d11, this.posY, d12), EnumFacing.UP)) {
                             this.setPositionAndUpdate(d11, this.posY + 1.0D, d12);
                             return;
                         }
 
                         BlockPos blockpos = new BlockPos(d11, this.posY - 1.0D, d12);
 
-                        if (this.world.getBlockState(blockpos).isSideSolid(world, blockpos, EnumFacing.UP) || this.world.getBlockState(blockpos).getMaterial() == Material.WATER) {
+                        if (this.world.access().getBlockState(blockpos).isSideSolid(world, blockpos, EnumFacing.UP) ||
+                                this.world.access().getBlockState(blockpos).getMaterial() == Material.WATER) {
                             d1 = d11;
                             d13 = this.posY + 1.0D;
                             d14 = d12;
                         }
                     }
-                    else if (!this.world.collidesWithAnyBlock(axisalignedbb1.offset(0.0D, 1.0D, 0.0D)) && this.world.getBlockState(new BlockPos(d11, this.posY + 1.0D, d12)).isSideSolid(world, new BlockPos(d11, this.posY + 1.0D, d12), EnumFacing.UP)) {
+                    else if (!this.world.collidesWithAnyBlock(axisalignedbb1.offset(0.0D, 1.0D, 0.0D)) &&
+                            this.world.access().getBlockState(new BlockPos(d11, this.posY + 1.0D, d12)).isSideSolid(world, new BlockPos(d11, this.posY + 1.0D, d12), EnumFacing.UP)) {
                         d1 = d11;
                         d13 = this.posY + 2.0D;
                         d14 = d12;
@@ -1935,6 +1937,7 @@ public abstract class EntityLivingBase extends Entity {
         this.randomYawVelocity *= 0.9F;
         this.updateElytra();
         this.travel(this.moveStrafing, this.moveVertical, this.moveForward);
+        //todo maybe async?
         this.collideWithNearbyEntities();
     }
 
