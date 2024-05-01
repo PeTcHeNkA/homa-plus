@@ -6,10 +6,8 @@ import plus.fserver.utls.AABKey;
 
 public class SyncAABBCache<V> extends SyncTe4Cache<AABKey, ArrayListE6<V>>{
     private final int clearTime;//500ms = 10 ticks
-    private int timer = 0;
+    private int timer = 0, timer2, timer3, maxV, maxN;
     private AABKey swap = new AABKey(0,0,0,0,0,0);
-
-    //private final ReentrantLock lock = new ReentrantLock();
 
     public SyncAABBCache(int clearTime) {
         this.clearTime = clearTime;
@@ -19,8 +17,72 @@ public class SyncAABBCache<V> extends SyncTe4Cache<AABKey, ArrayListE6<V>>{
     public void tick(){
         removeByStamp(prev());
         ++timer;
+
+        maxV = vCursor < maxV ? maxV : vCursor;
+        maxN = nCursor<maxN?maxN:nCursor;
+
         if(timer > clearTime){
+            //System.out.println("N:"+(c3-c2)+"+"+c2+",C:"+c);
             timer = 0;
+            if(++timer2 >= 60){
+                timer2 = 0;
+
+                if(++timer3 >= 5){
+                    cleanRed2();
+                    timer3 = 0;
+                } else {
+
+                    cleanRed1();
+                }
+            }
+        }
+    }
+
+
+    private void cleanRed2(){
+        l1: if(maxV > vCursor){
+            int usages = (maxV - vCursor) * 20;
+
+            Object[] vals = this.vals;
+            maxV = Math.min(maxV, vals.length);
+
+            if(usages >= maxN)break l1;
+
+            for(int cursor = usages; cursor < maxV; ++cursor){
+                vals[cursor] = null;
+            }
+            vCursor = usages-1;
+            //System.out.println("FREE "+(maxV-usages)+" values");
+            maxV = 0;
+        }
+
+        l2: if(maxN > nCursor){
+            int usages = (maxN - nCursor) * 20;
+
+            Object[] vals = this.emptyNodes;
+            maxN = Math.min(maxN, vals.length);
+
+            if(usages >= maxN)break l2;
+
+            for(int cursor = usages; cursor < maxN; ++cursor){
+                vals[cursor] = null;
+            }
+            nCursor = usages-1;
+            //System.out.println("FREE "+(maxN-usages)+" nodes");
+            maxN = 0;
+        }
+    }
+
+
+    private void cleanRed1(){
+        for (int i=0;i<vals.length;i++){
+            ArrayListE6 list = (ArrayListE6) vals[i];
+            if(list == null) return;
+            if(list.data.length > 6){
+                list.data = ArrayListE6.EMPTY_ARR;
+                list.size = 0;
+            }
+            else list.clearAll();
         }
     }
 
@@ -33,12 +95,16 @@ public class SyncAABBCache<V> extends SyncTe4Cache<AABKey, ArrayListE6<V>>{
     }
 
 
+   // int c = 0, c2 = 0, c3 = 0;
     public ArrayListE6<V> allocArr(){
         ArrayListE6<V> list = tryAllocVal();
         if(list != null){
+            //++c;
             list.fclear();
             return list;
         }
+        //++c3;
+        //System.out.println("NEN1");
         return new ArrayListE6<>();
     }
 
@@ -61,9 +127,7 @@ public class SyncAABBCache<V> extends SyncTe4Cache<AABKey, ArrayListE6<V>>{
 
 
     public void add(AABKey key, ArrayListE6<V> v){
-        //lock.lock();
         putValN1(key.hashCode(), key, v, timer);
-        //lock.unlock();
     }
 
 

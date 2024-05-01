@@ -55,6 +55,12 @@ public class ArrayListE6<T> implements List<T> {
     }
 
 
+    public void clearAll(){
+        for (int i = 0; i < data.length; i++) data[i] = null;
+        size = 0;
+    }
+
+
     public void fclear(){
         size = 0;
     }

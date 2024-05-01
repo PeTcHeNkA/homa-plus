@@ -105,7 +105,7 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
     Node<K,V>[] emptyNodes = EMPTY;
     //TreeNode<K,V>[] emptyTree = EMPTY_T;
     Object[] vals = EMPTY_O;
-    int nCursor = -1, kCursor = -1;
+    int nCursor = -1, vCursor = -1;
 
     public SyncTe4Cache(int initialCapacity, float loadFactor) {
         if (loadFactor <= 0)
@@ -140,8 +140,7 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
 
     final void free(Node<K,V> node){
         if(emptyNodes.length == ++nCursor){
-            int newSize = emptyNodes.length == 0?table.length:emptyNodes.length<<1;
-            Node[] newNodes = new Node[newSize];
+            Node[] newNodes = new Node[emptyNodes.length + 256];
             System.arraycopy(emptyNodes, 0, newNodes, 1, emptyNodes.length);
             newNodes[0] = node;
             emptyNodes = newNodes;
@@ -151,19 +150,18 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
 
 
     final V tryAllocVal(){
-        return kCursor > 0 ? (V) vals[kCursor--] : null;
+        return vCursor > 0 ? (V) vals[vCursor--] : null;
     }
 
 
     final void freeVal(V key){
-        if(vals.length == ++kCursor){
-            int newSize = vals.length == 0?table.length: vals.length<<1;
-            Object[] newNodes = new Object[newSize];
+        if(vals.length == ++vCursor){
+            Object[] newNodes = new Object[vals.length + 256];
             System.arraycopy(vals, 0, newNodes, 1, vals.length);
             newNodes[0] = key;
             vals = newNodes;
         }
-        else vals[kCursor] = key;
+        else vals[vCursor] = key;
     }
 
 
@@ -456,22 +454,51 @@ public class SyncTe4Cache<K,V> implements Map<K,V> {
         }
         return null;
     }
+//
+//
+//    public final void removeByStamp2(int stamp){
+//        if(size == 0)return;
+//        Node<K,V> next = null, node;
+//        Node<K,V>[] tab = table;
+//        int index = 0, n = tab.length;
+//
+//        do {} while (index < n && (next = tab[index++]) == null);
+//
+//        while (next != null){
+//            Node<K,V> e = next;
+//
+//            if((next = (node = e).next) == null) do {} while (index < tab.length && (next = tab[index++]) == null);
+//
+//            if(node.stamp == stamp) removeNodeF(node.hash, node.key);
+//        }
+//    }
 
 
     public final void removeByStamp(int stamp){
-        if(size == 0)return;
-        Node<K,V> next = null, node;
         Node<K,V>[] tab = table;
-        int index = 0, n = tab.length;
-
-        do {} while (index < n && (next = tab[index++]) == null);
-
-        while (next != null){
-            Node<K,V> e = next;
-
-            if((next = (node = e).next) == null) do {} while (index < tab.length && (next = tab[index++]) == null);
-
-            if(node.stamp == stamp) removeNodeF(node.hash, node.key);
+        for (int i=0;i<tab.length;i++){
+            Node<K, V> cur = table[i], prev = null;
+            while (cur != null){
+                if(cur.stamp == stamp){
+                    if(cur instanceof TreeNode){
+                        ((TreeNode<K,V>)cur).removeTreeNode(this, tab, false);
+                        cur = tab[i];
+                        --size;
+                    } else {
+                        freeVal(cur.value);
+                        free(cur);
+                        if(prev == null) cur = tab[i] = cur.next;
+                        else {
+                            prev.next = cur.next;
+                            cur = cur.next;
+                        }
+                        --size;
+                    }
+                } else {
+                    prev = cur;
+                    cur = cur.next;
+                }
+            }
         }
     }
 
