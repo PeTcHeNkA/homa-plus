@@ -198,30 +198,32 @@ public final class WorldEntitySpawner {
     }
 
 
-    public static boolean canCreatureTypeSpawnAtLocation(EntityLiving.SpawnPlacementType spawnPlacementTypeIn, World worldIn, BlockPos pos) {
-        if (!worldIn.getWorldBorder().contains(pos)) {
+    public static boolean canCreatureTypeSpawnAtLocation(EntityLiving.SpawnPlacementType type, World world, BlockPos pos) {
+        if (!world.getWorldBorder().contains(pos)) {
             return false;
         } else {
-            return spawnPlacementTypeIn.canSpawnAt(worldIn, pos);
+            return type.canSpawnAt(world, pos);
         }
     }
 
 
-    public static boolean canCreatureTypeSpawnBody(EntityLiving.SpawnPlacementType spawnPlacementTypeIn, World worldIn, BlockPos pos) {{
-            IBlockState iblockstate = worldIn.getBlockState(pos);
+    public static boolean canCreatureTypeSpawnBody(EntityLiving.SpawnPlacementType type, World world, BlockPos pos) {{
+            IBlockState state = world.access().getBlockState(pos);
 
-            if (spawnPlacementTypeIn == EntityLiving.SpawnPlacementType.IN_WATER) {
-                return iblockstate.getMaterial() == Material.WATER && worldIn.getBlockState(pos.down()).getMaterial() == Material.WATER && !worldIn.getBlockState(pos.up()).isNormalCube();
+            if (type == EntityLiving.SpawnPlacementType.IN_WATER) {
+                return state.getMaterial() == Material.WATER &&
+                        world.access().getBlockState(pos.getX(), pos.getY()-1, pos.getZ()).getMaterial() == Material.WATER
+                        && !world.access().getBlockState(pos.getX(), pos.getY()+1, pos.getZ()).isNormalCube();
             } else {
-                BlockPos blockpos = pos.down();
-                IBlockState state = worldIn.getBlockState(blockpos);
+                BlockPos down = pos.down();
+                IBlockState downState = world.getBlockState(down);
 
-                if (!state.getBlock().canCreatureSpawn(state, worldIn, blockpos, spawnPlacementTypeIn)) {
+                if (!downState.getBlock().canCreatureSpawn(downState, world, down, type)) {
                     return false;
                 } else {
-                    Block block = worldIn.getBlockState(blockpos).getBlock();
-                    boolean flag = block != Blocks.BEDROCK && block != Blocks.BARRIER;
-                    return flag && isValidEmptySpawnBlock(iblockstate) && isValidEmptySpawnBlock(worldIn.getBlockState(pos.up()));
+                    Block block = world.access().getBlockState(down).getBlock();
+                    return block != Blocks.BEDROCK && block != Blocks.BARRIER && isValidEmptySpawnBlock(state)
+                            && isValidEmptySpawnBlock(world.access().getBlockState(pos.getX(), pos.getY()+1, pos.getZ()));
                 }
             }
         }

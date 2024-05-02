@@ -489,7 +489,7 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
     }
 
 
-    private void processPlayerDigging0(CPacketPlayerDigging packetIn, WorldServer worldserver) {
+    private void processPlayerDigging0(CPacketPlayerDigging packetIn, WorldServer world) {
         BlockPos blockpos = packetIn.getPosition();
         this.player.markPlayerActive();
 
@@ -527,18 +527,18 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
 
                 if (d3 < dist * dist) {
                     if (packetIn.getAction() == CPacketPlayerDigging.Action.START_DESTROY_BLOCK) {
-                        if (worldserver.getWorldBorder().contains(blockpos))
+                        if (world.getWorldBorder().contains(blockpos))
                             this.player.interactionManager.onBlockClicked(blockpos, packetIn.getFacing());
                         else
-                            this.player.connection.netManager.sendPacketE(new SPacketBlockChange(worldserver, blockpos));
+                            this.player.connection.netManager.sendPacketE(new SPacketBlockChange(world, blockpos));
                     } else {
                         if (packetIn.getAction() == CPacketPlayerDigging.Action.STOP_DESTROY_BLOCK)
                             this.player.interactionManager.blockRemoving(blockpos);
                         else
                             //if(packetIn.getAction() == CPacketPlayerDigging.Action.ABORT_DESTROY_BLOCK)
                             this.player.interactionManager.cancelDestroyingBlock();
-                        if (worldserver.getBlockState(blockpos).getMaterial() != Material.AIR)
-                            this.player.connection.netManager.sendPacketE(new SPacketBlockChange(worldserver, blockpos));
+                        if (world.localSelector.getBlockState(blockpos).getMaterial() != Material.AIR)
+                            this.player.connection.netManager.sendPacketE(new SPacketBlockChange(world, blockpos));
                     }
                 }
         }
@@ -1078,9 +1078,10 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
     }
 
 
-    private void afterPlace(WorldServer worldserver, BlockPos blockpos, EnumFacing facing){
-        netManager.sendPacketSync(new SPacketBlockChange(worldserver, blockpos));
-        netManager.sendPacketSync(new SPacketBlockChange(worldserver, blockpos.offset(facing)));
+    private void afterPlace(WorldServer world, BlockPos pos, EnumFacing facing){
+        netManager.sendPacketSync(new SPacketBlockChange(world.localSelector.getState(pos), pos));
+        pos = pos.offset(facing);
+        netManager.sendPacketSync(new SPacketBlockChange(world.localSelector.getState(pos), pos));
     }
 
 

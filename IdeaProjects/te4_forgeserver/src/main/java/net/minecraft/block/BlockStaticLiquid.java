@@ -7,6 +7,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.event.ForgeEventFactory;
 import plus.fserver.utls.ChunkSelector;
 
@@ -47,16 +48,21 @@ public class BlockStaticLiquid extends BlockLiquid {
         if (this.material == Material.LAVA) {
             if (worldIn.getGameRules().getBoolean("doFireTick")) {
                 int i = rand.nextInt(3);
-                ChunkSelector selector = new ChunkSelector(worldIn);
+                ChunkSelector selector = ((WorldServer)worldIn).localSelector;
                 if (i > 0) {
                     BlockPos blockpos = pos;
 
                     for (int j = 0; j < i; ++j) {
-                        blockpos = blockpos.add(
-                                rand.nextInt(3) - 1,
-                                1,
-                                rand.nextInt(3) - 1
+                         blockpos = worldIn.localTempPos.setPos(
+                                blockpos.getX()+(rand.nextInt(3) - 1),
+                                blockpos.getY()+1,
+                                blockpos.getZ()+(rand.nextInt(3) - 1)
                         );
+//                        blockpos = blockpos.add(
+//                                rand.nextInt(3) - 1,
+//                                1,
+//                                rand.nextInt(3) - 1
+//                        );
 
                         if (blockpos.getY() >= 0 && blockpos.getY() < worldIn.getHeight() && !worldIn.isBlockLoaded(blockpos)) {
                             return;
@@ -76,13 +82,26 @@ public class BlockStaticLiquid extends BlockLiquid {
                 } else {
                     BlockPos temp;
                     for (int k = 0; k < 3; ++k) {
-                        BlockPos blockpos1 = pos.add(rand.nextInt(3) - 1, 0, rand.nextInt(3) - 1);
+//                        BlockPos blockpos1 = pos.add(
+//                                rand.nextInt(3) - 1,
+//                                0,
+//                                rand.nextInt(3) - 1
+//                        );
+                        BlockPos blockpos1 = worldIn.localTempPos.setPos(
+                                pos.getX()+(rand.nextInt(3) - 1),
+                                pos.getY()+1,
+                                pos.getZ()+(rand.nextInt(3) - 1)
+                        );
 
                         if (blockpos1.getY() >= 0 && blockpos1.getY() < 256 && !worldIn.isBlockLoaded(blockpos1)) {
                             return;
                         }
 
-                        if (selector.isAirBlock(temp = blockpos1.up()) && this.getCanBlockBurn(worldIn, selector, blockpos1)) {
+                        temp = worldIn.localTempPos2.setPos(
+                                blockpos1.getX(), blockpos1.getY()+1, blockpos1.getZ()
+                        );
+
+                        if (selector.isAirBlock(temp) && this.getCanBlockBurn(worldIn, selector, blockpos1)) {
                             selector.setBlockState(temp, net.minecraftforge.event.ForgeEventFactory.fireFluidPlaceBlockEvent(worldIn, temp, pos, Blocks.FIRE.getDefaultState()), 3);
                         }
                     }
@@ -98,8 +117,14 @@ public class BlockStaticLiquid extends BlockLiquid {
 
 
     protected boolean isSurroundingBlockFlammable(World worldIn, ChunkSelector selector, BlockPos pos) {
-        for (EnumFacing enumfacing : EnumFacing.values()) {
-            if (this.getCanBlockBurn(worldIn, selector, pos.offset(enumfacing))) {
+        BlockPos.MutableBlockPos temp = worldIn.localTempPos2;
+        for (EnumFacing enumfacing : EnumFacing.VALUES) {
+            temp.setPos(
+                    pos.getX()+enumfacing.getZOffset(),
+                    pos.getY()+enumfacing.getYOffset(),
+                    pos.getZ()+enumfacing.getZOffset()
+            );
+            if (this.getCanBlockBurn(worldIn, selector, temp)) {
                 return true;
             }
         }

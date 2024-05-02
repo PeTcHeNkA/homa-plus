@@ -141,13 +141,14 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     //todo warning ensure there will be no simultaneous use
     public final BlockPos.MutableBlockPos localTempPos = new BlockPos.MutableBlockPos();
     public final BlockPos.MutableBlockPos localTempPos2 = new BlockPos.MutableBlockPos();
+    public final BlockPos.MutableBlockPos localTempPos3 = new BlockPos.MutableBlockPos();
 
     public long tryUpdateNavigationLimit = 20L;
     public final LightingEngine lightingEngine = new LightingEngine(this);
     private LeavesCache leavesCache;
 
-    final SyncAABBCache<AxisAlignedBB> bbCache;
-    final SyncAABBCache<Entity>        eeCache;
+    final SyncListCache<AxisAlignedBB> bbCache;
+    final SyncListCache<Entity> eeCache;
     protected IBlockEAccess     effectiveAcces;
 
     protected World(ISaveHandler saveHandlerIn, WorldInfo info, WorldProvider providerIn, Profiler profilerIn, boolean client) {
@@ -170,8 +171,8 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         perWorldStorage = new MapStorage((ISaveHandler)null);
 
         if(ElcaCV.MORE_MOBS_OPTIMIZER) {
-            eeCache = new SyncAABBCache<>(10);
-            bbCache = new SyncAABBCache<>(10);
+            eeCache = new SyncListCache<>(10, 60);
+            bbCache = new SyncListCache<>(10, 90);
         } else {
             eeCache = null;
             bbCache = null;

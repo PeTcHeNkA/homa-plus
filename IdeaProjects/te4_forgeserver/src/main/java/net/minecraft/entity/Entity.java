@@ -1992,7 +1992,8 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
 
     public boolean isBeingRidden() {
-        return !this.getPassengers().isEmpty();
+        return !this.riddenByEntities.isEmpty();
+        //return !this.getPassengers().isEmpty();
     }
 
 
@@ -2910,7 +2911,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
 
     public <T extends Entity> Collection<T> getRecursivePassengersByType(Class<T> entityClass) {
-        Set<T> set = Sets.<T>newHashSet();
+        Set<T> set = new Te4HashSet<>();
         this.getRecursivePassengersByType(entityClass, set);
         return set;
     }

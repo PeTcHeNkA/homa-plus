@@ -4,13 +4,36 @@ import net.minecraft.util.math.AxisAlignedBB;
 import plus.fserver.utls.AABKey;
 
 
-public class SyncAABBCache<V> extends SyncTe4Cache<AABKey, ArrayListE6<V>>{
-    private final int clearTime;//500ms = 10 ticks
+public class SyncListCache<V> extends SyncTe4Cache<AABKey, ArrayListE6<V>>{
+    private final int clearTime, clearTime2;//500ms = 10 ticks
     private int timer = 0, timer2, timer3, maxV, maxN;
     private AABKey swap = new AABKey(0,0,0,0,0,0);
 
-    public SyncAABBCache(int clearTime) {
+    public SyncListCache(int clearTime, int clearTime2) {
         this.clearTime = clearTime;
+        this.clearTime2 = clearTime2;
+    }
+
+    static class BoxCache extends SyncListCache{
+        public BoxCache(int clearTime, int clearTime2) {
+            super(clearTime, clearTime2);
+        }
+
+        @Override
+        protected void cleanRed1(){
+            for (int i=0;i<vals.length;i++){
+                ArrayListE6 list = (ArrayListE6) vals[i];
+                if(list == null) return;
+                if(list.data.length > 6){
+                    list.data = ArrayListE6.EMPTY_ARR;
+                    list.size = 0;
+                }
+                else {
+                    Object[] arr = list.data;
+                    for(int j=3;j<arr.length;j++) arr[j] = null;
+                }
+            }
+        }
     }
 
 
@@ -22,9 +45,8 @@ public class SyncAABBCache<V> extends SyncTe4Cache<AABKey, ArrayListE6<V>>{
         maxN = nCursor<maxN?maxN:nCursor;
 
         if(timer > clearTime){
-            //System.out.println("N:"+(c3-c2)+"+"+c2+",C:"+c);
             timer = 0;
-            if(++timer2 >= 60){
+            if(++timer2 >= clearTime2){
                 timer2 = 0;
 
                 if(++timer3 >= 5){
@@ -39,7 +61,7 @@ public class SyncAABBCache<V> extends SyncTe4Cache<AABKey, ArrayListE6<V>>{
     }
 
 
-    private void cleanRed2(){
+    protected void cleanRed2(){
         l1: if(maxV > vCursor){
             int usages = (maxV - vCursor) * 20;
 
@@ -81,7 +103,7 @@ public class SyncAABBCache<V> extends SyncTe4Cache<AABKey, ArrayListE6<V>>{
     }
 
 
-    private void cleanRed1(){
+    protected void cleanRed1(){
         for (int i=0;i<vals.length;i++){
             ArrayListE6 list = (ArrayListE6) vals[i];
             if(list == null) return;

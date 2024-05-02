@@ -15,10 +15,7 @@ import net.minecraft.util.BlockIDIndexes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.EnumSkyBlock;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldEntitySpawner;
-import net.minecraft.world.WorldType;
+import net.minecraft.world.*;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.Chunk;
@@ -538,10 +535,10 @@ public class ChunkGeneratorOverworld implements IChunkGenerator {
 
 
     @Override
-    public List<Biome.SpawnListEntry> getPossibleCreatures(EnumCreatureType creatureType, BlockPos pos) {
-        Biome biome = this.world.getBiome(pos);
+    public List<Biome.SpawnListEntry> getPossibleCreatures(EnumCreatureType type, BlockPos pos) {
+        Biome biome = world.isRemote?this.world.getBiome(pos):((WorldServer)world).localSelector.getBiome(pos);
 
-        if (this.mapFeaturesEnabled && creatureType == EnumCreatureType.MONSTER) {
+        if (this.mapFeaturesEnabled && type == EnumCreatureType.MONSTER) {
             if (this.scatteredFeatureGenerator.isSwampHut(pos)) {
                 return this.scatteredFeatureGenerator.getMonsters();
             }
@@ -550,7 +547,7 @@ public class ChunkGeneratorOverworld implements IChunkGenerator {
                 return this.oceanMonumentGenerator.getMonsters();
             }
         }
-        return biome.getSpawnableList(creatureType);
+        return biome.getSpawnableList(type);
     }
 
 

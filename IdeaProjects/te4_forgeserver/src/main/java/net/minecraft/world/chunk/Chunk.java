@@ -266,10 +266,11 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
 
     private void recheckGaps(boolean onlyOne) {
-        if (this.world.isAreaLoaded(new BlockPos(this.x * 16 + 8, 0, this.z * 16 + 8), 16)) {
+        int x = (this.x << 4) + 8, z = (this.z << 4) + 8;
+        if (this.world.isAreaLoaded(x-16, 16, z-16, x+16, 16, z+16, true)) {
             int mask;
-            for (int x = 0; x < 16; ++x) {
-                for (int z = 0; z < 16; ++z) {
+            for (x = 0; x < 16; ++x) {
+                for (z = 0; z < 16; ++z) {
                     mask = 1<<z;
                     if ((updateSkylights[x] & mask) == mask) {
                         updateSkylights[x] &= ~mask;
@@ -432,14 +433,14 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
         if (j >= this.precipitationHeightMap[l] - 1) {
             this.precipitationHeightMap[l] = -999;
         }
-        IBlockState iblockstate = this.getBlockState(pos);
+        IBlockState prev = this.getBlockState(pos);
 
-        if (iblockstate == state) {
+        if (prev == state) {
             return null;
         } else {
             int i1 = this.heightMap[l];
-            Block block = state.getBlock(), block1 = iblockstate.getBlock();
-            int k1 = iblockstate.getLightOpacity(this.world, pos); // Relocate old light value lookup here, so that it is called before TE is removed.
+            Block block = state.getBlock(), prevBlock = prev.getBlock();
+            int k1 = prev.getLightOpacity(this.world, pos); // Relocate old light value lookup here, so that it is called before TE is removed.
             ExtendedBlockStorage storage = this.storageArrays[j >> 4];
             boolean flag = false;
 
@@ -455,15 +456,15 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
             storage.set(i, j & 15, k, state);
 
             if (!this.world.isRemote) {
-                if (block1 != block) block1.breakBlock(this.world, pos, iblockstate);
+                if (prevBlock != block) prevBlock.breakBlock(this.world, pos, prev);
 
                 TileEntity te = this.getTileEntity(pos, Chunk.EnumCreateEntityType.CHECK);
-                if (te != null && te.shouldRefresh(this.world, pos, iblockstate, state))
+                if (te != null && te.shouldRefresh(this.world, pos, prev, state))
                     this.world.removeTileEntity(pos);
 
-            } else if (block1.hasTileEntity(iblockstate)) {
+            } else if (prev.hasTile()) {
                 TileEntity te = this.getTileEntity(pos, Chunk.EnumCreateEntityType.CHECK);
-                if (te != null && te.shouldRefresh(this.world, pos, iblockstate, state))
+                if (te != null && te.shouldRefresh(this.world, pos, prev, state))
                     this.world.removeTileEntity(pos);
             }
 
@@ -489,11 +490,11 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
                 }
 
                 // If capturing blocks, only run block physics for TE's. Non-TE's are handled in ForgeHooks.onPlaceItemIntoWorld
-                if (!this.world.isRemote && block1 != block && (!this.world.captureBlockSnapshots || block.hasTileEntity(state))) {
+                if (!this.world.isRemote && prevBlock != block && (!this.world.captureBlockSnapshots || state.hasTile())) {
                     block.onBlockAdded(this.world, pos, state);
                 }
 
-                if (block.hasTileEntity(state)) {
+                if (state.hasTile()) {
                     TileEntity tileEntity = this.getTileEntity(pos, Chunk.EnumCreateEntityType.CHECK);
 
                     if (tileEntity == null) {
@@ -506,7 +507,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
                     }
                 }
                 this.dirty = true;
-                return iblockstate;
+                return prev;
             }
         }
     }
@@ -525,7 +526,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
         }
         storage.set(i, y & 15, k, newState);
 
-        if (current.getBlock().hasTileEntity(current)) {
+        if (current.hasTile()) {
             BlockPos pos = new BlockPos(x, y, z);
             TileEntity te = this.getTileEntity(pos, Chunk.EnumCreateEntityType.CHECK);
             if (te != null && te.shouldRefresh(this.world, pos, current, newState))
@@ -667,12 +668,11 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
 
     @Nullable
-    private TileEntity createNewTileEntity(BlockPos pos)
-    {
-        IBlockState iblockstate = this.getBlockState(pos);
-        Block block = iblockstate.getBlock();
-        return !block.hasTileEntity(iblockstate) ? null : block.createTileEntity(this.world, iblockstate);
+    private TileEntity createNewTileEntity(BlockPos pos) {
+        IBlockState state = this.getBlockState(pos);
+        return !state.hasTile()? null : state.getBlock().createTileEntity(this.world, state);
     }
+
 
     @Nullable
     public TileEntity getTileEntity(BlockPos pos, Chunk.EnumCreateEntityType creationMode) {
@@ -709,8 +709,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
         if (tileEntityIn.getWorld() != this.world)
             tileEntityIn.setWorld(this.world);
         tileEntityIn.setPos(pos);
-        IBlockState state = getBlockState(pos);
-        if (state.getBlock().hasTileEntity(state)) {
+        if (getBlockState(pos).hasTile()) {
             if (this.tileEntities.containsKey(pos))
                 this.tileEntities.get(pos).invalidate();
             tileEntityIn.validate();
@@ -939,9 +938,9 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
         while (this.tileEntityPosQueue.hasNext()) {
             BlockPos blockpos = this.tileEntityPosQueue.flush();
 
-            if (this.getTileEntity(blockpos, Chunk.EnumCreateEntityType.CHECK) == null && this.getBlockState(blockpos).getBlock().hasTileEntity(this.getBlockState(blockpos))) {
-                TileEntity tileentity = this.createNewTileEntity(blockpos);
-                this.world.setTileEntity(blockpos, tileentity);
+            if (this.getTileEntity(blockpos, Chunk.EnumCreateEntityType.CHECK) == null && this.getBlockState(blockpos).hasTile()) {
+                TileEntity tile = this.createNewTileEntity(blockpos);
+                this.world.setTileEntity(blockpos, tile);
                 this.world.markBlockRangeForRenderUpdate(blockpos, blockpos);
             }
         }

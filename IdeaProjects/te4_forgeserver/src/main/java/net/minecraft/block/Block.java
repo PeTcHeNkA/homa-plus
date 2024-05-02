@@ -46,8 +46,11 @@ import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.common.EnumPlantType;
+import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.fserver.api.IBlockEAccess;
 import plus.fserver.utls.collections.ArrayListE6;
 
 
@@ -476,78 +479,72 @@ public class Block extends net.minecraftforge.registries.IForgeRegistryEntry.Imp
 
     @Deprecated
     @Nullable
-    public AxisAlignedBB getCollisionBoundingBox(IBlockState blockState, IBlockAccess worldIn, BlockPos pos)
-    {
+    public AxisAlignedBB getCollisionBoundingBox(IBlockState blockState, IBlockAccess worldIn, BlockPos pos) {
         return blockState.getBoundingBox(worldIn, pos);
     }
 
+
     @Deprecated
     @SideOnly(Side.CLIENT)
-    public AxisAlignedBB getSelectedBoundingBox(IBlockState state, World worldIn, BlockPos pos)
-    {
+    public AxisAlignedBB getSelectedBoundingBox(IBlockState state, World worldIn, BlockPos pos) {
         return state.getBoundingBox(worldIn, pos).offset(pos);
     }
 
+
     @Deprecated
-    public boolean isOpaqueCube(IBlockState state)
-    {
+    public boolean isOpaqueCube(IBlockState state) {
         return true;
     }
 
-    public boolean canCollideCheck(IBlockState state, boolean hitIfLiquid)
-    {
+
+    public boolean canCollideCheck(IBlockState state, boolean hitIfLiquid) {
         return this.isCollidable();
     }
 
-    public boolean isCollidable()
-    {
+
+    public boolean isCollidable() {
         return true;
     }
 
-    public void randomTick(World worldIn, BlockPos pos, IBlockState state, Random random)
-    {
+
+    public void randomTick(World worldIn, BlockPos pos, IBlockState state, Random random) {
         this.updateTick(worldIn, pos, state, random);
     }
 
-    public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand)
-    {
-    }
+
+    public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand) {}
+
 
     @SideOnly(Side.CLIENT)
-    public void randomDisplayTick(IBlockState stateIn, World worldIn, BlockPos pos, Random rand)
-    {
-    }
+    public void randomDisplayTick(IBlockState stateIn, World worldIn, BlockPos pos, Random rand) {}
 
-    public void onPlayerDestroy(World worldIn, BlockPos pos, IBlockState state)
-    {
-    }
+
+    public void onPlayerDestroy(World worldIn, BlockPos pos, IBlockState state) {}
+
 
     @Deprecated
-    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos)
-    {
-    }
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos) {}
 
-    public int tickRate(World worldIn)
-    {
+
+    public int tickRate(World worldIn) {
         return 10;
     }
 
-    public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state)
-    {
-    }
 
-    public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
-    {
-        if (hasTileEntity(state) && !(this instanceof BlockContainer))
-        {
+    public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state) {}
+
+
+    public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
+        if (hasTileEntity(state) && !(this instanceof BlockContainer)) {
             worldIn.removeTileEntity(pos);
         }
     }
 
-    public int quantityDropped(Random random)
-    {
+
+    public int quantityDropped(Random random) {
         return 1;
     }
+
 
     public Item getItemDropped(IBlockState state, Random rand, int fortune)
     {
@@ -1649,46 +1646,52 @@ public class Block extends net.minecraftforge.registries.IForgeRegistryEntry.Imp
      *   Water check if its still water
      *
      * @param state The Current state
-     * @param world The current world
-     * @param pos Block position in world
+     * @param access The current access
+     * @param pos Block position in access
      * @param direction The direction relative to the given position the plant wants to be, typically its UP
      * @param plantable The plant that wants to check
      * @return True to allow the plant to be planted/stay.
      */
-    public boolean canSustainPlant(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing direction, net.minecraftforge.common.IPlantable plantable)
-    {
-        IBlockState plant = plantable.getPlant(world, pos.offset(direction));
-        net.minecraftforge.common.EnumPlantType plantType = plantable.getPlantType(world, pos.offset(direction));
+    public boolean canSustainPlant(IBlockState state, IBlockAccess access, BlockPos pos, EnumFacing direction, IPlantable plantable) {
+        BlockPos temp = access.getWorld().localTempPos2.setPos(
+                pos.getX()+direction.getXOffset(),
+                pos.getY()+direction.getYOffset(),
+                pos.getZ()+direction.getZOffset()
+        );
 
-        if (plant.getBlock() == net.minecraft.init.Blocks.CACTUS)
-        {
+        IBlockState plant = plantable.getPlant(access, temp);
+        EnumPlantType plantType = plantable.getPlantType(access, temp);
+
+        if (plant.getBlock() == net.minecraft.init.Blocks.CACTUS) {
             return this == net.minecraft.init.Blocks.CACTUS || this == net.minecraft.init.Blocks.SAND;
         }
 
-        if (plant.getBlock() == net.minecraft.init.Blocks.REEDS && this == net.minecraft.init.Blocks.REEDS)
-        {
+        if (plant.getBlock() == net.minecraft.init.Blocks.REEDS && this == net.minecraft.init.Blocks.REEDS) {
             return true;
         }
 
-        if (plantable instanceof BlockBush && ((BlockBush)plantable).canSustainBush(state))
-        {
+        if (plantable instanceof BlockBush && ((BlockBush)plantable).canSustainBush(state)) {
             return true;
         }
 
-        switch (plantType)
-        {
-            case Desert: return this == net.minecraft.init.Blocks.SAND || this == net.minecraft.init.Blocks.HARDENED_CLAY || this == net.minecraft.init.Blocks.STAINED_HARDENED_CLAY;
+        switch (plantType) {
+            case Desert: return this == net.minecraft.init.Blocks.SAND || this == net.minecraft.init.Blocks.HARDENED_CLAY
+                    || this == net.minecraft.init.Blocks.STAINED_HARDENED_CLAY;
             case Nether: return this == net.minecraft.init.Blocks.SOUL_SAND;
             case Crop:   return this == net.minecraft.init.Blocks.FARMLAND;
-            case Cave:   return state.isSideSolid(world, pos, EnumFacing.UP);
-            case Plains: return this == net.minecraft.init.Blocks.GRASS || this == net.minecraft.init.Blocks.DIRT || this == net.minecraft.init.Blocks.FARMLAND;
+            case Cave:   return state.isSideSolid(access, pos, EnumFacing.UP);
+            case Plains: return this == net.minecraft.init.Blocks.GRASS || this == net.minecraft.init.Blocks.DIRT
+                    || this == net.minecraft.init.Blocks.FARMLAND;
             case Water:  return state.getMaterial() == Material.WATER && state.getValue(BlockLiquid.LEVEL) == 0;
             case Beach:
-                boolean isBeach = this == net.minecraft.init.Blocks.GRASS || this == net.minecraft.init.Blocks.DIRT || this == net.minecraft.init.Blocks.SAND;
-                boolean hasWater = (world.getBlockState(pos.east()).getMaterial() == Material.WATER ||
-                        world.getBlockState(pos.west()).getMaterial() == Material.WATER ||
-                        world.getBlockState(pos.north()).getMaterial() == Material.WATER ||
-                        world.getBlockState(pos.south()).getMaterial() == Material.WATER);
+                boolean isBeach = this == net.minecraft.init.Blocks.GRASS || this == net.minecraft.init.Blocks.DIRT
+                        || this == net.minecraft.init.Blocks.SAND;
+                boolean hasWater = (
+                        access.getBlockState(pos.east()).getMaterial() == Material.WATER ||
+                        access.getBlockState(pos.west()).getMaterial() == Material.WATER ||
+                        access.getBlockState(pos.north()).getMaterial() == Material.WATER ||
+                        access.getBlockState(pos.south()).getMaterial() == Material.WATER
+                );
                 return isBeach && hasWater;
         }
 

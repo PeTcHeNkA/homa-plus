@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Collection;
 import net.minecraft.block.Block;
 import net.minecraft.block.properties.IProperty;
+import net.minecraft.world.IBlockAccess;
 import plus.fserver.patch.PBlockState;
 
 
@@ -21,4 +22,6 @@ public interface IBlockState extends IBlockBehaviors, IBlockProperties, PBlockSt
     Block getBlock();
 
     default IBlockState getClean(){return this;}
+
+    boolean hasTile();
 }

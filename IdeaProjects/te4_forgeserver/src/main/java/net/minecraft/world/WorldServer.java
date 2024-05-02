@@ -193,14 +193,14 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
     @Nullable
     public Biome.SpawnListEntry getSpawnListEntryForTypeAt(EnumCreatureType creatureType, BlockPos pos) {
         List<Biome.SpawnListEntry> list = chunkProviderServer.getPossibleCreatures(creatureType, pos);
-        list = net.minecraftforge.event.ForgeEventFactory.getPotentialSpawns(this, creatureType, pos, list);
+        list = ForgeEventFactory.getPotentialSpawns(this, creatureType, pos, list);
         return list != null && !list.isEmpty() ? WeightedRandom.getRandomItem(this.rand, list) : null;
     }
 
 
     public boolean canCreatureTypeSpawnHere(EnumCreatureType creatureType, Biome.SpawnListEntry spawnListEntry, BlockPos pos) {
         List<Biome.SpawnListEntry> list = chunkProviderServer.getPossibleCreatures(creatureType, pos);
-        list = net.minecraftforge.event.ForgeEventFactory.getPotentialSpawns(this, creatureType, pos, list);
+        list =ForgeEventFactory.getPotentialSpawns(this, creatureType, pos, list);
         return list != null && !list.isEmpty() ? list.contains(spawnListEntry) : false;
     }
 
@@ -298,20 +298,25 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
     }
 
 
+    private final Predicate<EntityLivingBase> ajastNear = entity -> entity != null && entity.isEntityAlive() && WorldServer.this.canSeeSky(entity.getPosition());
+
+
     protected BlockPos adjustPosToNearbyEntity(BlockPos pos) {
         BlockPos blockpos = this.getPrecipitationHeight(pos);
-        AxisAlignedBB axisalignedbb = (new AxisAlignedBB(blockpos, new BlockPos(blockpos.getX(), this.getHeight(), blockpos.getZ()))).grow(3.0D);
-        List<EntityLivingBase> list = this.getEntitiesWithinAABB(EntityLivingBase.class, axisalignedbb, new com.google.common.base.Predicate<EntityLivingBase>() {
-            public boolean apply(@Nullable EntityLivingBase entity) {
-                return entity != null && entity.isEntityAlive() && WorldServer.this.canSeeSky(entity.getPosition());
-            }
-        });
+        AxisAlignedBB aabb = commonWorldEntityAABB;
+
+        aabb.init(
+                blockpos.getX()-3, blockpos.getY()-3, blockpos.getZ()-3,
+                blockpos.getX()+3, this.getHeight()+3, blockpos.getZ()+3
+        );
+
+        List<EntityLivingBase> list = this.getEntitiesWithinAABB(EntityLivingBase.class, aabb, ajastNear);
 
         if (!list.isEmpty()) {
             return list.get(this.rand.nextInt(list.size())).getPosition();
         } else {
             if (blockpos.getY() == -1) {
-                blockpos = blockpos.up(2);
+                BlockPos.unsafeEdit(blockpos, blockpos.getX(), 1, blockpos.getZ());
             }
             return blockpos;
         }
@@ -1237,6 +1242,8 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
     }
 
 
+    private final BlockPos.MutableBlockPos localUpdateBlocks = new BlockPos.MutableBlockPos();
+    private final BlockPos.MutableBlockPos localUpdateBlocks2 = new BlockPos.MutableBlockPos();
     @Override
     protected void updateBlocks() {
         this.playerCheckLight();
@@ -1247,28 +1254,32 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
         } else {
             final boolean flag = isRaining(), flag1 = isThundering();
             Chunk chunk;
+            BlockPos.MutableBlockPos mut = localUpdateBlocks;
+            BlockPos.MutableBlockPos mut2 = localUpdateBlocks2;
             for (Iterator<Chunk> iterator = getPersistentChunkIterable(this.playerChunkMap.getChunkIterator()); iterator.hasNext(); this.profiler.endSection()){
                 chunk = iterator.next();
 
-                int j = chunk.x * 16;
-                int k = chunk.z * 16;
+                int j = chunk.x << 4;
+                int k = chunk.z << 4;
                 chunk.enqueueRelightChecks();
                 chunk.onTick(false);
 
                 if (flag && flag1 && provider.canDoLightning(chunk) && rand.nextInt(100000) == 0) {
                     updateLCG = updateLCG * 3 + 1013904223;
-                    int l = updateLCG >> 2;
-                    BlockPos blockpos = adjustPosToNearbyEntity(new BlockPos(j + (l & 15), 0, k + (l >> 8 & 15)));
+                    int updSeed = updateLCG >> 2;
+                    BlockPos blockpos = adjustPosToNearbyEntity(
+                            mut.setPos(j + (updSeed & 15), 0, k + (updSeed >> 8 & 15))
+                    );
 
                     if (isRainingAt(blockpos)) {
                         DifficultyInstance difficultyinstance = getDifficultyForLocation(blockpos);
 
                         if (getGameRules().doMobSpawning.getBoolean() && rand.nextDouble() < (double)difficultyinstance.getAdditionalDifficulty() * 0.01D) {
-                            EntitySkeletonHorse entityskeletonhorse = new EntitySkeletonHorse(WorldServer.this);
-                            entityskeletonhorse.setTrap(true);
-                            entityskeletonhorse.setGrowingAge(0);
-                            entityskeletonhorse.setPosition(blockpos.getX(), blockpos.getY(), blockpos.getZ());
-                            spawnEntity(entityskeletonhorse);
+                            EntitySkeletonHorse horse = new EntitySkeletonHorse(WorldServer.this);
+                            horse.setTrap(true);
+                            horse.setGrowingAge(0);
+                            horse.setPosition(blockpos.getX(), blockpos.getY(), blockpos.getZ());
+                            spawnEntity(horse);
                             addWeatherEffect(new EntityLightningBolt(WorldServer.this, blockpos.getX(), blockpos.getY(), blockpos.getZ(), true));
                         } else {
                             addWeatherEffect(new EntityLightningBolt(WorldServer.this, blockpos.getX(), blockpos.getY(), blockpos.getZ(), false));
@@ -1279,18 +1290,20 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
                 if (provider.canDoRainSnowIce(chunk) && rand.nextInt(16) == 0) {
                     updateLCG = updateLCG * 3 + 1013904223;
                     int j2 = updateLCG >> 2;
-                    BlockPos pos1 = getPrecipitationHeight(new BlockPos(j + (j2 & 15), 0, k + (j2 >> 8 & 15)));
-                    BlockPos pos2 = pos1.down();
+                    BlockPos pos1 = getPrecipitationHeight(
+                            mut.setPos(j + (j2 & 15), 0, k + (j2 >> 8 & 15))
+                    );
+                    mut2.setPos(pos1.getX(), pos1.getY()-1, pos1.getZ());
 
-                    if (isAreaLoaded(pos2, 1) && canBlockFreezeNoWater(pos2))
-                        setBlockState(pos2, Blocks.ICE.getDefaultState());
+                    if (isAreaLoaded(mut2, 1) && canBlockFreezeNoWater(mut2))
+                        setBlockState(mut2, Blocks.ICE.getDefaultState());
 
                     if (flag) {
                         if(canSnowAt(pos1, true))
                             setBlockState(pos1, Blocks.SNOW_LAYER.getDefaultState());
 
-                        if (getBiome(pos2).canRain())
-                            getBlockState(pos2).getBlock().fillWithRain(WorldServer.this, pos2);
+                        if (getBiome(mut2).canRain())
+                            getBlockState(mut2).getBlock().fillWithRain(WorldServer.this, mut2);
                     }
                 }
                 int randomTickSpeed = getGameRules().randomTickSpeed.getInt();
@@ -1307,7 +1320,9 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
                                 Block block = iblockstate.getBlock();
 
                                 if (block.getTickRandomly()) {
-                                    block.randomTick(WorldServer.this, new BlockPos(k1 + j, i2 + extendedblockstorage.getYLocation(), l1 + k), iblockstate, rand);
+                                    block.randomTick(WorldServer.this,
+                                            mut2.setPos(k1 + j, i2 + extendedblockstorage.getYLocation(), l1 + k)
+                                            , iblockstate, rand);
                                 }
                             }
                         }
@@ -1590,7 +1605,7 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
             for (int l3 = minX; l3 < maxX; ++l3) {
                 for (int i4 = minY; i4 < maxY; ++i4) {
                     for (int j4 = minZ; j4 < maxZ; ++j4) {
-                        block = localSelector.getBlockState(l3, i4, j4).getBlock();
+                        block = localSelector.getState(l3, i4, j4).getBlock();
                         if (block == Blocks.FIRE || block == Blocks.FLOWING_LAVA || block == Blocks.LAVA) {
                             return true;
                         } else if (block.isBurning(this, tempPooledLocalPos.setPos(l3, i4, j4))) {

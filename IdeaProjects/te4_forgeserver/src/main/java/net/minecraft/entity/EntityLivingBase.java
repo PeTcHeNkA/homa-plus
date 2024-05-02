@@ -1038,7 +1038,7 @@ public abstract class EntityLivingBase extends Entity {
                     MathHelper.floor(this.getEntityBoundingBox().minY),
                     MathHelper.floor(this.posZ)
             ));
-            return net.minecraftforge.common.ForgeHooks.isLivingOnLadder(iblockstate, world, blockpos, this);
+            return ForgeHooks.isLivingOnLadder(iblockstate, world, blockpos, this);
         }
     }
 

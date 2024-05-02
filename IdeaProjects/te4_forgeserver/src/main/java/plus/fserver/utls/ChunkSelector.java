@@ -108,6 +108,11 @@ public final class ChunkSelector implements IBlockEAccess {
     }
 
 
+    public IBlockState getState(int x, int y, int z){
+        return getChunkE(x>>4, z>>4).getBlockState(x, y, z);
+    }
+
+
     @Override
     public IBlockState getBlockState(BlockPos pos) {
         //if(pos.getY()<0||pos.getY()>255)return BlockIDIndexes.AIR_STATE;

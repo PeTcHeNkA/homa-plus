@@ -169,6 +169,7 @@ public class BlockStateContainer {
         private final boolean isNormalCube;
         private final boolean canProvidePower;
         private final boolean isFullCube;
+        private final boolean hasTile;
 
         //copy constant results. this is allow avoid interpretation
         protected StateImplementation(Block blockIn, ImmutableMap < IProperty<?>, Comparable<? >> propertiesIn) {
@@ -177,6 +178,7 @@ public class BlockStateContainer {
             isFullCube        = blockIn.isFullCube(this);
             isNormalCube      = blockIn.isNormalCube(this);
             canProvidePower   = blockIn.canProvidePower(this);
+            hasTile           = blockIn.hasTileEntity(this);
         }
 
         protected StateImplementation(Block blockIn, ImmutableMap<IProperty<?>, Comparable<?>> propertiesIn, ImmutableTable<IProperty<?>, Comparable<?>, IBlockState> propertyValueTable) {
@@ -186,6 +188,13 @@ public class BlockStateContainer {
             isFullCube        = blockIn.isFullCube(this);
             isNormalCube      = blockIn.isNormalCube(this);
             canProvidePower   = blockIn.canProvidePower(this);
+            hasTile           = blockIn.hasTileEntity(this);
+        }
+
+
+        @Override
+        public boolean hasTile() {
+            return hasTile;
         }
 
 

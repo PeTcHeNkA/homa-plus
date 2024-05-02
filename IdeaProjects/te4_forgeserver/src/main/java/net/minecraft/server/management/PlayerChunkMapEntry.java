@@ -4,6 +4,8 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import java.util.List;
 import javax.annotation.Nullable;
+
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetworkManager;
@@ -200,19 +202,21 @@ public class PlayerChunkMapEntry extends ArrayListE6<EntityPlayerMP> implements 
     }
 
 
-    @SuppressWarnings("unused")
+    //todo maybe use Elca cache? MC -> Netty
     public void update() {
         if (this.sentToPlayers && this.chunk != null) {
             if (this.changes != 0) {
                 if (this.changes == 1) {
-                    int i = (this.changedBlocks[0] >> 12 & 15) + posX << 4;
-                    int j = this.changedBlocks[0] & 255;
-                    int k = (this.changedBlocks[0] >> 8 & 15) + posZ << 4;
-                    BlockPos blockpos = new BlockPos(i, j, k);
-                    this.sendPacket(new SPacketBlockChange(this.playerChunkMap.getWorldServer(), blockpos));
-                    net.minecraft.block.state.IBlockState state = this.playerChunkMap.getWorldServer().getBlockState(blockpos);
+                    int cX = (this.changedBlocks[0] >> 12 & 15) + (posX << 4);
+                    int cY =  this.changedBlocks[0] & 255;
+                    int cZ = (this.changedBlocks[0] >> 8 & 15) + (posZ << 4);
 
-                    if (state.getBlock().hasTileEntity(state)) {
+                    BlockPos blockpos = new BlockPos(cX, cY, cZ);
+
+                    IBlockState state = this.playerChunkMap.getWorldServer().localSelector.getBlockState(blockpos);
+                    this.sendPacket(new SPacketBlockChange(state, blockpos));
+
+                    if (state.hasTile()) {
                         this.sendBlockEntity(this.playerChunkMap.getWorldServer().getTileEntity(blockpos));
                     }
                 }
@@ -221,18 +225,21 @@ public class PlayerChunkMapEntry extends ArrayListE6<EntityPlayerMP> implements 
                     //TODO: FDix Mojang's fuckup to modded by combining all TE data into the chunk data packet... seriously... packet size explosion!
                 } else {
                     this.sendPacket(new SPacketMultiBlockChange(this.changes, this.changedBlocks, this.chunk));
-                    //} Keep this in the else until we figure out a fix for mojang's derpitude on the data packet so we don't double send crap.
-                    //{// Forge: Send only the tile entities that are updated, Adding this brace lets us keep the indent and the patch small
-                    for (int l = 0; l < this.changes; ++l)
-                    {
-                        int i1 = (this.changedBlocks[l] >> 12 & 15) + posX << 4;
-                        int j1 = this.changedBlocks[l] & 255;
-                        int k1 = (this.changedBlocks[l] >> 8 & 15) + posZ << 4;
-                        BlockPos blockpos1 = new BlockPos(i1, j1, k1);
-                        net.minecraft.block.state.IBlockState state = this.playerChunkMap.getWorldServer().getBlockState(blockpos1);
+                    //} Keep this in the else until we figure out a fix for mojang's derpitude on the
+                    // data packet so we don't double send crap.
+                    //{// Forge: Send only the tile entities that are updated, Adding this brace
+                    // lets us keep the indent and the patch small
+                    BlockPos.MutableBlockPos pos = playerChunkMap.getWorldServer().localTempPos;
 
-                        if (state.getBlock().hasTileEntity(state)) {
-                            this.sendBlockEntity(this.playerChunkMap.getWorldServer().getTileEntity(blockpos1));
+                    for (int l = 0; l < this.changes; ++l) {
+                        int cX = (this.changedBlocks[l] >> 12 & 15) + posX << 4;
+                        int cY = this.changedBlocks[l] & 255;
+                        int cZ = (this.changedBlocks[l] >> 8 & 15) + posZ << 4;
+
+                        IBlockState state = this.playerChunkMap.getWorldServer().localSelector.getBlockState(cX, cY, cZ);
+
+                        if (state.hasTile()) {
+                            this.sendBlockEntity(this.playerChunkMap.getWorldServer().getTileEntity(pos.setPos(cX, cY, cZ)));
                         }
                     }
                 }
