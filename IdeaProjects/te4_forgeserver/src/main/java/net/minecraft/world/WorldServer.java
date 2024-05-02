@@ -1548,20 +1548,20 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
             Block block;
             Boolean result;
 
-            final BlockPos.MutableBlockPos waterAcceleration = tempPooledLocalPos;
+            final BlockPos.MutableBlockPos acc = tempPooledLocalPos;
 
             for (int l3 = minX; l3 < maxX; ++l3) {
                 for (int i4 = minY; i4 < maxY; ++i4) {
                     for (int j4 = minZ; j4 < maxZ; ++j4) {
-                        block = (state = localSelector.getState(waterAcceleration.setPos(l3, i4, j4))).getBlock();
+                        block = (state = localSelector.getState(acc.setPos(l3, i4, j4))).getBlock();
 
-                        result = block.isEntityInsideMaterial(this, waterAcceleration, state, entityIn, maxY, materialIn, false);
+                        result = block.isEntityInsideMaterial(this, acc, state, entityIn, maxY, materialIn, false);
                         if (result != null && result) {
                             // Forge: When requested call blocks modifyAcceleration method,
                             // and more importantly cause this method to return true,
                             // which results in an entity being "inWater"
                             flag = true;
-                            vec3d = block.modifyAcceleration(this, waterAcceleration, entityIn, vec3d);
+                            vec3d = block.modifyAcceleration(this, acc, entityIn, vec3d);
                             continue;
                         } else if (result != null && !result) continue;
 
@@ -1570,7 +1570,7 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
 
                             if ((double)maxY >= d0) {
                                 flag = true;
-                                vec3d = block.modifyAcceleration(this, waterAcceleration, entityIn, vec3d);
+                                vec3d = block.modifyAcceleration(this, acc, entityIn, vec3d);
                             }
                         }
                     }

@@ -44,16 +44,14 @@ public class BitArray {
             if(index<0 || index>=this.arraySize)
                 throw new IllegalArgumentException("Index should be in range [0, "+this.arraySize+"]");
 
-        int i = index * this.bitsPerEntry;
-        int j = i >> 6;
-        int k = ((index + 1) * this.bitsPerEntry - 1) >> 6;
-        int l = i & 63;
 
-        if (j == k) {
-            return (int)(this.longArray[j] >>> l & this.maxEntryValue);
+        int k, j;
+
+        if ((k = ((index + 1) * this.bitsPerEntry - 1) >> 6) == (j = (index *= this.bitsPerEntry) >> 6)) {
+            return (int)(this.longArray[j] >>> index & 63 & this.maxEntryValue);
         } else {
-            int i1 = 64 - l;
-            return (int)((this.longArray[j] >>> l | this.longArray[k] << i1) & this.maxEntryValue);
+            index &= 63;
+            return (int)((this.longArray[j] >>> index | this.longArray[k] << (64 - index)) & this.maxEntryValue);
         }
     }
 

@@ -82,7 +82,7 @@ public class BlockStateContainer implements IBlockStatePaletteResizer {
 
 
     public IBlockState get(int x, int y, int z) {
-        return this.get(y << 8 | z << 4 | x);
+        return this.palette.get(this.storage.getAt(y << 8 | z << 4 | x));
     }
 
 
