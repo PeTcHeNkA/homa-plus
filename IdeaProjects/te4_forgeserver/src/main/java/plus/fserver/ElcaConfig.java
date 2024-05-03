@@ -48,7 +48,7 @@ public class ElcaConfig {
     public static boolean DISABLE_SESSION_LOCK       = true;
     public static boolean IGNORE_ERRORS              = true;
     public static boolean REMOVE_ERROR_ENTITIES      = true;
-    public static boolean OVERWORLD_ASYNC_POPULATION = true;
+    public static boolean OVERWORLD_ASYNC_POPULATION = false;
 
     //public static boolean TICK_ONLY_TRACKED_ENTITIES = true;
     public static boolean REMOVE_SERVER_THREAD       = false;

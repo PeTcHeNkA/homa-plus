@@ -189,6 +189,9 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
     private boolean isPositionDirty;
     private final float[] pistonDeltas; //todo check mini error
     private long pistonDeltasGameTime;
+
+    public EntityTrackerEntry trackerEntry;
+
     /**
      * Setting this to true will prevent the world from calling {@link #onUpdate()} for this entity.
      */

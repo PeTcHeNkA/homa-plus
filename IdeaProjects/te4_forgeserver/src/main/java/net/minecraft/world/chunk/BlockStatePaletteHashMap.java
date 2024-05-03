@@ -6,6 +6,7 @@ import net.minecraft.util.BlockIDIndexes;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.fserver.ElcaCV;
 import java.util.Arrays;
 
 
@@ -13,8 +14,8 @@ public class BlockStatePaletteHashMap implements IBlockStatePalette {
     private IBlockState[] values;
     private int[] intKeys;
     private IBlockState[] byId;
-    private short nextFreeIndex;
-    private int mapSize;
+    private volatile short nextFreeIndex;
+    private volatile int mapSize;
     private final IBlockStatePaletteResizer paletteResizer;
     private final int bits;
 
@@ -24,6 +25,8 @@ public class BlockStatePaletteHashMap implements IBlockStatePalette {
         this.values = new IBlockState[initialCapacity];
         this.intKeys = new int[initialCapacity];
         this.byId = new IBlockState[initialCapacity];
+        if(ElcaCV.FIX_NULL_HASH_PALETTE)
+            Arrays.fill(byId, BlockIDIndexes.AIR_STATE);
         this.bits = bitsIn;
         this.paletteResizer = paletteResizerIn;
     }
@@ -37,12 +40,10 @@ public class BlockStatePaletteHashMap implements IBlockStatePalette {
 
     @Override
     public int idFor(IBlockState state) {
-        int i = getId(state);
-        if (i == -1) {
+        int i;
+        if ((i = getId(state)) == -1) {
             i = add(state);
-            if (i >= 1 << this.bits) {
-                i = this.paletteResizer.onResize(this.bits + 1, state);
-            }
+            if (i >= 1 << this.bits) i = this.paletteResizer.onResize(this.bits + 1, state);
         }
         return i;
     }
@@ -100,19 +101,22 @@ public class BlockStatePaletteHashMap implements IBlockStatePalette {
 
 
     private int nextId() {
-        while (this.nextFreeIndex < this.byId.length && this.byId[this.nextFreeIndex] != null) {
+        while (this.nextFreeIndex < this.byId.length && this.byId[this.nextFreeIndex] != null)
             ++this.nextFreeIndex;
-        }
         return this.nextFreeIndex;
     }
 
 
     private void grow(int capacity) {
         IBlockState[] ak = this.values;
+        IBlockState[] byIdn = new IBlockState[capacity];
+        if(ElcaCV.FIX_NULL_HASH_PALETTE)
+            Arrays.fill(byIdn, BlockIDIndexes.AIR_STATE);
+        byId = byIdn;
         int[] aint = this.intKeys;
         this.values = new IBlockState[capacity];
         this.intKeys = new int[capacity];
-        this.byId = new IBlockState[capacity];
+
         this.nextFreeIndex = 0;
         this.mapSize = 0;
 
@@ -146,7 +150,7 @@ public class BlockStatePaletteHashMap implements IBlockStatePalette {
 
 
     private int hashObject(IBlockState obectIn) {
-        return (MathHelper.hash(System.identityHashCode(obectIn)) & Integer.MAX_VALUE) % this.values.length;
+        return (MathHelper.hash(obectIn.getId()) & Integer.MAX_VALUE) % this.values.length;
     }
 
 
@@ -176,7 +180,10 @@ public class BlockStatePaletteHashMap implements IBlockStatePalette {
 
     public void clear() {
         Arrays.fill(this.values, null);
-        Arrays.fill(this.byId, null);
+        if(ElcaCV.FIX_NULL_HASH_PALETTE)
+            Arrays.fill(this.byId, BlockIDIndexes.AIR_STATE);
+        else
+            Arrays.fill(this.byId, null);
         this.nextFreeIndex = 0;
         this.mapSize = 0;
     }

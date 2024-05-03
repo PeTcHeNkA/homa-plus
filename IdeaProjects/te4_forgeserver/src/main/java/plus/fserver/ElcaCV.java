@@ -22,4 +22,7 @@ public class ElcaCV {
     public static final boolean ENABLE_NOTCH_SECRET           = false;
 
     public static final boolean ENTITY_FAST_WET               = true;
+
+
+    public static final boolean FIX_NULL_HASH_PALETTE         = false;
 }

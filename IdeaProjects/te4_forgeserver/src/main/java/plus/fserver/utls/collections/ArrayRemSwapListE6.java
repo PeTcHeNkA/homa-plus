@@ -1,5 +1,6 @@
 package plus.fserver.utls.collections;
 
+
 public class ArrayRemSwapListE6<T> extends ArrayListE6<T> {
     @Override
     public T remove(int index) {

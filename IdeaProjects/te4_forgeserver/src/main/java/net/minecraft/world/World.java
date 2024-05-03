@@ -66,7 +66,6 @@ import org.jetbrains.annotations.NotNull;
 import plus.fserver.ElcaConfig;
 import plus.fserver.api.IBlockEAccess;
 import plus.fserver.ElcaCV;
-import plus.fserver.utls.math.MathUtls;
 import plus.fserver.world.CollisionPredicate;
 import plus.fserver.utls.AABKey;
 import plus.fserver.utls.collections.*;
@@ -92,7 +91,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public final List<Entity> loadedEntityList = new ArrayRemSwapListE15<>();
     protected final List<Entity> unloadedEntityList = Lists.newArrayList();
     public final List<TileEntity> loadedTileEntityList= new ArrayRemSwapListE15<>();
-    public final List<TileEntity> tickableTileEntities = new ArrayRemSwapListE15<>();
+    public final ArrayRemSwapListE15<TileEntity> tickableTileEntities = new ArrayRemSwapListE15<>();
     private final List<TileEntity> addedTileEntityList = Lists.newArrayList();
     private final List<TileEntity> tileEntitiesToBeRemoved = Lists.newArrayList();
     public final List<EntityPlayer> playerEntities = Lists.newArrayList();
@@ -1663,7 +1662,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             this.tileEntitiesToBeRemoved.clear();
         }
 
-        Iterator<TileEntity> iterator = this.tickableTileEntities.iterator();
+        Iterator<TileEntity> iterator = this.tickableTileEntities.remIterator();
 
         while (iterator.hasNext()) {
             TileEntity tileentity = iterator.next();
@@ -1748,7 +1747,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         boolean flag = this.loadedTileEntityList.add(tile);
 
         if (flag && tile instanceof ITickable) {
-            this.tickableTileEntities.add(tile);
+            this.tickableTileEntities.addF(tile);
         }
         tile.onLoad();
 

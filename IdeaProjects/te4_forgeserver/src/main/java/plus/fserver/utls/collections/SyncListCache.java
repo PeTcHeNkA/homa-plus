@@ -14,7 +14,7 @@ public class SyncListCache<V> extends SyncTe4Cache<AABKey, ArrayListE6<V>>{
         this.clearTime2 = clearTime2;
     }
 
-    static class BoxCache extends SyncListCache{
+    static class BoxCache<V> extends SyncListCache<V>{
         public BoxCache(int clearTime, int clearTime2) {
             super(clearTime, clearTime2);
         }

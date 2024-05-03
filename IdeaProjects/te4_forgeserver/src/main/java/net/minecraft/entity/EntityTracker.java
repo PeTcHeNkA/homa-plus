@@ -32,7 +32,6 @@ public class EntityTracker {
     private static final Logger LOGGER = LogManager.getLogger();
     private final WorldServer world;
     private final Set<EntityTrackerEntry> entries = new IdentityTe4HashSet<>(); //is safe
-    private final IntHashMap<EntityTrackerEntry> trackedEntityHashTable = new IntHashMap<>();
     private int maxTrackingDistanceThreshold;
 
     public EntityTracker(WorldServer theWorldIn) {
@@ -62,14 +61,15 @@ public class EntityTracker {
     //private final AsyncChecker checker = new AsyncChecker();
     public void track(Entity entityIn, int trackingRange, final int updateFrequency, boolean sendVelocityUpdates) {
         try {
-            if (this.trackedEntityHashTable.containsItem(entityIn.getEntityId())) {
+            if (entityIn.trackerEntry != null) {
                 throw new IllegalStateException("Entity is already tracked!");
             }
-            EntityTrackerEntry entitytrackerentry = new EntityTrackerEntry(entityIn, trackingRange, this.maxTrackingDistanceThreshold, updateFrequency, sendVelocityUpdates);
-            //checker.check();
-            this.entries.add(entitytrackerentry);
-            this.trackedEntityHashTable.addKey(entityIn.getEntityId(), entitytrackerentry);
-            entitytrackerentry.updatePlayerEntities(this.world.playerEntities);
+            EntityTrackerEntry entry = new EntityTrackerEntry(entityIn, trackingRange, this.maxTrackingDistanceThreshold, updateFrequency, sendVelocityUpdates);
+
+            this.entries.add(entry);
+            entityIn.trackerEntry = entry;
+
+            entry.updatePlayerEntities(this.world.playerEntities);
         } catch (Throwable throwable) {
             CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Adding entity to track");
             CrashReportCategory crashreportcategory = crashreport.makeCategory("Entity To Track");
@@ -82,7 +82,6 @@ public class EntityTracker {
                 return s;
             });
             entityIn.addEntityCrashInfo(crashreportcategory);
-            this.trackedEntityHashTable.lookup(entityIn.getEntityId()).getTrackedEntity().addEntityCrashInfo(crashreport.makeCategory("Entity That Is Already Tracked"));
 
             try {
                 throw new ReportedException(crashreport);
@@ -94,15 +93,19 @@ public class EntityTracker {
 
 
     public void untrack(Entity entityIn) {
+        EntityTrackerEntry entry;
         if (entityIn instanceof EntityPlayerMP) {
             EntityPlayerMP entityplayermp = (EntityPlayerMP)entityIn;
-            for (EntityTrackerEntry entitytrackerentry : this.entries) {
-                entitytrackerentry.removeFromTrackedPlayers(entityplayermp);
+            for (Entity entity : world.loadedEntityList) {
+                if((entry = entity.trackerEntry) != null)
+                    entry.removeFromTrackedPlayers(entityplayermp);
+                else
+                    System.out.println("WARN: TRYING TO REMOVE ENTITY WITH NULL TRACKER");
             }
         }
-        EntityTrackerEntry entry = this.trackedEntityHashTable.removeObject(entityIn.getEntityId());
+        entry = entityIn.trackerEntry;
         if (entry != null) {
-            //checker.check();
+            entityIn.trackerEntry = null;
             this.entries.remove(entry);
             entry.sendDestroyEntityPacketToTrackedPlayers();
         }
@@ -152,8 +155,9 @@ public class EntityTracker {
     }
 
 
-    public void sendToTracking(Entity entityIn, Packet<?> packetIn) {
-        EntityTrackerEntry entry = this.trackedEntityHashTable.lookup(entityIn.getEntityId());
+    public void sendToTracking(Entity entity, Packet<?> packetIn) {
+        EntityTrackerEntry entry = entity.trackerEntry;
+        //EntityTrackerEntry entry = this.trackedEntityHashTable.lookup(entity.getEntityId());
 
         if (entry != null) {
             entry.sendPacketToTrackedPlayers(packetIn);
@@ -170,7 +174,8 @@ public class EntityTracker {
      * @return all players tracking the Entity
      */
     public Set<? extends net.minecraft.entity.player.EntityPlayer> getTrackingPlayers(Entity entity) {
-        EntityTrackerEntry entry = trackedEntityHashTable.lookup(entity.getEntityId());
+        EntityTrackerEntry entry = entity.trackerEntry;
+        //EntityTrackerEntry entry = trackedEntityHashTable.lookup(entity.getEntityId());
         if (entry == null)
             return java.util.Collections.emptySet();
         else
@@ -179,11 +184,12 @@ public class EntityTracker {
 
     /* ======================================== FORGE END   =====================================*/
 
-    public void sendToTrackingAndSelf(Entity entityIn, Packet<?> packetIn) {
-        EntityTrackerEntry entitytrackerentry = this.trackedEntityHashTable.lookup(entityIn.getEntityId());
+    public void sendToTrackingAndSelf(Entity entity, Packet<?> packetIn) {
+        EntityTrackerEntry entry = entity.trackerEntry;
+        //EntityTrackerEntry entry = this.trackedEntityHashTable.lookup(entity.getEntityId());
 
-        if (entitytrackerentry != null) {
-            entitytrackerentry.sendToTrackingAndSelf(packetIn);
+        if (entry != null) {
+            entry.sendToTrackingAndSelf(packetIn);
         }
     }
 

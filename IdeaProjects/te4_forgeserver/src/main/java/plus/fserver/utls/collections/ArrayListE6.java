@@ -107,6 +107,39 @@ public class ArrayListE6<T> implements List<T> {
     }
 
 
+    public Iterator<T> remIterator(){
+        return new SItr<>(this);
+    }
+
+
+    private static class SItr<T> implements Iterator<T>{
+        private final ArrayListE6<T> src;
+        private int cursor = 0;
+
+        private SItr(ArrayListE6<T> src) {
+            this.src = src;
+        }
+
+
+        @Override
+        public boolean hasNext() {
+            return cursor < src.size();
+        }
+
+
+        @Override
+        public T next() {
+            return src.get(cursor++);
+        }
+
+
+        @Override
+        public void remove() {
+            src.removeF(cursor);
+        }
+    }
+
+
     private static class Itr<T> implements Iterator<T>{
         private final Object[] data;
         private final int max;
@@ -247,6 +280,13 @@ public class ArrayListE6<T> implements List<T> {
         if (numMoved > 0) System.arraycopy(data, index+1, data, index, numMoved);
         data[--size] = null;
         return oldValue;
+    }
+
+
+    public void removeF(int index){
+        int numMoved = size - index - 1;
+        if (numMoved > 0) System.arraycopy(data, index+1, data, index, numMoved);
+        data[--size] = null;
     }
 
 
