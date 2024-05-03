@@ -410,9 +410,12 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
 
     public void onUpdate() {
-        if (!this.world.isRemote) {
-            this.setFlag(6, this.isGlowing());
-        }
+        onUpdateE();
+    }
+
+
+    protected final void onUpdateE(){
+        if (!this.world.isRemote) this.setFlag(6, this.isGlowing());
         this.onEntityUpdate();
     }
 

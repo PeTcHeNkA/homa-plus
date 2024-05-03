@@ -1710,7 +1710,12 @@ public abstract class EntityLivingBase extends Entity {
 
     public void onUpdate() {
         if (world.onLivingUpdate(this)) return;
-        super.onUpdate();
+        onUpdateE();
+        onUpdateB();
+    }
+
+
+    protected final void onUpdateB() {
         this.updateActiveHand();
 
         if (!this.world.isRemote) {
@@ -1969,32 +1974,33 @@ public abstract class EntityLivingBase extends Entity {
 
     //todo maybe async
     protected void collideWithNearbyEntities() {
-        List<Entity> list = (ticksExisted & 7) == 7?
-            this.world.getEntitiesInAABBexcluding(
-                    this, this.getEntityBoundingBox(),
-                    world.entityCP.forEntity(this)
-            ):
-            this.world.getEntitiesInAABBexcludingLimited(
+        List<Entity> list;
+        if((ticksExisted & 7) == 7){
+            if(!(list = this.world.getEntitiesInAABBexcludingLimited(
                     this, this.getEntityBoundingBox(),
                     world.entityCP.forEntity(this),
                     ElcaConfig.MAX_ENTITY_COLLISIONS
-            );
-        if (!list.isEmpty()) {
-            int limit = this.world.getGameRules().maxEntityCramming.getInt();
-            if (limit > 0 && list.size() > limit - 1 && this.rand.nextBoolean()) {
-                int j = 0;
-                for (int k = 0; k < list.size(); ++k) {
-                    if (!list.get(k).isRiding()) {
-                        ++j;
+            )).isEmpty()){
+                for (int cur = 0; cur < list.size(); ++cur) this.collideWithEntity(list.get(cur));
+            }
+        } else {
+            if(!(list = this.world.getEntitiesInAABBexcluding(
+                    this, this.getEntityBoundingBox(),
+                    world.entityCP.forEntity(this)
+            )).isEmpty()){
+                int limit = this.world.getGameRules().maxEntityCramming.getInt();
+                if (limit > 0 && list.size() > limit - 1 && this.rand.nextBoolean()) {
+                    int j = 0;
+                    for (int k = 0; k < list.size(); ++k) {
+                        Entity ent;
+                        if (!(ent = list.get(k)).isRiding()) ++j;
+                        collideWithEntity(ent);
+                    }
+                    if (j > limit - 1) {
+                        this.attackEntityFrom(DamageSource.CRAMMING, 6.0F);
                     }
                 }
-                if (j > limit - 1) {
-                    this.attackEntityFrom(DamageSource.CRAMMING, 6.0F);
-                }
-            }
-            for (int l = 0; l < list.size(); ++l) {
-                Entity entity = list.get(l);
-                this.collideWithEntity(entity);
+                else for (int cur = 0; cur < list.size(); ++cur) collideWithEntity(list.get(cur));
             }
         }
     }
@@ -2041,10 +2047,10 @@ public abstract class EntityLivingBase extends Entity {
 
     public void onItemPickup(Entity entityIn, int quantity) {
         if (!entityIn.isDead && !this.world.isRemote) {
-            EntityTracker entitytracker = ((WorldServer)this.world).getEntityTracker();
+            EntityTracker tracker = ((WorldServer)this.world).getEntityTracker();
 
             if (entityIn instanceof EntityItem || entityIn instanceof EntityArrow || entityIn instanceof EntityXPOrb) {
-                entitytracker.sendToTracking(entityIn, new SPacketCollectItem(entityIn.getEntityId(), this.getEntityId(), quantity));
+                tracker.sendToTracking(entityIn, new SPacketCollectItem(entityIn.getEntityId(), this.getEntityId(), quantity));
             }
         }
     }

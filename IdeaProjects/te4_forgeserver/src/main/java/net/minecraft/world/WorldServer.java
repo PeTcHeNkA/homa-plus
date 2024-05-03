@@ -464,8 +464,7 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
 
     @Override
     public void updateEntityWithOptionalForce(Entity entityIn, boolean forceUpdate) {
-        if (!this.canSpawnAnimals() && (entityIn instanceof EntityAnimal
-                || entityIn instanceof EntityWaterMob)) {
+        if (!this.canSpawnAnimals() && (entityIn instanceof EntityAnimal || entityIn instanceof EntityWaterMob)) {
             entityIn.setDead();
         }
         if (!this.canSpawnNPCs() && entityIn instanceof INpc) {
@@ -476,7 +475,7 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
 
 
     private void updateEntityWithOptionalForce0(Entity entityIn, boolean forceUpdate) {
-        if (!(entityIn instanceof EntityPlayer)) {
+        if (checkCanUpdate) {
             boolean canUpdate = getChunkProvider().isChunkLoadedSafe(entityIn.chunkCoordX, entityIn.chunkCoordZ);
             if (!canUpdate) canUpdate = ForgeEventFactory.canEntityUpdate(entityIn);
             if (!canUpdate) return;
@@ -494,63 +493,49 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
             if (entityIn.isRiding()) {
                 entityIn.updateRidden();
             } else {
-                entityIn.onUpdate();
+                if(!entityIn.updateBlocked) entityIn.onUpdate();
             }
         } catch (Exception exception){
             server.ticker().onError(this, onEntityError(entityIn, exception));
         }
 
-        if (MathUtls.isInvalidDouble(entityIn.posX)) {
-            entityIn.posX = entityIn.lastTickPosX;
-        }
-
-        if (MathUtls.isInvalidDouble(entityIn.posY)) {
-            entityIn.posY = entityIn.lastTickPosY;
-        }
-
-        if (MathUtls.isInvalidDouble(entityIn.posZ)) {
-            entityIn.posZ = entityIn.lastTickPosZ;
-        }
-
-        if (MathUtls.isInvalidDouble(entityIn.rotationPitch)) {
-            entityIn.rotationPitch = entityIn.prevRotationPitch;
-        }
-
-        if (MathUtls.isInvalidDouble(entityIn.rotationYaw)) {
-            entityIn.rotationYaw = entityIn.prevRotationYaw;
-        }
+        if (MathUtls.isInvalidDouble(entityIn.posX))          entityIn.posX = entityIn.lastTickPosX;
+        if (MathUtls.isInvalidDouble(entityIn.posY))          entityIn.posY = entityIn.lastTickPosY;
+        if (MathUtls.isInvalidDouble(entityIn.posZ))          entityIn.posZ = entityIn.lastTickPosZ;
+        if (MathUtls.isInvalidDouble(entityIn.rotationPitch)) entityIn.rotationPitch = entityIn.prevRotationPitch;
+        if (MathUtls.isInvalidDouble(entityIn.rotationYaw))   entityIn.rotationYaw = entityIn.prevRotationYaw;
 
         updateEntityChunkSection(entityIn, forceUpdate);
     }
 
 
     @Override
-    protected void updateEntityChunkSection(Entity entityIn, boolean forceUpdate){
+    protected void updateEntityChunkSection(Entity entity, boolean forceUpdate){
         //  1 / 16 = 0,0625
-        int cXpos = MathHelper.floor(entityIn.posX * 0.0625);
-        int cYpos = MathHelper.floor(entityIn.posY * 0.0625);
-        int cZpos = MathHelper.floor(entityIn.posZ * 0.0625);
+        int cXpos = MathHelper.floor(entity.posX * 0.0625);
+        int cYpos = MathHelper.floor(entity.posY * 0.0625);
+        int cZpos = MathHelper.floor(entity.posZ * 0.0625);
 
-        if (!entityIn.addedToChunk || entityIn.chunkCoordX != cXpos || entityIn.chunkCoordY != cYpos || entityIn.chunkCoordZ != cZpos) {
-            ChunkProviderServer cps = getChunkProvider();
+        if (!entity.addedToChunk || entity.chunkCoordX != cXpos || entity.chunkCoordY != cYpos || entity.chunkCoordZ != cZpos) {
+            ChunkProviderServer cps = chunkProviderServer;
             Chunk chunk;
-            if (entityIn.addedToChunk) {
-                chunk = cps.getLoadedChunk(entityIn.chunkCoordX, entityIn.chunkCoordZ);
-                if(chunk != null) chunk.removeEntityAtIndex(entityIn, entityIn.chunkCoordY);
+            if (entity.addedToChunk) {
+                chunk = cps.getLoadedChunk(entity.chunkCoordX, entity.chunkCoordZ);
+                if(chunk != null) chunk.removeEntityAtIndex(entity, entity.chunkCoordY);
             }
             chunk = cps.getLoadedChunk(cXpos, cZpos);
 
-            if (!entityIn.setPositionNonDirty() && chunk == null) {
-                entityIn.addedToChunk = false;
+            if (!entity.setPositionNonDirty() && chunk == null) {
+                entity.addedToChunk = false;
             } else {
                 if(chunk == null)chunk = cps.provideChunk(cXpos, cZpos);
-                chunk.addEntity(entityIn);
+                chunk.addEntity(entity);
             }
         }
 
-        if (forceUpdate && entityIn.addedToChunk) {
-            for (Entity entity4 : entityIn.getPassengers()) {
-                if (!entity4.isDead && entity4.getRidingEntity() == entityIn) {
+        if (forceUpdate && entity.addedToChunk) {
+            for (Entity entity4 : entity.getPassengers()) {
+                if (!entity4.isDead && entity4.getRidingEntity() == entity) {
                     this.updateEntity(entity4);
                 } else {
                     entity4.dismountRidingEntity();

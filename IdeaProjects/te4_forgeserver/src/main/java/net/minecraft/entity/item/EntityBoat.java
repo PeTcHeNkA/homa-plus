@@ -242,7 +242,7 @@ public class EntityBoat extends Entity {
         this.prevPosX = this.posX;
         this.prevPosY = this.posY;
         this.prevPosZ = this.posZ;
-        super.onUpdate();
+        super.onUpdateE();
         this.tickLerp();
 
         if (this.canPassengerSteer()) {

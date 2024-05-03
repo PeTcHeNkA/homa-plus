@@ -277,11 +277,13 @@ public abstract class EntityLiving extends EntityLivingBase {
 
     @Override
     public void onUpdate() {
-        super.onUpdate();
+        if (world.onLivingUpdate(this)) return;
+        onUpdateE();
+        onUpdateB();
         if (!this.world.isRemote) {
             this.updateLeashedState();
 
-            if (this.ticksExisted % 5 == 0) {
+            if ((this.ticksExisted & 7) == 7) {
                 boolean flag = !(this.getControllingPassenger() instanceof EntityLiving);
                 boolean flag1 = !(this.getRidingEntity() instanceof EntityBoat);
                 this.tasks.setControlFlag(1, flag);
@@ -1078,53 +1080,46 @@ public abstract class EntityLiving extends EntityLivingBase {
         return false;
     }
 
-    protected void updateLeashedState()
-    {
-        if (this.leashNBTTag != null)
-        {
+
+    protected void updateLeashedState() {
+        if (this.leashNBTTag != null) {
             this.recreateLeash();
         }
 
-        if (this.isLeashed)
-        {
-            if (!this.isEntityAlive())
-            {
+        if (this.isLeashed) {
+            if (!this.isEntityAlive()) {
                 this.clearLeashed(true, true);
             }
 
-            if (this.leashHolder == null || this.leashHolder.isDead)
-            {
+            if (this.leashHolder == null || this.leashHolder.isDead) {
                 this.clearLeashed(true, true);
             }
         }
     }
 
-    public void clearLeashed(boolean sendPacket, boolean dropLead)
-    {
-        if (this.isLeashed)
-        {
+
+    public void clearLeashed(boolean sendPacket, boolean dropLead) {
+        if (this.isLeashed) {
             this.isLeashed = false;
             this.leashHolder = null;
 
-            if (!this.world.isRemote && dropLead)
-            {
+            if (!this.world.isRemote && dropLead) {
                 this.dropItem(Items.LEAD, 1);
             }
 
-            if (!this.world.isRemote && sendPacket && this.world instanceof WorldServer)
-            {
+            if (!this.world.isRemote && sendPacket && this.world instanceof WorldServer) {
                 ((WorldServer)this.world).getEntityTracker().sendToTracking(this, new SPacketEntityAttach(this, (Entity)null));
             }
         }
     }
 
-    public boolean canBeLeashedTo(EntityPlayer player)
-    {
+
+    public boolean canBeLeashedTo(EntityPlayer player) {
         return !this.getLeashed() && !(this instanceof IMob);
     }
 
-    public boolean getLeashed()
-    {
+
+    public boolean getLeashed() {
         return this.isLeashed;
     }
 
@@ -1161,37 +1156,29 @@ public abstract class EntityLiving extends EntityLivingBase {
         return flag;
     }
 
-    private void recreateLeash()
-    {
-        if (this.isLeashed && this.leashNBTTag != null)
-        {
-            if (this.leashNBTTag.hasUniqueId("UUID"))
-            {
+
+    private void recreateLeash() {
+        if (this.isLeashed && this.leashNBTTag != null) {
+            if (this.leashNBTTag.hasUniqueId("UUID")) {
                 UUID uuid = this.leashNBTTag.getUniqueId("UUID");
 
-                for (EntityLivingBase entitylivingbase : this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().grow(10.0D)))
-                {
-                    if (entitylivingbase.getUniqueID().equals(uuid))
-                    {
+                for (EntityLivingBase entitylivingbase : this.world.getEntitiesWithinAABB(EntityLivingBase.class, this.getEntityBoundingBox().grow(10.0D))) {
+                    if (entitylivingbase.getUniqueID().equals(uuid)) {
                         this.setLeashHolder(entitylivingbase, true);
                         break;
                     }
                 }
             }
-            else if (this.leashNBTTag.hasKey("X", 99) && this.leashNBTTag.hasKey("Y", 99) && this.leashNBTTag.hasKey("Z", 99))
-            {
+            else if (this.leashNBTTag.hasKey("X", 99) && this.leashNBTTag.hasKey("Y", 99) && this.leashNBTTag.hasKey("Z", 99)) {
                 BlockPos blockpos = new BlockPos(this.leashNBTTag.getInteger("X"), this.leashNBTTag.getInteger("Y"), this.leashNBTTag.getInteger("Z"));
                 EntityLeashKnot entityleashknot = EntityLeashKnot.getKnotForPosition(this.world, blockpos);
 
-                if (entityleashknot == null)
-                {
+                if (entityleashknot == null) {
                     entityleashknot = EntityLeashKnot.createKnot(this.world, blockpos);
                 }
 
                 this.setLeashHolder(entityleashknot, true);
-            }
-            else
-            {
+            } else {
                 this.clearLeashed(false, true);
             }
         }
@@ -1244,19 +1231,22 @@ public abstract class EntityLiving extends EntityLivingBase {
         }
     }
 
-    public boolean canPassengerSteer()
-    {
+
+    @Override
+    public boolean canPassengerSteer() {
         return this.canBeSteered() && super.canPassengerSteer();
     }
 
-    public static boolean isItemStackInSlot(EntityEquipmentSlot slotIn, ItemStack stack)
-    {
+
+    public static boolean isItemStackInSlot(EntityEquipmentSlot slotIn, ItemStack stack) {
         EntityEquipmentSlot entityequipmentslot = getSlotForItemStack(stack);
         return entityequipmentslot == slotIn || entityequipmentslot == EntityEquipmentSlot.MAINHAND && slotIn == EntityEquipmentSlot.OFFHAND || entityequipmentslot == EntityEquipmentSlot.OFFHAND && slotIn == EntityEquipmentSlot.MAINHAND;
     }
 
+
+    @Override
     public boolean isServerWorld() {
-        return super.isServerWorld() && !this.isAIDisabled();
+        return !this.world.isRemote && !this.isAIDisabled();
     }
 
 

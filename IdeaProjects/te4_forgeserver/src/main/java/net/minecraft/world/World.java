@@ -66,6 +66,7 @@ import org.jetbrains.annotations.NotNull;
 import plus.fserver.ElcaConfig;
 import plus.fserver.api.IBlockEAccess;
 import plus.fserver.ElcaCV;
+import plus.fserver.utls.math.MathUtls;
 import plus.fserver.world.CollisionPredicate;
 import plus.fserver.utls.AABKey;
 import plus.fserver.utls.collections.*;
@@ -1599,6 +1600,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
+    protected boolean checkCanUpdate;
     public void updateEntities() {
         this.profiler.startSection("entities");
         this.profiler.startSection("global");
@@ -1636,10 +1638,12 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         }
 
         this.unloadedEntityList.clear();
+        checkCanUpdate = false;
         this.tickPlayers();
         this.profiler.endStartSection("regular");
 
         //entities
+        checkCanUpdate = true;
         tickLoadedEntities();
 
         this.profiler.endStartSection("blockEntities");
@@ -1778,17 +1782,14 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     public void updateEntityWithOptionalForce(Entity entityIn, boolean forceUpdate) {
-        if (!(entityIn instanceof EntityPlayer)) {
+        if (checkCanUpdate) {
             boolean canUpdate = isChunkLoaded(entityIn.chunkCoordX, entityIn.chunkCoordZ, true);
 
             //boolean isForced = !this.isRemote && getPersistentChunks().containsKey(new net.minecraft.util.math.ChunkPos(j2 >> 4, k2 >> 4));
             //int range = isForced ? 0 : 32;
             //boolean canUpdate = !forceUpdate || this.isAreaLoaded(j2 - range, 0, k2 - range, j2 + range, 0, k2 + range, true);
             if (!canUpdate) canUpdate = ForgeEventFactory.canEntityUpdate(entityIn);
-
-            if (!canUpdate) {
-                return;
-            }
+            if (!canUpdate) return;
         }
 
         entityIn.lastTickPosX = entityIn.posX;
@@ -1803,8 +1804,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             if (entityIn.isRiding()) {
                 entityIn.updateRidden();
             } else {
-                if(!entityIn.updateBlocked)
-                    entityIn.onUpdate();
+                if(!entityIn.updateBlocked) entityIn.onUpdate();
             }
         }
 
