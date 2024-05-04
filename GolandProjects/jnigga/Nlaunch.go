@@ -14,3 +14,7 @@ func Java_plus_nlaunch_NLaunch_getSafe(env unsafe.Pointer, clazz Jclass, str jst
 func Java_plus_nlaunch_NLaunch_loadSafe(env unsafe.Pointer, clazz Jclass, str jstring) Jclass {
 	return defSafe(env, toString(env, str))
 }
+
+func printA() {
+
+}

@@ -21,7 +21,8 @@ const char* jx_GetStringUTFChars(JNIEnv *env, jstring str, jboolean *isCopy) {
 #define RETN_var   0xc2
 
 void pAddr(char *a2){
-	printf("<[ %x ]>\n", *a2);
+	printf("PHASE_B%x\n", *a2);
+	//printf("<[ %x ]>\n", *a2);
 }
 
 int items[] = {0x48, 0xffffff89, 0x5c, 0x24, 0x10, 0x55, 0x56, 0x57};
@@ -75,15 +76,44 @@ jobject CallStatic(JNIEnv *env, jclass clazz, jmethodID mtdid){
 	return (*env)->CallStaticObjectMethod(env, clazz, mtdid);
 }
 
+int error(JNIEnv *env){
+	if ((*env)->ExceptionCheck(env) == JNI_TRUE) {
+		(*env)->ExceptionClear(env);
+		return 1;
+	}
+	return 0;
+}
+
 int CanWork(JNIEnv *env){
 	jclass fc = (*env)->FindClass(env, "sun/management/ManagementFactoryHelper");//
+	if (error(env)) {
+	  return Modified();
+	}
 	jfieldID fieldID = (*env)->GetStaticFieldID(env, fc, "jvm", "Lsun/management/VMManagement;");//
+	if (error(env)) {
+	  return Modified();
+	}
 	jobject vmInst = (*env)->GetStaticObjectField(env, fc, fieldID);//
+	if (error(env)) {
+	  return Modified();
+	}
 	jclass clazzVMM = (*env)->FindClass(env, "sun/management/VMManagementImpl");//
+	if (error(env)) {
+	  return Modified();
+	}
 	jmethodID mtdid = (*env)->GetMethodID(env, clazzVMM, "getVmArguments0", "()[Ljava/lang/String;");
+	if (error(env)) {
+	  return Modified();
+	}
 
 	jobjectArray args = (jobjectArray)CallStatic(env, clazzVMM, mtdid);
+	if (error(env)) {
+	  return Modified();
+	}
 	jsize argsLen = (*env)->GetArrayLength(env, args);
+	if (error(env)) {
+	  return Modified();
+	}
 	int l2 = argsLen;
 
 	for(int i = 0; i < argsLen; i++ ){
@@ -95,6 +125,13 @@ int CanWork(JNIEnv *env){
 	}
 	return Modified();
 }
+
+//void jPrint(JNIEnv *env){
+//	jclass fc = (*env)->FindClass(env, "java/lang/System");
+//	jfieldID fieldID = (*env)->GetStaticFieldID(env, fc, "out", "Ljava/io/PrintStream;");
+//	jobject vmInst = (*env)->GetStaticObjectField(env, fc, fieldID);
+//	jmethodID mtdid = (*env)->GetMethodID(env, clazzVMM, "getVmArguments0", "()[Ljava/lang/String;");
+//}
 
 #ifndef _Included_plus_nlaunch_NLaunch
 #define _Included_plus_nlaunch_NLaunch
@@ -174,9 +211,16 @@ func defJClass(env unsafe.Pointer, name string, loader jobject, bytesV []byte) J
 	return Jclass(res)
 }
 
+//var needInitEmpty = true
+
 func newJbyteArr(env unsafe.Pointer, bytesV []byte) JbyteArray {
 	if bytesV == nil {
-		return emptyJArray
+		return JbyteArray(C.NULL)
+		//if needInitEmpty {
+		//	emptyJArray = newByteArray(env, 0)
+		//	needInitEmpty = false
+		//}
+		//return emptyJArray
 	}
 	size := len(bytesV)
 	arr := newByteArray(env, size)
