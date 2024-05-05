@@ -1,6 +1,7 @@
 package plus.fserver.utls.debug;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityTrackerEntry;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
@@ -10,18 +11,48 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class DebugEntity extends Entity {
+    private static int ID = 0;
     private String name;
+
     public DebugEntity(World world){
         this("");
     }
+
     public DebugEntity(){
         this("");
     }
 
+
     public DebugEntity(String name) {
         super(null);
-        this.name =name;
+        this.name = name;
+        posX = 0; posY = 0; posZ = 0;
         setAABB(0,0,0);
+    }
+
+
+    public DebugEntity(double x, double y, double z){
+        this("ID: "+ (ID++), x, y, z);
+    }
+
+
+    public DebugEntity(String name, double x, double y, double z){
+        super(null);
+        this.name =name;
+        posX = x; posY = y; posZ = z;
+        setAABB(x, y, z);
+    }
+
+
+    public DebugEntity track(){
+        if(trackerEntry == null)
+            trackerEntry = new EntityTrackerEntry(this, -1, 0, 0, false);
+
+        trackerEntry.lastTrackedEntityPosX = posX;
+        trackerEntry.lastTrackedEntityPosY = posY;
+        trackerEntry.lastTrackedEntityPosZ = posZ;
+
+        return this;
     }
 
 
@@ -46,6 +77,11 @@ public class DebugEntity extends Entity {
     @Override
     protected void entityInit() {}
 
+
+    @Override
+    public boolean equals(Object p_equals_1_) {
+        return super.equals(p_equals_1_);
+    }
 
     @Override
     protected void readEntityFromNBT(NBTTagCompound compound) {}

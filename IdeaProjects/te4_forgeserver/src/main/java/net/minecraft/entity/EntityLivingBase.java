@@ -217,8 +217,7 @@ public abstract class EntityLivingBase extends Entity {
     }
 
 
-    public boolean canBreatheUnderwater()
-    {
+    public boolean canBreatheUnderwater() {
         return false;
     }
 
@@ -1881,7 +1880,14 @@ public abstract class EntityLivingBase extends Entity {
     }
 
 
-    public void onLivingUpdate() {
+    public void onLivingUpdate(){
+        this.onLivingUpdateTick();
+        //todo maybe async?
+        this.collideWithNearbyEntities();
+    }
+
+
+    public void onLivingUpdateTick() {
         if (this.jumpTicks > 0) {
             --this.jumpTicks;
         }
@@ -1942,8 +1948,6 @@ public abstract class EntityLivingBase extends Entity {
         this.randomYawVelocity *= 0.9F;
         this.updateElytra();
         this.travel(this.moveStrafing, this.moveVertical, this.moveForward);
-        //todo maybe async?
-        this.collideWithNearbyEntities();
     }
 
 
@@ -2057,7 +2061,10 @@ public abstract class EntityLivingBase extends Entity {
 
 
     public boolean canEntityBeSeen(Entity entityIn) {
-        return this.world.rayTraceBlocks(new Vec3d(this.posX, this.posY + (double)this.getEyeHeight(), this.posZ), new Vec3d(entityIn.posX, entityIn.posY + (double)entityIn.getEyeHeight(), entityIn.posZ), false, true, false) == null;
+        return this.world.rayTraceBlocks(
+                new Vec3d(this.posX, this.posY + (double)this.getEyeHeight(), this.posZ),
+                new Vec3d(entityIn.posX, entityIn.posY + (double)entityIn.getEyeHeight(), entityIn.posZ),
+                false, true, false) == null;
     }
 
 

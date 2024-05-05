@@ -38,8 +38,8 @@ public class ElcaConfig {
     public static int MAX_ENTITY_COLLISIONS      = 3;
     public static int MAX_ENTITY_COLLISIONS_MOVE = 1;
     public static int MAX_SPONGE_POWER           = 64;
-
     public static int MIN_CHANGED_BLOCKS_BUF     = 24;
+    public static int RESET_LOW_LEVEL_MOBS       = 200;
 
     //public static boolean FAST_LIGHT                 = true;
     public static boolean SLOW_SWIM_AI               = true;
@@ -48,7 +48,7 @@ public class ElcaConfig {
     public static boolean DISABLE_SESSION_LOCK       = true;
     public static boolean IGNORE_ERRORS              = true;
     public static boolean REMOVE_ERROR_ENTITIES      = true;
-    public static boolean OVERWORLD_ASYNC_POPULATION = false;
+    public static boolean OVERWORLD_ASYNC_POPULATION = true;
 
     //public static boolean TICK_ONLY_TRACKED_ENTITIES = true;
     public static boolean REMOVE_SERVER_THREAD       = false;

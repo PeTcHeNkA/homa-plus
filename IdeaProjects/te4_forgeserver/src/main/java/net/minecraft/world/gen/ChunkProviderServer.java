@@ -27,6 +27,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import plus.fserver.server.chunk.io.TChunkExecutor;
 import plus.fserver.server.chunk.io.TChunkGenProvider;
+import plus.fserver.utls.collections.ChunkPopulationTask;
 
 
 public class ChunkProviderServer implements IChunkProvider {
@@ -38,12 +39,14 @@ public class ChunkProviderServer implements IChunkProvider {
     public final Long2ObjectMap<Chunk> loadedChunks = new Long2ObjectOpenHashMap<>(8192);
     public final WorldServer world;
     private final Long2ObjectOpenHashMap realLC = (Long2ObjectOpenHashMap) loadedChunks;
+    private final ChunkPopulationTask task;
 
 
     public ChunkProviderServer(WorldServer worldObjIn, IChunkLoader chunkLoaderIn, IChunkGenerator chunkGeneratorIn) {
         this.world = worldObjIn;
         this.chunkLoader = chunkLoaderIn;
         this.chunkGenerator = chunkGeneratorIn;
+        task = chunkGeneratorIn.maybeAsync()?new ChunkPopulationTask(this):null;
     }
 
 
@@ -218,10 +221,8 @@ public class ChunkProviderServer implements IChunkProvider {
         Chunk chunk = provider.getChunk();
         loadedChunks.put(ChunkPos.asLong(chunk.x, chunk.z), chunk);
         chunk.onLoad();
-        if(chunkGenerator.maybeAsyncPopulate()) {
-            world.addAsyncTask(
-                    () -> provider.getChunk().populate(ChunkProviderServer.this, chunkGenerator)
-            );
+        if(task != null) {
+            task.add(provider.getChunk());
         } else {
             provider.getChunk().populate(ChunkProviderServer.this, chunkGenerator);
         }
@@ -236,6 +237,7 @@ public class ChunkProviderServer implements IChunkProvider {
     private int ticks = 0;
     @Override
     public boolean tick() {
+        if(task != null) task.reRunIfNeed();
         if (!this.world.disableLevelSaving) {
             if (!this.droppedChunks.isEmpty()) {
                 for (ChunkPos forced : this.world.getPersistentChunks().keySet()) {

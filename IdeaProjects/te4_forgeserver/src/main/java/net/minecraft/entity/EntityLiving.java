@@ -54,6 +54,8 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.storage.loot.LootContext;
 import net.minecraft.world.storage.loot.LootTable;
+import net.minecraftforge.event.ForgeEventFactory;
+import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.server.SStrings;
@@ -521,14 +523,18 @@ public abstract class EntityLiving extends EntityLivingBase {
 
     @Override
     public void onLivingUpdate() {
-        super.onLivingUpdate();
+        int lodLvl;
+        if((ticksExisted & (lodLvl = lodLvl())) == 0){
+            onLivingUpdateTick();
+            if(lodLvl < 2) this.collideWithNearbyEntities();
+        }
 
-        if (!this.world.isRemote && this.canPickUpLoot() && !this.dead && world.getMobGrifering(this)) {
+        if (lodLvl == 0 && !this.world.isRemote && this.canPickUpLoot() && !this.dead && world.getMobGrifering(this)) {
             AxisAlignedBB box;
             getEntityBoundingBox().growTo(1d,0d,1d, box = world.commonWorldEntityAABB);
-            for (EntityItem entityitem : this.world.getEntitiesWithinAABB(EntityItem.class, box)) {
-                if (!entityitem.isDead && !entityitem.getItem().isEmpty() && !entityitem.cannotPickup()) {
-                    this.updateEquipmentIfNeeded(entityitem);
+            for (EntityItem item : this.world.getEntitiesWithinAABB(EntityItem.class, box)) {
+                if (!item.isDead && !item.getItem().isEmpty() && !item.cannotPickup()) {
+                    this.updateEquipmentIfNeeded(item);
                 }
             }
         }
@@ -624,8 +630,8 @@ public abstract class EntityLiving extends EntityLivingBase {
         if (this.persistenceRequired) {
             this.idleTime = 0;
         }
-        else if ((this.idleTime & 0x1F) == 0x1F && (result = net.minecraftforge.event.ForgeEventFactory.canEntityDespawn(this)) != net.minecraftforge.fml.common.eventhandler.Event.Result.DEFAULT) {
-            if (result == net.minecraftforge.fml.common.eventhandler.Event.Result.DENY) {
+        else if ((this.idleTime & 0x1F) == 0x1F && (result = ForgeEventFactory.canEntityDespawn(this)) != Event.Result.DEFAULT) {
+            if (result == Event.Result.DENY) {
                 this.idleTime = 0;
             } else {
                 this.setDead();
@@ -1051,32 +1057,27 @@ public abstract class EntityLiving extends EntityLivingBase {
         return this.persistenceRequired;
     }
 
-    public final boolean processInitialInteract(EntityPlayer player, EnumHand hand)
-    {
-        if (this.getLeashed() && this.getLeashHolder() == player)
-        {
+
+    @Override
+    public final boolean processInitialInteract(EntityPlayer player, EnumHand hand) {
+        if (this.getLeashed() && this.getLeashHolder() == player) {
             this.clearLeashed(true, !player.capabilities.isCreativeMode);
             return true;
-        }
-        else
-        {
+        } else {
             ItemStack itemstack = player.getHeldItem(hand);
 
-            if (itemstack.getItem() == Items.LEAD && this.canBeLeashedTo(player))
-            {
+            if (itemstack.getItem() == Items.LEAD && this.canBeLeashedTo(player)) {
                 this.setLeashHolder(player, true);
                 itemstack.shrink(1);
                 return true;
-            }
-            else
-            {
+            } else {
                 return this.processInteract(player, hand) ? true : super.processInitialInteract(player, hand);
             }
         }
     }
 
-    protected boolean processInteract(EntityPlayer player, EnumHand hand)
-    {
+
+    protected boolean processInteract(EntityPlayer player, EnumHand hand) {
         return false;
     }
 

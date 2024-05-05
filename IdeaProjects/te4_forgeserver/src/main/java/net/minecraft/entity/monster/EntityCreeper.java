@@ -36,6 +36,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.fserver.ElcaMobs;
 
 
 public class EntityCreeper extends EntityMob {
@@ -305,5 +306,11 @@ public class EntityCreeper extends EntityMob {
 
     public void incrementDroppedSkulls() {
         ++this.droppedSkulls;
+    }
+
+
+    @Override
+    public int lodLvl() {
+        return ElcaMobs.CREEPER.lodLvl(elcaMinRange);
     }
 }

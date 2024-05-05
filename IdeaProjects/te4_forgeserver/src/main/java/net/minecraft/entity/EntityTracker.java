@@ -13,7 +13,6 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.SPacketEntityAttach;
 import net.minecraft.network.play.server.SPacketSetPassengers;
-import net.minecraft.util.IntHashMap;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.WorldServer;
@@ -23,7 +22,6 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import plus.fserver.utls.collections.IdentityTe4HashSet;
 import plus.fserver.world.EntityTrackerFactory;
 
 
@@ -31,7 +29,7 @@ public class EntityTracker {
     private static final EntityTrackerFactory trackingTable = new EntityTrackerFactory();
     private static final Logger LOGGER = LogManager.getLogger();
     private final WorldServer world;
-    private final Set<EntityTrackerEntry> entries = new IdentityTe4HashSet<>(); //is safe
+    //private final Set<EntityTrackerEntry> entries = new IdentityTe4HashSet<>(); //is safe
     private int maxTrackingDistanceThreshold;
 
     public EntityTracker(WorldServer theWorldIn) {
@@ -66,7 +64,7 @@ public class EntityTracker {
             }
             EntityTrackerEntry entry = new EntityTrackerEntry(entityIn, trackingRange, this.maxTrackingDistanceThreshold, updateFrequency, sendVelocityUpdates);
 
-            this.entries.add(entry);
+            //this.entries.add(entry);
             entityIn.trackerEntry = entry;
 
             entry.updatePlayerEntities(this.world.playerEntities);
@@ -106,7 +104,8 @@ public class EntityTracker {
         entry = entityIn.trackerEntry;
         if (entry != null) {
             entityIn.trackerEntry = null;
-            this.entries.remove(entry);
+            //entityIn.lodLvl &= ~1;
+            //this.entries.remove(entry);
             entry.sendDestroyEntityPacketToTrackedPlayers();
         }
     }
@@ -115,27 +114,33 @@ public class EntityTracker {
     private final ArrayList<EntityPlayerMP> toUpdate = new ArrayList<>();
     public void tick() {
         List<EntityPlayer> players = this.world.playerEntities;
+        EntityTrackerEntry entry;
         if((world.getTotalWorldTime()&1)==0){
-            for (EntityTrackerEntry entitytrackerentry : this.entries) {
-                entitytrackerentry.updatePlayerList(players);
+            for (Entity entity : world.loadedEntityList) {
+                if((entry = entity.trackerEntry) != null)
+                    entry.updatePlayerList(players);
             }
         } else {
             ArrayList<EntityPlayerMP> list = toUpdate;
-            for (EntityTrackerEntry entitytrackerentry : this.entries) {
-                entitytrackerentry.updatePlayerList(players);
-                if (entitytrackerentry.playerEntitiesUpdated) {
-                    Entity entity = entitytrackerentry.getTrackedEntity();
+            for (Entity entity : world.loadedEntityList) {
+                if((entry = entity.trackerEntry) != null) {
+                    entry.updatePlayerList(players);
+                    if (entry.playerEntitiesUpdated) {
+                        //Entity entity = entry.getTrackedEntity();
 
-                    if (entity instanceof EntityPlayerMP) {
-                        list.add((EntityPlayerMP) entity);
+                        if (entity instanceof EntityPlayerMP) {
+                            list.add((EntityPlayerMP) entity);
+                        }
                     }
                 }
             }
             for (int i = 0; i < list.size(); ++i) {
                 EntityPlayerMP entityplayermp = list.get(i);
-                for (EntityTrackerEntry entry : this.entries) {
-                    if (entry.getTrackedEntity() != entityplayermp) {
-                        entry.updatePlayerEntity(entityplayermp);
+                for (Entity entity : world.loadedEntityList) {
+                    if((entry = entity.trackerEntry) != null) {
+                        if (entry.getTrackedEntity() != entityplayermp) {
+                            entry.updatePlayerEntity(entityplayermp);
+                        }
                     }
                 }
             }
@@ -145,11 +150,14 @@ public class EntityTracker {
 
 
     public void updateVisibility(EntityPlayerMP player) {
-        for (EntityTrackerEntry entry : this.entries) {
-            if (entry.getTrackedEntity() == player) {
-                entry.updatePlayerEntities(this.world.playerEntities);
-            } else {
-                entry.updatePlayerEntity(player);
+        EntityTrackerEntry entry;
+        for (Entity entity : world.loadedEntityList) {
+            if((entry = entity.trackerEntry) != null) {
+                if (entity == player) {
+                    entry.updatePlayerEntities(this.world.playerEntities);
+                } else {
+                    entry.updatePlayerEntity(player);
+                }
             }
         }
     }
@@ -165,14 +173,6 @@ public class EntityTracker {
     }
 
 
-    /* ======================================== FORGE START =====================================*/
-
-    // don't expose the EntityTrackerEntry directly so mods can't mess with the data in there as easily
-    /**
-     * Get all players tracking the given Entity. The Entity must be part of the World that this Tracker belongs to.
-     * @param entity the Entity
-     * @return all players tracking the Entity
-     */
     public Set<? extends net.minecraft.entity.player.EntityPlayer> getTrackingPlayers(Entity entity) {
         EntityTrackerEntry entry = entity.trackerEntry;
         //EntityTrackerEntry entry = trackedEntityHashTable.lookup(entity.getEntityId());
@@ -182,7 +182,6 @@ public class EntityTracker {
             return java.util.Collections.unmodifiableSet(entry.trackingPlayers);
     }
 
-    /* ======================================== FORGE END   =====================================*/
 
     public void sendToTrackingAndSelf(Entity entity, Packet<?> packetIn) {
         EntityTrackerEntry entry = entity.trackerEntry;
@@ -195,8 +194,11 @@ public class EntityTracker {
 
 
     public void removePlayerFromTrackers(EntityPlayerMP player) {
-        for (EntityTrackerEntry entitytrackerentry : this.entries) {
-            entitytrackerentry.removeTrackedPlayerSymmetric(player);
+        EntityTrackerEntry entry;
+        for (Entity entity : player.world.loadedEntityList) {
+            if((entry = entity.trackerEntry) != null) {
+                entry.removeTrackedPlayerSymmetric(player);
+            }
         }
     }
 
@@ -204,18 +206,19 @@ public class EntityTracker {
     public void sendLeashedEntitiesInChunk(EntityPlayerMP player, Chunk chunkIn) {
         List<Entity> list = Lists.newArrayList();
         List<Entity> list1 = Lists.newArrayList();
-        for (EntityTrackerEntry entitytrackerentry : this.entries) {
-            Entity entity = entitytrackerentry.getTrackedEntity();
+        for (Entity entity : world.loadedEntityList) {
+            EntityTrackerEntry entry = entity.trackerEntry;
+            if (entry != null) {
+                if (entity != player && entity.chunkCoordX == chunkIn.x && entity.chunkCoordZ == chunkIn.z) {
+                    entry.updatePlayerEntity(player);
 
-            if (entity != player && entity.chunkCoordX == chunkIn.x && entity.chunkCoordZ == chunkIn.z) {
-                entitytrackerentry.updatePlayerEntity(player);
+                    if (entity instanceof EntityLiving && ((EntityLiving) entity).getLeashHolder() != null) {
+                        list.add(entity);
+                    }
 
-                if (entity instanceof EntityLiving && ((EntityLiving) entity).getLeashHolder() != null) {
-                    list.add(entity);
-                }
-
-                if (!entity.getPassengers().isEmpty()) {
-                    list1.add(entity);
+                    if (!entity.getPassengers().isEmpty()) {
+                        list1.add(entity);
+                    }
                 }
             }
         }
@@ -238,9 +241,11 @@ public class EntityTracker {
 
     public void setViewDistance(int distance) {
         this.maxTrackingDistanceThreshold = ((distance - 1) << 4);
-
-        for (EntityTrackerEntry entitytrackerentry : this.entries) {
-            entitytrackerentry.setMaxRange(this.maxTrackingDistanceThreshold);
+        EntityTrackerEntry entry;
+        for (Entity entity : world.loadedEntityList) {
+            if((entry = entity.trackerEntry) != null) {
+                entry.setMaxRange(this.maxTrackingDistanceThreshold);
+            }
         }
     }
 
@@ -251,10 +256,12 @@ public class EntityTracker {
         if (entityIn instanceof EntityPlayerMP) {
             this.track(entityIn, 512, 2);
             EntityPlayerMP entityplayermp = (EntityPlayerMP)entityIn;
-
-            for (EntityTrackerEntry entitytrackerentry : this.entries) {
-                if (entitytrackerentry.getTrackedEntity() != entityplayermp) {
-                    entitytrackerentry.updatePlayerEntity(entityplayermp);
+            EntityTrackerEntry entry;
+            for (Entity entity : world.loadedEntityList) {
+                if((entry = entity.trackerEntry) != null) {
+                    if (entry.getTrackedEntity() != entityplayermp) {
+                        entry.updatePlayerEntity(entityplayermp);
+                    }
                 }
             }
         } else {

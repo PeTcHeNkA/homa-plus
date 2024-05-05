@@ -2408,6 +2408,12 @@ public abstract class EntityPlayer extends EntityLivingBase {
     }
 
 
+    @Override
+    public int lodLvl() {
+        return 0;
+    }
+
+
     static class SleepEnemyPredicate implements Predicate<EntityMob> {
         private final EntityPlayer player;
 

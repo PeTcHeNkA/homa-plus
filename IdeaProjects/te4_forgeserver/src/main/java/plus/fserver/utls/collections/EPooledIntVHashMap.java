@@ -8,13 +8,20 @@ public class EPooledIntVHashMap<V> {
     private int count, threshold = 12;
 
 
-    private static int getSlotIndex(int hash, int slotCount) {
-        return hash & slotCount - 1;
+    private int getSlotIndex(int integer) {
+        integer = integer ^ integer >>> 20 ^ integer >>> 12;
+        return (integer ^ integer >>> 7 ^ integer >>> 4) & this.slots.length -1;
+    }
+
+
+    private int getSlotIndex(int hash, int size) {
+        hash = hash ^ hash >>> 20 ^ hash >>> 12;
+        return (hash ^ hash >>> 7 ^ hash >>> 4) & size -1;
     }
 
 
     public V lookup(int hashEntry) {
-        for (EPooledIntVHashMap.Entry<V> entry = this.slots[getSlotIndex(hashEntry, this.slots.length)]; entry != null; entry = entry.nextEntry) {
+        for (EPooledIntVHashMap.Entry<V> entry = this.slots[getSlotIndex(hashEntry)]; entry != null; entry = entry.nextEntry) {
             if (entry.hashEntry == hashEntry) {
                 return entry.valueEntry;
             }
@@ -29,7 +36,7 @@ public class EPooledIntVHashMap<V> {
 
 
     final EPooledIntVHashMap.Entry<V> lookupEntry(int hashEntry) {
-        for (EPooledIntVHashMap.Entry<V> entry = this.slots[getSlotIndex(hashEntry, this.slots.length)]; entry != null; entry = entry.nextEntry) {
+        for (EPooledIntVHashMap.Entry<V> entry = this.slots[getSlotIndex(hashEntry)]; entry != null; entry = entry.nextEntry) {
             if (entry.hashEntry == hashEntry) {
                 return entry;
             }
@@ -39,14 +46,14 @@ public class EPooledIntVHashMap<V> {
 
 
     public void addKey(int hashEntry, V valueEntry) {
-        int j = getSlotIndex(hashEntry, this.slots.length);
-        for (EPooledIntVHashMap.Entry<V> entry = this.slots[j]; entry != null; entry = entry.nextEntry) {
+        int index = getSlotIndex(hashEntry);
+        for (EPooledIntVHashMap.Entry<V> entry = this.slots[index]; entry != null; entry = entry.nextEntry) {
             if (entry.hashEntry == hashEntry) {
                 entry.valueEntry = valueEntry;
                 return;
             }
         }
-        this.insert(hashEntry, hashEntry, valueEntry, j);
+        this.insert(hashEntry, hashEntry, valueEntry, index);
     }
 
 
@@ -98,7 +105,7 @@ public class EPooledIntVHashMap<V> {
 
 
     final EPooledIntVHashMap.Entry<V> removeEntry(int hash) {
-        int j = getSlotIndex(hash, this.slots.length);
+        int j = getSlotIndex(hash);
         EPooledIntVHashMap.Entry<V> entry = this.slots[j];
         EPooledIntVHashMap.Entry<V> entry1;
         EPooledIntVHashMap.Entry<V> entry2;

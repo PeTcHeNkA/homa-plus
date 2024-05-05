@@ -1619,7 +1619,6 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
         int l2 = MathHelper.floor(aabb.minZ - MAX_ENTITY_RADIUS)>>4;
         int i3 = MathHelper.ceil(aabb.maxZ + MAX_ENTITY_RADIUS)>>4;
 
-        //List<T> list = new ArrayListE6<>();
         Chunk chunk;
 
         for (int xPos = MathHelper.floor(aabb.minX - MAX_ENTITY_RADIUS)>>4; xPos < k2; ++xPos) {
@@ -1629,18 +1628,15 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
                 }
             }
         }
-        //return list;
     }
 
 
-    //private ArrayListE6<Entity> lastList = ElcaCV.AABB_MEMORY_IMPROVEMENT?new ArrayListE6<>():null;
     @Override //synchronized, improved memory management
     public void getEntitiesInAABBexcludingNoCache(List<Entity> list, @Nullable Entity entityIn, AxisAlignedBB boundingBox, @Nullable Predicate <? super Entity > predicate) {
         int k2 = MathHelper.floor(boundingBox.maxX + MAX_ENTITY_RADIUS)>>4;
         int l2 = MathHelper.floor(boundingBox.minZ - MAX_ENTITY_RADIUS)>>4;
         int i3 = MathHelper.floor(boundingBox.maxZ + MAX_ENTITY_RADIUS)>>4;
 
-        //ArrayListE6<Entity> list = ElcaCV.AABB_MEMORY_IMPROVEMENT?lastList:new ArrayListE6<>();
         Chunk chunk;
 
         for (int xPos = MathHelper.floor(boundingBox.minX - MAX_ENTITY_RADIUS)>>4; xPos <= k2; ++xPos) {
@@ -1650,9 +1646,6 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
                 }
             }
         }
-//        if(list.isEmpty())return Collections.EMPTY_LIST;
-//        if(ElcaCV.AABB_MEMORY_IMPROVEMENT) lastList = new ArrayListE6<>();
-//        return list;
     }
 
 
@@ -1663,7 +1656,6 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
         int l2 = MathHelper.floor(boundingBox.minZ - MAX_ENTITY_RADIUS)>>4;
         int i3 = MathHelper.floor(boundingBox.maxZ + MAX_ENTITY_RADIUS)>>4;
 
-        //ArrayListE6<Entity> list = ElcaCV.AABB_MEMORY_IMPROVEMENT?lastList:new ArrayListE6<>();
         Chunk chunk;
 
         for (int xPos = MathHelper.floor(boundingBox.minX - MAX_ENTITY_RADIUS)>>4; xPos <= k2; ++xPos) {
@@ -1673,9 +1665,6 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
                 }
             }
         }
-        //if(list.isEmpty())return Collections.EMPTY_LIST;
-        //if(ElcaCV.AABB_MEMORY_IMPROVEMENT) lastList = new ArrayListE6<>();
-        //return list;
     }
 
 
@@ -1719,7 +1708,7 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
 
                             if (!fastCheck && flag1 && !worldborder.contains(xPos, zPos)) {
                                 state = BlockIDIndexes.STONE_STATE;
-                            } else {;
+                            } else {
                                 state = chunk.getBlockState(xPos, i2, zPos);
                             }
 

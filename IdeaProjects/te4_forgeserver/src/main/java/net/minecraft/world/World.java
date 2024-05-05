@@ -415,7 +415,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     public boolean setBlockToAir(BlockPos pos) {
-        return this.setBlockState(pos, Blocks.AIR.getDefaultState(), 3);
+        return this.setBlockState(pos, BlockIDIndexes.AIR_STATE, 3);
     }
 
 
@@ -431,7 +431,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             if (dropBlock) {
                 block.dropBlockAsItem(this, pos, iblockstate, 0);
             }
-            return this.setBlockState(pos, Blocks.AIR.getDefaultState(), 3);
+            return this.setBlockState(pos, BlockIDIndexes.AIR_STATE, 3);
         }
     }
 
@@ -1296,21 +1296,17 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     public boolean isInsideWorldBorder(Entity entityToCheck) {
-        double d0 = this.worldBorder.minX();
-        double d1 = this.worldBorder.minZ();
-        double d2 = this.worldBorder.maxX();
-        double d3 = this.worldBorder.maxZ();
-
+        double d0, d1, d2, d3;
         if (entityToCheck.isOutsideBorder()) {
-            ++d0;
-            ++d1;
-            --d2;
-            --d3;
+            d0 = worldB1+1;
+            d1 = worldB2+1;
+            d2 = worldB1-1;
+            d3 = worldB1-1;
         } else {
-            --d0;
-            --d1;
-            ++d2;
-            ++d3;
+            d0 = worldB1-1;
+            d1 = worldB1-1;
+            d2 = worldB3+1;
+            d3 = worldB4+1;
         }
         return entityToCheck.posX > d0 && entityToCheck.posX < d2 && entityToCheck.posZ > d1 && entityToCheck.posZ < d3;
     }
@@ -2253,6 +2249,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
+    private double worldB1, worldB2, worldB3, worldB4;
     public void tick() {
         this.updateWeather();
         if(ElcaCV.ENABLE_COLLISION_EVENTS) collisionEvent.reset();
@@ -2260,6 +2257,12 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             eeCache.tick();
             bbCache.tick();
         }
+
+        worldB1 = this.worldBorder.minX();
+        worldB2 = this.worldBorder.minZ();
+        worldB3 = this.worldBorder.maxX();
+        worldB4 = this.worldBorder.maxZ();
+
         clearEvents();
     }
 
@@ -3516,6 +3519,14 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             getEntitiesWithinAABB0(res, clazz, aabb, filter);
             return res;
         }
+    }
+
+
+    public <T extends Entity> List<T> getEntitiesWithinAABBNoCache(@NotNull Class <? extends T > clazz, @NotNull AxisAlignedBB aabb,
+                                                            @Nullable Predicate<? super T > filter){
+        ArrayListE6<T> res = new ArrayListE6<>();
+        getEntitiesWithinAABB0(res, clazz, aabb, filter);
+        return res;
     }
 
 

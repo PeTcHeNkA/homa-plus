@@ -89,6 +89,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import plus.fserver.ElcaConfig;
+import plus.fserver.ElcaMobs;
 import plus.fserver.api.IBlockEAccess;
 import plus.fserver.ElcaCV;
 import plus.fserver.server.SStrings;
@@ -191,6 +192,11 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
     private long pistonDeltasGameTime;
 
     public EntityTrackerEntry trackerEntry;
+    public double elcaMinRange;
+    //1 = track flag
+    //public byte lodLvl = 0;
+
+    //public boolean isTracked(){return (lodLvl & 1) == 1;}
 
     /**
      * Setting this to true will prevent the world from calling {@link #onUpdate()} for this entity.
@@ -211,9 +217,9 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         //this.rand = ThreadLocalRandom.current();
         if (worldIn != null) {
             this.dimension = worldIn.provider.getDimension();
-            this.rand = new Random();
+            this.rand = worldIn.commonWorldEntityRandom;
         } else {
-            this.rand = world.commonWorldEntityRandom;
+            this.rand = new Random();
         }
 
         this.fire = (short) -this.getFireImmuneTicks();
@@ -227,7 +233,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         //replace zero AABB to self
         this.setPosition(0.0D, 0.0D, 0.0D);
 
-        //if(ElcaCV.DEBUG_NO_SERVER)return;
+        if(ElcaCV.DEBUG_NO_SERVER)return;
 
         this.dataManager = new EntityDataManager(this);
         this.dataManager.register(FLAGS, (byte) 0);
@@ -437,11 +443,11 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         this.prevRotationPitch = this.rotationPitch;
         this.prevRotationYaw = this.rotationYaw;
 
-        if (!this.world.isRemote && this.world instanceof WorldServer) {
+        if (!this.world.isRemote) {
             if (this.inPortal) {
-                MinecraftServer minecraftserver = this.world.getMinecraftServer();
+                MinecraftServer server = this.world.getMinecraftServer();
 
-                if (minecraftserver.getAllowNether()) {
+                if (server.getAllowNether()) {
                     if (!this.isRiding()) {
                         int i = this.getMaxInPortalTime();
                         if (this.portalCounter++ >= i) {
@@ -1224,7 +1230,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
 
     public float getBrightness() {
-        BlockPos blockPos = new BlockPos(
+        BlockPos blockPos = world.localTempPos3.setPos(
                 this.posX, this.posY + (double)this.getEyeHeight(), this.posZ
         );
         if (this.world.isBlockLoaded(blockPos)) {
@@ -2999,5 +3005,10 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
     protected int getFireImmuneTicks() {
         return 1;
+    }
+
+
+    public int lodLvl(){
+        return ElcaMobs.GLOBAL.lodLvl(elcaMinRange);
     }
 }

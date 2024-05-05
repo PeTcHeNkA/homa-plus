@@ -108,44 +108,44 @@ public class WalkNodeProcessor extends NodeProcessor {
     }
 
 
-    @Override //todo error ai
-    public int findPathOptions(PathPoint[] pathOptions, PathPoint currentPoint, PathPoint targetPoint, float maxDistance) {
+    @Override
+    public int findPathOptions(PathPoint[] pathOptions, PathPoint cur, PathPoint target, float maxDistance) {
         int i = 0;
         int stepH = 0;
 
-        PntMatrix.Chunked chunked = matrix.getChunked(currentPoint.x, currentPoint.z);
+        PntMatrix.Chunked chunked = matrix.getChunked(cur.x, cur.z);
 
-        PathNodeType type = chunked.getCur(currentPoint.x, currentPoint.y + 1, currentPoint.z);
+        PathNodeType type = chunked.getCur(cur.x, cur.y + 1, cur.z);
         if(type==null) {
-            type = this.getPathNodeType(this.entity, currentPoint.x, currentPoint.y + 1, currentPoint.z);
-            chunked.setCur(currentPoint.x, currentPoint.y + 1, currentPoint.z, type);
+            type = this.getPathNodeType(this.entity, cur.x, cur.y + 1, cur.z);
+            chunked.setCur(cur.x, cur.y + 1, cur.z, type);
         }
 
         if (this.entity.getPathPriority(type) >= 0.0F) {
             stepH = MathHelper.floor(Math.max(1.0F, this.entity.stepHeight));
         }
 
-        pooledPos.setPos(currentPoint.x, currentPoint.y-1, currentPoint.z);
+        pooledPos.setPos(cur.x, cur.y-1, cur.z);
 
-        double curY = (double)currentPoint.y - (1.0D - this.blockaccess.getBlockState(pooledPos).getBoundingBox(this.blockaccess, pooledPos).maxY);
-        PathPoint pathpoint =  this.getSafePoint(chunked, currentPoint.x, currentPoint.y, currentPoint.z + 1, stepH, curY, EnumFacing.SOUTH);
-        PathPoint pathpoint1 = this.getSafePoint(chunked, currentPoint.x - 1, currentPoint.y, currentPoint.z, stepH, curY, EnumFacing.WEST);
-        PathPoint pathpoint2 = this.getSafePoint(chunked, currentPoint.x + 1, currentPoint.y, currentPoint.z, stepH, curY, EnumFacing.EAST);
-        PathPoint pathpoint3 = this.getSafePoint(chunked, currentPoint.x, currentPoint.y, currentPoint.z - 1, stepH, curY, EnumFacing.NORTH);
+        double curY = (double)cur.y - (1.0D - this.blockaccess.getBlockState(pooledPos).getBoundingBox(this.blockaccess, pooledPos).maxY);
+        PathPoint pathpoint =  this.getSafePoint(chunked, cur.x, cur.y, cur.z + 1, stepH, curY, EnumFacing.SOUTH);
+        PathPoint pathpoint1 = this.getSafePoint(chunked, cur.x - 1, cur.y, cur.z, stepH, curY, EnumFacing.WEST);
+        PathPoint pathpoint2 = this.getSafePoint(chunked, cur.x + 1, cur.y, cur.z, stepH, curY, EnumFacing.EAST);
+        PathPoint pathpoint3 = this.getSafePoint(chunked, cur.x, cur.y, cur.z - 1, stepH, curY, EnumFacing.NORTH);
 
-        if (pathpoint != null && !pathpoint.visited && pathpoint.distanceTo(targetPoint) < maxDistance) {
+        if (pathpoint != null && !pathpoint.visited && pathpoint.distanceTo(target) < maxDistance) {
             pathOptions[i++] = pathpoint;
         }
 
-        if (pathpoint1 != null && !pathpoint1.visited && pathpoint1.distanceTo(targetPoint) < maxDistance) {
+        if (pathpoint1 != null && !pathpoint1.visited && pathpoint1.distanceTo(target) < maxDistance) {
             pathOptions[i++] = pathpoint1;
         }
 
-        if (pathpoint2 != null && !pathpoint2.visited && pathpoint2.distanceTo(targetPoint) < maxDistance) {
+        if (pathpoint2 != null && !pathpoint2.visited && pathpoint2.distanceTo(target) < maxDistance) {
             pathOptions[i++] = pathpoint2;
         }
 
-        if (pathpoint3 != null && !pathpoint3.visited && pathpoint3.distanceTo(targetPoint) < maxDistance) {
+        if (pathpoint3 != null && !pathpoint3.visited && pathpoint3.distanceTo(target) < maxDistance) {
             pathOptions[i++] = pathpoint3;
         }
 
@@ -155,33 +155,33 @@ public class WalkNodeProcessor extends NodeProcessor {
         boolean flag3 = pathpoint1 == null || pathpoint1.nodeType == PathNodeType.OPEN || pathpoint1.costMalus != 0.0F;
 
         if (flag && flag3) {
-            PathPoint pathpoint4 = this.getSafePoint(chunked, currentPoint.x - 1, currentPoint.y, currentPoint.z - 1, stepH, curY, EnumFacing.NORTH);
+            PathPoint pathpoint4 = this.getSafePoint(chunked, cur.x - 1, cur.y, cur.z - 1, stepH, curY, EnumFacing.NORTH);
 
-            if (pathpoint4 != null && !pathpoint4.visited && pathpoint4.distanceTo(targetPoint) < maxDistance) {
+            if (pathpoint4 != null && !pathpoint4.visited && pathpoint4.distanceTo(target) < maxDistance) {
                 pathOptions[i++] = pathpoint4;
             }
         }
 
         if (flag && flag2) {
-            PathPoint pathpoint5 = this.getSafePoint(chunked, currentPoint.x + 1, currentPoint.y, currentPoint.z - 1, stepH, curY, EnumFacing.NORTH);
+            PathPoint pathpoint5 = this.getSafePoint(chunked, cur.x + 1, cur.y, cur.z - 1, stepH, curY, EnumFacing.NORTH);
 
-            if (pathpoint5 != null && !pathpoint5.visited && pathpoint5.distanceTo(targetPoint) < maxDistance) {
+            if (pathpoint5 != null && !pathpoint5.visited && pathpoint5.distanceTo(target) < maxDistance) {
                 pathOptions[i++] = pathpoint5;
             }
         }
 
         if (flag1 && flag3) {
-            PathPoint pathpoint6 = this.getSafePoint(chunked, currentPoint.x - 1, currentPoint.y, currentPoint.z + 1, stepH, curY, EnumFacing.SOUTH);
+            PathPoint pathpoint6 = this.getSafePoint(chunked, cur.x - 1, cur.y, cur.z + 1, stepH, curY, EnumFacing.SOUTH);
 
-            if (pathpoint6 != null && !pathpoint6.visited && pathpoint6.distanceTo(targetPoint) < maxDistance) {
+            if (pathpoint6 != null && !pathpoint6.visited && pathpoint6.distanceTo(target) < maxDistance) {
                 pathOptions[i++] = pathpoint6;
             }
         }
 
         if (flag1 && flag2) {
-            PathPoint pathpoint7 = this.getSafePoint(chunked, currentPoint.x + 1, currentPoint.y, currentPoint.z + 1, stepH, curY, EnumFacing.SOUTH);
+            PathPoint pathpoint7 = this.getSafePoint(chunked, cur.x + 1, cur.y, cur.z + 1, stepH, curY, EnumFacing.SOUTH);
 
-            if (pathpoint7 != null && !pathpoint7.visited && pathpoint7.distanceTo(targetPoint) < maxDistance) {
+            if (pathpoint7 != null && !pathpoint7.visited && pathpoint7.distanceTo(target) < maxDistance) {
                 pathOptions[i++] = pathpoint7;
             }
         }
