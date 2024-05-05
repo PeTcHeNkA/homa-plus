@@ -18,6 +18,17 @@ public class ArrayRemSwapListE6<T> extends ArrayListE6<T> {
     }
 
 
+    public void removeSwap(int index) {
+        if(size == index+1){
+            data[size] = null;
+        }
+        Object swap = data[size-1];
+        data[index] = swap;
+        data[size-1] = null;
+        --size;
+    }
+
+
     @Override
     public boolean contains(Object o) {
         for (int i =0 ; i < size; i++) if(o.equals(data[i]))return true;

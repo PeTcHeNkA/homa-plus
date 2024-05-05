@@ -2,6 +2,7 @@ package plus.fserver.utls.collections;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityTrackerEntry;
+import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -17,6 +18,7 @@ public class ChunkedEntityList {
     private int countChunks = 0;
 
     private final NearIter nearIter = new NearIter();
+    private final EntityIter allIter = new EntityIter();
 
 
     private Chunk allocChunk(long index) {
@@ -112,13 +114,13 @@ public class ChunkedEntityList {
             Chunk chunk;
             (chunk = allChunks[cIndex]).remove(entity);
 
-            if(chunk.isEmpty()){
+            if(chunk.isEmptyC()){
                 freeChunk(chunk);
 
                 int numMoved = countChunks - cIndex - 1;
                 if (numMoved > 0) System.arraycopy(allChunks, cIndex+1, allChunks, cIndex, numMoved);
 
-                --countChunks;
+                allChunks[--countChunks] = null;
             }
         } else {
             System.out.println("WARNING: Entity " + entity.getEntityId() + " not found in chunked list");
@@ -167,76 +169,160 @@ public class ChunkedEntityList {
 
 
     public NearIter nearEntityIter(Entity entity) {
-        return nearIter.init(entity);
+        return nearIter.init(this, entity);
     }
 
 
-    public class NearIter implements Iterator<Entity> {
+    public EntityIter entityIter() {
+        return allIter.init(allChunks, countChunks);
+    }
+
+
+    public boolean removeSafe(Entity entity) {
+        Entity cur;
+        for (EntityIter iter = entityIter(); iter.hasNext();) {
+            cur = iter.next();
+            if (cur == entity) {
+                iter.remove();
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    public static final class EntityIter implements Iterator<Entity>, Iterable<Entity> {
+        private Chunk[] chunks;
+        private int countChunks;
+        private Object[] current;
+        private int chunkCursor, entityCursor, entityCount;
+
+        public EntityIter init(Chunk[] chunks, int countChunks) {
+            this.chunks = chunks;
+            this.countChunks = countChunks;
+            reset();
+            return this;
+        }
+
+
+        public void reset(){
+            Chunk chunk = chunks[0];
+            if(chunk == null){
+                entityCount = -1;
+            } else {
+                chunkCursor = 0;
+                entityCursor = 0;
+                current = chunk.data;
+                entityCount = chunk.size;
+            }
+        }
+
+
+        @NotNull
+        @Override
+        public Iterator<Entity> iterator() {
+            return this;
+        }
+
+
+        @Override
+        public boolean hasNext() {
+            return entityCount != -1;
+        }
+
+
+        @Override
+        public void remove() {
+            Chunk chunk = chunks[chunkCursor];
+            chunk.removeSwap(entityCursor);
+            next();
+        }
+
+
+        @Override
+        public Entity next() {
+            Entity entity = (Entity) current[entityCursor++];
+            if(entityCursor == entityCount){
+                if((++chunkCursor) == countChunks){
+                    entityCount = -1;
+                    return entity;
+                }
+                Chunk chunk = chunks[chunkCursor];
+                current = chunk.data;
+                entityCount = chunk.size;
+                entityCursor = 0;
+            }
+            return entity;
+        }
+    }
+
+
+    public static class NearIter implements Iterator<Entity>, Iterable<Entity> {
         private final Chunk[] chunks = new Chunk[9];
         private Iterator<Entity> current;
         private int cursor = 0;
 
-        public NearIter init(Entity entity) {
+        public NearIter init(ChunkedEntityList list, Entity entity) {
             cursor = 0;
             int rawX = (((int) entity.posX) >> SHIFT);
             int rawZ = (((int) entity.posZ) >> SHIFT);
             Chunk temp;
 
-            long chunkIndex = indexOf(rawX - 1, rawZ - 1); // -1, -1
-            int startIdx    = binarySearchUnsafe(0, countChunks, chunkIndex);
+            long chunkIndex = list.indexOf(rawX - 1, rawZ - 1); // -1, -1
+            int startIdx    = list.binarySearchUnsafe(0, list.countChunks, chunkIndex);
 
-            temp = allChunks[startIdx];
+            temp = list.allChunks[startIdx];
             if(temp != null && chunkIndex == temp.index)chunks[0] = temp;
             else chunks[0] = null;
 
 
-            chunkIndex      = indexOf(rawX + 1, rawZ + 1); // +1, +1
-            int endIdx      = binarySearchUnsafe(startIdx,   countChunks, chunkIndex);
+            chunkIndex = list.indexOf(rawX + 1, rawZ + 1); // +1, +1
+            int endIdx = list.binarySearchUnsafe(startIdx,   list.countChunks, chunkIndex);
 
-            temp = allChunks[endIdx];
+            temp = list.allChunks[endIdx];
             if(temp != null && chunkIndex == temp.index)chunks[8] = temp;
             else chunks[8] = null;
 
 
-            chunkIndex = indexOf(rawX - 1, rawZ);       // -1, 0
-            int tempIdx = binarySearch(startIdx, endIdx, chunkIndex);
-            if (tempIdx >= 0) chunks[1] = allChunks[tempIdx];
+            chunkIndex = list.indexOf(rawX - 1, rawZ);       // -1, 0
+            int tempIdx = list.binarySearch(startIdx, endIdx, chunkIndex);
+            if (tempIdx >= 0) chunks[1] = list.allChunks[tempIdx];
             else chunks[1] = null;
 
 
-            chunkIndex = indexOf(rawX - 1, rawZ + 1);// -1, +1
-            tempIdx = binarySearch(startIdx, endIdx, chunkIndex);
-            if (tempIdx >= 0) chunks[2] = allChunks[tempIdx];
+            chunkIndex = list.indexOf(rawX - 1, rawZ + 1);// -1, +1
+            tempIdx = list.binarySearch(startIdx, endIdx, chunkIndex);
+            if (tempIdx >= 0) chunks[2] = list.allChunks[tempIdx];
             else chunks[2] = null;
 
 
-            chunkIndex = indexOf(rawX, rawZ - 1);       // 0, -1
-            tempIdx = binarySearch(startIdx, endIdx, chunkIndex);
-            if (tempIdx >= 0) chunks[3] = allChunks[tempIdx];
+            chunkIndex = list.indexOf(rawX, rawZ - 1);       // 0, -1
+            tempIdx = list.binarySearch(startIdx, endIdx, chunkIndex);
+            if (tempIdx >= 0) chunks[3] = list.allChunks[tempIdx];
             else chunks[3] = null;
 
 
-            chunkIndex = indexOf(rawX, rawZ);               // 0, 0
-            tempIdx = binarySearch(startIdx, endIdx, chunkIndex);
-            if (tempIdx >= 0) chunks[4] = allChunks[tempIdx];
+            chunkIndex = list.indexOf(rawX, rawZ);               // 0, 0
+            tempIdx = list.binarySearch(startIdx, endIdx, chunkIndex);
+            if (tempIdx >= 0) chunks[4] = list.allChunks[tempIdx];
             else chunks[4] = null;
 
 
-            chunkIndex = indexOf(rawX, rawZ + 1);        // 0, +1
-            tempIdx = binarySearch(startIdx, endIdx, chunkIndex);
-            if (tempIdx >= 0) chunks[5] = allChunks[tempIdx];
+            chunkIndex = list.indexOf(rawX, rawZ + 1);        // 0, +1
+            tempIdx = list.binarySearch(startIdx, endIdx, chunkIndex);
+            if (tempIdx >= 0) chunks[5] = list.allChunks[tempIdx];
             else chunks[5] = null;
 
 
-            chunkIndex = indexOf(rawX + 1, rawZ - 1); // +1, -1
-            tempIdx = binarySearch(startIdx, endIdx, chunkIndex);
-            if (tempIdx >= 0) chunks[6] = allChunks[tempIdx];
+            chunkIndex = list.indexOf(rawX + 1, rawZ - 1); // +1, -1
+            tempIdx = list.binarySearch(startIdx, endIdx, chunkIndex);
+            if (tempIdx >= 0) chunks[6] = list.allChunks[tempIdx];
             else chunks[6] = null;
 
 
-            chunkIndex = indexOf(rawX + 1, rawZ);        // +1, 0
-            tempIdx = binarySearch(startIdx, endIdx, chunkIndex);
-            if (tempIdx >= 0) chunks[7] = allChunks[tempIdx];
+            chunkIndex = list.indexOf(rawX + 1, rawZ);        // +1, 0
+            tempIdx = list.binarySearch(startIdx, endIdx, chunkIndex);
+            if (tempIdx >= 0) chunks[7] = list.allChunks[tempIdx];
             else chunks[7] = null;
 
 
@@ -253,6 +339,13 @@ public class ChunkedEntityList {
                 }
             }
             cursor = 9;
+        }
+
+
+        @NotNull
+        @Override
+        public Iterator<Entity> iterator() {
+            return this;
         }
 
 
@@ -274,7 +367,11 @@ public class ChunkedEntityList {
     }
 
 
-    public static final Comparator<Chunk> CHUNK_COMPARATOR = Comparator.comparingLong(o -> o.index);
+    //ignore warning, is faster
+    public static final Comparator<Chunk> CHUNK_COMPARATOR = (o1, o2) -> {
+        long l1 = o1.index, l2 = o2.index;
+        return l1 < l2 ? -1 : l1 == l2 ? 0 : 1;
+    };
 
 
     public static class Chunk extends ArrayRemSwapListE6<Entity>{
@@ -283,10 +380,12 @@ public class ChunkedEntityList {
             this.index = index;
         }
 
+
         public Chunk init(long index) {
             this.index = index;
             return this;
         }
+
 
         @Override
         public int hashCode() {
@@ -295,10 +394,18 @@ public class ChunkedEntityList {
     }
 
 
+    public int calcSize(){
+        int summ = 0, cs = countChunks;
+        Chunk[] ac = allChunks;
+        for (int i = 0;i < cs;i++)summ += ac[i].size;
+        return summ;
+    }
+
+
     @Override
     public String toString() {
         int summ = 0;
-        for (int i = 0;i<countChunks;i++)summ += allChunks[i].size();
+        for (int i = 0;i<countChunks;i++)summ += allChunks[i].size;
         return "ChunkedEntityList{" +
                 "chunks=" + countChunks + ", entities=" + summ +
                 '}';
