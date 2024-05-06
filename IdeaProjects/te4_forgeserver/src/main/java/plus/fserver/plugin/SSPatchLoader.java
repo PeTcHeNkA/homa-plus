@@ -22,18 +22,23 @@ public class SSPatchLoader extends TweakEngine implements IClassTransformer, ITw
     public static final String ELCA_VERSION;
 
     static {
-        String version = "2.3.7.04";
+        String version = "2.3.8.19";
         boolean isDev = true;
 
         int num  = 0;
         boolean[] flags = {
-            ENABLE_COLLISION_EVENTS       ,
-            ENABLE_EXPLOSION_EVENT        ,
-            AABB_MEMORY_IMPROVEMENT       ,
-            ENABLE_NEIGHBOR_NOTIFY_EVENT  ,
-            DEBUG_NO_SERVER               ,
-            CHECK_LEGAL_CHUNK_CHANGE      ,
-            MORE_MOBS_OPTIMIZER           ,
+            ENABLE_COLLISION_EVENTS      ,
+            ENABLE_EXPLOSION_EVENT       ,
+            AABB_MEMORY_IMPROVEMENT      ,
+            ENABLE_NEIGHBOR_NOTIFY_EVENT ,
+            CHECK_LEGAL_CHUNK_CHANGE     ,
+            MORE_MOBS_OPTIMIZER          ,
+            DISABLE_FORGE_FARMLAND       ,
+            ALLOW_ANY_PROJECTIVE_TNT     ,
+            CHECK_BI_ARRAY               ,
+            ENABLE_NOTCH_SECRET          ,
+            ENTITY_FAST_WET              ,
+            FIX_NULL_HASH_PALETTE        ,
         };
         for (int i=0;i< flags.length;i++)
             if(flags[i]) num |= 1<<i;

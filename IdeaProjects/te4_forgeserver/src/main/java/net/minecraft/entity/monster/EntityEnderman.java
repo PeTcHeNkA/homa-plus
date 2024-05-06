@@ -14,14 +14,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.ai.EntityAIAttackMelee;
-import net.minecraft.entity.ai.EntityAIBase;
-import net.minecraft.entity.ai.EntityAIHurtByTarget;
-import net.minecraft.entity.ai.EntityAILookIdle;
-import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
-import net.minecraft.entity.ai.EntityAISwimming;
-import net.minecraft.entity.ai.EntityAIWanderAvoidWater;
-import net.minecraft.entity.ai.EntityAIWatchClosest;
+import net.minecraft.entity.ai.*;
+import net.minecraft.entity.ai.attributes.AbstractAttributeMap;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.player.EntityPlayer;
@@ -69,13 +63,16 @@ public class EntityEnderman extends EntityMob {
 
     @Override
     protected void initEntityAI() {
-        this.tasks.addTask(0, new EntityAISwimming(this));
-        this.tasks.addTask(2, new EntityAIAttackMelee(this, 1.0D, false));
-        this.tasks.addTask(7, new EntityAIWanderAvoidWater(this, 1.0D, 0.0F));
-        this.tasks.addTask(8, new EntityAIWatchClosest(this, EntityPlayer.class, 8.0F));
-        this.tasks.addTask(8, new EntityAILookIdle(this));
-        this.tasks.addTask(10, new EntityEnderman.AIPlaceBlock(this));
-        this.tasks.addTask(11, new EntityEnderman.AITakeBlock(this));
+        EntityAITasks tasks = this.tasks;
+
+        tasks.addTask(0, new EntityAISwimming(this));
+        tasks.addTask(2, new EntityAIAttackMelee(this, 1.0D, false));
+        tasks.addTask(7, new EntityAIWanderAvoidWater(this, 1.0D, 0.0F));
+        tasks.addTask(8, new EntityAIWatchClosest(this, EntityPlayer.class, 8.0F));
+        tasks.addTask(8, new EntityAILookIdle(this));
+        tasks.addTask(10, new EntityEnderman.AIPlaceBlock(this));
+        tasks.addTask(11, new EntityEnderman.AITakeBlock(this));
+
         this.targetTasks.addTask(1, new EntityEnderman.AIFindPlayer(this));
         this.targetTasks.addTask(2, new EntityAIHurtByTarget(this, false, new Class[0]));
         this.targetTasks.addTask(3, new EntityAINearestAttackableTarget(this, EntityEndermite.class, 10, true, false,
@@ -91,28 +88,29 @@ public class EntityEnderman extends EntityMob {
     @Override
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
-        this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(40.0D);
-        this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.30000001192092896D);
-        this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(7.0D);
-        this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(64.0D);
+        AbstractAttributeMap map = this.getAttributeMap();
+        map.getAttributeInstance(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(40.0D);
+        map.getAttributeInstance(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.30000001192092896D);
+        map.getAttributeInstance(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(7.0D);
+        map.getAttributeInstance(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(64.0D);
     }
 
 
     @Override
     public void setAttackTarget(@Nullable EntityLivingBase entitylivingbaseIn) {
         super.setAttackTarget(entitylivingbaseIn);
-        IAttributeInstance iattributeinstance = this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED);
+        IAttributeInstance attr = this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED);
 
         if (entitylivingbaseIn == null) {
             this.targetChangeTime = 0;
             this.dataManager.set(SCREAMING, Boolean.valueOf(false));
-            iattributeinstance.removeModifier(ATTACKING_SPEED_BOOST);
+            attr.removeModifier(ATTACKING_SPEED_BOOST);
         } else {
             this.targetChangeTime = this.ticksExisted;
             this.dataManager.set(SCREAMING, Boolean.valueOf(true));
 
-            if (!iattributeinstance.hasModifier(ATTACKING_SPEED_BOOST)) {
-                iattributeinstance.applyModifier(ATTACKING_SPEED_BOOST);
+            if (!attr.hasModifier(ATTACKING_SPEED_BOOST)) {
+                attr.applyModifier(ATTACKING_SPEED_BOOST);
             }
         }
     }
@@ -120,9 +118,9 @@ public class EntityEnderman extends EntityMob {
 
     @Override
     protected void entityInit() {
-        super.entityInit();
         this.dataManager.register(CARRIED_BLOCK, Optional.absent());
-        this.dataManager.register(SCREAMING, Boolean.valueOf(false));
+        this.dataManager.register(SCREAMING, Boolean.FALSE);
+        super.entityInit();
     }
 
 

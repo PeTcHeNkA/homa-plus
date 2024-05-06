@@ -83,9 +83,8 @@ public abstract class EntityAnimal extends EntityAgeable implements IAnimals {
         super.writeEntityToNBT(compound);
         compound.setInteger("InLove", this.inLove);
 
-        if (this.playerInLove != null) {
+        if (this.playerInLove != null)
             compound.setUniqueId("LoveCause", this.playerInLove);
-        }
     }
 
 
@@ -175,9 +174,9 @@ public abstract class EntityAnimal extends EntityAgeable implements IAnimals {
 
     @Nullable
     public EntityPlayerMP getLoveCause() {
-        if (this.playerInLove == null) {
+        if (this.playerInLove == null)
             return null;
-        } else {
+        else {
             EntityPlayer entityplayer = this.world.getPlayerEntityByUUID(this.playerInLove);
             return entityplayer instanceof EntityPlayerMP ? (EntityPlayerMP)entityplayer : null;
         }
@@ -195,14 +194,9 @@ public abstract class EntityAnimal extends EntityAgeable implements IAnimals {
 
 
     public boolean canMateWith(EntityAnimal otherAnimal) {
-        if (otherAnimal == this) {
-            return false;
-        }
-        else if (otherAnimal.getClass() != this.getClass()) {
-            return false;
-        } else {
-            return this.isInLove() && otherAnimal.isInLove();
-        }
+        if (otherAnimal == this) return false;
+        else if (otherAnimal.getClass() != this.getClass()) return false;
+        else return this.isInLove() && otherAnimal.isInLove();
     }
 
 
@@ -215,9 +209,7 @@ public abstract class EntityAnimal extends EntityAgeable implements IAnimals {
                 double d2 = this.rand.nextGaussian() * 0.02D;
                 this.world.spawnParticle(EnumParticleTypes.HEART, this.posX + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, this.posY + 0.5D + (double)(this.rand.nextFloat() * this.height), this.posZ + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, d0, d1, d2);
             }
-        } else {
-            super.handleStatusUpdate(id);
-        }
+        } else super.handleStatusUpdate(id);
     }
 
 

@@ -3,12 +3,12 @@ package plus.fserver.utls.collections;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityTrackerEntry;
 import org.jetbrains.annotations.NotNull;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Iterator;
+import java.util.*;
 
 
-public class ChunkedEntityList {
+public class ChunkedEntityList implements List<Entity> {
+    private static boolean legaciCall = false;
+
     private static final int SHIFT = 6;
 
     private Chunk[] freeChunks = new Chunk[8];
@@ -188,6 +188,195 @@ public class ChunkedEntityList {
             }
         }
         return false;
+    }
+
+
+    @Override
+    public int size() {
+        return calcSize();
+    }
+
+
+    @Override
+    public boolean isEmpty() {
+        return countChunks == 0;
+    }
+
+
+    @Override
+    public boolean contains(Object o) {
+        Entity cur;
+        for (EntityIter iter = entityIter(); iter.hasNext();) {
+            cur = iter.next();
+            if (o.equals(cur)) return true;
+        }
+        return false;
+    }
+
+
+    @NotNull
+    @Override
+    public Iterator<Entity> iterator() {
+        return entityIter();
+    }
+
+
+    @Override
+    public boolean add(Entity entity) {
+        addEntity(entity);
+        return true;
+    }
+
+
+    @Override
+    public boolean remove(Object o) {
+        return removeSafe((Entity) o);
+    }
+
+
+    @Override
+    @Deprecated //todo maybe faster
+    public boolean removeAll(@NotNull Collection<?> c) {
+        for (Object o : c) {
+            if(!removeSafe((Entity) o)) return false;
+        }
+        return true;
+    }
+
+
+    @Override
+    @Deprecated
+    public int indexOf(Object o) {
+        int index = 0;
+        for (Entity entity : this) {
+            if (o.equals(entity)) return index;
+            ++index;
+        }
+        return -1;
+    }
+
+
+    @Override
+    @Deprecated
+    public int lastIndexOf(Object o) {
+        if(!legaciCall) {
+            System.out.println("WARNING: ChunkedEntityList#lastIndexOf() is deprecated, use ChunkedEntityList#indexOf() instead");
+            legaciCall = true;
+        }
+        return indexOf(o);
+    }
+
+
+    @Override
+    public boolean containsAll(@NotNull Collection<?> c) {
+        for (Object o : c) if(!contains(o)) return false;
+        return true;
+    }
+
+
+    @Override
+    public boolean addAll(@NotNull Collection<? extends Entity> c) {
+        for (Entity entity : c) addEntity(entity);
+        return true;
+    }
+
+
+    @Override
+    @Deprecated
+    public boolean addAll(int index, @NotNull Collection<? extends Entity> c) {
+        if(!legaciCall) {
+            System.out.println("WARNING: ChunkedEntityList#addAll(int, collection) is deprecated, use ChunkedEntityList#addAll(collection) instead");
+            legaciCall = true;
+        }
+        addAll(c);
+        return true;
+    }
+
+
+    @Override
+    public void clear() {
+        for (int i = 0; i < countChunks; i++) {
+            Chunk chunk = allChunks[i];
+            chunk.clear();
+            freeChunk(chunk);
+        }
+        countChunks = 0;
+    }
+
+
+    @Override //todo test this
+    @Deprecated
+    public Entity get(int index) {
+        if(countChunks == 0) return null;
+        int cCursor = 1;
+        Chunk[] chunks = this.allChunks;
+        Chunk chunk = chunks[0];
+
+        while (index > chunk.size){
+            index -= chunk.size;
+            if(cCursor == countChunks) return null;
+            chunk = chunks[cCursor++];
+        }
+        return (Entity) chunk.data[index];
+    }
+
+
+    @Override //todo test this
+    @Deprecated
+    public Entity set(int index, Entity element) {
+        if(countChunks == 0) return null;
+        int cCursor = 1;
+        Chunk[] chunks = this.allChunks;
+        Chunk chunk = chunks[0];
+
+        while (index > chunk.size){
+            index -= chunk.size;
+            if(cCursor == countChunks) return null;
+            chunk = chunks[cCursor++];
+        }
+        Entity old = (Entity) chunk.data[index];
+        chunk.data[index] = element;
+        return old;
+    }
+
+
+    @Override
+    @Deprecated
+    public void add(int index, Entity entity) {
+        if(!legaciCall) {
+            System.out.println("WARNING: ChunkedEntityList#add() is deprecated, use ChunkedEntityList#addEntity() instead");
+            legaciCall = true;
+        }
+        addEntity(entity);
+    }
+
+
+    @Override
+    @Deprecated //todo test this
+    public Entity remove(int index) {
+        if(countChunks == 0) return null;
+        int cCursor = 1;
+        Chunk[] chunks = this.allChunks;
+        Chunk chunk = chunks[0];
+
+        while (index > chunk.size){
+            index -= chunk.size;
+            if(cCursor == countChunks) return null;
+            chunk = chunks[cCursor++];
+        }
+        return chunk.remove(index);
+    }
+
+
+    @NotNull
+    @Override
+    public <T> T[] toArray(@NotNull T[] a) {
+        T[] arr = Arrays.copyOf(a, size());
+        int i = 0;
+        for (Entity entity : this) {
+            arr[i++] = (T) entity;
+        }
+        return arr;
     }
 
 
@@ -394,7 +583,7 @@ public class ChunkedEntityList {
     }
 
 
-    public int calcSize(){
+    public final int calcSize(){
         int summ = 0, cs = countChunks;
         Chunk[] ac = allChunks;
         for (int i = 0;i < cs;i++)summ += ac[i].size;
@@ -404,10 +593,40 @@ public class ChunkedEntityList {
 
     @Override
     public String toString() {
-        int summ = 0;
-        for (int i = 0;i<countChunks;i++)summ += allChunks[i].size;
-        return "ChunkedEntityList{" +
-                "chunks=" + countChunks + ", entities=" + summ +
-                '}';
+        return "ChunkedEntityList{" + "chunks=" + countChunks + ", entities=" + calcSize() + '}';
+    }
+
+
+    @NotNull
+    @Override
+    public ListIterator<Entity> listIterator(int index) {
+        throw new UnsupportedOperationException("TODO");
+    }
+
+
+    @NotNull
+    @Override
+    public ListIterator<Entity> listIterator() {
+        return listIterator(0);
+    }
+
+
+    @NotNull
+    @Override
+    public List<Entity> subList(int fromIndex, int toIndex) {
+        throw new UnsupportedOperationException("TODO");
+    }
+
+
+    @NotNull
+    @Override
+    public Object[] toArray() {
+        throw new UnsupportedOperationException("TODO");
+    }
+
+
+    @Override
+    public boolean retainAll(@NotNull Collection<?> c) {
+        throw new UnsupportedOperationException("TODO");
     }
 }

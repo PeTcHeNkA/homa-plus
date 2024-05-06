@@ -79,8 +79,8 @@ public class EntitySpider extends EntityMob {
 
     @Override
     protected void entityInit() {
+        this.dataManager.register(CLIMBING, (byte) 0);
         super.entityInit();
-        this.dataManager.register(CLIMBING, Byte.valueOf((byte)0));
     }
 
 

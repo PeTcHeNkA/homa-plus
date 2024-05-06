@@ -8,14 +8,8 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.ai.EntityAIBase;
-import net.minecraft.entity.ai.EntityAILookIdle;
-import net.minecraft.entity.ai.EntityAIMoveTowardsRestriction;
-import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
-import net.minecraft.entity.ai.EntityAIWander;
-import net.minecraft.entity.ai.EntityAIWatchClosest;
-import net.minecraft.entity.ai.EntityLookHelper;
-import net.minecraft.entity.ai.EntityMoveHelper;
+import net.minecraft.entity.ai.*;
+import net.minecraft.entity.ai.attributes.AbstractAttributeMap;
 import net.minecraft.entity.passive.EntitySquid;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
@@ -67,12 +61,13 @@ public class EntityGuardian extends EntityMob {
     protected void initEntityAI() {
         EntityAIMoveTowardsRestriction entityaimovetowardsrestriction = new EntityAIMoveTowardsRestriction(this, 1.0D);
         this.wander = new EntityAIWander(this, 1.0D, 80);
-        this.tasks.addTask(4, new EntityGuardian.AIGuardianAttack(this));
-        this.tasks.addTask(5, entityaimovetowardsrestriction);
-        this.tasks.addTask(7, this.wander);
-        this.tasks.addTask(8, new EntityAIWatchClosest(this, EntityPlayer.class, 8.0F));
-        this.tasks.addTask(8, new EntityAIWatchClosest(this, EntityGuardian.class, 12.0F, 0.01F));
-        this.tasks.addTask(9, new EntityAILookIdle(this));
+        EntityAITasks tasks = this.tasks;
+        tasks.addTask(4, new EntityGuardian.AIGuardianAttack(this));
+        tasks.addTask(5, entityaimovetowardsrestriction);
+        tasks.addTask(7, this.wander);
+        tasks.addTask(8, new EntityAIWatchClosest(this, EntityPlayer.class, 8.0F));
+        tasks.addTask(8, new EntityAIWatchClosest(this, EntityGuardian.class, 12.0F, 0.01F));
+        tasks.addTask(9, new EntityAILookIdle(this));
         this.wander.setMutexBits(3);
         entityaimovetowardsrestriction.setMutexBits(3);
         this.targetTasks.addTask(1, new EntityAINearestAttackableTarget(this, EntityLivingBase.class, 10, true, false, new EntityGuardian.GuardianTargetSelector(this)));
@@ -82,10 +77,11 @@ public class EntityGuardian extends EntityMob {
     @Override
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
-        this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(6.0D);
-        this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.5D);
-        this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(16.0D);
-        this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(30.0D);
+        AbstractAttributeMap map = this.getAttributeMap();
+        map.getAttributeInstance(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(6.0D);
+        map.getAttributeInstance(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.5D);
+        map.getAttributeInstance(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(16.0D);
+        map.getAttributeInstance(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(30.0D);
     }
 
 
@@ -102,9 +98,9 @@ public class EntityGuardian extends EntityMob {
 
     @Override
     protected void entityInit() {
-        super.entityInit();
         this.dataManager.register(MOVING, Boolean.FALSE);
         this.dataManager.register(TARGET_ENTITY, 0);
+        super.entityInit();
     }
 
 

@@ -136,7 +136,7 @@ public class ChunkLCache implements IBlockEAccess {
     @Override
     public IBlockState getBlockState(BlockPos pos) {
         if(pos.getY()>255 || pos.getY()<0)return BlockIDIndexes.AIR_STATE;
-        return getExecutor(pos.getX()>>4, pos.getZ()>>4).getChunk().getBlockState(pos);
+        return getExecutor(pos.getX()>>4, pos.getZ()>>4).getChunk().getBlockState(pos.getX(), pos.getY(), pos.getZ());
     }
 
 

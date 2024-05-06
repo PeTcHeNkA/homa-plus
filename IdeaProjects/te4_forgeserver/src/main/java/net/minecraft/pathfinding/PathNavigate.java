@@ -93,8 +93,7 @@ public abstract class PathNavigate {
             return this.currentPath;
         } else {
             this.targetPos = pos;
-            float range = this.getPathSearchRange();
-            return this.pathFinder.findPath(new ChunkLCache(entity), this.entity, this.targetPos, range);
+            return this.pathFinder.findPath(new ChunkLCache(entity), this.entity, this.targetPos, this.getPathSearchRange());
         }
     }
 

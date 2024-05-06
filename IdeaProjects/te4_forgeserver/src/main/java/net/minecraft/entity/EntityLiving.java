@@ -1,6 +1,5 @@
 package net.minecraft.entity;
 
-import java.util.Arrays;
 import java.util.Random;
 import java.util.UUID;
 import javax.annotation.Nullable;
@@ -77,10 +76,10 @@ public abstract class EntityLiving extends EntityLivingBase {
     private EntityLivingBase attackTarget;
     private final EntitySenses senses;
 
-    protected float[] inventoryHandsDropChances = new float[2];
+    protected float[] inventoryHandsDropChances = new float[]{0.085F, 0.085F};
     private final FixedItemList inventoryHands = new FixedItemList(2);
 
-    protected float[] inventoryArmorDropChances = new float[4];
+    protected float[] inventoryArmorDropChances = new float[]{0.085F, 0.085F, 0.085F, 0.085F};
     private final FixedItemList inventoryArmor = new FixedItemList(4);
 
     private boolean canPickUpLoot;
@@ -103,12 +102,8 @@ public abstract class EntityLiving extends EntityLivingBase {
         //this.bodyHelper = this.createBodyHelper();
         this.navigator = this.createNavigator(worldIn);
         this.senses = new EntitySenses(this);
-        Arrays.fill(this.inventoryArmorDropChances, 0.085F);
-        Arrays.fill(this.inventoryHandsDropChances, 0.085F);
 
-        if (worldIn != null && !worldIn.isRemote) {
-            this.initEntityAI();
-        }
+        if (worldIn != null && !worldIn.isRemote) this.initEntityAI();
     }
 
 
@@ -117,6 +112,7 @@ public abstract class EntityLiving extends EntityLivingBase {
     protected void onCliInit() {
         this.bodyHelper = this.createBodyHelper();
     }
+
 
     protected void initEntityAI() {}
 
@@ -236,20 +232,15 @@ public abstract class EntityLiving extends EntityLivingBase {
     protected int getExperiencePoints(EntityPlayer player) {
         if (this.experienceValue > 0) {
             int i = this.experienceValue;
-            for (int j = 0; j < this.inventoryArmor.size(); ++j) {
-                if (!this.inventoryArmor.get(j).isEmpty() && this.inventoryArmorDropChances[j] <= 1.0F) {
+            for (int j = 0; j < this.inventoryArmor.size(); ++j)
+                if (!this.inventoryArmor.get(j).isEmpty() && this.inventoryArmorDropChances[j] <= 1.0F)
                     i += 1 + this.rand.nextInt(3);
-                }
-            }
-            for (int k = 0; k < this.inventoryHands.size(); ++k) {
-                if (!this.inventoryHands.get(k).isEmpty() && this.inventoryHandsDropChances[k] <= 1.0F) {
+
+            for (int k = 0; k < this.inventoryHands.size(); ++k)
+                if (!this.inventoryHands.get(k).isEmpty() && this.inventoryHandsDropChances[k] <= 1.0F)
                     i += 1 + this.rand.nextInt(3);
-                }
-            }
             return i;
-        } else {
-            return this.experienceValue;
-        }
+        } else return this.experienceValue;
     }
 
 
@@ -319,12 +310,9 @@ public abstract class EntityLiving extends EntityLivingBase {
         Item item = this.getDropItem();
         if (item != null) {
             int i = this.rand.nextInt(3);
-            if (lootingModifier > 0) {
-                i += this.rand.nextInt(lootingModifier + 1);
-            }
-            for (int j = 0; j < i; ++j) {
-                this.dropItem(item, 1);
-            }
+            if (lootingModifier > 0) i += this.rand.nextInt(lootingModifier + 1);
+
+            for (int j = 0; j < i; ++j) this.dropItem(item, 1);
         }
     }
 
@@ -356,9 +344,9 @@ public abstract class EntityLiving extends EntityLivingBase {
         for (ItemStack itemstack1 : this.inventoryHands) {
             NBTTagCompound nbttagcompound1 = new NBTTagCompound();
 
-            if (!itemstack1.isEmpty()) {
+            if (!itemstack1.isEmpty())
                 itemstack1.writeToNBT(nbttagcompound1);
-            }
+
             nbttaglist1.appendTag(nbttagcompound1);
         }
 
@@ -532,11 +520,9 @@ public abstract class EntityLiving extends EntityLivingBase {
         if (lodLvl == 0 && !this.world.isRemote && this.canPickUpLoot() && !this.dead && world.getMobGrifering(this)) {
             AxisAlignedBB box;
             getEntityBoundingBox().growTo(1d,0d,1d, box = world.commonWorldEntityAABB);
-            for (EntityItem item : this.world.getEntitiesWithinAABB(EntityItem.class, box)) {
-                if (!item.isDead && !item.getItem().isEmpty() && !item.cannotPickup()) {
+            for (EntityItem item : this.world.getEntitiesWithinAABB(EntityItem.class, box))
+                if (!item.isDead && !item.getItem().isEmpty() && !item.cannotPickup())
                     this.updateEquipmentIfNeeded(item);
-                }
-            }
         }
     }
 

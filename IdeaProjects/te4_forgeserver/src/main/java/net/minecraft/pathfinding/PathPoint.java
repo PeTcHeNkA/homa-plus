@@ -5,8 +5,8 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class PathPoint
-{
+
+public class PathPoint {
     public int x;
     public int y;
     public int z;
@@ -28,6 +28,7 @@ public class PathPoint
         this.z = z;
         this.hash = makeHash(x, y, z);
     }
+
 
     public PathPoint(int x, int y, int z, int hash) {
         this.x = x;
@@ -105,45 +106,41 @@ public class PathPoint
         return f * f + f1 * f1 + f2 * f2;
     }
 
-    public float distanceManhattan(PathPoint p_186281_1_)
-    {
+
+    public float distanceManhattan(PathPoint p_186281_1_) {
         float f = (float)Math.abs(p_186281_1_.x - this.x);
         float f1 = (float)Math.abs(p_186281_1_.y - this.y);
         float f2 = (float)Math.abs(p_186281_1_.z - this.z);
         return f + f1 + f2;
     }
 
-    public boolean equals(Object p_equals_1_)
-    {
-        if (!(p_equals_1_ instanceof PathPoint))
-        {
-            return false;
-        }
-        else
-        {
-            PathPoint pathpoint = (PathPoint)p_equals_1_;
+
+    public boolean equals(Object obj) {
+        if (!(obj instanceof PathPoint)) return false;
+        else {
+            PathPoint pathpoint = (PathPoint)obj;
             return this.hash == pathpoint.hash && this.x == pathpoint.x && this.y == pathpoint.y && this.z == pathpoint.z;
         }
     }
 
-    public int hashCode()
-    {
+
+    public int hashCode() {
         return this.hash;
     }
 
-    public boolean isAssigned()
-    {
+
+    public boolean isAssigned() {
         return this.index >= 0;
     }
 
-    public String toString()
-    {
+
+    public String toString() {
         return this.x + ", " + this.y + ", " + this.z;
     }
 
+
     @SideOnly(Side.CLIENT)
-    public static PathPoint createFromBuffer(PacketBuffer buf)
-    {
+    public static PathPoint createFromBuffer(PacketBuffer buf) {
         PathPoint pathpoint = new PathPoint(buf.readInt(), buf.readInt(), buf.readInt());
         pathpoint.distanceFromOrigin = buf.readFloat();
         pathpoint.cost = buf.readFloat();

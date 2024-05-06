@@ -36,8 +36,8 @@ public class EntityBat extends EntityAmbientCreature {
 
     @Override
     protected void entityInit() {
-        super.entityInit();
         this.dataManager.register(HANGING, (byte) 0);
+        super.entityInit();
     }
 
 
@@ -101,11 +101,8 @@ public class EntityBat extends EntityAmbientCreature {
 
     public void setIsBatHanging(boolean isHanging) {
         byte b0 = this.dataManager.get(HANGING);
-        if (isHanging) {
-            this.dataManager.set(HANGING, (byte) (b0 | 1));
-        } else {
-            this.dataManager.set(HANGING, (byte) (b0 & -2));
-        }
+        if (isHanging) this.dataManager.set(HANGING, (byte) (b0 | 1));
+        else this.dataManager.set(HANGING, (byte) (b0 & -2));
     }
 
 

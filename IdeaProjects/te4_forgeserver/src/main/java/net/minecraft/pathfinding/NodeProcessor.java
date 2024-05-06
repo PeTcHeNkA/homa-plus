@@ -41,11 +41,10 @@ public abstract class NodeProcessor {
         PathPoint pathpoint = this.pointMap.lookup(hash);
         if (pathpoint == null) {
             pathpoint = pointMap.tryGetValueOnInsert();
-            if(pathpoint == null) {
-                pathpoint = new PathPoint(x, y, z, hash);
-            } else {
-                pathpoint.init(x, y, z, hash);
-            }
+
+            if(pathpoint == null) pathpoint = new PathPoint(x, y, z, hash);
+            else                  pathpoint.init(x, y, z, hash);
+
             this.pointMap.addKey(hash, pathpoint);
         }
         return pathpoint;

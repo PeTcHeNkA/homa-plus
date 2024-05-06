@@ -35,9 +35,7 @@ public abstract class EntityMob extends EntityCreature implements IMob {
         this.updateArmSwingProgress();
         float f = this.getBrightness();
 
-        if (f > 0.5F) {
-            this.idleTime += 2;
-        }
+        if (f > 0.5F) this.idleTime += 2;
         super.onLivingUpdateTick();
     }
 
@@ -46,10 +44,7 @@ public abstract class EntityMob extends EntityCreature implements IMob {
     @Override
     public void onUpdate() {
         super.onUpdate();
-
-        if (!this.world.isRemote && this.world.getDifficulty() == EnumDifficulty.PEACEFUL) {
-            this.setDead();
-        }
+        if (!this.world.isRemote && this.world.getDifficulty() == EnumDifficulty.PEACEFUL) this.setDead();
     }
 
 
@@ -67,7 +62,7 @@ public abstract class EntityMob extends EntityCreature implements IMob {
 
     @Override
     public boolean attackEntityFrom(DamageSource source, float amount) {
-        return this.isEntityInvulnerable(source) ? false : super.attackEntityFrom(source, amount);
+        return !this.isEntityInvulnerable(source) && super.attackEntityFrom(source, amount);
     }
 
 
@@ -102,8 +97,7 @@ public abstract class EntityMob extends EntityCreature implements IMob {
         boolean flag = entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), f);
 
         if (flag) {
-            if (i > 0 && entityIn instanceof EntityLivingBase)
-            {
+            if (i > 0 && entityIn instanceof EntityLivingBase) {
                 ((EntityLivingBase)entityIn).knockBack(this, (float)i * 0.5F, (double)MathHelper.sin(this.rotationYaw * 0.017453292F), (double)(-MathHelper.cos(this.rotationYaw * 0.017453292F)));
                 this.motionX *= 0.6D;
                 this.motionZ *= 0.6D;
@@ -183,9 +177,8 @@ public abstract class EntityMob extends EntityCreature implements IMob {
                 this.world.setSkylightSubtracted(10);
                 i = this.world.getLightFromNeighbors(blockpos);
                 this.world.setSkylightSubtracted(prev);
-            } else {
+            } else
                 i = this.world.getLightFromNeighbors(blockpos);
-            }
             return i <= this.rand.nextInt(8);
         }
     }

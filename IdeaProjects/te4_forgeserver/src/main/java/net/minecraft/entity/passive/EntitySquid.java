@@ -185,11 +185,8 @@ public class EntitySquid extends EntityWaterMob {
 
     @SideOnly(Side.CLIENT)
     public void handleStatusUpdate(byte id) {
-        if (id == 19) {
-            this.squidRotation = 0.0F;
-        } else {
-            super.handleStatusUpdate(id);
-        }
+        if (id == 19) this.squidRotation = 0.0F;
+        else super.handleStatusUpdate(id);
     }
 
 

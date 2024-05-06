@@ -3,7 +3,7 @@ package plus.fserver;
 
 //used only on compile
 public class ElcaCV {
-    public static final boolean DEBUG_NO_SERVER               = true;
+    public static final boolean DEBUG_NO_SERVER               = false;
 
 
     public static final boolean ENABLE_COLLISION_EVENTS       = false;

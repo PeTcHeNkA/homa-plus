@@ -44,7 +44,6 @@ public class BitArray {
             if(index<0 || index>=this.arraySize)
                 throw new IllegalArgumentException("Index should be in range [0, "+this.arraySize+"]");
 
-
         int k, j;
 
         if ((k = ((index + 1) * this.bitsPerEntry - 1) >> 6) == (j = (index *= this.bitsPerEntry) >> 6)) {

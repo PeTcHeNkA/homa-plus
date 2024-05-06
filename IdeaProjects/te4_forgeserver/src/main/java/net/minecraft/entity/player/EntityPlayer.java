@@ -22,6 +22,7 @@ import net.minecraft.entity.IEntityMultiPart;
 import net.minecraft.entity.IMerchant;
 import net.minecraft.entity.MultiPartEntityPart;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.AbstractAttributeMap;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.ai.attributes.RangedAttribute;
 import net.minecraft.entity.item.EntityBoat;
@@ -175,22 +176,24 @@ public abstract class EntityPlayer extends EntityLivingBase {
 
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
-        this.getAttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(1.0D);
-        this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.10000000149011612D);
-        this.getAttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_SPEED);
-        this.getAttributeMap().registerAttribute(SharedMonsterAttributes.LUCK);
-        this.getAttributeMap().registerAttribute(REACH_DISTANCE);
+        AbstractAttributeMap map = getAttributeMap();
+        map.registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(1.0D);
+        map.getAttributeInstance(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.10000000149011612D);
+        map.registerAttribute(SharedMonsterAttributes.ATTACK_SPEED);
+        map.registerAttribute(SharedMonsterAttributes.LUCK);
+        map.registerAttribute(REACH_DISTANCE);
     }
 
 
     @Override
     protected void entityInit() {
-        this.dataManager.register(ABSORPTION, 0.0F);
-        this.dataManager.register(PLAYER_SCORE, 0);
-        this.dataManager.register(PLAYER_MODEL_FLAG, (byte) 0);
-        this.dataManager.register(MAIN_HAND, (byte) 1);
-        this.dataManager.register(LEFT_SHOULDER_ENTITY, new NBTTagCompound());
-        this.dataManager.register(RIGHT_SHOULDER_ENTITY, new NBTTagCompound());
+        EntityDataManager manager = this.dataManager;
+        manager.register(ABSORPTION, 0.0F);
+        manager.register(PLAYER_SCORE, 0);
+        manager.register(PLAYER_MODEL_FLAG, (byte) 0);
+        manager.register(MAIN_HAND, (byte) 1);
+        manager.register(LEFT_SHOULDER_ENTITY, new NBTTagCompound());
+        manager.register(RIGHT_SHOULDER_ENTITY, new NBTTagCompound());
         super.entityInit();
     }
 

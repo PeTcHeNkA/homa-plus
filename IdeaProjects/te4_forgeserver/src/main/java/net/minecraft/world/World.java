@@ -666,70 +666,46 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         }
     }
 
-    public int getLightFromNeighbors(BlockPos pos)
-    {
+
+    public int getLightFromNeighbors(BlockPos pos) {
         return this.getLight(pos, true);
     }
 
-    public int getLight(BlockPos pos, boolean checkNeighbors)
-    {
-        if (pos.getX() >= -30000000 && pos.getZ() >= -30000000 && pos.getX() < 30000000 && pos.getZ() < 30000000)
-        {
-            if (checkNeighbors && this.getBlockState(pos).useNeighborBrightness())
-            {
+
+    public int getLight(BlockPos pos, boolean checkNeighbors) {
+        if (pos.getX() >= -30000000 && pos.getZ() >= -30000000 && pos.getX() < 30000000 && pos.getZ() < 30000000) {
+            if (checkNeighbors && this.getBlockState(pos).useNeighborBrightness()) {
                 int i1 = this.getLight(pos.up(), false);
                 int i = this.getLight(pos.east(), false);
                 int j = this.getLight(pos.west(), false);
                 int k = this.getLight(pos.south(), false);
                 int l = this.getLight(pos.north(), false);
 
-                if (i > i1)
-                {
-                    i1 = i;
-                }
-
-                if (j > i1)
-                {
-                    i1 = j;
-                }
-
-                if (k > i1)
-                {
-                    i1 = k;
-                }
-
-                if (l > i1)
-                {
-                    i1 = l;
-                }
+                if (i > i1) i1 = i;
+                if (j > i1) i1 = j;
+                if (k > i1) i1 = k;
+                if (l > i1) i1 = l;
 
                 return i1;
-            }
-            else if (pos.getY() < 0)
-            {
+            } else if (pos.getY() < 0) {
                 return 0;
-            }
-            else
-            {
-                if (pos.getY() >= 256)
-                {
+            } else {
+                if (pos.getY() >= 256) {
                     pos = new BlockPos(pos.getX(), 255, pos.getZ());
                 }
-
                 Chunk chunk = this.getChunk(pos);
                 return chunk.getLightSubtracted(pos, this.skylightSubtracted);
             }
-        }
-        else
-        {
+        } else {
             return 15;
         }
     }
 
-    public BlockPos getHeight(BlockPos pos)
-    {
+
+    public BlockPos getHeight(BlockPos pos) {
         return new BlockPos(pos.getX(), this.getHeight(pos.getX(), pos.getZ()), pos.getZ());
     }
+
 
     public int getHeight(int x, int z)
     {

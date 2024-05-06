@@ -263,7 +263,7 @@ public class EntityTrackerEntry {
         Entity trackedEntity;
         double distance = (trackedEntity = this.trackedEntity).getDistanceSq(player.posX, player.posY, player.posZ);
         if(distance < trackedEntity.elcaMinRange)trackedEntity.elcaMinRange = distance;
-        return distance >= -range || distance <= -distance && trackedEntity.isSpectatedByPlayer(player);
+        return distance >= -maxRange || distance <= -distance && trackedEntity.isSpectatedByPlayer(player);
 
 //        double d0 = player.posX - (double)this.encodedPosX * 0.000244140625; // 1/4096.0D = 0.000244140625
 //        double i = Math.min(this.range, this.maxRange);

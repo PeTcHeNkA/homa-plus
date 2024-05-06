@@ -11,20 +11,8 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.ai.EntityAIBreakDoor;
-import net.minecraft.entity.ai.EntityAIHurtByTarget;
-import net.minecraft.entity.ai.EntityAILookIdle;
-import net.minecraft.entity.ai.EntityAIMoveThroughVillage;
-import net.minecraft.entity.ai.EntityAIMoveTowardsRestriction;
-import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
-import net.minecraft.entity.ai.EntityAISwimming;
-import net.minecraft.entity.ai.EntityAIWanderAvoidWater;
-import net.minecraft.entity.ai.EntityAIWatchClosest;
-import net.minecraft.entity.ai.EntityAIZombieAttack;
-import net.minecraft.entity.ai.attributes.AttributeModifier;
-import net.minecraft.entity.ai.attributes.IAttribute;
-import net.minecraft.entity.ai.attributes.IAttributeInstance;
-import net.minecraft.entity.ai.attributes.RangedAttribute;
+import net.minecraft.entity.ai.*;
+import net.minecraft.entity.ai.attributes.*;
 import net.minecraft.entity.passive.EntityChicken;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
@@ -57,9 +45,9 @@ public class EntityZombie extends EntityMob {
     protected static final IAttribute SPAWN_REINFORCEMENTS_CHANCE = (new RangedAttribute((IAttribute)null, "zombie.spawnReinforcements", 0.0D, 0.0D, 1.0D)).setDescription("Spawn Reinforcements Chance");
     private static final UUID BABY_SPEED_BOOST_ID = UUID.fromString("B9766B59-9566-4402-BC1F-2EE2A276D836");
     private static final AttributeModifier BABY_SPEED_BOOST = new AttributeModifier(BABY_SPEED_BOOST_ID, "Baby speed boost", 0.5D, 1);
-    private static final DataParameter<Boolean> IS_CHILD = EntityDataManager.<Boolean>createKey(EntityZombie.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Integer> VILLAGER_TYPE = EntityDataManager.<Integer>createKey(EntityZombie.class, DataSerializers.VARINT);
-    private static final DataParameter<Boolean> ARMS_RAISED = EntityDataManager.<Boolean>createKey(EntityZombie.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> IS_CHILD = EntityDataManager.createKey(EntityZombie.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Integer> VILLAGER_TYPE = EntityDataManager.createKey(EntityZombie.class, DataSerializers.VARINT);
+    private static final DataParameter<Boolean> ARMS_RAISED = EntityDataManager.createKey(EntityZombie.class, DataSerializers.BOOLEAN);
     private final EntityAIBreakDoor breakDoor = new EntityAIBreakDoor(this);
     private boolean isBreakDoorsTaskSet;
     private float zombieWidth = -1.0F;
@@ -73,43 +61,47 @@ public class EntityZombie extends EntityMob {
 
     @Override
     protected void initEntityAI() {
-        this.tasks.addTask(0, new EntityAISwimming(this));
-        this.tasks.addTask(2, new EntityAIZombieAttack(this, 1.0D, false));
-        this.tasks.addTask(5, new EntityAIMoveTowardsRestriction(this, 1.0D));
-        this.tasks.addTask(7, new EntityAIWanderAvoidWater(this, 1.0D));
-        this.tasks.addTask(8, new EntityAIWatchClosest(this, EntityPlayer.class, 8.0F));
-        this.tasks.addTask(8, new EntityAILookIdle(this));
+        EntityAITasks tasks = this.tasks;
+        tasks.addTask(0, new EntityAISwimming(this));
+        tasks.addTask(2, new EntityAIZombieAttack(this, 1.0D, false));
+        tasks.addTask(5, new EntityAIMoveTowardsRestriction(this, 1.0D));
+        tasks.addTask(7, new EntityAIWanderAvoidWater(this, 1.0D));
+        tasks.addTask(8, new EntityAIWatchClosest(this, EntityPlayer.class, 8.0F));
+        tasks.addTask(8, new EntityAILookIdle(this));
         this.applyEntityAI();
     }
 
 
     protected void applyEntityAI() {
-        this.tasks.addTask(6,       new EntityAIMoveThroughVillage(this, 1.0D, false));
-        this.targetTasks.addTask(1, new EntityAIHurtByTarget(this, true, new Class[] {EntityPigZombie.class}));
-        this.targetTasks.addTask(2, new EntityAINearestAttackableTarget<>(this, EntityPlayer.class, true));
-        this.targetTasks.addTask(3, new EntityAINearestAttackableTarget<>(this, EntityVillager.class, false));
-        this.targetTasks.addTask(3, new EntityAINearestAttackableTarget<>(this, EntityIronGolem.class, true));
+        this.tasks.addTask(6, new EntityAIMoveThroughVillage(this, 1.0D, false));
+        EntityAITasks targetTasks = this.targetTasks;
+        targetTasks.addTask(1, new EntityAIHurtByTarget(this, true, EntityPigZombie.class));
+        targetTasks.addTask(2, new EntityAINearestAttackableTarget<>(this, EntityPlayer.class, true));
+        targetTasks.addTask(3, new EntityAINearestAttackableTarget<>(this, EntityVillager.class, false));
+        targetTasks.addTask(3, new EntityAINearestAttackableTarget<>(this, EntityIronGolem.class, true));
     }
 
 
     @Override
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
-        this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(35.0D);
-        this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.23000000417232513D);
-        this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(3.0D);
-        this.getEntityAttribute(SharedMonsterAttributes.ARMOR).setBaseValue(2.0D);
-        this.getAttributeMap().registerAttribute(SPAWN_REINFORCEMENTS_CHANCE).setBaseValue(
+        AbstractAttributeMap map = this.getAttributeMap();
+        map.getAttributeInstance(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(35.0D);
+        map.getAttributeInstance(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.23000000417232513D);
+        map.getAttributeInstance(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(3.0D);
+        map.getAttributeInstance(SharedMonsterAttributes.ARMOR).setBaseValue(2.0D);
+        map.registerAttribute(SPAWN_REINFORCEMENTS_CHANCE).setBaseValue(
                 this.rand.nextDouble() * ForgeModContainer.zombieSummonBaseChance);
     }
 
 
     @Override
     protected void entityInit() {
+        EntityDataManager manager = getDataManager();
+        manager.register(IS_CHILD, Boolean.FALSE);
+        manager.register(VILLAGER_TYPE, 0);
+        manager.register(ARMS_RAISED, Boolean.FALSE);
         super.entityInit();
-        this.getDataManager().register(IS_CHILD, Boolean.FALSE);
-        this.getDataManager().register(VILLAGER_TYPE, 0);
-        this.getDataManager().register(ARMS_RAISED, Boolean.FALSE);
     }
 
 
@@ -133,11 +125,8 @@ public class EntityZombie extends EntityMob {
         if (this.isBreakDoorsTaskSet != enabled) {
             this.isBreakDoorsTaskSet = enabled;
             ((PathNavigateGround)this.getNavigator()).setBreakDoors(enabled);
-            if (enabled) {
-                this.tasks.addTask(1, this.breakDoor);
-            } else {
-                this.tasks.removeTask(this.breakDoor);
-            }
+            if (enabled) this.tasks.addTask(1, this.breakDoor);
+            else this.tasks.removeTask(this.breakDoor);
         }
     }
 
@@ -150,24 +139,20 @@ public class EntityZombie extends EntityMob {
 
     @Override
     protected int getExperiencePoints(EntityPlayer player) {
-        if (this.isChild()) {
-            this.experienceValue = (int)((float)this.experienceValue * 2.5F);
-        }
+        if (this.isChild()) this.experienceValue = (int)((float)this.experienceValue * 2.5F);
         return super.getExperiencePoints(player);
     }
 
 
 
     public void setChild(boolean childZombie) {
-        this.getDataManager().set(IS_CHILD, Boolean.valueOf(childZombie));
+        this.getDataManager().set(IS_CHILD, childZombie);
 
         if (this.world != null && !this.world.isRemote) {
             IAttributeInstance iattributeinstance = this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED);
             iattributeinstance.removeModifier(BABY_SPEED_BOOST);
 
-            if (childZombie) {
-                iattributeinstance.applyModifier(BABY_SPEED_BOOST);
-            }
+            if (childZombie) iattributeinstance.applyModifier(BABY_SPEED_BOOST);
         }
         this.setChildSize(childZombie);
     }
@@ -175,10 +160,7 @@ public class EntityZombie extends EntityMob {
 
     @Override
     public void notifyDataManagerChange(DataParameter<?> key) {
-        if (IS_CHILD.equals(key)) {
-            this.setChildSize(this.isChild());
-        }
-
+        if (IS_CHILD.equals(key)) this.setChildSize(this.isChild());
         super.notifyDataManagerChange(key);
     }
 

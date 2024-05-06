@@ -487,25 +487,25 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
 
 
     @Override
-    public void awardKillScore(Entity p_191956_1_, int p_191956_2_, DamageSource p_191956_3_) {
-        if (p_191956_1_ != this) {
-            super.awardKillScore(p_191956_1_, p_191956_2_, p_191956_3_);
-            this.addScore(p_191956_2_);
+    public void awardKillScore(Entity entity, int num, DamageSource src) {
+        if (entity != this) {
+            super.awardKillScore(entity, num, src);
+            this.addScore(num);
             Collection<ScoreObjective> collection = this.getWorldScoreboard().getObjectivesFromCriteria(IScoreCriteria.TOTAL_KILL_COUNT);
 
-            if (p_191956_1_ instanceof EntityPlayer) {
+            if (entity instanceof EntityPlayer) {
                 this.addStat(StatList.PLAYER_KILLS);
                 collection.addAll(this.getWorldScoreboard().getObjectivesFromCriteria(IScoreCriteria.PLAYER_KILL_COUNT));
             } else {
                 this.addStat(StatList.MOB_KILLS);
             }
 
-            collection.addAll(this.awardTeamKillScores(p_191956_1_));
+            collection.addAll(this.awardTeamKillScores(entity));
 
             for (ScoreObjective scoreobjective : collection) {
                 this.getWorldScoreboard().getOrCreateScore(this.getName(), scoreobjective).incrementScore();
             }
-            CriteriaTriggers.PLAYER_KILLED_ENTITY.trigger(this, p_191956_1_, p_191956_3_);
+            CriteriaTriggers.PLAYER_KILLED_ENTITY.trigger(this, entity, src);
         }
     }
 
