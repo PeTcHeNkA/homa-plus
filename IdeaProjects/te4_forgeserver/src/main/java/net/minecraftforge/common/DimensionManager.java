@@ -286,8 +286,7 @@ public class DimensionManager {
 
 
     private static boolean canUnloadWorld(WorldServer world) {
-        return ForgeChunkManager.getPersistentChunksFor(world).isEmpty()
-                && world.playerEntities.isEmpty()
+        return world.playerEntities.isEmpty()
                 && !world.provider.getDimensionType().shouldLoadSpawn()
                 && !keepLoaded.contains(world.provider.getDimension());
     }

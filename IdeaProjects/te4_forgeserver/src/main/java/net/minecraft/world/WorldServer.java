@@ -350,8 +350,8 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
         if (this.scheduledUpdatesAreImmediate && material != Material.AIR) {
             if (blockIn.requiresUpdates()) {
                 //Keeping here as a note for future when it may be restored.
-                boolean isForced = getPersistentChunks().containsKey(new ChunkPos(pos));
-                int range = isForced ? 0 : 8;
+                //boolean isForced = false;// getPersistentChunks().containsKey(new ChunkPos(pos));
+                int range = 8;
                 if (this.isAreaLoaded(pos.add(-range, -range, -range), pos.add(range, range, range))) {
                     IBlockState iblockstate = this.getBlockState(pos);
 
@@ -400,7 +400,7 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
 
     @Override
     public void updateEntities() {
-        if (this.playerEntities.isEmpty() && getPersistentChunks().isEmpty()) {
+        if (this.playerEntities.isEmpty()) {
             if (this.updateEntityTick++ >= 300) {
                 return;
             }
@@ -477,6 +477,7 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
     private void updateEntityWithOptionalForce0(Entity entityIn, boolean forceUpdate) {
         if (checkCanUpdate) {
             boolean canUpdate = getChunkProvider().isChunkLoadedSafe(entityIn.chunkCoordX, entityIn.chunkCoordZ);
+            //todo make this pooled
             if (!canUpdate) canUpdate = ForgeEventFactory.canEntityUpdate(entityIn);
             if (!canUpdate) return;
         }
@@ -1233,7 +1234,7 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
     protected void updateBlocks() {
         this.playerCheckLight();
         if (this.worldInfo.getTerrainType() == WorldType.DEBUG_ALL_BLOCK_STATES) {
-            for (Iterator<Chunk> iterator = getPersistentChunkIterable(this.playerChunkMap.getChunkIterator()); iterator.hasNext(); this.profiler.endSection()){
+            for (Iterator<Chunk> iterator = this.playerChunkMap.getChunkIterator(); iterator.hasNext(); this.profiler.endSection()){
                 iterator.next().onTick(false);
             }
         } else {
@@ -1241,7 +1242,7 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
             Chunk chunk;
             BlockPos.MutableBlockPos mut = localUpdateBlocks;
             BlockPos.MutableBlockPos mut2 = localUpdateBlocks2;
-            for (Iterator<Chunk> iterator = getPersistentChunkIterable(this.playerChunkMap.getChunkIterator()); iterator.hasNext(); this.profiler.endSection()){
+            for (Iterator<Chunk> iterator = this.playerChunkMap.getChunkIterator(); iterator.hasNext(); this.profiler.endSection()){
                 chunk = iterator.next();
 
                 int j = chunk.x << 4;

@@ -43,6 +43,9 @@ import plus.tson.utl.Te4HashMap;
 
 
 public class Chunk implements net.minecraftforge.common.capabilities.ICapabilityProvider, ILightingEngineProvider {
+    public static final int STORAGES_COUNT = 16;
+    public static final int MAX_HEIGHT     = 255;
+
     public static final EnumFacing[] HORIZONTAL = EnumFacing.Plane.HORIZONTAL.facings();
     private static final Logger LOGGER = LogManager.getLogger();
     public static final ExtendedBlockStorage NULL_BLOCK_STORAGE = null;
@@ -71,9 +74,10 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
     private final FastBuffer<BlockPos> tileEntityPosQueue;
 //    public boolean unloadQueued;
     public byte state = 0;
-    //00 (0) = default
-    //01 (1) = tracked
-    //10 (2) = requested
+    //00  (0) = default
+    //01  (1) = tracked
+    //10  (2) = requested
+    //100 (4) = should tick
 
     public boolean isNotUnloadQueued(){
         return (state & 1) == 1;
@@ -96,11 +100,18 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
         state &= ~1;
     }
     public boolean maybeUnload(){
-        return (state & 3) == 0;
+        return (state & 7) == 0;
+    }
+    public void setPersistent(boolean b){
+        if(b) state &= ~4;
+        else state |= 4;
+    }
+    public boolean isPersistent(){
+        return (state & 4) == 4;
     }
 
     public Chunk(World worldIn, int x, int z) {
-        this.storageArrays = new ExtendedBlockStorage[16];
+        this.storageArrays = new ExtendedBlockStorage[STORAGES_COUNT];
         this.blockBiomeArray = new byte[256];
         this.precipitationHeightMap = new short[256];
         this.updateSkylights = new short[16];
@@ -418,9 +429,9 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
 
     public IBlockState getBlockState(final int x, final int y, final int z) {
-        if (y >= 0 && y >> 4 < storageArrays.length) {
-            ExtendedBlockStorage storage = this.storageArrays[y >> 4];
-            if (storage != null) return storage.get(x & 15, y & 15, z & 15);
+        if (y >= 0 && y < MAX_HEIGHT) {
+            ExtendedBlockStorage storage;
+            if ((storage = this.storageArrays[y >> 4]) != null) return storage.get(x & 15, y & 15, z & 15);
         }
         return BlockIDIndexes.AIR_STATE;
     }

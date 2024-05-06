@@ -240,9 +240,9 @@ public class ChunkProviderServer implements IChunkProvider {
         if(task != null) task.reRunIfNeed();
         if (!this.world.disableLevelSaving) {
             if (!this.droppedChunks.isEmpty()) {
-                for (ChunkPos forced : this.world.getPersistentChunks().keySet()) {
-                    this.droppedChunks.remove(ChunkPos.asLong(forced.x, forced.z));
-                }
+//                for (ChunkPos forced : this.world.getPersistentChunks().keySet()) {
+//                    this.droppedChunks.remove(ChunkPos.asLong(forced.x, forced.z));
+//                }
                 int i = 0;
                 for (LongIterator iterator = this.droppedChunks.iterator();
                      i < 100 && iterator.hasNext();) {

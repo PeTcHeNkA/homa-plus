@@ -19,12 +19,13 @@ import net.minecraft.world.chunk.Chunk;
 import plus.fserver.ElcaConfig;
 import plus.fserver.server.chunk.PlayerCMapSelector;
 import plus.fserver.utls.collections.ArrayRemSwapListE15;
+import plus.fserver.utls.collections.ChunkIterator;
 import plus.tson.utl.Te4HashSet;
 
 
 public class PlayerChunkMap {
-    private static final Predicate<EntityPlayerMP> NOT_SPECTATOR = player -> player != null && !player.isSpectator();
-    private static final Predicate<EntityPlayerMP> CAN_GENERATE_CHUNKS = player -> player != null && (!player.isSpectator() || player.getServerWorld().getGameRules().getBoolean("spectatorsGenerateChunks"));
+    public static final Predicate<EntityPlayerMP> NOT_SPECTATOR = player -> player != null && !player.isSpectator();
+    public static final Predicate<EntityPlayerMP> CAN_GENERATE_CHUNKS = player -> player != null && (!player.isSpectator() || player.getServerWorld().getGameRules().getBoolean("spectatorsGenerateChunks"));
 
     private final WorldServer world;
     private final ArrayRemSwapListE15<EntityPlayerMP> players = new ArrayRemSwapListE15<>();
@@ -54,32 +55,9 @@ public class PlayerChunkMap {
 
 
     //todo сделать динамическую выборку
-    public Iterator<Chunk> getChunkIterator() {
-        return new AbstractIterator<Chunk>() {
-            private final Iterator<PlayerChunkMapEntry> iterator = entries.iterator();
-            private final int radius =
-                    ((world.getTotalWorldTime()&1)==1)?ElcaConfig.CHUNK_TICK_RADIUS_1:ElcaConfig.CHUNK_TICK_RADIUS_2;
-            protected Chunk computeNext() {
-                while (true) {
-                    if (iterator.hasNext()) {//todo
-                        PlayerChunkMapEntry playerchunkmapentry = iterator.next();
-                        Chunk chunk = playerchunkmapentry.getChunk();
-                        if (chunk == null) continue;
-                        if (!chunk.isLightPopulated() && chunk.isTerrainPopulated())
-                            return chunk;
-
-                        if (!chunk.wasTicked())
-                            return chunk;
-
-                        if (!playerchunkmapentry.hasPlayerMatchingInRange(radius, PlayerChunkMap.NOT_SPECTATOR)) {
-                            continue;
-                        }
-                        return chunk;
-                    }
-                    return this.endOfData();
-                }
-            }
-        };
+    public ChunkIterator getChunkIterator() {
+        int radius = ((world.getTotalWorldTime()&1)==1)?ElcaConfig.CHUNK_TICK_RADIUS_1:ElcaConfig.CHUNK_TICK_RADIUS_2;
+        return new ChunkIterator(entries, radius);
     }
 
 

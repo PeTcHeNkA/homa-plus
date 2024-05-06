@@ -110,11 +110,6 @@ public class BlockGrass extends BlockFs implements IGrowable {
                 if (light >= 9) {
                     BlockPos.MutableBlockPos blockpos;
                     for (int i = 0; i < 4; ++i) {
-//                        blockpos = pos.add(
-//                                rand.nextInt(3) - 1,
-//                                rand.nextInt(5) - 4,
-//                                rand.nextInt(3) - 1
-//                        );
                         blockpos = worldIn.localTempPos2.setPos(
                                 pos.getX()+(rand.nextInt(3) - 1),
                                 pos.getY()+(rand.nextInt(5) - 4),

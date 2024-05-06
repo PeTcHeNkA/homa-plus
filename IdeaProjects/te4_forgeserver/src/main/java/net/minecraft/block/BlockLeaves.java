@@ -19,6 +19,7 @@ import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.api.IBlockEAccess;
+import plus.fserver.utls.ChunkSelector;
 import plus.fserver.utls.collections.LeavesCache;
 
 
@@ -65,90 +66,72 @@ public abstract class BlockLeaves extends BlockFs implements net.minecraftforge.
         if (!world.isRemote) {
             if (state.getValue(CHECK_DECAY) && state.getValue(DECAYABLE)) {
                 // Forge: prevent decaying leaves from updating neighbors and loading unloaded chunks
-                if (!world.isAreaLoaded(pos, 1)) return;
+                //if (!world.isAreaLoaded(pos, 1)) return;
                 // Forge: extend range from 5 to 6 to account for neighbor checks in world.markAndNotifyBlock -> world.updateObservingBlocksAt
                 if (world.isAreaLoaded(pos, 6)) {
-                    int cX = pos.getX();
-                    int cY = pos.getY();
-                    int cZ = pos.getZ();
+                    int num1 = pos.getX(), cY = pos.getY(), num2 = pos.getZ(), dx, dy, dz;
 
                     LeavesCache cache = world.getLeavesCache();
-                    IBlockEAccess access = world.access();
+                    ChunkSelector access = ((WorldServer)world).localSelector;
+                    Block block;
+                    for (dx = -4; dx <= 4; ++dx) {
+                        for (dz = -4; dz <= 4; ++dz) {
+                            for (dy = -4; dy <= 4; ++dy) {
+                                IBlockState iblockstate = access.getState(cache.setPos(num1 + dx, cY + dy, num2 + dz));
 
-                    for (int dx = -4; dx <= 4; ++dx) {
-                        for (int dz = -4; dz <= 4; ++dz) {
-                            for (int dy = -4; dy <= 4; ++dy) {
-                                IBlockState iblockstate = access.getBlockState(cache.setPos(cX + dx, cY + dy, cZ + dz));
-                                Block block = iblockstate.getBlock();
-
-                                if (!block.canSustainLeaves(iblockstate, world, cache)) {
-                                    if (block.isLeaves(iblockstate, world, cache)) {
-                                        cache.set(dx, dy, dz, -2);
-
-                                    } else {
-                                        cache.set(dx, dy, dz, -1);
-                                    }
-                                } else {
-                                    cache.set(dx, dy, dz, 0);
-                                }
+                                if (!(block = iblockstate.getBlock()).canSustainLeaves(iblockstate, world, cache)) {
+                                    if (block.isLeaves(iblockstate, world, cache))
+                                         cache.set(dx, dy, dz, -2);
+                                    else cache.set(dx, dy, dz, -1);
+                                } else   cache.set(dx, dy, dz, 0);
                             }
                         }
                     }
 
-                    for (int cursor, factor = 1; factor <= 4; ++factor) {
-                        for (int dx = -4; dx <= 4; ++dx) {
-                            for (int dy = -4; dy <= 4; ++dy) {
-                                for (int dz = -4; dz <= 4; ++dz) {
-                                    if (cache.get(dx, dy, dz) == factor - 1) {
+                    for (num2 = 1; num2 <= 4; ++num2) {
+                        for (dx = -4; dx <= 4; ++dx) {
+                            for (dy = -4; dy <= 4; ++dy) {
+                                for (dz = -4; dz <= 4; ++dz) {
+                                    if (cache.get(dx, dy, dz) == num2 - 1) {
                                         if(dx != -4) {
-                                            cursor = LeavesCache.cursor(dx - 1, dy, dz);
-                                            if (cache.get(cursor) == -2) {
-                                                cache.set(cursor, factor);
-                                            }
+                                            num1 = LeavesCache.cursor(dx - 1, dy, dz);
+                                            if (cache.get(num1) == -2)
+                                                cache.set(num1, num2);
                                         }
                                         if(dx != 4) {
-                                            cursor = LeavesCache.cursor(dx + 1, dy, dz);
-                                            if (cache.get(cursor) == -2) {
-                                                cache.set(cursor, factor);
-                                            }
+                                            num1 = LeavesCache.cursor(dx + 1, dy, dz);
+                                            if (cache.get(num1) == -2)
+                                                cache.set(num1, num2);
                                         }
                                         if(dy != -4) {
-                                            cursor = LeavesCache.cursor(dx, dy - 1, dz);
-                                            if (cache.get(cursor) == -2) {
-                                                cache.set(cursor, factor);
-                                            }
+                                            num1 = LeavesCache.cursor(dx, dy - 1, dz);
+                                            if (cache.get(num1) == -2)
+                                                cache.set(num1, num2);
                                         }
                                         if(dy != 4) {
-                                            cursor = LeavesCache.cursor(dx, dy + 1, dz);
-                                            if (cache.get(cursor) == -2) {
-                                                cache.set(cursor, factor);
-                                            }
+                                            num1 = LeavesCache.cursor(dx, dy + 1, dz);
+                                            if (cache.get(num1) == -2)
+                                                cache.set(num1, num2);
                                         }
                                         if(dz != -4) {
-                                            cursor = LeavesCache.cursor(dx, dy, dz - 1);
-                                            if (cache.get(cursor) == -2) {
-                                                cache.set(cursor, factor);
-                                            }
+                                            num1 = LeavesCache.cursor(dx, dy, dz - 1);
+                                            if (cache.get(num1) == -2)
+                                                cache.set(num1, num2);
                                         }
                                         if(dz != 4) {
-                                            cursor = LeavesCache.cursor(dx, dy, dz + 1);
-                                            if (cache.get(cursor) == -2) {
-                                                cache.set(cursor, factor);
-                                            }
+                                            num1 = LeavesCache.cursor(dx, dy, dz + 1);
+                                            if (cache.get(num1) == -2)
+                                                cache.set(num1, num2);
                                         }
                                     }
                                 }
                             }
                         }
                     }
-
                     //int center = cache.get(0,0,0);
 
-                    if (cache.get(0,0,0) >= 0) {
-                        world.setBlockState(pos, state.withProperty(CHECK_DECAY, Boolean.FALSE), 4);
-                    } else {
-                        this.destroy(world, access, pos);
-                    }
+                    if (cache.get(0,0,0) >= 0) world.setBlockState(pos, state.withProperty(CHECK_DECAY, Boolean.FALSE), 4);
+                    else this.destroy(world, access, pos);
                 }
             }
         }

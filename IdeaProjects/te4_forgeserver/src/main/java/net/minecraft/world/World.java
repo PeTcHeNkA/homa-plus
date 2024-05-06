@@ -3279,8 +3279,9 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
+    @Deprecated
     public Iterator<Chunk> getPersistentChunkIterable(Iterator<Chunk> chunkIterator) {
-        return net.minecraftforge.common.ForgeChunkManager.getPersistentChunksIterableFor(this, chunkIterator);
+        return chunkIterator;
     }
     /**
      * Readded as it was removed, very useful helper function
