@@ -298,6 +298,17 @@ public final class AxisAlignedBB {
     }
 
 
+    public void offsetTo(double x, double y, double z, AxisAlignedBB flush) {
+        flush.initSafe(this.minX + x, this.minY + y, this.minZ + z, this.maxX + x, this.maxY + y, this.maxZ + z);
+    }
+
+
+    public AxisAlignedBB offsetToF(double x, double y, double z, AxisAlignedBB flush) {
+        flush.initSafe(this.minX + x, this.minY + y, this.minZ + z, this.maxX + x, this.maxY + y, this.maxZ + z);
+        return flush;
+    }
+
+
     public AxisAlignedBB offset(Vec3d vec) {
         return this.offset(vec.x, vec.y, vec.z);
     }

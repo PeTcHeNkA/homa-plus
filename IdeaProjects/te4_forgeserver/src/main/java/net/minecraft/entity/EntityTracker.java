@@ -104,8 +104,6 @@ public class EntityTracker {
         entry = entityIn.trackerEntry;
         if (entry != null) {
             entityIn.trackerEntry = null;
-            //entityIn.lodLvl &= ~1;
-            //this.entries.remove(entry);
             entry.sendDestroyEntityPacketToTrackedPlayers();
         }
     }
@@ -126,23 +124,18 @@ public class EntityTracker {
                 if((entry = entity.trackerEntry) != null) {
                     entry.updatePlayerList(players);
                     if (entry.playerEntitiesUpdated) {
-                        //Entity entity = entry.getTrackedEntity();
 
-                        if (entity instanceof EntityPlayerMP) {
-                            list.add((EntityPlayerMP) entity);
-                        }
+                        if (entity instanceof EntityPlayerMP) list.add((EntityPlayerMP) entity);
+
                     }
                 }
             }
             for (int i = 0; i < list.size(); ++i) {
                 EntityPlayerMP entityplayermp = list.get(i);
-                for (Entity entity : world.loadedEntityList) {
-                    if((entry = entity.trackerEntry) != null) {
-                        if (entry.getTrackedEntity() != entityplayermp) {
+                for (Entity entity : world.loadedEntityList)
+                    if((entry = entity.trackerEntry) != null)
+                        if (entry.getTrackedEntity() != entityplayermp)
                             entry.updatePlayerEntity(entityplayermp);
-                        }
-                    }
-                }
             }
             list.clear();
         }
@@ -151,55 +144,38 @@ public class EntityTracker {
 
     public void updateVisibility(EntityPlayerMP player) {
         EntityTrackerEntry entry;
-        for (Entity entity : world.loadedEntityList) {
+        for (Entity entity : world.loadedEntityList)
             if((entry = entity.trackerEntry) != null) {
-                if (entity == player) {
-                    entry.updatePlayerEntities(this.world.playerEntities);
-                } else {
-                    entry.updatePlayerEntity(player);
-                }
+                if (entity == player) entry.updatePlayerEntities(this.world.playerEntities);
+                else                  entry.updatePlayerEntity(player);
             }
-        }
     }
 
 
     public void sendToTracking(Entity entity, Packet<?> packetIn) {
         EntityTrackerEntry entry = entity.trackerEntry;
-        //EntityTrackerEntry entry = this.trackedEntityHashTable.lookup(entity.getEntityId());
-
-        if (entry != null) {
-            entry.sendPacketToTrackedPlayers(packetIn);
-        }
+        if (entry != null) entry.sendPacketToTrackedPlayers(packetIn);
     }
 
 
     public Set<? extends net.minecraft.entity.player.EntityPlayer> getTrackingPlayers(Entity entity) {
         EntityTrackerEntry entry = entity.trackerEntry;
-        //EntityTrackerEntry entry = trackedEntityHashTable.lookup(entity.getEntityId());
-        if (entry == null)
-            return java.util.Collections.emptySet();
-        else
-            return java.util.Collections.unmodifiableSet(entry.trackingPlayers);
+
+        if (entry == null) return java.util.Collections.emptySet();
+        else               return java.util.Collections.unmodifiableSet(entry.trackingPlayers);
     }
 
 
     public void sendToTrackingAndSelf(Entity entity, Packet<?> packetIn) {
         EntityTrackerEntry entry = entity.trackerEntry;
-        //EntityTrackerEntry entry = this.trackedEntityHashTable.lookup(entity.getEntityId());
-
-        if (entry != null) {
-            entry.sendToTrackingAndSelf(packetIn);
-        }
+        if (entry != null) entry.sendToTrackingAndSelf(packetIn);
     }
 
 
     public void removePlayerFromTrackers(EntityPlayerMP player) {
         EntityTrackerEntry entry;
-        for (Entity entity : player.world.loadedEntityList) {
-            if((entry = entity.trackerEntry) != null) {
-                entry.removeTrackedPlayerSymmetric(player);
-            }
-        }
+        for (Entity entity : player.world.loadedEntityList)
+            if((entry = entity.trackerEntry) != null) entry.removeTrackedPlayerSymmetric(player);
     }
 
 
@@ -212,29 +188,21 @@ public class EntityTracker {
                 if (entity != player && entity.chunkCoordX == chunkIn.x && entity.chunkCoordZ == chunkIn.z) {
                     entry.updatePlayerEntity(player);
 
-                    if (entity instanceof EntityLiving && ((EntityLiving) entity).getLeashHolder() != null) {
+                    if (entity instanceof EntityLiving && ((EntityLiving) entity).getLeashHolder() != null)
                         list.add(entity);
-                    }
 
-                    if (!entity.getPassengers().isEmpty()) {
-                        list1.add(entity);
-                    }
+                    if (!entity.getPassengers().isEmpty()) list1.add(entity);
                 }
             }
         }
         if(list.isEmpty()||list1.isEmpty())return;
         NetworkManager manager = player.connection.netManager;
         manager.exec(() -> {
-            if (!list.isEmpty()) {
-                for (Entity entity1 : list) {
-                    manager.sendPacketSync(new SPacketEntityAttach(entity1, ((EntityLiving)entity1).getLeashHolder()));
-                }
-            }
-            if (!list1.isEmpty()) {
-                for (Entity entity2 : list1) {
-                    manager.sendPacketSync(new SPacketSetPassengers(entity2));
-                }
-            }
+            if (!list.isEmpty())
+                for (Entity entity1 : list) manager.sendPacketSync(new SPacketEntityAttach(entity1, ((EntityLiving)entity1).getLeashHolder()));
+
+            if (!list1.isEmpty())
+                for (Entity entity2 : list1) manager.sendPacketSync(new SPacketSetPassengers(entity2));
         });
     }
 
@@ -242,11 +210,9 @@ public class EntityTracker {
     public void setViewDistance(int distance) {
         this.maxTrackingDistanceThreshold = ((distance - 1) << 4);
         EntityTrackerEntry entry;
-        for (Entity entity : world.loadedEntityList) {
-            if((entry = entity.trackerEntry) != null) {
+        for (Entity entity : world.loadedEntityList)
+            if((entry = entity.trackerEntry) != null)
                 entry.setMaxRange(this.maxTrackingDistanceThreshold);
-            }
-        }
     }
 
 
@@ -258,11 +224,9 @@ public class EntityTracker {
             EntityPlayerMP entityplayermp = (EntityPlayerMP)entityIn;
             EntityTrackerEntry entry;
             for (Entity entity : world.loadedEntityList) {
-                if((entry = entity.trackerEntry) != null) {
-                    if (entry.getTrackedEntity() != entityplayermp) {
+                if((entry = entity.trackerEntry) != null)
+                    if (entry.getTrackedEntity() != entityplayermp)
                         entry.updatePlayerEntity(entityplayermp);
-                    }
-                }
             }
         } else {
             EntityTrackerFactory.TrackInfo inf = trackingTable.getFor(entityIn);

@@ -65,7 +65,7 @@ public class WalkNodeProcessor extends NodeProcessor {
                  ((state = this.blockaccess.getBlockState(pooledPos)).getMaterial() ==
                          Material.AIR || state.getBlock()
                                  .isPassable(this.blockaccess, pooledPos))
-                         && pooledPos.getY() > 0; pooledPos.setY(pooledPos.getY()-1)) {;}
+                         && pooledPos.getY() > 0; pooledPos.setY(pooledPos.getY()-1));
 
             yFactor = pooledPos.getY()+1;
         }
@@ -75,30 +75,40 @@ public class WalkNodeProcessor extends NodeProcessor {
         PathNodeType type;
         PntMatrix.Chunked chunked = matrix.getChunked(blockpos2.getX(), blockpos2.getZ());
         type = chunked.getCur(blockpos2.getX(), yFactor, blockpos2.getZ());
+
         if(type==null) {
             type = this.getPathNodeType(this.entity, blockpos2.getX(), yFactor, blockpos2.getZ());
             chunked.setCur(blockpos2.getX(), yFactor, blockpos2.getZ(), type);
         }
 
         if (this.entity.getPathPriority(type) < 0.0F) {
-            Set<BlockPos> set = new Te4HashSet<>();
-            set.add(new BlockPos(this.entity.getEntityBoundingBox().minX, yFactor, this.entity.getEntityBoundingBox().minZ));
-            set.add(new BlockPos(this.entity.getEntityBoundingBox().minX, yFactor, this.entity.getEntityBoundingBox().maxZ));
-            set.add(new BlockPos(this.entity.getEntityBoundingBox().maxX, yFactor, this.entity.getEntityBoundingBox().minZ));
-            set.add(new BlockPos(this.entity.getEntityBoundingBox().maxX, yFactor, this.entity.getEntityBoundingBox().maxZ));
+            Set<BlockPos> set = new Te4HashSet<>(8, 1f);
+            AxisAlignedBB box = this.entity.getEntityBoundingBox();
+            BlockPos pos;
+            set.add(pos = new BlockPos(box.minX, yFactor, box.minZ));
 
-            for (BlockPos pos : set) {
-                type = chunked.getType(pos.getX(), pos.getY(), pos.getZ());
-                if(type==null) {
-                    type = this.getPathNodeType(this.entity, pos);
-                    chunked.setType(pos.getX(), pos.getY(), pos.getZ(), type);
-                }
-                if (this.entity.getPathPriority(type) >= 0.0F) {
-                    return this.openPoint(pos.getX(), pos.getY(), pos.getZ());
-                }
-            }
+            if (needOpen(chunked, pos)) return this.openPoint(pos.getX(), pos.getY(), pos.getZ());
+
+            if(set.add(pos = new BlockPos(box.minX, yFactor, box.maxZ)))
+                if (needOpen(chunked, pos)) return this.openPoint(pos.getX(), pos.getY(), pos.getZ());
+
+            if(set.add(pos =new BlockPos(box.maxX, yFactor, box.minZ)))
+                if (needOpen(chunked, pos)) return this.openPoint(pos.getX(), pos.getY(), pos.getZ());
+
+            if(set.add(pos = new BlockPos(box.minX, yFactor, box.minZ)))
+                if (needOpen(chunked, pos)) return this.openPoint(pos.getX(), pos.getY(), pos.getZ());
         }
         return this.openPoint(blockpos2.getX(), yFactor, blockpos2.getZ());
+    }
+
+
+    private boolean needOpen(PntMatrix.Chunked chunked, BlockPos pos) {
+        PathNodeType type;
+        if ((type = chunked.getType(pos.getX(), pos.getY(), pos.getZ())) == null) {
+            type = this.getPathNodeType(this.entity, pos);
+            chunked.setType(pos.getX(), pos.getY(), pos.getZ(), type);
+        }
+        return this.entity.getPathPriority(type) >= 0.0F;
     }
 
 
@@ -202,9 +212,8 @@ public class WalkNodeProcessor extends NodeProcessor {
                         this.blockaccess, pooledPos).maxY
         );
 
-        if (num1 - curY > 1.125D) {
-            return null;
-        } else {
+        if (num1 - curY > 1.125D) return null;
+        else {
             PathNodeType type;
             chunked = chunked.get(x, z);
 
@@ -246,9 +255,7 @@ public class WalkNodeProcessor extends NodeProcessor {
                                         .getBoundingBox(this.blockaccess, pooledPos).maxY - 0.002D,
                                 0.0D, box);
 
-                        if (this.entity.world.collidesWithAnyBlock(box)) {
-                            pathpoint = null;
-                        }
+                        if (this.entity.world.collidesWithAnyBlock(box)) pathpoint = null;
                     }
                 }
 
@@ -260,9 +267,7 @@ public class WalkNodeProcessor extends NodeProcessor {
                             (float) y + this.entity.height, (double) z + num1 + 0.5D
                     );
 
-                    if (this.entity.world.collidesWithAnyBlock(box)) {
-                        return null;
-                    }
+                    if (this.entity.world.collidesWithAnyBlock(box)) return null;
 
                     if (this.entity.width >= 1.0F) {
                         PathNodeType type2 = chunked.getCur(x, y - 1, z);
@@ -270,7 +275,6 @@ public class WalkNodeProcessor extends NodeProcessor {
                             type2 = this.getPathNodeType(this.entity, x, y, z);
                             chunked.setCur(x, y, z, type2);
                         }
-                        //type2 = this.getPathNodeType(this.entity, x, y - 1, z);
 
                         if (type2 == PathNodeType.BLOCKED) {
                             pathpoint = this.openPoint(x, y, z);
@@ -279,24 +283,18 @@ public class WalkNodeProcessor extends NodeProcessor {
                             return pathpoint;
                         }
                     }
-
                     int i = 0;
 
                     while (y > 0 && type == PathNodeType.OPEN) {
                         --y;
 
-                        if (i++ >= this.entity.getMaxFallHeight()) {
-                            return null;
-                        }
+                        if (i++ >= this.entity.getMaxFallHeight()) return null;
 
                         type = chunked.getType(x, y, z);
                         if(type==null){
                             type = this.getPathNodeType(this.entity, x, y, z);
                             chunked.setType(x, y, z, type);
                         }
-
-                        //type = this.getPathNodeType(this.entity, x, y, z);
-
                         priority = this.entity.getPathPriority(type);
 
                         if (type != PathNodeType.OPEN && priority >= 0.0f) {
@@ -306,9 +304,7 @@ public class WalkNodeProcessor extends NodeProcessor {
                             break;
                         }
 
-                        if (priority < 0.0F) {
-                            return null;
-                        }
+                        if (priority < 0.0F) return null;
                     }
                 }
 
@@ -353,26 +349,18 @@ public class WalkNodeProcessor extends NodeProcessor {
         int stepX = xSize>1?2:1;
         int stepZ = zSize>1?2:1;
         for (int dY = 0; dY < ySize; ++dY) {
-            for (int dX = 0; dX < xSize; dX+=stepX) {
-                for (int dZ = 0; dZ < zSize; dZ+=stepZ) {
+            for (int dX = 0; dX < xSize; dX += stepX) {
+                for (int dZ = 0; dZ < zSize; dZ += stepZ) {
 
                     nodeType = this.getPathNodeType(access, dX + x, dY + y, dZ + z);
 
-                    if (nodeType == PathNodeType.DOOR_WOOD_CLOSED && canOpenDoorsIn && canEnterDoorsIn) {
-                        nodeType = PathNodeType.WALKABLE;
-                    }
+                    if (nodeType == PathNodeType.DOOR_WOOD_CLOSED && canOpenDoorsIn && canEnterDoorsIn) nodeType = PathNodeType.WALKABLE;
+                    if (nodeType == PathNodeType.DOOR_OPEN && !canEnterDoorsIn)                         nodeType = PathNodeType.BLOCKED;
+                    if (nodeType == PathNodeType.RAIL && !(access.getBlockState(pos).getBlock() instanceof BlockRailBase)
+                            && !(access.getBlockState(pos.down()).getBlock() instanceof BlockRailBase)) nodeType = PathNodeType.FENCE;
 
-                    if (nodeType == PathNodeType.DOOR_OPEN && !canEnterDoorsIn) {
-                        nodeType = PathNodeType.BLOCKED;
-                    }
+                    if (dX == 0 && dY == 0 && dZ == 0) type = nodeType;
 
-                    if (nodeType == PathNodeType.RAIL && !(access.getBlockState(pos).getBlock() instanceof BlockRailBase) && !(access.getBlockState(pos.down()).getBlock() instanceof BlockRailBase)) {
-                        nodeType = PathNodeType.FENCE;
-                    }
-
-                    if (dX == 0 && dY == 0 && dZ == 0) {
-                        type = nodeType;
-                    }
                     types.add(nodeType);
                 }
             }
@@ -400,14 +388,9 @@ public class WalkNodeProcessor extends NodeProcessor {
             PathNodeType raw2 = this.getPathNodeTypeRaw(access, state);
             raw = raw2 != PathNodeType.WALKABLE && raw2 != PathNodeType.OPEN && raw2 != PathNodeType.WATER && raw2 != PathNodeType.LAVA ? PathNodeType.WALKABLE : PathNodeType.OPEN;
 
-            if (raw2 == PathNodeType.DAMAGE_FIRE || state.getBlock() == Blocks.MAGMA) {
-                raw = PathNodeType.DAMAGE_FIRE;
-            }
-
-            if (raw2 == PathNodeType.DAMAGE_CACTUS) {
-                raw = PathNodeType.DAMAGE_CACTUS;
-            }
-            if (raw2 == PathNodeType.DAMAGE_OTHER) raw = PathNodeType.DAMAGE_OTHER;
+            if (raw2 == PathNodeType.DAMAGE_FIRE || state.getBlock() == Blocks.MAGMA) raw = PathNodeType.DAMAGE_FIRE;
+            if (raw2 == PathNodeType.DAMAGE_CACTUS)                                   raw = PathNodeType.DAMAGE_CACTUS;
+            if (raw2 == PathNodeType.DAMAGE_OTHER)                                    raw = PathNodeType.DAMAGE_OTHER;
         }
         return this.checkNeighborBlocks(access, x, y, z, raw);
     }
@@ -423,13 +406,9 @@ public class WalkNodeProcessor extends NodeProcessor {
                     if (i != 0 || j != 0) {
                         state = access.getBlockState(pooledPos.setPos(i + x, y, j + z));
                         type = (block = state.getBlock()).getAiPathNodeType(state, access, pooledPos, this.currentEntity);
-                        if (block == Blocks.CACTUS || type == PathNodeType.DAMAGE_CACTUS) {
-                            nodeType = PathNodeType.DANGER_CACTUS;
-                        }
-                        else if (block == Blocks.FIRE || type == PathNodeType.DAMAGE_FIRE) {
-                            nodeType = PathNodeType.DANGER_FIRE;
-                        }
-                        else if (type == PathNodeType.DAMAGE_OTHER) nodeType = PathNodeType.DANGER_OTHER;
+                        if (block == Blocks.CACTUS || type == PathNodeType.DAMAGE_CACTUS)  nodeType = PathNodeType.DANGER_CACTUS;
+                        else if (block == Blocks.FIRE || type == PathNodeType.DAMAGE_FIRE) nodeType = PathNodeType.DANGER_FIRE;
+                        else if (type == PathNodeType.DAMAGE_OTHER)                        nodeType = PathNodeType.DANGER_OTHER;
                     }
                 }
             }

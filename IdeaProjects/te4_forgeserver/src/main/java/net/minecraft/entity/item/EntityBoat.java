@@ -36,6 +36,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.fserver.api.IBlockEAccess;
 
 
 public class EntityBoat extends Entity {
@@ -233,13 +234,8 @@ public class EntityBoat extends Entity {
             this.removePassengers();
         }
 
-        if (this.getTimeSinceHit() > 0) {
-            this.setTimeSinceHit(this.getTimeSinceHit() - 1);
-        }
-
-        if (this.getDamageTaken() > 0.0F) {
-            this.setDamageTaken(this.getDamageTaken() - 1.0F);
-        }
+        if (this.getTimeSinceHit() > 0)   this.setTimeSinceHit(this.getTimeSinceHit() - 1   );
+        if (this.getDamageTaken() > 0.0F) this.setDamageTaken (this.getDamageTaken()  - 1.0F);
 
         this.prevPosX = this.posX;
         this.prevPosY = this.posY;
@@ -286,7 +282,9 @@ public class EntityBoat extends Entity {
         }
 
         this.doBlockCollisions();
-        List<Entity> list = this.world.getEntitiesInAABBexcluding(this, this.getEntityBoundingBox().grow(0.20000000298023224D, -0.009999999776482582D, 0.20000000298023224D), EntitySelectors.getTeamCollisionPredicate(this));
+        AxisAlignedBB box = world.commonWorldEntityAABB;
+        this.getEntityBoundingBox().growTo(0.20000000298023224D, -0.009999999776482582D, 0.20000000298023224D, box);
+        List<Entity> list = this.world.getEntitiesInAABBexcluding(this, box, EntitySelectors.getTeamCollisionPredicate(this));
 
         if (!list.isEmpty()) {
             boolean flag = !this.world.isRemote && !(this.getControllingPassenger() instanceof EntityPlayer);
@@ -349,7 +347,6 @@ public class EntityBoat extends Entity {
     }
 
 
-
     private EntityBoat.Status getBoatStatus() {
         EntityBoat.Status status = this.getUnderwaterStatus();
         if (status != null) {
@@ -362,9 +359,8 @@ public class EntityBoat extends Entity {
             if (f > 0.0F) {
                 this.boatGlide = f;
                 return EntityBoat.Status.ON_LAND;
-            } else {
+            } else
                 return EntityBoat.Status.IN_AIR;
-            }
         }
     }
 
@@ -378,6 +374,7 @@ public class EntityBoat extends Entity {
         int i1 = MathHelper.floor(axisalignedbb.minZ);
         int j1 = MathHelper.ceil(axisalignedbb.maxZ);
 
+        IBlockEAccess access = world.access();
         BlockPos.MutableBlockPos pos = world.localTempPos;
         label108: for (int k1 = k; k1 < l; ++k1) {
             float f = 0.0F;
@@ -385,15 +382,13 @@ public class EntityBoat extends Entity {
 
             while (true) {
                 if (l1 >= j) {
-                    if (f < 1.0F) {
-                        return (float)pos.getY() + f;
-                    }
+                    if (f < 1.0F) return (float)pos.getY() + f;
                     break;
                 }
 
                 for (int i2 = i1; i2 < j1; ++i2) {
                     pos.setPos(l1, k1, i2);
-                    IBlockState iblockstate = this.world.getBlockState(pos);
+                    IBlockState iblockstate = access.getBlockState(pos);
 
                     Boolean result = iblockstate.getBlock().isAABBInsideMaterial(world, pos, new AxisAlignedBB(pos), Material.WATER);
                     if (result != null) {
@@ -404,9 +399,7 @@ public class EntityBoat extends Entity {
                     if (iblockstate.getMaterial() == Material.WATER) {
                         f = Math.max(f, BlockLiquid.getBlockLiquidHeight(iblockstate, this.world, pos));
                     }
-                    if (f >= 1.0F) {
-                        continue label108;
-                    }
+                    if (f >= 1.0F) continue label108;
                 }
                 ++l1;
             }
@@ -428,6 +421,7 @@ public class EntityBoat extends Entity {
         float f = 0.0F;
         int k1 = 0;
         BlockPos.MutableBlockPos pos = world.localTempPos;
+        IBlockEAccess access = world.access();
 
         for (int l1 = i; l1 < j; ++l1) {
             for (int i2 = i1; i2 < j1; ++i2) {
@@ -437,11 +431,11 @@ public class EntityBoat extends Entity {
                     for (int k2 = k; k2 < l; ++k2) {
                         if (j2 <= 0 || k2 != k && k2 != l - 1) {
                             pos.setPos(l1, k2, i2);
-                            IBlockState iblockstate = this.world.getBlockState(pos);
+                            IBlockState iblockstate = access.getBlockState(pos);
                             iblockstate.addCollisionBoxToList(this.world, pos, axisalignedbb1, list, this, false);
 
                             if (!list.isEmpty()) {
-                                f += iblockstate.getBlock().getSlipperiness(iblockstate, this.world, pos, this);
+                                f += iblockstate.getBlock().getSlipperiness(iblockstate, access, pos, this);
                                 ++k1;
                             }
                             list.clear();
@@ -465,19 +459,20 @@ public class EntityBoat extends Entity {
         boolean flag = false;
         this.waterLevel = Double.MIN_VALUE;
         BlockPos.MutableBlockPos pos = world.localTempPos;
+        IBlockEAccess access = world.access();
 
         for (int k1 = i; k1 < j; ++k1) {
             for (int l1 = k; l1 < l; ++l1) {
                 for (int i2 = i1; i2 < j1; ++i2) {
                     pos.setPos(k1, l1, i2);
-                    IBlockState iblockstate = this.world.getBlockState(pos);
+                    IBlockState iblockstate = access.getBlockState(pos);
 
                     Boolean result = iblockstate.getBlock().isAABBInsideMaterial(world, pos, axisalignedbb, Material.WATER);
                     if (result != null) {
                         if (!result) continue;
 
                         float f = iblockstate.getBlock().getBlockLiquidHeight(world, pos, iblockstate, Material.WATER) + pos.getY();
-                        this.waterLevel = Math.max((double)f, this.waterLevel);
+                        this.waterLevel = Math.max(f, this.waterLevel);
                         flag |= axisalignedbb.minY < (double)f;
                     }
 
@@ -505,12 +500,13 @@ public class EntityBoat extends Entity {
         int j1 = MathHelper.ceil(axisalignedbb.maxZ);
         boolean flag = false;
         BlockPos.MutableBlockPos pos = world.localTempPos;
+        IBlockEAccess access = world.access();
 
         for (int k1 = i; k1 < j; ++k1) {
             for (int l1 = k; l1 < l; ++l1) {
                 for (int i2 = i1; i2 < j1; ++i2) {
                     pos.setPos(k1, l1, i2);
-                    IBlockState iblockstate = this.world.getBlockState(pos);
+                    IBlockState iblockstate = access.getBlockState(pos);
 
                     Boolean result = iblockstate.getBlock().isAABBInsideMaterial(world, pos, axisalignedbb, Material.WATER);
                     if (result != null) {

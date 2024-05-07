@@ -298,7 +298,7 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
     }
 
 
-    private final Predicate<EntityLivingBase> ajastNear = entity -> entity != null && entity.isEntityAlive() && WorldServer.this.canSeeSky(entity.getPosition());
+    private final Predicate<EntityLivingBase> ajastNear = entity -> entity != null && entity.isEntityAlive() && WorldServer.this.canSeeSky(entity);
 
 
     protected BlockPos adjustPosToNearbyEntity(BlockPos pos) {
@@ -312,9 +312,9 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
 
         List<EntityLivingBase> list = this.getEntitiesWithinAABB(EntityLivingBase.class, aabb, ajastNear);
 
-        if (!list.isEmpty()) {
+        if (!list.isEmpty())
             return list.get(this.rand.nextInt(list.size())).getPosition();
-        } else {
+        else {
             if (blockpos.getY() == -1) {
                 BlockPos.unsafeEdit(blockpos, blockpos.getX(), 1, blockpos.getZ());
             }
@@ -918,12 +918,9 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
 
 
     private void sendPacketWithinDistance(EntityPlayerMP player, boolean longDistance, double x, double y, double z, Packet<?> packetIn) {
-        BlockPos blockpos = player.getPosition();
-        double d0 = blockpos.distanceSq(x, y, z);
+        double d0 = player.distanceSq(x, y, z);
 
-        if (d0 <= 1024.0D || longDistance && d0 <= 262144.0D) {
-            player.connection.sendPacket(packetIn);
-        }
+        if (d0 <= 1024.0D || longDistance && d0 <= 262144.0D) player.connection.netManager.sendPacketE(packetIn);
     }
 
 

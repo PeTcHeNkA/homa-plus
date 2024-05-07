@@ -40,7 +40,7 @@ public class WorldGenGlowStone2 extends WorldGenerator {
                 if (blockpos.getY()>0 && blockpos.getY() < 255 && selector.isAirBlock(blockpos)) {
                     int j = 0;
 
-                    for (EnumFacing enumfacing : EnumFacing.values()) {
+                    for (EnumFacing enumfacing : EnumFacing.VALUES) {
                         pos0 = blockpos.offset(enumfacing);
                         if (selector.getState(pos0).getBlock() == Blocks.GLOWSTONE) {
                             ++j;

@@ -69,9 +69,9 @@ public class EntityItem extends Entity {
         this.setSize(0.25F, 0.25F);
         this.setPosition(x, y, z);
         this.rotationYaw = (float)(Math.random() * 360.0D);
-        this.motionX = (double)((float)(Math.random() * 0.20000000298023224D - 0.10000000149011612D));
+        this.motionX = (float)(Math.random() * 0.20000000298023224D - 0.10000000149011612D);
         this.motionY = 0.20000000298023224D;
-        this.motionZ = (double)((float)(Math.random() * 0.20000000298023224D - 0.10000000149011612D));
+        this.motionZ = (float)(Math.random() * 0.20000000298023224D - 0.10000000149011612D);
     }
 
 

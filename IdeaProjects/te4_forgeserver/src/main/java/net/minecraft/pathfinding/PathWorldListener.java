@@ -67,16 +67,14 @@ public class PathWorldListener implements IWorldEventListener {
 
 
     public void onEntityAdded(Entity entityIn) {
-        if (entityIn instanceof EntityLiving) {
+        if (entityIn instanceof EntityLiving)
             this.navigations.add(((EntityLiving) entityIn).getNavigator());
-        }
     }
 
 
     public void onEntityRemoved(Entity entityIn) {
-        if (entityIn instanceof EntityLiving) {
+        if (entityIn instanceof EntityLiving)
             this.navigations.remove(((EntityLiving) entityIn).getNavigator());
-        }
     }
 
 

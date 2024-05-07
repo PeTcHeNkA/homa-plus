@@ -115,11 +115,11 @@ public class EntityTrackerEntry {
 
     @Override
     public boolean equals(Object other) {
-        if (other instanceof EntityTrackerEntry) {
+        if (other instanceof EntityTrackerEntry)
             return ((EntityTrackerEntry)other).trackedEntity.getEntityId() == this.trackedEntity.getEntityId();
-        } else {
+        else
             return false;
-        }
+
     }
 
 
@@ -138,9 +138,9 @@ public class EntityTrackerEntry {
         if (this.trackedEntity instanceof EntityLivingBase) {
             AttributeMap attributemap = (AttributeMap)((EntityLivingBase)this.trackedEntity).getAttributeMap();
             Set<IAttributeInstance> set = attributemap.getDirtyInstances();
-            if (!set.isEmpty()) {
+            if (!set.isEmpty())
                 this.sendToTrackingAndSelf(new SPacketEntityProperties(this.trackedEntity.getEntityId(), set));
-            }
+
             set.clear();
         }
     }
@@ -148,9 +148,8 @@ public class EntityTrackerEntry {
 
     public void sendToTrackingAndSelf(Packet<?> packetIn) {
         this.sendPacketToTrackedPlayers(packetIn);
-        if (this.trackedEntity instanceof EntityPlayerMP) {
+        if (this.trackedEntity instanceof EntityPlayerMP)
             ((EntityPlayerMP)this.trackedEntity).connection.netManager.sendPacketE(packetIn);
-        }
     }
 
 
@@ -257,8 +256,6 @@ public class EntityTrackerEntry {
         }
     }
 
-    //public double minRange = 1024;
-
     public boolean isVisibleTo(EntityPlayerMP player) {
         Entity trackedEntity;
         double distance = (trackedEntity = this.trackedEntity).getDistanceSq(player.posX, player.posY, player.posZ);
@@ -280,9 +277,8 @@ public class EntityTrackerEntry {
 
     public void updatePlayerEntities(List<EntityPlayer> players) {
         this.trackedEntity.elcaMinRange = 1073741824d;
-        for (int i = 0; i < players.size(); ++i) {
+        for (int i = 0; i < players.size(); ++i)
             updatePlayerEntity((EntityPlayerMP)players.get(i));
-        }
     }
 
 

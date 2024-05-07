@@ -223,7 +223,7 @@ public class EntityEnderman extends EntityMob {
         if (this.world.isDaytime() && this.ticksExisted >= this.targetChangeTime + 600) {
             float f = this.getBrightness();
 
-            if (f > 0.5F && this.world.canSeeSky(new BlockPos(this)) && this.rand.nextFloat() * 30.0F < (f - 0.4F) * 2.0F) {
+            if (f > 0.5F && this.world.canSeeSky(this) && this.rand.nextFloat() * 30.0F < (f - 0.4F) * 2.0F) {
                 this.setAttackTarget((EntityLivingBase)null);
                 this.teleportRandomly();
             }

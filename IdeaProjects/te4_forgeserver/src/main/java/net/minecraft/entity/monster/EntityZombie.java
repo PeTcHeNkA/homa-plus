@@ -170,17 +170,16 @@ public class EntityZombie extends EntityMob {
         if (this.world.isDaytime() && !this.world.isRemote && !this.isChild() && this.shouldBurnInDay()) {
             float f = this.getBrightness();
 
-            if (f > 0.5F && this.rand.nextFloat() * 30.0F < (f - 0.4F) * 2.0F &&
-                    this.world.canSeeSky(new BlockPos(this.posX, this.posY + (double)this.getEyeHeight(), this.posZ))) {
+            if (f > 0.5F && this.rand.nextFloat() * 30.0F < (f - 0.4F) * 2.0F && this.world.canSeeSky(this)) {
                 boolean flag = true;
-                ItemStack itemstack = this.getItemStackFromSlot(EntityEquipmentSlot.HEAD);
+                ItemStack stack = this.getItemStackFromSlot(EntityEquipmentSlot.HEAD);
 
-                if (!itemstack.isEmpty()) {
-                    if (itemstack.isItemStackDamageable()) {
-                        itemstack.setItemDamage(itemstack.getItemDamage() + this.rand.nextInt(2));
+                if (!stack.isEmpty()) {
+                    if (stack.isItemStackDamageable()) {
+                        stack.setItemDamage(stack.getItemDamage() + this.rand.nextInt(2));
 
-                        if (itemstack.getItemDamage() >= itemstack.getMaxDamage()) {
-                            this.renderBrokenItemStack(itemstack);
+                        if (stack.getItemDamage() >= stack.getMaxDamage()) {
+                            this.renderBrokenItemStack(stack);
                             this.setItemStackToSlot(EntityEquipmentSlot.HEAD, ItemStack.EMPTY);
                         }
                     }
@@ -188,9 +187,7 @@ public class EntityZombie extends EntityMob {
                     flag = false;
                 }
 
-                if (flag) {
-                    this.setFire(8);
-                }
+                if (flag) this.setFire(8);
             }
         }
         super.onLivingUpdateTick();

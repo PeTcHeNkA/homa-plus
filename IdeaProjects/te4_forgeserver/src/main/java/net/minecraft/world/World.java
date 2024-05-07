@@ -612,42 +612,46 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
-    public boolean canSeeSky(BlockPos pos)
-    {
+    public boolean canSeeSky(BlockPos pos) {
         return this.getChunk(pos).canSeeSky(pos);
     }
 
 
-    public boolean canBlockSeeSky(BlockPos pos)
-    {
-        if (pos.getY() >= this.getSeaLevel())
-        {
-            return this.canSeeSky(pos);
-        }
-        else
-        {
-            BlockPos blockpos = new BlockPos(pos.getX(), this.getSeaLevel(), pos.getZ());
+    public final boolean canSeeSky(Entity entity){
+        return canSeeSky(
+                MathHelper.floor(entity.posX),
+                MathHelper.floor(entity.posY + entity.getEyeHeight()),
+                MathHelper.floor(entity.posZ)
+        );
+    }
 
-            if (!this.canSeeSky(blockpos))
-            {
+
+    public final boolean canSeeSky(int x, int y, int z) {
+        return this.getChunk(x >> 4, z >> 4).canSeeSky(x, y, z);
+    }
+
+
+    public boolean canBlockSeeSky(BlockPos pos) {
+        if (pos.getY() >= this.getSeaLevel()) {
+            return this.canSeeSky(pos.getX(), pos.getY(), pos.getZ());
+        } else {
+            if (!this.canSeeSky(pos.getX(), this.getSeaLevel(), pos.getZ())) {
                 return false;
-            }
-            else
-            {
-                for (BlockPos blockpos1 = blockpos.down(); blockpos1.getY() > pos.getY(); blockpos1 = blockpos1.down())
-                {
+            } else {
+                BlockPos blockpos = new BlockPos(pos.getX(), this.getSeaLevel()-1, pos.getZ());
+
+                for (BlockPos blockpos1 = blockpos.down(); blockpos1.getY() > pos.getY(); blockpos1 = blockpos1.down()) {
                     IBlockState iblockstate = this.getBlockState(blockpos1);
 
-                    if (iblockstate.getBlock().getLightOpacity(iblockstate, this, blockpos) > 0 && !iblockstate.getMaterial().isLiquid())
-                    {
+                    if (iblockstate.getBlock().getLightOpacity(iblockstate, this, blockpos) > 0 && !iblockstate.getMaterial().isLiquid()) {
                         return false;
                     }
                 }
-
                 return true;
             }
         }
     }
+
 
     public int getLight(BlockPos pos)
     {
@@ -3393,7 +3397,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public List<AxisAlignedBB> getCollisionBoxes(@Nullable Entity entityIn, @NotNull AxisAlignedBB aabb) {
         if(ElcaCV.MORE_MOBS_OPTIMIZER) {
             AABKey key = bbCache.key(aabb);
-            //AABKey key = new AABKey(aabb);
+
             ArrayListE6<AxisAlignedBB> res = this.bbCache.getC(key);
             if (res != null) return res;
             res = bbCache.allocArr();
@@ -3416,12 +3420,12 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             AABKey key = bbCache.key(aabb);
             ArrayListE6<AxisAlignedBB> res = bbCache.getC(key);
             if (res != null) return res;
-            getCollisionBoxes0Limited(res = bbCache.allocArr(), entityIn, aabb, lim);
+            getCollisionBoxesNoCacheLimited(res = bbCache.allocArr(), entityIn, aabb, lim);
             bbCache.add(key, res);
             return res;
         } else {
             ArrayListE6<AxisAlignedBB> list;
-            getCollisionBoxes0Limited(list = new ArrayListE6<>(), entityIn, aabb, lim);
+            getCollisionBoxesNoCacheLimited(list = new ArrayListE6<>(), entityIn, aabb, lim);
             return list;
         }
     }
@@ -3545,9 +3549,9 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
-    private void getCollisionBoxes0Limited(ArrayListE6<AxisAlignedBB> list, @Nullable Entity entityIn, AxisAlignedBB aabb, int lim) {
+    public final void getCollisionBoxesNoCacheLimited(ArrayListE6<AxisAlignedBB> list, @Nullable Entity entityIn, AxisAlignedBB aabb, int lim) {
         this.getCollisionBoxes(entityIn, aabb, false, list);
-        if (entityIn != null && lim > 0) {
+        if (entityIn != null && list.sizeC() < lim) {
             AxisAlignedBB temp;
             aabb.growTo(0.25D,0.25D,0.25D, temp = localTempAABB);
             List<Entity> list1 = getEntitiesInAABBexcludingLimited(entityIn, temp, EntitySelectors.NOT_SPECTATING, lim);
@@ -3556,6 +3560,23 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         if(ElcaCV.ENABLE_COLLISION_EVENTS)
             MinecraftForge.EVENT_BUS.post(collisionEvent.init(entityIn, aabb, list));
         //return list;
+    }
+
+
+    public final ArrayListE6<AxisAlignedBB> allocAABBList(){
+        return bbCache.allocArr();
+    }
+
+
+    public final void freeAABBList(ArrayListE6<AxisAlignedBB> list){
+        bbCache.freeArr(list);
+    }
+
+
+    public final boolean noCollisionsBoxesNoCacheIn(ArrayListE6<AxisAlignedBB> list, @Nullable Entity entityIn, AxisAlignedBB aabb){
+        list.fclear();
+        getCollisionBoxesNoCacheLimited(list, entityIn, aabb, 1);
+        return list.isEmptyC();
     }
 
 

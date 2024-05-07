@@ -22,7 +22,7 @@ public class SSPatchLoader extends TweakEngine implements IClassTransformer, ITw
     public static final String ELCA_VERSION;
 
     static {
-        String version = "2.3.8.19";
+        String version = "2.3.8.25";
         boolean isDev = true;
 
         int num  = 0;

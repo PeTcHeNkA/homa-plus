@@ -2038,25 +2038,19 @@ public abstract class EntityPlayer extends EntityLivingBase {
 
     @Override
     public void setAbsorptionAmount(float amount) {
-        if (amount < 0.0F) {
-            amount = 0.0F;
-        }
-        this.getDataManager().set(ABSORPTION, Float.valueOf(amount));
+        this.getDataManager().set(ABSORPTION, amount < 0f? 0f : amount);
     }
 
 
     @Override
     public float getAbsorptionAmount() {
-        return this.getDataManager().get(ABSORPTION).floatValue();
+        return this.getDataManager().get(ABSORPTION);
     }
 
 
     public static UUID getUUID(GameProfile profile) {
         UUID uuid = profile.getId();
-
-        if (uuid == null) {
-            uuid = getOfflineUUID(profile.getName());
-        }
+        if (uuid == null) uuid = getOfflineUUID(profile.getName());
         return uuid;
     }
 

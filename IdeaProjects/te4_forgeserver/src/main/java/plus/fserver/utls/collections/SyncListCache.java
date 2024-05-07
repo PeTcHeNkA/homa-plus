@@ -138,6 +138,11 @@ public class SyncListCache<V> extends SyncTe4Cache<AABKey, ArrayListE6<V>>{
     }
 
 
+    public void freeArr(ArrayListE6<V> list){
+        super.freeVal(list);
+    }
+
+
     final Node<AABKey,ArrayListE6<V>> alloc0(int hash, AABKey key, ArrayListE6<V> value, int stamp){
         if(nCursor > 0){
             Node<AABKey,ArrayListE6<V>> node = emptyNodes[nCursor--];

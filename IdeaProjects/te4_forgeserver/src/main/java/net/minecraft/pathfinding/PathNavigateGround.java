@@ -12,6 +12,7 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
+import plus.fserver.api.IBlockEAccess;
 import plus.fserver.world.PntMatrix;
 
 
@@ -82,23 +83,20 @@ public class PathNavigateGround extends PathNavigate {
 
     private int getPathablePosY() {
         if (this.entity.isInWater() && this.getCanSwim()) {
-            int i = (int)this.entity.getEntityBoundingBox().minY;
-            Block block = this.world.getBlockState(new BlockPos(MathHelper.floor(this.entity.posX), i, MathHelper.floor(this.entity.posZ))).getBlock();
-            int j = 0;
+            IBlockEAccess access = world.access();
+            int i = (int)this.entity.getEntityBoundingBox().minY, px, pz, j = 0;
+
+            Block block = access.getBlockState(px = MathHelper.floor(this.entity.posX), i, pz = MathHelper.floor(this.entity.posZ)).getBlock();
+
 
             while (block == Blocks.FLOWING_WATER || block == Blocks.WATER) {
                 ++i;
-                block = this.world.getBlockState(new BlockPos(MathHelper.floor(this.entity.posX), i, MathHelper.floor(this.entity.posZ))).getBlock();
+                block = access.getBlockState(px, i, pz).getBlock();
                 ++j;
-
-                if (j > 16) {
-                    return (int)this.entity.getEntityBoundingBox().minY;
-                }
+                if (j > 16) return (int)this.entity.getEntityBoundingBox().minY;
             }
             return i;
-        } else {
-            return (int)(this.entity.getEntityBoundingBox().minY + 0.5D);
-        }
+        } else return (int)(this.entity.getEntityBoundingBox().minY + 0.5D);
     }
 
 
@@ -107,17 +105,16 @@ public class PathNavigateGround extends PathNavigate {
         super.removeSunnyPath();
 
         if (this.shouldAvoidSun) {
-            BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos(
+            if (this.world.canSeeSky(
                     MathHelper.floor(this.entity.posX),
                     (int)(this.entity.getEntityBoundingBox().minY + 0.5D),
-                    MathHelper.floor(this.entity.posZ));
-
-            if (this.world.canSeeSky(pos)) return;
+                    MathHelper.floor(this.entity.posZ)
+            )) return;
             PathPoint pathpoint;
             for (int i = 0; i < this.currentPath.getCurrentPathLength(); ++i) {
                 pathpoint = this.currentPath.getPathPointFromIndex(i);
 
-                if (this.world.canSeeSky(pos.setPos(pathpoint.x, pathpoint.y, pathpoint.z))) {
+                if (this.world.canSeeSky(pathpoint.x, pathpoint.y, pathpoint.z)) {
                     this.currentPath.setCurrentPathLength(i - 1);
                     return;
                 }

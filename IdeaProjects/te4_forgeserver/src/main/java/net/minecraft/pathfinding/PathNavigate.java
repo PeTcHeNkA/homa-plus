@@ -14,6 +14,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import plus.fserver.ElcaCV;
+import plus.fserver.api.IBlockEAccess;
 import plus.fserver.utls.ChunkLCache;
 import plus.fserver.utls.math.FastRandom;
 
@@ -87,11 +88,10 @@ public abstract class PathNavigate {
 
     @Nullable
     public Path getPathToPos(BlockPos pos) {
-        if (!this.canNavigate()) {
-            return null;
-        } else if (this.currentPath != null && !this.currentPath.isFinished() && targetPos != null && isNear(pos, targetPos)) {
+        if (!this.canNavigate()) return null;
+        else if (this.currentPath != null && !this.currentPath.isFinished() && targetPos != null && isNear(pos, targetPos))
             return this.currentPath;
-        } else {
+        else {
             this.targetPos = pos;
             return this.pathFinder.findPath(new ChunkLCache(entity), this.entity, this.targetPos, this.getPathSearchRange());
         }
@@ -116,12 +116,10 @@ public abstract class PathNavigate {
 
     @Nullable
     public Path getPathToEntityLiving(Entity entityIn) {
-        if (!this.canNavigate()) {
-            return null;
-        } else {
-            if (this.currentPath != null && !this.currentPath.isFinished() && isNear(targetPos, entityIn.posX, entityIn.posY, entityIn.posZ)) {
-                return this.currentPath;
-            } else {
+        if (!this.canNavigate()) return null;
+        else {
+            if (this.currentPath != null && !this.currentPath.isFinished() && isNear(targetPos, entityIn.posX, entityIn.posY, entityIn.posZ)) return this.currentPath;
+            else {
                 this.targetPos = new BlockPos(entityIn);
                 return this.pathFinder.findPath(new ChunkLCache(entity), this.entity, entityIn, this.getPathSearchRange());
             }
@@ -135,8 +133,8 @@ public abstract class PathNavigate {
 
 
     public boolean tryMoveToEntityLiving(Entity entityIn, double speedIn) {
-        Path path = this.getPathToEntityLiving(entityIn);
-        return path != null && this.setPath(path, speedIn);
+        Path path;
+        return (path = this.getPathToEntityLiving(entityIn)) != null && this.setPath(path, speedIn);
     }
 
 
@@ -145,18 +143,15 @@ public abstract class PathNavigate {
             this.currentPath = null;
             return false;
         } else {
-            if (!pathentityIn.isSamePath(this.currentPath)) {
-                this.currentPath = pathentityIn;
-            }
+            if (!pathentityIn.isSamePath(this.currentPath)) this.currentPath = pathentityIn;
+
             this.removeSunnyPath();
 
-            if (this.currentPath.getCurrentPathLength() <= 0) {
-                return false;
-            } else {
+            if (this.currentPath.getCurrentPathLength() <= 0) return false;
+            else {
                 this.speed = speedIn;
-                Vec3d vec3d = this.getEntityPosition();
                 this.ticksAtLastPos = this.totalTicks;
-                this.lastPosCheck = vec3d;
+                this.lastPosCheck = this.getEntityPosition();
                 return true;
             }
         }
@@ -293,18 +288,18 @@ public abstract class PathNavigate {
 
     protected void removeSunnyPath() {
         if (this.currentPath != null) {
-            for (int i = 0; i < this.currentPath.getCurrentPathLength(); ++i) {
-                PathPoint pathpoint = this.currentPath.getPathPointFromIndex(i);
-                PathPoint pathpoint1 = i + 1 < this.currentPath.getCurrentPathLength() ? this.currentPath.getPathPointFromIndex(i + 1) : null;
-                IBlockState iblockstate = this.world.getBlockState(new BlockPos(pathpoint.x, pathpoint.y, pathpoint.z));
-                Block block = iblockstate.getBlock();
+            Path cur = this.currentPath;
+            IBlockEAccess access = world.access();
+            for (int i = 0; i < cur.getCurrentPathLength(); ++i) {
+                PathPoint curPoint = cur.getPathPointFromIndex(i);
 
-                if (block == Blocks.CAULDRON) {
-                    this.currentPath.setPoint(i, pathpoint.cloneMove(pathpoint.x, pathpoint.y + 1, pathpoint.z));
+                if (access.getBlockState(curPoint.x, curPoint.y, curPoint.z).getBlock() == Blocks.CAULDRON) {
+                    cur.setPoint(i, curPoint.cloneMove(curPoint.x, curPoint.y + 1, curPoint.z));
 
-                    if (pathpoint1 != null && pathpoint.y >= pathpoint1.y) {
-                        this.currentPath.setPoint(i + 1, pathpoint1.cloneMove(pathpoint1.x, pathpoint.y + 1, pathpoint1.z));
-                    }
+                    PathPoint point2 = i + 1 < cur.getCurrentPathLength() ? cur.getPathPointFromIndex(i + 1) : null;
+
+                    if (point2 != null && curPoint.y >= point2.y)
+                        cur.setPoint(i + 1, point2.cloneMove(point2.x, curPoint.y + 1, point2.z));
                 }
             }
         }

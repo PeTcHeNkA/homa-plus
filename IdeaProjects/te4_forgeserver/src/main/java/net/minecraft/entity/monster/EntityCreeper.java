@@ -102,15 +102,15 @@ public class EntityCreeper extends EntityMob {
 
 
     @Override
-    public void writeEntityToNBT(NBTTagCompound compound) {
-        super.writeEntityToNBT(compound);
+    public void writeEntityToNBT(NBTTagCompound nbt) {
+        super.writeEntityToNBT(nbt);
 
         if (this.dataManager.get(POWERED)) {
-            compound.setBoolean("powered", true);
+            nbt.setBoolean("powered", true);
         }
-        compound.setShort("Fuse", (short)this.fuseTime);
-        compound.setByte("ExplosionRadius", (byte)this.explosionRadius);
-        compound.setBoolean("ignited", this.hasIgnited());
+        nbt.setShort("Fuse", (short)this.fuseTime);
+        nbt.setByte("ExplosionRadius", (byte)this.explosionRadius);
+        nbt.setBoolean("ignited", this.hasIgnited());
     }
 
 
@@ -119,17 +119,14 @@ public class EntityCreeper extends EntityMob {
         super.readEntityFromNBT(compound);
         this.dataManager.set(POWERED, compound.getBoolean("powered"));
 
-        if (compound.hasKey("Fuse", 99)) {
+        if (compound.hasKey("Fuse", 99))
             this.fuseTime = compound.getShort("Fuse");
-        }
 
-        if (compound.hasKey("ExplosionRadius", 99)) {
+        if (compound.hasKey("ExplosionRadius", 99))
             this.explosionRadius = compound.getByte("ExplosionRadius");
-        }
 
-        if (compound.getBoolean("ignited")) {
+        if (compound.getBoolean("ignited"))
             this.ignite();
-        }
     }
 
 
@@ -138,21 +135,18 @@ public class EntityCreeper extends EntityMob {
         if (this.isEntityAlive()) {
             this.lastActiveTime = this.timeSinceIgnited;
 
-            if (this.hasIgnited()) {
+            if (this.hasIgnited())
                 this.setCreeperState(1);
-            }
 
             int i = this.getCreeperState();
 
-            if (i > 0 && this.timeSinceIgnited == 0) {
+            if (i > 0 && this.timeSinceIgnited == 0)
                 this.playSound(SoundEvents.ENTITY_CREEPER_PRIMED, 1.0F, 0.5F);
-            }
 
             this.timeSinceIgnited += i;
 
-            if (this.timeSinceIgnited < 0) {
+            if (this.timeSinceIgnited < 0)
                 this.timeSinceIgnited = 0;
-            }
 
             if (this.timeSinceIgnited >= this.fuseTime) {
                 this.timeSinceIgnited = this.fuseTime;
@@ -267,18 +261,18 @@ public class EntityCreeper extends EntityMob {
         Collection<PotionEffect> collection = this.getActivePotionEffects();
 
         if (!collection.isEmpty()) {
-            EntityAreaEffectCloud entityareaeffectcloud = new EntityAreaEffectCloud(this.world, this.posX, this.posY, this.posZ);
-            entityareaeffectcloud.setRadius(2.5F);
-            entityareaeffectcloud.setRadiusOnUse(-0.5F);
-            entityareaeffectcloud.setWaitTime(10);
-            entityareaeffectcloud.setDuration(entityareaeffectcloud.getDuration() / 2);
-            entityareaeffectcloud.setRadiusPerTick(-entityareaeffectcloud.getRadius() / (float)entityareaeffectcloud.getDuration());
+            EntityAreaEffectCloud cloud = new EntityAreaEffectCloud(this.world, this.posX, this.posY, this.posZ);
+            cloud.setRadius(2.5F);
+            cloud.setRadiusOnUse(-0.5F);
+            cloud.setWaitTime(10);
+            cloud.setDuration(cloud.getDuration() / 2);
+            cloud.setRadiusPerTick(-cloud.getRadius() / (float)cloud.getDuration());
 
             for (PotionEffect potioneffect : collection) {
-                entityareaeffectcloud.addEffect(new PotionEffect(potioneffect));
+                cloud.addEffect(new PotionEffect(potioneffect));
             }
 
-            this.world.spawnEntity(entityareaeffectcloud);
+            this.world.spawnEntity(cloud);
         }
     }
 

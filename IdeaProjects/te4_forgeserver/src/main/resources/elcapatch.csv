@@ -10,6 +10,7 @@
 "net.minecraft.block.BlockBone"
 "net.minecraft.block.BlockBookshelf"
 "net.minecraft.block.BlockBreakableFs"
+"net.minecraft.block.BlockBush"
 "net.minecraft.block.BlockCarpet"
 "net.minecraft.block.BlockClay"
 "net.minecraft.block.BlockColoredFs"
@@ -150,6 +151,7 @@
 "net.minecraft.entity.ai.EntityAIPanic"
 "net.minecraft.entity.ai.EntityAITasks$EntityAITaskEntry"
 "net.minecraft.entity.ai.EntityAITasks"
+"net.minecraft.entity.ai.EntitySenses"
 "net.minecraft.entity.Entity$1"
 "net.minecraft.entity.Entity$2"
 "net.minecraft.entity.Entity$3"
@@ -168,16 +170,57 @@
 "net.minecraft.entity.item.EntityBoat$Status"
 "net.minecraft.entity.item.EntityBoat$Type"
 "net.minecraft.entity.item.EntityBoat"
+"net.minecraft.entity.item.EntityFallingBlock"
+"net.minecraft.entity.item.EntityItem"
 "net.minecraft.entity.item.EntityMinecart$1"
 "net.minecraft.entity.item.EntityMinecart$Type"
 "net.minecraft.entity.item.EntityMinecart"
+"net.minecraft.entity.monster.AbstractSkeleton$1"
+"net.minecraft.entity.monster.AbstractSkeleton"
+"net.minecraft.entity.monster.EntityBlaze$AIFireballAttack"
+"net.minecraft.entity.monster.EntityBlaze"
 "net.minecraft.entity.monster.EntityCreeper"
+"net.minecraft.entity.monster.EntityEnderman$1"
+"net.minecraft.entity.monster.EntityEnderman$AIFindPlayer"
+"net.minecraft.entity.monster.EntityEnderman$AIPlaceBlock"
+"net.minecraft.entity.monster.EntityEnderman$AITakeBlock"
+"net.minecraft.entity.monster.EntityEnderman"
+"net.minecraft.entity.monster.EntityGuardian$AIGuardianAttack"
+"net.minecraft.entity.monster.EntityGuardian$GuardianMoveHelper"
+"net.minecraft.entity.monster.EntityGuardian$GuardianTargetSelector"
+"net.minecraft.entity.monster.EntityGuardian"
+"net.minecraft.entity.monster.EntityMob"
+"net.minecraft.entity.monster.EntitySpider$AISpiderAttack"
+"net.minecraft.entity.monster.EntitySpider$AISpiderTarget"
+"net.minecraft.entity.monster.EntitySpider$GroupData"
+"net.minecraft.entity.monster.EntitySpider"
+"net.minecraft.entity.monster.EntityWitch"
+"net.minecraft.entity.monster.EntityZombie$1"
+"net.minecraft.entity.monster.EntityZombie$GroupData"
+"net.minecraft.entity.monster.EntityZombie"
+"net.minecraft.entity.passive.EntityAmbientCreature"
+"net.minecraft.entity.passive.EntityAnimal"
+"net.minecraft.entity.passive.EntityBat"
+"net.minecraft.entity.passive.EntitySquid$AIMoveRandom"
+"net.minecraft.entity.passive.EntitySquid"
+"net.minecraft.entity.passive.EntityVillager$1"
+"net.minecraft.entity.passive.EntityVillager$EmeraldForItems"
+"net.minecraft.entity.passive.EntityVillager$ItemAndEmeraldToItem"
+"net.minecraft.entity.passive.EntityVillager$ITradeList"
+"net.minecraft.entity.passive.EntityVillager$ListEnchantedBookForEmeralds"
+"net.minecraft.entity.passive.EntityVillager$ListEnchantedItemForEmeralds"
+"net.minecraft.entity.passive.EntityVillager$ListItemForEmeralds"
+"net.minecraft.entity.passive.EntityVillager$PriceInfo"
+"net.minecraft.entity.passive.EntityVillager$TreasureMapForEmeralds"
+"net.minecraft.entity.passive.EntityVillager"
+"net.minecraft.entity.passive.EntityWaterMob"
 "net.minecraft.entity.player.EntityPlayer$1"
 "net.minecraft.entity.player.EntityPlayer$EnumChatVisibility"
 "net.minecraft.entity.player.EntityPlayer$SleepEnemyPredicate"
 "net.minecraft.entity.player.EntityPlayer$SleepResult"
 "net.minecraft.entity.player.EntityPlayer"
 "net.minecraft.entity.player.EntityPlayerMP"
+"net.minecraft.entity.player.InventoryPlayer"
 "net.minecraft.inventory.Container"
 "net.minecraft.inventory.EntityEquipmentSlot$Type"
 "net.minecraft.inventory.EntityEquipmentSlot"
@@ -231,8 +274,10 @@
 "net.minecraft.network.NetworkManager$InboundHandlerTuplePacketListener"
 "net.minecraft.network.NetworkManager"
 "net.minecraft.network.play.client.CPacketClientSettings"
+"net.minecraft.network.play.server.SPacketBlockChange"
 "net.minecraft.pathfinding.FlyingNodeProcessor"
 "net.minecraft.pathfinding.NodeProcessor"
+"net.minecraft.pathfinding.PathFinder"
 "net.minecraft.pathfinding.PathHeap"
 "net.minecraft.pathfinding.PathNavigate"
 "net.minecraft.pathfinding.PathNavigateGround"
@@ -246,7 +291,6 @@
 "net.minecraft.server.dedicated.DedicatedServer$1"
 "net.minecraft.server.dedicated.DedicatedServer"
 "net.minecraft.server.integrated.IntegratedServer"
-"net.minecraft.server.management.PlayerChunkMap$1"
 "net.minecraft.server.management.PlayerChunkMap"
 "net.minecraft.server.management.PlayerChunkMapEntry"
 "net.minecraft.server.management.PlayerList$1"
@@ -377,6 +421,20 @@
 "net.minecraftforge.common.DimensionManager$1", (true)
 "net.minecraftforge.common.DimensionManager$Dimension", (true)
 "net.minecraftforge.common.DimensionManager", (true)
+"net.minecraftforge.common.ForgeChunkManager$ChunkEntry", (true)
+"net.minecraftforge.common.ForgeChunkManager$ForceChunkEvent", (true)
+"net.minecraftforge.common.ForgeChunkManager$LoadingCallback", (true)
+"net.minecraftforge.common.ForgeChunkManager$OrderedLoadingCallback", (true)
+"net.minecraftforge.common.ForgeChunkManager$PlayerOrderedLoadingCallback", (true)
+"net.minecraftforge.common.ForgeChunkManager$Ticket", (true)
+"net.minecraftforge.common.ForgeChunkManager$Type", (true)
+"net.minecraftforge.common.ForgeChunkManager$UnforceChunkEvent", (true)
+"net.minecraftforge.common.ForgeChunkManager", (true)
+"net.minecraftforge.common.ForgeHooks$1", (true)
+"net.minecraftforge.common.ForgeHooks$2", (true)
+"net.minecraftforge.common.ForgeHooks$LootTableContext", (true)
+"net.minecraftforge.common.ForgeHooks$SeedEntry", (true)
+"net.minecraftforge.common.ForgeHooks", (true)
 "net.minecraftforge.event.entity.EntityEvent$CanUpdate", (true)
 "net.minecraftforge.event.entity.EntityEvent$EnteringChunk", (true)
 "net.minecraftforge.event.entity.EntityEvent$EntityConstructing", (true)
