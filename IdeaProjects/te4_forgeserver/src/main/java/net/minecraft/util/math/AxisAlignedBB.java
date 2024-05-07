@@ -520,4 +520,9 @@ public final class AxisAlignedBB {
     public Vec3d getCenter() {
         return new Vec3d(this.minX + (this.maxX - this.minX) * 0.5D, this.minY + (this.maxY - this.minY) * 0.5D, this.minZ + (this.maxZ - this.minZ) * 0.5D);
     }
+
+
+    public AxisAlignedBB copy(){
+        return new AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ);
+    }
 }

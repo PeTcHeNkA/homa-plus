@@ -36,9 +36,11 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.fserver.ElcaMobs;
 import plus.fserver.api.IBlockEAccess;
 
 
+//todo jump on boat
 public class EntityBoat extends Entity {
     private static final DataParameter<Integer> TIME_SINCE_HIT = EntityDataManager.createKey(EntityBoat.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> FORWARD_DIRECTION = EntityDataManager.createKey(EntityBoat.class, DataSerializers.VARINT);
@@ -233,14 +235,18 @@ public class EntityBoat extends Entity {
         if (!this.world.isRemote && this.outOfControlTicks >= 60.0F) {
             this.removePassengers();
         }
-
-        if (this.getTimeSinceHit() > 0)   this.setTimeSinceHit(this.getTimeSinceHit() - 1   );
-        if (this.getDamageTaken() > 0.0F) this.setDamageTaken (this.getDamageTaken()  - 1.0F);
-
         this.prevPosX = this.posX;
         this.prevPosY = this.posY;
         this.prevPosZ = this.posZ;
-        super.onUpdateE();
+
+        int temp;
+        float tempF;
+        if ((temp  = this.getTimeSinceHit()) > 0)   this.setTimeSinceHit(temp - 1     );
+        if ((tempF = this.getDamageTaken()) > 0.0F) this.setDamageTaken (tempF  - 1.0F);
+        temp = lodLvl();
+
+        if((ticksExisted & temp) == temp) super.onUpdateE();
+
         this.tickLerp();
 
         if (this.canPassengerSteer()) {
@@ -262,41 +268,46 @@ public class EntityBoat extends Entity {
             this.motionZ = 0.0D;
         }
 
-        for (int i = 0; i <= 1; ++i) {
-            if (this.getPaddleState(i)) {
-                if (!this.isSilent() && (double)(this.paddlePositions[i] % ((float)Math.PI * 2F)) <= (Math.PI / 4D) && ((double)this.paddlePositions[i] + 0.39269909262657166D) % (Math.PI * 2D) >= (Math.PI / 4D)) {
-                    SoundEvent soundevent = this.getPaddleSound();
+        if((ticksExisted & temp) == temp) {
 
-                    if (soundevent != null) {
-                        Vec3d vec3d = this.getLook(1.0F);
-                        double d0 = i == 1 ? -vec3d.z : vec3d.z;
-                        double d1 = i == 1 ? vec3d.x : -vec3d.x;
-                        this.world.playSound(null, this.posX + d0, this.posY, this.posZ + d1, soundevent, this.getSoundCategory(), 1.0F, 0.8F + 0.4F * this.rand.nextFloat());
+            for (int i = 0; i <= 1; ++i) {
+                if (this.getPaddleState(i)) {
+                    if (!this.isSilent() && (double) (this.paddlePositions[i] % ((float) Math.PI * 2F)) <= (Math.PI / 4D) && ((double) this.paddlePositions[i] + 0.39269909262657166D) % (Math.PI * 2D) >= (Math.PI / 4D)) {
+                        SoundEvent soundevent = this.getPaddleSound();
+
+                        if (soundevent != null) {
+                            Vec3d vec3d = this.getLook(1.0F);
+                            double d0 = i == 1 ? -vec3d.z : vec3d.z;
+                            double d1 = i == 1 ? vec3d.x : -vec3d.x;
+                            this.world.playSound(null, this.posX + d0, this.posY, this.posZ + d1, soundevent, this.getSoundCategory(), 1.0F, 0.8F + 0.4F * this.rand.nextFloat());
+                        }
                     }
+
+                    this.paddlePositions[i] = (float) ((double) this.paddlePositions[i] + 0.39269909262657166D);
+                } else {
+                    this.paddlePositions[i] = 0.0F;
                 }
-
-                this.paddlePositions[i] = (float)((double)this.paddlePositions[i] + 0.39269909262657166D);
-            } else {
-                this.paddlePositions[i] = 0.0F;
             }
-        }
 
-        this.doBlockCollisions();
-        AxisAlignedBB box = world.commonWorldEntityAABB;
-        this.getEntityBoundingBox().growTo(0.20000000298023224D, -0.009999999776482582D, 0.20000000298023224D, box);
-        List<Entity> list = this.world.getEntitiesInAABBexcluding(this, box, EntitySelectors.getTeamCollisionPredicate(this));
+            if (temp > 1) return;
 
-        if (!list.isEmpty()) {
-            boolean flag = !this.world.isRemote && !(this.getControllingPassenger() instanceof EntityPlayer);
+            this.doBlockCollisions();
+            AxisAlignedBB box = world.commonWorldEntityAABB;
+            this.getEntityBoundingBox().growTo(0.20000000298023224D, -0.009999999776482582D, 0.20000000298023224D, box);
+            List<Entity> list = this.world.getEntitiesInAABBexcluding(this, box, EntitySelectors.getTeamCollisionPredicate(this));
 
-            for (int j = 0; j < list.size(); ++j) {
-                Entity entity = list.get(j);
+            if (!list.isEmpty()) {
+                boolean flag = !this.world.isRemote && !(this.getControllingPassenger() instanceof EntityPlayer);
 
-                if (!entity.isPassenger(this)) {
-                    if (flag && this.getPassengers().size() < 2 && !entity.isRiding() && entity.width < this.width && entity instanceof EntityLivingBase && !(entity instanceof EntityWaterMob) && !(entity instanceof EntityPlayer)) {
-                        entity.startRiding(this);
-                    } else {
-                        this.applyEntityCollision(entity);
+                for (int j = 0; j < list.size(); ++j) {
+                    Entity entity = list.get(j);
+
+                    if (!entity.isPassenger(this)) {
+                        if (flag && this.getPassengers().size() < 2 && !entity.isRiding() && entity.width < this.width && entity instanceof EntityLivingBase && !(entity instanceof EntityWaterMob) && !(entity instanceof EntityPlayer)) {
+                            entity.startRiding(this);
+                        } else {
+                            this.applyEntityCollision(entity);
+                        }
                     }
                 }
             }
@@ -329,8 +340,11 @@ public class EntityBoat extends Entity {
             this.rotationYaw = (float)((double)this.rotationYaw + d3 / (double)this.lerpSteps);
             this.rotationPitch = (float)((double)this.rotationPitch + (this.lerpPitch - (double)this.rotationPitch) / (double)this.lerpSteps);
             --this.lerpSteps;
-            this.mutPosition(d0, d1, d2);
+            //NOT EDIT THIS! Otherwise, the entity's AABB will end up in the pool and will be reused
+            this.setPosition(d0, d1, d2);
             this.setRotation(this.rotationYaw, this.rotationPitch);
+        } else {
+            this.setEntityBoundingBox(getCollisionBoundingBox().copy());
         }
     }
 
@@ -858,5 +872,11 @@ public class EntityBoat extends Entity {
             this.rotationYaw = (float)this.lerpYaw;
             this.rotationPitch = (float)this.lerpPitch;
         }
+    }
+
+
+    @Override
+    public int lodLvl() {
+        return ElcaMobs.BOAT.lodLvl(elcaMinRange);
     }
 }

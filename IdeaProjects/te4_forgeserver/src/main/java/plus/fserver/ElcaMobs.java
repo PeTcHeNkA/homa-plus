@@ -28,6 +28,7 @@ public class ElcaMobs {
     public static final EntityLodFunc ITEM     ;
     public static final EntityLodFunc FALLING  ;
     public static final EntityLodFunc BAT      ;
+    public static final EntityLodFunc BOAT     ;
 
 
     static {
@@ -57,6 +58,7 @@ public class ElcaMobs {
         ITEM      = new EntityLodFunc(config.get("item"),     12, 24);
         FALLING   = new EntityLodFunc(config.get("falling"),  16, 32);
         BAT       = new EntityLodFunc(config.get("bat"),      12, 24);
+        BOAT      = new EntityLodFunc(config.get("bat"),      12, 24);
 
 
         SPIDER_RIDER_PAWN_CHANCE   = getR(config, "spider.rider_spawn",   80  );
