@@ -18,7 +18,7 @@ import net.minecraft.world.IInteractionObject;
 import net.minecraft.world.World;
 
 
-public class BlockWorkbench extends BlockFs {
+public class BlockWorkbench extends BlockFx {
     protected BlockWorkbench() {
         super(Material.WOOD);
         this.setCreativeTab(CreativeTabs.DECORATIONS);

@@ -47,7 +47,7 @@ public abstract class BlockLiquid extends Block {
 
 
     @Override
-    public void addCollisionBoxToListF(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> collidingBoxes) {}
+    public void addCollisionBoxToListF(IBlockState state, IBlockAccess worldIn, BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> collidingBoxes) {}
 
 
     @Override

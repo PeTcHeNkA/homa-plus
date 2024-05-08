@@ -10,7 +10,7 @@ import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.NonNullList;
 
 
-public class BlockStoneBrick extends Block {
+public class BlockStoneBrick extends BlockFx {
     public static final PropertyEnum<BlockStoneBrick.EnumType> VARIANT = PropertyEnum.create("variant", BlockStoneBrick.EnumType.class);
     public static final int DEFAULT_META = BlockStoneBrick.EnumType.DEFAULT.getMetadata();
     public static final int MOSSY_META = BlockStoneBrick.EnumType.MOSSY.getMetadata();
@@ -32,8 +32,8 @@ public class BlockStoneBrick extends Block {
 
     @Override
     public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> items) {
-        for (BlockStoneBrick.EnumType blockstonebrick$enumtype : BlockStoneBrick.EnumType.values()) {
-            items.add(new ItemStack(this, 1, blockstonebrick$enumtype.getMetadata()));
+        for (BlockStoneBrick.EnumType type : BlockStoneBrick.EnumType.values()) {
+            items.add(new ItemStack(this, 1, type.getMetadata()));
         }
     }
 

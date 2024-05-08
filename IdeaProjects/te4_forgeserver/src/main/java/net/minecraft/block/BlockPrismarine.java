@@ -15,7 +15,7 @@ import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.IBlockAccess;
 
 
-public class BlockPrismarine extends BlockFs {
+public class BlockPrismarine extends BlockFx {
     public static final PropertyEnum<BlockPrismarine.EnumType> VARIANT = PropertyEnum.<BlockPrismarine.EnumType>create("variant", BlockPrismarine.EnumType.class);
     public static final int ROUGH_META = BlockPrismarine.EnumType.ROUGH.getMetadata();
     public static final int BRICKS_META = BlockPrismarine.EnumType.BRICKS.getMetadata();

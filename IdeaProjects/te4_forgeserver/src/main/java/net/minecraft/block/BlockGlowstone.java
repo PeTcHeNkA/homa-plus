@@ -12,7 +12,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.IBlockAccess;
 
 
-public class BlockGlowstone extends BlockFs {
+public class BlockGlowstone extends BlockFx {
     public BlockGlowstone(Material materialIn) {
         super(materialIn);
         this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);

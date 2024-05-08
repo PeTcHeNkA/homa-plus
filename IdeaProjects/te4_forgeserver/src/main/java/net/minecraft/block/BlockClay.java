@@ -8,7 +8,7 @@ import net.minecraft.item.Item;
 import java.util.Random;
 
 
-public class BlockClay extends BlockFs {
+public class BlockClay extends BlockFx {
     public BlockClay() {
         super(Material.CLAY);
         this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);

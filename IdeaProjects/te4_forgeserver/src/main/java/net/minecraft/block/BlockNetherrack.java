@@ -8,7 +8,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 
 
-public class BlockNetherrack extends BlockFs {
+public class BlockNetherrack extends BlockFx {
     public BlockNetherrack() {
         super(Material.ROCK);
         this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);

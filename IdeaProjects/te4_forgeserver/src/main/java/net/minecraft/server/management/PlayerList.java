@@ -941,6 +941,7 @@ public abstract class PlayerList {
     }
 
 
+    @Nullable
     public EntityPlayerMP getPlayerByUUID(UUID playerUUID) {
         return this.uuidToPlayerMap.get(playerUUID);
     }

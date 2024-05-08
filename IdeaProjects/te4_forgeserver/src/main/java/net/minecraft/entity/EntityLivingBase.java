@@ -205,9 +205,8 @@ public abstract class EntityLivingBase extends Entity {
 
 
     protected void updateFallState(double y, boolean onGroundIn, IBlockState state, BlockPos pos) {
-        if (!this.isInWater()) {
-            this.handleWaterMovement();
-        }
+        if (!this.isInWater()) this.handleWaterMovement();
+
         if (!this.world.isRemote && this.fallDistance > 3.0F && onGroundIn) {
             float f = (float)MathHelper.ceil(this.fallDistance - 3.0F);
 
@@ -292,25 +291,17 @@ public abstract class EntityLivingBase extends Entity {
 
         if (this.getHealth() <= 0.0F) this.onDeathUpdate();
 
+        if (this.recentlyHit > 0) --this.recentlyHit;
+        else this.attackingPlayer = null;
 
-        if (this.recentlyHit > 0) {
-            --this.recentlyHit;
-        } else {
-            this.attackingPlayer = null;
-        }
-
-        if (this.lastAttackedEntity != null && !this.lastAttackedEntity.isEntityAlive()) {
+        if (this.lastAttackedEntity != null && !this.lastAttackedEntity.isEntityAlive())
             this.lastAttackedEntity = null;
-        }
 
         if (this.revengeTarget != null) {
-            if (!this.revengeTarget.isEntityAlive()) {
+            if (!this.revengeTarget.isEntityAlive())
                 this.setRevengeTarget((EntityLivingBase)null);
-            }
             else if (this.ticksExisted - this.revengeTimer > 100)
-            {
                 this.setRevengeTarget((EntityLivingBase)null);
-            }
         }
 
         this.updatePotionEffects();
@@ -1446,8 +1437,8 @@ public abstract class EntityLivingBase extends Entity {
 
     public void travel(float strafe, float vertical, float forward) {
         if (this.isServerWorld() || this.canPassengerSteer()) {
-            if (!this.isInWater() || this instanceof EntityPlayer && ((EntityPlayer)this).capabilities.isFlying) {
-                if (!this.isInLava() || this instanceof EntityPlayer && ((EntityPlayer)this).capabilities.isFlying) {
+            if (!this.isInWater() || isPlayer() && ((EntityPlayer)this).capabilities.isFlying) {
+                if (!this.isInLava() || isPlayer() && ((EntityPlayer)this).capabilities.isFlying) {
                     if (this.isElytraFlying()) {
                         if (this.motionY > -0.5D) this.fallDistance = 1.0F;
 
@@ -1649,39 +1640,39 @@ public abstract class EntityLivingBase extends Entity {
 
 
             for (EntityEquipmentSlot slot : EntityEquipmentSlot.VALUES) {
-                ItemStack itemstack;
+                ItemStack stack;
 
                 switch (slot.getSlotType()) {
                     case HAND:
-                        itemstack = this.handInventory.get(slot.getIndex());
+                        stack = this.handInventory.get(slot.getIndex());
                         break;
                     case ARMOR:
-                        itemstack = this.armorArray.get(slot.getIndex());
+                        stack = this.armorArray.get(slot.getIndex());
                         break;
                     default:
                         continue;
                 }
-                ItemStack itemstack1 = this.getItemStackFromSlot(slot);
+                ItemStack other = this.getItemStackFromSlot(slot);
 
-                if (!ItemStack.areItemStacksEqual(itemstack1, itemstack)) {
-                    if (!ItemStack.areItemStacksEqualUsingNBTShareTag(itemstack1, itemstack))
-                        ((WorldServer)this.world).getEntityTracker().sendToTracking(this, new SPacketEntityEquipment(this.getEntityId(), slot, itemstack1));
-                    MinecraftForge.EVENT_BUS.post(new LivingEquipmentChangeEvent(this, slot, itemstack, itemstack1));
+                if (!ItemStack.areItemStacksEqual(other, stack)) {
+                    if (!ItemStack.areItemStacksEqualUsingNBTShareTag(other, stack))
+                        ((WorldServer)this.world).getEntityTracker().sendToTracking(this, new SPacketEntityEquipment(this.getEntityId(), slot, other));
+                    MinecraftForge.EVENT_BUS.post(new LivingEquipmentChangeEvent(this, slot, stack, other));
 
-                    if (!itemstack.isEmpty())
-                        this.getAttributeMap().removeAttributeModifiers(itemstack.getAttributeModifiers(slot));
+                    if (!stack.isEmpty())
+                        this.getAttributeMap().removeAttributeModifiers(stack.getAttributeModifiers(slot));
 
 
-                    if (!itemstack1.isEmpty())
-                        this.getAttributeMap().applyAttributeModifiers(itemstack1.getAttributeModifiers(slot));
+                    if (!other.isEmpty())
+                        this.getAttributeMap().applyAttributeModifiers(other.getAttributeModifiers(slot));
 
 
                     switch (slot.getSlotType()) {
                         case HAND:
-                            this.handInventory.fSet(slot.getIndex(), itemstack1.isEmpty() ? ItemStack.EMPTY : itemstack1.copy());
+                            this.handInventory.fSet(slot.getIndex(), other.isEmpty() ? ItemStack.EMPTY : other.copy());
                             break;
                         case ARMOR:
-                            this.armorArray   .fSet(slot.getIndex(), itemstack1.isEmpty() ? ItemStack.EMPTY : itemstack1.copy());
+                            this.armorArray   .fSet(slot.getIndex(), other.isEmpty() ? ItemStack.EMPTY : other.copy());
                     }
                 }
             }
@@ -1751,12 +1742,12 @@ public abstract class EntityLivingBase extends Entity {
         }
 
         this.renderYawOffset = this.rotationYaw - f1;
-        if (f1 * f1 > 2500.0F) {
+        if (f1 * f1 > 2500.0F)
             this.renderYawOffset += f1 * 0.2F;
-        }
-        if (flag) {
+
+        if (flag)
             num2 *= -1.0F;
-        }
+
         return num2;
     }
 
@@ -1805,17 +1796,14 @@ public abstract class EntityLivingBase extends Entity {
         }
 
         if (this.isJumping) {
-            if (this.isInWater()) {
-                this.handleJumpWater();
-            } else if (this.isInLava()) {
-                this.handleJumpLava();
-            } else if (this.onGround && this.jumpTicks == 0) {
+            if (this.isInWater())     this.handleJumpWater();
+            else if (this.isInLava()) this.handleJumpLava();
+            else if (this.onGround && this.jumpTicks == 0) {
                 this.jump();
                 this.jumpTicks = 10;
             }
-        } else {
+        } else
             this.jumpTicks = 0;
-        }
 
         this.moveStrafing *= 0.98F;
         this.moveForward *= 0.98F;

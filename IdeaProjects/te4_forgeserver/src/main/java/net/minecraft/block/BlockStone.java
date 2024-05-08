@@ -17,7 +17,7 @@ import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.IBlockAccess;
 
 
-public class BlockStone extends BlockFs {
+public class BlockStone extends BlockFx {
     public static final PropertyEnum<BlockStone.EnumType> VARIANT = PropertyEnum.create("variant", BlockStone.EnumType.class);
 
     public BlockStone() {

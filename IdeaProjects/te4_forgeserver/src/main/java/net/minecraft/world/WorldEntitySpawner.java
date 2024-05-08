@@ -8,6 +8,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.*;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.util.WeightedRandom;
 import net.minecraft.util.math.BlockPos;
@@ -15,9 +16,7 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import plus.fserver.ElcaConfig;
 import plus.fserver.utls.math.FastRandom;
@@ -43,7 +42,9 @@ public final class WorldEntitySpawner {
         if (!spawnHostileMobs && !spawnPeacefulMobs) {
             return 0;
         } else {
-            this.eligibleChunksForSpawning.clear();
+            Set<ChunkPos> posSet = this.eligibleChunksForSpawning;
+            PlayerChunkMap map = world.getPlayerChunkMap();
+            posSet.clear();
             int factor = 0;
 
             for (EntityPlayer entityplayer : world.playerEntities) {
@@ -56,14 +57,14 @@ public final class WorldEntitySpawner {
                             boolean flag = i1 == -8 || i1 == 8 || j1 == -8 || j1 == 8;
                             ChunkPos chunkpos = new ChunkPos(i1 + j, j1 + k);
 
-                            if (!this.eligibleChunksForSpawning.contains(chunkpos)) {
+                            if (!posSet.contains(chunkpos)) {
                                 ++factor;
 
                                 if (!flag && world.getWorldBorder().contains(chunkpos)) {
-                                    PlayerChunkMapEntry playerchunkmapentry = world.getPlayerChunkMap().getEntry(chunkpos.x, chunkpos.z);
+                                    PlayerChunkMapEntry entry = map.getEntry(chunkpos.x, chunkpos.z);
 
-                                    if (playerchunkmapentry != null && playerchunkmapentry.isSentToPlayers()) {
-                                        this.eligibleChunksForSpawning.add(chunkpos);
+                                    if (entry != null && entry.isSentToPlayers()) {
+                                        posSet.add(chunkpos);
                                     }
                                 }
                             }
@@ -91,7 +92,7 @@ public final class WorldEntitySpawner {
 
                     if (count <= maxCount) {
                         if(spawnPos==null) spawnPos = new SpawnPos(world);
-                        ChunkPos[] shuffled = this.eligibleChunksForSpawning.toArray(new ChunkPos[0]);
+                        ChunkPos[] shuffled = posSet.toArray(new ChunkPos[0]);
                         FastRandom.INST.shuffle(shuffled);
 
                         inner:

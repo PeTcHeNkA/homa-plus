@@ -10,7 +10,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 
-public class BlockRedstoneLight extends BlockFs {
+public class BlockRedstoneLight extends BlockFx {
     private final boolean isOn;
 
     public BlockRedstoneLight(boolean isOn) {

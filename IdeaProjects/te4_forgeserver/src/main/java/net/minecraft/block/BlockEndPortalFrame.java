@@ -29,7 +29,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import plus.fserver.utls.collections.ArrayListE6;
-import static net.minecraft.block.BlockFs.addCollisionBoxToListFs;
+import static net.minecraft.block.BlockFs.addCollisionBoxToListFx;
 
 
 public class BlockEndPortalFrame extends Block {
@@ -60,18 +60,16 @@ public class BlockEndPortalFrame extends Block {
     public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes, @Nullable Entity entityIn, boolean isActualState) {
         addCollisionBoxToList(pos, entityBox, collidingBoxes, AABB_BLOCK);
 
-        if (worldIn.getBlockState(pos).getValue(EYE).booleanValue()) {
+        if (worldIn.getBlockState(pos).getValue(EYE).booleanValue())
             addCollisionBoxToList(pos, entityBox, collidingBoxes, AABB_EYE);
-        }
     }
 
 
     @Override
-    public void addCollisionBoxToListF(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> collidingBoxes) {
-        addCollisionBoxToListFs(pos, entityBox, collidingBoxes, AABB_BLOCK);
-        if (worldIn.getBlockState(pos).getValue(EYE)) {
-            addCollisionBoxToListFs(pos, entityBox, collidingBoxes, AABB_EYE);
-        }
+    public void addCollisionBoxToListF(IBlockState state, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> collidingBoxes) {
+        addCollisionBoxToListFx(pos, entityBox, collidingBoxes, AABB_BLOCK);
+        if (access.getBlockState(pos).getValue(EYE))
+            addCollisionBoxToListFx(pos, entityBox, collidingBoxes, AABB_EYE);
     }
 
 

@@ -18,7 +18,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 
-public class BlockRedstoneOre extends BlockFs {
+public class BlockRedstoneOre extends BlockFx {
     private final boolean isOn;
 
     public BlockRedstoneOre(boolean isOn) {

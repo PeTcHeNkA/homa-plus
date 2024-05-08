@@ -476,7 +476,7 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
 
     private void updateEntityWithOptionalForce0(Entity entityIn, boolean forceUpdate) {
         if (checkCanUpdate) {
-            boolean canUpdate = getChunkProvider().isChunkLoadedSafe(entityIn.chunkCoordX, entityIn.chunkCoordZ);
+            boolean canUpdate = chunkProviderServer.isChunkLoadedSafe(entityIn.chunkCoordX, entityIn.chunkCoordZ);
             //todo make this pooled
             if (!canUpdate) canUpdate = ForgeEventFactory.canEntityUpdate(entityIn);
             if (!canUpdate) return;
@@ -491,11 +491,9 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
         if (forceUpdate && entityIn.addedToChunk) try {
             ++entityIn.ticksExisted;
 
-            if (entityIn.isRiding()) {
-                entityIn.updateRidden();
-            } else {
-                if(!entityIn.updateBlocked) entityIn.onUpdate();
-            }
+            if (entityIn.isRiding())         entityIn.updateRidden();
+            else if(!entityIn.updateBlocked) entityIn.onUpdate();
+
         } catch (Exception exception){
             server.ticker().onError(this, onEntityError(entityIn, exception));
         }
@@ -919,7 +917,6 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
 
     private void sendPacketWithinDistance(EntityPlayerMP player, boolean longDistance, double x, double y, double z, Packet<?> packetIn) {
         double d0 = player.distanceSq(x, y, z);
-
         if (d0 <= 1024.0D || longDistance && d0 <= 262144.0D) player.connection.netManager.sendPacketE(packetIn);
     }
 
@@ -1235,12 +1232,15 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
                 iterator.next().onTick(false);
             }
         } else {
+            int updateLCG = this.updateLCG;
+            final int rts = getGameRules().randomTickSpeed.getInt();
             final boolean flag = isRaining(), flag1 = isThundering();
+            ChunkSelector selector = localSelector;
             Chunk chunk;
             BlockPos.MutableBlockPos mut = localUpdateBlocks;
             BlockPos.MutableBlockPos mut2 = localUpdateBlocks2;
             for (Iterator<Chunk> iterator = this.playerChunkMap.getChunkIterator(); iterator.hasNext(); this.profiler.endSection()){
-                chunk = iterator.next();
+                selector.setChunk(chunk = iterator.next());
 
                 int j = chunk.x << 4;
                 int k = chunk.z << 4;
@@ -1254,7 +1254,7 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
                             mut.setPos(j + (updSeed & 15), 0, k + (updSeed >> 8 & 15))
                     );
 
-                    if (isRainingAt(blockpos)) {
+                    if (isRainingAt(chunk, blockpos)) {
                         DifficultyInstance difficultyinstance = getDifficultyForLocation(blockpos);
 
                         if (getGameRules().doMobSpawning.getBoolean() && rand.nextDouble() < (double)difficultyinstance.getAdditionalDifficulty() * 0.01D) {
@@ -1289,28 +1289,47 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
                             getBlockState(mut2).getBlock().fillWithRain(WorldServer.this, mut2);
                     }
                 }
-                int randomTickSpeed = getGameRules().randomTickSpeed.getInt();
-                if (randomTickSpeed > 0) {
-                    for (ExtendedBlockStorage extendedblockstorage : chunk.getBlockStorageArray()) {
-                        if (extendedblockstorage != Chunk.NULL_BLOCK_STORAGE && extendedblockstorage.needsRandomTick()) {
-                            for (int i1 = 0; i1 < randomTickSpeed; ++i1) {
-                                updateLCG = updateLCG * 3 + 1013904223;
-                                int j1 = updateLCG >> 2;
-                                int k1 = j1 & 15;
-                                int l1 = j1 >> 8 & 15;
-                                int i2 = j1 >> 16 & 15;
-                                IBlockState iblockstate = extendedblockstorage.get(k1, i2, l1);
-                                Block block = iblockstate.getBlock();
 
-                                if (block.getTickRandomly()) {
+                if (rts > 0) {
+                    int dx, dz, dy;
+                    Block block;
+                    for (ExtendedBlockStorage storage : chunk.getBlockStorageArray()) {
+                        if (storage != Chunk.NULL_BLOCK_STORAGE && storage.needsRandomTick()) {
+                            for (int i1 = 0; i1 < rts; ++i1) {
+                                updateLCG = updateLCG * 3 + 1013904223;
+                                int rand = updateLCG >> 2;
+
+                                IBlockState state = storage.get(dx = rand & 15, dy = rand >> 16 & 15, dz = rand >> 8 & 15);
+
+                                if ((block = state.getBlock()).getTickRandomly()) {
                                     block.randomTick(WorldServer.this,
-                                            mut2.setPos(k1 + j, i2 + extendedblockstorage.getYLocation(), l1 + k)
-                                            , iblockstate, rand);
+                                            mut2.setPos(dx + j, dy + storage.getYLocation(), dz + k), state, this.rand
+                                    );
                                 }
                             }
                         }
                     }
                 }
+            }
+
+            this.updateLCG = updateLCG;
+        }
+    }
+
+
+    private boolean isRainingAt(Chunk chunk, BlockPos position) {
+        if (!this.isRaining()) {
+            return false;
+        } else if (!chunk.canSeeSky(position)) {
+            return false;
+        } else if (chunk.getPrecipitationHeight(position).getY() > position.getY()) {
+            return false;
+        } else {
+            Biome biome = chunk.getBiome(position, provider.biomeProvider);
+            if (biome.getEnableSnow()) {
+                return false;
+            } else {
+                return !this.canSnowAt(position, false) && biome.canRain();
             }
         }
     }
@@ -1588,12 +1607,11 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
             for (int l3 = minX; l3 < maxX; ++l3) {
                 for (int i4 = minY; i4 < maxY; ++i4) {
                     for (int j4 = minZ; j4 < maxZ; ++j4) {
-                        block = localSelector.getState(l3, i4, j4).getBlock();
-                        if (block == Blocks.FIRE || block == Blocks.FLOWING_LAVA || block == Blocks.LAVA) {
+                        block = localSelector.getStateUnchecked(l3, i4, j4).getBlock();
+                        if (block == Blocks.FIRE || block == Blocks.FLOWING_LAVA || block == Blocks.LAVA)
                             return true;
-                        } else if (block.isBurning(this, tempPooledLocalPos.setPos(l3, i4, j4))) {
+                        else if (block.isBurning(this, tempPooledLocalPos.setPos(l3, i4, j4)))
                             return true;
-                        }
                     }
                 }
             }
@@ -1650,19 +1668,16 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
     @Override //synchronized, improved memory management
     protected void getEntitiesInAABBexcludingNoCacheLimited(List<Entity> list, @Nullable Entity entityIn, AxisAlignedBB boundingBox, @Nullable Predicate <? super Entity > predicate, int lim) {
         if(lim==0)return;
-        int k2 = MathHelper.floor(boundingBox.maxX + MAX_ENTITY_RADIUS)>>4;
-        int l2 = MathHelper.floor(boundingBox.minZ - MAX_ENTITY_RADIUS)>>4;
-        int i3 = MathHelper.floor(boundingBox.maxZ + MAX_ENTITY_RADIUS)>>4;
+        int k2 = MathHelper.floor(boundingBox.maxX + MAX_ENTITY_RADIUS)>>4,
+            l2 = MathHelper.floor(boundingBox.minZ - MAX_ENTITY_RADIUS)>>4,
+            i3 = MathHelper.floor(boundingBox.maxZ + MAX_ENTITY_RADIUS)>>4;
 
         Chunk chunk;
 
-        for (int xPos = MathHelper.floor(boundingBox.minX - MAX_ENTITY_RADIUS)>>4; xPos <= k2; ++xPos) {
-            for (int zPos = l2; zPos <= i3; ++zPos) {
-                if ((chunk = localSelector.getLoadedE(xPos, zPos)) != null) {
+        for (int xPos = MathHelper.floor(boundingBox.minX - MAX_ENTITY_RADIUS)>>4; xPos <= k2; ++xPos)
+            for (int zPos = l2; zPos <= i3; ++zPos)
+                if ((chunk = localSelector.getLoadedE(xPos, zPos)) != null)
                     chunk.getEntitiesWithinAABBForEntityLimited(entityIn, boundingBox, list, predicate, lim);
-                }
-            }
-        }
     }
 
 
@@ -1670,10 +1685,9 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
     @Override
     protected boolean getCollisionBoxes(@Nullable Entity entityIn, AxisAlignedBB aabb, boolean fastCheck, ArrayListE6<AxisAlignedBB> outList) {
         if (fastCheck){
-            if(ElcaCV.ENABLE_COLLISION_EVENTS){
+            if(ElcaCV.ENABLE_COLLISION_EVENTS)
                 MinecraftForge.EVENT_BUS.post(collisionEvent.init(entityIn, aabb, outList));
-            }
-            if(!outList.isEmpty())return true;
+            if(!outList.isEmptyC())return true;
         }
         int minX = MathHelper.floor(aabb.minX) - 1;
         int maxX = MathHelper.ceil(aabb.maxX) + 1;
@@ -1685,45 +1699,34 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
         WorldBorder worldborder = this.getWorldBorder();
         boolean flag = entityIn != null && entityIn.isOutsideBorder();
         boolean flag1 = entityIn != null && this.isInsideWorldBorder(entityIn);
-        IBlockState state;
-        for (int xPos = minX; xPos < maxX; ++xPos) {
+        ChunkSelector selector = localSelector;
+        for (int xPos = minX; xPos < maxX; ++xPos)
             for (int zPos = minZ; zPos < maxZ; ++zPos) {
                 boolean flag2 = xPos == minX || xPos == maxX - 1;
                 boolean flag3 = zPos == minZ || zPos == maxZ - 1;
                 Chunk chunk;
 
-                if ((!flag2 || !flag3) && (chunk = localSelector.getLoadedE(xPos>>4, zPos>>4))!=null) {
-
-                    for (int i2 = minY; i2 < maxY; ++i2) {
+                if ((!flag2 || !flag3) && (chunk = selector.getLoadedE(xPos>>4, zPos>>4))!=null)
+                    for (int i2 = minY; i2 < maxY; ++i2)
                         if (!flag2 && !flag3 || i2 != maxY - 1) {
                             if (fastCheck) {
-                                if (xPos < -30000000 || xPos >= 30000000 || zPos < -30000000 || zPos >= 30000000) {
-                                    return true;
-                                }
-                            } else if (entityIn != null && flag == flag1) {
-                                entityIn.setOutsideBorder(!flag1);
-                            }
+                                if (xPos < -30000000 || xPos >= 30000000 || zPos < -30000000 || zPos >= 30000000) return true;
 
-                            if (!fastCheck && flag1 && !worldborder.contains(xPos, zPos)) {
-                                state = BlockIDIndexes.STONE_STATE;
-                            } else {
-                                state = chunk.getBlockState(xPos, i2, zPos);
-                            }
+                            } else if (entityIn != null && flag == flag1) entityIn.setOutsideBorder(!flag1);
 
-                            state.addCollisionBoxToListF(this, tempPooledLocalPos.setPos(xPos, i2, zPos), aabb, outList, entityIn, false);
+                            ((!fastCheck && flag1 && !worldborder.contains(xPos, zPos))?
+                                    BlockIDIndexes.STONE_STATE : chunk.getBlockState(xPos, i2, zPos))
 
-                            if (fastCheck) {
+                                .addCollisionBoxToListF(selector, tempPooledLocalPos.setPos(xPos, i2, zPos), aabb, outList, entityIn, false);
+
+                            if (fastCheck)
                                 if(ElcaCV.ENABLE_COLLISION_EVENTS){
                                     MinecraftForge.EVENT_BUS.post(collisionEvent.init(entityIn, aabb, outList));
-                                    if(!outList.isEmpty())return true;
+                                    if(!outList.isEmptyC())return true;
                                 }else return true;
-                            }
                         }
-                    }
-                }
             }
-        }
-        return !outList.isEmpty();
+        return !outList.isEmptyC();
     }
 
 

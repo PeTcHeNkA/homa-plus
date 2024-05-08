@@ -18,8 +18,8 @@ class SpawnPos extends BlockPos.MutableBlockPos {
         int rand = world.rand.nextInt();
         int nX = (x << 4) + (rand & 15);
         int nZ = (z << 4) + ((rand >> 4) & 15);
-        int k = MathHelper.roundUp(chunk.getHeight(new BlockPos(nX, 0, nZ)) + 1, 16);
+        int k = MathHelper.roundUp(chunk.getHeightValue(nX & 15, nZ & 15) + 1, 16);
         int nY = world.rand.nextInt(k > 0 ? k : chunk.getTopFilledSegment() + 16 - 1);
-        setPos(nX, nY, nZ);
+        editRoot(nX, nY, nZ);
     }
 }

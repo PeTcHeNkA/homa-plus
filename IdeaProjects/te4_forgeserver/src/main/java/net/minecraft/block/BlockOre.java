@@ -16,7 +16,7 @@ import net.minecraft.world.World;
 import plus.fserver.utls.math.FastRandom;
 
 
-public class BlockOre extends BlockFs {
+public class BlockOre extends BlockFx {
     public BlockOre() {
         this(Material.ROCK.getMaterialMapColor());
     }

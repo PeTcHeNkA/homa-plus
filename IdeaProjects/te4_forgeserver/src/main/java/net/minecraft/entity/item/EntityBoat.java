@@ -282,11 +282,8 @@ public class EntityBoat extends Entity {
                             this.world.playSound(null, this.posX + d0, this.posY, this.posZ + d1, soundevent, this.getSoundCategory(), 1.0F, 0.8F + 0.4F * this.rand.nextFloat());
                         }
                     }
-
                     this.paddlePositions[i] = (float) ((double) this.paddlePositions[i] + 0.39269909262657166D);
-                } else {
-                    this.paddlePositions[i] = 0.0F;
-                }
+                } else this.paddlePositions[i] = 0.0F;
             }
 
             if (temp > 1) return;
@@ -305,9 +302,8 @@ public class EntityBoat extends Entity {
                     if (!entity.isPassenger(this)) {
                         if (flag && this.getPassengers().size() < 2 && !entity.isRiding() && entity.width < this.width && entity instanceof EntityLivingBase && !(entity instanceof EntityWaterMob) && !(entity instanceof EntityPlayer)) {
                             entity.startRiding(this);
-                        } else {
+                        } else
                             this.applyEntityCollision(entity);
-                        }
                     }
                 }
             }
@@ -629,16 +625,10 @@ public class EntityBoat extends Entity {
             if (this.getPassengers().size() > 1) {
                 int i = this.getPassengers().indexOf(passenger);
 
-                if (i == 0) {
-                    f = 0.2F;
-                }
-                else {
-                    f = -0.6F;
-                }
+                if (i == 0) f = 0.2F;
+                else f = -0.6F;
 
-                if (passenger instanceof EntityAnimal) {
-                    f = (float)((double)f + 0.2D);
-                }
+                if (passenger instanceof EntityAnimal) f = (float)((double)f + 0.2D);
             }
 
             Vec3d vec3d = (new Vec3d((double)f, 0.0D, 0.0D)).rotateYaw(-this.rotationYaw * 0.017453292F - ((float)Math.PI / 2F));
@@ -689,12 +679,10 @@ public class EntityBoat extends Entity {
 
     @Override
     public boolean processInitialInteract(EntityPlayer player, EnumHand hand) {
-        if (player.isSneaking()) {
-            return false;
-        } else {
-            if (!this.world.isRemote && this.outOfControlTicks < 60.0F) {
+        if (player.isSneaking()) return false;
+        else {
+            if (!this.world.isRemote && this.outOfControlTicks < 60.0F)
                 player.startRiding(this);
-            }
             return true;
         }
     }

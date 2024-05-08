@@ -13,7 +13,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 
 
-public class BlockSandStone extends BlockFs {
+public class BlockSandStone extends BlockFx {
     public static final PropertyEnum<BlockSandStone.EnumType> TYPE = PropertyEnum.create("type", BlockSandStone.EnumType.class);
 
     public BlockSandStone() {

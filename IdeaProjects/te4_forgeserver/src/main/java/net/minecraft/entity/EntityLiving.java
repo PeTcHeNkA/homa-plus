@@ -243,16 +243,14 @@ public abstract class EntityLiving extends EntityLivingBase {
 
 
     public void spawnExplosionParticle() {
-        if (this.world.isRemote) {
+        if (this.world.isRemote)
             for (int i = 0; i < 20; ++i) {
                 double d0 = this.rand.nextGaussian() * 0.02D;
                 double d1 = this.rand.nextGaussian() * 0.02D;
                 double d2 = this.rand.nextGaussian() * 0.02D;
                 this.world.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, this.posX + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width - d0 * 10.0D, this.posY + (double)(this.rand.nextFloat() * this.height) - d1 * 10.0D, this.posZ + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width - d2 * 10.0D, d0, d1, d2);
             }
-        } else {
-            this.world.setEntityState(this, (byte)20);
-        }
+        else this.world.setEntityState(this, (byte)20);
     }
 
 
@@ -327,9 +325,8 @@ public abstract class EntityLiving extends EntityLivingBase {
         for (ItemStack stack : this.inventoryArmor) {
             NBTTagCompound tag = new NBTTagCompound();
 
-            if (!stack.isEmpty()) {
-                stack.writeToNBT(tag);
-            }
+            if (!stack.isEmpty()) stack.writeToNBT(tag);
+
             nbttaglist.appendTag(tag);
         }
 
@@ -541,33 +538,28 @@ public abstract class EntityLiving extends EntityLivingBase {
                 ItemArmor itemarmor = (ItemArmor)itemstack.getItem();
                 ItemArmor itemarmor1 = (ItemArmor)itemstack1.getItem();
 
-                if (itemarmor.damageReduceAmount == itemarmor1.damageReduceAmount) {
+                if (itemarmor.damageReduceAmount == itemarmor1.damageReduceAmount)
                     flag = itemstack.getMetadata() > itemstack1.getMetadata() || itemstack.hasTagCompound() && !itemstack1.hasTagCompound();
-                } else {
+                else
                     flag = itemarmor.damageReduceAmount > itemarmor1.damageReduceAmount;
-                }
-            } else {
+
+            } else
                 flag = false;
-            }
         }
 
         if (flag && this.canEquipItem(itemstack)) {
             double d0;
 
             switch (entityequipmentslot.getSlotType()) {
-                case HAND:
-                    d0 = this.inventoryHandsDropChances[entityequipmentslot.getIndex()];
+                case HAND:  d0 = this.inventoryHandsDropChances[entityequipmentslot.getIndex()];
                     break;
-                case ARMOR:
-                    d0 = this.inventoryArmorDropChances[entityequipmentslot.getIndex()];
+                case ARMOR: d0 = this.inventoryArmorDropChances[entityequipmentslot.getIndex()];
                     break;
-                default:
-                    d0 = 0.0D;
+                default:    d0 = 0.0D;
             }
 
-            if (!itemstack1.isEmpty() && (double)(this.rand.nextFloat() - 0.1F) < d0) {
+            if (!itemstack1.isEmpty() && (double)(this.rand.nextFloat() - 0.1F) < d0)
                 this.entityDropItem(itemstack1, 0.0F);
-            }
 
             this.setItemStackToSlot(entityequipmentslot, itemstack);
 
@@ -601,11 +593,11 @@ public abstract class EntityLiving extends EntityLivingBase {
             this.idleTime = 0;
         }
         else if ((this.idleTime & 0x1F) == 0x1F && (result = ForgeEventFactory.canEntityDespawn(this)) != Event.Result.DEFAULT) {
-            if (result == Event.Result.DENY) {
+            if (result == Event.Result.DENY)
                 this.idleTime = 0;
-            } else {
+            else
                 this.setDead();
-            }
+
         } else {
             Entity entity = this.world.getClosestPlayerToEntity(this, -1.0D);
 
@@ -1026,16 +1018,13 @@ public abstract class EntityLiving extends EntityLivingBase {
                 BlockPos blockpos = new BlockPos(this.leashNBTTag.getInteger("X"), this.leashNBTTag.getInteger("Y"), this.leashNBTTag.getInteger("Z"));
                 EntityLeashKnot entityleashknot = EntityLeashKnot.getKnotForPosition(this.world, blockpos);
 
-                if (entityleashknot == null) {
+                if (entityleashknot == null)
                     entityleashknot = EntityLeashKnot.createKnot(this.world, blockpos);
-                }
 
                 this.setLeashHolder(entityleashknot, true);
-            } else {
+            } else
                 this.clearLeashed(false, true);
-            }
         }
-
         this.leashNBTTag = null;
     }
 

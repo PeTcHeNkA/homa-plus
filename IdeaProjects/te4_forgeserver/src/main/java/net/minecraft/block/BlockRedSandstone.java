@@ -10,7 +10,7 @@ import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.NonNullList;
 
 
-public class BlockRedSandstone extends BlockFs {
+public class BlockRedSandstone extends BlockFx {
     public static final PropertyEnum<BlockRedSandstone.EnumType> TYPE = PropertyEnum.create("type", BlockRedSandstone.EnumType.class);
 
     public BlockRedSandstone() {

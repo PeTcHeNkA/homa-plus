@@ -218,28 +218,21 @@ public class LightingHooks {
 
 
     public static void initChunkLighting(final Chunk chunk, final World world) {
-        final int xBase = chunk.x << 4;
-        final int zBase = chunk.z << 4;
-        final BlockPosDelta pos = new BlockPosDelta(xBase, 0, zBase);
+        final int xBase, zBase;
+        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos(xBase = chunk.x << 4, 0, zBase = chunk.z << 4);
 
-        if (world.isAreaLoaded(pos.delta(-16, 0, -16).toImmutable(), pos.delta(31, 255, 31), false)) {
-            final ExtendedBlockStorage[] extendedBlockStorage = chunk.getBlockStorageArray();
-            for (int j = 0; j < extendedBlockStorage.length; ++j) {
-                final ExtendedBlockStorage storage = extendedBlockStorage[j];
+        //pos.delta(-16, 0, -16), pos.delta(31, 255, 31)
+        if (world.isAreaLoaded(xBase-16, 0, zBase+16, xBase+31, 255, zBase+31, false)) {
+            final ExtendedBlockStorage[] storages = chunk.getBlockStorageArray();
+            for (int j = 0; j < storages.length; ++j) {
+                final ExtendedBlockStorage storage = storages[j];
                 if (storage != Chunk.NULL_BLOCK_STORAGE) {
                     final int yBase = j * 16;
-                    for (int y = 0; y < 16; ++y) {
-                        for (int z = 0; z < 16; ++z) {
-                            for (int x = 0; x < 16; ++x) {
-                                final IBlockState state = storage.getData().get(x, y, z);
-                                final int light = state.getLightValue(world, pos);
-                                if (light > 0) {
-                                    pos.useDelta(xBase + x, yBase + y, zBase + z);
-                                    world.checkLightFor(EnumSkyBlock.BLOCK, pos);
-                                }
-                            }
-                        }
-                    }
+                    for (int y = 0; y < 16; ++y)
+                        for (int z = 0; z < 16; ++z)
+                            for (int x = 0; x < 16; ++x)
+                                if (storage.getData().get(x, y, z).getLightValue(world, pos) > 0)
+                                    world.checkLightFor(EnumSkyBlock.BLOCK, pos.setPos(xBase + x, yBase + y, zBase + z));
                 }
             }
             if (world.provider.hasSkyLight()) {

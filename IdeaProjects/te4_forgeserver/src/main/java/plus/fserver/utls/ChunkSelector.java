@@ -30,6 +30,11 @@ public final class ChunkSelector implements IBlockEAccess {
     }
 
 
+    public void setChunk(Chunk chunk){
+        this.chunk = chunk;curX = chunk.x;curZ = chunk.z;
+    }
+
+
     public void clear(){
         this.chunk = null;
         curX = curZ = Integer.MIN_VALUE;
@@ -110,6 +115,11 @@ public final class ChunkSelector implements IBlockEAccess {
 
     public IBlockState getState(int x, int y, int z){
         return getChunkE(x>>4, z>>4).getBlockState(x, y, z);
+    }
+
+
+    public IBlockState getStateUnchecked(int x, int y, int z){
+        return getChunkE(x>>4, z>>4).getBlockStateUnchecked(x, y, z);
     }
 
 
@@ -206,7 +216,7 @@ public final class ChunkSelector implements IBlockEAccess {
     public boolean setBlockState(BlockPos pos, IBlockState newState, int flags) {
         if (pos.getY() > 255 || pos.getY() < 1) return false;
         Chunk chunk = getChunkE(pos.getX()>>4, pos.getZ()>>4);
-        IBlockState oldState = chunk.getBlockState(pos = pos.toImmutable());
+        IBlockState oldState = chunk.getBlockStateUnchecked((pos = pos.toImmutable()).getX(), pos.getY(), pos.getZ());
 
         if (newState.getLightOpacity(this, pos) != oldState.getLightOpacity(this, pos) ||
                 newState.getLightValue(this, pos) != oldState.getLightValue(this, pos)) {

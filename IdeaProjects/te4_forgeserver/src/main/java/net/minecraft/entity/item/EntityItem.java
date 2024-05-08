@@ -509,26 +509,25 @@ public class EntityItem extends Entity {
             if (y != 0.0D) {
                 boxes = defBoxes(x, y, z);
                 temp = 0;
-                for (int l = boxes.size(); temp < l; ++temp) {
+                for (int l = boxes.size(); temp < l; ++temp)
                     y = boxes.get(temp).calculateYOffset(this.getEntityBoundingBox(), y);
-                }
             }
             if (x != 0.0D) {
                 temp = 0;
                 if(boxes == null)boxes = defBoxes(x, y, z);
 
-                for (int l5 = boxes.size(); temp < l5; ++temp) {
+                for (int l5 = boxes.size(); temp < l5; ++temp)
                     x = boxes.get(temp).calculateXOffset(this.getEntityBoundingBox(), x);
-                }
+
             }
 
             if (z != 0.0D) {
                 temp = 0;
                 if(boxes == null)boxes = defBoxes(x, y, z);
 
-                for (int i6 = boxes.size(); temp < i6; ++temp) {
+                for (int i6 = boxes.size(); temp < i6; ++temp)
                     z = boxes.get(temp).calculateZOffset(this.getEntityBoundingBox(), z);
-                }
+
             }
             if(boxes != null) {
                 this.getEntityBoundingBox().offsetMut(x, y, z);
@@ -559,29 +558,19 @@ public class EntityItem extends Entity {
                         } else {
                             blockpos = new BlockPos(curX, curY, curZ);
                         }
-                    } else {
+                    } else
                         blockpos = new BlockPos(curX, curY, curZ);
-                    }
+
                     state.getBlock().onFallenUpon(this.world, blockpos, this, fallDistance);
                 }
                 fallDistance = 0;
-            } else {
+            } else
                 this.fallDistance = (float)((double)this.fallDistance - y);
-            }
 
-            if (oldX != x) {
-                this.motionX = 0.0D;
-            }
+            if (oldX != x) this.motionX = 0.0D;
+            if (oldZ != z) this.motionZ = 0.0D;
 
-            if (oldZ != z) {
-                this.motionZ = 0.0D;
-            }
-
-            Block block = state.getBlock();
-
-            if (oldY != y) {
-                block.onLanded(this.world, this);
-            }
+            if (oldY != y) state.getBlock().onLanded(this.world, this);
 
             try {
                 this.doBlockCollisions();

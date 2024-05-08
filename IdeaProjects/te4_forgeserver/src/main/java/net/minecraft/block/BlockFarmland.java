@@ -20,7 +20,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.ElcaCV;
 
 
-public class BlockFarmland extends BlockFs {
+public class BlockFarmland extends BlockFx {
     public static final PropertyInteger MOISTURE = PropertyInteger.create("moisture", 0, 7);
     protected static final AxisAlignedBB FARMLAND_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.9375D, 1.0D);
     protected static final AxisAlignedBB field_194405_c = new AxisAlignedBB(0.0D, 0.9375D, 0.0D, 1.0D, 1.0D, 1.0D);

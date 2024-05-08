@@ -17,7 +17,7 @@ import net.minecraft.world.World;
 
 
 //todo export to public part
-public class BlockDirt extends BlockFs {
+public class BlockDirt extends BlockFx {
     public static final PropertyEnum<BlockDirt.DirtType> VARIANT = PropertyEnum.create("variant", BlockDirt.DirtType.class);
     public static final PropertyBool SNOWY = PropertyBool.create("snowy");
 

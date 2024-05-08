@@ -9,7 +9,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 
-public class BlockBarrier extends BlockFs {
+public class BlockBarrier extends BlockFx {
     protected BlockBarrier() {
         super(Material.BARRIER);
         this.setBlockUnbreakable();

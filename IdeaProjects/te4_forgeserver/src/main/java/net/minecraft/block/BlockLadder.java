@@ -19,7 +19,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 
-public class BlockLadder extends BlockFs {
+public class BlockLadder extends BlockFx {
     public static final PropertyDirection FACING = BlockHorizontal.FACING;
     protected static final AxisAlignedBB LADDER_EAST_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 0.1875D, 1.0D, 1.0D);
     protected static final AxisAlignedBB LADDER_WEST_AABB = new AxisAlignedBB(0.8125D, 0.0D, 0.0D, 1.0D, 1.0D, 1.0D);
@@ -35,7 +35,7 @@ public class BlockLadder extends BlockFs {
 
     @Override
     public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
-        switch ((EnumFacing)state.getValue(FACING)) {
+        switch (state.getValue(FACING)) {
             case NORTH:
                 return LADDER_NORTH_AABB;
             case SOUTH:

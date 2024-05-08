@@ -8,7 +8,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 
 
-public class BlockHardenedClay extends BlockFs {
+public class BlockHardenedClay extends BlockFx {
     public BlockHardenedClay() {
         super(Material.ROCK);
         this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);

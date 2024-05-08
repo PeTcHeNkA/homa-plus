@@ -24,7 +24,7 @@ import plus.fserver.api.IBlockEAccess;
 import plus.fserver.utls.collections.ArrayListE10;
 
 
-public class BlockSponge extends BlockFs {
+public class BlockSponge extends BlockFx {
     public static final PropertyBool WET = PropertyBool.create("wet");
 
     protected BlockSponge() {

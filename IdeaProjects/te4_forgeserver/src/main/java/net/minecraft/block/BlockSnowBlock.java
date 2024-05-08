@@ -11,7 +11,7 @@ import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 
 
-public class BlockSnowBlock extends BlockFs {
+public class BlockSnowBlock extends BlockFx {
     protected BlockSnowBlock() {
         super(Material.CRAFTED_SNOW);
         this.setTickRandomly(true);

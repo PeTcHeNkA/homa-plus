@@ -31,7 +31,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.utls.collections.ArrayListE6;
 import plus.fserver.utls.collections.ArrayListEV;
-import static net.minecraft.block.BlockFs.addCollisionBoxToListFs;
+import static net.minecraft.block.BlockFs.addCollisionBoxToListFx;
 
 
 public class BlockStairs extends Block {
@@ -85,20 +85,17 @@ public class BlockStairs extends Block {
 
 
     @Override
-    public void addCollisionBoxToListF(IBlockState bstate, World worldIn, BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> collidingBoxes) {
-        bstate = this.getActualState(bstate, worldIn, pos);
+    public void addCollisionBoxToListF(IBlockState bstate, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> collidingBoxes) {
+        bstate = this.getActualState(bstate, access, pos);
 
-        addCollisionBoxToListFs(pos, entityBox, collidingBoxes, bstate.getValue(HALF) == BlockStairs.EnumHalf.TOP ? AABB_SLAB_TOP : AABB_SLAB_BOTTOM);
-
+        addCollisionBoxToListFx(pos, entityBox, collidingBoxes, bstate.getValue(HALF) == BlockStairs.EnumHalf.TOP ? AABB_SLAB_TOP : AABB_SLAB_BOTTOM);
         BlockStairs.EnumShape shape = bstate.getValue(SHAPE);
 
-        if (shape == BlockStairs.EnumShape.STRAIGHT || shape == BlockStairs.EnumShape.INNER_LEFT || shape == BlockStairs.EnumShape.INNER_RIGHT) {
-            addCollisionBoxToListFs(pos, entityBox, collidingBoxes, getCollQuarterBlock(bstate));
-        }
+        if (shape == BlockStairs.EnumShape.STRAIGHT || shape == BlockStairs.EnumShape.INNER_LEFT || shape == BlockStairs.EnumShape.INNER_RIGHT)
+            addCollisionBoxToListFx(pos, entityBox, collidingBoxes, getCollQuarterBlock(bstate));
 
-        if (shape != BlockStairs.EnumShape.STRAIGHT) {
-            addCollisionBoxToListFs(pos, entityBox, collidingBoxes, getCollEighthBlock(bstate));
-        }
+        if (shape != BlockStairs.EnumShape.STRAIGHT)
+            addCollisionBoxToListFx(pos, entityBox, collidingBoxes, getCollEighthBlock(bstate));
     }
 
 

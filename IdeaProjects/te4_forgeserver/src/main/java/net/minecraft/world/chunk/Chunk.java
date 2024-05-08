@@ -437,6 +437,12 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
     }
 
 
+    public IBlockState getBlockStateUnchecked(final int x, final int y, final int z){
+        ExtendedBlockStorage storage;
+        return ((storage = this.storageArrays[y >> 4]) == null) ? BlockIDIndexes.AIR_STATE : storage.get(x & 15, y & 15, z & 15);
+    }
+
+
     @Nullable
     public IBlockState setBlockState(final BlockPos pos, final IBlockState state) {
         int i = pos.getX() & 15, j = pos.getY(), k = pos.getZ() & 15, l = k << 4 | i;
@@ -1092,39 +1098,33 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
             boolean flag;
             for (i = 0; i < 8; ++i) {
                 if (this.queuedLightChecks >= 4096) return;
-                j = this.queuedLightChecks % 16;
-                k = this.queuedLightChecks / 16 % 16;
-                l = this.queuedLightChecks / 256;
+                j = this.queuedLightChecks & 15;
+                k = (this.queuedLightChecks >> 4) & 15;
+                l = this.queuedLightChecks >> 8;
                 ++this.queuedLightChecks;
 
                 for (int i1 = 0; i1 < 16; ++i1) {
-                    if(this.storageArrays[j] == null){
+                    if(this.storageArrays[j] == null)
                         flag = i1 == 0 || i1 == 15 || k == 0 || k == 15 || l == 0 || l == 15;
-                    } else {
+                    else
                         flag = this.storageArrays[j].get(k, i1, l).getMaterial() == Material.AIR;
-                    }
+
                     if(flag) {
                         int ly = (j << 4) + i1;
-                        for (EnumFacing enumfacing : EnumFacing.values()) {
-                            BlockPos pos2 = offset(px + k, ly, pz + l, enumfacing);
-                            if (getBlockState(pos2).getLightValue(this.world, pos2) > 0) {
+                        BlockPos.MutableBlockPos pos2 = new BlockPos.MutableBlockPos();
+                        for (EnumFacing enumfacing : EnumFacing.VALUES) {
+                            if (getBlockState(
+                                    pos2.setPos(
+                                            px + k + enumfacing.getXOffset(), ly + enumfacing.getYOffset(), pz + l + enumfacing.getZOffset()
+                                    )
+                            ).getLightValue(this.world, pos2) > 0)
                                 this.world.checkLight(pos2);
-                            }
                         }
-                        this.world.checkLight(new BlockPos(px + k, ly, pz + l));
+                        this.world.checkLight(pos2.setPos(px + k, ly, pz + l));
                     }
                 }
             }
         }
-    }
-
-
-    private BlockPos offset(int x, int y, int z, EnumFacing facing) {
-        return new BlockPos(
-                x + facing.getXOffset(),
-                y + facing.getYOffset(),
-                z + facing.getZOffset()
-        );
     }
 
 

@@ -8,7 +8,7 @@ import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 
 
-public class BlockBookshelf extends BlockFs {
+public class BlockBookshelf extends BlockFx {
     public BlockBookshelf() {
         super(Material.WOOD);
         this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);

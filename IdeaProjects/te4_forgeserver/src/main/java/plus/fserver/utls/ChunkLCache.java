@@ -176,6 +176,16 @@ public class ChunkLCache implements IBlockEAccess {
     @Override
     public IBlockState getBlockState(int x, int y, int z) {
         if(y>255 || y<0)return BlockIDIndexes.AIR_STATE;
+        return getExecutor(x>>4, z>>4).getChunk().getBlockStateUnchecked(x, y, z);
+    }
+
+
+    public IBlockState getState(BlockPos pos){
+        return getExecutor(pos.getX()>>4, pos.getZ()>>4).getChunk().getBlockState(pos);
+    }
+
+
+    public IBlockState getState(int x, int y, int z){
         return getExecutor(x>>4, z>>4).getChunk().getBlockState(x, y, z);
     }
 
@@ -194,7 +204,7 @@ public class ChunkLCache implements IBlockEAccess {
         Chunk chunk = getExecutor(pos.getX()>>4, pos.getZ()>>4).getChunk();
         pos = pos.toImmutable();
 
-        IBlockState oldState = chunk.getBlockState(pos);
+        IBlockState oldState = chunk.getBlockStateUnchecked(pos.getX(), pos.getY(), pos.getZ());
         int oldLight = oldState.getLightValue(world, pos);
         int oldOpacity = oldState.getLightOpacity(world, pos);
 

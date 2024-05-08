@@ -9,7 +9,7 @@ import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 
 
-public class BlockMelon extends BlockFs {
+public class BlockMelon extends BlockFx {
     protected BlockMelon() {
         super(Material.GOURD, MapColor.LIME);
         this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);

@@ -19,7 +19,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.api.IBlockEAccess;
 
 
-public class BlockMycelium extends BlockFs {
+public class BlockMycelium extends BlockFx {
     public static final PropertyBool SNOWY = PropertyBool.create("snowy");
 
     protected BlockMycelium() {

@@ -24,7 +24,7 @@ import net.minecraft.world.World;
 import plus.fserver.ElcaCV;
 
 
-public class BlockTNT extends Block {
+public class BlockTNT extends BlockFx {
     public static final PropertyBool EXPLODE = PropertyBool.create("explode");
 
     public BlockTNT() {

@@ -1227,40 +1227,39 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
 
     private void processCustomPayload0(@NotNull CPacketCustomPayload packetIn) {
         String s = packetIn.getChannelName();
+        PacketBuffer buf = packetIn.getBufferData();
         switch (s) {
             case "MC|BEdit":
-                PacketBuffer packetbuffer = packetIn.getBufferData();
                 try {
-                    ItemStack itemstack = packetbuffer.readItemStack();
-                    if (itemstack.isEmpty()) return;
-                    if (!ItemWritableBook.isNBTValid(itemstack.getTagCompound()))
+                    ItemStack stack = buf.readItemStack();
+                    if (stack.isEmpty()) return;
+                    if (!ItemWritableBook.isNBTValid(stack.getTagCompound()))
                         throw new IOException("Invalid book tag!");
                     ItemStack itemstack1 = this.player.getHeldItemMainhand();
                     if (itemstack1.isEmpty()) return;
-                    if (itemstack.getItem() == Items.WRITABLE_BOOK && itemstack.getItem() == itemstack1.getItem()) {
-                        itemstack1.setTagInfo("pages", itemstack.getTagCompound().getTagList("pages", 8));
+                    if (stack.getItem() == Items.WRITABLE_BOOK && stack.getItem() == itemstack1.getItem()) {
+                        itemstack1.setTagInfo("pages", stack.getTagCompound().getTagList("pages", 8));
                     }
                 } catch (Exception exception6) {
                     LOGGER.error("Couldn't handle book info", (Throwable) exception6);
                 }
                 break;
             case "MC|BSign":
-                PacketBuffer packetbuffer1 = packetIn.getBufferData();
                 try {
-                    ItemStack itemstack3 = packetbuffer1.readItemStack();
-                    if (itemstack3.isEmpty()) return;
-                    if (!ItemWrittenBook.validBookTagContents(itemstack3.getTagCompound()))
+                    ItemStack stack = buf.readItemStack();
+                    if (stack.isEmpty()) return;
+                    if (!ItemWrittenBook.validBookTagContents(stack.getTagCompound()))
                         throw new IOException("Invalid book tag!");
 
                     ItemStack itemstack4 = this.player.getHeldItemMainhand();
                     if (itemstack4.isEmpty()) {
                         return;
                     }
-                    if (itemstack3.getItem() == Items.WRITABLE_BOOK && itemstack4.getItem() == Items.WRITABLE_BOOK) {
+                    if (stack.getItem() == Items.WRITABLE_BOOK && itemstack4.getItem() == Items.WRITABLE_BOOK) {
                         ItemStack itemstack2 = new ItemStack(Items.WRITTEN_BOOK);
                         itemstack2.setTagInfo("author", new NBTTagString(this.player.getName()));
-                        itemstack2.setTagInfo("title", new NBTTagString(itemstack3.getTagCompound().getString("title")));
-                        NBTTagList nbttaglist = itemstack3.getTagCompound().getTagList("pages", 8);
+                        itemstack2.setTagInfo("title", new NBTTagString(stack.getTagCompound().getString("title")));
+                        NBTTagList nbttaglist = stack.getTagCompound().getTagList("pages", 8);
 
                         for (int i = 0; i < nbttaglist.tagCount(); ++i) {
                             String s1 = nbttaglist.getStringTagAt(i);
@@ -1297,8 +1296,6 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
                     this.player.sendMessage(new TextComponentTranslation("advMode.notAllowed"));
                     return;
                 }
-
-                PacketBuffer buf = packetIn.getBufferData();
 
                 try {
                     int l = buf.readByte();
@@ -1346,12 +1343,10 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
                     return;
                 }
 
-                PacketBuffer packetbuffer3 = packetIn.getBufferData();
-
                 try {
                     CommandBlockBaseLogic commandblockbaselogic = null;
                     TileEntityCommandBlock tileentitycommandblock = null;
-                    BlockPos blockpos1 = new BlockPos(packetbuffer3.readInt(), packetbuffer3.readInt(), packetbuffer3.readInt());
+                    BlockPos blockpos1 = new BlockPos(buf.readInt(), buf.readInt(), buf.readInt());
                     TileEntity tileentity2 = this.player.world.getTileEntity(blockpos1);
 
                     if (tileentity2 instanceof TileEntityCommandBlock) {
@@ -1359,11 +1354,11 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
                         commandblockbaselogic = tileentitycommandblock.getCommandBlockLogic();
                     }
 
-                    String s7 = packetbuffer3.readString(packetbuffer3.readableBytes());
-                    boolean flag3 = packetbuffer3.readBoolean();
-                    TileEntityCommandBlock.Mode mode = TileEntityCommandBlock.Mode.valueOf(packetbuffer3.readString(16));
-                    boolean flag = packetbuffer3.readBoolean();
-                    boolean flag1 = packetbuffer3.readBoolean();
+                    String s7 = buf.readString(buf.readableBytes());
+                    boolean flag3 = buf.readBoolean();
+                    TileEntityCommandBlock.Mode mode = TileEntityCommandBlock.Mode.valueOf(buf.readString(16));
+                    boolean flag = buf.readBoolean();
+                    boolean flag1 = buf.readBoolean();
 
                     if (commandblockbaselogic != null) {
                         EnumFacing enumfacing = this.player.world.getBlockState(blockpos1).getValue(BlockCommandBlock.FACING);
@@ -1405,9 +1400,8 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
             case "MC|Beacon":
                 if (this.player.openContainer instanceof ContainerBeacon) {
                     try {
-                        PacketBuffer packetbuffer4 = packetIn.getBufferData();
-                        int i1 = packetbuffer4.readInt();
-                        int k1 = packetbuffer4.readInt();
+                        int i1 = buf.readInt();
+                        int k1 = buf.readInt();
                         ContainerBeacon containerbeacon = (ContainerBeacon) this.player.openContainer;
                         Slot slot = containerbeacon.getSlot(0);
 
@@ -1439,74 +1433,71 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
                 }
                 break;
             case "MC|Struct":
-                if (!this.player.canUseCommandBlock()) {
-                    return;
-                }
-                PacketBuffer packetbuffer5 = packetIn.getBufferData();
+                if (!this.player.canUseCommandBlock()) return;
+
                 try {
-                    BlockPos blockpos = new BlockPos(packetbuffer5.readInt(), packetbuffer5.readInt(), packetbuffer5.readInt());
+                    BlockPos blockpos = new BlockPos(buf.readInt(), buf.readInt(), buf.readInt());
                     IBlockState iblockstate1 = this.player.world.getBlockState(blockpos);
                     TileEntity tileentity1 = this.player.world.getTileEntity(blockpos);
 
                     if (tileentity1 instanceof TileEntityStructure) {
-                        TileEntityStructure tileentitystructure = (TileEntityStructure) tileentity1;
-                        int l1 = packetbuffer5.readByte();
-                        String s8 = packetbuffer5.readString(32);
-                        tileentitystructure.setMode(TileEntityStructure.Mode.valueOf(s8));
-                        tileentitystructure.setName(packetbuffer5.readString(64));
-                        int i2 = MathHelper.clamp(packetbuffer5.readInt(), -32, 32);
-                        int j2 = MathHelper.clamp(packetbuffer5.readInt(), -32, 32);
-                        int k2 = MathHelper.clamp(packetbuffer5.readInt(), -32, 32);
-                        tileentitystructure.setPosition(new BlockPos(i2, j2, k2));
-                        int l2 = MathHelper.clamp(packetbuffer5.readInt(), 0, 32);
-                        int i3 = MathHelper.clamp(packetbuffer5.readInt(), 0, 32);
-                        int j = MathHelper.clamp(packetbuffer5.readInt(), 0, 32);
-                        tileentitystructure.setSize(new BlockPos(l2, i3, j));
-                        String s2 = packetbuffer5.readString(32);
-                        tileentitystructure.setMirror(Mirror.valueOf(s2));
-                        String s3 = packetbuffer5.readString(32);
-                        tileentitystructure.setRotation(Rotation.valueOf(s3));
-                        tileentitystructure.setMetadata(packetbuffer5.readString(128));
-                        tileentitystructure.setIgnoresEntities(packetbuffer5.readBoolean());
-                        tileentitystructure.setShowAir(packetbuffer5.readBoolean());
-                        tileentitystructure.setShowBoundingBox(packetbuffer5.readBoolean());
-                        tileentitystructure.setIntegrity(MathHelper.clamp(packetbuffer5.readFloat(), 0.0F, 1.0F));
-                        tileentitystructure.setSeed(packetbuffer5.readVarLong());
-                        String s4 = tileentitystructure.getName();
+                        TileEntityStructure structure = (TileEntityStructure) tileentity1;
+                        int l1 = buf.readByte();
+                        String s8 = buf.readString(32);
+                        structure.setMode(TileEntityStructure.Mode.valueOf(s8));
+                        structure.setName(buf.readString(64));
+                        int i2 = MathHelper.clamp(buf.readInt(), -32, 32);
+                        int j2 = MathHelper.clamp(buf.readInt(), -32, 32);
+                        int k2 = MathHelper.clamp(buf.readInt(), -32, 32);
+                        structure.setPosition(new BlockPos(i2, j2, k2));
+                        int l2 = MathHelper.clamp(buf.readInt(), 0, 32);
+                        int i3 = MathHelper.clamp(buf.readInt(), 0, 32);
+                        int j = MathHelper.clamp(buf.readInt(), 0, 32);
+                        structure.setSize(new BlockPos(l2, i3, j));
+                        String s2 = buf.readString(32);
+                        structure.setMirror(Mirror.valueOf(s2));
+                        String s3 = buf.readString(32);
+                        structure.setRotation(Rotation.valueOf(s3));
+                        structure.setMetadata(buf.readString(128));
+                        structure.setIgnoresEntities(buf.readBoolean());
+                        structure.setShowAir(buf.readBoolean());
+                        structure.setShowBoundingBox(buf.readBoolean());
+                        structure.setIntegrity(MathHelper.clamp(buf.readFloat(), 0.0F, 1.0F));
+                        structure.setSeed(buf.readVarLong());
+                        String s4 = structure.getName();
 
                         if (l1 == 2) {
-                            if (tileentitystructure.save()) {
+                            if (structure.save()) {
                                 this.player.sendStatusMessage(new TextComponentTranslation("structure_block.save_success", s4), false);
                             } else {
                                 this.player.sendStatusMessage(new TextComponentTranslation("structure_block.save_failure", s4), false);
                             }
                         } else if (l1 == 3) {
-                            if (!tileentitystructure.isStructureLoadable()) {
+                            if (!structure.isStructureLoadable()) {
                                 this.player.sendStatusMessage(new TextComponentTranslation("structure_block.load_not_found", s4), false);
-                            } else if (tileentitystructure.load()) {
+                            } else if (structure.load()) {
                                 this.player.sendStatusMessage(new TextComponentTranslation("structure_block.load_success", s4), false);
                             } else {
                                 this.player.sendStatusMessage(new TextComponentTranslation("structure_block.load_prepare", s4), false);
                             }
                         } else if (l1 == 4) {
-                            if (tileentitystructure.detectSize()) {
+                            if (structure.detectSize()) {
                                 this.player.sendStatusMessage(new TextComponentTranslation("structure_block.size_success", s4), false);
                             } else {
                                 this.player.sendStatusMessage(new TextComponentTranslation("structure_block.size_failure"), false);
                             }
                         }
 
-                        tileentitystructure.markDirty();
+                        structure.markDirty();
                         this.player.world.notifyBlockUpdate(blockpos, iblockstate1, iblockstate1, 3);
                     }
                 } catch (Exception exception1) {
-                    LOGGER.error("Couldn't set structure block", (Throwable) exception1);
+                    LOGGER.error("Couldn't set structure block", exception1);
                 }
                 break;
             case "MC|PickItem":
-                PacketBuffer packetbuffer6 = packetIn.getBufferData();
                 try {
-                    int j1 = packetbuffer6.readVarInt();
+                    int j1 = buf.readVarInt();
                     this.player.inventory.pickItem(j1);
                     netManager.sendPacket(new SPacketSetSlot(-2, this.player.inventory.currentItem, this.player.inventory.getStackInSlot(this.player.inventory.currentItem)));
                     netManager.sendPacket(new SPacketSetSlot(-2, j1, this.player.inventory.getStackInSlot(j1)));
@@ -1514,6 +1505,9 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
                 } catch (Exception exception) {
                     LOGGER.error("Couldn't pick item", exception);
                 }
+                break;
+            case "Elca:Check":
+                System.out.println("Elca detected!");
                 break;
         }
     }

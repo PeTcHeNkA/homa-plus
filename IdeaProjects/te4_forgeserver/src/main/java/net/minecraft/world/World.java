@@ -606,8 +606,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
-    public boolean isBlockTickPending(BlockPos pos, Block blockType)
-    {
+    public boolean isBlockTickPending(BlockPos pos, Block blockType) {
         return false;
     }
 
@@ -1524,35 +1523,32 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     public void tickLoadedEntities(){
-        for (int cursor = 0; cursor < this.loadedEntityList.size(); ++cursor) {
-            Entity entity2 = this.loadedEntityList.get(cursor);
-            Entity entity3 = entity2.getRidingEntity();
+        ArrayRemSwapListE15<Entity> list = (ArrayRemSwapListE15<Entity>) this.loadedEntityList;
+        for (int cursor = 0; cursor < list.sizeC(); ++cursor) {
+            Entity entity = list.get(cursor);
+            Entity ridding = entity.getRidingEntity();
 
-            if (entity3 != null) {
-                if (!entity3.isDead && entity3.isPassenger(entity2)) {
+            if (ridding != null) {
+                if (!ridding.isDead && ridding.isPassenger(entity))
                     continue;
-                }
-                entity2.dismountRidingEntity();
+                entity.dismountRidingEntity();
             }
 
-            if (!entity2.isDead && !(entity2 instanceof EntityPlayerMP)) {
-                try {
-                    this.updateEntity(entity2);
-
-                } catch (Throwable throwable1) {
-                    onEntityError(entity2, throwable1);
-                }
+            if (!entity.isDead && !(entity instanceof EntityPlayerMP)) try {
+                this.updateEntity(entity);
+            } catch (Throwable throwable1) {
+                onEntityError(entity, throwable1);
             }
 
-            if (entity2.isDead) {
-                int l1 = entity2.chunkCoordX;
-                int i2 = entity2.chunkCoordZ;
+            if (entity.isDead) {
+                int l1 = entity.chunkCoordX;
+                int i2 = entity.chunkCoordZ;
                 //todo
-                if (entity2.addedToChunk && this.isChunkLoaded(l1, i2, true)) {
-                    this.getChunk(l1, i2).removeEntity(entity2);
+                if (entity.addedToChunk && this.isChunkLoaded(l1, i2, true)) {
+                    this.getChunk(l1, i2).removeEntity(entity);
                 }
-                this.loadedEntityList.remove(cursor--);
-                this.onEntityRemoved(entity2);
+                list.remove(cursor--);
+                this.onEntityRemoved(entity);
             }
         }
     }
@@ -3184,58 +3180,56 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         }
     }
 
-    public DifficultyInstance getDifficultyForLocation(BlockPos pos)
-    {
+
+    public DifficultyInstance getDifficultyForLocation(BlockPos pos) {
         long j2 = 0L;
         float f = 0.0F;
 
-        if (this.isBlockLoaded(pos))
-        {
+        if (this.isBlockLoaded(pos)) {
             f = this.getCurrentMoonPhaseFactor();
             j2 = this.getChunk(pos).getInhabitedTime();
         }
-
         return new DifficultyInstance(this.getDifficulty(), this.getWorldTime(), j2, f);
     }
 
-    public EnumDifficulty getDifficulty()
-    {
+
+    public EnumDifficulty getDifficulty() {
         return this.getWorldInfo().getDifficulty();
     }
 
-    public int getSkylightSubtracted()
-    {
+
+    public int getSkylightSubtracted() {
         return this.skylightSubtracted;
     }
 
-    public void setSkylightSubtracted(int newSkylightSubtracted)
-    {
+
+    public void setSkylightSubtracted(int newSkylightSubtracted) {
         this.skylightSubtracted = newSkylightSubtracted;
     }
 
+
     @SideOnly(Side.CLIENT)
-    public int getLastLightningBolt()
-    {
+    public int getLastLightningBolt() {
         return this.lastLightningBolt;
     }
 
-    public void setLastLightningBolt(int lastLightningBoltIn)
-    {
+
+    public void setLastLightningBolt(int lastLightningBoltIn) {
         this.lastLightningBolt = lastLightningBoltIn;
     }
 
-    public VillageCollection getVillageCollection()
-    {
+
+    public VillageCollection getVillageCollection() {
         return this.villageCollection;
     }
 
-    public WorldBorder getWorldBorder()
-    {
+
+    public WorldBorder getWorldBorder() {
         return this.worldBorder;
     }
 
-    public boolean isSpawnChunk(int x, int z)
-    {
+
+    public boolean isSpawnChunk(int x, int z) {
         BlockPos blockpos1 = this.getSpawnPoint();
         int j2 = x * 16 + 8 - blockpos1.getX();
         int k2 = z * 16 + 8 - blockpos1.getZ();

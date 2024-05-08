@@ -464,8 +464,8 @@ public class Block extends net.minecraftforge.registries.IForgeRegistryEntry.Imp
 
 
     @Deprecated
-    public void addCollisionBoxToListF(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> collidingBoxes) {
-        addCollisionBoxToList(pos, entityBox, collidingBoxes, state.getCollisionBoundingBox(worldIn, pos));
+    public void addCollisionBoxToListF(IBlockState state, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> collidingBoxes) {
+        addCollisionBoxToList(state, access.getWorld(), pos, entityBox, collidingBoxes, null, false);
     }
 
 
@@ -2312,7 +2312,7 @@ public class Block extends net.minecraftforge.registries.IForgeRegistryEntry.Imp
         //used fs
         registerBlock(3, "dirt", (new BlockDirt()).setHardness(0.5F).setSoundType(SoundType.GROUND).setTranslationKey("dirt"));
         //used fs
-        Block block = (new BlockFs(Material.ROCK)).setHardness(2.0F).setResistance(10.0F).setSoundType(SoundType.STONE).setTranslationKey("stonebrick").setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
+        Block block = (new BlockFx(Material.ROCK)).setHardness(2.0F).setResistance(10.0F).setSoundType(SoundType.STONE).setTranslationKey("stonebrick").setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
         registerBlock(4, "cobblestone", block);
         //used fs
         Block block1 = (new BlockPlanks()).setHardness(2.0F).setResistance(5.0F).setSoundType(SoundType.WOOD).setTranslationKey("wood");
@@ -2350,7 +2350,7 @@ public class Block extends net.minecraftforge.registries.IForgeRegistryEntry.Imp
         //used fs
         registerBlock(21, "lapis_ore", (new BlockOre()).setHardness(3.0F).setResistance(5.0F).setSoundType(SoundType.STONE).setTranslationKey("oreLapis"));
         //used fs
-        registerBlock(22, "lapis_block", (new BlockFs(Material.IRON, MapColor.LAPIS)).setHardness(3.0F).setResistance(5.0F).setSoundType(SoundType.STONE).setTranslationKey("blockLapis").setCreativeTab(CreativeTabs.BUILDING_BLOCKS));
+        registerBlock(22, "lapis_block", (new BlockFx(Material.IRON, MapColor.LAPIS)).setHardness(3.0F).setResistance(5.0F).setSoundType(SoundType.STONE).setTranslationKey("blockLapis").setCreativeTab(CreativeTabs.BUILDING_BLOCKS));
         //todo
         registerBlock(23, "dispenser", (new BlockDispenser()).setHardness(3.5F).setSoundType(SoundType.STONE).setTranslationKey("dispenser"));
         Block block2 = (new BlockSandStone()).setSoundType(SoundType.STONE).setHardness(0.8F).setTranslationKey("sandStone");
@@ -2391,22 +2391,22 @@ public class Block extends net.minecraftforge.registries.IForgeRegistryEntry.Imp
         Block block4 = (new BlockMushroom()).setHardness(0.0F).setSoundType(SoundType.PLANT).setTranslationKey("mushroom");
         registerBlock(40, "red_mushroom", block4);
         //used fs
-        registerBlock(41, "gold_block", (new BlockFs(Material.IRON, MapColor.GOLD)).setHardness(3.0F).setResistance(10.0F).setSoundType(SoundType.METAL).setTranslationKey("blockGold").setCreativeTab(CreativeTabs.BUILDING_BLOCKS));
+        registerBlock(41, "gold_block", (new BlockFx(Material.IRON, MapColor.GOLD)).setHardness(3.0F).setResistance(10.0F).setSoundType(SoundType.METAL).setTranslationKey("blockGold").setCreativeTab(CreativeTabs.BUILDING_BLOCKS));
         //used fs
-        registerBlock(42, "iron_block", (new BlockFs(Material.IRON, MapColor.IRON)).setHardness(5.0F).setResistance(10.0F).setSoundType(SoundType.METAL).setTranslationKey("blockIron").setCreativeTab(CreativeTabs.BUILDING_BLOCKS));
+        registerBlock(42, "iron_block", (new BlockFx(Material.IRON, MapColor.IRON)).setHardness(5.0F).setResistance(10.0F).setSoundType(SoundType.METAL).setTranslationKey("blockIron").setCreativeTab(CreativeTabs.BUILDING_BLOCKS));
         //used fs
         registerBlock(43, "double_stone_slab", (new BlockDoubleStoneSlab()).setHardness(2.0F).setResistance(10.0F).setSoundType(SoundType.STONE).setTranslationKey("stoneSlab"));
         //used fs
         registerBlock(44, "stone_slab", (new BlockHalfStoneSlab()).setHardness(2.0F).setResistance(10.0F).setSoundType(SoundType.STONE).setTranslationKey("stoneSlab"));
         //used fs
-        Block block5 = (new BlockFs(Material.ROCK, MapColor.RED)).setHardness(2.0F).setResistance(10.0F).setSoundType(SoundType.STONE).setTranslationKey("brick").setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
+        Block block5 = (new BlockFx(Material.ROCK, MapColor.RED)).setHardness(2.0F).setResistance(10.0F).setSoundType(SoundType.STONE).setTranslationKey("brick").setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
         registerBlock(45, "brick_block", block5);
         //used fs, custom options
         registerBlock(46, "tnt", (new BlockTNT()).setHardness(0.0F).setSoundType(SoundType.PLANT).setTranslationKey("tnt"));
         //used fs
         registerBlock(47, "bookshelf", (new BlockBookshelf()).setHardness(1.5F).setSoundType(SoundType.WOOD).setTranslationKey("bookshelf"));
         //used fs
-        registerBlock(48, "mossy_cobblestone", (new BlockFs(Material.ROCK)).setHardness(2.0F).setResistance(10.0F).setSoundType(SoundType.STONE).setTranslationKey("stoneMoss").setCreativeTab(CreativeTabs.BUILDING_BLOCKS));
+        registerBlock(48, "mossy_cobblestone", (new BlockFx(Material.ROCK)).setHardness(2.0F).setResistance(10.0F).setSoundType(SoundType.STONE).setTranslationKey("stoneMoss").setCreativeTab(CreativeTabs.BUILDING_BLOCKS));
         //used fs
         registerBlock(49, "obsidian", (new BlockObsidian()).setHardness(50.0F).setResistance(2000.0F).setSoundType(SoundType.STONE).setTranslationKey("obsidian"));
         //ignored fs, NULL AABB
@@ -2424,7 +2424,7 @@ public class Block extends net.minecraftforge.registries.IForgeRegistryEntry.Imp
         //used fs
         registerBlock(56, "diamond_ore", (new BlockOre()).setHardness(3.0F).setResistance(5.0F).setSoundType(SoundType.STONE).setTranslationKey("oreDiamond"));
         //used fs
-        registerBlock(57, "diamond_block", (new BlockFs(Material.IRON, MapColor.DIAMOND)).setHardness(5.0F).setResistance(10.0F).setSoundType(SoundType.METAL).setTranslationKey("blockDiamond").setCreativeTab(CreativeTabs.BUILDING_BLOCKS));
+        registerBlock(57, "diamond_block", (new BlockFx(Material.IRON, MapColor.DIAMOND)).setHardness(5.0F).setResistance(10.0F).setSoundType(SoundType.METAL).setTranslationKey("blockDiamond").setCreativeTab(CreativeTabs.BUILDING_BLOCKS));
         //used fs
         registerBlock(58, "crafting_table", (new BlockWorkbench()).setHardness(2.5F).setSoundType(SoundType.WOOD).setTranslationKey("workbench"));
         //ignored fs, NULL AABB
@@ -2556,7 +2556,7 @@ public class Block extends net.minecraftforge.registries.IForgeRegistryEntry.Imp
         //used fs
         registerBlock(120, "end_portal_frame", (new BlockEndPortalFrame()).setSoundType(SoundType.GLASS).setLightLevel(0.125F).setHardness(-1.0F).setTranslationKey("endPortalFrame").setResistance(6000000.0F).setCreativeTab(CreativeTabs.DECORATIONS));
         //used fs
-        registerBlock(121, "end_stone", (new BlockFs(Material.ROCK, MapColor.SAND)).setHardness(3.0F).setResistance(15.0F).setSoundType(SoundType.STONE).setTranslationKey("whiteStone").setCreativeTab(CreativeTabs.BUILDING_BLOCKS));
+        registerBlock(121, "end_stone", (new BlockFx(Material.ROCK, MapColor.SAND)).setHardness(3.0F).setResistance(15.0F).setSoundType(SoundType.STONE).setTranslationKey("whiteStone").setCreativeTab(CreativeTabs.BUILDING_BLOCKS));
         //todo
         registerBlock(122, "dragon_egg", (new BlockDragonEgg()).setHardness(3.0F).setResistance(15.0F).setSoundType(SoundType.STONE).setLightLevel(0.125F).setTranslationKey("dragonEgg"));
         //used fs
@@ -2580,7 +2580,7 @@ public class Block extends net.minecraftforge.registries.IForgeRegistryEntry.Imp
         //ignored fs, NULL AABB
         registerBlock(132, "tripwire", (new BlockTripWire()).setTranslationKey("tripWire"));
         //used fs
-        registerBlock(133, "emerald_block", (new BlockFs(Material.IRON, MapColor.EMERALD)).setHardness(5.0F).setResistance(10.0F).setSoundType(SoundType.METAL).setTranslationKey("blockEmerald").setCreativeTab(CreativeTabs.BUILDING_BLOCKS));
+        registerBlock(133, "emerald_block", (new BlockFx(Material.IRON, MapColor.EMERALD)).setHardness(5.0F).setResistance(10.0F).setSoundType(SoundType.METAL).setTranslationKey("blockEmerald").setCreativeTab(CreativeTabs.BUILDING_BLOCKS));
         //used fs
         registerBlock(134, "spruce_stairs", (new BlockStairs(block1.getDefaultState().withProperty(BlockPlanks.VARIANT, BlockPlanks.EnumType.SPRUCE))).setTranslationKey("stairsWoodSpruce"));
         //used fs
@@ -2661,7 +2661,7 @@ public class Block extends net.minecraftforge.registries.IForgeRegistryEntry.Imp
         //used fs
         registerBlock(172, "hardened_clay", (new BlockHardenedClay()).setHardness(1.25F).setResistance(7.0F).setSoundType(SoundType.STONE).setTranslationKey("clayHardened"));
         //used fs
-        registerBlock(173, "coal_block", (new BlockFs(Material.ROCK, MapColor.BLACK)).setHardness(5.0F).setResistance(10.0F).setSoundType(SoundType.STONE).setTranslationKey("blockCoal").setCreativeTab(CreativeTabs.BUILDING_BLOCKS));
+        registerBlock(173, "coal_block", (new BlockFx(Material.ROCK, MapColor.BLACK)).setHardness(5.0F).setResistance(10.0F).setSoundType(SoundType.STONE).setTranslationKey("blockCoal").setCreativeTab(CreativeTabs.BUILDING_BLOCKS));
         //used fs
         registerBlock(174, "packed_ice", (new BlockPackedIce()).setHardness(0.5F).setSoundType(SoundType.GLASS).setTranslationKey("icePacked"));
         //ignored fs, NULL AABB
@@ -2716,7 +2716,7 @@ public class Block extends net.minecraftforge.registries.IForgeRegistryEntry.Imp
         //todo
         registerBlock(200, "chorus_flower", (new BlockChorusFlower()).setHardness(0.4F).setSoundType(SoundType.WOOD).setTranslationKey("chorusFlower"));
         //used fs
-        Block block13 = (new BlockFs(Material.ROCK, MapColor.MAGENTA)).setHardness(1.5F).setResistance(10.0F).setSoundType(SoundType.STONE).setCreativeTab(CreativeTabs.BUILDING_BLOCKS).setTranslationKey("purpurBlock");
+        Block block13 = (new BlockFx(Material.ROCK, MapColor.MAGENTA)).setHardness(1.5F).setResistance(10.0F).setSoundType(SoundType.STONE).setCreativeTab(CreativeTabs.BUILDING_BLOCKS).setTranslationKey("purpurBlock");
         registerBlock(201, "purpur_block", block13);
         //used fs
         registerBlock(202, "purpur_pillar", (new BlockRotatedPillarFs(Material.ROCK, MapColor.MAGENTA)).setHardness(1.5F).setResistance(10.0F).setSoundType(SoundType.STONE).setCreativeTab(CreativeTabs.BUILDING_BLOCKS).setTranslationKey("purpurPillar"));
@@ -2727,7 +2727,7 @@ public class Block extends net.minecraftforge.registries.IForgeRegistryEntry.Imp
         //used fs
         registerBlock(205, "purpur_slab", (new BlockPurpurSlab.Half()).setHardness(2.0F).setResistance(10.0F).setSoundType(SoundType.STONE).setTranslationKey("purpurSlab"));
         //used fs
-        registerBlock(206, "end_bricks", (new BlockFs(Material.ROCK, MapColor.SAND)).setSoundType(SoundType.STONE).setHardness(0.8F).setCreativeTab(CreativeTabs.BUILDING_BLOCKS).setTranslationKey("endBricks"));
+        registerBlock(206, "end_bricks", (new BlockFx(Material.ROCK, MapColor.SAND)).setSoundType(SoundType.STONE).setHardness(0.8F).setCreativeTab(CreativeTabs.BUILDING_BLOCKS).setTranslationKey("endBricks"));
         //ignored fs, NULL AABB
         registerBlock(207, "beetroots", (new BlockBeetroot()).setTranslationKey("beetroots"));
         //used fs
@@ -2744,7 +2744,7 @@ public class Block extends net.minecraftforge.registries.IForgeRegistryEntry.Imp
         //used fs
         registerBlock(213, "magma", (new BlockMagma()).setHardness(0.5F).setSoundType(SoundType.STONE).setTranslationKey("magma"));
         //used fs
-        registerBlock(214, "nether_wart_block", (new BlockFs(Material.GRASS, MapColor.RED)).setCreativeTab(CreativeTabs.BUILDING_BLOCKS).setHardness(1.0F).setSoundType(SoundType.WOOD).setTranslationKey("netherWartBlock"));
+        registerBlock(214, "nether_wart_block", (new BlockFx(Material.GRASS, MapColor.RED)).setCreativeTab(CreativeTabs.BUILDING_BLOCKS).setHardness(1.0F).setSoundType(SoundType.WOOD).setTranslationKey("netherWartBlock"));
         //used fs
         registerBlock(215, "red_nether_brick", (new BlockNetherBrick()).setHardness(2.0F).setResistance(10.0F).setSoundType(SoundType.STONE).setTranslationKey("redNetherBrick").setCreativeTab(CreativeTabs.BUILDING_BLOCKS));
         //used fs

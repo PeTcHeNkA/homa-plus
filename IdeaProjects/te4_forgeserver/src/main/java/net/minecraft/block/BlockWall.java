@@ -62,9 +62,8 @@ public class BlockWall extends Block {
 
 
     @Override
-    public void addCollisionBoxToListF(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> collidingBoxes) {
-        state = this.getActualState(state, worldIn, pos);
-        addCollisionBoxToListFs(pos, entityBox, collidingBoxes, CLIP_AABB_BY_INDEX[getAABBIndex(state)]);
+    public void addCollisionBoxToListF(IBlockState state, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> collidingBoxes) {
+        addCollisionBoxToListFs(pos, entityBox, collidingBoxes, CLIP_AABB_BY_INDEX[getAABBIndex(getActualState(state, access, pos))]);
     }
 
 

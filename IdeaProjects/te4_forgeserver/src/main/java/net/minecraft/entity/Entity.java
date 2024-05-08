@@ -1672,8 +1672,8 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
             for (int i = 0, px = 0, py = -999999, pz = 0; i < 8; ++i) {
                 int y = MathHelper.floor(this.posY +  (( ((i) & 1) - 0.5F) * 0.1F) + yeeH);
-                int x = MathHelper.floor(this.posX +  (( ((i >> 1) & 1) - 0.5F) * w08));
-                int z = MathHelper.floor(this.posZ +  (( ((i >> 2) & 1) - 0.5F) * w08));
+                int x = MathHelper.floor(this.posX +  (( ((i >> 1) & 1)    - 0.5F) * w08));
+                int z = MathHelper.floor(this.posZ +  (( ((i >> 2) & 1)    - 0.5F) * w08));
 
                 if (px != x || py != y || pz != z)
                     if (access.getBlockState(px = x, py = y, pz = z).causesSuffocation()) return true;

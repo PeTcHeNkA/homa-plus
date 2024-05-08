@@ -27,7 +27,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.utls.collections.ArrayListE6;
-import static net.minecraft.block.BlockFs.addCollisionBoxToListFs;
+import static net.minecraft.block.BlockFs.addCollisionBoxToListFx;
 
 
 public class BlockFence extends Block {
@@ -81,26 +81,22 @@ public class BlockFence extends Block {
 
 
     @Override
-    public void addCollisionBoxToListF(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> collidingBoxes) {
-        state = state.getActualState(worldIn, pos);
+    public void addCollisionBoxToListF(IBlockState state, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> collidingBoxes) {
+        state = state.getActualState(access, pos);
 
-        addCollisionBoxToListFs(pos, entityBox, collidingBoxes, PILLAR_AABB);
+        addCollisionBoxToListFx(pos, entityBox, collidingBoxes, PILLAR_AABB);
 
-        if (state.getValue(NORTH)) {
-            addCollisionBoxToListFs(pos, entityBox, collidingBoxes, NORTH_AABB);
-        }
+        if (state.getValue(NORTH))
+            addCollisionBoxToListFx(pos, entityBox, collidingBoxes, NORTH_AABB);
 
-        if (state.getValue(EAST)) {
-            addCollisionBoxToListFs(pos, entityBox, collidingBoxes, EAST_AABB);
-        }
+        if (state.getValue(EAST))
+            addCollisionBoxToListFx(pos, entityBox, collidingBoxes, EAST_AABB);
 
-        if (state.getValue(SOUTH)) {
-            addCollisionBoxToListFs(pos, entityBox, collidingBoxes, SOUTH_AABB);
-        }
+        if (state.getValue(SOUTH))
+            addCollisionBoxToListFx(pos, entityBox, collidingBoxes, SOUTH_AABB);
 
-        if (state.getValue(WEST)) {
-            addCollisionBoxToListFs(pos, entityBox, collidingBoxes, WEST_AABB);
-        }
+        if (state.getValue(WEST))
+            addCollisionBoxToListFx(pos, entityBox, collidingBoxes, WEST_AABB);
     }
 
 

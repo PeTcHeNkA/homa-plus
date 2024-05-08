@@ -5,6 +5,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import plus.fserver.utls.collections.ArrayListE6;
 import javax.annotation.Nullable;
@@ -21,8 +22,8 @@ public class BlockFs extends Block{
 
 
     @Override
-    public void addCollisionBoxToListF(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> collidingBoxes) {
-        addCollisionBoxToListFs(pos, entityBox, collidingBoxes, state.getCollisionBoundingBox(worldIn, pos));
+    public void addCollisionBoxToListF(IBlockState state, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> list) {
+        addCollisionBoxToListFs(pos, entityBox, list, state.getCollisionBoundingBox(access, pos));
     }
 
 
@@ -35,5 +36,13 @@ public class BlockFs extends Block{
 
             if (entityBox.intersects(src)) list.addF(src);
         }
+    }
+
+
+    public static void addCollisionBoxToListFx(BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> list, @Nullable AxisAlignedBB blockBox) {
+        AxisAlignedBB src = list.getSafe(list.sizeC());
+        if (src != null) blockBox.offsetTo(pos, src);
+        else src = blockBox.offset(pos);
+        if (entityBox.intersects(src)) list.addF(src);
     }
 }

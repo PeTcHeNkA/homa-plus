@@ -24,9 +24,10 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.utls.collections.ArrayListE6;
+import static net.minecraft.block.BlockFs.addCollisionBoxToListFx;
 
 
-public class BlockPane extends BlockFs {
+public class BlockPane extends Block {
     public static final PropertyBool NORTH = PropertyBool.create("north");
     public static final PropertyBool EAST = PropertyBool.create("east");
     public static final PropertyBool SOUTH = PropertyBool.create("south");
@@ -87,26 +88,22 @@ public class BlockPane extends BlockFs {
 
 
     @Override
-    public void addCollisionBoxToListF(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> collidingBoxes) {
-        state = this.getActualState(state, worldIn, pos);
+    public void addCollisionBoxToListF(IBlockState state, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> list) {
+        state = this.getActualState(state, access, pos);
 
-        addCollisionBoxToListFs(pos, entityBox, collidingBoxes, AABB_BY_INDEX[0]);
+        addCollisionBoxToListFx(pos, entityBox, list, AABB_BY_INDEX[0]);
 
-        if (state.getValue(NORTH)) {
-            addCollisionBoxToListFs(pos, entityBox, collidingBoxes, AABB_BY_INDEX[getBoundingBoxIndex(EnumFacing.NORTH)]);
-        }
+        if (state.getValue(NORTH))
+            addCollisionBoxToListFx(pos, entityBox, list, AABB_BY_INDEX[getBoundingBoxIndex(EnumFacing.NORTH)]);
 
-        if (state.getValue(SOUTH)) {
-            addCollisionBoxToListFs(pos, entityBox, collidingBoxes, AABB_BY_INDEX[getBoundingBoxIndex(EnumFacing.SOUTH)]);
-        }
+        if (state.getValue(SOUTH))
+            addCollisionBoxToListFx(pos, entityBox, list, AABB_BY_INDEX[getBoundingBoxIndex(EnumFacing.SOUTH)]);
 
-        if (state.getValue(EAST)) {
-            addCollisionBoxToListFs(pos, entityBox, collidingBoxes, AABB_BY_INDEX[getBoundingBoxIndex(EnumFacing.EAST)]);
-        }
+        if (state.getValue(EAST))
+            addCollisionBoxToListFx(pos, entityBox, list, AABB_BY_INDEX[getBoundingBoxIndex(EnumFacing.EAST)]);
 
-        if (state.getValue(WEST)) {
-            addCollisionBoxToListFs(pos, entityBox, collidingBoxes, AABB_BY_INDEX[getBoundingBoxIndex(EnumFacing.WEST)]);
-        }
+        if (state.getValue(WEST))
+            addCollisionBoxToListFx(pos, entityBox, list, AABB_BY_INDEX[getBoundingBoxIndex(EnumFacing.WEST)]);
     }
 
 
