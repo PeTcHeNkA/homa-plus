@@ -81,9 +81,7 @@ public class PlayerChunkMap {
         if (!this.dirtyEntries.isEmpty()) {
             Set<PlayerChunkMapEntry> old = dirtyEntries;
             dirtyEntries = new Te4HashSet<>();
-            for (PlayerChunkMapEntry entry:old){
-                entry.update();
-            }
+            for (PlayerChunkMapEntry entry:old) entry.update();
         }
 
         if (this.sortMissingChunks && i % 4L == 0L) {

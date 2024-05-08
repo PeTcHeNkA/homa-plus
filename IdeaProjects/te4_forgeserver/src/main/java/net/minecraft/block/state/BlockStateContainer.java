@@ -230,8 +230,8 @@ public class BlockStateContainer {
 
 
         @Override
-        public boolean equals(Object p_equals_1_) {
-            return this == p_equals_1_;
+        public boolean equals(Object obj) {
+            return this == obj;
         }
 
 

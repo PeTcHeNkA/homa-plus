@@ -150,6 +150,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     final SyncListCache<AxisAlignedBB> bbCache;
     final SyncListCache<Entity> eeCache;
     protected IBlockEAccess     effectiveAcces;
+    public final ChunkSelector localSelector;
 
     protected World(ISaveHandler saveHandlerIn, WorldInfo info, WorldProvider providerIn, Profiler profilerIn, boolean client) {
         this(null, saveHandlerIn, info, providerIn, profilerIn, client);
@@ -177,7 +178,13 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             eeCache = null;
             bbCache = null;
         }
+        localSelector = initSelector();
         effectiveAcces = this;
+    }
+
+
+    protected ChunkSelector initSelector(){
+        return null;
     }
 
 

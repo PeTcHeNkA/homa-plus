@@ -211,10 +211,9 @@ public class PlayerChunkMapEntry extends ArrayListE6<EntityPlayerMP> implements 
                     int cY =  this.changedBlocks[0] & 255;
                     int cZ = (this.changedBlocks[0] >> 8 & 15) + (posZ << 4);
 
-                    BlockPos blockpos = new BlockPos(cX, cY, cZ);
-
-                    IBlockState state = this.playerChunkMap.getWorldServer().localSelector.getBlockState(blockpos);
-                    this.sendPacket(new SPacketBlockChange(state, blockpos));
+                    IBlockState state = chunk.getBlockStateUnchecked(cX, cY, cZ);
+                    BlockPos blockpos;
+                    this.sendPacket(new SPacketBlockChange(state, blockpos = new BlockPos(cX, cY, cZ)));
 
                     if (state.hasTile()) {
                         this.sendBlockEntity(this.playerChunkMap.getWorldServer().getTileEntity(blockpos));
@@ -236,7 +235,7 @@ public class PlayerChunkMapEntry extends ArrayListE6<EntityPlayerMP> implements 
                         int cY = this.changedBlocks[l] & 255;
                         int cZ = (this.changedBlocks[l] >> 8 & 15) + posZ << 4;
 
-                        IBlockState state = this.playerChunkMap.getWorldServer().localSelector.getBlockState(cX, cY, cZ);
+                        IBlockState state = chunk.getBlockStateUnchecked(cX, cY, cZ);
 
                         if (state.hasTile()) {
                             this.sendBlockEntity(this.playerChunkMap.getWorldServer().getTileEntity(pos.setPos(cX, cY, cZ)));

@@ -26,6 +26,11 @@ import plus.fserver.utls.collections.LeavesCache;
 public abstract class BlockLeaves extends BlockFs implements net.minecraftforge.common.IShearable {
     public static final PropertyBool DECAYABLE = PropertyBool.create("decayable");
     public static final PropertyBool CHECK_DECAY = PropertyBool.create("check_decay");
+//    private static final int[][] updates = new int[][]{
+//            {-1,-1,-1}, {-1,-1,-0}, {-1,-1,1}, {0,-1,-1}, {0,-1,0}, {0,-1,1}, {1,-1,-1}, {1,-1,0}, {1,-1,-1},
+//            {-1, 0,-1}, {-1, 0,-0}, {-1, 0,1}, {0, 0,-1},           {0,-1,1}, {1,-1,-1}, {1,-1,0}, {1,-1,-1},
+//            {-1, 1,-1}, {-1, 1,-0}, {-1, 1,1}, {0, 1,-1}, {0, 1,0}, {0,-1,1}, {1,-1,-1}, {1,-1,0}, {1,-1,-1}
+//    };
     protected boolean leavesFancy;
 
     public BlockLeaves() {
@@ -40,20 +45,17 @@ public abstract class BlockLeaves extends BlockFs implements net.minecraftforge.
 
     @Override
     public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
-        int k = pos.getX();
-        int l = pos.getY();
-        int i1 = pos.getZ();
+        int k = pos.getX(), l = pos.getY(), i1 = pos.getZ();
 
-        if (worldIn.isAreaLoaded(new BlockPos(k - 2, l - 2, i1 - 2), new BlockPos(k + 2, l + 2, i1 + 2))) {
-            for (int j1 = -1; j1 <= 1; ++j1) {
-                for (int k1 = -1; k1 <= 1; ++k1) {
-                    for (int l1 = -1; l1 <= 1; ++l1) {
-                        BlockPos blockpos = pos.add(j1, k1, l1);
-                        IBlockState iblockstate = worldIn.getBlockState(blockpos);
-
-                        if (iblockstate.getBlock().isLeaves(iblockstate, worldIn, blockpos)) {
-                            iblockstate.getBlock().beginLeavesDecay(iblockstate, worldIn, blockpos);
-                        }
+        IBlockAccess access = worldIn.access();
+        BlockPos.MutableBlockPos temp = worldIn.localTempPos;
+        if (worldIn.isAreaLoaded(k - 2, l - 2, i1 - 2, k + 2, l + 2, i1 + 2, true)) {
+            int dx, dy, dz;
+            for (dx = -1; dx <= 1; ++dx) {
+                for (dz = -1; dz <= 1; ++dz) {
+                    for (dy = -1; dy <= 1; ++dy) {
+                        IBlockState state1 = access.getBlockState(temp.setPos(pos.getX()+dx, pos.getY()+dy, pos.getZ()+dz));
+                        if (state1.getBlock().isLeaves(state1, worldIn, temp)) state1.getBlock().beginLeavesDecay(state1, worldIn, temp);
                     }
                 }
             }
@@ -204,10 +206,10 @@ public abstract class BlockLeaves extends BlockFs implements net.minecraftforge.
 
     @Override
     public boolean isShearable(ItemStack item, IBlockAccess world, BlockPos pos){ return true; }
-
-
-    @Override
-    public boolean isLeaves(IBlockState state, IBlockAccess world, BlockPos pos){ return true; }
+//
+//
+//    @Override
+//    public boolean isLeaves(IBlockState state, IBlockAccess world, BlockPos pos){ return true; }
 
 
     @Override

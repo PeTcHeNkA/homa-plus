@@ -118,7 +118,7 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
 
     private final ConcurrentHashMap<TQueuedChunk, TChunkTask> _chunkTasks = new ConcurrentHashMap<>();
     private final ConcurrentLinkedQueue<Runnable> _syncTasks = new ConcurrentLinkedQueue<>();
-    public final ChunkSelector localSelector;
+
     private ChunkProviderServer chunkProviderServer;
 
     public WorldServer(MinecraftServer server, ISaveHandler saveHandlerIn, WorldInfo info, int dimensionId, Profiler profilerIn) {
@@ -142,7 +142,12 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
 
         DimensionManager.setWorld(dimensionId, this, server);
 
-        effectiveAcces = localSelector = new ChunkSelector(this);
+        effectiveAcces = localSelector;
+    }
+
+
+    protected ChunkSelector initSelector(){
+        return new ChunkSelector(this);
     }
 
 
@@ -228,7 +233,7 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
         for (EntityPlayer entityplayer : this.playerEntities.stream().filter(EntityPlayer::isPlayerSleeping).collect(Collectors.toList())) {
             entityplayer.wakeUpPlayer(false, false, true);
         }
-        if (this.getGameRules().getBoolean("doWeatherCycle")) {
+        if (this.getGameRules().doWeatherCycle.getBoolean()) {
             this.resetRainAndThunder();
         }
     }
@@ -610,7 +615,7 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
         } else if (this.worldInfo.getTerrainType() == WorldType.DEBUG_ALL_BLOCK_STATES) {
             this.worldInfo.setSpawn(BlockPos.ORIGIN.up());
         } else {
-            net.minecraftforge.event.ForgeEventFactory.onCreateWorldSpawn(this, settings);
+           ForgeEventFactory.onCreateWorldSpawn(this, settings);
         }
     }
 
@@ -715,12 +720,11 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
         super.onEntityAdded(entityIn);
         this.entitiesById.addKey(entityIn.getEntityId(), entityIn);
         this.entitiesByUuid.put(entityIn.getUniqueID(), entityIn);
+
         Entity[] aentity = entityIn.getParts();
-        if (aentity != null) {
-            for (Entity entity : aentity) {
-                this.entitiesById.addKey(entity.getEntityId(), entity);
-            }
-        }
+
+        if (aentity != null) for (Entity entity : aentity)
+            this.entitiesById.addKey(entity.getEntityId(), entity);
     }
 
 
@@ -731,11 +735,8 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
         this.entitiesByUuid.remove(entityIn.getUniqueID());
         Entity[] aentity = entityIn.getParts();
 
-        if (aentity != null) {
-            for (Entity entity : aentity) {
-                this.entitiesById.removeObject(entity.getEntityId());
-            }
-        }
+        if (aentity != null) for (Entity entity : aentity)
+            this.entitiesById.removeObject(entity.getEntityId());
     }
 
 
@@ -793,11 +794,8 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
     @Override
     public void addBlockEvent(BlockPos pos, Block blockIn, int eventID, int eventParam) {
         BlockEventData blockeventdata = new BlockEventData(pos, blockIn, eventID, eventParam);
-        for (BlockEventData eventData : this.blockEventQueue[this.blockEventCacheIndex]) {
-            if (eventData.equals(blockeventdata)) {
-                return;
-            }
-        }
+        for (BlockEventData eventData : this.blockEventQueue[this.blockEventCacheIndex])
+            if (eventData.equals(blockeventdata)) return;
         this.blockEventQueue[this.blockEventCacheIndex].add(blockeventdata);
     }
 
@@ -1420,36 +1418,34 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
 
 
     @Override
-    public final boolean isBlockNormalCube(@NotNull BlockPos pos, boolean _default) {
-        if (pos.getY()<0||pos.getY()>255) {
+    public final boolean isBlockNormalCube(@NotNull BlockPos pos, boolean def) {
+        if (pos.getY() < 0|| pos.getY() > 255) {
             return false;
         } else {
             Chunk chunk1 = localSelector.getLoadedE(pos.getX() >> 4, pos.getZ() >> 4);
             if (chunk1 != null && !chunk1.isEmpty()) {
-                IBlockState state = chunk1.getBlockState(pos);
+                IBlockState state = chunk1.getBlockStateUnchecked(pos.getX(), pos.getY(), pos.getZ());
                 return state.getBlock().isNormalCube(state, localSelector, pos);
             }
-            return _default;
+            return def;
         }
     }
 
 
     @Override
-    public final boolean isSideSolid(BlockPos pos, @NotNull EnumFacing side, boolean _default) {
-        if (pos.getY() < 0 || pos.getY() >= 256) return _default;
+    public final boolean isSideSolid(BlockPos pos, @NotNull EnumFacing side, boolean def) {
+        if (pos.getY() < 0 || pos.getY() >= 256) return def;
         Chunk chunk = localSelector.getChunk(pos);
-        if (chunk.isEmpty()) return _default;
-        return localSelector.getCurState(pos).isSideSolid(localSelector, pos, side);
+        if (chunk.isEmpty()) return def;
+        return chunk.getBlockStateUnchecked(pos.getX(), pos.getY(), pos.getZ()).isSideSolid(localSelector, pos, side);
     }
 
 
     @Override
     public int getLight(BlockPos pos, boolean checkNeighbors){
-        if (pos.getX() >= -30000000 && pos.getZ() >= -30000000 && pos.getX() < 30000000 && pos.getZ() < 30000000){
+        if (pos.getX() >= -30000000 && pos.getZ() >= -30000000 && pos.getX() < 30000000 && pos.getZ() < 30000000)
             return getLight0(pos, checkNeighbors);
-        } else {
-            return 15;
-        }
+        else return 15;
     }
 
 
@@ -1499,22 +1495,19 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
 
         BlockPos.MutableBlockPos pos = tempPooledLocalPos;
         IBlockState state;
-        for (int xPos = MathHelper.floor(bb.minX); xPos < maxX; ++xPos) {
+        for (int xPos = MathHelper.floor(bb.minX); xPos < maxX; ++xPos)
             for (int yPos = minY; yPos < maxY; ++yPos) {
                 for (int zPos = minZ; zPos < maxZ; ++zPos) {
 
-                    state = localSelector.getState(pos.setPos(xPos, yPos, zPos));
-                    Boolean result = state.getBlock().isAABBInsideMaterial(this, pos, bb, materialIn);
+                    state = localSelector.getStateUnchecked(xPos, yPos, zPos);
+                    Boolean result = state.getBlock().isAABBInsideMaterial(this, pos.setPos(xPos, yPos, zPos), bb, materialIn);
                     if (result != null) {
                         if (!result) continue;
                         return true;
                     }
-                    if (state.getMaterial() == materialIn) {
-                        return true;
-                    }
+                    if (state.getMaterial() == materialIn) return true;
                 }
             }
-        }
         return false;
     }
 
@@ -1532,16 +1525,12 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
 
     @Override
     public boolean handleMaterialAcceleration(AxisAlignedBB bb, Material materialIn, Entity entityIn) {
-        int minY = MathHelper.floor(bb.minY);
-        int maxY = MathHelper.ceil(bb.maxY);
-        if(minY < 0 || maxY > 255)return false;
+        int yPos, maxY;
+        if((yPos = MathHelper.floor(bb.minY)) < 0 || (maxY = MathHelper.ceil(bb.maxY)) > 255)return false;
 
-        int minX = MathHelper.floor(bb.minX);
-        int maxX = MathHelper.ceil(bb.maxX);
-        int minZ = MathHelper.floor(bb.minZ);
-        int maxZ = MathHelper.ceil(bb.maxZ);
+        int xPos, maxX, zPos, maxZ;
 
-        if (!this.isAreaLoaded0(minX, minZ, maxX, maxZ)) {
+        if (!this.isAreaLoaded0(xPos = MathHelper.floor(bb.minX), zPos = MathHelper.floor(bb.minZ), maxX = MathHelper.ceil(bb.maxX), maxZ = MathHelper.ceil(bb.maxZ))) {
             return false;
         } else {
             boolean flag = false;
@@ -1550,14 +1539,12 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
             Block block;
             Boolean result;
 
-            final BlockPos.MutableBlockPos acc = tempPooledLocalPos;
+            for (final BlockPos.MutableBlockPos acc = tempPooledLocalPos; xPos < maxX; ++xPos) {
+                for (; zPos < maxZ; ++zPos) {
+                    for (; yPos < maxY; ++yPos) {
+                        block = (state = localSelector.getStateUnchecked(xPos, yPos, zPos)).getBlock();
 
-            for (int l3 = minX; l3 < maxX; ++l3) {
-                for (int i4 = minY; i4 < maxY; ++i4) {
-                    for (int j4 = minZ; j4 < maxZ; ++j4) {
-                        block = (state = localSelector.getState(acc.setPos(l3, i4, j4))).getBlock();
-
-                        result = block.isEntityInsideMaterial(this, acc, state, entityIn, maxY, materialIn, false);
+                        result = block.isEntityInsideMaterial(this, acc.setPos(xPos, yPos, zPos), state, entityIn, maxY, materialIn, false);
                         if (result != null && result) {
                             // Forge: When requested call blocks modifyAcceleration method,
                             // and more importantly cause this method to return true,
@@ -1568,7 +1555,7 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
                         } else if (result != null && !result) continue;
 
                         if (state.getMaterial() == materialIn) {
-                            double d0 = (float)(i4 + 1) - BlockLiquid.getLiquidHeightPercent(state.getValue(BlockLiquid.LEVEL));
+                            double d0 = (float)(yPos + 1) - BlockLiquid.getLiquidHeightPercent(state.getValue(BlockLiquid.LEVEL));
 
                             if ((double)maxY >= d0) {
                                 flag = true;
@@ -1592,38 +1579,30 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
 
     @Override
     public boolean isFlammableWithin(AxisAlignedBB bb) {
-        int minY = MathHelper.floor(bb.minY),
-            maxY = MathHelper.ceil(bb.maxY);
+        int yPos, maxY;
+        if((yPos = MathHelper.floor(bb.minY)) < 0 || (maxY = MathHelper.ceil(bb.maxY)) > 255)return false;
 
-        if(minY < 0 || maxY > 255)return false;
+        int xPos, maxX, zPos, maxZ;
 
-        int minX = MathHelper.floor(bb.minX),
-            maxX = MathHelper.ceil(bb.maxX),
-            minZ = MathHelper.floor(bb.minZ),
-            maxZ = MathHelper.ceil(bb.maxZ);
-
-        if (this.isAreaLoaded0(minX, minZ, maxX, maxZ)) {
-            Block block;
-            for (int l3 = minX; l3 < maxX; ++l3) {
-                for (int i4 = minY; i4 < maxY; ++i4) {
-                    for (int j4 = minZ; j4 < maxZ; ++j4) {
-                        block = localSelector.getStateUnchecked(l3, i4, j4).getBlock();
+        if (this.isAreaLoaded0((xPos = MathHelper.floor(bb.minX)), (zPos = MathHelper.floor(bb.minZ)), (maxX = MathHelper.ceil(bb.maxX)),
+                (maxZ = MathHelper.ceil(bb.maxZ))))
+            for (Block block; xPos < maxX; ++xPos)
+                for (; zPos < maxZ; ++zPos)
+                    for (; yPos < maxY; ++yPos) {
+                        block = localSelector.getStateUnchecked(xPos, yPos, zPos).getBlock();
                         if (block == Blocks.FIRE || block == Blocks.FLOWING_LAVA || block == Blocks.LAVA)
                             return true;
-                        else if (block.isBurning(this, tempPooledLocalPos.setPos(l3, i4, j4)))
+                        else if (block.isBurning(this, tempPooledLocalPos.setPos(xPos, yPos, zPos)))
                             return true;
                     }
-                }
-            }
-        }
         return false;
     }
 
 
     @Override
     public boolean isBlockFullCube(BlockPos pos) {
-        if(pos.getY()<0 || pos.getY()>255)return false;
-        AxisAlignedBB axisalignedbb = localSelector.getState(pos).getCollisionBoundingBox(this, pos);
+        if(pos.getY() < 0 || pos.getY() > 255)return false;
+        AxisAlignedBB axisalignedbb = localSelector.getStateUnchecked(pos.getX(), pos.getY(), pos.getZ()).getCollisionBoundingBox(this, pos);
         return axisalignedbb != Block.NULL_AABB && axisalignedbb.getAverageEdgeLength() >= 1.0D;
     }
 
@@ -1631,19 +1610,16 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
     @Override
     protected <T extends Entity> void getEntitiesWithinAABB0(List<T> list, Class <? extends T > clazz,
                                                                 AxisAlignedBB aabb, @Nullable Predicate<? super T > filter) {
-        int k2 = MathHelper.ceil(aabb.maxX + MAX_ENTITY_RADIUS)>>4;
-        int l2 = MathHelper.floor(aabb.minZ - MAX_ENTITY_RADIUS)>>4;
-        int i3 = MathHelper.ceil(aabb.maxZ + MAX_ENTITY_RADIUS)>>4;
+        int maxX = MathHelper.ceil(aabb.maxX + MAX_ENTITY_RADIUS)>>4;
+        int minZ = MathHelper.floor(aabb.minZ - MAX_ENTITY_RADIUS)>>4;
+        int maxZ = MathHelper.ceil(aabb.maxZ + MAX_ENTITY_RADIUS)>>4;
 
         Chunk chunk;
 
-        for (int xPos = MathHelper.floor(aabb.minX - MAX_ENTITY_RADIUS)>>4; xPos < k2; ++xPos) {
-            for (int zPos = l2; zPos < i3; ++zPos) {
-                if ((chunk = chunkProviderServer.getLoadedChunk(xPos, zPos)) != null) {
+        for (int xPos = MathHelper.floor(aabb.minX - MAX_ENTITY_RADIUS)>>4; xPos < maxX; ++xPos)
+            for (int zPos = minZ; zPos < maxZ; ++zPos)
+                if ((chunk = chunkProviderServer.getLoadedChunk(xPos, zPos)) != null)
                     chunk.getEntitiesOfTypeWithinAABB(clazz, aabb, list, filter);
-                }
-            }
-        }
     }
 
 
@@ -1655,13 +1631,10 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
 
         Chunk chunk;
 
-        for (int xPos = MathHelper.floor(boundingBox.minX - MAX_ENTITY_RADIUS)>>4; xPos <= k2; ++xPos) {
-            for (int zPos = l2; zPos <= i3; ++zPos) {
-                if ((chunk = localSelector.getLoadedE(xPos, zPos)) != null) {
+        for (int xPos = MathHelper.floor(boundingBox.minX - MAX_ENTITY_RADIUS)>>4; xPos <= k2; ++xPos)
+            for (int zPos = l2; zPos <= i3; ++zPos)
+                if ((chunk = localSelector.getLoadedE(xPos, zPos)) != null)
                     chunk.getEntitiesWithinAABBForEntity(entityIn, boundingBox, list, predicate);
-                }
-            }
-        }
     }
 
 
@@ -1692,32 +1665,36 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
         int minX = MathHelper.floor(aabb.minX) - 1;
         int maxX = MathHelper.ceil(aabb.maxX) + 1;
         int minY = MathHelper.floor(aabb.minY) - 1;
+        if (minY < 0)minY = 0;
         int maxY = MathHelper.ceil(aabb.maxY) + 1;
+        if (maxY > 255)maxY = 255;
         int minZ = MathHelper.floor(aabb.minZ) - 1;
         int maxZ = MathHelper.ceil(aabb.maxZ) + 1;
 
         WorldBorder worldborder = this.getWorldBorder();
-        boolean flag = entityIn != null && entityIn.isOutsideBorder();
-        boolean flag1 = entityIn != null && this.isInsideWorldBorder(entityIn);
+        boolean flag = entityIn != null && entityIn.isOutsideBorder(),
+                flag1 = entityIn != null && this.isInsideWorldBorder(entityIn),
+                flag2, flag3;
         ChunkSelector selector = localSelector;
+        Chunk chunk;
+
         for (int xPos = minX; xPos < maxX; ++xPos)
             for (int zPos = minZ; zPos < maxZ; ++zPos) {
-                boolean flag2 = xPos == minX || xPos == maxX - 1;
-                boolean flag3 = zPos == minZ || zPos == maxZ - 1;
-                Chunk chunk;
+                flag2 = xPos == minX || xPos == maxX - 1;
+                flag3 = zPos == minZ || zPos == maxZ - 1;
 
                 if ((!flag2 || !flag3) && (chunk = selector.getLoadedE(xPos>>4, zPos>>4))!=null)
-                    for (int i2 = minY; i2 < maxY; ++i2)
-                        if (!flag2 && !flag3 || i2 != maxY - 1) {
+                    for (int yPos = minY; yPos < maxY; ++yPos)
+                        if (!flag2 && !flag3 || yPos != maxY - 1) {
                             if (fastCheck) {
                                 if (xPos < -30000000 || xPos >= 30000000 || zPos < -30000000 || zPos >= 30000000) return true;
 
                             } else if (entityIn != null && flag == flag1) entityIn.setOutsideBorder(!flag1);
 
                             ((!fastCheck && flag1 && !worldborder.contains(xPos, zPos))?
-                                    BlockIDIndexes.STONE_STATE : chunk.getBlockState(xPos, i2, zPos))
+                                    BlockIDIndexes.STONE_STATE : chunk.getBlockStateUnchecked(xPos, yPos, zPos))
 
-                                .addCollisionBoxToListF(selector, tempPooledLocalPos.setPos(xPos, i2, zPos), aabb, outList, entityIn, false);
+                                .addCollisionBoxToListF(selector, tempPooledLocalPos.setPos(xPos, yPos, zPos), aabb, outList, entityIn, false);
 
                             if (fastCheck)
                                 if(ElcaCV.ENABLE_COLLISION_EVENTS){
