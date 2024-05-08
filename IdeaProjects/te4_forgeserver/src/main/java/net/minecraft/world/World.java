@@ -41,6 +41,7 @@ import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
+import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.MapStorage;
@@ -98,7 +99,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public final List<Entity> weatherEffects = Lists.newArrayList();
     protected final IntHashMap<Entity> entitiesById = new IntHashMap<>();
     private final long cloudColour = 16777215L;
-    private int skylightSubtracted;
+    protected int skylightSubtracted;
     protected int updateLCG = (new Random()).nextInt();
     protected final int DIST_HASH_MAGIC = 1013904223;
     public float prevRainingStrength;
@@ -150,7 +151,10 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     final SyncListCache<AxisAlignedBB> bbCache;
     final SyncListCache<Entity> eeCache;
     protected IBlockEAccess     effectiveAcces;
+    //ONLY SERVER SIDE NOT NULL!
     public final ChunkSelector localSelector;
+    ChunkProviderServer chunkProviderServer;
+    //END UNSAFE
 
     protected World(ISaveHandler saveHandlerIn, WorldInfo info, WorldProvider providerIn, Profiler profilerIn, boolean client) {
         this(null, saveHandlerIn, info, providerIn, profilerIn, client);
@@ -280,11 +284,6 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
-    public boolean isAirBlock(BlockPos pos) {
-        return this.getBlockState(pos).getBlock().isAir(this.getBlockState(pos), this, pos);
-    }
-
-
     public boolean isBlockLoaded(BlockPos pos) {
         return this.isBlockLoaded(pos, true);
     }
@@ -292,11 +291,6 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
     public boolean isBlockLoaded(BlockPos pos, boolean allowEmpty) {
         return this.isChunkLoaded(pos.getX() >> 4, pos.getZ() >> 4, allowEmpty);
-    }
-
-
-    public boolean isAreaLoaded(BlockPos center, int radius) {
-        return this.isAreaLoaded(center, radius, true);
     }
 
 
@@ -487,16 +481,6 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
-    public void updateObservingBlocksAt(BlockPos pos, Block blockType) {
-        this.observedNeighborChanged(pos.west(),  blockType, pos);
-        this.observedNeighborChanged(pos.east(),  blockType, pos);
-        this.observedNeighborChanged(pos.down(),  blockType, pos);
-        this.observedNeighborChanged(pos.up(),    blockType, pos);
-        this.observedNeighborChanged(pos.north(), blockType, pos);
-        this.observedNeighborChanged(pos.south(), blockType, pos);
-    }
-
-
     //todo not optimal
     public void notifyNeighborsOfStateChange(BlockPos pos, Block blockType, boolean updateObservers) {
         if(ElcaCV.ENABLE_NEIGHBOR_NOTIFY_EVENT) {
@@ -559,30 +543,6 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             this.neighborChanged(
                     temp.setPos(pos.getX(),pos.getY(),pos.getZ()+1), blockType, pos
             );
-        }
-    }
-
-
-    public void neighborChanged(BlockPos pos, final Block blockIn, BlockPos fromPos) {
-        if (!this.isRemote) {
-            IBlockState iblockstate = this.getBlockState(pos);
-            try {
-                iblockstate.neighborChanged(this, pos, blockIn, fromPos);
-            } catch (Throwable throwable) {
-                CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Exception while updating neighbours");
-                CrashReportCategory crashreportcategory = crashreport.makeCategory("Block being updated");
-                crashreportcategory.addDetail("Source block type", new ICrashReportDetail<String>() {
-                    public String call() throws Exception {
-                        try {
-                            return String.format("ID #%d (%s // %s // %s)", Block.getIdFromBlock(blockIn), blockIn.getTranslationKey(), blockIn.getClass().getName(), blockIn.getRegistryName());
-                        } catch (Throwable var2) {
-                            return "ID #" + Block.getIdFromBlock(blockIn);
-                        }
-                    }
-                });
-                CrashReportCategory.addBlockInfo(crashreportcategory, pos, iblockstate);
-                throw new ReportedException(crashreport);
-            }
         }
     }
 
@@ -679,36 +639,6 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
     public int getLightFromNeighbors(BlockPos pos) {
         return this.getLight(pos, true);
-    }
-
-
-    public int getLight(BlockPos pos, boolean checkNeighbors) {
-        if (pos.getX() >= -30000000 && pos.getZ() >= -30000000 && pos.getX() < 30000000 && pos.getZ() < 30000000) {
-            if (checkNeighbors && this.getBlockState(pos).useNeighborBrightness()) {
-                int i1 = this.getLight(pos.up(), false);
-                int i = this.getLight(pos.east(), false);
-                int j = this.getLight(pos.west(), false);
-                int k = this.getLight(pos.south(), false);
-                int l = this.getLight(pos.north(), false);
-
-                if (i > i1) i1 = i;
-                if (j > i1) i1 = j;
-                if (k > i1) i1 = k;
-                if (l > i1) i1 = l;
-
-                return i1;
-            } else if (pos.getY() < 0) {
-                return 0;
-            } else {
-                if (pos.getY() >= 256) {
-                    pos = new BlockPos(pos.getX(), 255, pos.getZ());
-                }
-                Chunk chunk = this.getChunk(pos);
-                return chunk.getLightSubtracted(pos, this.skylightSubtracted);
-            }
-        } else {
-            return 15;
-        }
     }
 
 
@@ -1916,125 +1846,6 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
-    public boolean isFlammableWithin(AxisAlignedBB bb) {
-        int j2 = MathHelper.floor(bb.minX);
-        int k2 = MathHelper.ceil(bb.maxX);
-        int l2 = MathHelper.floor(bb.minY);
-        int i3 = MathHelper.ceil(bb.maxY);
-        int j3 = MathHelper.floor(bb.minZ);
-        int k3 = MathHelper.ceil(bb.maxZ);
-
-        if (this.isAreaLoaded(j2, l2, j3, k2, i3, k3, true)) {
-            BlockPos.PooledMutableBlockPos pooledPos = BlockPos.PooledMutableBlockPos.retain();
-
-            for (int l3 = j2; l3 < k2; ++l3) {
-                for (int i4 = l2; i4 < i3; ++i4) {
-                    for (int j4 = j3; j4 < k3; ++j4) {
-                        Block block = this.getBlockState(pooledPos.setPos(l3, i4, j4)).getBlock();
-
-                        if (block == Blocks.FIRE || block == Blocks.FLOWING_LAVA || block == Blocks.LAVA) {
-                            pooledPos.release();
-                            return true;
-                        } else if (block.isBurning(this, new BlockPos(l3, i4, j4))) {
-                            pooledPos.release();
-                            return true;
-                        }
-                    }
-                }
-            }
-            pooledPos.release();
-        }
-        return false;
-    }
-
-
-    public boolean handleMaterialAcceleration(AxisAlignedBB bb, Material materialIn, Entity entityIn) {
-        int j2 = MathHelper.floor(bb.minX);
-        int k2 = MathHelper.ceil(bb.maxX);
-        int l2 = MathHelper.floor(bb.minY);
-        int i3 = MathHelper.ceil(bb.maxY);
-        int j3 = MathHelper.floor(bb.minZ);
-        int k3 = MathHelper.ceil(bb.maxZ);
-
-        if (!this.isAreaLoaded(j2, l2, j3, k2, i3, k3, true)) {
-            return false;
-        } else {
-            boolean flag = false;
-            Vec3d vec3d = Vec3d.ZERO;
-            BlockPos.PooledMutableBlockPos blockpos$pooledmutableblockpos = BlockPos.PooledMutableBlockPos.retain();
-
-            for (int l3 = j2; l3 < k2; ++l3) {
-                for (int i4 = l2; i4 < i3; ++i4) {
-                    for (int j4 = j3; j4 < k3; ++j4) {
-                        blockpos$pooledmutableblockpos.setPos(l3, i4, j4);
-                        IBlockState iblockstate1 = this.getBlockState(blockpos$pooledmutableblockpos);
-                        Block block = iblockstate1.getBlock();
-
-                        Boolean result = block.isEntityInsideMaterial(this, blockpos$pooledmutableblockpos, iblockstate1, entityIn, (double)i3, materialIn, false);
-                        if (result != null && result == true) {
-                            // Forge: When requested call blocks modifyAcceleration method, and more importantly cause this method to return true, which results in an entity being "inWater"
-                            flag = true;
-                            vec3d = block.modifyAcceleration(this, blockpos$pooledmutableblockpos, entityIn, vec3d);
-                            continue;
-                        }
-                        else if (result != null && result == false) continue;
-
-                        if (iblockstate1.getMaterial() == materialIn) {
-                            double d0 = (double)((float)(i4 + 1) - BlockLiquid.getLiquidHeightPercent(((Integer)iblockstate1.getValue(BlockLiquid.LEVEL)).intValue()));
-
-                            if ((double)i3 >= d0) {
-                                flag = true;
-                                vec3d = block.modifyAcceleration(this, blockpos$pooledmutableblockpos, entityIn, vec3d);
-                            }
-                        }
-                    }
-                }
-            }
-            blockpos$pooledmutableblockpos.release();
-
-            if (vec3d.length() > 0.0D && entityIn.isPushedByWater()) {
-                vec3d = vec3d.normalize();
-                double d1 = 0.014D;
-                entityIn.motionX += vec3d.x * 0.014D;
-                entityIn.motionY += vec3d.y * 0.014D;
-                entityIn.motionZ += vec3d.z * 0.014D;
-            }
-            return flag;
-        }
-    }
-
-
-    public boolean isMaterialInBB(AxisAlignedBB bb, Material materialIn) {
-        int j2 = MathHelper.floor(bb.minX);
-        int k2 = MathHelper.ceil(bb.maxX);
-        int l2 = MathHelper.floor(bb.minY);
-        int i3 = MathHelper.ceil(bb.maxY);
-        int j3 = MathHelper.floor(bb.minZ);
-        int k3 = MathHelper.ceil(bb.maxZ);
-        BlockPos.PooledMutableBlockPos blockpos$pooledmutableblockpos = BlockPos.PooledMutableBlockPos.retain();
-
-        for (int l3 = j2; l3 < k2; ++l3) {
-            for (int i4 = l2; i4 < i3; ++i4) {
-                for (int j4 = j3; j4 < k3; ++j4) {
-                    IBlockState iblockstate1 = this.getBlockState(blockpos$pooledmutableblockpos.setPos(l3, i4, j4));
-                    Boolean result = iblockstate1.getBlock().isAABBInsideMaterial(this, blockpos$pooledmutableblockpos, bb, materialIn);
-                    if (result != null) {
-                        if (!result) continue;
-                        blockpos$pooledmutableblockpos.release();
-                        return true;
-                    }
-                    if (iblockstate1.getMaterial() == materialIn) {
-                        blockpos$pooledmutableblockpos.release();
-                        return true;
-                    }
-                }
-            }
-        }
-        blockpos$pooledmutableblockpos.release();
-        return false;
-    }
-
-
     public Explosion createExplosion(@Nullable Entity entityIn, double x, double y, double z, float strength, boolean damagesTerrain) {
         return this.newExplosion(entityIn, x, y, z, strength, false, damagesTerrain);
     }
@@ -2192,28 +2003,6 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
     public void markTileEntityForRemoval(TileEntity tileEntityIn) {
         this.tileEntitiesToBeRemoved.add(tileEntityIn);
-    }
-
-
-    public boolean isBlockFullCube(BlockPos pos) {
-        AxisAlignedBB axisalignedbb = this.getBlockState(pos).getCollisionBoundingBox(this, pos);
-        return axisalignedbb != Block.NULL_AABB && axisalignedbb.getAverageEdgeLength() >= 1.0D;
-    }
-
-
-    public boolean isBlockNormalCube(BlockPos pos, boolean _default) {
-        if (this.isOutsideBuildHeight(pos)) {
-            return false;
-        } else {
-            Chunk chunk1 = this.chunkProvider.getLoadedChunk(pos.getX() >> 4, pos.getZ() >> 4);
-
-            if (chunk1 != null && !chunk1.isEmpty()) {
-                IBlockState iblockstate1 = this.getBlockState(pos);
-                return iblockstate1.getBlock().isNormalCube(iblockstate1, this, pos);
-            } else {
-                return _default;
-            }
-        }
     }
 
 
@@ -2651,12 +2440,6 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     @Override
-    public int getStrongPower(BlockPos pos, EnumFacing direction) {
-        return this.getBlockState(pos).getStrongPower(this, pos, direction);
-    }
-
-
-    @Override
     public WorldType getWorldType() {
         return this.worldInfo.getTerrainType();
     }
@@ -2667,53 +2450,8 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
-    private int getStrongPowerDelta(BlockPosDelta pos) {
-        int max = this.getStrongPower(pos.dY(-1), EnumFacing.DOWN);
-
-        if (max >= 15) {
-            return max;
-        } else {
-            int cur = this.getStrongPower(pos.dY(1), EnumFacing.UP);
-
-            if (cur >= 15) {
-                return cur;
-            } else {
-                if(cur>max)max = cur;
-                cur = this.getStrongPower(pos.dZ(-1), EnumFacing.NORTH);
-
-                if (cur >= 15) {
-                    return cur;
-                } else {
-                    if(cur>max)max = cur;
-                    cur = this.getStrongPower(pos.dZ(1), EnumFacing.SOUTH);
-
-                    if (cur >= 15) {
-                        return cur;
-                    } else {
-                        if(cur>max)max = cur;
-                        cur = this.getStrongPower(pos.dX(-1), EnumFacing.WEST);
-
-                        if (cur >= 15) {
-                            return cur;
-                        } else {
-                            cur = this.getStrongPower(pos.dX(1), EnumFacing.EAST);
-                            return max>cur?max:cur;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-
     public boolean isSidePowered(BlockPos pos, EnumFacing side) {
         return this.getRedstonePower(pos, side) > 0;
-    }
-
-
-    public int getRedstonePower(BlockPos pos, EnumFacing facing) {
-        IBlockState iblockstate1 = this.getBlockState(pos);
-        return iblockstate1.getBlock().shouldCheckWeakPower(iblockstate1, this, pos, facing) ? this.getStrongPower(pos) : iblockstate1.getWeakPower(this, pos, facing);
     }
 
 
@@ -3512,24 +3250,6 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
-    protected <T extends Entity> void getEntitiesWithinAABB0(List<T> list, Class <? extends T > clazz, AxisAlignedBB aabb, @Nullable Predicate <? super T > filter) {
-        int j2 = MathHelper.floor((aabb.minX - MAX_ENTITY_RADIUS) / 16.0D);
-        int k2 = MathHelper.ceil((aabb.maxX + MAX_ENTITY_RADIUS) / 16.0D);
-        int l2 = MathHelper.floor((aabb.minZ - MAX_ENTITY_RADIUS) / 16.0D);
-        int i3 = MathHelper.ceil((aabb.maxZ + MAX_ENTITY_RADIUS) / 16.0D);
-        //List<T> list = new ArrayList<>();
-
-        for (int j3 = j2; j3 < k2; ++j3) {
-            for (int k3 = l2; k3 < i3; ++k3) {
-                if (this.isChunkLoaded(j3, k3, true)) {
-                    this.getChunk(j3, k3).getEntitiesOfTypeWithinAABB(clazz, aabb, list, filter);
-                }
-            }
-        }
-        //return list;
-    }
-
-
     protected final GetCollisionBoxesEvent collisionEvent =
             ElcaCV.ENABLE_COLLISION_EVENTS?
             new GetCollisionBoxesEvent(this):null;
@@ -3633,41 +3353,6 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
-    public void getEntitiesInAABBexcludingNoCache(List<Entity> list, @Nullable Entity entityIn, AxisAlignedBB boundingBox, @Nullable Predicate <? super Entity > predicate) {
-        //List<Entity> list = new ArrayList<>();
-        int k2 = MathHelper.floor((boundingBox.maxX + MAX_ENTITY_RADIUS) / 16.0D);
-        int l2 = MathHelper.floor((boundingBox.minZ - MAX_ENTITY_RADIUS) / 16.0D);
-        int i3 = MathHelper.floor((boundingBox.maxZ + MAX_ENTITY_RADIUS) / 16.0D);
-
-        for (int j3 = MathHelper.floor((boundingBox.minX - MAX_ENTITY_RADIUS) / 16.0D); j3 <= k2; ++j3) {
-            for (int k3 = l2; k3 <= i3; ++k3) {
-                if (this.isChunkLoaded(j3, k3, true)) {
-                    this.getChunk(j3, k3).getEntitiesWithinAABBForEntity(entityIn, boundingBox, list, predicate);
-                }
-            }
-        }
-        //return list;
-    }
-
-
-    protected void getEntitiesInAABBexcludingNoCacheLimited(List<Entity> list, @Nullable Entity entityIn, AxisAlignedBB boundingBox,
-                                                                    @Nullable Predicate <? super Entity > predicate, int lim) {
-        //List<Entity> list = new ArrayList<>();
-        int k2 = MathHelper.floor((boundingBox.maxX + MAX_ENTITY_RADIUS) / 16.0D);
-        int l2 = MathHelper.floor((boundingBox.minZ - MAX_ENTITY_RADIUS) / 16.0D);
-        int i3 = MathHelper.floor((boundingBox.maxZ + MAX_ENTITY_RADIUS) / 16.0D);
-
-        for (int j3 = MathHelper.floor((boundingBox.minX - MAX_ENTITY_RADIUS) / 16.0D); j3 <= k2; ++j3) {
-            for (int k3 = l2; k3 <= i3; ++k3) {
-                if (this.isChunkLoaded(j3, k3, true)) {
-                    this.getChunk(j3, k3).getEntitiesWithinAABBForEntityLimited(entityIn, boundingBox, list, predicate, lim);
-                }
-            }
-        }
-        //return list;
-    }
-
-
     @Override
     public IBlockState getBlockState(int x, int y, int z) {
         if (y < 0 || y > 255) return BlockIDIndexes.AIR_STATE;
@@ -3677,68 +3362,6 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         }
     }
 
-
-    protected boolean getCollisionBoxes(@Nullable Entity entityIn, AxisAlignedBB aabb, boolean fastCheck, ArrayListE6<AxisAlignedBB> outList) {
-        if (fastCheck){
-            if(ElcaCV.ENABLE_COLLISION_EVENTS){
-                MinecraftForge.EVENT_BUS.post(collisionEvent.init(entityIn, aabb, outList));
-            }
-            if(!outList.isEmpty())return true;
-        }
-        try {
-            int minX = MathHelper.floor(aabb.minX) - 1;
-            int maxX = MathHelper.ceil(aabb.maxX) + 1;
-            int minY = MathHelper.floor(aabb.minY) - 1;
-            int maxY = MathHelper.ceil(aabb.maxY) + 1;
-            int minZ = MathHelper.floor(aabb.minZ) - 1;
-            int maxZ = MathHelper.ceil(aabb.maxZ) + 1;
-
-            WorldBorder worldborder = this.getWorldBorder();
-            boolean flag = entityIn != null && entityIn.isOutsideBorder();
-            boolean flag1 = entityIn != null && this.isInsideWorldBorder(entityIn);
-            BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
-            IBlockState state;
-            //IBlockEAccess access = isRemote?this:new ChunkSelector(this);
-            for (int xPos = minX; xPos < maxX; ++xPos) {
-                for (int zPos = minZ; zPos < maxZ; ++zPos) {
-                    boolean flag2 = xPos == minX || xPos == maxX - 1;
-                    boolean flag3 = zPos == minZ || zPos == maxZ - 1;
-
-                    if ((!flag2 || !flag3) && isChunkLoaded(xPos>>4, zPos>>4, true)) {
-                        Chunk chunk = null;
-                        for (int i2 = minY; i2 < maxY; ++i2) {
-                            if (!flag2 && !flag3 || i2 != maxY - 1) {
-                                if (fastCheck) {
-                                    if (xPos < -30000000 || xPos >= 30000000 || zPos < -30000000 || zPos >= 30000000) {
-                                        return true;
-                                    }
-                                } else if (entityIn != null && flag == flag1) {
-                                    entityIn.setOutsideBorder(!flag1);
-                                }
-
-                                if (!fastCheck && flag1 && !worldborder.contains(xPos, zPos)) {
-                                    state = BlockIDIndexes.STONE_STATE;
-                                } else {
-                                    if(chunk == null)chunk = getChunk(xPos>>4, zPos>>4);
-                                    state = chunk.getBlockState(xPos, i2, zPos);
-                                }
-
-                                state.addCollisionBoxToListF(this, pos.setPos(xPos, i2, zPos), aabb, outList, entityIn, false);
-
-                                if (fastCheck) {
-                                    if(ElcaCV.ENABLE_COLLISION_EVENTS){
-                                        MinecraftForge.EVENT_BUS.post(collisionEvent.init(entityIn, aabb, outList));
-                                        if(!outList.isEmpty())return true;
-                                    }else return true;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        } finally {}
-        return !outList.isEmpty();
-    }
 
     //pooledEvents
     private final LivingSpawnEvent.CheckSpawn checkSpawnEvemt = new LivingSpawnEvent.CheckSpawn();
@@ -3857,8 +3480,414 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public boolean doPlayerHarvestCheck(EntityPlayer player, IBlockState state, boolean success) {
         return harvestCheck.post(player, state, success);
     }
+
+
+    //to merge ==============================================================================================================
+    private final BlockPos.MutableBlockPos tempPooledLocalPos = new BlockPos.MutableBlockPos();
+
+    //common
+    public boolean isBlockFullCube(BlockPos pos) {
+        if(pos.getY() < 0 || pos.getY() > 255)return false;
+        AxisAlignedBB axisalignedbb = localSelector.getStateUnchecked(pos.getX(), pos.getY(), pos.getZ()).getCollisionBoundingBox(this, pos);
+        return axisalignedbb != Block.NULL_AABB && axisalignedbb.getAverageEdgeLength() >= 1.0D;
+    }
+
+
+    @Override
+    public boolean isAirBlock(@NotNull BlockPos pos) {
+        if(isOutsideBuildHeight(pos))return true;
+        IBlockState state = getChunk(pos).getBlockState(pos);
+        return state.getBlock().isAir(state, this, pos);
+    }
+
+
+    public boolean isBlockNormalCube(@NotNull BlockPos pos, boolean def) {
+        if (pos.getY() < 0|| pos.getY() > 255) return false;
+        else {
+            Chunk chunk1 = localSelector.getLoadedE(pos.getX() >> 4, pos.getZ() >> 4);
+            if (chunk1 != null && !chunk1.isEmpty()) {
+                IBlockState state = chunk1.getBlockStateUnchecked(pos.getX(), pos.getY(), pos.getZ());
+                return state.getBlock().isNormalCube(state, localSelector, pos);
+            }
+            return def;
+        }
+    }
+
+
+    //redstone
+    public int getRedstonePower(BlockPos pos, EnumFacing facing) {
+        IBlockState state = localSelector.getState(pos);
+        return state.getBlock().shouldCheckWeakPower(state, this, pos, facing) ?
+                getStrongPowerDelta(new BlockPosDelta(pos)) : state.getWeakPower(localSelector, pos, facing);
+    }
+
+
+    public int getStrongPower(BlockPos pos, EnumFacing direction) {
+        return localSelector.getState(pos).getStrongPower(localSelector, pos, direction);
+    }
+
+
+    private int getStrongPowerDelta(BlockPosDelta pos) {
+        int max = localSelector.getState(pos.dY(-1)).getStrongPower(localSelector, pos, EnumFacing.DOWN);
+
+        if (max >= 15) {
+            return max;
+        } else {
+            int cur = localSelector.getState(pos.dY(1)).getStrongPower(localSelector, pos, EnumFacing.UP);
+
+            if (cur >= 15) {
+                return cur;
+            } else {
+                if(cur>max)max = cur;
+                cur = localSelector.getState(pos.dZ(-1)).getStrongPower(localSelector, pos, EnumFacing.NORTH);
+
+                if (cur >= 15) {
+                    return cur;
+                } else {
+                    if(cur>max)max = cur;
+                    cur = localSelector.getState(pos.dZ(1)).getStrongPower(localSelector, pos, EnumFacing.SOUTH);
+
+                    if (cur >= 15) {
+                        return cur;
+                    } else {
+                        if(cur>max)max = cur;
+                        cur = localSelector.getState(pos.dX(-1)).getStrongPower(localSelector, pos, EnumFacing.WEST);
+
+                        if (cur >= 15) {
+                            return cur;
+                        } else {
+                            cur = localSelector.getState(pos.dX(1)).getStrongPower(localSelector, pos, EnumFacing.EAST);
+                            return max>cur?max:cur;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+    public void neighborChanged(BlockPos pos, final Block blockIn, BlockPos fromPos) {
+        localSelector.getState(pos).neighborChanged(this, pos, blockIn, fromPos);
+    }
+
+
+    //area
+    public boolean isAreaLoaded(BlockPos center, int radius) {
+        if (center.getY() - radius < 255) {
+            int     xStart = (center.getX() - radius) >> 4,
+                    xEnd   = (center.getX() + radius) >> 4,
+                    zStart = (center.getZ() - radius) >> 4,
+                    zEnd   = (center.getZ() + radius) >> 4;
+
+            for (;xStart <= xEnd; ++xStart) {
+                for (;zStart <= zEnd; ++zStart)
+                    if (!chunkProviderServer.chunkExists(xStart, zStart)) return false;
+            }
+            return true;
+        } else return false;
+    }
+
+
+    private boolean isAreaLoaded0(int xStart, int zStart, int xEnd, int zEnd) {
+        zStart = zStart >> 4;
+        xEnd = xEnd >> 4;
+        zEnd = zEnd >> 4;
+        for (int i = xStart >> 4; i <= xEnd; ++i)
+            for (int j = zStart; j <= zEnd; ++j)
+                if (!this.isChunkLoaded(i, j, true)) return false;
+        return true;
+    }
+
+
+    //ligh
+    public int getLight(BlockPos pos, boolean checkNeighbors){
+        if (pos.getX() >= -30000000 && pos.getZ() >= -30000000 && pos.getX() < 30000000 && pos.getZ() < 30000000)
+            return getLight0(pos, checkNeighbors);
+        else return 15;
+    }
+
+
+    private int getLight0(BlockPos pos, boolean checkNeighbors) {
+        if (checkNeighbors && localSelector.getState(pos).useNeighborBrightness()) {
+            BlockPos.MutableBlockPos temp = new BlockPos.MutableBlockPos(
+                    pos.getX(), pos.getY()+1, pos.getZ()
+            );
+            int i1 = this.getLight0(temp,   false);
+            int i =  this.getLight0(
+                    temp.setPos(pos.getX()+1, pos.getY(), pos.getZ()), false
+            );
+            temp.setX(pos.getX()-1);
+            int j =  this.getLight0(temp, false);
+            int k =  this.getLight0(
+                    temp.setPos(pos.getX(), pos.getY(), pos.getZ()+1),false
+            );
+            temp.setZ(pos.getZ()-1);
+            int l =  this.getLight0(temp,false);
+
+            if (i > i1) i1 = i;
+            if (j > i1) i1 = j;
+            if (k > i1) i1 = k;
+            if (l > i1) i1 = l;
+
+            return i1;
+        } else if (pos.getY() < 0) {
+            return 0;
+        } else {
+            if (pos.getY() >= 256) {
+                pos = new BlockPos(pos.getX(), 255, pos.getZ());
+            }
+            return localSelector.getChunk(pos).getLightSubtracted(pos, getSkylightSubtracted());
+        }
+    }
+
+
+    //chunk-iter functions
+    public void updateObservingBlocksAt(BlockPos pos, Block blockType) {
+        if(this.isRemote)return;
+        int bX = pos.getX(), bY = pos.getY(), bZ = pos.getZ();
+        if(bY>0) {
+            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+            int nX, nZ, buf;
+            Chunk chunk = localSelector.getChunk(nX = (bX+1) >>4, nZ = bZ>>4);
+            IBlockState iblockstate;
+
+            iblockstate = chunk.getBlockState(mut.setPos(bX + 1, bY, bZ));
+            iblockstate.getBlock().observedNeighborChange(iblockstate, this, mut, blockType, pos);
+
+            if((buf=(bX-1)>>4)!=nX){
+                chunk = getChunk(nX = buf, nZ);
+            }
+
+            iblockstate = chunk.getBlockState(mut.setPos(bX - 1, bY, bZ));
+            iblockstate.getBlock().observedNeighborChange(iblockstate, this, mut, blockType, pos);
+
+            if((buf=(bX)>>4)!=nX || (bZ+1)>>4 != nZ){
+                chunk = getChunk(nX = buf, nZ = (bZ+1)>>4);
+            }
+
+            iblockstate = chunk.getBlockState(mut.setPos(bX, bY, bZ + 1));
+            iblockstate.getBlock().observedNeighborChange(iblockstate, this, mut, blockType, pos);
+
+            if((buf=(bZ-1)>>4)!=nZ){
+                chunk = getChunk(nX, nZ = buf);
+            }
+
+            iblockstate = chunk.getBlockState(mut.setPos(bX, bY, bZ - 1));
+            iblockstate.getBlock().observedNeighborChange(iblockstate, this, mut, blockType, pos);
+
+            if((buf=(bZ)>>4)!=nZ){
+                chunk = getChunk(nX, buf);
+            }
+
+            if(bY>1) {
+                iblockstate = chunk.getBlockState(mut.setPos(bX, bY - 1, bZ));
+                iblockstate.getBlock().observedNeighborChange(iblockstate, this, mut, blockType, pos);
+
+                if(bY<256) {
+                    iblockstate = chunk.getBlockState(mut.setPos(bX, bY + 1, bZ));
+                    iblockstate.getBlock().observedNeighborChange(iblockstate, this, mut, blockType, pos);
+                }
+            }
+        }
+    }
+
+
+    public boolean isMaterialInBB(AxisAlignedBB bb, Material materialIn) {
+        int minY = MathHelper.floor(bb.minY);
+        int maxY = MathHelper.ceil(bb.maxY);
+        if(minY<0 || maxY > 255)return false;
+
+        int maxX = MathHelper.ceil(bb.maxX);
+        int minZ = MathHelper.floor(bb.minZ);
+        int maxZ = MathHelper.ceil(bb.maxZ);
+
+        BlockPos.MutableBlockPos pos = tempPooledLocalPos;
+        IBlockState state;
+        for (int xPos = MathHelper.floor(bb.minX); xPos < maxX; ++xPos)
+            for (int yPos = minY; yPos < maxY; ++yPos) {
+                for (int zPos = minZ; zPos < maxZ; ++zPos) {
+
+                    state = localSelector.getStateUnchecked(xPos, yPos, zPos);
+                    Boolean result = state.getBlock().isAABBInsideMaterial(this, pos.setPos(xPos, yPos, zPos), bb, materialIn);
+                    if (result != null) {
+                        if (!result) continue;
+                        return true;
+                    }
+                    if (state.getMaterial() == materialIn) return true;
+                }
+            }
+        return false;
+    }
+
+
+    public boolean isFlammableWithin(AxisAlignedBB bb) {
+        int yPos, maxY;
+        if((yPos = MathHelper.floor(bb.minY)) < 0 || (maxY = MathHelper.ceil(bb.maxY)) > 255)return false;
+
+        int xPos, maxX, zPos, maxZ;
+
+        if (this.isAreaLoaded0((xPos = MathHelper.floor(bb.minX)), (zPos = MathHelper.floor(bb.minZ)), (maxX = MathHelper.ceil(bb.maxX)),
+                (maxZ = MathHelper.ceil(bb.maxZ))))
+            for (Block block; xPos < maxX; ++xPos)
+                for (; zPos < maxZ; ++zPos)
+                    for (; yPos < maxY; ++yPos) {
+                        block = localSelector.getStateUnchecked(xPos, yPos, zPos).getBlock();
+                        if (block == Blocks.FIRE || block == Blocks.FLOWING_LAVA || block == Blocks.LAVA)
+                            return true;
+                        else if (block.isBurning(this, tempPooledLocalPos.setPos(xPos, yPos, zPos)))
+                            return true;
+                    }
+        return false;
+    }
+
+
+    public boolean handleMaterialAcceleration(AxisAlignedBB bb, Material materialIn, Entity entityIn) {
+        int yPos, maxY;
+        if((yPos = MathHelper.floor(bb.minY)) < 0 || (maxY = MathHelper.ceil(bb.maxY)) > 255)return false;
+
+        int xPos, maxX, zPos, maxZ;
+
+        if (!this.isAreaLoaded0(xPos = MathHelper.floor(bb.minX), zPos = MathHelper.floor(bb.minZ), maxX = MathHelper.ceil(bb.maxX), maxZ = MathHelper.ceil(bb.maxZ))) {
+            return false;
+        } else {
+            boolean flag = false;
+            Vec3d vec3d = Vec3d.ZERO;
+            IBlockState state;
+            Block block;
+            Boolean result;
+
+            for (final BlockPos.MutableBlockPos acc = tempPooledLocalPos; xPos < maxX; ++xPos) {
+                for (; zPos < maxZ; ++zPos) {
+                    for (; yPos < maxY; ++yPos) {
+                        block = (state = localSelector.getStateUnchecked(xPos, yPos, zPos)).getBlock();
+
+                        result = block.isEntityInsideMaterial(this, acc.setPos(xPos, yPos, zPos), state, entityIn, maxY, materialIn, false);
+                        if (result != null && result) {
+                            // Forge: When requested call blocks modifyAcceleration method,
+                            // and more importantly cause this method to return true,
+                            // which results in an entity being "inWater"
+                            flag = true;
+                            vec3d = block.modifyAcceleration(this, acc, entityIn, vec3d);
+                            continue;
+                        } else if (result != null && !result) continue;
+
+                        if (state.getMaterial() == materialIn) {
+                            double d0 = (float)(yPos + 1) - BlockLiquid.getLiquidHeightPercent(state.getValue(BlockLiquid.LEVEL));
+
+                            if ((double)maxY >= d0) {
+                                flag = true;
+                                vec3d = block.modifyAcceleration(this, acc, entityIn, vec3d);
+                            }
+                        }
+                    }
+                }
+            }
+            //accelUsed = false;
+            if (vec3d.length() > 0.0D && entityIn.isPushedByWater()) {
+                vec3d = vec3d.normalize();
+                entityIn.motionX += vec3d.x * 0.014D;
+                entityIn.motionY += vec3d.y * 0.014D;
+                entityIn.motionZ += vec3d.z * 0.014D;
+            }
+            return flag;
+        }
+    }
+
+
+    //collisions
+    protected boolean getCollisionBoxes(@Nullable Entity entityIn, AxisAlignedBB aabb, boolean fastCheck, ArrayListE6<AxisAlignedBB> outList) {
+        if (fastCheck){
+            if(ElcaCV.ENABLE_COLLISION_EVENTS)
+                MinecraftForge.EVENT_BUS.post(collisionEvent.init(entityIn, aabb, outList));
+            if(!outList.isEmptyC())return true;
+        }
+        int minX = MathHelper.floor(aabb.minX) - 1;
+        int maxX = MathHelper.ceil(aabb.maxX) + 1;
+        int minY = MathHelper.floor(aabb.minY) - 1;
+        if (minY < 0)minY = 0;
+        int maxY = MathHelper.ceil(aabb.maxY) + 1;
+        if (maxY > 255)maxY = 255;
+        int minZ = MathHelper.floor(aabb.minZ) - 1;
+        int maxZ = MathHelper.ceil(aabb.maxZ) + 1;
+
+        WorldBorder worldborder = this.getWorldBorder();
+        boolean flag = entityIn != null && entityIn.isOutsideBorder(),
+                flag1 = entityIn != null && this.isInsideWorldBorder(entityIn),
+                flag2, flag3;
+        ChunkSelector selector = localSelector;
+        Chunk chunk;
+
+        for (int xPos = minX; xPos < maxX; ++xPos)
+            for (int zPos = minZ; zPos < maxZ; ++zPos) {
+                flag2 = xPos == minX || xPos == maxX - 1;
+                flag3 = zPos == minZ || zPos == maxZ - 1;
+
+                if ((!flag2 || !flag3) && (chunk = selector.getLoadedE(xPos>>4, zPos>>4))!=null)
+                    for (int yPos = minY; yPos < maxY; ++yPos)
+                        if (!flag2 && !flag3 || yPos != maxY - 1) {
+                            if (fastCheck) {
+                                if (xPos < -30000000 || xPos >= 30000000 || zPos < -30000000 || zPos >= 30000000) return true;
+
+                            } else if (entityIn != null && flag == flag1) entityIn.setOutsideBorder(!flag1);
+
+                            ((!fastCheck && flag1 && !worldborder.contains(xPos, zPos))?
+                                    BlockIDIndexes.STONE_STATE : chunk.getBlockStateUnchecked(xPos, yPos, zPos))
+
+                                    .addCollisionBoxToListF(selector, tempPooledLocalPos.setPos(xPos, yPos, zPos), aabb, outList, entityIn, false);
+
+                            if (fastCheck)
+                                if(ElcaCV.ENABLE_COLLISION_EVENTS){
+                                    MinecraftForge.EVENT_BUS.post(collisionEvent.init(entityIn, aabb, outList));
+                                    if(!outList.isEmptyC())return true;
+                                }else return true;
+                        }
+            }
+        return !outList.isEmptyC();
+    }
+
+
+    protected <T extends Entity> void getEntitiesWithinAABB0(List<T> list, Class <? extends T > clazz,
+                                                             AxisAlignedBB aabb, @Nullable Predicate<? super T > filter) {
+        int maxX = MathHelper.ceil(aabb.maxX + MAX_ENTITY_RADIUS)>>4;
+        int minZ = MathHelper.floor(aabb.minZ - MAX_ENTITY_RADIUS)>>4;
+        int maxZ = MathHelper.ceil(aabb.maxZ + MAX_ENTITY_RADIUS)>>4;
+
+        Chunk chunk;
+
+        for (int xPos = MathHelper.floor(aabb.minX - MAX_ENTITY_RADIUS)>>4; xPos < maxX; ++xPos)
+            for (int zPos = minZ; zPos < maxZ; ++zPos)
+                if ((chunk = chunkProviderServer.getLoadedChunk(xPos, zPos)) != null)
+                    chunk.getEntitiesOfTypeWithinAABB(clazz, aabb, list, filter);
+    }
+
+
+    //collisions, no cache
+    protected void getEntitiesInAABBexcludingNoCacheLimited(List<Entity> list, @Nullable Entity entityIn, AxisAlignedBB boundingBox, @Nullable Predicate <? super Entity > predicate, int lim) {
+        if(lim==0)return;
+        int k2 = MathHelper.floor(boundingBox.maxX + MAX_ENTITY_RADIUS)>>4,
+                l2 = MathHelper.floor(boundingBox.minZ - MAX_ENTITY_RADIUS)>>4,
+                i3 = MathHelper.floor(boundingBox.maxZ + MAX_ENTITY_RADIUS)>>4;
+
+        Chunk chunk;
+
+        for (int xPos = MathHelper.floor(boundingBox.minX - MAX_ENTITY_RADIUS)>>4; xPos <= k2; ++xPos)
+            for (int zPos = l2; zPos <= i3; ++zPos)
+                if ((chunk = localSelector.getLoadedE(xPos, zPos)) != null)
+                    chunk.getEntitiesWithinAABBForEntityLimited(entityIn, boundingBox, list, predicate, lim);
+    }
+
+
+
+    public void getEntitiesInAABBexcludingNoCache(List<Entity> list, @Nullable Entity entityIn, AxisAlignedBB boundingBox, @Nullable Predicate <? super Entity > predicate) {
+        int k2 = MathHelper.floor(boundingBox.maxX + MAX_ENTITY_RADIUS)>>4;
+        int l2 = MathHelper.floor(boundingBox.minZ - MAX_ENTITY_RADIUS)>>4;
+        int i3 = MathHelper.floor(boundingBox.maxZ + MAX_ENTITY_RADIUS)>>4;
+
+        Chunk chunk;
+
+        for (int xPos = MathHelper.floor(boundingBox.minX - MAX_ENTITY_RADIUS)>>4; xPos <= k2; ++xPos)
+            for (int zPos = l2; zPos <= i3; ++zPos)
+                if ((chunk = localSelector.getLoadedE(xPos, zPos)) != null)
+                    chunk.getEntitiesWithinAABBForEntity(entityIn, boundingBox, list, predicate);
+    }
 }
-
-
-
-

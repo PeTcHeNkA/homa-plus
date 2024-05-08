@@ -1,9 +1,15 @@
 package net.minecraft.client.multiplayer;
 
+import com.google.common.base.Predicate;
 import com.google.common.collect.Sets;
+
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import javax.annotation.Nullable;
+
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -26,10 +32,7 @@ import net.minecraft.network.Packet;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.util.*;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.*;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.EnumDifficulty;
@@ -48,11 +51,11 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.ElcaCV;
 import plus.fserver.utls.collections.ArrayListE6;
+import plus.fserver.utls.math.BlockPosDelta;
 
 
 @SideOnly(Side.CLIENT)
-public class WorldClient extends World
-{
+public class WorldClient extends World {
     private final NetHandlerPlayClient connection;
     private ChunkProviderClient clientChunkProvider;
     private final Set<Entity> entityList = Sets.newHashSet();
@@ -62,8 +65,7 @@ public class WorldClient extends World
     private int ambienceTicks;
     protected Set<ChunkPos> visibleChunks;
 
-    public WorldClient(NetHandlerPlayClient netHandler, WorldSettings settings, int dimension, EnumDifficulty difficulty, Profiler profilerIn)
-    {
+    public WorldClient(NetHandlerPlayClient netHandler, WorldSettings settings, int dimension, EnumDifficulty difficulty, Profiler profilerIn) {
         super(new SaveHandlerMP(), new WorldInfo(settings, "MpServer"), net.minecraftforge.common.DimensionManager.createProviderFor(dimension), profilerIn, true);
         this.ambienceTicks = this.rand.nextInt(12000);
         this.visibleChunks = Sets.newHashSet();
@@ -191,7 +193,6 @@ public class WorldClient extends World
         } else {
             this.entitySpawnQueue.add(entityIn);
         }
-
         return flag;
     }
 
@@ -225,20 +226,16 @@ public class WorldClient extends World
 
     public void addEntityToWorld(int entityID, Entity entityToSpawn) {
         Entity entity = this.getEntityByID(entityID);
-
-        if (entity != null)
-        {
+        if (entity != null) {
             this.removeEntity(entity);
         }
 
         this.entityList.add(entityToSpawn);
         entityToSpawn.setEntityId(entityID);
 
-        if (!this.spawnEntity(entityToSpawn))
-        {
+        if (!this.spawnEntity(entityToSpawn)) {
             this.entitySpawnQueue.add(entityToSpawn);
         }
-
         this.entitiesById.addKey(entityID, entityToSpawn);
     }
 
@@ -466,5 +463,343 @@ public class WorldClient extends World
     @Override
     public ChunkProviderClient getChunkProvider() {
         return (ChunkProviderClient)super.getChunkProvider();
+    }
+
+
+    //to merge ========================================================================================================================
+    protected <T extends Entity> void getEntitiesWithinAABB0(List<T> list, Class <? extends T > clazz, AxisAlignedBB aabb, @Nullable Predicate<? super T > filter) {
+        int j2 = MathHelper.floor((aabb.minX - MAX_ENTITY_RADIUS) / 16.0D);
+        int k2 = MathHelper.ceil((aabb.maxX + MAX_ENTITY_RADIUS) / 16.0D);
+        int l2 = MathHelper.floor((aabb.minZ - MAX_ENTITY_RADIUS) / 16.0D);
+        int i3 = MathHelper.ceil((aabb.maxZ + MAX_ENTITY_RADIUS) / 16.0D);
+
+        for (int j3 = j2; j3 < k2; ++j3) {
+            for (int k3 = l2; k3 < i3; ++k3) {
+                if (this.isChunkLoaded(j3, k3, true)) {
+                    this.getChunk(j3, k3).getEntitiesOfTypeWithinAABB(clazz, aabb, list, filter);
+                }
+            }
+        }
+    }
+
+
+    public boolean isBlockFullCube(BlockPos pos) {
+        AxisAlignedBB axisalignedbb = this.getBlockState(pos).getCollisionBoundingBox(this, pos);
+        return axisalignedbb != Block.NULL_AABB && axisalignedbb.getAverageEdgeLength() >= 1.0D;
+    }
+
+
+    public boolean isBlockNormalCube(BlockPos pos, boolean _default) {
+        if (this.isOutsideBuildHeight(pos)) {
+            return false;
+        } else {
+            Chunk chunk1 = this.chunkProvider.getLoadedChunk(pos.getX() >> 4, pos.getZ() >> 4);
+
+            if (chunk1 != null && !chunk1.isEmpty()) {
+                IBlockState iblockstate1 = this.getBlockState(pos);
+                return iblockstate1.getBlock().isNormalCube(iblockstate1, this, pos);
+            } else {
+                return _default;
+            }
+        }
+    }
+
+
+    public boolean isFlammableWithin(AxisAlignedBB bb) {
+        int j2 = MathHelper.floor(bb.minX);
+        int k2 = MathHelper.ceil(bb.maxX);
+        int l2 = MathHelper.floor(bb.minY);
+        int i3 = MathHelper.ceil(bb.maxY);
+        int j3 = MathHelper.floor(bb.minZ);
+        int k3 = MathHelper.ceil(bb.maxZ);
+
+        if (this.isAreaLoaded(j2, l2, j3, k2, i3, k3, true)) {
+            BlockPos.PooledMutableBlockPos pooledPos = BlockPos.PooledMutableBlockPos.retain();
+
+            for (int l3 = j2; l3 < k2; ++l3) {
+                for (int i4 = l2; i4 < i3; ++i4) {
+                    for (int j4 = j3; j4 < k3; ++j4) {
+                        Block block = this.getBlockState(pooledPos.setPos(l3, i4, j4)).getBlock();
+
+                        if (block == Blocks.FIRE || block == Blocks.FLOWING_LAVA || block == Blocks.LAVA) {
+                            pooledPos.release();
+                            return true;
+                        } else if (block.isBurning(this, new BlockPos(l3, i4, j4))) {
+                            pooledPos.release();
+                            return true;
+                        }
+                    }
+                }
+            }
+            pooledPos.release();
+        }
+        return false;
+    }
+
+
+    protected boolean getCollisionBoxes(@Nullable Entity entityIn, AxisAlignedBB aabb, boolean fastCheck, ArrayListE6<AxisAlignedBB> outList) {
+        if (fastCheck){
+            if(ElcaCV.ENABLE_COLLISION_EVENTS){
+                MinecraftForge.EVENT_BUS.post(collisionEvent.init(entityIn, aabb, outList));
+            }
+            if(!outList.isEmpty())return true;
+        }
+        try {
+            int minX = MathHelper.floor(aabb.minX) - 1;
+            int maxX = MathHelper.ceil(aabb.maxX) + 1;
+            int minY = MathHelper.floor(aabb.minY) - 1;
+            int maxY = MathHelper.ceil(aabb.maxY) + 1;
+            int minZ = MathHelper.floor(aabb.minZ) - 1;
+            int maxZ = MathHelper.ceil(aabb.maxZ) + 1;
+
+            WorldBorder worldborder = this.getWorldBorder();
+            boolean flag = entityIn != null && entityIn.isOutsideBorder();
+            boolean flag1 = entityIn != null && this.isInsideWorldBorder(entityIn);
+            BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+            IBlockState state;
+            //IBlockEAccess access = isRemote?this:new ChunkSelector(this);
+            for (int xPos = minX; xPos < maxX; ++xPos) {
+                for (int zPos = minZ; zPos < maxZ; ++zPos) {
+                    boolean flag2 = xPos == minX || xPos == maxX - 1;
+                    boolean flag3 = zPos == minZ || zPos == maxZ - 1;
+
+                    if ((!flag2 || !flag3) && isChunkLoaded(xPos>>4, zPos>>4, true)) {
+                        Chunk chunk = null;
+                        for (int i2 = minY; i2 < maxY; ++i2) {
+                            if (!flag2 && !flag3 || i2 != maxY - 1) {
+                                if (fastCheck) {
+                                    if (xPos < -30000000 || xPos >= 30000000 || zPos < -30000000 || zPos >= 30000000) {
+                                        return true;
+                                    }
+                                } else if (entityIn != null && flag == flag1) {
+                                    entityIn.setOutsideBorder(!flag1);
+                                }
+
+                                if (!fastCheck && flag1 && !worldborder.contains(xPos, zPos)) {
+                                    state = BlockIDIndexes.STONE_STATE;
+                                } else {
+                                    if(chunk == null)chunk = getChunk(xPos>>4, zPos>>4);
+                                    state = chunk.getBlockState(xPos, i2, zPos);
+                                }
+
+                                state.addCollisionBoxToListF(this, pos.setPos(xPos, i2, zPos), aabb, outList, entityIn, false);
+
+                                if (fastCheck) {
+                                    if(ElcaCV.ENABLE_COLLISION_EVENTS){
+                                        MinecraftForge.EVENT_BUS.post(collisionEvent.init(entityIn, aabb, outList));
+                                        if(!outList.isEmpty())return true;
+                                    }else return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } finally {}
+        return !outList.isEmpty();
+    }
+
+
+    protected void getEntitiesInAABBexcludingNoCacheLimited(List<Entity> list, @Nullable Entity entityIn, AxisAlignedBB boundingBox,
+                                                            @Nullable Predicate <? super Entity > predicate, int lim) {
+        int k2 = MathHelper.floor((boundingBox.maxX + MAX_ENTITY_RADIUS) / 16.0D);
+        int l2 = MathHelper.floor((boundingBox.minZ - MAX_ENTITY_RADIUS) / 16.0D);
+        int i3 = MathHelper.floor((boundingBox.maxZ + MAX_ENTITY_RADIUS) / 16.0D);
+
+        for (int j3 = MathHelper.floor((boundingBox.minX - MAX_ENTITY_RADIUS) / 16.0D); j3 <= k2; ++j3) {
+            for (int k3 = l2; k3 <= i3; ++k3) {
+                if (this.isChunkLoaded(j3, k3, true)) {
+                    this.getChunk(j3, k3).getEntitiesWithinAABBForEntityLimited(entityIn, boundingBox, list, predicate, lim);
+                }
+            }
+        }
+    }
+
+
+    public void getEntitiesInAABBexcludingNoCache(List<Entity> list, @Nullable Entity entityIn, AxisAlignedBB boundingBox, @Nullable Predicate <? super Entity > predicate) {
+        int k2 = MathHelper.floor((boundingBox.maxX + MAX_ENTITY_RADIUS) / 16.0D);
+        int l2 = MathHelper.floor((boundingBox.minZ - MAX_ENTITY_RADIUS) / 16.0D);
+        int i3 = MathHelper.floor((boundingBox.maxZ + MAX_ENTITY_RADIUS) / 16.0D);
+
+        for (int j3 = MathHelper.floor((boundingBox.minX - MAX_ENTITY_RADIUS) / 16.0D); j3 <= k2; ++j3) {
+            for (int k3 = l2; k3 <= i3; ++k3) {
+                if (this.isChunkLoaded(j3, k3, true)) {
+                    this.getChunk(j3, k3).getEntitiesWithinAABBForEntity(entityIn, boundingBox, list, predicate);
+                }
+            }
+        }
+    }
+
+
+    public int getRedstonePower(BlockPos pos, EnumFacing facing) {
+        IBlockState iblockstate1 = this.getBlockState(pos);
+        return iblockstate1.getBlock().shouldCheckWeakPower(iblockstate1, this, pos, facing) ? this.getStrongPower(pos) : iblockstate1.getWeakPower(this, pos, facing);
+    }
+
+
+    public void neighborChanged(BlockPos pos, final Block blockIn, BlockPos fromPos) {
+        if (!this.isRemote) {
+            IBlockState iblockstate = this.getBlockState(pos);
+            try {
+                iblockstate.neighborChanged(this, pos, blockIn, fromPos);
+            } catch (Throwable throwable) {
+                CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Exception while updating neighbours");
+                CrashReportCategory crashreportcategory = crashreport.makeCategory("Block being updated");
+                crashreportcategory.addDetail("Source block type", new ICrashReportDetail<String>() {
+                    public String call() throws Exception {
+                        try {
+                            return String.format("ID #%d (%s // %s // %s)", Block.getIdFromBlock(blockIn), blockIn.getTranslationKey(), blockIn.getClass().getName(), blockIn.getRegistryName());
+                        } catch (Throwable var2) {
+                            return "ID #" + Block.getIdFromBlock(blockIn);
+                        }
+                    }
+                });
+                CrashReportCategory.addBlockInfo(crashreportcategory, pos, iblockstate);
+                throw new ReportedException(crashreport);
+            }
+        }
+    }
+
+
+    @Override
+    public int getStrongPower(BlockPos pos, EnumFacing direction) {
+        return this.getBlockState(pos).getStrongPower(this, pos, direction);
+    }
+
+
+    public int getLight(BlockPos pos, boolean checkNeighbors) {
+        if (pos.getX() >= -30000000 && pos.getZ() >= -30000000 && pos.getX() < 30000000 && pos.getZ() < 30000000) {
+            if (checkNeighbors && this.getBlockState(pos).useNeighborBrightness()) {
+                int i1 = this.getLight(pos.up(), false);
+                int i = this.getLight(pos.east(), false);
+                int j = this.getLight(pos.west(), false);
+                int k = this.getLight(pos.south(), false);
+                int l = this.getLight(pos.north(), false);
+
+                if (i > i1) i1 = i;
+                if (j > i1) i1 = j;
+                if (k > i1) i1 = k;
+                if (l > i1) i1 = l;
+
+                return i1;
+            } else if (pos.getY() < 0) {
+                return 0;
+            } else {
+                if (pos.getY() >= 256) {
+                    pos = new BlockPos(pos.getX(), 255, pos.getZ());
+                }
+                Chunk chunk = this.getChunk(pos);
+                return chunk.getLightSubtracted(pos, this.skylightSubtracted);
+            }
+        } else {
+            return 15;
+        }
+    }
+
+
+    public boolean isAreaLoaded(BlockPos center, int radius) {
+        return this.isAreaLoaded(center, radius, true);
+    }
+
+
+    public boolean isAirBlock(BlockPos pos) {
+        return this.getBlockState(pos).getBlock().isAir(this.getBlockState(pos), this, pos);
+    }
+
+
+    public void updateObservingBlocksAt(BlockPos pos, Block blockType) {
+        this.observedNeighborChanged(pos.west(),  blockType, pos);
+        this.observedNeighborChanged(pos.east(),  blockType, pos);
+        this.observedNeighborChanged(pos.down(),  blockType, pos);
+        this.observedNeighborChanged(pos.up(),    blockType, pos);
+        this.observedNeighborChanged(pos.north(), blockType, pos);
+        this.observedNeighborChanged(pos.south(), blockType, pos);
+    }
+
+
+    public boolean handleMaterialAcceleration(AxisAlignedBB bb, Material materialIn, Entity entityIn) {
+        int j2 = MathHelper.floor(bb.minX);
+        int k2 = MathHelper.ceil(bb.maxX);
+        int l2 = MathHelper.floor(bb.minY);
+        int i3 = MathHelper.ceil(bb.maxY);
+        int j3 = MathHelper.floor(bb.minZ);
+        int k3 = MathHelper.ceil(bb.maxZ);
+
+        if (!this.isAreaLoaded(j2, l2, j3, k2, i3, k3, true)) {
+            return false;
+        } else {
+            boolean flag = false;
+            Vec3d vec3d = Vec3d.ZERO;
+            BlockPos.PooledMutableBlockPos blockpos$pooledmutableblockpos = BlockPos.PooledMutableBlockPos.retain();
+
+            for (int l3 = j2; l3 < k2; ++l3) {
+                for (int i4 = l2; i4 < i3; ++i4) {
+                    for (int j4 = j3; j4 < k3; ++j4) {
+                        blockpos$pooledmutableblockpos.setPos(l3, i4, j4);
+                        IBlockState iblockstate1 = this.getBlockState(blockpos$pooledmutableblockpos);
+                        Block block = iblockstate1.getBlock();
+
+                        Boolean result = block.isEntityInsideMaterial(this, blockpos$pooledmutableblockpos, iblockstate1, entityIn, (double)i3, materialIn, false);
+                        if (result != null && result == true) {
+                            // Forge: When requested call blocks modifyAcceleration method, and more importantly cause this method to return true, which results in an entity being "inWater"
+                            flag = true;
+                            vec3d = block.modifyAcceleration(this, blockpos$pooledmutableblockpos, entityIn, vec3d);
+                            continue;
+                        }
+                        else if (result != null && result == false) continue;
+
+                        if (iblockstate1.getMaterial() == materialIn) {
+                            double d0 = (double)((float)(i4 + 1) - BlockLiquid.getLiquidHeightPercent(((Integer)iblockstate1.getValue(BlockLiquid.LEVEL)).intValue()));
+
+                            if ((double)i3 >= d0) {
+                                flag = true;
+                                vec3d = block.modifyAcceleration(this, blockpos$pooledmutableblockpos, entityIn, vec3d);
+                            }
+                        }
+                    }
+                }
+            }
+            blockpos$pooledmutableblockpos.release();
+
+            if (vec3d.length() > 0.0D && entityIn.isPushedByWater()) {
+                vec3d = vec3d.normalize();
+                double d1 = 0.014D;
+                entityIn.motionX += vec3d.x * 0.014D;
+                entityIn.motionY += vec3d.y * 0.014D;
+                entityIn.motionZ += vec3d.z * 0.014D;
+            }
+            return flag;
+        }
+    }
+
+
+    public boolean isMaterialInBB(AxisAlignedBB bb, Material materialIn) {
+        int j2 = MathHelper.floor(bb.minX);
+        int k2 = MathHelper.ceil(bb.maxX);
+        int l2 = MathHelper.floor(bb.minY);
+        int i3 = MathHelper.ceil(bb.maxY);
+        int j3 = MathHelper.floor(bb.minZ);
+        int k3 = MathHelper.ceil(bb.maxZ);
+        BlockPos.PooledMutableBlockPos blockpos$pooledmutableblockpos = BlockPos.PooledMutableBlockPos.retain();
+
+        for (int l3 = j2; l3 < k2; ++l3) {
+            for (int i4 = l2; i4 < i3; ++i4) {
+                for (int j4 = j3; j4 < k3; ++j4) {
+                    IBlockState iblockstate1 = this.getBlockState(blockpos$pooledmutableblockpos.setPos(l3, i4, j4));
+                    Boolean result = iblockstate1.getBlock().isAABBInsideMaterial(this, blockpos$pooledmutableblockpos, bb, materialIn);
+                    if (result != null) {
+                        if (!result) continue;
+                        blockpos$pooledmutableblockpos.release();
+                        return true;
+                    }
+                    if (iblockstate1.getMaterial() == materialIn) {
+                        blockpos$pooledmutableblockpos.release();
+                        return true;
+                    }
+                }
+            }
+        }
+        blockpos$pooledmutableblockpos.release();
+        return false;
     }
 }
