@@ -88,6 +88,8 @@ import plus.fserver.utls.collections.ArrayListE6;
 import plus.fserver.utls.math.BlockPosDelta;
 import plus.tson.utl.Te4HashSet;
 
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
+
 
 public class WorldServer extends World implements IThreadListener, PWorldServer, MeanTicker {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -245,7 +247,7 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
 
 
     public boolean areAllPlayersAsleep() {
-        if (this.allPlayersSleeping && !this.isRemote) {
+        if (this.allPlayersSleeping && (!this.isRemote || SERVER_COMPILE)) {
             for (EntityPlayer entityplayer : this.playerEntities) {
                 if (!entityplayer.isSpectator() && !entityplayer.isPlayerFullyAsleep()) {
                     return false;
@@ -499,7 +501,7 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
             if (entityIn.isRiding())         entityIn.updateRidden();
             else if(!entityIn.updateBlocked) entityIn.onUpdate();
 
-        } catch (Exception exception){
+        } catch (Throwable exception){
             server.ticker().onError(this, onEntityError(entityIn, exception));
         }
 

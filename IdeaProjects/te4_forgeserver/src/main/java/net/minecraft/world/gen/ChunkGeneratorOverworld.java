@@ -39,6 +39,7 @@ import plus.fserver.world.generator.future.WorldGenStalactite;
 import plus.fserver.world.generator.map.EMapGenBase;
 import plus.fserver.world.generator.map.EMapGenCaves;
 import plus.fserver.world.generator.map.EMapGenRavine;
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public class ChunkGeneratorOverworld implements IChunkGenerator {
@@ -536,7 +537,7 @@ public class ChunkGeneratorOverworld implements IChunkGenerator {
 
     @Override
     public List<Biome.SpawnListEntry> getPossibleCreatures(EnumCreatureType type, BlockPos pos) {
-        Biome biome = world.isRemote?this.world.getBiome(pos):((WorldServer)world).localSelector.getBiome(pos);
+        Biome biome = (world.isRemote || !SERVER_COMPILE)?this.world.getBiome(pos): world.localSelector.getBiome(pos);
 
         if (this.mapFeaturesEnabled && type == EnumCreatureType.MONSTER) {
             if (this.scatteredFeatureGenerator.isSwampHut(pos)) {

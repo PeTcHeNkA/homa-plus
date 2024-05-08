@@ -81,7 +81,7 @@ public class EntityAIPanic extends EntityAIBase {
         float factor = (float)(horizontalRange * horizontalRange * verticalRange * 2);
         BlockPos.MutableBlockPos pos = null;
         //todo check?
-        ChunkSelector selector = ((WorldServer)worldIn).localSelector;
+        ChunkSelector selector = worldIn.localSelector;
 
         for (int aX = cX - horizontalRange; aX <= cX + horizontalRange; ++aX) {
             for (int aZ = cZ - horizontalRange; aZ <= cZ + horizontalRange; ++aZ) {

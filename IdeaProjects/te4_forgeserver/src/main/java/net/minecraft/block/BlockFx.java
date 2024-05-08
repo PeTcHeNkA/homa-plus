@@ -21,8 +21,8 @@ public class BlockFx extends Block{
 
     @Override
     public void addCollisionBoxToListF(IBlockState state, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> list) {
-        AxisAlignedBB blockBox = getCollisionBoundingBox(state, access, pos);
         AxisAlignedBB src;
+        AxisAlignedBB blockBox = getCollisionBoundingBox(state, access, pos);
         if((src = list.getSafe(list.sizeC())) != null) blockBox.offsetTo(pos, src);
         else src = blockBox.offset(pos);
         if (entityBox.intersects(src)) list.addF(src);

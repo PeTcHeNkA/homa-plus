@@ -41,6 +41,8 @@ import plus.fserver.world.light.api.ILightingEngine;
 import plus.fserver.world.light.api.ILightingEngineProvider;
 import plus.tson.utl.Te4HashMap;
 
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
+
 
 public class Chunk implements net.minecraftforge.common.capabilities.ICapabilityProvider, ILightingEngineProvider {
     public static final int STORAGES_COUNT = 16;
@@ -472,7 +474,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
             storage.set(i, j & 15, k, state);
 
-            if (!this.world.isRemote) {
+            if (!this.world.isRemote || SERVER_COMPILE) {
                 if (prevBlock != block) prevBlock.breakBlock(this.world, pos, prev);
 
                 TileEntity te = this.getTileEntity(pos, Chunk.EnumCreateEntityType.CHECK);
@@ -507,7 +509,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
                 }
 
                 // If capturing blocks, only run block physics for TE's. Non-TE's are handled in ForgeHooks.onPlaceItemIntoWorld
-                if (!this.world.isRemote && prevBlock != block && (!this.world.captureBlockSnapshots || state.hasTile())) {
+                if ((!this.world.isRemote || SERVER_COMPILE) && prevBlock != block && (!this.world.captureBlockSnapshots || state.hasTile())) {
                     block.onBlockAdded(this.world, pos, state);
                 }
 
@@ -945,7 +947,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
     public void onTick(boolean skipRecheckGaps) {
         if (this.isGapLightingUpdated && this.world.provider.hasSkyLight() && !skipRecheckGaps) {
-            this.recheckGaps(this.world.isRemote);
+            this.recheckGaps(this.world.isRemote || !SERVER_COMPILE);
         }
         this.ticked = true;
 
@@ -1055,7 +1057,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
     public Biome getBiome(BlockPos pos, BiomeProvider provider) {
         int x = pos.getX() & 15, z = pos.getZ() & 15, k = this.blockBiomeArray[z << 4 | x] & 255;
         if (k == 255) {
-            Biome biome = world.isRemote ? Biomes.PLAINS : provider.getBiome(pos, Biomes.PLAINS);
+            Biome biome = (world.isRemote || !SERVER_COMPILE) ? Biomes.PLAINS : provider.getBiome(pos, Biomes.PLAINS);
             k = Biome.getIdForBiome(biome);
             this.blockBiomeArray[z << 4 | x] = (byte)(k & 255);
         }
@@ -1068,7 +1070,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
     public Biome getBiome(int x, int z, BiomeProvider provider) {
         int index = this.blockBiomeArray[(z & 15) << 4 | x & 15] & 255;
         if (index == 255) {
-            Biome biome = world.isRemote ? Biomes.PLAINS : provider.getBiome(x, z, Biomes.PLAINS);
+            Biome biome = (world.isRemote || !SERVER_COMPILE) ? Biomes.PLAINS : provider.getBiome(x, z, Biomes.PLAINS);
             index = Biome.getIdForBiome(biome);
             this.blockBiomeArray[(z & 15) << 4 | (x & 15)] = (byte)(index & 255);
         }

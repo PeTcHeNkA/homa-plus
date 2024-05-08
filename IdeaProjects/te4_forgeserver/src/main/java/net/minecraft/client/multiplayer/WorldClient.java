@@ -53,6 +53,8 @@ import plus.fserver.ElcaCV;
 import plus.fserver.utls.collections.ArrayListE6;
 import plus.fserver.utls.math.BlockPosDelta;
 
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
+
 
 @SideOnly(Side.CLIENT)
 public class WorldClient extends World {
@@ -67,6 +69,7 @@ public class WorldClient extends World {
 
     public WorldClient(NetHandlerPlayClient netHandler, WorldSettings settings, int dimension, EnumDifficulty difficulty, Profiler profilerIn) {
         super(new SaveHandlerMP(), new WorldInfo(settings, "MpServer"), net.minecraftforge.common.DimensionManager.createProviderFor(dimension), profilerIn, true);
+        if(SERVER_COMPILE)throw new RuntimeException("Client world not supported by server compilation");
         this.ambienceTicks = this.rand.nextInt(12000);
         this.visibleChunks = Sets.newHashSet();
         this.connection = netHandler;
@@ -638,7 +641,7 @@ public class WorldClient extends World {
 
 
     public void neighborChanged(BlockPos pos, final Block blockIn, BlockPos fromPos) {
-        if (!this.isRemote) {
+        if (!this.isRemote || SERVER_COMPILE) {
             IBlockState iblockstate = this.getBlockState(pos);
             try {
                 iblockstate.neighborChanged(this, pos, blockIn, fromPos);

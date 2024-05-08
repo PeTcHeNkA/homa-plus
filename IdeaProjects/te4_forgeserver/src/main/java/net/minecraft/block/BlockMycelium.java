@@ -13,10 +13,10 @@ import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.api.IBlockEAccess;
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public class BlockMycelium extends BlockFx {
@@ -39,7 +39,7 @@ public class BlockMycelium extends BlockFx {
 
     @Override
     public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand) {
-        if (!worldIn.isRemote) {
+        if (!worldIn.isRemote || SERVER_COMPILE) {
             if (!worldIn.isAreaLoaded(pos, 2)) return; // Forge: prevent loading unloaded chunks when checking neighbor's light and spreading
             BlockPos.MutableBlockPos temp = new BlockPos.MutableBlockPos(pos.getX(), pos.getY()+1, pos.getZ());
             IBlockEAccess access = worldIn.access();

@@ -26,6 +26,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public class InventoryPlayer implements IInventory {
@@ -367,7 +368,7 @@ public class InventoryPlayer implements IInventory {
                 crashreportcategory.addDetail("Item Class", () -> stack.getItem().getClass().getName());
                 crashreportcategory.addDetail("Item name", stack::getDisplayName);
                 ReportedException err = new ReportedException(crashreport);
-                if(player != null && player.world != null && player.world.isRemote) {
+                if(player != null && player.world != null && (!player.world.isRemote || SERVER_COMPILE)) {
                     player.world.getMinecraftServer().ticker().onError((WorldServer) player.world, err);
                     return false;
                 }
@@ -378,7 +379,7 @@ public class InventoryPlayer implements IInventory {
 
 
     public void placeItemBackInInventory(World world, ItemStack stack) {
-        if (!world.isRemote) {
+        if (!world.isRemote || SERVER_COMPILE) {
             while (!stack.isEmpty()) {
                 int i = this.storeItemStack(stack);
 

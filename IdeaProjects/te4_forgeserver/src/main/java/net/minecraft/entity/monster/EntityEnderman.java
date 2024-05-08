@@ -42,6 +42,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
 import net.minecraftforge.event.ForgeEventFactory;
 import plus.fserver.ElcaMobs;
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public class EntityEnderman extends EntityMob {
@@ -204,7 +205,7 @@ public class EntityEnderman extends EntityMob {
 
     @Override
     public void onLivingUpdate() {
-        if (this.world.isRemote) {
+        if (this.world.isRemote || !SERVER_COMPILE) {
             for (int i = 0; i < 2; ++i) {
                 this.world.spawnParticle(EnumParticleTypes.PORTAL, this.posX + (this.rand.nextDouble() - 0.5D) * (double)this.width, this.posY + this.rand.nextDouble() * (double)this.height - 0.25D, this.posZ + (this.rand.nextDouble() - 0.5D) * (double)this.width, (this.rand.nextDouble() - 0.5D) * 2.0D, -this.rand.nextDouble(), (this.rand.nextDouble() - 0.5D) * 2.0D);
             }

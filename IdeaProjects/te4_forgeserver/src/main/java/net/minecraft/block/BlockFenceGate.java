@@ -21,6 +21,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.utls.collections.ArrayListE6;
 import static net.minecraft.block.BlockFs.addCollisionBoxToListFs;
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public class BlockFenceGate extends BlockHorizontal {
@@ -156,7 +157,7 @@ public class BlockFenceGate extends BlockHorizontal {
 
     @Override
     public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos) {
-        if (!worldIn.isRemote) {
+        if (!worldIn.isRemote || SERVER_COMPILE) {
             boolean flag = worldIn.isBlockPowered(pos);
 
             if (state.getValue(POWERED) != flag) {

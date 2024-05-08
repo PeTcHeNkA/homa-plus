@@ -25,6 +25,7 @@ import net.minecraft.world.storage.loot.LootTableList;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.ElcaMobs;
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public class EntityBlaze extends EntityMob {
@@ -114,7 +115,7 @@ public class EntityBlaze extends EntityMob {
             this.motionY *= 0.6D;
         }
 
-        if (this.world.isRemote) {
+        if (this.world.isRemote || !SERVER_COMPILE) {
             if (this.rand.nextInt(24) == 0 && !this.isSilent()) {
                 this.world.playSound(this.posX + 0.5D, this.posY + 0.5D, this.posZ + 0.5D, SoundEvents.ENTITY_BLAZE_BURN, this.getSoundCategory(), 1.0F + this.rand.nextFloat(), this.rand.nextFloat() * 0.7F + 0.3F, false);
             }

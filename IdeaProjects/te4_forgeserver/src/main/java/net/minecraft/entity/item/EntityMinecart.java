@@ -32,6 +32,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.minecart.MinecartCollisionEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public abstract class EntityMinecart extends Entity implements IWorldNameable {
@@ -155,7 +156,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
 
     @Override
     public boolean attackEntityFrom(DamageSource source, float amount) {
-        if (!this.world.isRemote && !this.isDead) {
+        if ((!this.world.isRemote || SERVER_COMPILE) && !this.isDead) {
             if (this.isEntityInvulnerable(source)) {
                 return false;
             } else {
@@ -224,7 +225,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
             this.outOfWorld();
         }
 
-        if (!this.world.isRemote) {
+        if (!this.world.isRemote || SERVER_COMPILE) {
             this.world.profiler.startSection("portal");
             MinecraftServer minecraftserver = this.world.getMinecraftServer();
             int i = this.getMaxInPortalTime();
@@ -262,7 +263,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
             this.world.profiler.endSection();
         }
 
-        if (this.world.isRemote) {
+        if (this.world.isRemote || !SERVER_COMPILE) {
             if (this.turnProgress > 0) {
                 double d4 = this.posX + (this.minecartX - this.posX) / (double)this.turnProgress;
                 double d5 = this.posY + (this.minecartY - this.posY) / (double)this.turnProgress;
@@ -737,7 +738,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
             getCollisionHandler().onEntityCollision(this, entityIn);
             return;
         }
-        if (!this.world.isRemote) {
+        if (!this.world.isRemote || SERVER_COMPILE) {
             if (!entityIn.noClip && !this.noClip) {
                 if (!this.isPassenger(entityIn)) {
                     double d0 = entityIn.posX - this.posX;

@@ -14,8 +14,8 @@ import org.apache.logging.log4j.Logger;
 import plus.fserver.utls.collections.PooledLongQueue;
 import plus.fserver.world.light.api.IChunkLighting;
 import plus.fserver.world.light.api.ILightingEngine;
-
 import java.util.concurrent.locks.ReentrantLock;
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public class LightingEngine implements ILightingEngine {
@@ -90,7 +90,7 @@ public class LightingEngine implements ILightingEngine {
 
     @Override
     public void processLightUpdatesForType(final EnumSkyBlock lightType) {
-        if (this.updating || this.world.isRemote && !this.isCallingFromMainThread()) {
+        if (this.updating || (this.world.isRemote || !SERVER_COMPILE) && !this.isCallingFromMainThread()) {
             return;
         }
         final PooledLongQueue queue = this.queuedLightUpdates[lightType.ordinal()];
@@ -114,7 +114,7 @@ public class LightingEngine implements ILightingEngine {
 
     @Override
     public void processSync(final EnumSkyBlock lightType){
-        if (this.updating || this.world.isRemote && !this.isCallingFromMainThread()) {
+        if (this.updating || (this.world.isRemote || !SERVER_COMPILE) && !this.isCallingFromMainThread()) {
             return;
         }
         final PooledLongQueue queue = this.queuedLightUpdates[lightType.ordinal()];

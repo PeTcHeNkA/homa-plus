@@ -4,7 +4,6 @@ import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.BlockStateContainer;
@@ -28,6 +27,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.utls.collections.ArrayListE6;
 import static net.minecraft.block.BlockFs.addCollisionBoxToListFx;
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public class BlockFence extends Block {
@@ -82,7 +82,7 @@ public class BlockFence extends Block {
 
     @Override
     public void addCollisionBoxToListF(IBlockState state, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> collidingBoxes) {
-        state = state.getActualState(access, pos);
+        state = getActualState(state, access, pos);
 
         addCollisionBoxToListFx(pos, entityBox, collidingBoxes, PILLAR_AABB);
 
@@ -147,12 +147,12 @@ public class BlockFence extends Block {
     }
 
 
-    public boolean canConnectTo(IBlockAccess worldIn, BlockPos pos, EnumFacing facing) {
-        IBlockState iblockstate = worldIn.getBlockState(pos);
-        BlockFaceShape blockfaceshape = iblockstate.getBlockFaceShape(worldIn, pos, facing);
-        Block block = iblockstate.getBlock();
-        boolean flag = blockfaceshape == BlockFaceShape.MIDDLE_POLE && (iblockstate.getMaterial() == this.material || block instanceof BlockFenceGate);
-        return !isExcepBlockForAttachWithPiston(block) && blockfaceshape == BlockFaceShape.SOLID || flag;
+    public boolean canConnectTo(IBlockAccess access, BlockPos pos, EnumFacing facing) {
+        Block block;
+        IBlockState state;
+        BlockFaceShape shape = (state = access.getBlockState(pos)).getBlockFaceShape(access, pos, facing);
+        return !isExcepBlockForAttachWithPiston(block = state.getBlock()) && shape == BlockFaceShape.SOLID ||
+                shape == BlockFaceShape.MIDDLE_POLE && (state.getMaterial() == this.material || block instanceof BlockFenceGate);
     }
 
 
@@ -170,7 +170,7 @@ public class BlockFence extends Block {
 
     @Override
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-        if (!worldIn.isRemote) {
+        if (!worldIn.isRemote || SERVER_COMPILE) {
             return ItemLead.attachToFence(playerIn, worldIn, pos);
         } else {
             ItemStack itemstack = playerIn.getHeldItem(hand);
@@ -188,9 +188,9 @@ public class BlockFence extends Block {
     @Override
     public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos) {
         return state.withProperty(NORTH, canFenceConnectTo(worldIn, pos, EnumFacing.NORTH))
-                .withProperty(EAST,  canFenceConnectTo(worldIn, pos, EnumFacing.EAST))
-                .withProperty(SOUTH, canFenceConnectTo(worldIn, pos, EnumFacing.SOUTH))
-                .withProperty(WEST,  canFenceConnectTo(worldIn, pos, EnumFacing.WEST));
+                    .withProperty(EAST,  canFenceConnectTo(worldIn, pos, EnumFacing.EAST))
+                    .withProperty(SOUTH, canFenceConnectTo(worldIn, pos, EnumFacing.SOUTH))
+                    .withProperty(WEST,  canFenceConnectTo(worldIn, pos, EnumFacing.WEST));
     }
 
 
@@ -225,7 +225,7 @@ public class BlockFence extends Block {
 
     @Override
     protected BlockStateContainer createBlockState() {
-        return new BlockStateContainer(this, new IProperty[] {NORTH, EAST, WEST, SOUTH});
+        return new BlockStateContainer(this, NORTH, EAST, WEST, SOUTH);
     }
 
     /* ======================================== FORGE START ======================================== */
@@ -237,10 +237,9 @@ public class BlockFence extends Block {
     }
 
 
-    private boolean canFenceConnectTo(IBlockAccess world, BlockPos pos, EnumFacing facing) {
+    private boolean canFenceConnectTo(IBlockAccess access, BlockPos pos, EnumFacing facing) {
         BlockPos other = pos.offset(facing);
-        Block block = world.getBlockState(other).getBlock();
-        return block.canBeConnectedTo(world, other, facing.getOpposite()) || canConnectTo(world, other, facing.getOpposite());
+        return access.getBlockState(other).getBlock().canBeConnectedTo(access, other, facing.getOpposite()) || canConnectTo(access, other, facing.getOpposite());
     }
 
     /* ======================================== FORGE END ======================================== */

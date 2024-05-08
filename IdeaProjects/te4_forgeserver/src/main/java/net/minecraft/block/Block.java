@@ -50,8 +50,8 @@ import net.minecraftforge.common.EnumPlantType;
 import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import plus.fserver.api.IBlockEAccess;
 import plus.fserver.utls.collections.ArrayListE6;
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public class Block extends net.minecraftforge.registries.IForgeRegistryEntry.Impl<Block> {
@@ -535,9 +535,8 @@ public class Block extends net.minecraftforge.registries.IForgeRegistryEntry.Imp
 
 
     public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
-        if (hasTileEntity(state) && !(this instanceof BlockContainer)) {
+        if (hasTileEntity(state) && !(this instanceof BlockContainer))
             worldIn.removeTileEntity(pos);
-        }
     }
 
 
@@ -546,45 +545,43 @@ public class Block extends net.minecraftforge.registries.IForgeRegistryEntry.Imp
     }
 
 
-    public Item getItemDropped(IBlockState state, Random rand, int fortune)
-    {
+    public Item getItemDropped(IBlockState state, Random rand, int fortune) {
         return Item.getItemFromBlock(this);
     }
 
+
     @Deprecated
-    public float getPlayerRelativeBlockHardness(IBlockState state, EntityPlayer player, World worldIn, BlockPos pos)
-    {
+    public float getPlayerRelativeBlockHardness(IBlockState state, EntityPlayer player, World worldIn, BlockPos pos) {
         return net.minecraftforge.common.ForgeHooks.blockStrength(state, player, worldIn, pos);
     }
 
-    public final void dropBlockAsItem(World worldIn, BlockPos pos, IBlockState state, int fortune)
-    {
+
+    public final void dropBlockAsItem(World worldIn, BlockPos pos, IBlockState state, int fortune) {
         this.dropBlockAsItemWithChance(worldIn, pos, state, 1.0F, fortune);
     }
 
-    public void dropBlockAsItemWithChance(World worldIn, BlockPos pos, IBlockState state, float chance, int fortune)
-    {
-        if (!worldIn.isRemote && !worldIn.restoringBlockSnapshots) // do not drop items while restoring blockstates, prevents item dupe
+
+    public void dropBlockAsItemWithChance(World worldIn, BlockPos pos, IBlockState state, float chance, int fortune) {
+        if ((!worldIn.isRemote || SERVER_COMPILE) && !worldIn.restoringBlockSnapshots) // do not drop items while restoring blockstates, prevents item dupe
         {
             List<ItemStack> drops = getDrops(worldIn, pos, state, fortune); // use the old method until it gets removed, for backward compatibility
             chance = net.minecraftforge.event.ForgeEventFactory.fireBlockHarvesting(drops, worldIn, pos, state, fortune, chance, false, harvesters.get());
 
-            for (ItemStack drop : drops)
-            {
-                if (worldIn.rand.nextFloat() <= chance)
-                {
+            for (ItemStack drop : drops) {
+                if (worldIn.rand.nextFloat() <= chance) {
                     spawnAsEntity(worldIn, pos, drop);
                 }
             }
         }
     }
 
-    public static void spawnAsEntity(World worldIn, BlockPos pos, ItemStack stack)
-    {
-        if (!worldIn.isRemote && !stack.isEmpty() && worldIn.getGameRules().getBoolean("doTileDrops")&& !worldIn.restoringBlockSnapshots) // do not drop items while restoring blockstates, prevents item dupe
+
+    public static void spawnAsEntity(World worldIn, BlockPos pos, ItemStack stack) {
+        if ((!worldIn.isRemote || SERVER_COMPILE) && !stack.isEmpty() &&
+                worldIn.getGameRules().doTileDrops.getBoolean() && !worldIn.restoringBlockSnapshots)
+            // do not drop items while restoring blockstates, prevents item dupe
         {
-            if (captureDrops.get())
-            {
+            if (captureDrops.get()) {
                 capturedDrops.get().add(stack);
                 return;
             }
@@ -598,18 +595,17 @@ public class Block extends net.minecraftforge.registries.IForgeRegistryEntry.Imp
         }
     }
 
-    public void dropXpOnBlockBreak(World worldIn, BlockPos pos, int amount)
-    {
-        if (!worldIn.isRemote && worldIn.getGameRules().getBoolean("doTileDrops"))
-        {
-            while (amount > 0)
-            {
+
+    public void dropXpOnBlockBreak(World worldIn, BlockPos pos, int amount) {
+        if ((!worldIn.isRemote || SERVER_COMPILE) && worldIn.getGameRules().doTileDrops.getBoolean()) {
+            while (amount > 0) {
                 int i = EntityXPOrb.getXPSplit(amount);
                 amount -= i;
                 worldIn.spawnEntity(new EntityXPOrb(worldIn, (double)pos.getX() + 0.5D, (double)pos.getY() + 0.5D, (double)pos.getZ() + 0.5D, i));
             }
         }
     }
+
 
     public int damageDropped(IBlockState state)
     {

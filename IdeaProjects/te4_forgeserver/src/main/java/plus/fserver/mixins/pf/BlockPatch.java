@@ -6,13 +6,14 @@ import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
+@Deprecated
 @Mixin(Block.class)
 public class BlockPatch {
     @Shadow protected static ThreadLocal<Boolean> captureDrops;
@@ -26,7 +27,7 @@ public class BlockPatch {
     @Overwrite
     public static void spawnAsEntity(World worldIn, BlockPos pos, ItemStack stack) {
         // do not drop items while restoring blockstates, prevents item dupe
-        if (!worldIn.isRemote && !stack.isEmpty() && worldIn.getGameRules().doTileDrops.getBoolean() && !worldIn.restoringBlockSnapshots) {
+        if ((!worldIn.isRemote || SERVER_COMPILE) && !stack.isEmpty() && worldIn.getGameRules().doTileDrops.getBoolean() && !worldIn.restoringBlockSnapshots) {
             if (captureDrops.get()) {
                 capturedDrops.get().add(stack);
                 return;
@@ -47,7 +48,7 @@ public class BlockPatch {
      */
     @Overwrite
     public void dropXpOnBlockBreak(World worldIn, BlockPos pos, int amount) {
-        if (!worldIn.isRemote && worldIn.getGameRules().doTileDrops.getBoolean()) {
+        if ((!worldIn.isRemote || SERVER_COMPILE) && worldIn.getGameRules().doTileDrops.getBoolean()) {
             while (amount > 0) {
                 int i = EntityXPOrb.getXPSplit(amount);
                 amount -= i;
@@ -55,16 +56,4 @@ public class BlockPatch {
             }
         }
     }
-//
-//
-//    /**
-//     * @author Te4hno
-//     * @reason Speedy
-//     * todo maybe unstabile
-//     */
-//    @Overwrite
-//    public boolean isPassable(IBlockAccess worldIn, BlockPos pos) {
-//        return false;
-//        //return !this.material.blocksMovement();
-//    }
 }

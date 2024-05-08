@@ -26,6 +26,7 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import plus.fserver.utls.collections.ArrayListE6;
 import static net.minecraft.block.BlockFs.addCollisionBoxToListFs;
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public class BlockDaylightDetector extends BlockContainer {
@@ -90,7 +91,7 @@ public class BlockDaylightDetector extends BlockContainer {
     @Override
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
         if (playerIn.isAllowEdit()) {
-            if (worldIn.isRemote) {
+            if (worldIn.isRemote || !SERVER_COMPILE) {
                 return true;
             } else {
                 if (this.inverted) {

@@ -38,9 +38,9 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.ElcaMobs;
 import plus.fserver.api.IBlockEAccess;
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
-//todo jump on boat
 public class EntityBoat extends Entity {
     private static final DataParameter<Integer> TIME_SINCE_HIT = EntityDataManager.createKey(EntityBoat.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> FORWARD_DIRECTION = EntityDataManager.createKey(EntityBoat.class, DataSerializers.VARINT);
@@ -232,7 +232,7 @@ public class EntityBoat extends Entity {
             ++this.outOfControlTicks;
         }
 
-        if (!this.world.isRemote && this.outOfControlTicks >= 60.0F) {
+        if ((!this.world.isRemote || SERVER_COMPILE) && this.outOfControlTicks >= 60.0F) {
             this.removePassengers();
         }
         this.prevPosX = this.posX;
@@ -256,7 +256,7 @@ public class EntityBoat extends Entity {
 
             this.updateMotion();
 
-            if (this.world.isRemote) {
+            if (this.world.isRemote || !SERVER_COMPILE) {
                 this.controlBoat();
                 this.world.sendPacketToServer(new CPacketSteerBoat(this.getPaddleState(0), this.getPaddleState(1)));
             }
@@ -294,7 +294,7 @@ public class EntityBoat extends Entity {
             List<Entity> list = this.world.getEntitiesInAABBexcluding(this, box, EntitySelectors.getTeamCollisionPredicate(this));
 
             if (!list.isEmpty()) {
-                boolean flag = !this.world.isRemote && !(this.getControllingPassenger() instanceof EntityPlayer);
+                boolean flag = (!this.world.isRemote || SERVER_COMPILE) && !(this.getControllingPassenger() instanceof EntityPlayer);
 
                 for (int j = 0; j < list.size(); ++j) {
                     Entity entity = list.get(j);
@@ -701,7 +701,7 @@ public class EntityBoat extends Entity {
                     }
                     this.fall(this.fallDistance, 1.0F);
 
-                    if (!this.world.isRemote && !this.isDead) {
+                    if ((!this.world.isRemote || SERVER_COMPILE) && !this.isDead) {
                         this.setDead();
 
                         if (this.world.getGameRules().doEntityDrops.getBoolean()) {

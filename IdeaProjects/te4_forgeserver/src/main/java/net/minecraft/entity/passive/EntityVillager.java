@@ -81,11 +81,12 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import plus.fserver.ElcaMobs;
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public class EntityVillager extends EntityAgeable implements INpc, IMerchant {
     private static final Logger LOGGER = LogManager.getLogger();
-    private static final DataParameter<Integer> PROFESSION = EntityDataManager.<Integer>createKey(EntityVillager.class, DataSerializers.VARINT);
+    private static final DataParameter<Integer> PROFESSION = EntityDataManager.createKey(EntityVillager.class, DataSerializers.VARINT);
     private int randomTickDivider;
     private boolean isMating;
     private boolean isPlaying;
@@ -237,7 +238,7 @@ public class EntityVillager extends EntityAgeable implements INpc, IMerchant {
                 player.addStat(StatList.TALKED_TO_VILLAGER);
             }
 
-            if (!this.world.isRemote && !this.buyingList.isEmpty()) {
+            if ((!this.world.isRemote || SERVER_COMPILE) && !this.buyingList.isEmpty()) {
                 this.setCustomer(player);
                 player.displayVillagerTradeGui(this);
             }
@@ -570,7 +571,7 @@ public class EntityVillager extends EntityAgeable implements INpc, IMerchant {
 
     @Override
     public void verifySellingItem(ItemStack stack) {
-        if (!this.world.isRemote && this.livingSoundTime > -this.getTalkInterval() + 20) {
+        if ((!this.world.isRemote || SERVER_COMPILE) && this.livingSoundTime > -this.getTalkInterval() + 20) {
             this.livingSoundTime = -this.getTalkInterval();
             this.playSound(stack.isEmpty() ? SoundEvents.ENTITY_VILLAGER_NO : SoundEvents.ENTITY_VILLAGER_YES, this.getSoundVolume(), this.getSoundPitch());
         }
@@ -791,7 +792,7 @@ public class EntityVillager extends EntityAgeable implements INpc, IMerchant {
 
     @Override
     public void onStruckByLightning(EntityLightningBolt lightningBolt) {
-        if (!this.world.isRemote && !this.isDead) {
+        if ((!this.world.isRemote || SERVER_COMPILE) && !this.isDead) {
             EntityWitch entitywitch = new EntityWitch(this.world);
             entitywitch.setLocationAndAngles(this.posX, this.posY, this.posZ, this.rotationYaw, this.rotationPitch);
             entitywitch.onInitialSpawn(this.world.getDifficultyForLocation(new BlockPos(entitywitch)), (IEntityLivingData)null);

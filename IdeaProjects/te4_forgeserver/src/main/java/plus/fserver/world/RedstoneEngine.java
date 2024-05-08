@@ -289,7 +289,7 @@ public class RedstoneEngine {
 
     private void identifyNode(final World worldIn, final UpdateNode upd1) {
         final BlockPos pos = upd1.self;
-        final IBlockState oldState = ((WorldServer)worldIn).localSelector.getState(pos);
+        final IBlockState oldState = worldIn.localSelector.getState(pos);
         upd1.currentState = oldState;
 
         final Block block = oldState.getBlock();

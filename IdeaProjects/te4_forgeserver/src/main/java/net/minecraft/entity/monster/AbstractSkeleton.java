@@ -33,6 +33,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.ElcaMobs;
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public abstract class AbstractSkeleton extends EntityMob implements IRangedAttackMob {
@@ -104,7 +105,7 @@ public abstract class AbstractSkeleton extends EntityMob implements IRangedAttac
 
     @Override
     public void onLivingUpdateTick() {
-        if (this.world.isDaytime() && !this.world.isRemote) {
+        if (this.world.isDaytime() && (!this.world.isRemote || SERVER_COMPILE)) {
             float f = this.getBrightness();
 
             if (f > 0.5F && this.rand.nextFloat() * 30.0F < (f - 0.4F) * 2.0F && this.getRidingEntity() instanceof EntityBoat ?
@@ -170,7 +171,7 @@ public abstract class AbstractSkeleton extends EntityMob implements IRangedAttac
 
 
     public void setCombatTask() {
-        if (this.world != null && !this.world.isRemote) {
+        if (this.world != null && (!this.world.isRemote || SERVER_COMPILE)) {
             this.tasks.removeTask(this.aiAttackOnCollide);
             this.tasks.removeTask(this.aiArrowAttack);
             ItemStack itemstack = this.getHeldItemMainhand();
@@ -225,7 +226,7 @@ public abstract class AbstractSkeleton extends EntityMob implements IRangedAttac
     public void setItemStackToSlot(EntityEquipmentSlot slotIn, ItemStack stack) {
         super.setItemStackToSlot(slotIn, stack);
 
-        if (!this.world.isRemote && slotIn == EntityEquipmentSlot.MAINHAND) {
+        if ((!this.world.isRemote || SERVER_COMPILE) && slotIn == EntityEquipmentSlot.MAINHAND) {
             this.setCombatTask();
         }
     }

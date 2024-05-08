@@ -16,6 +16,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public class EntitySquid extends EntityWaterMob {
@@ -112,7 +113,7 @@ public class EntitySquid extends EntityWaterMob {
         this.squidRotation += this.rotationVelocity;
 
         if ((double)this.squidRotation > (Math.PI * 2D)) {
-            if (this.world.isRemote) {
+            if (this.world.isRemote || !SERVER_COMPILE) {
                 this.squidRotation = ((float)Math.PI * 2F);
             } else {
                 this.squidRotation = (float)((double)this.squidRotation - (Math.PI * 2D));
@@ -141,7 +142,7 @@ public class EntitySquid extends EntityWaterMob {
                 this.rotateSpeed *= 0.99F;
             }
 
-            if (!this.world.isRemote) {
+            if (!this.world.isRemote || SERVER_COMPILE) {
                 this.motionX = this.randomMotionVecX * this.randomMotionSpeed;
                 this.motionY = this.randomMotionVecY * this.randomMotionSpeed;
                 this.motionZ = this.randomMotionVecZ * this.randomMotionSpeed;
@@ -155,7 +156,7 @@ public class EntitySquid extends EntityWaterMob {
         } else {
             this.tentacleAngle = MathHelper.abs(MathHelper.sin(this.squidRotation)) * (float)Math.PI * 0.25F;
 
-            if (!this.world.isRemote) {
+            if (!this.world.isRemote || SERVER_COMPILE) {
                 this.motionX = 0.0D;
                 this.motionZ = 0.0D;
 

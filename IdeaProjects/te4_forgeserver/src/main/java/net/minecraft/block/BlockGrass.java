@@ -2,7 +2,6 @@ package net.minecraft.block;
 
 import java.util.Random;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
@@ -13,11 +12,11 @@ import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.utls.ChunkSelector;
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public class BlockGrass extends BlockFx implements IGrowable {
@@ -92,11 +91,11 @@ public class BlockGrass extends BlockFx implements IGrowable {
 
     @Override
     public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand) {
-        if (!worldIn.isRemote) {
+        if (!worldIn.isRemote || SERVER_COMPILE) {
             if (!worldIn.isAreaLoaded(pos, 3)) return;
             pos = worldIn.localTempPos.setPos(pos.getX(), pos.getY()+1, pos.getZ());
 
-            ChunkSelector selector = ((WorldServer)worldIn).localSelector;
+            ChunkSelector selector = worldIn.localSelector;
             Chunk chunk = selector.getChunkE(pos.getX()>>4, pos.getZ()>>4);
 
             int light = worldIn.getLightFromNeighbors(pos);

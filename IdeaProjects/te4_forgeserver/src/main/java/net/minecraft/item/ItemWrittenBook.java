@@ -23,6 +23,7 @@ import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public class ItemWrittenBook extends Item {
@@ -79,7 +80,7 @@ public class ItemWrittenBook extends Item {
     public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
         ItemStack itemstack = playerIn.getHeldItem(handIn);
 
-        if (!worldIn.isRemote) {
+        if (!worldIn.isRemote || SERVER_COMPILE) {
             this.resolveContents(itemstack, playerIn);
         }
 

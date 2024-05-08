@@ -324,6 +324,11 @@ public class ArrayListE6<T> implements List<T> {
     }
 
 
+    public T getC(int index){
+        return (T) data[index];
+    }
+
+
     public T getSafe(int index){
         if(index >= data.length) return null;
         return (T) data[index];

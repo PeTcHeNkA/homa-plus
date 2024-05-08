@@ -16,6 +16,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.IInteractionObject;
 import net.minecraft.world.World;
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public class BlockWorkbench extends BlockFx {
@@ -26,7 +27,7 @@ public class BlockWorkbench extends BlockFx {
 
 
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-        if (worldIn.isRemote) {
+        if (worldIn.isRemote || !SERVER_COMPILE) {
             return true;
         } else {
             playerIn.displayGui(new BlockWorkbench.InterfaceCraftingTable(worldIn, pos));

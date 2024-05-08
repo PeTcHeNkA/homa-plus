@@ -18,12 +18,12 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.utls.ChunkSelector;
 import plus.fserver.utls.math.BlockPosDelta;
 import plus.fserver.world.RedstoneEngine;
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public class BlockRedstoneWire extends BlockFs {
@@ -157,31 +157,15 @@ public class BlockRedstoneWire extends BlockFs {
 
     @Override
     public void onBlockAdded(final World worldIn, final BlockPos pos, final IBlockState state) {
-        if (!worldIn.isRemote) {
+        if (!worldIn.isRemote || SERVER_COMPILE)
             this.turbo.updateSurroundingRedstone(worldIn, pos, state, null);
-//            for (final EnumFacing enumfacing : BlockIDIndexes.FACING_VERTICAL) {
-//                worldIn.notifyNeighborsOfStateChange(pos.offset(enumfacing), this, false);
-//            }
-//            for (final EnumFacing enumfacing2 : BlockIDIndexes.FACING_HORIZONTAL) {
-//                this.notifyWireNeighborsOfStateChange(worldIn, pos.offset(enumfacing2));
-//            }
-//            for (final EnumFacing enumfacing3 : BlockIDIndexes.FACING_HORIZONTAL) {
-//                final BlockPos blockpos = pos.offset(enumfacing3);
-//                if (worldIn.getBlockState(blockpos).isNormalCube()) {
-//                    this.notifyWireNeighborsOfStateChange(worldIn, blockpos.up());
-//                }
-//                else {
-//                    this.notifyWireNeighborsOfStateChange(worldIn, blockpos.down());
-//                }
-//            }
-        }
     }
 
 
     @Override
     public void breakBlock(final World worldIn, final BlockPos pos, final IBlockState state) {
         super.breakBlock(worldIn, pos, state);
-        if (!worldIn.isRemote) {
+        if (!worldIn.isRemote || SERVER_COMPILE) {
             for (final EnumFacing enumfacing : EnumFacing.VALUES) {
                 worldIn.notifyNeighborsOfStateChange(pos.offset(enumfacing), this, false);
             }
@@ -213,7 +197,7 @@ public class BlockRedstoneWire extends BlockFs {
 
     @Override
     public void neighborChanged(final IBlockState state, final World worldIn, final BlockPos pos, final Block blockIn, final BlockPos fromPos) {
-        if (!worldIn.isRemote) {
+        if (!worldIn.isRemote || SERVER_COMPILE) {
             if (this.canPlaceBlockAt(worldIn, pos)) {
                 this.turbo.updateSurroundingRedstone(worldIn, pos, state, fromPos);
             } else {
@@ -246,7 +230,7 @@ public class BlockRedstoneWire extends BlockFs {
 
         int mask = 0;
         //todo unchecked
-        ChunkSelector selector = ((WorldServer)access.getWorld()).localSelector;
+        ChunkSelector selector = access.getWorld().localSelector;
         BlockPosDelta delta = access.getWorld().redstoneCache.mutDelta;
         delta.setPos(pos.getX(), pos.getY(), pos.getZ());
         for (final EnumFacing enumfacing : BlockIDIndexes.FACING_HORIZONTAL)
@@ -454,7 +438,7 @@ public class BlockRedstoneWire extends BlockFs {
     }
 
 
-    enum EnumAttachPosition implements IStringSerializable {
+    public static enum EnumAttachPosition implements IStringSerializable {
         UP("up"),
         SIDE("side"),
         NONE("none");

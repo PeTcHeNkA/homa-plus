@@ -23,6 +23,7 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public class BlockTrapDoor extends BlockFx {
@@ -120,7 +121,7 @@ public class BlockTrapDoor extends BlockFx {
 
     @Override
     public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos) {
-        if (!worldIn.isRemote) {
+        if (!worldIn.isRemote || SERVER_COMPILE) {
             boolean flag = worldIn.isBlockPowered(pos);
 
             if (flag || blockIn.getDefaultState().canProvidePower()) {

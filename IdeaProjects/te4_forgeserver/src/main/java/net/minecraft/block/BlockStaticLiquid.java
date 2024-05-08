@@ -46,9 +46,9 @@ public class BlockStaticLiquid extends BlockLiquid {
     @Override
     public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand) {
         if (this.material == Material.LAVA) {
-            if (worldIn.getGameRules().getBoolean("doFireTick")) {
+            if (worldIn.getGameRules().doFireTick.getBoolean()) {
                 int i = rand.nextInt(3);
-                ChunkSelector selector = ((WorldServer)worldIn).localSelector;
+                ChunkSelector selector = worldIn.localSelector;
                 if (i > 0) {
                     BlockPos blockpos = pos;
 
