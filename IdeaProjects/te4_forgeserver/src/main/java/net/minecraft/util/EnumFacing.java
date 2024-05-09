@@ -12,6 +12,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3i;
+import org.apache.logging.log4j.core.util.ObjectArrayIterator;
 
 
 public enum EnumFacing implements IStringSerializable {
@@ -186,7 +187,7 @@ public enum EnumFacing implements IStringSerializable {
 
     @Nullable
     public static EnumFacing byName(String name) {
-        return name == null ? null : (EnumFacing)NAME_LOOKUP.get(name.toLowerCase(Locale.ROOT));
+        return NAME_LOOKUP.get(name.toLowerCase(Locale.ROOT));
     }
 
 
@@ -389,13 +390,15 @@ public enum EnumFacing implements IStringSerializable {
         }
 
 
+        @Override
         public boolean apply(@Nullable EnumFacing facing) {
             return facing != null && facing.getAxis().getPlane() == this;
         }
 
 
+        @Override
         public Iterator<EnumFacing> iterator() {
-            return Iterators.forArray(FACINGS);
+            return new ObjectArrayIterator<>(FACINGS);
         }
     }
 
