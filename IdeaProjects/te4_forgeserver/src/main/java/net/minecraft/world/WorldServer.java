@@ -14,7 +14,6 @@ import net.minecraft.advancements.AdvancementManager;
 import net.minecraft.advancements.FunctionManager;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
-import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReport;
@@ -44,11 +43,9 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.village.VillageCollection;
 import net.minecraft.village.VillageSiege;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
@@ -84,10 +81,7 @@ import plus.fserver.server.chunk.io.TQueuedChunk;
 import plus.fserver.utls.ChunkSelector;
 import plus.fserver.utls.math.MathUtls;
 import plus.fserver.world.NavigationCache;
-import plus.fserver.utls.collections.ArrayListE6;
-import plus.fserver.utls.math.BlockPosDelta;
 import plus.tson.utl.Te4HashSet;
-
 import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 

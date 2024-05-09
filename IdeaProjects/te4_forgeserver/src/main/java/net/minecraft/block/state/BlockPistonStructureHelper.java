@@ -8,6 +8,7 @@ import net.minecraft.block.material.EnumPushReaction;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import plus.fserver.ElcaConfig;
 import plus.fserver.api.IBlockEAccess;
 import plus.fserver.utls.ChunkSelector;
 import plus.fserver.utls.collections.ArrayListE6;
@@ -52,10 +53,10 @@ public class BlockPistonStructureHelper {
     public boolean canMove() {
         this.toMove.clear();
         this.toDestroy.clear();
-        IBlockState iblockstate = access.getBlockState(this.blockToMove);
+        IBlockState state = access.getBlockState(this.blockToMove);
 
-        if (!BlockPistonBase.canPush(iblockstate, this.world, this.blockToMove, this.moveDirection, false, this.moveDirection)) {
-            if (iblockstate.getPushReaction() == EnumPushReaction.DESTROY) {
+        if (!BlockPistonBase.canPush(state, this.world, this.blockToMove, this.moveDirection, false, this.moveDirection)) {
+            if (state.getPushReaction() == EnumPushReaction.DESTROY) {
                 this.toDestroy.add(this.blockToMove);
                 return true;
             } else {
@@ -64,7 +65,6 @@ public class BlockPistonStructureHelper {
         } else if (!this.addBlockLine(this.blockToMove, this.moveDirection)) {
             return false;
         } else {
-            IBlockState state;
             BlockPos blockpos;
             for (int i = 0; i < this.toMove.size(); ++i) {
                 state = access.getBlockState(blockpos = this.toMove.get(i));
@@ -77,12 +77,11 @@ public class BlockPistonStructureHelper {
 
 
     private boolean addBlockLine(BlockPos origin, EnumFacing facing) {
-        IBlockState iblockstate = access.getBlockState(origin);
-        Block block = iblockstate.getBlock();
+        IBlockState start = access.getBlockState(origin);
 
-        if (iblockstate.getBlock().isAir(iblockstate, this.world, origin)) {
+        if (start.getBlock().isAir(start, this.world, origin)) {
             return true;
-        } else if (!BlockPistonBase.canPush(iblockstate, this.world, origin, this.moveDirection, false, facing)) {
+        } else if (!BlockPistonBase.canPush(start, this.world, origin, this.moveDirection, false, facing)) {
             return true;
         } else if (origin.equals(this.pistonPos)) {
             return true;
@@ -91,29 +90,32 @@ public class BlockPistonStructureHelper {
         } else {
             int i = 1;
 
-            if (i + this.toMove.size() > 12) {
+            if (i + this.toMove.size() > ElcaConfig.MAX_PISTON_POWER) {
                 return false;
             } else {
-                while (block.isStickyBlock(iblockstate)) {
-                    BlockPos blockpos = origin.offset(this.moveDirection.getOpposite(), i);
-                    iblockstate = access.getBlockState(blockpos);
-                    block = iblockstate.getBlock();
+                Block block = start.getBlock();
+                BlockPos.MutableBlockPos temp = world.localTempPos;
 
-                    if (iblockstate.getBlock().isAir(iblockstate, this.world, blockpos) || !BlockPistonBase.canPush(iblockstate, this.world, blockpos, this.moveDirection, false, this.moveDirection.getOpposite()) || blockpos.equals(this.pistonPos)) {
-                        break;
-                    }
+                EnumFacing opp = this.moveDirection.getOpposite();
 
-                    ++i;
+                while (block.isStickyBlock(start)) {
+                    block = (start = access.getBlockState(temp.setPos(
+                                    origin.getX() + opp.getXOffset() * i,
+                                    origin.getY() + opp.getYOffset() * i,
+                                    origin.getZ() + opp.getZOffset() * i
+                            ))).getBlock();
 
-                    if (i + this.toMove.size() > 12) {
-                        return false;
-                    }
+                    if (start.getBlock().isAir(start, this.world, temp) ||
+                            !BlockPistonBase.canPush(start, this.world, temp, this.moveDirection, false, opp)
+                            || temp.equals(this.pistonPos)) break;
+
+                    if (++i + this.toMove.size() > ElcaConfig.MAX_PISTON_POWER) return false;
                 }
 
                 int i1 = 0;
 
                 for (int j = i - 1; j >= 0; --j) {
-                    this.toMove.add(origin.offset(this.moveDirection.getOpposite(), j));
+                    this.toMove.add(origin.offset(opp, j));
                     ++i1;
                 }
 
@@ -137,24 +139,19 @@ public class BlockPistonStructureHelper {
                         return true;
                     }
 
-                    iblockstate = access.getBlockState(pos1);
+                    start = access.getBlockState(pos1);
 
-                    if (iblockstate.getBlock().isAir(iblockstate, this.world, pos1)) {
-                        return true;
-                    }
+                    if (start.getBlock().isAir(start, this.world, pos1)) return true;
 
-                    if (!BlockPistonBase.canPush(iblockstate, this.world, pos1, this.moveDirection, true, this.moveDirection) || pos1.equals(this.pistonPos)) {
+                    if (!BlockPistonBase.canPush(start, this.world, pos1, this.moveDirection, true, this.moveDirection) || pos1.equals(this.pistonPos))
                         return false;
-                    }
 
-                    if (iblockstate.getPushReaction() == EnumPushReaction.DESTROY) {
+                    if (start.getPushReaction() == EnumPushReaction.DESTROY) {
                         this.toDestroy.add(pos1);
                         return true;
                     }
 
-                    if (this.toMove.size() >= 12) {
-                        return false;
-                    }
+                    if (this.toMove.size() >= ElcaConfig.MAX_PISTON_POWER) return false;
 
                     this.toMove.add(pos1);
                     ++i1;
@@ -166,7 +163,7 @@ public class BlockPistonStructureHelper {
 
 
     private void reorderListAtCollision(int min, int max) {
-        List<BlockPos> list = this.toMove.subList(0, max);
+        List<BlockPos> list  = this.toMove.subList(0, max);
         List<BlockPos> list1 = this.toMove.subList(this.toMove.size() - min, this.toMove.size());
         List<BlockPos> list2 = this.toMove.subList(max, this.toMove.size() - min);
         this.toMove.clear();
@@ -177,9 +174,9 @@ public class BlockPistonStructureHelper {
 
 
     private boolean addBranchingBlocks(BlockPos fromPos) {
-        for (EnumFacing enumfacing : EnumFacing.VALUES)
-            if (enumfacing.getAxis() != this.moveDirection.getAxis()
-                    && !this.addBlockLine(fromPos.offset(enumfacing), enumfacing)) return true;
+        for (EnumFacing facing : EnumFacing.VALUES)
+            if (facing.getAxis() != this.moveDirection.getAxis()
+                    && !this.addBlockLine(fromPos.offset(facing), facing)) return true;
         return false;
     }
 

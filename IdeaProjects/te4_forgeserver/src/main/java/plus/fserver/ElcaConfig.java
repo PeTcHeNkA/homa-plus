@@ -38,6 +38,7 @@ public class ElcaConfig {
     public static int MAX_ENTITY_COLLISIONS      = 3;
     public static int MAX_ENTITY_COLLISIONS_MOVE = 1;
     public static int MAX_SPONGE_POWER           = 64;
+    public static int MAX_PISTON_POWER           = 12;
     public static int MIN_CHANGED_BLOCKS_BUF     = 24;
     public static int RESET_LOW_LEVEL_MOBS       = 200;
 
@@ -91,6 +92,7 @@ public class ElcaConfig {
         MIN_CHANGED_BLOCKS_BUF     = calc(file, "min-changed-blocks-buf"      , MIN_CHANGED_BLOCKS_BUF     );
 
         MAX_SPONGE_POWER           = calc(file, "max-sponge-power"            , MAX_SPONGE_POWER           );
+        MAX_PISTON_POWER           = calc(file, "max-piston-power"            , MAX_PISTON_POWER           );
 
         SLOW_SWIM_AI               = calc(file, "slow-swim-ai"                , SLOW_SWIM_AI               );
         SLOW_TEMP_CHECK            = calc(file, "slow-temp-check"             , SLOW_TEMP_CHECK            );

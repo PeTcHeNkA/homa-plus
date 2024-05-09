@@ -208,15 +208,6 @@ public abstract class EntityLiving extends EntityLivingBase {
     }
 
 
-    public void onEntityUpdate() {
-        super.onEntityUpdate();
-        if (this.isEntityAlive() && this.rand.nextInt(1000) < this.livingSoundTime++) {
-            this.applyEntityAI();
-            this.playLivingSound();
-        }
-    }
-
-
     protected void playHurtSound(DamageSource source) {
         this.applyEntityAI();
         super.playHurtSound(source);
@@ -265,17 +256,24 @@ public abstract class EntityLiving extends EntityLivingBase {
     @Override
     public void onUpdate() {
         if (world.onLivingUpdate(this)) return;
-        onUpdateE();
+
+        if (!this.world.isRemote || SERVER_COMPILE) this.setFlag(6, this.isGlowing());
+        this.onEntityUpdate();
+
+        if (this.isEntityAlive() && this.rand.nextInt(1000) < this.livingSoundTime++) {
+            this.applyEntityAI();
+            this.playLivingSound();
+        }
+
         onUpdateB();
+
         if (!this.world.isRemote || SERVER_COMPILE) {
             this.updateLeashedState();
 
             if ((this.ticksExisted & 7) == 7) {
-                boolean flag = !(this.getControllingPassenger() instanceof EntityLiving);
-                boolean flag1 = !(this.getRidingEntity() instanceof EntityBoat);
-                this.tasks.setControlFlag(1, flag);
-                this.tasks.setControlFlag(4, flag && flag1);
-                this.tasks.setControlFlag(2, flag);
+                boolean flag;
+                this.tasks.setControlFlag(3, flag = !(this.getControllingPassenger() instanceof EntityLiving));
+                this.tasks.setControlFlag(4, flag && !(this.getRidingEntity() instanceof EntityBoat));
             }
         }
     }

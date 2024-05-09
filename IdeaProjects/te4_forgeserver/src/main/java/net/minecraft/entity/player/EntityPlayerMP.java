@@ -699,9 +699,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
 
     @Override
     protected void frostWalk(BlockPos pos) {
-        if (!this.isSpectator()) {
-            super.frostWalk(pos);
-        }
+        if (!this.isSpectator()) super.frostWalk(pos);
     }
 
 

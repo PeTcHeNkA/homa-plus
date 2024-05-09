@@ -3,6 +3,8 @@ package plus.fserver;
 
 //used only on compile
 public class ElcaCV {
+    public static final int MAX_FROST_WALK_RANGE = 16;
+
     public static final boolean DEBUG_NO_SERVER               = false;
 
 

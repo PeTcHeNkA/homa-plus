@@ -148,20 +148,25 @@ public class BlockPistonBase extends BlockDirectional {
 
 
     private boolean shouldBeExtended(World worldIn, BlockPos pos, EnumFacing facing) {
-        for (EnumFacing enumFacing : EnumFacing.VALUES) {
-            if (enumFacing != facing && worldIn.isSidePowered(pos.offset(enumFacing), enumFacing)) {
-                return true;
-            }
+        BlockPos.MutableBlockPos temp = worldIn.localTempPos;
+        for (EnumFacing cur : EnumFacing.VALUES) {
+            temp.setPos(
+                    pos.getX()+ cur.getXOffset(),
+                    pos.getY()+ cur.getYOffset(),
+                    pos.getZ()+ cur.getZOffset()
+            );
+            if (cur != facing && worldIn.isSidePowered(temp, cur)) return true;
         }
-        if (worldIn.isSidePowered(pos, EnumFacing.DOWN)) {
+        if (worldIn.isSidePowered(pos, EnumFacing.DOWN))
             return true;
-        } else {
-            BlockPos blockpos = pos.up();
-
-            for (EnumFacing enumFacing : EnumFacing.VALUES) {
-                if (enumFacing != EnumFacing.DOWN && worldIn.isSidePowered(blockpos.offset(enumFacing), enumFacing)) {
-                    return true;
-                }
+        else {
+            for (EnumFacing cur : EnumFacing.VALUES) {
+                temp.setPos(
+                        pos.getX()+ cur.getXOffset(),
+                        pos.getY()+ cur.getYOffset()+1,
+                        pos.getZ()+ cur.getZOffset()
+                );
+                if (cur != EnumFacing.DOWN && worldIn.isSidePowered(temp, cur)) return true;
             }
             return false;
         }

@@ -15,6 +15,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.crash.ICrashReportDetail;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
@@ -1513,9 +1514,6 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
     protected boolean checkCanUpdate;
     public void updateEntities() {
-        this.profiler.startSection("entities");
-        this.profiler.startSection("global");
-
         for (int i = 0; i < this.weatherEffects.size(); ++i) {
             Entity entity = this.weatherEffects.get(i);
 
@@ -1531,7 +1529,6 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             }
         }
 
-        this.profiler.endStartSection("remove");
         this.loadedEntityList.removeAll(this.unloadedEntityList);
 
         for (int k = 0; k < this.unloadedEntityList.size(); ++k) {
@@ -1551,13 +1548,11 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         this.unloadedEntityList.clear();
         checkCanUpdate = false;
         this.tickPlayers();
-        this.profiler.endStartSection("regular");
 
         //entities
         checkCanUpdate = true;
         tickLoadedEntities();
 
-        this.profiler.endStartSection("blockEntities");
         this.processingLoadedTiles = true; //FML Move above remove to prevent CMEs
 
         //tile entities
@@ -1586,13 +1581,9 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
                     //Forge: Fix TE's getting an extra tick on the client side....
                 {
                     try {
-                        this.profiler.func_194340_a(() -> {
-                            return String.valueOf((Object)TileEntity.getKey(tileentity.getClass()));
-                        });
                         net.minecraftforge.server.timings.TimeTracker.TILE_ENTITY_UPDATE.trackStart(tileentity);
                         ((ITickable)tileentity).update();
                         net.minecraftforge.server.timings.TimeTracker.TILE_ENTITY_UPDATE.trackEnd(tileentity);
-                        this.profiler.endSection();
                     } catch (Throwable throwable) {
                         CrashReport crashreport2 = CrashReport.makeCrashReport(throwable, "Ticking block entity");
                         CrashReportCategory crashreportcategory2 = crashreport2.makeCategory("Block entity being ticked");
@@ -1620,7 +1611,6 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         }
 
         this.processingLoadedTiles = false;
-        this.profiler.endStartSection("pendingBlockEntities");
 
         if (!this.addedTileEntityList.isEmpty()) {
             for (int j1 = 0; j1 < this.addedTileEntityList.size(); ++j1) {
@@ -1641,9 +1631,6 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             }
             this.addedTileEntityList.clear();
         }
-
-        this.profiler.endSection();
-        this.profiler.endSection();
     }
 
 
@@ -3447,7 +3434,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
-    public boolean onLivingUpdate(EntityLivingBase entity){
+    public final boolean onLivingUpdate(EntityLivingBase entity){
         return updateEvent.post(entity);
     }
 
