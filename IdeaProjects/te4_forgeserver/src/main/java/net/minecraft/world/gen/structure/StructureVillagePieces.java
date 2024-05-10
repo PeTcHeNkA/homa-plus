@@ -36,7 +36,7 @@ import net.minecraft.world.biome.BiomeSavanna;
 import net.minecraft.world.biome.BiomeTaiga;
 import net.minecraft.world.gen.structure.template.TemplateManager;
 import net.minecraft.world.storage.loot.LootTableList;
-import plus.fserver.utls.ChunkSelector;
+import plus.fserver.server.elca.ChunkSelector;
 
 
 public class StructureVillagePieces {

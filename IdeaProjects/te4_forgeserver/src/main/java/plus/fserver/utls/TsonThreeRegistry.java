@@ -1,15 +1,16 @@
-package plus.fserver.world.generator.three;
+package plus.fserver.utls;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.minecraft.block.*;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.gen.feature.*;
-import plus.fserver.utls.McTsonUtils;
+import plus.fserver.world.generator.three.*;
 import plus.tson.TsonList;
 import plus.tson.TsonMap;
 import plus.tson.TsonObj;
 import java.util.Random;
+import static plus.tson.ext.TsonNumUtils.*;
 
 
 public class TsonThreeRegistry {
@@ -89,12 +90,12 @@ public class TsonThreeRegistry {
 
     private static WorldGenAbstractTree bigOfTson(TsonMap map) {
         SaplingsGenerator sapGen = saplings(map);
-        float heightAtt = McTsonUtils.getParam(map, "height_attenuation", 0.618f);
-        float branchSlope = McTsonUtils.getParam(map, "branch_slope", 0.381f);
-        float scaleW = McTsonUtils.getParam(map, "scale_width", 1.0f);
-        float leafDens = McTsonUtils.getParam(map, "leaf_density", 1.0f);
-        int limit = McTsonUtils.getParam(map, "height_limit", 12);
-        int trunk = McTsonUtils.getParam(map,"trunk_size", 1);
+        float heightAtt   = calc(map, "height_attenuation", 0.618f);
+        float branchSlope = calc(map, "branch_slope", 0.381f);
+        float scaleW      = calc(map, "scale_width", 1.0f);
+        float leafDens    = calc(map, "leaf_density", 1.0f);
+        int limit         = calc(map, "height_limit", 12);
+        int trunk         = calc(map,"trunk_size", 1);
 
         if(sapGen == null) return new WorldGenBigTree(
                 notify(map), wood(map, DEFAULT_LOG), leaves(map, DEFAULT_LEAF),
@@ -125,7 +126,7 @@ public class TsonThreeRegistry {
                 else if(obj.isNumber()) id = obj.getInt();
                 else if (obj.isMap()) {
                     id = getOrCreateOf(obj.getMap());
-                    weight = McTsonUtils.getParam(obj.getMap(), "weight", weight);
+                    weight = calc(obj.getMap(), "weight", weight);
                 }
                 while (weight>0){
                     list.add(id);
@@ -168,12 +169,12 @@ public class TsonThreeRegistry {
 
 
     private static int heightBase(TsonMap map, int def){
-        return McTsonUtils.getParam(map, "height_base", def);
+        return calc(map, "height_base", def);
     }
 
 
     private static int heightRandom(TsonMap map, int def){
-        return McTsonUtils.getParam(map, "height_random", def);
+        return calc(map, "height_random", def);
     }
 
 

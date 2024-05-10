@@ -18,7 +18,8 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.api.IBlockEAccess;
-import plus.fserver.utls.ChunkSelector;
+import plus.fserver.block.BlockFs;
+import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.collections.LeavesCache;
 import static plus.fserver.ElcaCV.SERVER_COMPILE;
 

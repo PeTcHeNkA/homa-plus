@@ -1,4 +1,4 @@
-package plus.fserver.patch;
+package plus.fserver.api;
 
 import net.minecraft.world.storage.ISaveHandler;
 import plus.fserver.server.IAsyWorldTicker;

@@ -29,7 +29,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import plus.fserver.utls.collections.ArrayListE6;
-import static net.minecraft.block.BlockFs.addCollisionBoxToListFx;
+import static plus.fserver.block.BlockFs.addCollisionBoxToListFx;
 
 
 public class BlockEndPortalFrame extends Block {

@@ -1,7 +1,7 @@
 package plus.fserver.utls.collections;
 
 import net.minecraft.util.math.AxisAlignedBB;
-import plus.fserver.utls.AABKey;
+import plus.fserver.server.elca.AABKey;
 
 
 public class SyncListCache<V> extends SyncTe4Cache<AABKey, ArrayListE6<V>>{

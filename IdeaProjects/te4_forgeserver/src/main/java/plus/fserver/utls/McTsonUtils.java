@@ -14,7 +14,6 @@ import plus.tson.security.ClassManager;
 
 public class McTsonUtils {
 
-
     public static ClassManager mobClassManager(){
         return new ClassManager() {
             @Override
@@ -82,24 +81,6 @@ public class McTsonUtils {
             return Block.getBlockById(obj.getInt()).getDefaultState();
         }
         throw new RuntimeException();
-    }
-
-
-    public static int getParam(TsonMap map, String key, int def){
-        TsonObj res = map.get(key);
-        if(res==null)return def;
-        if(res.isNumber())return res.getInt();
-        if(res.isString()){
-            String s = res.getStr();
-            switch (s.charAt(0)){
-                case '+': return def + Integer.parseInt(s.substring(1));
-                case '-': return def - Integer.parseInt(s.substring(1));
-                case '*': return def * Integer.parseInt(s.substring(1));
-                case '/': return def / Integer.parseInt(s.substring(1));
-            }
-            return Integer.parseInt(s);
-        }
-        throw new IllegalArgumentException();
     }
 
 

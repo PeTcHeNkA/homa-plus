@@ -3,7 +3,7 @@ package net.minecraft.world.gen.feature;
 
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import plus.fserver.utls.ChunkSelector;
+import plus.fserver.server.elca.ChunkSelector;
 import java.util.Random;
 
 

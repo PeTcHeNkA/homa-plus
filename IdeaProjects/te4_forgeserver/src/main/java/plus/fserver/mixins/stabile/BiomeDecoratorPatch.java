@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import plus.fserver.api.PWorldInfo;
-import plus.fserver.utls.ChunkSelector;
+import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.world.generator.ChunkGenSettingsPlus;
 import java.util.Random;
 

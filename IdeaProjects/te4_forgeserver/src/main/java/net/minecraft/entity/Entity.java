@@ -87,7 +87,7 @@ import plus.fserver.ElcaMobs;
 import plus.fserver.api.IBlockEAccess;
 import plus.fserver.ElcaCV;
 import plus.fserver.server.SStrings;
-import plus.fserver.utls.ChunkSelector;
+import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.collections.ArrayListE6;
 import plus.tson.utl.Te4HashSet;
 

@@ -1,4 +1,4 @@
-package plus.fserver.server;
+package plus.fserver.utls;
 
 import io.netty.util.collection.IntObjectHashMap;
 import net.minecraft.profiler.Profiler;

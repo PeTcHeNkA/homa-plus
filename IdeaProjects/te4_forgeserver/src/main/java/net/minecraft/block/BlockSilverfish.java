@@ -14,6 +14,8 @@ import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import plus.fserver.block.BlockFs;
+
 import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 

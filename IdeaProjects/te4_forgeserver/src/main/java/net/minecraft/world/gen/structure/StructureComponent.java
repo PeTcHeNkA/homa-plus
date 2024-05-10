@@ -17,7 +17,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.template.TemplateManager;
-import plus.fserver.utls.ChunkSelector;
+import plus.fserver.server.elca.ChunkSelector;
 
 
 public abstract class StructureComponent {

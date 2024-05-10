@@ -6,8 +6,8 @@ import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.*;
-import plus.fserver.patch.EmptyInvCraft;
-import plus.fserver.patch.FastDyeBlend;
+import plus.fserver.utls.EmptyInvCraft;
+import plus.fserver.utls.FastDyeBlend;
 
 
 @Mixin(EntitySheep.class)

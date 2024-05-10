@@ -9,6 +9,7 @@ import net.minecraft.item.Item;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
+import plus.fserver.block.BlockFx;
 
 
 public class BlockSnowBlock extends BlockFx {

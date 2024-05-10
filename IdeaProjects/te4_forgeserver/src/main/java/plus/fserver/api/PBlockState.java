@@ -1,4 +1,5 @@
-package plus.fserver.patch;
+package plus.fserver.api;
+
 
 public interface PBlockState {
     void setId(int hs);

@@ -10,6 +10,7 @@ import net.minecraft.item.Item;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.IBlockAccess;
+import plus.fserver.block.BlockFx;
 
 
 public class BlockGlowstone extends BlockFx {

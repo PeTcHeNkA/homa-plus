@@ -78,7 +78,7 @@ import plus.fserver.api.PWorldServer;
 import plus.fserver.ElcaCV;
 import plus.fserver.server.chunk.io.TChunkTask;
 import plus.fserver.server.chunk.io.TQueuedChunk;
-import plus.fserver.utls.ChunkSelector;
+import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.math.MathUtls;
 import plus.fserver.world.NavigationCache;
 import plus.tson.utl.Te4HashSet;

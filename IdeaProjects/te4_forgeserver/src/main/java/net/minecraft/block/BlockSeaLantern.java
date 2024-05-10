@@ -10,6 +10,7 @@ import net.minecraft.item.Item;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.IBlockAccess;
+import plus.fserver.block.BlockFs;
 
 
 public class BlockSeaLantern extends BlockFs {

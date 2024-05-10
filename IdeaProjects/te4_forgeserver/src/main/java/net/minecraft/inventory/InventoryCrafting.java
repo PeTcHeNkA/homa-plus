@@ -6,7 +6,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
-import plus.fserver.utls.item.ItemStackUtils;
 import plus.fserver.utls.collections.FixedItemList;
 
 
@@ -70,13 +69,13 @@ public class InventoryCrafting implements IInventory {
 
 
     public ItemStack removeStackFromSlot(int index) {
-        return ItemStackUtils.getAndRemove(this.stackList, index);
+        return FixedItemList.getAndRemove(this.stackList, index);
     }
 
 
     @Override
     public ItemStack decrStackSize(int index, int count) {
-        ItemStack itemstack = ItemStackUtils.getAndSplit(this.stackList, index, count);
+        ItemStack itemstack = FixedItemList.getAndSplit(this.stackList, index, count);
         if (!itemstack.isEmpty()) {
             this.eventHandler.onCraftMatrixChanged(this);
         }

@@ -21,7 +21,7 @@ import net.minecraftforge.common.DungeonHooks;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import plus.fserver.utls.math.BlockPosDelta;
-import plus.fserver.utls.ChunkSelector;
+import plus.fserver.server.elca.ChunkSelector;
 
 
 public class WorldGenDungeons extends WorldGenerator {

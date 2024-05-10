@@ -37,9 +37,6 @@ public class BlockPosDelta extends BlockPos {
                 sy + dy,
                 sz + dz
         );
-//        sx = super.getX() + dx;
-//        sy = super.getY() + dy;
-//        sz = super.getZ() + dz;
         return this;
     }
 
@@ -50,9 +47,6 @@ public class BlockPosDelta extends BlockPos {
                 sy + side.getYOffset(),
                 sz + side.getZOffset()
         );
-//        x = sx + side.getXOffset();
-//        y = sy + side.getYOffset();
-//        z = sz + side.getZOffset();
         return this;
     }
 
@@ -63,9 +57,6 @@ public class BlockPosDelta extends BlockPos {
                 sy,
                 sz
         );
-//        sx = super.getX() + dx;
-//        sy = super.getY();
-//        sz = super.getZ();
         return this;
     }
 
@@ -74,9 +65,6 @@ public class BlockPosDelta extends BlockPos {
         editRoot(
                 sx, sy+dy, sz
         );
-//        sx = super.getX();
-//        sy = super.getY() + dy;
-//        sz = super.getZ();
         return this;
     }
 
@@ -85,45 +73,20 @@ public class BlockPosDelta extends BlockPos {
         editRoot(
                 sx, sy, sz+dz
         );
-//        sx = super.getX();
-//        sy = super.getY();
-//        sz = super.getZ() + dz;
         return this;
     }
 
 
     public BlockPosDelta useDelta(int x, int y, int z){
         editRoot(x, y, z);
-//        this.sx = x;
-//        this.sy = y;
-//        this.sz = z;
         return this;
     }
-//
-//
+
+
     public BlockPosDelta shiftY(int y){
         editRootY(getY() + y);
-        //this.y += y;
         return this;
     }
-//
-//
-//    @Override
-//    public int getX() {
-//        return sx;
-//    }
-//
-//
-//    @Override
-//    public int getY() {
-//        return sy;
-//    }
-//
-//
-//    @Override
-//    public int getZ() {
-//        return sz;
-//    }
 
 
     @Override
@@ -134,9 +97,6 @@ public class BlockPosDelta extends BlockPos {
 
     public BlockPosDelta reset() {
         editRoot(sx, sy, sz);
-//        sx = super.getX();
-//        sy = super.getY();
-//        sz = super.getZ();
         return this;
     }
 

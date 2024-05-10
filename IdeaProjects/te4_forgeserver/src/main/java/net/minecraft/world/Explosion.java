@@ -27,7 +27,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.api.IBlockEAccess;
 import plus.fserver.ElcaCV;
-import plus.fserver.utls.ChunkLCache;
+import plus.fserver.server.elca.ChunkLCache;
 import plus.tson.utl.Te4HashSet;
 import static plus.fserver.ElcaCV.SERVER_COMPILE;
 

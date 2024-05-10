@@ -1676,6 +1676,12 @@ public abstract class EntityPlayer extends EntityLivingBase {
     }
 
 
+    @Override
+    public boolean isElytraFlying() {
+        return this.getFlag(7);
+    }
+
+
     private void addMountedMovementStat(double p_71015_1_, double p_71015_3_, double p_71015_5_) {
         if (this.isRiding()) {
             int i = Math.round(MathHelper.sqrt(p_71015_1_ * p_71015_1_ + p_71015_3_ * p_71015_3_ + p_71015_5_ * p_71015_5_) * 100.0F);

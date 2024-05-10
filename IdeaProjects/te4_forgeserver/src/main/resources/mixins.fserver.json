@@ -14,11 +14,7 @@
     "light.MixinChunkProviderServer",
     "light.MixinExtendedBlockStorage",
     "light.MixinSPacketChunkData",
-    "md.EntityPlayerPatch",
     "md.VillageCollectionPatch",
-    "pf.BlockCallbacksPatch",
-    "pf.BlockPatch",
-    "pf.EntityEntryPatch",
     "pf.EntitySheepPatch",
     "pf.EntityXPOrbPatch",
     "pf.GameDataPatch",
@@ -31,7 +27,6 @@
     "stabile.WorldTypePatch"
   ],
   "server": [
-    "server.ServerEulaPatch",
     "server.SlotCli"
   ]
 }

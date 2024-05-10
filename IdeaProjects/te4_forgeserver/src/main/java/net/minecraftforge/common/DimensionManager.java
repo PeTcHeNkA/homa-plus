@@ -34,7 +34,7 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.FMLLog;
-import plus.fserver.server.WorldConstructor;
+import plus.fserver.utls.WorldConstructor;
 import javax.annotation.Nullable;
 
 

@@ -1,8 +1,7 @@
 package net.minecraft.pathfinding;
 
 import javax.annotation.Nullable;
-import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -15,7 +14,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import plus.fserver.ElcaCV;
 import plus.fserver.api.IBlockEAccess;
-import plus.fserver.utls.ChunkLCache;
+import plus.fserver.server.elca.ChunkLCache;
 import plus.fserver.utls.math.FastRandom;
 
 

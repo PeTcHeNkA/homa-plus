@@ -536,19 +536,21 @@ public class ChunkGeneratorOverworld implements IChunkGenerator {
 
 
     @Override
-    public List<Biome.SpawnListEntry> getPossibleCreatures(EnumCreatureType type, BlockPos pos) {
-        Biome biome = (world.isRemote || !SERVER_COMPILE)?this.world.getBiome(pos): world.localSelector.getBiome(pos);
-
-        if (this.mapFeaturesEnabled && type == EnumCreatureType.MONSTER) {
+    public List<Biome.SpawnListEntry> getPossibleCreatures(EnumCreatureType creatureType, BlockPos pos) {
+        if (this.mapFeaturesEnabled && creatureType == EnumCreatureType.MONSTER) {
             if (this.scatteredFeatureGenerator.isSwampHut(pos)) {
                 return this.scatteredFeatureGenerator.getMonsters();
             }
-            if (this.settings.useMonuments
-                    && this.oceanMonumentGenerator.isPositionInStructure(this.world, pos)) {
+
+            if (this.settings.useMonuments &&
+                    this.oceanMonumentGenerator.isPositionInStructure(this.world, pos)) {
                 return this.oceanMonumentGenerator.getMonsters();
             }
         }
-        return biome.getSpawnableList(type);
+        return (!world.isRemote || SERVER_COMPILE)?
+                world.localSelector.getBiome(pos).getSpawnableList(creatureType)
+                :
+                world.getBiome(pos).getSpawnableList(creatureType);
     }
 
 

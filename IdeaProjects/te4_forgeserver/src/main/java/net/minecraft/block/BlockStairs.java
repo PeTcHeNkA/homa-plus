@@ -31,7 +31,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.utls.collections.ArrayListE6;
 import plus.fserver.utls.collections.ArrayListEV;
-import static net.minecraft.block.BlockFs.addCollisionBoxToListFx;
+import static plus.fserver.block.BlockFs.addCollisionBoxToListFx;
 
 
 public class BlockStairs extends Block {

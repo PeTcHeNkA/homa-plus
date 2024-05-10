@@ -50,6 +50,7 @@ import net.minecraftforge.common.EnumPlantType;
 import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.fserver.block.BlockFx;
 import plus.fserver.utls.collections.ArrayListE6;
 import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
@@ -577,15 +578,11 @@ public class Block extends net.minecraftforge.registries.IForgeRegistryEntry.Imp
 
 
     public static void spawnAsEntity(World worldIn, BlockPos pos, ItemStack stack) {
-        if ((!worldIn.isRemote || SERVER_COMPILE) && !stack.isEmpty() &&
-                worldIn.getGameRules().doTileDrops.getBoolean() && !worldIn.restoringBlockSnapshots)
-            // do not drop items while restoring blockstates, prevents item dupe
-        {
+        if ((!worldIn.isRemote || SERVER_COMPILE) && !stack.isEmpty() && worldIn.getGameRules().doTileDrops.getBoolean() && !worldIn.restoringBlockSnapshots) {
             if (captureDrops.get()) {
                 capturedDrops.get().add(stack);
                 return;
             }
-            float f = 0.5F;
             double d0 = (double)(worldIn.rand.nextFloat() * 0.5F) + 0.25D;
             double d1 = (double)(worldIn.rand.nextFloat() * 0.5F) + 0.25D;
             double d2 = (double)(worldIn.rand.nextFloat() * 0.5F) + 0.25D;
@@ -601,7 +598,7 @@ public class Block extends net.minecraftforge.registries.IForgeRegistryEntry.Imp
             while (amount > 0) {
                 int i = EntityXPOrb.getXPSplit(amount);
                 amount -= i;
-                worldIn.spawnEntity(new EntityXPOrb(worldIn, (double)pos.getX() + 0.5D, (double)pos.getY() + 0.5D, (double)pos.getZ() + 0.5D, i));
+                worldIn.spawnEntity(new EntityXPOrb(worldIn, pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, i));
             }
         }
     }

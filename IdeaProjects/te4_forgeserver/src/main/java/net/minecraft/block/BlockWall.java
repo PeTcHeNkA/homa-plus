@@ -22,7 +22,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.utls.collections.ArrayListE6;
-import static net.minecraft.block.BlockFs.addCollisionBoxToListFs;
+import static plus.fserver.block.BlockFs.addCollisionBoxToListFs;
 
 
 public class BlockWall extends Block {

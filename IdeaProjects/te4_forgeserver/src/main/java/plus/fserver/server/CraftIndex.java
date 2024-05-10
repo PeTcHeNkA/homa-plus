@@ -1,4 +1,4 @@
-package plus.fserver.utls.item;
+package plus.fserver.server;
 
 import net.minecraft.init.Items;
 import net.minecraft.inventory.InventoryCrafting;
@@ -9,6 +9,7 @@ import java.util.Arrays;
 public class CraftIndex {
     private final Item[] items;
     private final int hash;
+
     public CraftIndex(InventoryCrafting inv){
         items = new Item[inv.getSizeInventory()];
         int hash = 0;

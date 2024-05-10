@@ -7,7 +7,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import plus.fserver.utls.collections.ArrayListE6;
-import static net.minecraft.block.BlockFs.addCollisionBoxToListFs;
+import static plus.fserver.block.BlockFs.addCollisionBoxToListFs;
 
 
 public class BlockRotatedPillarFs extends BlockRotatedPillar{

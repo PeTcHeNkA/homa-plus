@@ -32,7 +32,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import plus.fserver.utls.item.CraftIndex;
+import plus.fserver.server.CraftIndex;
 import plus.tson.utl.Te4HashMap;
 
 public class CraftingManager {

@@ -9,6 +9,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
+import plus.fserver.block.BlockFx;
 
 
 public class BlockObsidian extends BlockFx {

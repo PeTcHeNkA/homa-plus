@@ -7,7 +7,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
-import plus.fserver.utls.ChunkSelector;
+import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.math.FastRandom;
 
 import static net.minecraft.world.gen.feature.WorldGenGlowStone1.GLOW_STONE_DEF_STATE;
