@@ -25,6 +25,7 @@ import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import plus.fserver.utls.collections.ArrayListE6;
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
 import static plus.fserver.block.BlockFs.addCollisionBoxToListFs;
 
 
@@ -90,9 +91,7 @@ public class BlockDaylightDetector extends BlockContainer {
     @Override
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
         if (playerIn.isAllowEdit()) {
-            if (worldIn.isRemote) {
-                return true;
-            } else {
+            if (!worldIn.isRemote || SERVER_COMPILE) {
                 if (this.inverted) {
                     worldIn.setBlockState(pos, Blocks.DAYLIGHT_DETECTOR.getDefaultState().withProperty(POWER, state.getValue(POWER)), 4);
                     Blocks.DAYLIGHT_DETECTOR.updatePower(worldIn, pos);
@@ -100,8 +99,8 @@ public class BlockDaylightDetector extends BlockContainer {
                     worldIn.setBlockState(pos, Blocks.DAYLIGHT_DETECTOR_INVERTED.getDefaultState().withProperty(POWER, state.getValue(POWER)), 4);
                     Blocks.DAYLIGHT_DETECTOR_INVERTED.updatePower(worldIn, pos);
                 }
-                return true;
             }
+            return true;
         } else {
             return super.onBlockActivated(worldIn, pos, state, playerIn, hand, facing, hitX, hitY, hitZ);
         }

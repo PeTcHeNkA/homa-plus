@@ -15,6 +15,7 @@ import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import plus.fserver.ElcaMobs;
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public abstract class EntityMob extends EntityCreature implements IMob {
@@ -44,7 +45,7 @@ public abstract class EntityMob extends EntityCreature implements IMob {
     @Override
     public void onUpdate() {
         super.onUpdate();
-        if (!this.world.isRemote && this.world.getDifficulty() == EnumDifficulty.PEACEFUL) this.setDead();
+        if ((!this.world.isRemote || SERVER_COMPILE) && this.world.getDifficulty() == EnumDifficulty.PEACEFUL) this.setDead();
     }
 
 

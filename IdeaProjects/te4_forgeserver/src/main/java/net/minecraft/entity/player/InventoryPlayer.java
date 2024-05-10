@@ -27,6 +27,8 @@ import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
+
 
 public class InventoryPlayer implements IInventory {
     public final NonNullList<ItemStack> mainInventory    = NonNullList.withSize(36, ItemStack.EMPTY);
@@ -378,7 +380,7 @@ public class InventoryPlayer implements IInventory {
 
 
     public void placeItemBackInInventory(World world, ItemStack stack) {
-        if (!world.isRemote) {
+        if (!world.isRemote || SERVER_COMPILE) {
             while (!stack.isEmpty()) {
                 int i = this.storeItemStack(stack);
 

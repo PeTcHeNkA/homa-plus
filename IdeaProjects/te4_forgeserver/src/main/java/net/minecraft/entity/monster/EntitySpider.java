@@ -37,6 +37,8 @@ import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
 import plus.fserver.ElcaMobs;
 
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
+
 
 public class EntitySpider extends EntityMob {
     private static final DataParameter<Byte> CLIMBING = EntityDataManager.createKey(EntitySpider.class, DataSerializers.BYTE);
@@ -88,7 +90,7 @@ public class EntitySpider extends EntityMob {
     public void onUpdate() {
         super.onUpdate();
 
-        if (!this.world.isRemote) {
+        if (!this.world.isRemote || SERVER_COMPILE) {
             this.setBesideClimbableBlock(this.collidedHorizontally);
         }
     }

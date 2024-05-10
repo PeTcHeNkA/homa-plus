@@ -114,6 +114,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import plus.fserver.utls.collections.Int1LinkedList;
 
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
+
 
 public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -303,7 +305,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
 
         this.openContainer.detectAndSendChanges();
 
-        if (!this.world.isRemote && this.openContainer != null && !this.openContainer.canInteractWith(this)) {
+        if ((!this.world.isRemote || SERVER_COMPILE) && this.openContainer != null && !this.openContainer.canInteractWith(this)) {
             this.closeScreen();
             this.openContainer = this.inventoryContainer;
         }

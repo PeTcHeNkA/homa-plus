@@ -1,8 +1,9 @@
 package net.minecraft.world.gen.feature;
 
 import java.util.Random;
+
+import net.minecraft.block.BlockBush;
 import net.minecraft.block.BlockTallGrass;
-import net.minecraft.block.BlockUtils;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
@@ -35,7 +36,7 @@ public class WorldGenTallGrass extends WorldGenerator {
             FastRandom.INST.setRandom8x8x4(pos, position);
             if (pos.getY() > 0 && pos.getY() < 255 && selector.isAirBlock(pos)) {
                 pos.setY(pos.getY()-1);
-                if(BlockUtils.canGrowFlower(Blocks.TALLGRASS, selector.getCurState(pos))){
+                if(BlockBush.canGrowFlower(Blocks.TALLGRASS, selector.getCurState(pos))){
                     selector.setCurStateFast(pos.getX(), pos.getY()+1, pos.getZ(), tallGrassState);
                 }
             }

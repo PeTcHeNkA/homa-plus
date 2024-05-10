@@ -50,7 +50,7 @@ public class BlockSand extends BlockFallingFs {
 
     @Override
     public int getMetaFromState(IBlockState state) {
-        return ((BlockSand.EnumType)state.getValue(VARIANT)).getMetadata();
+        return state.getValue(VARIANT).getMetadata();
     }
 
 

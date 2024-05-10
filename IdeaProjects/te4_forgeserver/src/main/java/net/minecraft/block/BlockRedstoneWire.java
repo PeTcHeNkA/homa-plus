@@ -25,6 +25,8 @@ import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.math.BlockPosDelta;
 import plus.fserver.world.RedstoneEngine;
 
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
+
 
 public class BlockRedstoneWire extends BlockFs {
     public static final PropertyEnum<BlockRedstoneWire.EnumAttachPosition> NORTH = PropertyEnum.create("north", BlockRedstoneWire.EnumAttachPosition.class);
@@ -157,7 +159,7 @@ public class BlockRedstoneWire extends BlockFs {
 
     @Override
     public void onBlockAdded(final World worldIn, final BlockPos pos, final IBlockState state) {
-        if (!worldIn.isRemote)
+        if (!worldIn.isRemote || SERVER_COMPILE)
             this.turbo.updateSurroundingRedstone(worldIn, pos, state, null);
     }
 
@@ -165,16 +167,16 @@ public class BlockRedstoneWire extends BlockFs {
     @Override
     public void breakBlock(final World worldIn, final BlockPos pos, final IBlockState state) {
         super.breakBlock(worldIn, pos, state);
-        if (!worldIn.isRemote) {
+        if (!worldIn.isRemote || SERVER_COMPILE) {
             for (final EnumFacing enumfacing : EnumFacing.VALUES) {
                 worldIn.notifyNeighborsOfStateChange(pos.offset(enumfacing), this, false);
             }
             this.turbo.updateSurroundingRedstone(worldIn, pos, state, null);
-            for (final EnumFacing enumfacing2 : BlockIDIndexes.FACING_HORIZONTAL) {
-                this.notifyWireNeighborsOfStateChange(worldIn, pos.offset(enumfacing2));
+            for (final EnumFacing facing : BlockIDIndexes.FACING_HORIZONTAL) {
+                this.notifyWireNeighborsOfStateChange(worldIn, pos.offset(facing));
             }
-            for (final EnumFacing enumfacing3 : BlockIDIndexes.FACING_HORIZONTAL) {
-                final BlockPos blockpos = pos.offset(enumfacing3);
+            for (final EnumFacing facing : BlockIDIndexes.FACING_HORIZONTAL) {
+                final BlockPos blockpos = pos.offset(facing);
                 if (worldIn.getBlockState(blockpos).isNormalCube()) {
                     this.notifyWireNeighborsOfStateChange(worldIn, blockpos.up());
                 }

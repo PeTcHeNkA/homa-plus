@@ -9,6 +9,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import plus.fserver.block.BlockFx;
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public class BlockRedstoneLight extends BlockFx {
@@ -26,7 +27,7 @@ public class BlockRedstoneLight extends BlockFx {
 
     @Override
     public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state) {
-        if (!worldIn.isRemote) {
+        if (!worldIn.isRemote || SERVER_COMPILE) {
             if (this.isOn && !worldIn.isBlockPowered(pos)) {
                 worldIn.setBlockState(pos, Blocks.REDSTONE_LAMP.getDefaultState(), 2);
             } else if (!this.isOn && worldIn.isBlockPowered(pos)) {
@@ -38,7 +39,7 @@ public class BlockRedstoneLight extends BlockFx {
 
     @Override
     public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos) {
-        if (!worldIn.isRemote) {
+        if (!worldIn.isRemote || SERVER_COMPILE) {
             if (this.isOn && !worldIn.isBlockPowered(pos)) {
                 worldIn.scheduleUpdate(pos, this, 4);
             } else if (!this.isOn && worldIn.isBlockPowered(pos)) {
@@ -50,7 +51,7 @@ public class BlockRedstoneLight extends BlockFx {
 
     @Override
     public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand) {
-        if (!worldIn.isRemote) {
+        if (!worldIn.isRemote || SERVER_COMPILE) {
             if (this.isOn && !worldIn.isBlockPowered(pos)) {
                 worldIn.setBlockState(pos, Blocks.REDSTONE_LAMP.getDefaultState(), 2);
             }

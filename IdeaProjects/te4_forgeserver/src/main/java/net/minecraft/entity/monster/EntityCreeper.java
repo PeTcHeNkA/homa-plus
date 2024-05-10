@@ -29,6 +29,7 @@ import net.minecraft.world.storage.loot.LootTableList;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.ElcaMobs;
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public class EntityCreeper extends EntityMob {
@@ -235,7 +236,7 @@ public class EntityCreeper extends EntityMob {
             this.world.playSound(player, this.posX, this.posY, this.posZ, SoundEvents.ITEM_FLINTANDSTEEL_USE, this.getSoundCategory(), 1.0F, this.rand.nextFloat() * 0.4F + 0.8F);
             player.swingArm(hand);
 
-            if (!this.world.isRemote) {
+            if (!this.world.isRemote || SERVER_COMPILE) {
                 this.ignite();
                 itemstack.damageItem(1, player);
                 return true;
@@ -246,7 +247,7 @@ public class EntityCreeper extends EntityMob {
 
 
     private void explode() {
-        if (!this.world.isRemote) {
+        if (!this.world.isRemote || SERVER_COMPILE) {
             float f = this.getPowered() ? 2.0F : 1.0F;
             this.dead = true;
             this.world.createExplosion(this, this.posX, this.posY, this.posZ,

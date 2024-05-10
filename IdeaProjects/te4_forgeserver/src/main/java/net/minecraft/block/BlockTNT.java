@@ -23,6 +23,7 @@ import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import plus.fserver.ElcaCV;
 import plus.fserver.block.BlockFx;
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public class BlockTNT extends BlockFx {
@@ -58,7 +59,7 @@ public class BlockTNT extends BlockFx {
 
     @Override
     public void onExplosionDestroy(World worldIn, BlockPos pos, Explosion explosionIn) {
-        if (!worldIn.isRemote) {
+        if (!worldIn.isRemote || SERVER_COMPILE) {
             EntityTNTPrimed entitytntprimed = new EntityTNTPrimed(worldIn, (float)pos.getX() + 0.5F, pos.getY(), (float)pos.getZ() + 0.5F, explosionIn.getExplosivePlacedBy());
             entitytntprimed.setFuse((short)(worldIn.rand.nextInt(entitytntprimed.getFuse() / 4) + entitytntprimed.getFuse() / 8));
             worldIn.spawnEntity(entitytntprimed);
@@ -73,7 +74,7 @@ public class BlockTNT extends BlockFx {
 
 
     public void explode(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase igniter) {
-        if (!worldIn.isRemote) {
+        if (!worldIn.isRemote || SERVER_COMPILE) {
             if (state.getValue(EXPLODE)) {
                 EntityTNTPrimed entitytntprimed = new EntityTNTPrimed(worldIn, (double)((float)pos.getX() + 0.5F), (double)pos.getY(), (double)((float)pos.getZ() + 0.5F), igniter);
                 worldIn.spawnEntity(entitytntprimed);
@@ -105,7 +106,7 @@ public class BlockTNT extends BlockFx {
 
     @Override
     public void onEntityCollision(World worldIn, BlockPos pos, IBlockState state, Entity entityIn) {
-        if (!worldIn.isRemote && entityIn.isBurning()) {
+        if ((!worldIn.isRemote || SERVER_COMPILE) && entityIn.isBurning()) {
             if(entityIn instanceof EntityArrow){
                 EntityArrow arrow = (EntityArrow)entityIn;
 

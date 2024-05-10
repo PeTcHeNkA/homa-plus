@@ -61,7 +61,7 @@ public class BlockDirt extends BlockFx {
 
 
     public int getMetaFromState(IBlockState state) {
-        return ((BlockDirt.DirtType)state.getValue(VARIANT)).getMetadata();
+        return state.getValue(VARIANT).getMetadata();
     }
 
 

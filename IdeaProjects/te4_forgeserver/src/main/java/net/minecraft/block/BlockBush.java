@@ -41,6 +41,10 @@ public class BlockBush extends Block implements net.minecraftforge.common.IPlant
         this.setCreativeTab(CreativeTabs.DECORATIONS);
     }
 
+    public static boolean canGrowFlower(BlockBush block, IBlockState state){
+        return block.canSustainBush(state);
+    }
+
 
     @Override
     public boolean canPlaceBlockAt(World worldIn, BlockPos pos) {

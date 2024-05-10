@@ -95,6 +95,7 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.ElcaCV;
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 @SuppressWarnings("incomplete-switch")
@@ -218,7 +219,7 @@ public abstract class EntityPlayer extends EntityLivingBase {
                 this.sleepTimer = 100;
             }
 
-            if (!this.world.isRemote) {
+            if (!this.world.isRemote || SERVER_COMPILE) {
                 if (!this.isInBed()) {
                     this.wakeUpPlayer(true, true, false);
                 } else if (!ForgeEventFactory.fireSleepingTimeCheck(this, this.bedLocation)) {
@@ -236,7 +237,7 @@ public abstract class EntityPlayer extends EntityLivingBase {
 
         super.onUpdate();
 
-        if (!this.world.isRemote && this.openContainer != null && !this.openContainer.canInteractWith(this)) {
+        if ((!this.world.isRemote || SERVER_COMPILE) && this.openContainer != null && !this.openContainer.canInteractWith(this)) {
             this.closeScreen();
             this.openContainer = this.inventoryContainer;
         }
@@ -247,7 +248,7 @@ public abstract class EntityPlayer extends EntityLivingBase {
 
         this.updateCape();
 
-        if (!this.world.isRemote) {
+        if (!this.world.isRemote || SERVER_COMPILE) {
             this.foodStats.onUpdate(this);
             this.addStat(StatList.PLAY_ONE_MINUTE);
 
@@ -429,7 +430,7 @@ public abstract class EntityPlayer extends EntityLivingBase {
 
     @Override
     public void updateRidden() {
-        if (!this.world.isRemote && this.isSneaking() && this.isRiding()) {
+        if ((!this.world.isRemote || SERVER_COMPILE) && this.isSneaking() && this.isRiding()) {
             this.dismountRidingEntity();
             this.setSneaking(false);
         } else {
@@ -922,7 +923,7 @@ public abstract class EntityPlayer extends EntityLivingBase {
             if (this.getHealth() <= 0.0F) {
                 return false;
             } else {
-                if (this.isPlayerSleeping() && !this.world.isRemote) {
+                if (this.isPlayerSleeping() && (!this.world.isRemote || SERVER_COMPILE)) {
                     this.wakeUpPlayer(true, true, false);
                 }
 
@@ -1368,9 +1369,9 @@ public abstract class EntityPlayer extends EntityLivingBase {
         if (ret != null) return ret;
         final IBlockState state = this.world.isBlockLoaded(bedLocation) ? this.world.getBlockState(bedLocation) : null;
         final boolean isBed = state != null && state.getBlock().isBed(state, this.world, bedLocation, this);
-        final EnumFacing enumfacing = isBed && state.getBlock() instanceof BlockHorizontal ? (EnumFacing)state.getValue(BlockHorizontal.FACING) : null;
+        final EnumFacing enumfacing = isBed && state.getBlock() instanceof BlockHorizontal ? state.getValue(BlockHorizontal.FACING) : null;
 
-        if (!this.world.isRemote) {
+        if (!this.world.isRemote || SERVER_COMPILE) {
             if (this.isPlayerSleeping() || !this.isEntityAlive()) {
                 return EntityPlayer.SleepResult.OTHER_PROBLEM;
             }
@@ -1418,7 +1419,7 @@ public abstract class EntityPlayer extends EntityLivingBase {
         this.motionY = 0.0D;
         this.motionZ = 0.0D;
 
-        if (!this.world.isRemote) {
+        if (!this.world.isRemote || SERVER_COMPILE) {
             this.world.updateAllPlayersSleepingFlag();
         }
         return EntityPlayer.SleepResult.OK;
@@ -1463,7 +1464,7 @@ public abstract class EntityPlayer extends EntityLivingBase {
 
         this.sleeping = false;
 
-        if (!this.world.isRemote && updateWorldFlag) {
+        if ((!this.world.isRemote || SERVER_COMPILE) && updateWorldFlag) {
             this.world.updateAllPlayersSleepingFlag();
         }
 
@@ -1808,19 +1809,17 @@ public abstract class EntityPlayer extends EntityLivingBase {
         }
     }
 
-    public void addExhaustion(float exhaustion)
-    {
-        if (!this.capabilities.disableDamage)
-        {
-            if (!this.world.isRemote)
-            {
+
+    public void addExhaustion(float exhaustion) {
+        if (!this.capabilities.disableDamage) {
+            if (!this.world.isRemote || SERVER_COMPILE) {
                 this.foodStats.addExhaustion(exhaustion);
             }
         }
     }
 
-    public FoodStats getFoodStats()
-    {
+
+    public FoodStats getFoodStats() {
         return this.foodStats;
     }
 
