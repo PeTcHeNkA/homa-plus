@@ -163,8 +163,10 @@ tasks.register('proguard', ProGuardTask) {
 
     configuration file('proguard.pro')
 
-    injars 'build/libs/elca_server-2.7.jar'
-    outjars 'build/libs/elca_server-2.7-pro.jar'
+    def proName = name + "-" + version
+
+    injars 'build/libs/'+proName+'.jar'
+    outjars 'build/libs/'+proName+'-pro.jar'
 
     libraryjars sourceSets.main.compileClasspath
 

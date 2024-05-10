@@ -78,6 +78,9 @@ import plus.fserver.world.RedstoneEngine;
 import plus.fserver.world.light.LightingEngine;
 import plus.fserver.world.light.api.ILightingEngineProvider;
 
+import static plus.fserver.ElcaCV.CLIENT_COMPILE;
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
+
 
 public abstract class World implements IBlockEAccess, net.minecraftforge.common.capabilities.ICapabilityProvider, ILightingEngineProvider {
     /**
@@ -123,7 +126,9 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public final Profiler profiler;
     private final Calendar calendar;
     protected Scoreboard worldScoreboard;
+
     public final boolean isRemote;
+
     protected boolean spawnHostileMobs;
     protected boolean spawnPeacefulMobs;
     private boolean processingLoadedTiles;
@@ -171,7 +176,13 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         this.profiler = profilerIn;
         this.worldInfo = info;
         this.provider = providerIn;
-        this.isRemote = client;
+
+        if(SERVER_COMPILE){
+            this.isRemote = false;
+        } else {
+            this.isRemote = client;
+        }
+
         this.worldBorder = providerIn.createWorldBorder();
         perWorldStorage = new MapStorage((ISaveHandler)null);
 
@@ -362,7 +373,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public boolean setBlockState(BlockPos pos, IBlockState newState, int flags) {
         if (this.isOutsideBuildHeight(pos)) {
             return false;
-        } else if (!this.isRemote && this.worldInfo.getTerrainType()
+        } else if ((!this.isRemote || SERVER_COMPILE) && this.worldInfo.getTerrainType()
                 == WorldType.DEBUG_ALL_BLOCK_STATES) {
             return false;
         } else {
@@ -370,7 +381,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
             pos = pos.toImmutable(); // Forge - prevent mutable BlockPos leaks
             net.minecraftforge.common.util.BlockSnapshot blockSnapshot = null;
-            if (this.captureBlockSnapshots && !this.isRemote) {
+            if (this.captureBlockSnapshots && (!this.isRemote || SERVER_COMPILE)) {
                 blockSnapshot = net.minecraftforge.common.util.BlockSnapshot.getBlockSnapshot(this, pos, flags);
                 this.capturedBlockSnapshots.add(blockSnapshot);
             }
@@ -402,15 +413,15 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     // method in order to directly send client and physic updates
     public void markAndNotifyBlock(BlockPos pos, @Nullable Chunk chunk, IBlockState iblockstate, IBlockState newState, int flags) {
         Block block = newState.getBlock();
-        if ((flags & 2) != 0 && (!this.isRemote || (flags & 4) == 0) && (chunk == null || chunk.isPopulated()))
+        if ((flags & 2) != 0 && ((!this.isRemote || SERVER_COMPILE) || (flags & 4) == 0) && (chunk == null || chunk.isPopulated()))
             this.notifyBlockUpdate(pos, iblockstate, newState, flags);
-        if (!this.isRemote && (flags & 1) != 0) {
+        if ((!this.isRemote || SERVER_COMPILE) && (flags & 1) != 0) {
             this.notifyNeighborsRespectDebug(pos, iblockstate.getBlock(), true);
 
             if (newState.hasComparatorInputOverride()) {
                 this.updateComparatorOutputLevel(pos, block);
             }
-        } else if (!this.isRemote && (flags & 16) == 0)
+        } else if ((!this.isRemote || SERVER_COMPILE) && (flags & 16) == 0)
             this.updateObservingBlocksAt(pos, block);
     }
 
@@ -548,7 +559,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     public void observedNeighborChanged(BlockPos pos, final Block changedBlock, BlockPos changedBlockPos) {
-        if (!this.isRemote) {
+        if (!this.isRemote || SERVER_COMPILE) {
             IBlockState iblockstate = this.getBlockState(pos);
             if (true) {
                 try {
@@ -2049,7 +2060,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
     public void updateWeatherBody() {
         if (this.provider.hasSkyLight()) {
-            if (!this.isRemote) {
+            if (!this.isRemote || SERVER_COMPILE) {
                 if (this.getGameRules().doWeatherCycle.getBoolean()) {
                     int j2 = this.worldInfo.getCleanWeatherTime();
 

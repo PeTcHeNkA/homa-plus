@@ -51,7 +51,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.ElcaCV;
 import plus.fserver.utls.collections.ArrayListE6;
-import plus.fserver.utls.math.BlockPosDelta;
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 @SideOnly(Side.CLIENT)
@@ -67,6 +67,7 @@ public class WorldClient extends World {
 
     public WorldClient(NetHandlerPlayClient netHandler, WorldSettings settings, int dimension, EnumDifficulty difficulty, Profiler profilerIn) {
         super(new SaveHandlerMP(), new WorldInfo(settings, "MpServer"), net.minecraftforge.common.DimensionManager.createProviderFor(dimension), profilerIn, true);
+        if(SERVER_COMPILE)throw new RuntimeException("Server compile not supports client world!");
         this.ambienceTicks = this.rand.nextInt(12000);
         this.visibleChunks = Sets.newHashSet();
         this.connection = netHandler;

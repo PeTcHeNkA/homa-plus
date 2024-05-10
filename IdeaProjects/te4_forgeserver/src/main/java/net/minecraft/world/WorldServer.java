@@ -243,7 +243,7 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
 
 
     public boolean areAllPlayersAsleep() {
-        if (this.allPlayersSleeping && (!this.isRemote)) {
+        if (this.allPlayersSleeping) {
             for (EntityPlayer entityplayer : this.playerEntities) {
                 if (!entityplayer.isSpectator() && !entityplayer.isPlayerFullyAsleep()) {
                     return false;

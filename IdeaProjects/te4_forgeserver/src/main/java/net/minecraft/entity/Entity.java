@@ -91,6 +91,8 @@ import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.collections.ArrayListE6;
 import plus.tson.utl.Te4HashSet;
 
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
+
 
 public abstract class Entity implements ICommandSender, net.minecraftforge.common.capabilities.ICapabilitySerializable<NBTTagCompound> {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -425,7 +427,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
 
     protected final void onUpdateE(){
-        if (!this.world.isRemote) this.setFlag(6, this.isGlowing());
+        if (!this.world.isRemote || SERVER_COMPILE) this.setFlag(6, this.isGlowing());
         this.onEntityUpdate();
     }
 
@@ -441,7 +443,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         this.prevRotationPitch          = this.rotationPitch;
         this.prevRotationYaw            = this.rotationYaw;
 
-        if (!this.world.isRemote) {
+        if (!this.world.isRemote || SERVER_COMPILE) {
             if (this.inPortal) {
                 MinecraftServer server = this.world.getMinecraftServer();
 
@@ -487,7 +489,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
             }
 
         if (this.posY < -64.0D) this.outOfWorld();
-        if (!this.world.isRemote) this.setFlag(0, this.fire > 0);
+        if (!this.world.isRemote || SERVER_COMPILE) this.setFlag(0, this.fire > 0);
 
         this.firstUpdate = false;
     }
@@ -847,7 +849,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         this.posX = (axisalignedbb.minX + axisalignedbb.maxX) * 0.5d;
         this.posY = axisalignedbb.minY;
         this.posZ = (axisalignedbb.minZ + axisalignedbb.maxZ) * 0.5d;
-        if (this.isAddedToWorld() && !this.world.isRemote)
+        if (this.isAddedToWorld() && (!this.world.isRemote || SERVER_COMPILE))
             this.world.updateEntityWithOptionalForce(this, false);
         // Forge - Process chunk registration after moving.
     }
@@ -1176,7 +1178,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         if (d0 >= 180.0D) this.prevRotationYaw -= 360.0F;
 
         // Forge - ensure target chunk is loaded.
-        if (!this.world.isRemote) this.world.getChunk((int) Math.floor(this.posX) >> 4, (int) Math.floor(this.posZ) >> 4);
+        if (!this.world.isRemote || SERVER_COMPILE) this.world.getChunk((int) Math.floor(this.posX) >> 4, (int) Math.floor(this.posZ) >> 4);
 
         this.setPosition(this.posX, this.posY, this.posZ);
         this.setRotation(yaw, pitch);
@@ -1783,7 +1785,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         if (passenger.getRidingEntity() != this) {
             throw new IllegalStateException("Use x.startRiding(y), not y.addPassenger(x)");
         } else {
-            if (!this.world.isRemote && passenger instanceof EntityPlayer && !(this.getControllingPassenger() instanceof EntityPlayer)) {
+            if ((!this.world.isRemote || SERVER_COMPILE) && passenger instanceof EntityPlayer && !(this.getControllingPassenger() instanceof EntityPlayer)) {
                 this.riddenByEntities.add(0, passenger);
             } else {
                 this.riddenByEntities.add(passenger);
@@ -1840,7 +1842,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         if (this.timeUntilPortal > 0) {
             this.timeUntilPortal = this.getPortalCooldown();
         } else {
-            if (!this.world.isRemote && !pos.equals(this.lastPortalPos)) {
+            if ((!this.world.isRemote || SERVER_COMPILE) && !pos.equals(this.lastPortalPos)) {
                 this.lastPortalPos = new BlockPos(pos);
                 BlockPattern.PatternHelper helper = Blocks.PORTAL.createPatternHelper(this.world, this.lastPortalPos);
                 double d0 = helper.getForwards().getAxis() == EnumFacing.Axis.X ? (double)helper.getFrontTopLeft().getZ() : (double)helper.getFrontTopLeft().getX();
@@ -1932,13 +1934,14 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
 
     public boolean isGlowing() {
-        return this.glowing || this.world.isRemote && this.getFlag(6);
+        if(SERVER_COMPILE)return this.glowing;
+        else return this.glowing || this.world.isRemote && this.getFlag(6);
     }
 
 
     public void setGlowing(boolean glowingIn) {
         this.glowing = glowingIn;
-        if (!this.world.isRemote) {
+        if (!this.world.isRemote || SERVER_COMPILE) {
             this.setFlag(6, this.glowing);
         }
     }
@@ -2179,7 +2182,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
     @Nullable // Forge: Entities that require custom handling should override this method, not the other
     public Entity changeDimension(int dimensionIn, net.minecraftforge.common.util.ITeleporter teleporter) {
-        if (!this.world.isRemote && !this.isDead) {
+        if ((!this.world.isRemote || SERVER_COMPILE) && !this.isDead) {
             if (!ForgeHooks.onTravelToDimension(this, dimensionIn)) return null;
             MinecraftServer minecraftserver = this.getServer();
             int i = this.dimension;
@@ -2503,7 +2506,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
 
     public void setCommandStat(CommandResultStats.Type type, int amount) {
-        if (this.world != null && !this.world.isRemote) {
+        if (this.world != null && (!this.world.isRemote || SERVER_COMPILE)) {
             if(this.cmdResultStats == null)this.cmdResultStats = new CommandResultStats();
             this.cmdResultStats.setCommandStatForSender(this.world.getMinecraftServer(), this, type, amount);
         }
@@ -2868,7 +2871,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
     public boolean canPassengerSteer() {
         Entity entity = this.getControllingPassenger();
-        return (entity instanceof EntityPlayer)? ((EntityPlayer)entity).isUser() : !this.world.isRemote;
+        return (entity instanceof EntityPlayer)? ((EntityPlayer)entity).isUser() : (!this.world.isRemote || SERVER_COMPILE);
     }
 
 

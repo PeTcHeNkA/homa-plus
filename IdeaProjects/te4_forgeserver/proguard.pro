@@ -4,7 +4,6 @@
 -keep,allowoptimization,allowshrinking class net.minecraft.entity.Entity { *; }
 -keep,allowoptimization,allowshrinking class net.minecraft.entity.EntityLiving { *; }
 -keep,allowoptimization,allowshrinking class net.minecraft.entity.EntityLivingBase { *; }
-
 -keep,allowoptimization,allowshrinking class net.minecraft.pathfinding.WalkNodeProcessor { *; }
 
 -keep class com.** { *; }

@@ -57,6 +57,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.server.SStrings;
 import plus.fserver.utls.collections.FixedItemList;
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public abstract class EntityLiving extends EntityLivingBase {
@@ -101,7 +102,7 @@ public abstract class EntityLiving extends EntityLivingBase {
         this.navigator = this.createNavigator(worldIn);
         this.senses = new EntitySenses(this);
 
-        if (worldIn != null && !worldIn.isRemote) this.initEntityAI();
+        if (worldIn != null && (!worldIn.isRemote || SERVER_COMPILE)) this.initEntityAI();
     }
 
 
@@ -256,7 +257,7 @@ public abstract class EntityLiving extends EntityLivingBase {
     public void onUpdate() {
         if (world.onLivingUpdate(this)) return;
 
-        if (!this.world.isRemote) this.setFlag(6, this.isGlowing());
+        if (!this.world.isRemote || SERVER_COMPILE) this.setFlag(6, this.isGlowing());
         this.onEntityUpdate();
 
         if (this.isEntityAlive() && this.rand.nextInt(1000) < this.livingSoundTime++) {
@@ -265,7 +266,7 @@ public abstract class EntityLiving extends EntityLivingBase {
         }
 
         onUpdateB();
-        if (!this.world.isRemote) {
+        if (!this.world.isRemote || SERVER_COMPILE) {
             this.updateLeashedState();
 
             if ((this.ticksExisted & 7) == 7) {
@@ -496,7 +497,7 @@ public abstract class EntityLiving extends EntityLivingBase {
             if(lodLvl < 2) this.collideWithNearbyEntities();
         }
 
-        if (lodLvl == 0 && !this.world.isRemote && this.canPickUpLoot() && !this.dead && world.getMobGrifering(this)) {
+        if (lodLvl == 0 && (!this.world.isRemote || SERVER_COMPILE) && this.canPickUpLoot() && !this.dead && world.getMobGrifering(this)) {
             AxisAlignedBB box;
             getEntityBoundingBox().growTo(1d,0d,1d, box = world.commonWorldEntityAABB);
             for (EntityItem item : this.world.getEntitiesWithinAABB(EntityItem.class, box))
@@ -958,9 +959,9 @@ public abstract class EntityLiving extends EntityLivingBase {
             this.isLeashed = false;
             this.leashHolder = null;
 
-            if (!this.world.isRemote && dropLead) this.dropItem(Items.LEAD, 1);
+            if ((!this.world.isRemote || SERVER_COMPILE) && dropLead) this.dropItem(Items.LEAD, 1);
 
-            if (!this.world.isRemote && sendPacket && this.world instanceof WorldServer)
+            if ((!this.world.isRemote || SERVER_COMPILE) && sendPacket && this.world instanceof WorldServer)
                 ((WorldServer)this.world).getEntityTracker().sendToTracking(this, new SPacketEntityAttach(this, (Entity)null));
         }
     }
@@ -984,7 +985,7 @@ public abstract class EntityLiving extends EntityLivingBase {
         this.isLeashed = true;
         this.leashHolder = entityIn;
 
-        if (!this.world.isRemote && sendAttachNotification && this.world instanceof WorldServer) {
+        if ((!this.world.isRemote || SERVER_COMPILE) && sendAttachNotification && this.world instanceof WorldServer) {
             ((WorldServer)this.world).getEntityTracker().sendToTracking(this, new SPacketEntityAttach(this, this.leashHolder));
         }
 
@@ -1069,7 +1070,7 @@ public abstract class EntityLiving extends EntityLivingBase {
 
     @Override
     public boolean isServerWorld() {
-        return !this.world.isRemote && !this.isAIDisabled();
+        return (!this.world.isRemote || SERVER_COMPILE) && !this.isAIDisabled();
     }
 
 
