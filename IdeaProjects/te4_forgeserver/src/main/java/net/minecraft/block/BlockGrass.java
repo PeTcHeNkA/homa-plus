@@ -17,7 +17,6 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.block.BlockFx;
 import plus.fserver.server.elca.ChunkSelector;
-import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public class BlockGrass extends BlockFx implements IGrowable {
@@ -92,7 +91,7 @@ public class BlockGrass extends BlockFx implements IGrowable {
 
     @Override
     public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand) {
-        if (!worldIn.isRemote || SERVER_COMPILE) {
+        if (!worldIn.isRemote) {
             if (!worldIn.isAreaLoaded(pos, 3)) return;
             pos = worldIn.localTempPos.setPos(pos.getX(), pos.getY()+1, pos.getZ());
 

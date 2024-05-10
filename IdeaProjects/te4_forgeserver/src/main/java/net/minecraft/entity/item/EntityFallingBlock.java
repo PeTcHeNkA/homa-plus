@@ -31,7 +31,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.ElcaMobs;
-import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public class EntityFallingBlock extends Entity {
@@ -118,7 +117,7 @@ public class EntityFallingBlock extends Entity {
                 if (this.world.access().getBlockState(blockpos).getBlock() == block) {
                     this.world.access().setBlockState(blockpos, BlockIDIndexes.AIR_STATE, 3);
                 }
-                else if (!this.world.isRemote || SERVER_COMPILE) {
+                else if (!this.world.isRemote) {
                     this.setDead();
                     return;
                 }
@@ -130,7 +129,7 @@ public class EntityFallingBlock extends Entity {
 
             this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
 
-            if (!this.world.isRemote || SERVER_COMPILE) {
+            if (!this.world.isRemote) {
                 int lodLvl = lodLvl();
                 if(lodLvl != 0 && (ticksExisted & lodLvl) != 0)return;
 
@@ -149,7 +148,7 @@ public class EntityFallingBlock extends Entity {
                 }
 
                 if (!this.onGround && !flag1) {
-                    if (this.fallTime > 100 && (!this.world.isRemote || SERVER_COMPILE) && (temp1.getY() < 1 || temp1.getY() > 256) || this.fallTime > 600) {
+                    if (this.fallTime > 100 && !this.world.isRemote && (temp1.getY() < 1 || temp1.getY() > 256) || this.fallTime > 600) {
                         if (this.shouldDropItem && this.world.getGameRules().getBoolean("doEntityDrops")) {
                             this.entityDropItem(new ItemStack(block, 1, block.damageDropped(this.fallTile)), 0.0F);
                         }

@@ -129,7 +129,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
-import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public class ForgeHooks {
@@ -482,7 +481,7 @@ public class ForgeHooks {
             return null;
         }
 
-        if (!player.world.isRemote || SERVER_COMPILE) {
+        if (!player.world.isRemote) {
             player.getEntityWorld().spawnEntity(event.getEntityItem());
         }
         return event.getEntityItem();

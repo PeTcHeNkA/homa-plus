@@ -5,7 +5,6 @@ import com.google.common.base.Predicates;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.scoreboard.Team;
-import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public class CollisionPredicate implements Predicate<Entity> {
@@ -29,7 +28,7 @@ public class CollisionPredicate implements Predicate<Entity> {
             if (((EntityPlayer) entity).isSpectator()) return false;
         }
 
-        if ((!entity.world.isRemote || SERVER_COMPILE) || entity instanceof EntityPlayer && ((EntityPlayer) entity).isUser()) {
+        if (!entity.world.isRemote || entity instanceof EntityPlayer && ((EntityPlayer) entity).isUser()) {
             Team team1 = entity.getTeam();
             Team.CollisionRule rule2 = team1 == null ? Team.CollisionRule.ALWAYS : team1.getCollisionRule();
 

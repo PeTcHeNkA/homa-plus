@@ -18,8 +18,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.api.IBlockEAccess;
 import plus.fserver.block.BlockFx;
 
-import static plus.fserver.ElcaCV.SERVER_COMPILE;
-
 
 public class BlockMycelium extends BlockFx {
     public static final PropertyBool SNOWY = PropertyBool.create("snowy");
@@ -41,7 +39,7 @@ public class BlockMycelium extends BlockFx {
 
     @Override
     public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand) {
-        if (!worldIn.isRemote || SERVER_COMPILE) {
+        if (!worldIn.isRemote) {
             if (!worldIn.isAreaLoaded(pos, 2)) return; // Forge: prevent loading unloaded chunks when checking neighbor's light and spreading
             BlockPos.MutableBlockPos temp = new BlockPos.MutableBlockPos(pos.getX(), pos.getY()+1, pos.getZ());
             IBlockEAccess access = worldIn.access();

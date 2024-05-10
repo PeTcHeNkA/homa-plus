@@ -18,8 +18,6 @@ import net.minecraft.world.IInteractionObject;
 import net.minecraft.world.World;
 import plus.fserver.block.BlockFx;
 
-import static plus.fserver.ElcaCV.SERVER_COMPILE;
-
 
 public class BlockWorkbench extends BlockFx {
     protected BlockWorkbench() {
@@ -29,7 +27,7 @@ public class BlockWorkbench extends BlockFx {
 
 
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-        if (worldIn.isRemote || !SERVER_COMPILE) {
+        if (worldIn.isRemote) {
             return true;
         } else {
             playerIn.displayGui(new BlockWorkbench.InterfaceCraftingTable(worldIn, pos));

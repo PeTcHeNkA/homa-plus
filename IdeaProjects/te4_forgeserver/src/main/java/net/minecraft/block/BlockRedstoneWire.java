@@ -24,7 +24,6 @@ import plus.fserver.block.BlockFs;
 import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.math.BlockPosDelta;
 import plus.fserver.world.RedstoneEngine;
-import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public class BlockRedstoneWire extends BlockFs {
@@ -158,7 +157,7 @@ public class BlockRedstoneWire extends BlockFs {
 
     @Override
     public void onBlockAdded(final World worldIn, final BlockPos pos, final IBlockState state) {
-        if (!worldIn.isRemote || SERVER_COMPILE)
+        if (!worldIn.isRemote)
             this.turbo.updateSurroundingRedstone(worldIn, pos, state, null);
     }
 
@@ -166,7 +165,7 @@ public class BlockRedstoneWire extends BlockFs {
     @Override
     public void breakBlock(final World worldIn, final BlockPos pos, final IBlockState state) {
         super.breakBlock(worldIn, pos, state);
-        if (!worldIn.isRemote || SERVER_COMPILE) {
+        if (!worldIn.isRemote) {
             for (final EnumFacing enumfacing : EnumFacing.VALUES) {
                 worldIn.notifyNeighborsOfStateChange(pos.offset(enumfacing), this, false);
             }
@@ -198,7 +197,7 @@ public class BlockRedstoneWire extends BlockFs {
 
     @Override
     public void neighborChanged(final IBlockState state, final World worldIn, final BlockPos pos, final Block blockIn, final BlockPos fromPos) {
-        if (!worldIn.isRemote || SERVER_COMPILE) {
+        if (!worldIn.isRemote) {
             if (this.canPlaceBlockAt(worldIn, pos)) {
                 this.turbo.updateSurroundingRedstone(worldIn, pos, state, fromPos);
             } else {

@@ -52,7 +52,6 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.block.BlockFx;
 import plus.fserver.utls.collections.ArrayListE6;
-import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public class Block extends net.minecraftforge.registries.IForgeRegistryEntry.Impl<Block> {
@@ -563,7 +562,7 @@ public class Block extends net.minecraftforge.registries.IForgeRegistryEntry.Imp
 
 
     public void dropBlockAsItemWithChance(World worldIn, BlockPos pos, IBlockState state, float chance, int fortune) {
-        if ((!worldIn.isRemote || SERVER_COMPILE) && !worldIn.restoringBlockSnapshots) // do not drop items while restoring blockstates, prevents item dupe
+        if ((!worldIn.isRemote) && !worldIn.restoringBlockSnapshots) // do not drop items while restoring blockstates, prevents item dupe
         {
             List<ItemStack> drops = getDrops(worldIn, pos, state, fortune); // use the old method until it gets removed, for backward compatibility
             chance = net.minecraftforge.event.ForgeEventFactory.fireBlockHarvesting(drops, worldIn, pos, state, fortune, chance, false, harvesters.get());
@@ -578,7 +577,7 @@ public class Block extends net.minecraftforge.registries.IForgeRegistryEntry.Imp
 
 
     public static void spawnAsEntity(World worldIn, BlockPos pos, ItemStack stack) {
-        if ((!worldIn.isRemote || SERVER_COMPILE) && !stack.isEmpty() && worldIn.getGameRules().doTileDrops.getBoolean() && !worldIn.restoringBlockSnapshots) {
+        if ((!worldIn.isRemote) && !stack.isEmpty() && worldIn.getGameRules().doTileDrops.getBoolean() && !worldIn.restoringBlockSnapshots) {
             if (captureDrops.get()) {
                 capturedDrops.get().add(stack);
                 return;
@@ -594,7 +593,7 @@ public class Block extends net.minecraftforge.registries.IForgeRegistryEntry.Imp
 
 
     public void dropXpOnBlockBreak(World worldIn, BlockPos pos, int amount) {
-        if ((!worldIn.isRemote || SERVER_COMPILE) && worldIn.getGameRules().doTileDrops.getBoolean()) {
+        if ((!worldIn.isRemote) && worldIn.getGameRules().doTileDrops.getBoolean()) {
             while (amount > 0) {
                 int i = EntityXPOrb.getXPSplit(amount);
                 amount -= i;

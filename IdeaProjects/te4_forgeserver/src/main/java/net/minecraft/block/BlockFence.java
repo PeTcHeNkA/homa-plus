@@ -27,7 +27,6 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.utls.collections.ArrayListE6;
 import static plus.fserver.block.BlockFs.addCollisionBoxToListFx;
-import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public class BlockFence extends Block {
@@ -170,7 +169,7 @@ public class BlockFence extends Block {
 
     @Override
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-        if (!worldIn.isRemote || SERVER_COMPILE) {
+        if (!worldIn.isRemote) {
             return ItemLead.attachToFence(playerIn, worldIn, pos);
         } else {
             ItemStack itemstack = playerIn.getHeldItem(hand);

@@ -39,7 +39,6 @@ import net.minecraftforge.common.ForgeModContainer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.ElcaMobs;
-import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public class EntityZombie extends EntityMob {
@@ -149,7 +148,7 @@ public class EntityZombie extends EntityMob {
     public void setChild(boolean childZombie) {
         this.getDataManager().set(IS_CHILD, childZombie);
 
-        if (this.world != null && (!this.world.isRemote || SERVER_COMPILE)) {
+        if (this.world != null && !this.world.isRemote) {
             IAttributeInstance iattributeinstance = this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED);
             iattributeinstance.removeModifier(BABY_SPEED_BOOST);
 
@@ -168,7 +167,7 @@ public class EntityZombie extends EntityMob {
 
     @Override
     public void onLivingUpdateTick() {
-        if (this.world.isDaytime() && (!this.world.isRemote || SERVER_COMPILE) && !this.isChild() && this.shouldBurnInDay()) {
+        if (this.world.isDaytime() && !this.world.isRemote && !this.isChild() && this.shouldBurnInDay()) {
             float f = this.getBrightness();
 
             if (f > 0.5F && this.rand.nextFloat() * 30.0F < (f - 0.4F) * 2.0F && this.world.canSeeSky(this)) {

@@ -11,7 +11,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.scoreboard.Team;
-import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public final class EntitySelectors {
@@ -39,7 +38,7 @@ public final class EntitySelectors {
             if (!entity.canBePushed()) {
                 return false;
             }
-            else if ((!entityIn.world.isRemote || SERVER_COMPILE) || entity instanceof EntityPlayer && ((EntityPlayer)entity).isUser()) {
+            else if (!entityIn.world.isRemote || entity instanceof EntityPlayer && ((EntityPlayer)entity).isUser()) {
                 Team team1 = entity.getTeam();
                 Team.CollisionRule team$collisionrule1 = team1 == null ? Team.CollisionRule.ALWAYS : team1.getCollisionRule();
 

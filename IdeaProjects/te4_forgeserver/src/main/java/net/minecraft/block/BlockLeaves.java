@@ -21,7 +21,6 @@ import plus.fserver.api.IBlockEAccess;
 import plus.fserver.block.BlockFs;
 import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.collections.LeavesCache;
-import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public abstract class BlockLeaves extends BlockFs implements net.minecraftforge.common.IShearable {
@@ -66,7 +65,7 @@ public abstract class BlockLeaves extends BlockFs implements net.minecraftforge.
 
     @Override
     public void updateTick(World world, BlockPos pos, IBlockState state, Random rand) {
-        if (!world.isRemote || SERVER_COMPILE) {
+        if (!world.isRemote) {
             if (state.getValue(CHECK_DECAY) && state.getValue(DECAYABLE)) {
                 // Forge: prevent decaying leaves from updating neighbors and loading unloaded chunks
                 //if (!world.isAreaLoaded(pos, 1)) return;

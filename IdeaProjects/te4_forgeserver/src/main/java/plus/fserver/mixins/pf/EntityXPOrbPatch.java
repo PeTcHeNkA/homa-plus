@@ -25,7 +25,6 @@ import net.minecraft.entity.item.EntityXPOrb;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import java.util.List;
-import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 @Mixin(EntityXPOrb.class)
@@ -73,7 +72,7 @@ public abstract class EntityXPOrbPatch extends Entity {
             this.playSound(SoundEvents.ENTITY_GENERIC_BURN, 0.4F, 2.0F + this.rand.nextFloat() * 0.4F);
         }
 
-        if(!world.isRemote || SERVER_COMPILE) {
+        if(!world.isRemote) {
             pushOutOfBlocks(this.posX, (this.getEntityBoundingBox().minY + this.getEntityBoundingBox().maxY) / 2.0D, this.posZ);
         } else {
             pushOutOfBlocksFixed(this.posX, (this.getEntityBoundingBox().minY + this.getEntityBoundingBox().maxY) / 2.0D, this.posZ);

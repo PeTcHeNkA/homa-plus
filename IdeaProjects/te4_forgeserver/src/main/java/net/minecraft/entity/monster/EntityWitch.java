@@ -36,7 +36,6 @@ import net.minecraft.world.storage.loot.LootTableList;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.ElcaMobs;
-import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public class EntityWitch extends EntityMob implements IRangedAttackMob {
@@ -114,7 +113,7 @@ public class EntityWitch extends EntityMob implements IRangedAttackMob {
 
     @Override
     public void onLivingUpdateTick() {
-        if (!this.world.isRemote || SERVER_COMPILE) {
+        if (!this.world.isRemote) {
             if (this.isDrinkingPotion()) {
                 if (this.potionUseTimer-- <= 0) {
                     this.setDrinkingPotion(false);

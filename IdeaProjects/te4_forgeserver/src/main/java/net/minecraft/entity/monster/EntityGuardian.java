@@ -32,7 +32,6 @@ import net.minecraft.world.storage.loot.LootTableList;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.ElcaMobs;
-import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public class EntityGuardian extends EntityMob {
@@ -134,7 +133,7 @@ public class EntityGuardian extends EntityMob {
     public EntityLivingBase getTargetedEntity() {
         if (!this.hasTargetedEntity()) {
             return null;
-        } else if (this.world.isRemote || !SERVER_COMPILE) {
+        } else if (this.world.isRemote) {
             if (this.targetedEntity != null) {
                 return this.targetedEntity;
             } else {
@@ -208,7 +207,7 @@ public class EntityGuardian extends EntityMob {
 
     @Override
     public void onLivingUpdateTick() {
-        if (this.world.isRemote || !SERVER_COMPILE) {
+        if (this.world.isRemote) {
             this.clientSideTailAnimationO = this.clientSideTailAnimation;
 
             if (!this.isInWater()) {

@@ -9,6 +9,7 @@ import net.minecraft.world.chunk.storage.*;
 import net.minecraft.util.math.*;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.ChunkEvent;
+import org.spongepowered.asm.mixin.injection.callback.*;
 import net.minecraft.world.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.*;
@@ -19,7 +20,6 @@ import plus.fserver.world.light.api.IChunkLightingData;
 import plus.fserver.world.light.api.ILightingEngineProvider;
 import java.util.Map;
 import static net.minecraft.world.chunk.Chunk.HORIZONTAL;
-import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 @Mixin(Chunk.class)
@@ -51,7 +51,7 @@ public abstract class MixinChunk implements IChunkLighting, IChunkLightingData, 
      */
     @Overwrite
     public int getLightSubtracted(BlockPos pos, int amount) {
-        if(world.isRemote || !SERVER_COMPILE)this.getLightingEngine().processLightUpdates();
+        if(world.isRemote)this.getLightingEngine().processLightUpdates();
         int i = pos.getX() & 15, j = pos.getY(), k = pos.getZ() & 15;
         ExtendedBlockStorage storage = this.storageArrays[j >> 4];
         if (storage == null) {
@@ -119,7 +119,7 @@ public abstract class MixinChunk implements IChunkLighting, IChunkLightingData, 
      */
     @Overwrite
     public int getLightFor(final EnumSkyBlock type, final BlockPos pos) {
-        if(world.isRemote || !SERVER_COMPILE)this.getLightingEngine().processLightUpdatesForType(type);
+        if(world.isRemote)this.getLightingEngine().processLightUpdatesForType(type);
         return this.getCachedLightFor(type, pos);
     }
 

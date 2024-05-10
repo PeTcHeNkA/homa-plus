@@ -36,7 +36,6 @@ import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
 import plus.fserver.ElcaMobs;
-import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public class EntitySpider extends EntityMob {
@@ -89,8 +88,9 @@ public class EntitySpider extends EntityMob {
     public void onUpdate() {
         super.onUpdate();
 
-        if (!this.world.isRemote || SERVER_COMPILE)
+        if (!this.world.isRemote) {
             this.setBesideClimbableBlock(this.collidedHorizontally);
+        }
     }
 
 

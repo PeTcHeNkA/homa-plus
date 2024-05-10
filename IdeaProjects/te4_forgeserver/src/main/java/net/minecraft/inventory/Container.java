@@ -19,7 +19,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.utls.collections.ArrayListE2;
 import plus.fserver.utls.collections.ArrayListEV;
 import plus.tson.utl.Te4HashSet;
-import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public abstract class Container {
@@ -616,7 +615,7 @@ public abstract class Container {
 
 
     protected void slotChangedCraftingGrid(World world, EntityPlayer player, InventoryCrafting inv, InventoryCraftResult result) {
-        if (!world.isRemote || SERVER_COMPILE) {
+        if (!world.isRemote) {
             EntityPlayerMP entityplayermp = (EntityPlayerMP)player;
             ItemStack itemstack = ItemStack.EMPTY;
             IRecipe irecipe = CraftingManager.findMatchingRecipe(inv, world);

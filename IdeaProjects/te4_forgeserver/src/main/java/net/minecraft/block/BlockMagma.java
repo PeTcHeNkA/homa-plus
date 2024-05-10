@@ -21,8 +21,6 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.block.BlockFx;
 
-import static plus.fserver.ElcaCV.SERVER_COMPILE;
-
 
 public class BlockMagma extends BlockFx {
     public BlockMagma() {
@@ -64,7 +62,7 @@ public class BlockMagma extends BlockFx {
             worldIn.setBlockToAir(blockpos);
             worldIn.playSound(null, pos, SoundEvents.BLOCK_FIRE_EXTINGUISH, SoundCategory.BLOCKS, 0.5F, 2.6F + (worldIn.rand.nextFloat() - worldIn.rand.nextFloat()) * 0.8F);
 
-            if (!worldIn.isRemote || SERVER_COMPILE) {
+            if (!worldIn.isRemote) {
                 ((WorldServer)worldIn).spawnParticle(EnumParticleTypes.SMOKE_LARGE, (double)blockpos.getX() + 0.5D, (double)blockpos.getY() + 0.25D, (double)blockpos.getZ() + 0.5D, 8, 0.5D, 0.25D, 0.5D, 0.0D);
             }
         }

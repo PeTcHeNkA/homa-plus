@@ -16,7 +16,6 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public class BlockStainedGlass extends BlockBreakableFs {
@@ -82,7 +81,7 @@ public class BlockStainedGlass extends BlockBreakableFs {
 
     @Override
     public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state) {
-        if (!worldIn.isRemote || SERVER_COMPILE) {
+        if (!worldIn.isRemote) {
             BlockBeacon.updateColorAsync(worldIn, pos);
         }
     }
@@ -90,7 +89,7 @@ public class BlockStainedGlass extends BlockBreakableFs {
 
     @Override
     public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
-        if (!worldIn.isRemote || SERVER_COMPILE) {
+        if (!worldIn.isRemote) {
             BlockBeacon.updateColorAsync(worldIn, pos);
         }
     }

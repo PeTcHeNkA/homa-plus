@@ -77,7 +77,6 @@ import plus.fserver.utls.math.Vec3dMut;
 import plus.fserver.world.RedstoneEngine;
 import plus.fserver.world.light.LightingEngine;
 import plus.fserver.world.light.api.ILightingEngineProvider;
-import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public abstract class World implements IBlockEAccess, net.minecraftforge.common.capabilities.ICapabilityProvider, ILightingEngineProvider {
@@ -363,7 +362,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public boolean setBlockState(BlockPos pos, IBlockState newState, int flags) {
         if (this.isOutsideBuildHeight(pos)) {
             return false;
-        } else if ((!this.isRemote || SERVER_COMPILE) && this.worldInfo.getTerrainType()
+        } else if (!this.isRemote && this.worldInfo.getTerrainType()
                 == WorldType.DEBUG_ALL_BLOCK_STATES) {
             return false;
         } else {
@@ -371,7 +370,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
             pos = pos.toImmutable(); // Forge - prevent mutable BlockPos leaks
             net.minecraftforge.common.util.BlockSnapshot blockSnapshot = null;
-            if (this.captureBlockSnapshots && (!this.isRemote || SERVER_COMPILE)) {
+            if (this.captureBlockSnapshots && !this.isRemote) {
                 blockSnapshot = net.minecraftforge.common.util.BlockSnapshot.getBlockSnapshot(this, pos, flags);
                 this.capturedBlockSnapshots.add(blockSnapshot);
             }
@@ -403,15 +402,15 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     // method in order to directly send client and physic updates
     public void markAndNotifyBlock(BlockPos pos, @Nullable Chunk chunk, IBlockState iblockstate, IBlockState newState, int flags) {
         Block block = newState.getBlock();
-        if ((flags & 2) != 0 && (!this.isRemote || SERVER_COMPILE || (flags & 4) == 0) && (chunk == null || chunk.isPopulated()))
+        if ((flags & 2) != 0 && (!this.isRemote || (flags & 4) == 0) && (chunk == null || chunk.isPopulated()))
             this.notifyBlockUpdate(pos, iblockstate, newState, flags);
-        if ((!this.isRemote || SERVER_COMPILE) && (flags & 1) != 0) {
+        if (!this.isRemote && (flags & 1) != 0) {
             this.notifyNeighborsRespectDebug(pos, iblockstate.getBlock(), true);
 
             if (newState.hasComparatorInputOverride()) {
                 this.updateComparatorOutputLevel(pos, block);
             }
-        } else if ((!this.isRemote || SERVER_COMPILE) && (flags & 16) == 0)
+        } else if (!this.isRemote && (flags & 16) == 0)
             this.updateObservingBlocksAt(pos, block);
     }
 
@@ -549,7 +548,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     public void observedNeighborChanged(BlockPos pos, final Block changedBlock, BlockPos changedBlockPos) {
-        if (!this.isRemote || SERVER_COMPILE) {
+        if (!this.isRemote) {
             IBlockState iblockstate = this.getBlockState(pos);
             if (true) {
                 try {
@@ -850,7 +849,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
                 EnumFacing enumfacing;
                 RayTraceResult rtxResult2 = null;
-                IBlockEAccess selector = (isRemote || !SERVER_COMPILE)?this:localSelector;
+                IBlockEAccess selector = isRemote?this:new ChunkSelector(chunk);
 
                 int k1 = 200;
 
@@ -1121,7 +1120,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
     public boolean spawnEntity(Entity entityIn) {
         // do not drop any items while restoring blocksnapshots. Prevents dupes
-        if ((!this.isRemote || SERVER_COMPILE) && (entityIn == null || (entityIn instanceof net.minecraft.entity.item.EntityItem && this.restoringBlockSnapshots))) return false;
+        if (!this.isRemote && (entityIn == null || (entityIn instanceof net.minecraft.entity.item.EntityItem && this.restoringBlockSnapshots))) return false;
 
         int i = MathHelper.floor(entityIn.posX / 16.0D);
         int j = MathHelper.floor(entityIn.posZ / 16.0D);
@@ -1468,7 +1467,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public void tickLoadedEntities(){
         ArrayRemSwapListE15<Entity> list = (ArrayRemSwapListE15<Entity>) this.loadedEntityList;
         for (int cursor = 0; cursor < list.sizeC(); ++cursor) {
-            Entity entity = list.getC(cursor);
+            Entity entity = list.get(cursor);
             Entity ridding = entity.getRidingEntity();
 
             if (ridding != null) {
@@ -1649,7 +1648,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         }
         tile.onLoad();
 
-        if (this.isRemote || !SERVER_COMPILE) {
+        if (this.isRemote) {
             BlockPos blockpos1 = tile.getPos();
             IBlockState iblockstate1 = this.getBlockState(blockpos1);
             this.notifyBlockUpdate(blockpos1, iblockstate1, iblockstate1, 2);
@@ -1850,7 +1849,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     public float getBlockDensity(Vec3d vec, AxisAlignedBB bb) {
-        IBlockEAccess selector = (isRemote || !SERVER_COMPILE)?this:localSelector;
+        IBlockEAccess selector = isRemote?this:new ChunkSelector(this);
         return getBlockDensity(selector, vec, bb);
     }
 
@@ -2050,7 +2049,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
     public void updateWeatherBody() {
         if (this.provider.hasSkyLight()) {
-            if (!this.isRemote || SERVER_COMPILE) {
+            if (!this.isRemote) {
                 if (this.getGameRules().doWeatherCycle.getBoolean()) {
                     int j2 = this.worldInfo.getCleanWeatherTime();
 
@@ -3433,7 +3432,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
-    public final boolean onLivingUpdate(EntityLivingBase entity){
+    public boolean onLivingUpdate(EntityLivingBase entity){
         return updateEvent.post(entity);
     }
 
@@ -3632,7 +3631,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
     //chunk-iter functions
     public void updateObservingBlocksAt(BlockPos pos, Block blockType) {
-        if(this.isRemote || !SERVER_COMPILE)return;
+        if(this.isRemote)return;
         int bX = pos.getX(), bY = pos.getY(), bZ = pos.getZ();
         if(bY>0) {
             BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();

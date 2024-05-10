@@ -96,8 +96,6 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.ElcaCV;
 
-import static plus.fserver.ElcaCV.SERVER_COMPILE;
-
 
 @SuppressWarnings("incomplete-switch")
 public abstract class EntityPlayer extends EntityLivingBase {
@@ -220,7 +218,7 @@ public abstract class EntityPlayer extends EntityLivingBase {
                 this.sleepTimer = 100;
             }
 
-            if (!this.world.isRemote || SERVER_COMPILE) {
+            if (!this.world.isRemote) {
                 if (!this.isInBed()) {
                     this.wakeUpPlayer(true, true, false);
                 } else if (!ForgeEventFactory.fireSleepingTimeCheck(this, this.bedLocation)) {
@@ -238,7 +236,7 @@ public abstract class EntityPlayer extends EntityLivingBase {
 
         super.onUpdate();
 
-        if ((!this.world.isRemote || SERVER_COMPILE) && this.openContainer != null && !this.openContainer.canInteractWith(this)) {
+        if (!this.world.isRemote && this.openContainer != null && !this.openContainer.canInteractWith(this)) {
             this.closeScreen();
             this.openContainer = this.inventoryContainer;
         }
@@ -249,7 +247,7 @@ public abstract class EntityPlayer extends EntityLivingBase {
 
         this.updateCape();
 
-        if (!this.world.isRemote || SERVER_COMPILE) {
+        if (!this.world.isRemote) {
             this.foodStats.onUpdate(this);
             this.addStat(StatList.PLAY_ONE_MINUTE);
 
@@ -493,7 +491,7 @@ public abstract class EntityPlayer extends EntityLivingBase {
         super.onLivingUpdate();
         IAttributeInstance iattributeinstance = this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED);
 
-        if (!this.world.isRemote || SERVER_COMPILE) {
+        if (!this.world.isRemote) {
             iattributeinstance.setBaseValue(this.capabilities.getWalkSpeed());
         }
 
@@ -605,7 +603,7 @@ public abstract class EntityPlayer extends EntityLivingBase {
         }
 
         captureDrops = false;
-        if (!world.isRemote || SERVER_COMPILE) ForgeEventFactory.onPlayerDrops(this, cause, capturedDrops, recentlyHit > 0);
+        if (!world.isRemote) ForgeEventFactory.onPlayerDrops(this, cause, capturedDrops, recentlyHit > 0);
 
         if (cause != null) {
             this.motionX = -MathHelper.cos((this.attackedAtYaw + this.rotationYaw) * 0.017453292F) * 0.1F;
@@ -924,7 +922,7 @@ public abstract class EntityPlayer extends EntityLivingBase {
             if (this.getHealth() <= 0.0F) {
                 return false;
             } else {
-                if (this.isPlayerSleeping() && (!this.world.isRemote || SERVER_COMPILE)) {
+                if (this.isPlayerSleeping() && !this.world.isRemote) {
                     this.wakeUpPlayer(true, true, false);
                 }
 
@@ -1372,7 +1370,7 @@ public abstract class EntityPlayer extends EntityLivingBase {
         final boolean isBed = state != null && state.getBlock().isBed(state, this.world, bedLocation, this);
         final EnumFacing enumfacing = isBed && state.getBlock() instanceof BlockHorizontal ? (EnumFacing)state.getValue(BlockHorizontal.FACING) : null;
 
-        if (!this.world.isRemote || SERVER_COMPILE) {
+        if (!this.world.isRemote) {
             if (this.isPlayerSleeping() || !this.isEntityAlive()) {
                 return EntityPlayer.SleepResult.OTHER_PROBLEM;
             }
@@ -1420,7 +1418,7 @@ public abstract class EntityPlayer extends EntityLivingBase {
         this.motionY = 0.0D;
         this.motionZ = 0.0D;
 
-        if (!this.world.isRemote || SERVER_COMPILE) {
+        if (!this.world.isRemote) {
             this.world.updateAllPlayersSleepingFlag();
         }
         return EntityPlayer.SleepResult.OK;
@@ -1465,9 +1463,9 @@ public abstract class EntityPlayer extends EntityLivingBase {
 
         this.sleeping = false;
 
-        if ((!this.world.isRemote || SERVER_COMPILE) && updateWorldFlag)
+        if (!this.world.isRemote && updateWorldFlag) {
             this.world.updateAllPlayersSleepingFlag();
-
+        }
 
         this.sleepTimer = immediately ? 0 : 100;
 
@@ -1810,14 +1808,16 @@ public abstract class EntityPlayer extends EntityLivingBase {
         }
     }
 
-
-    public void addExhaustion(float exhaustion) {
+    public void addExhaustion(float exhaustion)
+    {
         if (!this.capabilities.disableDamage)
-            if (!this.world.isRemote || SERVER_COMPILE) {
+        {
+            if (!this.world.isRemote)
+            {
                 this.foodStats.addExhaustion(exhaustion);
             }
+        }
     }
-
 
     public FoodStats getFoodStats()
     {
@@ -1963,7 +1963,7 @@ public abstract class EntityPlayer extends EntityLivingBase {
 
 
     private void spawnShoulderEntity(@Nullable NBTTagCompound tag) {
-        if ((!this.world.isRemote || SERVER_COMPILE) && !tag.isEmpty()) {
+        if (!this.world.isRemote && !tag.isEmpty()) {
             Entity entity = EntityList.createEntityFromNBT(tag, this.world);
 
             if (entity instanceof EntityTameable) {

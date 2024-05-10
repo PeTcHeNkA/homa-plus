@@ -32,6 +32,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fml.relauncher.Side;
@@ -41,12 +42,11 @@ import org.apache.logging.log4j.Logger;
 import plus.fserver.ElcaMobs;
 import plus.fserver.server.elca.ChunkSelector;
 import java.util.List;
-import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public class EntityItem extends Entity {
     private static final Logger LOGGER = LogManager.getLogger();
-    private static final DataParameter<ItemStack> ITEM = EntityDataManager.createKey(EntityItem.class, DataSerializers.ITEM_STACK);
+    private static final DataParameter<ItemStack> ITEM = EntityDataManager.<ItemStack>createKey(EntityItem.class, DataSerializers.ITEM_STACK);
     private int age;
     private int pickupDelay;
     private int health;
@@ -126,7 +126,7 @@ public class EntityItem extends Entity {
                 this.motionY -= 0.03999999910593033D;
             }
 
-            if ((!this.world.isRemote || SERVER_COMPILE) && lodLvl == 0) {
+            if (!this.world.isRemote && lodLvl == 0) {
                 this.noClip = this.pushOutOfBlocks(this.posX, (this.getEntityBoundingBox().minY + this.getEntityBoundingBox().maxY) / 2.0D, this.posZ);
             } else {
                 this.noClip = false;
@@ -144,7 +144,7 @@ public class EntityItem extends Entity {
                     this.playSound(SoundEvents.ENTITY_GENERIC_BURN, 0.4F, 2.0F + this.rand.nextFloat() * 0.4F);
                 }
 
-                if (!this.world.isRemote || SERVER_COMPILE) {
+                if (!this.world.isRemote) {
                     this.searchForOtherItemsNearby();
                 }
             }
@@ -173,7 +173,7 @@ public class EntityItem extends Entity {
 
             if(lodLvl == 0 || (age & lodLvl) == lodLvl) this.handleWaterMovement();
 
-            if (!this.world.isRemote || SERVER_COMPILE) {
+            if (!this.world.isRemote) {
                 double d3 = this.motionX - d0;
                 double d4 = this.motionY - d1;
                 double d5 = this.motionZ - d2;
@@ -186,7 +186,7 @@ public class EntityItem extends Entity {
 
             ItemStack item = this.getItem();
 
-            if ((!this.world.isRemote || SERVER_COMPILE) && this.age >= lifespan) {
+            if (!this.world.isRemote && this.age >= lifespan) {
                 int hook = ForgeEventFactory.onItemExpire(this, item);
                 if (hook < 0) this.setDead();
                 else          this.lifespan += hook;
@@ -282,7 +282,7 @@ public class EntityItem extends Entity {
 
     @Override
     public boolean attackEntityFrom(DamageSource source, float amount) {
-        if (this.world.isRemote || !SERVER_COMPILE || this.isDead) return false; //Forge: Fixes MC-53850
+        if (this.world.isRemote || this.isDead) return false; //Forge: Fixes MC-53850
         if (this.isEntityInvulnerable(source)) {
             return false;
         }
@@ -356,7 +356,7 @@ public class EntityItem extends Entity {
 
     @Override
     public void onCollideWithPlayer(EntityPlayer entityIn) {
-        if (!this.world.isRemote || SERVER_COMPILE) {
+        if (!this.world.isRemote) {
             if (this.pickupDelay > 0) return;
             ItemStack itemstack = this.getItem();
             Item item = itemstack.getItem();
@@ -397,7 +397,7 @@ public class EntityItem extends Entity {
     public Entity changeDimension(int dimensionIn, net.minecraftforge.common.util.ITeleporter teleporter) {
         Entity entity = super.changeDimension(dimensionIn, teleporter);
 
-        if ((!this.world.isRemote || SERVER_COMPILE) && entity instanceof EntityItem) {
+        if (!this.world.isRemote && entity instanceof EntityItem) {
             ((EntityItem)entity).searchForOtherItemsNearby();
         }
         return entity;

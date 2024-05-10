@@ -22,8 +22,6 @@ public class ElcaCV {
     public static final boolean ENTITY_FAST_WET               = true;
     public static final boolean FIX_NULL_HASH_PALETTE         = false;
 
-    public static final boolean SERVER_COMPILE                = false;
-
     static {
         if(DEBUG_NO_SERVER) {
             System.out.println("WARNING: DEBUG_NO_SERVER ACTIVATED");
