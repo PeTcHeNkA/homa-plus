@@ -7,6 +7,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldType;
@@ -107,6 +108,13 @@ public final class ChunkSelector implements IBlockEAccess {
     }
 
 
+    public int getLightFor(EnumSkyBlock type, BlockPos pos) {
+        if(pos.getY() < 0 || pos.getY() > 255)return type.defaultLightValue;
+        Chunk chunk1 = getLoadedE(pos.getX()>>4, pos.getZ()>>4);
+        return chunk1 == null?type.defaultLightValue:chunk.getLightFor(type, pos);
+    }
+
+
     public IBlockState getState(BlockPos pos){
         return getChunkE(pos.getX()>>4, pos.getZ()>>4).getBlockState(pos);
     }
@@ -131,6 +139,16 @@ public final class ChunkSelector implements IBlockEAccess {
 
     public IBlockState getCurState(BlockPos pos){
         return chunk.getBlockState(pos);
+    }
+
+
+    public IBlockState getCurState(int x, int y, int z){
+        return chunk.getBlockState(x, y, z);
+    }
+
+
+    public IBlockState getCurStateUnchecked(int x, int y, int z){
+        return chunk.getBlockStateUnchecked(x, y, z);
     }
 
 

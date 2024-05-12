@@ -101,9 +101,15 @@ public class BlockStatePaletteHashMap implements IBlockStatePalette {
 
 
     private int nextId() {
-        while (this.nextFreeIndex < this.byId.length && this.byId[this.nextFreeIndex] != null)
-            ++this.nextFreeIndex;
-        return this.nextFreeIndex;
+        if(ElcaCV.FIX_NULL_HASH_PALETTE){
+            while (this.nextFreeIndex < this.byId.length && this.byId[this.nextFreeIndex] != BlockIDIndexes.AIR_STATE)
+                ++this.nextFreeIndex;
+            return this.nextFreeIndex;
+        } else {
+            while (this.nextFreeIndex < this.byId.length && this.byId[this.nextFreeIndex] != null)
+                ++this.nextFreeIndex;
+            return this.nextFreeIndex;
+        }
     }
 
 
@@ -180,12 +186,15 @@ public class BlockStatePaletteHashMap implements IBlockStatePalette {
 
     public void clear() {
         Arrays.fill(this.values, null);
-        if(ElcaCV.FIX_NULL_HASH_PALETTE)
+        if(ElcaCV.FIX_NULL_HASH_PALETTE){
+            this.nextFreeIndex = 0;
+            this.mapSize = 0;
             Arrays.fill(this.byId, BlockIDIndexes.AIR_STATE);
-        else
+        } else {
             Arrays.fill(this.byId, null);
-        this.nextFreeIndex = 0;
-        this.mapSize = 0;
+            this.nextFreeIndex = 0;
+            this.mapSize = 0;
+        }
     }
 
 

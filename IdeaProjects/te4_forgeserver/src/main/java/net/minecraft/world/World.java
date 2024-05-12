@@ -1222,8 +1222,13 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
-    public boolean inInWorldBorder(AxisAlignedBB bb){
+    public final boolean inInWorldBorder(AxisAlignedBB bb){
         return bb.maxX > worldBMinx && bb.minX < worldBMaxx && bb.maxZ > worldBMinz && bb.minZ < worldBMaxz;
+    }
+
+
+    public final boolean inInWorldBorder(int x, int z) {
+        return x > worldBMinx && x < worldBMaxx && z > worldBMinz && z < worldBMaxz;
     }
 
 
@@ -3809,7 +3814,6 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         int minZ = MathHelper.floor(aabb.minZ) - 1;
         int maxZ = MathHelper.ceil(aabb.maxZ) + 1;
 
-        WorldBorder worldborder = this.getWorldBorder();
         boolean flag = entityIn != null && entityIn.isOutsideBorder(),
                 flag1 = entityIn != null && this.isInsideWorldBorder(entityIn),
                 flag2, flag3;
@@ -3829,7 +3833,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
                             } else if (entityIn != null && flag == flag1) entityIn.setOutsideBorder(!flag1);
 
-                            ((!fastCheck && flag1 && !worldborder.contains(xPos, zPos))?
+                            ((!fastCheck && flag1 && inInWorldBorder(xPos, zPos))?
                                     BlockIDIndexes.STONE_STATE : chunk.getBlockStateUnchecked(xPos, yPos, zPos))
 
                                     .addCollisionBoxToListF(selector, tempPooledLocalPos.setPos(xPos, yPos, zPos), aabb, outList, entityIn, false);

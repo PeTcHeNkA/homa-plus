@@ -236,6 +236,7 @@ public final class AsyWorldTickerV2 implements ThreadFactory, IAsyWorldTicker{
             }
             if(inf.save++>saveAllEvery){
                 try {
+                    //todo test async net.minecraft.world.storage.MapStorage.saveData
                     worldserver.saveAllChunks(true,null);
                     server.getPlayerList().saveLocalPlayers(worldserver);
                     inf.save = 0;

@@ -78,8 +78,6 @@ import plus.fserver.api.IBlockEAccess;
 import plus.fserver.server.SStrings;
 import plus.fserver.utls.collections.FixedItemList;
 import plus.fserver.utls.math.Vec3dMut;
-
-import static plus.fserver.ElcaCV.CLIENT_COMPILE;
 import static plus.fserver.ElcaCV.SERVER_COMPILE;
 import static plus.fserver.utls.math.MathUtls.F_180_PI;
 
@@ -1714,7 +1712,7 @@ public abstract class EntityLivingBase extends Entity {
 
 
         this.onGroundSpeedFactor += (f - this.onGroundSpeedFactor) * 0.3F;
-        f5 = this.updateDistance(f4, f5);
+
 
         while (this.rotationYaw     - this.prevRotationYaw     < -180.0F) this.prevRotationYaw     -= 360.0F;
         while (this.rotationYaw     - this.prevRotationYaw     >= 180.0F) this.prevRotationYaw     += 360.0F;
@@ -1725,7 +1723,7 @@ public abstract class EntityLivingBase extends Entity {
         while (this.rotationYawHead - this.prevRotationYawHead < -180.0F) this.prevRotationYawHead -= 360.0F;
         while (this.rotationYawHead - this.prevRotationYawHead >= 180.0F) this.prevRotationYawHead += 360.0F;
 
-        this.movedDistance += f5;
+        this.movedDistance += this.updateDistance(f4, f5);
 
         if (this.isElytraFlying()) ++this.ticksElytraFlying;
         else this.ticksElytraFlying = 0;

@@ -753,6 +753,12 @@ public class ForgeChunkManager {
     }
 
 
+    public static void invalidate(long coords, World world){
+        Cache<Long, ChunkEntry> cache = dormantChunkCache.get(world);
+        cache.invalidate(coords);
+    }
+
+
     public static void storeChunkNBT(Chunk chunk, NBTTagCompound nbt) {
         if (dormantChunkCacheSize == 0) return;
 

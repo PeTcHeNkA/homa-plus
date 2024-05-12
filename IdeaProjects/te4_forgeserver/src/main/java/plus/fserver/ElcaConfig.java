@@ -55,6 +55,7 @@ public class ElcaConfig {
     public static boolean REMOVE_SERVER_THREAD       = false;
     public static boolean SKIP_CHECK_NETWORK         = true;
     public static boolean PRINT_CAUSE_SERVER_STOP    = true;
+    public static boolean PROCESS_LIGHT_ON_SAVE      = false;
 
 
     private static File dir(String str){

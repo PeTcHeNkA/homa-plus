@@ -39,6 +39,7 @@ import plus.fserver.world.generator.future.WorldGenStalactite;
 import plus.fserver.world.generator.map.EMapGenBase;
 import plus.fserver.world.generator.map.EMapGenCaves;
 import plus.fserver.world.generator.map.EMapGenRavine;
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public class ChunkGeneratorOverworld implements IChunkGenerator {
@@ -546,7 +547,7 @@ public class ChunkGeneratorOverworld implements IChunkGenerator {
                 return this.oceanMonumentGenerator.getMonsters();
             }
         }
-        return (!world.isRemote)?
+        return (!world.isRemote || SERVER_COMPILE)?
                 world.localSelector.getBiome(pos).getSpawnableList(creatureType)
                 :
                 world.getBiome(pos).getSpawnableList(creatureType);

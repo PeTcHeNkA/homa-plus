@@ -18,19 +18,7 @@ public class TChunkExecutor {
         TChunkTask task = world.getChunkTasks().remove(key);
 
         if (task != null) {
-            if (!world.getMinecraftServer().ticker().service.remove(task)){
-                synchronized(task) {
-                    while (!task.runFinished()) {
-                        try {
-                            task.wait();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            } else {
-                task.run();
-            }
+            completeTask(task);
         } else {
             task = new TChunkIOProvider(key, loader, (ChunkProviderServer) provider);
             task.run();
@@ -56,6 +44,18 @@ public class TChunkExecutor {
     }
 
 
+    public static void queueChunkUnload(WorldServer world, AnvilChunkLoader loader, IChunkProvider provider, Chunk chunk) {
+        TQueuedChunk key = new TQueuedChunk(chunk.x, chunk.z, world);
+        PWorldServer sworld = world;
+        TChunkTask task = sworld.getChunkTasks().get(key);
+        if (task == null) {
+            task = new TChunkUnloadTask(key, loader, (ChunkProviderServer) provider, chunk);
+            sworld.getChunkTasks().put(key, task);
+            world.getMinecraftServer().ticker().service.execute(task);
+        }
+    }
+
+
     public static Chunk syncChunkGen(World world, AnvilChunkLoader loader,
                                       IChunkProvider provider, int x, int z) {
         TQueuedChunk key = new TQueuedChunk(x, z, world);
@@ -64,25 +64,30 @@ public class TChunkExecutor {
         TChunkTask task = sworld.getChunkTasks().remove(key);
 
         if (task != null) {
-            if (!world.getMinecraftServer().ticker().service.remove(task)){
-                synchronized(task) {
-                    while (!task.runFinished()) {
-                        try {
-                            task.wait();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            } else {
-                task.run();
-            }
+            completeTask(task);
         } else {
             task = new TChunkGenProvider(key, loader, (ChunkProviderServer) provider);
             task.run();
         }
         task.syncCallback();
         return task.getChunk();
+    }
+
+
+    public static void completeTask(TChunkTask task){
+        if (!task.world().getMinecraftServer().ticker().service.remove(task)){
+            synchronized(task) {
+                while (!task.runFinished()) {
+                    try {
+                        task.wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        } else {
+            task.run();
+        }
     }
 
 

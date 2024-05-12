@@ -13,6 +13,17 @@ class SpawnPos extends BlockPos.MutableBlockPos {
     }
 
 
+    void setRandomChunkPos(Chunk chunk) {
+        this.chunk = chunk;
+        int rand = world.rand.nextInt();
+        int nX = (chunk.x << 4) + (rand & 15);
+        int nZ = (chunk.z << 4) + ((rand >> 4) & 15);
+        int k = MathHelper.roundUp(chunk.getHeightValue(nX & 15, nZ & 15) + 1, 16);
+        int nY = world.rand.nextInt(k > 0 ? k : chunk.getTopFilledSegment() + 16 - 1);
+        editRoot(nX, nY, nZ);
+    }
+
+
     void setRandomChunkPos(int x, int z) {
         chunk = world.getChunk(x, z);
         int rand = world.rand.nextInt();

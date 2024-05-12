@@ -731,20 +731,20 @@ public class WorldClient extends World {
         } else {
             boolean flag = false;
             Vec3d vec3d = Vec3d.ZERO;
-            BlockPos.PooledMutableBlockPos blockpos$pooledmutableblockpos = BlockPos.PooledMutableBlockPos.retain();
+            BlockPos.PooledMutableBlockPos pos = BlockPos.PooledMutableBlockPos.retain();
 
             for (int l3 = j2; l3 < k2; ++l3) {
                 for (int i4 = l2; i4 < i3; ++i4) {
                     for (int j4 = j3; j4 < k3; ++j4) {
-                        blockpos$pooledmutableblockpos.setPos(l3, i4, j4);
-                        IBlockState iblockstate1 = this.getBlockState(blockpos$pooledmutableblockpos);
+                        pos.setPos(l3, i4, j4);
+                        IBlockState iblockstate1 = this.getBlockState(pos);
                         Block block = iblockstate1.getBlock();
 
-                        Boolean result = block.isEntityInsideMaterial(this, blockpos$pooledmutableblockpos, iblockstate1, entityIn, (double)i3, materialIn, false);
+                        Boolean result = block.isEntityInsideMaterial(this, pos, iblockstate1, entityIn, (double)i3, materialIn, false);
                         if (result != null && result == true) {
                             // Forge: When requested call blocks modifyAcceleration method, and more importantly cause this method to return true, which results in an entity being "inWater"
                             flag = true;
-                            vec3d = block.modifyAcceleration(this, blockpos$pooledmutableblockpos, entityIn, vec3d);
+                            vec3d = block.modifyAcceleration(this, pos, entityIn, vec3d);
                             continue;
                         }
                         else if (result != null && result == false) continue;
@@ -754,13 +754,13 @@ public class WorldClient extends World {
 
                             if ((double)i3 >= d0) {
                                 flag = true;
-                                vec3d = block.modifyAcceleration(this, blockpos$pooledmutableblockpos, entityIn, vec3d);
+                                vec3d = block.modifyAcceleration(this, pos, entityIn, vec3d);
                             }
                         }
                     }
                 }
             }
-            blockpos$pooledmutableblockpos.release();
+            pos.release();
 
             if (vec3d.length() > 0.0D && entityIn.isPushedByWater()) {
                 vec3d = vec3d.normalize();

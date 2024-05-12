@@ -223,9 +223,9 @@ public class ElcaCommands extends ServerCommand {
             for (Entity entity:world.loadedEntityList){
                 if(entity == null)continue;
                 int lodLvl = entity.lodLvl();
-                if(lodLvl==0)lod0++;
-                if(lodLvl==1)lod1++;
-                if(lodLvl==2)lod2++;
+                if(lodLvl == 0) lod0++;
+                if(lodLvl == 1) lod1++;
+                if(lodLvl == 2) lod2++;
             }
 
             curChunks = world.getChunkProvider().getLoadedChunkCount();
@@ -237,22 +237,6 @@ public class ElcaCommands extends ServerCommand {
                     formatTps(worldTPS),
                     curChunks, curMobs, lod0, lod1, lod2
             );
-//            reply(sender, "Navigation cache: "+new ScanMem().scan(world.navCache));
-//            reply(sender, "Entities: "+new ScanMem().exclude(
-//                    WorldServer.class, World.class, Chunk.class, EntityPlayer.class,
-//                    EntityPlayerMP.class, ChunkProviderServer.class, File.class
-//            ).exclude(
-//                    "net.minecraft.client", "sun", "java.util.jar", "java.util.jar",
-//                    "net.minecraftforge"
-//            ).scan(world.loadedEntityList));
-//            reply(sender, "Chunks: "+new ScanMem().exclude(
-//                    WorldServer.class, World.class, EntityPlayer.class,
-//                    EntityPlayerMP.class, ChunkProviderServer.class, ClassInheritanceMultiMap.class,
-//                    File.class
-//            ).exclude(
-//                    "net.minecraft.client", "sun", "java.util.jar", "java.util.jar",
-//                    "net.minecraftforge"
-//            ).scan(world.getChunkProvider().loadedChunks));
         }
     }
 

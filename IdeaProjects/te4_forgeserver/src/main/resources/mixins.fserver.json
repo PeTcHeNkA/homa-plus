@@ -6,10 +6,8 @@
   "refmap": "mixins.fserver.refmap.json",
   "plugin": "plus.fserver.plugin.SSLightLoader",
   "mixins": [
-    "exp.MapStoragePatch",
     "exp.RegionFilePatch",
     "expmem.ItemStackPatch",
-    "light.MixinAnvilChunkLoader",
     "light.MixinChunk",
     "light.MixinChunkProviderServer",
     "light.MixinExtendedBlockStorage",

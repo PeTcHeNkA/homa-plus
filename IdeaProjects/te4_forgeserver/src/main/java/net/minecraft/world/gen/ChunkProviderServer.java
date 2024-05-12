@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.objects.ObjectCollection;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nullable;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
@@ -13,6 +14,7 @@ import net.minecraft.util.ReportedException;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.MinecraftException;
+import net.minecraft.world.NextTickListEntry;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.Biome;
@@ -168,7 +170,7 @@ public class ChunkProviderServer implements IChunkProvider {
     }
 
 
-    private void saveChunkExtraData(Chunk chunkIn) {
+    public void saveChunkExtraData(Chunk chunkIn) {
         try {
             this.chunkLoader.saveExtraChunkData(this.world, chunkIn);
         }
@@ -178,10 +180,23 @@ public class ChunkProviderServer implements IChunkProvider {
     }
 
 
-    private void saveChunkData(Chunk chunkIn) {
+    public void saveChunkData(Chunk chunk) {
+        try {
+            chunk.setLastSaveTime(this.world.getTotalWorldTime());
+            this.chunkLoader.saveChunk(this.world, chunk);
+        } catch (IOException ioexception) {
+            LOGGER.error("Couldn't save chunk", ioexception);
+        }
+        catch (MinecraftException minecraftexception) {
+            LOGGER.error("Couldn't save chunk; already in use by another instance of Minecraft?", minecraftexception);
+        }
+    }
+
+
+    public void saveChunkData(List<NextTickListEntry> pendings, Chunk chunkIn) {
         try {
             chunkIn.setLastSaveTime(this.world.getTotalWorldTime());
-            this.chunkLoader.saveChunk(this.world, chunkIn);
+            this.chunkLoader.saveChunk(pendings, this.world, chunkIn);
         } catch (IOException ioexception) {
             LOGGER.error("Couldn't save chunk", ioexception);
         }
@@ -252,10 +267,16 @@ public class ChunkProviderServer implements IChunkProvider {
                     if (chunk != null) {
                         if(chunk.maybeUnload()) {
                             chunk.onUnload();
-                            ForgeChunkManager.putDormantChunk(olong, chunk);
-                            this.saveChunkData(chunk);
-                            this.saveChunkExtraData(chunk);
-                            this.loadedChunks.remove(olong);
+                            if(chunkLoader instanceof AnvilChunkLoader){
+                                //ForgeChunkManager.invalidate(olong, world);
+                                TChunkExecutor.queueChunkUnload(world, (AnvilChunkLoader)chunkLoader,this, chunk);
+                                loadedChunks.remove(olong);
+                            } else {
+                                ForgeChunkManager.putDormantChunk(olong, chunk);
+                                this.saveChunkData(chunk);
+                                this.saveChunkExtraData(chunk);
+                                this.loadedChunks.remove(olong);
+                            }
                             ++i;
                             iterator.remove();
                         } else {

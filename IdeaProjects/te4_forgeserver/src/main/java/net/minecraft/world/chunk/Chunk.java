@@ -74,10 +74,11 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
     private final FastBuffer<BlockPos> tileEntityPosQueue;
 //    public boolean unloadQueued;
     public byte state = 0;
-    //00  (0) = default
-    //01  (1) = tracked
-    //10  (2) = requested
-    //100 (4) = should tick
+    //00   (0) = default
+    //01   (1) = tracked
+    //10   (2) = requested
+    //100  (4) = should tick
+    //1000 (8) = now sawing
 
     public boolean isNotUnloadQueued(){
         return (state & 1) == 1;
@@ -108,6 +109,13 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
     }
     public boolean isPersistent(){
         return (state & 4) == 4;
+    }
+    public boolean isNowSaving(){
+        return (state & 8) == 8;
+    }
+    public void setSaveStatus(boolean b){
+        if(b) state &= ~8;
+        else state |= 8;
     }
 
     public Chunk(World worldIn, int x, int z) {

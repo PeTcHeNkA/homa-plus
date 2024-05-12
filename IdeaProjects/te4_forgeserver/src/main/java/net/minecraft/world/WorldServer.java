@@ -44,11 +44,9 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.village.VillageCollection;
 import net.minecraft.village.VillageSiege;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
@@ -195,16 +193,21 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
 
     @Nullable
     public Biome.SpawnListEntry getSpawnListEntryForTypeAt(EnumCreatureType creatureType, BlockPos pos) {
-        List<Biome.SpawnListEntry> list = chunkProviderServer.getPossibleCreatures(creatureType, pos);
-        list = ForgeEventFactory.getPotentialSpawns(this, creatureType, pos, list);
+        List<Biome.SpawnListEntry> list = getSpawnList(creatureType, pos);
         return list != null && !list.isEmpty() ? WeightedRandom.getRandomItem(this.rand, list) : null;
     }
 
 
-    public boolean canCreatureTypeSpawnHere(EnumCreatureType creatureType, Biome.SpawnListEntry spawnListEntry, BlockPos pos) {
-        List<Biome.SpawnListEntry> list = chunkProviderServer.getPossibleCreatures(creatureType, pos);
-        list =ForgeEventFactory.getPotentialSpawns(this, creatureType, pos, list);
-        return list != null && !list.isEmpty() && list.contains(spawnListEntry);
+    @Nullable
+    public final List<Biome.SpawnListEntry> getSpawnList(EnumCreatureType type, BlockPos pos){
+        List<Biome.SpawnListEntry> list = chunkProviderServer.getPossibleCreatures(type, pos);
+        return ForgeEventFactory.getPotentialSpawns(this, type, pos, list);
+    }
+
+
+    public boolean canCreatureTypeSpawnHere(EnumCreatureType creatureType, Biome.SpawnListEntry entry, BlockPos pos) {
+        List<Biome.SpawnListEntry> list = getSpawnList(creatureType, pos);
+        return list != null && !list.isEmpty() && list.contains(entry);
     }
 
 
@@ -666,8 +669,8 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
         this.worldInfo.setBorderLerpTarget(this.getWorldBorder().getTargetSize());
         this.worldInfo.setBorderLerpTime(this.getWorldBorder().getTimeUntilTarget());
         this.saveHandler.saveWorldInfoWithPlayer(this.worldInfo, this.server.getPlayerList().getHostPlayerData());
-        this.mapStorage.saveAllData();
-        this.perWorldStorage.saveAllData();
+        this.mapStorage.saveAllData(this);
+        this.perWorldStorage.saveAllData(this);
     }
 
 

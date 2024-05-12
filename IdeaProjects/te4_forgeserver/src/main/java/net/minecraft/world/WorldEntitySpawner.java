@@ -82,13 +82,13 @@ public final class WorldEntitySpawner {
             SpawnPos spawnPos = null;
             //BlockPos worldSpawn = world.getSpawnPoint();
 
-            for (EnumCreatureType enumcreaturetype : TYPES) {
-                if ((!enumcreaturetype.getPeacefulCreature() || spawnPeacefulMobs) && (enumcreaturetype.getPeacefulCreature() || spawnHostileMobs) && (!enumcreaturetype.getAnimal() || spawnOnSetTickRate)) {
+            for (EnumCreatureType creatureType : TYPES) {
+                if ((!creatureType.getPeacefulCreature() || spawnPeacefulMobs) && (creatureType.getPeacefulCreature() || spawnHostileMobs) && (!creatureType.getAnimal() || spawnOnSetTickRate)) {
                     int count = countCache[cursor];
                     if(count == -1)
-                        count = countCache[cursor] = world.countEntities(enumcreaturetype, true);
+                        count = countCache[cursor] = world.countEntities(creatureType, true);
 
-                    int maxCount = enumcreaturetype.getMaxNumberOfCreature() * factor / MOB_COUNT_DIV;
+                    int maxCount = creatureType.getMaxNumberOfCreature() * factor / MOB_COUNT_DIV;
 
                     if (count <= maxCount) {
                         if(spawnPos==null) spawnPos = new SpawnPos(world);
@@ -99,12 +99,10 @@ public final class WorldEntitySpawner {
 
                         for (ChunkPos pos : shuffled) {
                             spawnPos.setRandomChunkPos(pos.x, pos.z);
-                            int sX = spawnPos.getX();
-                            int sY = spawnPos.getY();
-                            int sZ = spawnPos.getZ();
-                            IBlockState iblockstate = spawnPos.chunk.getBlockState(spawnPos);
+                            int sX, sY, sZ;
+                            IBlockState state = spawnPos.chunk.getBlockStateUnchecked(sX = spawnPos.getX(), sY = spawnPos.getY(), sZ = spawnPos.getZ());
 
-                            if (!iblockstate.isNormalCube()) {
+                            if (!state.isNormalCube()) {
                                 int pack = 0;
 
                                 for (int k2 = 0; k2 < 3; ++k2) {
@@ -123,11 +121,11 @@ public final class WorldEntitySpawner {
 
                                         if (!world.isAnyPlayerWithinRangeAt(f, sY, f1, 24.0D)/* && worldSpawn.distanceSq(f, sY, f1) >= 576.0D*/) {
                                             if (entry == null) {
-                                                entry = world.getSpawnListEntryForTypeAt(enumcreaturetype, spawnPos);
+                                                entry = world.getSpawnListEntryForTypeAt(creatureType, spawnPos);
 
                                                 if (entry == null) break;
                                             }
-                                            if (world.canCreatureTypeSpawnHere(enumcreaturetype, entry, spawnPos) && canCreatureTypeSpawnAtLocation(EntitySpawnPlacementRegistry.getPlacementForEntity(entry.entityClass), world, spawnPos)) {
+                                            if (world.canCreatureTypeSpawnHere(creatureType, entry, spawnPos) && canCreatureTypeSpawnAtLocation(EntitySpawnPlacementRegistry.getPlacementForEntity(entry.entityClass), world, spawnPos)) {
                                                 EntityLiving entityliving;
 
                                                 try {
