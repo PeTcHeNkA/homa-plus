@@ -19,23 +19,33 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.fserver.api.Keep;
 import plus.fserver.utls.collections.ArrayListE6;
 import static plus.fserver.block.BlockFs.addCollisionBoxToListFs;
 
 
 public class BlockFenceGate extends BlockHorizontal {
+    @Keep
     public static final PropertyBool OPEN = PropertyBool.create("open");
+    @Keep
     public static final PropertyBool POWERED = PropertyBool.create("powered");
+    @Keep
     public static final PropertyBool IN_WALL = PropertyBool.create("in_wall");
+    @Keep
     protected static final AxisAlignedBB AABB_HITBOX_ZAXIS = new AxisAlignedBB(0.0D, 0.0D, 0.375D, 1.0D, 1.0D, 0.625D);
+    @Keep
     protected static final AxisAlignedBB AABB_HITBOX_XAXIS = new AxisAlignedBB(0.375D, 0.0D, 0.0D, 0.625D, 1.0D, 1.0D);
+    @Keep
     protected static final AxisAlignedBB AABB_HITBOX_ZAXIS_INWALL = new AxisAlignedBB(0.0D, 0.0D, 0.375D, 1.0D, 0.8125D, 0.625D);
+    @Keep
     protected static final AxisAlignedBB AABB_HITBOX_XAXIS_INWALL = new AxisAlignedBB(0.375D, 0.0D, 0.0D, 0.625D, 0.8125D, 1.0D);
+    @Keep
     protected static final AxisAlignedBB AABB_COLLISION_BOX_ZAXIS = new AxisAlignedBB(0.0D, 0.0D, 0.375D, 1.0D, 1.5D, 0.625D);
+    @Keep
     protected static final AxisAlignedBB AABB_COLLISION_BOX_XAXIS = new AxisAlignedBB(0.375D, 0.0D, 0.0D, 0.625D, 1.5D, 1.0D);
 
-    public BlockFenceGate(BlockPlanks.EnumType p_i46394_1_) {
-        super(Material.WOOD, p_i46394_1_.getMapColor());
+    public BlockFenceGate(BlockPlanks.EnumType type) {
+        super(Material.WOOD, type.getMapColor());
         this.setDefaultState(this.blockState.getBaseState()
                 .withProperty(OPEN, Boolean.FALSE)
                 .withProperty(POWERED, Boolean.FALSE)
@@ -50,6 +60,7 @@ public class BlockFenceGate extends BlockHorizontal {
     }
 
 
+    @Override
     public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
         state = this.getActualState(state, source, pos);
 

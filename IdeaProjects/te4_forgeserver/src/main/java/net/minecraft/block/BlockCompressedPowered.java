@@ -15,11 +15,13 @@ public class BlockCompressedPowered extends BlockFs {
     }
 
 
+    @Override
     public boolean canProvidePower(IBlockState state) {
         return true;
     }
 
 
+    @Override
     public int getWeakPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side) {
         return 15;
     }

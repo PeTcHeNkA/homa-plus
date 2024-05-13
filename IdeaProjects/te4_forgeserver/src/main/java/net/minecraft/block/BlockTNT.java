@@ -22,11 +22,13 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import plus.fserver.ElcaCV;
+import plus.fserver.api.Keep;
 import plus.fserver.block.BlockFx;
 import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public class BlockTNT extends BlockFx {
+    @Keep
     public static final PropertyBool EXPLODE = PropertyBool.create("explode");
 
     public BlockTNT() {

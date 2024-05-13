@@ -30,11 +30,7 @@ import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.*;
 import net.minecraft.village.VillageCollection;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeProvider;
@@ -67,6 +63,7 @@ import org.jetbrains.annotations.NotNull;
 import plus.fserver.ElcaConfig;
 import plus.fserver.api.IBlockEAccess;
 import plus.fserver.ElcaCV;
+import plus.fserver.api.Keep;
 import plus.fserver.world.CollisionPredicate;
 import plus.fserver.server.elca.AABKey;
 import plus.fserver.utls.collections.*;
@@ -77,7 +74,6 @@ import plus.fserver.utls.math.Vec3dMut;
 import plus.fserver.world.RedstoneEngine;
 import plus.fserver.world.light.LightingEngine;
 import plus.fserver.world.light.api.ILightingEngineProvider;
-
 import static plus.fserver.ElcaCV.CLIENT_COMPILE;
 import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
@@ -164,7 +160,6 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     protected World(ISaveHandler saveHandlerIn, WorldInfo info, WorldProvider providerIn, Profiler profilerIn, boolean client) {
         this(null, saveHandlerIn, info, providerIn, profilerIn, client);
     }
-
 
     protected World(MinecraftServer server, ISaveHandler saveHandlerIn, WorldInfo info, WorldProvider providerIn, Profiler profilerIn, boolean client) {
         this.eventListeners = Lists.newArrayList(this.pathListener);
@@ -1224,6 +1219,12 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
     public final boolean inInWorldBorder(AxisAlignedBB bb){
         return bb.maxX > worldBMinx && bb.minX < worldBMaxx && bb.maxZ > worldBMinz && bb.minZ < worldBMaxz;
+    }
+
+
+    public final boolean inInWorldBorder(ChunkPos range) {
+        return (double)range.getXEnd() > worldBMinx && (double)range.getXStart() < worldBMaxx &&
+                (double)range.getZEnd() > worldBMinz && (double)range.getZStart() < worldBMaxz;
     }
 
 
@@ -2309,11 +2310,13 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
+    @Keep
     public List<Entity> getEntitiesWithinAABBExcludingEntity(@Nullable Entity entityIn, AxisAlignedBB bb) {
         return this.getEntitiesInAABBexcluding(entityIn, bb, EntitySelectors.NOT_SPECTATING);
     }
 
 
+    @Keep
     public <T extends Entity> List<T> getEntities(Class <? extends T > entityType, Predicate <? super T > filter) {
         List<T> list = Lists.<T>newArrayList();
         for (Entity entity4 : this.loadedEntityList) {
@@ -2324,6 +2327,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
+    @Keep
     public <T extends Entity> List<T> getPlayers(Class <? extends T > playerType, Predicate <? super T > filter) {
         List<T> list = Lists.<T>newArrayList();
 
@@ -2335,11 +2339,13 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
+    @Keep
     public <T extends Entity> List<T> getEntitiesWithinAABB(Class <? extends T > classEntity, AxisAlignedBB bb) {
         return this.<T>getEntitiesWithinAABB(classEntity, bb, EntitySelectors.NOT_SPECTATING);
     }
 
 
+    @Keep
     @Nullable
     public <T extends Entity> T findNearestEntityWithinAABB(Class <? extends T > entityType, AxisAlignedBB aabb, T closestTo) {
         List<T> list = this.<T>getEntitiesWithinAABB(entityType, aabb);
@@ -3650,7 +3656,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         if(this.isRemote)return;
         int bX = pos.getX(), bY = pos.getY(), bZ = pos.getZ();
         if(bY>0) {
-            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+            BlockPos.MutableBlockPos mut = tempPooledLocalPos;
             int nX, nZ, buf;
             Chunk chunk = localSelector.getChunk(nX = (bX+1) >>4, nZ = bZ>>4);
             IBlockState iblockstate;
@@ -3696,6 +3702,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
+    @Keep
     public boolean isMaterialInBB(AxisAlignedBB bb, Material materialIn) {
         int minY = MathHelper.floor(bb.minY);
         int maxY = MathHelper.ceil(bb.maxY);
@@ -3724,6 +3731,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
+    @Keep
     public boolean isFlammableWithin(AxisAlignedBB bb) {
         int yPos, maxY;
         if((yPos = MathHelper.floor(bb.minY)) < 0 || (maxY = MathHelper.ceil(bb.maxY)) > 255)return false;
@@ -3745,6 +3753,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
+    @Keep
     public boolean handleMaterialAcceleration(AxisAlignedBB bb, Material materialIn, Entity entityIn) {
         int yPos, maxY;
         if((yPos = MathHelper.floor(bb.minY)) < 0 || (maxY = MathHelper.ceil(bb.maxY)) > 255)return false;
@@ -3799,6 +3808,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     //collisions
+    @Keep
     protected boolean getCollisionBoxes(@Nullable Entity entityIn, AxisAlignedBB aabb, boolean fastCheck, ArrayListE6<AxisAlignedBB> outList) {
         if (fastCheck){
             if(ElcaCV.ENABLE_COLLISION_EVENTS)
@@ -3833,7 +3843,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
                             } else if (entityIn != null && flag == flag1) entityIn.setOutsideBorder(!flag1);
 
-                            ((!fastCheck && flag1 && inInWorldBorder(xPos, zPos))?
+                            ((!fastCheck && flag1 && !inInWorldBorder(xPos, zPos))?
                                     BlockIDIndexes.STONE_STATE : chunk.getBlockStateUnchecked(xPos, yPos, zPos))
 
                                     .addCollisionBoxToListF(selector, tempPooledLocalPos.setPos(xPos, yPos, zPos), aabb, outList, entityIn, false);
@@ -3849,6 +3859,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
+    @Keep
     protected <T extends Entity> void getEntitiesWithinAABB0(List<T> list, Class <? extends T > clazz,
                                                              AxisAlignedBB aabb, @Nullable Predicate<? super T > filter) {
         int maxX = MathHelper.ceil(aabb.maxX + MAX_ENTITY_RADIUS)>>4;

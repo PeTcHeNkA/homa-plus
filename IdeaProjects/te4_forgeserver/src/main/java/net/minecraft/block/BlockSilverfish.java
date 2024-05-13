@@ -14,10 +14,12 @@ import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import plus.fserver.api.Keep;
 import plus.fserver.block.BlockFs;
 
 
 public class BlockSilverfish extends BlockFs {
+    @Keep
     public static final PropertyEnum<BlockSilverfish.EnumType> VARIANT = PropertyEnum.create("variant", BlockSilverfish.EnumType.class);
 
     public BlockSilverfish() {
@@ -102,6 +104,7 @@ public class BlockSilverfish extends BlockFs {
     }
 
 
+    @Keep
     public enum EnumType implements IStringSerializable {
         STONE(0, "stone")
                 {

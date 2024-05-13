@@ -7,6 +7,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing.Plane;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import plus.fserver.api.Keep;
 import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.math.FastRandom;
 
@@ -14,10 +15,13 @@ import plus.fserver.utls.math.FastRandom;
 public class WorldGenPumpkin extends CWorldGenerator {
     private final IBlockState state;
 
+    @Keep
     public WorldGenPumpkin() {
         state = Blocks.PUMPKIN.getDefaultState();
     }
 
+
+    @Keep
     public WorldGenPumpkin(IBlockState state) {
         this.state = state;
     }

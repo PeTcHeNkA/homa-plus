@@ -28,14 +28,19 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import plus.fserver.api.Keep;
 import plus.fserver.utls.collections.ArrayListE6;
 import static plus.fserver.block.BlockFs.addCollisionBoxToListFx;
 
 
 public class BlockEndPortalFrame extends Block {
+    @Keep
     public static final PropertyDirection FACING = BlockHorizontal.FACING;
+    @Keep
     public static final PropertyBool EYE = PropertyBool.create("eye");
+    @Keep
     protected static final AxisAlignedBB AABB_BLOCK = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.8125D, 1.0D);
+    @Keep
     protected static final AxisAlignedBB AABB_EYE = new AxisAlignedBB(0.3125D, 0.8125D, 0.3125D, 0.6875D, 1.0D, 0.6875D);
     private static BlockPattern portalShape;
 
@@ -57,6 +62,7 @@ public class BlockEndPortalFrame extends Block {
     }
 
 
+    @Override
     public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes, @Nullable Entity entityIn, boolean isActualState) {
         addCollisionBoxToList(pos, entityBox, collidingBoxes, AABB_BLOCK);
 

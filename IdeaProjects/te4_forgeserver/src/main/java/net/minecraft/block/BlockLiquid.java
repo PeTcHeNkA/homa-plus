@@ -24,12 +24,14 @@ import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.api.IBlockEAccess;
+import plus.fserver.api.Keep;
 import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.collections.ArrayListE6;
 import plus.fserver.utls.math.Vec3dMut;
 
 
 public abstract class BlockLiquid extends Block {
+    @Keep
     public static final PropertyInteger LEVEL = PropertyInteger.create("level", 0, 15);
 
     protected BlockLiquid(Material materialIn) {

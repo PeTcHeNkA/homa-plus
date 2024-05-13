@@ -10,7 +10,6 @@ import plus.fserver.utls.math.FastRandom;
 
 
 public class WorldGenDeadBush extends CWorldGenerator {
-
     @Override
     public boolean generate(World worldIn, ChunkSelector selector, Random rand, BlockPos position0) {
         BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos(position0);

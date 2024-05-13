@@ -29,7 +29,6 @@ public class WorldGenDungeons extends WorldGenerator {
     private static final IBlockState COBBLESTONE       = Blocks.COBBLESTONE.getDefaultState();
     private static final Logger LOGGER = LogManager.getLogger();
 
-
     private static final ResourceLocation[] SPAWNERTYPES = new ResourceLocation[] {
             EntityList.getKey(EntitySkeleton.class),
             EntityList.getKey(EntityZombie.class),

@@ -35,6 +35,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import plus.asyutl.buf.FastBuffer;
 import plus.fserver.api.BiomeIndexes;
+import plus.fserver.api.Keep;
 import plus.fserver.api.PWorldServer;
 import plus.fserver.ElcaCV;
 import plus.fserver.world.light.api.ILightingEngine;
@@ -43,36 +44,59 @@ import plus.tson.utl.Te4HashMap;
 
 
 public class Chunk implements net.minecraftforge.common.capabilities.ICapabilityProvider, ILightingEngineProvider {
+    @Keep
     public static final int STORAGES_COUNT = 16;
+    @Keep
     public static final int MAX_HEIGHT     = 255;
-
+    @Keep
     public static final EnumFacing[] HORIZONTAL = EnumFacing.Plane.HORIZONTAL.facings();
+    @Keep
     private static final Logger LOGGER = LogManager.getLogger();
+    @Keep
     public static final ExtendedBlockStorage NULL_BLOCK_STORAGE = null;
+    @Keep
     private final ExtendedBlockStorage[] storageArrays;
+    @Keep
     private final byte[] blockBiomeArray;
+    @Keep
     private final short[] precipitationHeightMap;
+    @Keep
     private final short[] updateSkylights;
-    //private final boolean[] updateSkylightColumns;
+    @Keep
     private boolean loaded;
+    @Keep
     private final World world;
+    @Keep
     private final int[] heightMap;
     public final int x;
     public final int z;
+    @Keep
     private boolean isGapLightingUpdated;
+    @Keep
     private final Map<BlockPos, TileEntity> tileEntities;
+    @Keep
     private final ClassInheritanceMultiMap<Entity>[] entityLists;
+    @Keep
     private boolean isTerrainPopulated;
+    @Keep
     private boolean isLightPopulated;
+    @Keep
     private boolean ticked;
+    @Keep
     private boolean dirty;
+    @Keep
     private boolean hasEntities;
+    @Keep
     private long lastSaveTime;
+    @Keep
     private int heightMapMinimum;
+    @Keep
     private long inhabitedTime;
+    @Keep
     private int queuedLightChecks;
+    @Keep
     private final FastBuffer<BlockPos> tileEntityPosQueue;
-//    public boolean unloadQueued;
+    @Keep
     public byte state = 0;
     //00   (0) = default
     //01   (1) = tracked

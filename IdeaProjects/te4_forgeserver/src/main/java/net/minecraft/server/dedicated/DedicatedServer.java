@@ -48,13 +48,16 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import plus.fserver.ElcaConfig;
+import plus.fserver.api.Keep;
 import plus.fserver.plugin.SSPatchLoader;
 
 
+@Keep
 @SideOnly(Side.SERVER)
 public class DedicatedServer extends MinecraftServer implements IServer {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Pattern RESOURCE_PACK_SHA1_PATTERN = Pattern.compile("^[a-fA-F0-9]{40}$");
+    @Keep
     public final List<PendingCommand> pendingCommandList = Collections.synchronizedList(Lists.newArrayList());
     private RConThreadQuery rconQueryThread;
     private final RConConsoleSource rconConsoleSource = new RConConsoleSource(this);
@@ -64,6 +67,7 @@ public class DedicatedServer extends MinecraftServer implements IServer {
     private boolean canSpawnStructures;
     private GameType gameType;
     private boolean guiIsEnabled;
+    @Keep
     public static boolean allowPlayerLogins = false;
 
 

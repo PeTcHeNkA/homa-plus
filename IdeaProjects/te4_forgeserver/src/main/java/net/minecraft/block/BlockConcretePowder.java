@@ -16,10 +16,12 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import plus.fserver.api.IBlockEAccess;
+import plus.fserver.api.Keep;
 
 
 public class BlockConcretePowder extends BlockFallingFs {
-    public static final PropertyEnum<EnumDyeColor> COLOR = PropertyEnum.<EnumDyeColor>create("color", EnumDyeColor.class);
+    @Keep
+    public static final PropertyEnum<EnumDyeColor> COLOR = PropertyEnum.create("color", EnumDyeColor.class);
 
     public BlockConcretePowder() {
         super(Material.SAND);
@@ -36,6 +38,7 @@ public class BlockConcretePowder extends BlockFallingFs {
     }
 
 
+    @Keep
     protected boolean tryTouchWater(World worldIn, BlockPos pos, IBlockState state) {
         IBlockEAccess access = worldIn.access();
 

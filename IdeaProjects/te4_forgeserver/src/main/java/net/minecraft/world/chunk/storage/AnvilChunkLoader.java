@@ -39,7 +39,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import plus.fserver.world.light.LightingHooks;
 import plus.fserver.world.light.api.IChunkLightingData;
-import plus.fserver.world.light.api.ILightingEngineProvider;
 
 
 public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO {
@@ -621,8 +620,8 @@ public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO {
         }
     }
 
-    public int getPendingSaveCount()
-    {
+
+    public int getPendingSaveCount() {
         return this.chunksToSave.size();
     }
 }

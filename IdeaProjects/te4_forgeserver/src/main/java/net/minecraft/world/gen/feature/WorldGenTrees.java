@@ -11,6 +11,7 @@ import net.minecraft.util.BlockIDIndexes;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import plus.fserver.api.Keep;
 import plus.fserver.server.elca.ChunkSelector;
 
 
@@ -22,11 +23,13 @@ public class WorldGenTrees extends WorldGenAbstractTree {
     private final IBlockState metaWood;
     private final IBlockState metaLeaves;
 
+    @Keep
     public WorldGenTrees(boolean notify) {
         this(notify, 4, DEFAULT_TRUNK, DEFAULT_LEAF, false);
     }
 
 
+    @Keep
     public WorldGenTrees(boolean notify, int minTreeHeightIn, IBlockState woodMeta, IBlockState metaLeaves, boolean growVines) {
         super(notify);
         this.minTreeHeight = minTreeHeightIn;
@@ -36,6 +39,7 @@ public class WorldGenTrees extends WorldGenAbstractTree {
     }
 
 
+    @Override
     public boolean generate(World worldIn, Random rand, BlockPos position) {
         int factor = rand.nextInt(3) + this.minTreeHeight;
 

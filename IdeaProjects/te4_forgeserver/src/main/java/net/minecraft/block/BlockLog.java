@@ -10,11 +10,12 @@ import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import plus.fserver.api.IBlockEAccess;
+import plus.fserver.api.Keep;
 
 
 public abstract class BlockLog extends BlockRotatedPillarFs {
+    @Keep
     public static final PropertyEnum<BlockLog.EnumAxis> LOG_AXIS = PropertyEnum.create("axis", BlockLog.EnumAxis.class);
 
     public BlockLog() {
@@ -70,7 +71,8 @@ public abstract class BlockLog extends BlockRotatedPillarFs {
     }
 
 
-    @Override public boolean canSustainLeaves(IBlockState state, net.minecraft.world.IBlockAccess world, BlockPos pos){
+    @Override
+    public boolean canSustainLeaves(IBlockState state, net.minecraft.world.IBlockAccess world, BlockPos pos){
         return true;
     }
 
@@ -81,6 +83,7 @@ public abstract class BlockLog extends BlockRotatedPillarFs {
     }
 
 
+    @Keep
     public enum EnumAxis implements IStringSerializable {
         X("x"),
         Y("y"),
@@ -113,6 +116,7 @@ public abstract class BlockLog extends BlockRotatedPillarFs {
             }
         }
 
+        @Override
         public String getName() {
             return this.name;
         }

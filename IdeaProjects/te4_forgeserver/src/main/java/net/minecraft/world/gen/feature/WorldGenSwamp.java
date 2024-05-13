@@ -12,6 +12,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import plus.fserver.api.Keep;
 import plus.fserver.server.elca.ChunkSelector;
 
 
@@ -19,12 +20,13 @@ public class WorldGenSwamp extends WorldGenAbstractTree {
     private static final IBlockState TRUNK = Blocks.LOG.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.OAK);
     private static final IBlockState LEAF = Blocks.LEAVES.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.OAK).withProperty(BlockOldLeaf.CHECK_DECAY, Boolean.valueOf(false));
 
-    public WorldGenSwamp()
-    {
+    @Keep
+    public WorldGenSwamp() {
         super(false);
     }
 
 
+    @Override
     public boolean generate(World worldIn, Random rand, BlockPos position0) {
         int i;
         ChunkSelector selector = new ChunkSelector(worldIn);

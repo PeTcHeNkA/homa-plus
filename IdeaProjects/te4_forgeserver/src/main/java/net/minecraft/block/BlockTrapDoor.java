@@ -23,18 +23,28 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.fserver.api.Keep;
 import plus.fserver.block.BlockFx;
 
 
 public class BlockTrapDoor extends BlockFx {
+    @Keep
     public static final PropertyDirection FACING = BlockHorizontal.FACING;
+    @Keep
     public static final PropertyBool OPEN = PropertyBool.create("open");
+    @Keep
     public static final PropertyEnum<BlockTrapDoor.DoorHalf> HALF = PropertyEnum.create("half", BlockTrapDoor.DoorHalf.class);
+    @Keep
     protected static final AxisAlignedBB EAST_OPEN_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 0.1875D, 1.0D, 1.0D);
+    @Keep
     protected static final AxisAlignedBB WEST_OPEN_AABB = new AxisAlignedBB(0.8125D, 0.0D, 0.0D, 1.0D, 1.0D, 1.0D);
+    @Keep
     protected static final AxisAlignedBB SOUTH_OPEN_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 1.0D, 0.1875D);
+    @Keep
     protected static final AxisAlignedBB NORTH_OPEN_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.8125D, 1.0D, 1.0D, 1.0D);
+    @Keep
     protected static final AxisAlignedBB BOTTOM_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.1875D, 1.0D);
+    @Keep
     protected static final AxisAlignedBB TOP_AABB = new AxisAlignedBB(0.0D, 0.8125D, 0.0D, 1.0D, 1.0D, 1.0D);
 
     protected BlockTrapDoor(Material materialIn) {
@@ -257,6 +267,7 @@ public class BlockTrapDoor extends BlockFx {
     }
 
 
+    @Keep
     public enum DoorHalf implements IStringSerializable {
         TOP("top"),
         BOTTOM("bottom");

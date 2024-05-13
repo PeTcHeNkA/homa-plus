@@ -2,11 +2,11 @@ package net.minecraft.world.gen.feature;
 
 import com.google.common.base.Predicate;
 import java.util.Random;
-
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
+import plus.fserver.api.Keep;
 import plus.fserver.server.elca.ChunkSelector;
 
 
@@ -16,11 +16,13 @@ public class WorldGenMinable extends CWorldGenerator {
     private final int numberOfBlocks;
     private final Predicate<IBlockState> predicate;
 
+    @Keep
     public WorldGenMinable(IBlockState state, int blockCount) {
         this(state, blockCount, DEFAULT_PREDICATE);
     }
 
 
+    @Keep
     public WorldGenMinable(IBlockState state, int blockCount, Predicate<IBlockState> predicate) {
         this.oreBlock = state;
         this.numberOfBlocks = blockCount;

@@ -24,13 +24,16 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import plus.fserver.api.Keep;
 import plus.fserver.utls.collections.ArrayListE6;
 import static plus.fserver.ElcaCV.SERVER_COMPILE;
 import static plus.fserver.block.BlockFs.addCollisionBoxToListFs;
 
 
 public class BlockDaylightDetector extends BlockContainer {
+    @Keep
     public static final PropertyInteger POWER = PropertyInteger.create("power", 0, 15);
+    @Keep
     protected static final AxisAlignedBB DAYLIGHT_DETECTOR_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.375D, 1.0D);
     private final boolean inverted;
 

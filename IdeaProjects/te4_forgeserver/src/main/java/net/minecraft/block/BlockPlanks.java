@@ -11,10 +11,12 @@ import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
+import plus.fserver.api.Keep;
 import plus.fserver.block.BlockFx;
 
 
 public class BlockPlanks extends BlockFx {
+    @Keep
     public static final PropertyEnum<BlockPlanks.EnumType> VARIANT = PropertyEnum.create("variant", BlockPlanks.EnumType.class);
 
     public BlockPlanks() {
@@ -112,6 +114,7 @@ public class BlockPlanks extends BlockFx {
         }
 
 
+        @Override
         public String getName() {
             return this.name;
         }

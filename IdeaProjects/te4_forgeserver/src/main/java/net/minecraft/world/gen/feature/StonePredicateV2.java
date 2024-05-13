@@ -6,6 +6,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import org.jetbrains.annotations.Nullable;
 
+
 final class StonePredicateV2 implements Predicate<IBlockState> {
     private static final IBlockState state1 = Blocks.STONE.getDefaultState()
             .withProperty(BlockStone.VARIANT, BlockStone.EnumType.STONE);

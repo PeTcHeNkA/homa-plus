@@ -13,14 +13,20 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.IBlockAccess;
+import plus.fserver.api.Keep;
 import plus.fserver.block.BlockFx;
 
 
 public class BlockPrismarine extends BlockFx {
+    @Keep
     public static final PropertyEnum<BlockPrismarine.EnumType> VARIANT = PropertyEnum.<BlockPrismarine.EnumType>create("variant", BlockPrismarine.EnumType.class);
+    @Keep
     public static final int ROUGH_META = BlockPrismarine.EnumType.ROUGH.getMetadata();
+    @Keep
     public static final int BRICKS_META = BlockPrismarine.EnumType.BRICKS.getMetadata();
+    @Keep
     public static final int DARK_META = BlockPrismarine.EnumType.DARK.getMetadata();
+
 
     public BlockPrismarine() {
         super(Material.ROCK);
@@ -108,6 +114,7 @@ public class BlockPrismarine extends BlockFx {
         }
 
 
+        @Override
         public String getName() {
             return this.name;
         }

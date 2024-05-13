@@ -13,14 +13,16 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.ElcaCV;
+import plus.fserver.api.Keep;
 
 
 public abstract class BlockRedstoneDiode extends BlockHorizontal {
+    @Keep
     protected static final AxisAlignedBB REDSTONE_DIODE_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.125D, 1.0D);
+    @Keep
     protected final boolean isRepeaterPowered;
 
     protected BlockRedstoneDiode(boolean powered) {

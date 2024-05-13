@@ -7,6 +7,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import plus.fserver.api.Keep;
 import plus.fserver.server.elca.ChunkSelector;
 
 
@@ -14,10 +15,11 @@ public class WorldGenShrub extends WorldGenTrees {
     private final IBlockState leavesMetadata;
     private final IBlockState woodMetadata;
 
-    public WorldGenShrub(IBlockState p_i46450_1_, IBlockState p_i46450_2_) {
+    @Keep
+    public WorldGenShrub(IBlockState wood, IBlockState leaf) {
         super(false);
-        this.woodMetadata = p_i46450_1_;
-        this.leavesMetadata = p_i46450_2_;
+        this.woodMetadata = wood;
+        this.leavesMetadata = leaf;
     }
 
 

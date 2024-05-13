@@ -31,12 +31,12 @@ public class TChunkExecutor {
     public static void queueChunkLoad(WorldServer world, AnvilChunkLoader loader, IChunkProvider provider,
                                       int x, int z, Runnable runnable) {
         TQueuedChunk key = new TQueuedChunk(x, z, world);
-        PWorldServer sworld = world;
-        TChunkTask task = sworld.getChunkTasks().get(key);
+
+        TChunkTask task = world.getChunkTasks().get(key);
         if (task == null) {
             task = new TChunkIOProvider(key, loader, (ChunkProviderServer) provider);
             task.addCallback(runnable);
-            sworld.getChunkTasks().put(key, task);
+            world.getChunkTasks().put(key, task);
             world.getMinecraftServer().ticker().service.execute(task);
         } else {
             task.addCallback(runnable);
@@ -46,11 +46,11 @@ public class TChunkExecutor {
 
     public static void queueChunkUnload(WorldServer world, AnvilChunkLoader loader, IChunkProvider provider, Chunk chunk) {
         TQueuedChunk key = new TQueuedChunk(chunk.x, chunk.z, world);
-        PWorldServer sworld = world;
-        TChunkTask task = sworld.getChunkTasks().get(key);
+
+        TChunkTask task = world.getChunkTasks().get(key);
         if (task == null) {
             task = new TChunkUnloadTask(key, loader, (ChunkProviderServer) provider, chunk);
-            sworld.getChunkTasks().put(key, task);
+            world.getChunkTasks().put(key, task);
             world.getMinecraftServer().ticker().service.execute(task);
         }
     }

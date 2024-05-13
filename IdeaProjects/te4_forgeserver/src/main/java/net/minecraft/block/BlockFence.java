@@ -185,11 +185,11 @@ public class BlockFence extends Block {
 
 
     @Override
-    public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos) {
-        return state.withProperty(NORTH, canFenceConnectTo(worldIn, pos, EnumFacing.NORTH))
-                    .withProperty(EAST,  canFenceConnectTo(worldIn, pos, EnumFacing.EAST))
-                    .withProperty(SOUTH, canFenceConnectTo(worldIn, pos, EnumFacing.SOUTH))
-                    .withProperty(WEST,  canFenceConnectTo(worldIn, pos, EnumFacing.WEST));
+    public IBlockState getActualState(IBlockState state, IBlockAccess access, BlockPos pos) {
+        return state.withProperty(NORTH, canFenceConnectTo(access, pos, EnumFacing.NORTH))
+                    .withProperty(EAST,  canFenceConnectTo(access, pos, EnumFacing.EAST))
+                    .withProperty(SOUTH, canFenceConnectTo(access, pos, EnumFacing.SOUTH))
+                    .withProperty(WEST,  canFenceConnectTo(access, pos, EnumFacing.WEST));
     }
 
 

@@ -18,19 +18,24 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.fserver.api.Keep;
 import plus.fserver.block.BlockFx;
 
 
 public abstract class BlockSlab extends BlockFx {
+    @Keep
     public static final PropertyEnum<BlockSlab.EnumBlockHalf> HALF = PropertyEnum.create("half", BlockSlab.EnumBlockHalf.class);
+    @Keep
     protected static final AxisAlignedBB AABB_BOTTOM_HALF = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.5D, 1.0D);
+    @Keep
     protected static final AxisAlignedBB AABB_TOP_HALF    = new AxisAlignedBB(0.0D, 0.5D, 0.0D, 1.0D, 1.0D, 1.0D);
-
+    @Keep
     public BlockSlab(Material materialIn) {
         this(materialIn, materialIn.getMaterialMapColor());
     }
 
 
+    @Keep
     public BlockSlab(Material material, MapColor color) {
         super(material, color);
         this.fullBlock = this.isDouble();
@@ -133,18 +138,23 @@ public abstract class BlockSlab extends BlockFx {
     }
 
 
+    @Keep
     public abstract String getTranslationKey(int meta);
 
 
+    @Keep
     public abstract boolean isDouble();
 
 
+    @Keep
     public abstract IProperty<?> getVariantProperty();
 
 
+    @Keep
     public abstract Comparable<?> getTypeForItem(ItemStack stack);
 
 
+    @Keep
     public enum EnumBlockHalf implements IStringSerializable {
         TOP("top"),
         BOTTOM("bottom");
@@ -157,14 +167,14 @@ public abstract class BlockSlab extends BlockFx {
         }
 
 
-        public String toString()
-        {
+        @Override
+        public String toString() {
             return this.name;
         }
 
 
-        public String getName()
-        {
+        @Override
+        public String getName() {
             return this.name;
         }
     }

@@ -49,6 +49,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
 import plus.fserver.ElcaConfig;
+import plus.fserver.api.Keep;
 import plus.fserver.server.network.NativeCompressionDecoder;
 import plus.fserver.server.network.NativeCompressionEncoder;
 
@@ -56,9 +57,13 @@ import plus.fserver.server.network.NativeCompressionEncoder;
 public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >> {
     private static final GenericFutureListener[] emptyFuture = new GenericFutureListener[0];
     private static final Logger LOGGER = LogManager.getLogger();
+    @Keep
     public static final Marker NETWORK_MARKER = MarkerManager.getMarker("NETWORK");
+    @Keep
     public static final Marker NETWORK_PACKETS_MARKER = MarkerManager.getMarker("NETWORK_PACKETS", NETWORK_MARKER);
+    @Keep
     public static final AttributeKey<EnumConnectionState> PROTOCOL_ATTRIBUTE_KEY = AttributeKey.<EnumConnectionState>valueOf("protocol");
+    @Keep
     public static final LazyLoadBase<NioEventLoopGroup> CLIENT_NIO_EVENTLOOP = new LazyLoadBase<NioEventLoopGroup>()
     {
         protected NioEventLoopGroup load()
@@ -66,6 +71,7 @@ public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >> {
             return new NioEventLoopGroup(0, (new ThreadFactoryBuilder()).setNameFormat("Netty Client IO #%d").setDaemon(true).build());
         }
     };
+    @Keep
     public static final LazyLoadBase<EpollEventLoopGroup> CLIENT_EPOLL_EVENTLOOP = new LazyLoadBase<EpollEventLoopGroup>()
     {
         protected EpollEventLoopGroup load()
@@ -73,6 +79,7 @@ public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >> {
             return new EpollEventLoopGroup(0, (new ThreadFactoryBuilder()).setNameFormat("Netty Epoll Client IO #%d").setDaemon(true).build());
         }
     };
+    @Keep
     public static final LazyLoadBase<LocalEventLoopGroup> CLIENT_LOCAL_EVENTLOOP = new LazyLoadBase<LocalEventLoopGroup>()
     {
         protected LocalEventLoopGroup load()
@@ -95,8 +102,8 @@ public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >> {
     }
 
 
-    public EnumPacketDirection getDirection()
-    {
+    @Keep
+    public EnumPacketDirection getDirection() {
         return this.direction;
     }
 
@@ -114,6 +121,7 @@ public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >> {
     }
 
 
+    @Keep
     public void setConnectionState(EnumConnectionState newState) {
         this.channel.attr(PROTOCOL_ATTRIBUTE_KEY).set(newState);
         this.channel.config().setAutoRead(true);
@@ -153,6 +161,7 @@ public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >> {
     }
 
 
+    @Keep
     public void setNetHandler(INetHandler handler) {
         Validate.notNull(handler, "packetListener");
         LOGGER.debug("Set listener of {} to {}", this, handler);
@@ -160,6 +169,7 @@ public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >> {
     }
 
 
+    @Keep
     public void sendPacket(Packet<?> packetIn) {
         if (this.isChannelOpen()) {
             this.flushOutboundQueue();
@@ -175,6 +185,7 @@ public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >> {
     }
 
 
+    @Keep
     public void sendPacket(Packet<?> packetIn, GenericFutureListener <? extends Future <? super Void >> listener, GenericFutureListener <? extends Future <? super Void >> ... listeners) {
         if (this.isChannelOpen()) {
             this.flushOutboundQueue();
@@ -220,6 +231,7 @@ public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >> {
     }
 
 
+    @Keep
     public void flushOutboundQueue() {
         NetworkManager.InboundHandlerTuplePacketListener listener = this.outboundPacketsQueue.poll();
         while (listener != null){
@@ -229,6 +241,7 @@ public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >> {
     }
 
 
+    @Keep
     public void processReceivedPackets() {
         if(isChannelOpen()) this.flushOutboundQueue();
         if (this.packetListener instanceof ITickable) {
@@ -240,11 +253,13 @@ public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >> {
     }
 
 
+    @Keep
     public SocketAddress getRemoteAddress() {
         return this.socketAddress;
     }
 
 
+    @Keep
     public void closeChannel(ITextComponent message) {
         if (this.channel.isOpen()) {
             this.channel.close().awaitUninterruptibly();
@@ -253,6 +268,7 @@ public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >> {
     }
 
 
+    @Keep
     public boolean isLocalChannel() {
         return this.channel instanceof LocalChannel || this.channel instanceof LocalServerChannel;
     }
@@ -304,6 +320,7 @@ public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >> {
     }
 
 
+    @Keep
     public void enableEncryption(SecretKey key) {
         this.isEncrypted = true;
         this.channel.pipeline().addBefore("splitter", "decrypt", new NettyEncryptingDecoder(CryptManager.createNetCipherInstance(2, key)));
@@ -317,31 +334,37 @@ public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >> {
     }
 
 
+    @Keep
     public boolean isChannelOpen() {
         return this.channel != null && this.channel.isOpen();
     }
 
 
+    @Keep
     public boolean hasNoChannel() {
         return this.channel == null;
     }
 
 
+    @Keep
     public INetHandler getNetHandler() {
         return this.packetListener;
     }
 
 
+    @Keep
     public ITextComponent getExitMessage() {
         return this.terminationReason;
     }
 
 
+    @Keep
     public void disableAutoRead() {
         this.channel.config().setAutoRead(false);
     }
 
 
+    @Keep
     public void setCompressionThreshold(int threshold) {
         //Natives.compress.get().create(threshold).
         if (threshold >= 0) {
@@ -373,6 +396,8 @@ public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >> {
         }
     }
 
+
+    @Keep
     public void handleDisconnection() {
         if (this.channel != null && !this.channel.isOpen()) {
             if (this.disconnected) {
@@ -390,11 +415,13 @@ public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >> {
     }
 
 
+    @Keep
     public Channel channel() {
         return channel;
     }
 
 
+    @Keep
     public static class InboundHandlerTuplePacketListener {
         private final Packet<?> packet;
         private final GenericFutureListener <? extends Future <? super Void >> [] futureListeners;
@@ -421,6 +448,7 @@ public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >> {
     }
 
 
+
     public void sendPacketSync(Packet<?> packetIn){
         if (this.isChannelOpen()) {
             flushOutboundQueue();
@@ -436,6 +464,7 @@ public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >> {
     }
 
 
+    @Keep
     public void sendPacketE(Packet<?> packetIn) {
         if (this.isChannelOpen()) {
             channel.eventLoop().execute(() -> {

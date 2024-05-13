@@ -420,6 +420,8 @@
 "net.minecraft.world.gen.structure.MapGenMineshaft"
 "net.minecraft.world.gen.structure.MapGenScatteredFeature$Start"
 "net.minecraft.world.gen.structure.MapGenScatteredFeature"
+"net.minecraft.world.gen.structure.StructureBoundingBox$1"
+"net.minecraft.world.gen.structure.StructureBoundingBox"
 "net.minecraft.world.gen.structure.StructureComponent$1"
 "net.minecraft.world.gen.structure.StructureComponent$BlockSelector"
 "net.minecraft.world.gen.structure.StructureComponent"

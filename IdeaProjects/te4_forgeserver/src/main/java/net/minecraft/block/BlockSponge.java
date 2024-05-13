@@ -20,11 +20,13 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.ElcaConfig;
 import plus.fserver.api.IBlockEAccess;
+import plus.fserver.api.Keep;
 import plus.fserver.block.BlockFx;
 import plus.fserver.utls.collections.ArrayListE10;
 
 
 public class BlockSponge extends BlockFx {
+    @Keep
     public static final PropertyBool WET = PropertyBool.create("wet");
 
     protected BlockSponge() {

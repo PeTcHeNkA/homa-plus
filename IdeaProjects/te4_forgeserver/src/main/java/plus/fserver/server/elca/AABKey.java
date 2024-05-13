@@ -29,11 +29,11 @@ public final class AABKey {
 
 
     public void init(double _minX, double _minY, double _minZ, double _maxX, double _maxY, double _maxZ){
-        minX = ((int)_minX*96)>>5;
-        maxX = ((int)_maxX*96)>>5;
-        comY = ((((int)_minY*192)>>3) & 0xFFFF) | ((((int)_maxY*96)>>4)<<16);
-        minZ = ((int)_minZ*96)>>5;
-        maxZ = ((int)_maxZ*96)>>5;
+        minX = ((int)_minX*96)>>4;
+        maxX = ((int)_maxX*96)>>4;
+        comY = ((((int)_minY*96)>>3) & 0xFFFF) | ((((int)_maxY*96)>>3)<<16);
+        minZ = ((int)_minZ*96)>>4;
+        maxZ = ((int)_maxZ*96)>>4;
     }
 
 

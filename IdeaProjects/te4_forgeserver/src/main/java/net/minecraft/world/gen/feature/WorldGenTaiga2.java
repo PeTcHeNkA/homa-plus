@@ -9,6 +9,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import plus.fserver.api.Keep;
 import plus.fserver.server.elca.ChunkSelector;
 
 
@@ -16,11 +17,13 @@ public class WorldGenTaiga2 extends WorldGenAbstractTree {
     private static final IBlockState TRUNK = Blocks.LOG.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.SPRUCE);
     private static final IBlockState LEAF = Blocks.LEAVES.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.SPRUCE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
 
+    @Keep
     public WorldGenTaiga2(boolean flag) {
         super(flag);
     }
 
 
+    @Override
     public boolean generate(World worldIn, Random rand, BlockPos position) {
         int num = rand.nextInt();
         int i = num & 3 + 6;

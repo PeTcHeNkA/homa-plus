@@ -11,6 +11,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
+import plus.fserver.api.Keep;
 
 
 public class CommandResultStats {
@@ -25,6 +26,7 @@ public class CommandResultStats {
     }
 
 
+    @Keep
     public void setCommandStatForSender(MinecraftServer p_184932_1_, final ICommandSender p_184932_2_, Type p_184932_3_, int p_184932_4_) {
         String lvt_5_1_ = this.entitiesID[p_184932_3_.getTypeID()];
         if (lvt_5_1_ != null) {
@@ -96,6 +98,7 @@ public class CommandResultStats {
     }
 
 
+    @Keep
     public void readStatsFromNBT(NBTTagCompound tag) {
         if (tag.hasKey("CommandStats", 10)) {
             NBTTagCompound tag1 = tag.getCompoundTag("CommandStats");
@@ -116,6 +119,7 @@ public class CommandResultStats {
     }
 
 
+    @Keep
     public void writeStatsToNBT(NBTTagCompound tag) {
         NBTTagCompound tag2 = new NBTTagCompound();
         Type[] var3 = CommandResultStats.Type.values();
@@ -138,6 +142,7 @@ public class CommandResultStats {
     }
 
 
+    @Keep
     public static void setScoreBoardStat(CommandResultStats stats, Type type,
                                          @Nullable String str1, @Nullable String str2) {
         if (str1 != null && !str1.isEmpty() && str2 != null && !str2.isEmpty()) {
@@ -176,6 +181,7 @@ public class CommandResultStats {
     }
 
 
+    @Keep
     public void addAllStats(CommandResultStats stats) {
         Type[] var2 = CommandResultStats.Type.values();
         int var3 = var2.length;
@@ -191,6 +197,7 @@ public class CommandResultStats {
     }
 
 
+    @Keep
     public enum Type {
         SUCCESS_COUNT(0, "SuccessCount"),
         AFFECTED_BLOCKS(1, "AffectedBlocks"),

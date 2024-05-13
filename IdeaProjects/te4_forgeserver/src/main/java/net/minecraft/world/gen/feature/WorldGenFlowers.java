@@ -1,12 +1,12 @@
 package net.minecraft.world.gen.feature;
 
 import java.util.Random;
-
 import net.minecraft.block.BlockBush;
 import net.minecraft.block.BlockFlower;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import plus.fserver.api.Keep;
 import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.math.FastRandom;
 
@@ -15,11 +15,13 @@ public class WorldGenFlowers extends WorldGenerator {
     private BlockFlower flower;
     private IBlockState state;
 
+    @Keep
     public WorldGenFlowers(BlockFlower block, BlockFlower.EnumFlowerType type) {
         this.setGeneratedBlock(block, type);
     }
 
 
+    @Keep
     public void setGeneratedBlock(BlockFlower block, BlockFlower.EnumFlowerType type) {
         this.flower = block;
         this.state = block.getDefaultState().withProperty(block.getTypeProperty(), type);

@@ -12,6 +12,8 @@ import plus.fserver.server.elca.ChunkSelector;
 
 public class WorldGenGlowStone1 extends WorldGenerator {
     static final IBlockState GLOW_STONE_DEF_STATE = Blocks.GLOWSTONE.getDefaultState();
+
+    @Override
     public boolean generate(World worldIn, Random rand, BlockPos position) {
         if (!worldIn.isAirBlock(position)) {
             return false;
@@ -23,12 +25,12 @@ public class WorldGenGlowStone1 extends WorldGenerator {
         else {
             ChunkSelector selector = new ChunkSelector(chunk);
             chunk.setBlockState(position, GLOW_STONE_DEF_STATE);
-            //IBlockState state;
+
             BlockPos pos0, blockpos;
 
             for (int i = 0; i < 1500; ++i) {
                 blockpos = position.add(rand.nextInt(8) - rand.nextInt(8), -rand.nextInt(12), rand.nextInt(8) - rand.nextInt(8));
-                //state = selector.getState(blockpos);
+
                 if (blockpos.getY() > 0 && blockpos.getY() < 255 && selector.isAirBlock(position)) {
                     int j = 0;
 

@@ -8,6 +8,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import plus.fserver.api.Keep;
 import plus.fserver.server.elca.ChunkSelector;
 
 
@@ -17,6 +18,7 @@ public abstract class WorldGenHugeTrees extends WorldGenAbstractTree {
     protected final IBlockState leavesMetadata;
     protected int extraRandomHeight;
 
+    @Keep
     public WorldGenHugeTrees(boolean notify, int baseHeightIn, int extraRandomHeightIn, IBlockState woodMetadataIn, IBlockState leavesMetadataIn) {
         super(notify);
         this.baseHeight = baseHeightIn;
@@ -26,6 +28,7 @@ public abstract class WorldGenHugeTrees extends WorldGenAbstractTree {
     }
 
 
+    @Keep
     protected int getHeight(Random rand) {
         int i = rand.nextInt(3) + this.baseHeight;
 
@@ -68,6 +71,7 @@ public abstract class WorldGenHugeTrees extends WorldGenAbstractTree {
     }
 
 
+    @Keep
     protected boolean ensureDirtsUnderneath(ChunkSelector selector, BlockPos pos, World worldIn) {
         BlockPos blockpos = pos.down();
         IBlockState state = selector.getState(blockpos);
@@ -85,6 +89,7 @@ public abstract class WorldGenHugeTrees extends WorldGenAbstractTree {
     }
 
 
+    @Keep
     protected boolean ensureGrowable(World worldIn, Random rand, BlockPos treePos, int height) {
         ChunkSelector selector = new ChunkSelector(worldIn);
         return this.isSpaceAt(selector, worldIn, treePos, height) &&
@@ -92,17 +97,20 @@ public abstract class WorldGenHugeTrees extends WorldGenAbstractTree {
     }
 
 
+    @Keep
     protected boolean ensureGrowable(ChunkSelector selector, World world, BlockPos treePos, int height) {
         return this.isSpaceAt(selector, world, treePos, height) &&
                 this.ensureDirtsUnderneath(selector, treePos, world);
     }
 
 
+    @Keep
     public void growLeavesLayerStrict(World worldIn, BlockPos layerCenter, int width) {
         growLeavesLayerStrict(new ChunkSelector(worldIn), worldIn, layerCenter, width);
     }
 
 
+    @Keep
     public void growLeavesLayerStrict(ChunkSelector selector, World worldIn, BlockPos layerCenter, int width) {
         int i = width * width;
 
@@ -124,11 +132,13 @@ public abstract class WorldGenHugeTrees extends WorldGenAbstractTree {
     }
 
 
+    @Keep
     protected void growLeavesLayer(World worldIn, BlockPos layerCenter, int width) {
         growLeavesLayer(new ChunkSelector(worldIn), layerCenter, width);
     }
 
 
+    @Keep
     protected void growLeavesLayer(ChunkSelector selector, BlockPos layerCenter, int width) {
         WorldServer worldIn = selector.getWorld();
         int i = width * width;
@@ -148,6 +158,7 @@ public abstract class WorldGenHugeTrees extends WorldGenAbstractTree {
     }
 
 
+    @Keep
     protected void onPlantGrow(ChunkSelector selector, BlockPos pos, BlockPos source) {
         IBlockState state = selector.getState(pos);
         state.getBlock().onPlantGrow(state, selector.getWorld(), pos, source);

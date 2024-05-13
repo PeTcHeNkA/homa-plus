@@ -12,8 +12,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3i;
 import org.apache.logging.log4j.core.util.ObjectArrayIterator;
+import plus.fserver.api.Keep;
 
 
+@Keep
 public enum EnumFacing implements IStringSerializable {
     DOWN( 0, 1, -1, "down" , EnumFacing.AxisDirection.NEGATIVE, EnumFacing.Axis.Y, new Vec3i( 0, -1,  0)),
     UP(   1, 0, -1, "up"   , EnumFacing.AxisDirection.POSITIVE, EnumFacing.Axis.Y, new Vec3i( 0,  1,  0)),
@@ -33,6 +35,7 @@ public enum EnumFacing implements IStringSerializable {
     public static final EnumFacing[] HORIZONTALS = new EnumFacing[4];
     private static final Map<String, EnumFacing> NAME_LOOKUP = Maps.newHashMap();
     private final int xOff, yOff, zOff;
+    private EnumFacing oppositeFacing;
 
 
     EnumFacing(int indexIn, int oppositeIn, int horizontalIndexIn, String nameIn, EnumFacing.AxisDirection axisDirectionIn, EnumFacing.Axis axisIn, Vec3i directionVecIn) {
@@ -59,6 +62,7 @@ public enum EnumFacing implements IStringSerializable {
         return this.horizontalIndex;
     }
 
+
     public EnumFacing.AxisDirection getAxisDirection() {
         return this.axisDirection;
     }
@@ -80,7 +84,7 @@ public enum EnumFacing implements IStringSerializable {
 
 
     public EnumFacing getOpposite() {
-        return byIndex(this.opposite);
+        return oppositeFacing;
     }
 
 
@@ -271,13 +275,17 @@ public enum EnumFacing implements IStringSerializable {
 
 
     static {
-        for (EnumFacing enumfacing : values()) {
-            VALUES[enumfacing.index] = enumfacing;
+        for (EnumFacing facing : values()) {
+            VALUES[facing.index] = facing;
 
-            if (enumfacing.getAxis().isHorizontal()) {
-                HORIZONTALS[enumfacing.horizontalIndex] = enumfacing;
+            if (facing.getAxis().isHorizontal()) {
+                HORIZONTALS[facing.horizontalIndex] = facing;
             }
-            NAME_LOOKUP.put(enumfacing.getName2().toLowerCase(Locale.ROOT), enumfacing);
+            NAME_LOOKUP.put(facing.getName2().toLowerCase(Locale.ROOT), facing);
+        }
+
+        for (EnumFacing facing:VALUES){
+            facing.oppositeFacing = byIndex(facing.opposite);
         }
     }
 
@@ -372,6 +380,7 @@ public enum EnumFacing implements IStringSerializable {
     }
 
 
+    @Keep
     public static enum Plane implements Predicate<EnumFacing>, Iterable<EnumFacing> {
         HORIZONTAL,
         VERTICAL;

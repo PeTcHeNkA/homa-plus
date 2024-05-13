@@ -41,6 +41,7 @@ public class ElcaConfig {
     public static int MAX_PISTON_POWER           = 12;
     public static int MIN_CHANGED_BLOCKS_BUF     = 24;
     public static int RESET_LOW_LEVEL_MOBS       = 200;
+    public static int MAX_WORLD_SPAWNER_RANGE    = 7;
 
     //public static boolean FAST_LIGHT                 = true;
     public static boolean SLOW_SWIM_AI               = true;
@@ -56,6 +57,7 @@ public class ElcaConfig {
     public static boolean SKIP_CHECK_NETWORK         = true;
     public static boolean PRINT_CAUSE_SERVER_STOP    = true;
     public static boolean PROCESS_LIGHT_ON_SAVE      = false;
+    public static boolean ASYNC_SAVE_CHUNKS          = true;
 
 
     private static File dir(String str){
@@ -91,6 +93,8 @@ public class ElcaConfig {
         MAX_ENTITY_COLLISIONS      = calc(file, "max-entity-collisions"       , MAX_ENTITY_COLLISIONS      );
         MAX_ENTITY_COLLISIONS_MOVE = calc(file, "max-entity-collisions-move"  , MAX_ENTITY_COLLISIONS_MOVE );
         MIN_CHANGED_BLOCKS_BUF     = calc(file, "min-changed-blocks-buf"      , MIN_CHANGED_BLOCKS_BUF     );
+        RESET_LOW_LEVEL_MOBS       = calc(file, "reset-low-level-mobs"        , RESET_LOW_LEVEL_MOBS       );
+        MAX_WORLD_SPAWNER_RANGE    = calc(file, "max-world-spawner-range"     , MAX_WORLD_SPAWNER_RANGE    );
 
         MAX_SPONGE_POWER           = calc(file, "max-sponge-power"            , MAX_SPONGE_POWER           );
         MAX_PISTON_POWER           = calc(file, "max-piston-power"            , MAX_PISTON_POWER           );

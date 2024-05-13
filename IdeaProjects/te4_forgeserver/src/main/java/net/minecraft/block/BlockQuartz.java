@@ -17,10 +17,12 @@ import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import plus.fserver.api.Keep;
 import plus.fserver.block.BlockFx;
 
 
 public class BlockQuartz extends BlockFx {
+    @Keep
     public static final PropertyEnum<BlockQuartz.EnumType> VARIANT = PropertyEnum.create("variant", BlockQuartz.EnumType.class);
 
     public BlockQuartz() {
@@ -130,6 +132,7 @@ public class BlockQuartz extends BlockFx {
     }
 
 
+    @Keep
     public enum EnumType implements IStringSerializable {
         DEFAULT(0, "default", "default"),
         CHISELED(1, "chiseled", "chiseled"),

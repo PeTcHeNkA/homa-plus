@@ -7,23 +7,28 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import plus.fserver.api.Keep;
 import plus.fserver.server.elca.ChunkSelector;
 
 
 public abstract class WorldGenAbstractTree extends WorldGenerator {
-    public WorldGenAbstractTree(boolean notify)
-    {
+    @Keep
+    public WorldGenAbstractTree(boolean notify) {
         super(notify);
     }
 
+    @Keep
     protected boolean canGrowInto(Block blockType) {
         Material material = blockType.getDefaultState().getMaterial();
         return material == Material.AIR || material == Material.LEAVES || blockType == Blocks.GRASS || blockType == Blocks.DIRT || blockType == Blocks.LOG || blockType == Blocks.LOG2 || blockType == Blocks.SAPLING || blockType == Blocks.VINE;
     }
 
+
+    @Keep
     public void generateSaplings(World worldIn, Random random, BlockPos pos) {}
 
 
+    @Keep
     protected void setDirtAt(World worldIn, BlockPos pos) {
         if (worldIn.getBlockState(pos).getBlock() != Blocks.DIRT) {
             this.setBlockAndNotifyAdequately(worldIn, pos, Blocks.DIRT.getDefaultState());
@@ -31,12 +36,14 @@ public abstract class WorldGenAbstractTree extends WorldGenerator {
     }
 
 
+    @Keep
     public boolean isReplaceable(World world, BlockPos pos) {
         net.minecraft.block.state.IBlockState state = world.getBlockState(pos);
         return state.getBlock().isAir(state, world, pos) || state.getBlock().isLeaves(state, world, pos) || state.getBlock().isWood(world, pos) || canGrowInto(state.getBlock());
     }
 
 
+    @Keep
     public boolean isReplaceable(ChunkSelector selector, World world, BlockPos pos) {
         IBlockState state = selector.getState(pos);
         return state.getBlock().isAir(state, world, pos) ||

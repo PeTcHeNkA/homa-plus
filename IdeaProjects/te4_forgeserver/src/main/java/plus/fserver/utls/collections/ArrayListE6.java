@@ -330,8 +330,7 @@ public class ArrayListE6<T> implements List<T> {
 
 
     public T getSafe(int index){
-        if(index >= data.length) return null;
-        return (T) data[index];
+        return index >= data.length? null: (T) data[index];
     }
 
 

@@ -32,14 +32,17 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import plus.fserver.api.Keep;
 import plus.fserver.server.CraftIndex;
 import plus.tson.utl.Te4HashMap;
+
 
 public class CraftingManager {
     private static final Logger LOGGER = LogManager.getLogger();
     private static int nextAvailableId;
+    @Keep
     public static final RegistryNamespaced<ResourceLocation, IRecipe> REGISTRY = GameData.getWrapper(IRecipe.class);
-    //craft index
+    @Keep
     public static final Te4HashMap<CraftIndex, IRecipe> index = new Te4HashMap<>();
 
     public static boolean init() {
@@ -162,14 +165,15 @@ public class CraftingManager {
         }
     }
 
-    //Forge: Made private use GameData/Registry events!
-    private static void register(String name, IRecipe recipe) {
+
+    @Keep
+    public static void register(String name, IRecipe recipe) {
         register(new ResourceLocation(name), recipe);
     }
 
 
-    //Forge: Made private use GameData/Registry events!
-    private static void register(ResourceLocation name, IRecipe recipe) {
+    @Keep
+    public static void register(ResourceLocation name, IRecipe recipe) {
         if (REGISTRY.containsKey(name)) {
             throw new IllegalStateException("Duplicate recipe ignored with ID " + name);
         } else {
@@ -178,6 +182,7 @@ public class CraftingManager {
     }
 
 
+    @Keep
     public static ItemStack findMatchingResult(InventoryCrafting craftMatrix, World worldIn) {
         for (IRecipe irecipe : REGISTRY) {
             if (irecipe.matches(craftMatrix, worldIn)) {
@@ -188,6 +193,7 @@ public class CraftingManager {
     }
 
 
+    @Keep
     @Nullable //use craft index
     public static IRecipe findMatchingRecipe(InventoryCrafting craftMatrix, World worldIn) {
         CraftIndex cIndex;
@@ -204,6 +210,7 @@ public class CraftingManager {
     }
 
 
+    @Keep
     public static NonNullList<ItemStack> getRemainingItems(InventoryCrafting craftMatrix, World worldIn) {
         CraftIndex cIndex;
         IRecipe result = index.get(cIndex = new CraftIndex(craftMatrix));
@@ -224,6 +231,7 @@ public class CraftingManager {
     }
 
 
+    @Keep
     @Nullable
     public static IRecipe getRecipe(ResourceLocation name)
     {
@@ -231,6 +239,7 @@ public class CraftingManager {
     }
 
 
+    @Keep
     @Deprecated //DO NOT USE THIS
     public static int getIDForRecipe(IRecipe recipe)
     {
@@ -238,6 +247,7 @@ public class CraftingManager {
     }
 
 
+    @Keep
     @Deprecated //DO NOT USE THIS
     @Nullable
     public static IRecipe getRecipeById(int id)

@@ -11,6 +11,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
+import plus.fserver.api.Keep;
 import plus.fserver.server.elca.ChunkSelector;
 
 
@@ -20,6 +21,7 @@ public class WorldGenBigTree extends WorldGenAbstractTree {
     private final IBlockState defLeavesState;
     private final int heightLimitLimit, trunkSize;
 
+    @Keep
     public WorldGenBigTree(boolean notify) {
         super(notify);
         defLogState    = Blocks.LOG.getDefaultState();
@@ -32,6 +34,7 @@ public class WorldGenBigTree extends WorldGenAbstractTree {
         trunkSize = 1;
     }
 
+    @Keep
     public WorldGenBigTree(boolean notify, IBlockState log, IBlockState leaf,
                            double heightAttenuation, double branchSlope, double scaleWidth,
                            double leafDensity, int heightLimitLimit, int trunkSize
@@ -48,6 +51,7 @@ public class WorldGenBigTree extends WorldGenAbstractTree {
     }
 
 
+    @Keep
     void generateLeafNodeList(GenSession session, ArrayList<WorldGenBigTree.FoliageCoordinates> cords, BlockPos basePos) {
         session.height = (int)((double)session.heightLimit * this.heightAttenuation);
         if (session.height >= session.heightLimit) {
@@ -95,6 +99,7 @@ public class WorldGenBigTree extends WorldGenAbstractTree {
     }
 
 
+    @Keep
     void crosSection(ChunkSelector selector, BlockPos pos, float num, IBlockState state1) {
         int i = (int)((double)num + 0.618D);
         World world = selector.getWorld();
@@ -117,6 +122,7 @@ public class WorldGenBigTree extends WorldGenAbstractTree {
     }
 
 
+    @Keep
     float layerSize(int heightLimit, int y) {
         if ((float)y < (float)heightLimit * 0.3F) {
             return -1.0F;
@@ -137,6 +143,7 @@ public class WorldGenBigTree extends WorldGenAbstractTree {
     }
 
 
+    @Keep
     float leafSize(int leafDistanceLimit, int y) {
         if (y >= 0 && y < leafDistanceLimit) {
             return y != 0 && y != leafDistanceLimit - 1 ? 3.0F : 2.0F;
@@ -146,6 +153,7 @@ public class WorldGenBigTree extends WorldGenAbstractTree {
     }
 
 
+    @Keep
     void generateLeafNode(GenSession session, BlockPos pos) {
         IBlockState state = defLeavesState.withProperty(
                 BlockLeaves.CHECK_DECAY, Boolean.FALSE
@@ -307,6 +315,7 @@ public class WorldGenBigTree extends WorldGenAbstractTree {
     }
 
 
+    @Keep
     static class FoliageCoordinates extends BlockPos {
         private final int branchBase;
 

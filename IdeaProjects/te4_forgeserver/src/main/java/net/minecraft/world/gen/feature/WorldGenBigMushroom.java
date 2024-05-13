@@ -7,23 +7,26 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import plus.fserver.api.Keep;
 import plus.fserver.server.elca.ChunkSelector;
 
 
 public class WorldGenBigMushroom extends WorldGenerator {
     private final Block mushroomType;
 
-    public WorldGenBigMushroom(Block p_i46449_1_) {
+    public WorldGenBigMushroom(Block block) {
         super(true);
-        this.mushroomType = p_i46449_1_;
+        this.mushroomType = block;
     }
 
+    @Keep
     public WorldGenBigMushroom() {
         super(false);
         this.mushroomType = null;
     }
 
 
+    @Override
     public boolean generate(World worldIn, Random rand, BlockPos position) {
         Block block = this.mushroomType;
 

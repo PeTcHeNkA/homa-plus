@@ -8,6 +8,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
+import plus.fserver.api.Keep;
 import plus.fserver.server.elca.ChunkSelector;
 
 
@@ -15,10 +16,13 @@ public class WorldGenClay extends WorldGenerator {
     private final IBlockState state = Blocks.CLAY.getDefaultState();
     private final int numberOfBlocks;
 
+    @Keep
     public WorldGenClay(int num) {
         this.numberOfBlocks = num;
     }
 
+
+    @Override
     public boolean generate(World worldIn, Random rand, BlockPos position) {
         Chunk chunk = worldIn.getChunk(position);
         if (chunk.getBlockState(position).getMaterial() != Material.WATER) {

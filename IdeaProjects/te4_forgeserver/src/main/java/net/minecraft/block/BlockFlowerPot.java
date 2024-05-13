@@ -31,12 +31,16 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.fserver.api.Keep;
 import plus.fserver.utls.collections.ArrayListE6;
 
 
 public class BlockFlowerPot extends BlockContainer {
+    @Keep
     public static final PropertyInteger LEGACY_DATA = PropertyInteger.create("legacy_data", 0, 15);
+    @Keep
     public static final PropertyEnum<BlockFlowerPot.EnumFlowerType> CONTENTS = PropertyEnum.create("contents", BlockFlowerPot.EnumFlowerType.class);
+    @Keep
     protected static final AxisAlignedBB FLOWER_POT_AABB = new AxisAlignedBB(0.3125D, 0.0D, 0.3125D, 0.6875D, 0.375D, 0.6875D);
 
     public BlockFlowerPot() {
@@ -198,58 +202,43 @@ public class BlockFlowerPot extends BlockContainer {
 
     @Override
     public TileEntity createNewTileEntity(World worldIn, int meta) {
-        Block block = null;
-        int i = 0;
+        return createNew(meta);
+    }
 
+
+    private TileEntity createNew(int meta){
         switch (meta) {
-            case 1:
-                block = Blocks.RED_FLOWER;
-                i = BlockFlower.EnumFlowerType.POPPY.getMeta();
-                break;
+            default:
+                return newTi(Blocks.RED_FLOWER, BlockFlower.EnumFlowerType.POPPY.getMeta());
             case 2:
-                block = Blocks.YELLOW_FLOWER;
-                break;
+                return newTi(Blocks.YELLOW_FLOWER, 0);
             case 3:
-                block = Blocks.SAPLING;
-                i = BlockPlanks.EnumType.OAK.getMetadata();
-                break;
+                return newTi(Blocks.SAPLING, BlockPlanks.EnumType.OAK.getMetadata());
             case 4:
-                block = Blocks.SAPLING;
-                i = BlockPlanks.EnumType.SPRUCE.getMetadata();
-                break;
+                return newTi(Blocks.SAPLING, BlockPlanks.EnumType.SPRUCE.getMetadata());
             case 5:
-                block = Blocks.SAPLING;
-                i = BlockPlanks.EnumType.BIRCH.getMetadata();
-                break;
+                return newTi(Blocks.SAPLING, BlockPlanks.EnumType.BIRCH.getMetadata());
             case 6:
-                block = Blocks.SAPLING;
-                i = BlockPlanks.EnumType.JUNGLE.getMetadata();
-                break;
+                return newTi(Blocks.SAPLING, BlockPlanks.EnumType.JUNGLE.getMetadata());
             case 7:
-                block = Blocks.RED_MUSHROOM;
-                break;
+                return newTi(Blocks.RED_MUSHROOM, 0);
             case 8:
-                block = Blocks.BROWN_MUSHROOM;
-                break;
+                return newTi(Blocks.BROWN_MUSHROOM, 0);
             case 9:
-                block = Blocks.CACTUS;
-                break;
+                return newTi(Blocks.CACTUS, 0);
             case 10:
-                block = Blocks.DEADBUSH;
-                break;
+                return newTi(Blocks.DEADBUSH, 0);
             case 11:
-                block = Blocks.TALLGRASS;
-                i = BlockTallGrass.EnumType.FERN.getMeta();
-                break;
+                return newTi(Blocks.TALLGRASS, BlockTallGrass.EnumType.FERN.getMeta());
             case 12:
-                block = Blocks.SAPLING;
-                i = BlockPlanks.EnumType.ACACIA.getMetadata();
-                break;
+                return newTi(Blocks.SAPLING, BlockPlanks.EnumType.ACACIA.getMetadata());
             case 13:
-                block = Blocks.SAPLING;
-                i = BlockPlanks.EnumType.DARK_OAK.getMetadata();
+                return newTi(Blocks.SAPLING, BlockPlanks.EnumType.DARK_OAK.getMetadata());
         }
+    }
 
+
+    private static TileEntity newTi(Block block, int i){
         return new TileEntityFlowerPot(Item.getItemFromBlock(block), i);
     }
 
@@ -402,8 +391,10 @@ public class BlockFlowerPot extends BlockContainer {
         super.harvestBlock(world, player, pos, state, te, tool);
         world.setBlockToAir(pos);
     }
+
     /*===========================FORGE END==========================================*/
 
+    @Keep
     public static enum EnumFlowerType implements IStringSerializable {
         EMPTY("empty"),
         POPPY("rose"),

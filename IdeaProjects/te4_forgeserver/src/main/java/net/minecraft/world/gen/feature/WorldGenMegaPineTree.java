@@ -10,6 +10,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
+import plus.fserver.api.Keep;
 import plus.fserver.server.elca.ChunkSelector;
 
 
@@ -19,9 +20,10 @@ public class WorldGenMegaPineTree extends WorldGenHugeTrees {
     private static final IBlockState PODZOL = Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.PODZOL);
     private final boolean useBaseHeight;
 
-    public WorldGenMegaPineTree(boolean notify, boolean p_i45457_2_) {
+    @Keep
+    public WorldGenMegaPineTree(boolean notify, boolean useBaseHeight) {
         super(notify, 13, 15, TRUNK, LEAF);
-        this.useBaseHeight = p_i45457_2_;
+        this.useBaseHeight = useBaseHeight;
     }
 
 

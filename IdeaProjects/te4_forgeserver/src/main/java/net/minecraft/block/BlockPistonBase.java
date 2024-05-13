@@ -24,17 +24,25 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import plus.fserver.api.IBlockEAccess;
+import plus.fserver.api.Keep;
 import plus.fserver.utls.collections.ArrayListE6;
 import static plus.fserver.block.BlockFs.addCollisionBoxToListFs;
 
 
 public class BlockPistonBase extends BlockDirectional {
+    @Keep
     public static final PropertyBool EXTENDED = PropertyBool.create("extended");
+    @Keep
     protected static final AxisAlignedBB PISTON_BASE_EAST_AABB  = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 0.75D, 1.0D, 1.0D);
+    @Keep
     protected static final AxisAlignedBB PISTON_BASE_WEST_AABB  = new AxisAlignedBB(0.25D, 0.0D, 0.0D, 1.0D, 1.0D, 1.0D);
+    @Keep
     protected static final AxisAlignedBB PISTON_BASE_SOUTH_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 1.0D, 0.75D);
+    @Keep
     protected static final AxisAlignedBB PISTON_BASE_NORTH_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.25D, 1.0D, 1.0D, 1.0D);
+    @Keep
     protected static final AxisAlignedBB PISTON_BASE_UP_AABB    = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.75D, 1.0D);
+    @Keep
     protected static final AxisAlignedBB PISTON_BASE_DOWN_AABB  = new AxisAlignedBB(0.0D, 0.25D, 0.0D, 1.0D, 1.0D, 1.0D);
     private final boolean isSticky;
 

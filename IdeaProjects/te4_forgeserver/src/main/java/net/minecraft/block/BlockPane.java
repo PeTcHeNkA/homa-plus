@@ -23,16 +23,21 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.fserver.api.Keep;
 import plus.fserver.utls.collections.ArrayListE6;
 import static plus.fserver.block.BlockFs.addCollisionBoxToListFx;
 
 
 public class BlockPane extends Block {
+    @Keep
     public static final PropertyBool NORTH = PropertyBool.create("north");
+    @Keep
     public static final PropertyBool EAST = PropertyBool.create("east");
+    @Keep
     public static final PropertyBool SOUTH = PropertyBool.create("south");
+    @Keep
     public static final PropertyBool WEST = PropertyBool.create("west");
-
+    @Keep
     protected static final AxisAlignedBB[] AABB_BY_INDEX = new AxisAlignedBB[] {
             new AxisAlignedBB(0.4375D, 0.0D, 0.4375D, 0.5625D, 1.0D, 0.5625D),
             new AxisAlignedBB(0.4375D, 0.0D, 0.4375D, 0.5625D, 1.0D, 1.0D),
@@ -121,19 +126,19 @@ public class BlockPane extends Block {
 
     private static int getBoundingBoxIndex(IBlockState state) {
         int i = 0;
-        if (state.getValue(NORTH).booleanValue()) {
+        if (state.getValue(NORTH)) {
             i |= getBoundingBoxIndex(EnumFacing.NORTH);
         }
 
-        if (state.getValue(EAST).booleanValue()) {
+        if (state.getValue(EAST)) {
             i |= getBoundingBoxIndex(EnumFacing.EAST);
         }
 
-        if (state.getValue(SOUTH).booleanValue()) {
+        if (state.getValue(SOUTH)) {
             i |= getBoundingBoxIndex(EnumFacing.SOUTH);
         }
 
-        if (state.getValue(WEST).booleanValue()) {
+        if (state.getValue(WEST)) {
             i |= getBoundingBoxIndex(EnumFacing.WEST);
         }
         return i;
@@ -173,6 +178,7 @@ public class BlockPane extends Block {
     }
 
 
+    @Keep
     public final boolean attachesTo(IBlockAccess p_193393_1_, IBlockState state, BlockPos pos, EnumFacing facing) {
         Block block = state.getBlock();
         BlockFaceShape blockfaceshape = state.getBlockFaceShape(p_193393_1_, pos, facing);
@@ -180,11 +186,13 @@ public class BlockPane extends Block {
     }
 
 
+    @Keep
     protected static boolean isExcepBlockForAttachWithPiston(Block p_193394_0_) {
         return p_193394_0_ instanceof BlockShulkerBox || p_193394_0_ instanceof BlockLeaves || p_193394_0_ == Blocks.BEACON || p_193394_0_ == Blocks.CAULDRON || p_193394_0_ == Blocks.GLOWSTONE || p_193394_0_ == Blocks.ICE || p_193394_0_ == Blocks.SEA_LANTERN || p_193394_0_ == Blocks.PISTON || p_193394_0_ == Blocks.STICKY_PISTON || p_193394_0_ == Blocks.PISTON_HEAD || p_193394_0_ == Blocks.MELON_BLOCK || p_193394_0_ == Blocks.PUMPKIN || p_193394_0_ == Blocks.LIT_PUMPKIN || p_193394_0_ == Blocks.BARRIER;
     }
 
 
+    @Override
     protected boolean canSilkHarvest() {
         return true;
     }

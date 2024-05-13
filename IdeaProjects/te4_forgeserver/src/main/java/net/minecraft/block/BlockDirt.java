@@ -14,6 +14,7 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import plus.fserver.api.Keep;
 import plus.fserver.block.BlockFx;
 
 
@@ -22,6 +23,7 @@ public class BlockDirt extends BlockFx {
     public static final PropertyEnum<BlockDirt.DirtType> VARIANT = PropertyEnum.create("variant", BlockDirt.DirtType.class);
     public static final PropertyBool SNOWY = PropertyBool.create("snowy");
 
+    @Keep
     protected BlockDirt() {
         super(Material.GROUND);
         this.setDefaultState(this.blockState.getBaseState().withProperty(VARIANT, BlockDirt.DirtType.DIRT).withProperty(SNOWY, Boolean.FALSE));
@@ -29,11 +31,13 @@ public class BlockDirt extends BlockFx {
     }
 
 
+    @Override
     public MapColor getMapColor(IBlockState state, IBlockAccess worldIn, BlockPos pos) {
         return state.getValue(VARIANT).getColor();
     }
 
 
+    @Override
     public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos) {
         if (state.getValue(VARIANT) == BlockDirt.DirtType.PODZOL) {
             Block block = worldIn.getBlockState(pos.up()).getBlock();
@@ -43,6 +47,7 @@ public class BlockDirt extends BlockFx {
     }
 
 
+    @Override
     public void getSubBlocks(CreativeTabs itemIn, NonNullList<ItemStack> items) {
         items.add(new ItemStack(this, 1, BlockDirt.DirtType.DIRT.getMetadata()));
         items.add(new ItemStack(this, 1, BlockDirt.DirtType.COARSE_DIRT.getMetadata()));
@@ -50,26 +55,31 @@ public class BlockDirt extends BlockFx {
     }
 
 
+    @Override
     public ItemStack getItem(World worldIn, BlockPos pos, IBlockState state) {
         return new ItemStack(this, 1, state.getValue(VARIANT).getMetadata());
     }
 
 
+    @Override
     public IBlockState getStateFromMeta(int meta) {
         return this.getDefaultState().withProperty(VARIANT, BlockDirt.DirtType.byMetadata(meta));
     }
 
 
+    @Override
     public int getMetaFromState(IBlockState state) {
         return state.getValue(VARIANT).getMetadata();
     }
 
 
+    @Override
     protected BlockStateContainer createBlockState() {
         return new BlockStateContainer(this, VARIANT, SNOWY);
     }
 
 
+    @Override
     public int damageDropped(IBlockState state) {
         BlockDirt.DirtType type = state.getValue(VARIANT);
 
@@ -81,6 +91,7 @@ public class BlockDirt extends BlockFx {
     }
 
 
+    @Keep
     public static enum DirtType implements IStringSerializable {
         DIRT(0, "dirt", "default", MapColor.DIRT),
         COARSE_DIRT(1, "coarse_dirt", "coarse", MapColor.DIRT),

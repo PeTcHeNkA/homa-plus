@@ -7,12 +7,14 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
+import plus.fserver.api.Keep;
 import plus.fserver.server.elca.ChunkSelector;
 
 
 public class WorldGenLiquids extends WorldGenerator {
     private final IBlockState state;
 
+    @Keep
     public WorldGenLiquids(Block blockIn) {
         this.state = blockIn.getDefaultState();
     }

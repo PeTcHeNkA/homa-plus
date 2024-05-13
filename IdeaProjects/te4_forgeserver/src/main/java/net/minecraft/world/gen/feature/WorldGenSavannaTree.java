@@ -7,6 +7,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import plus.fserver.api.Keep;
 import plus.fserver.server.elca.ChunkSelector;
 
 
@@ -16,6 +17,7 @@ public class WorldGenSavannaTree extends WorldGenAbstractTree {
     private final int height;
     private final int randHeight;
 
+    @Keep
     public WorldGenSavannaTree(boolean notify) {
         super(notify);
         wood   = Blocks.LOG2.getDefaultState().withProperty(BlockNewLog.VARIANT, BlockPlanks.EnumType.ACACIA);
@@ -25,6 +27,7 @@ public class WorldGenSavannaTree extends WorldGenAbstractTree {
     }
 
 
+    @Keep
     public WorldGenSavannaTree(boolean notify, IBlockState wood, IBlockState leaves, int height, int randHeight){
         super(notify);
         this.wood = wood;
@@ -34,6 +37,7 @@ public class WorldGenSavannaTree extends WorldGenAbstractTree {
     }
 
 
+    @Override
     public boolean generate(World worldIn, Random rand, BlockPos position) {
         int i = rand.nextInt(randHeight) + rand.nextInt(randHeight) + height;
         boolean flag = true;

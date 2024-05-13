@@ -14,7 +14,7 @@ import plus.fserver.block.BlockFx;
 
 public class BlockObsidian extends BlockFx {
     public BlockObsidian() {
-        super(Material.ROCK);
+        super(Material.ROCK, MapColor.BLACK);
         this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
     }
 
@@ -22,11 +22,5 @@ public class BlockObsidian extends BlockFx {
     @Override
     public Item getItemDropped(IBlockState state, Random rand, int fortune) {
         return Item.getItemFromBlock(Blocks.OBSIDIAN);
-    }
-
-
-    @Override
-    public MapColor getMapColor(IBlockState state, IBlockAccess worldIn, BlockPos pos) {
-        return MapColor.BLACK;
     }
 }

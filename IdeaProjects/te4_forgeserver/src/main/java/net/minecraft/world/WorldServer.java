@@ -74,6 +74,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import plus.fserver.ElcaConfig;
+import plus.fserver.api.Keep;
 import plus.fserver.api.MeanTicker;
 import plus.fserver.api.PWorldServer;
 import plus.fserver.ElcaCV;
@@ -81,6 +82,7 @@ import plus.fserver.server.chunk.io.TChunkTask;
 import plus.fserver.server.chunk.io.TQueuedChunk;
 import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.math.MathUtls;
+import plus.fserver.world.CommonWorldEntitySpawner;
 import plus.fserver.world.NavigationCache;
 import plus.tson.utl.Te4HashSet;
 
@@ -100,14 +102,15 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
     private boolean allPlayersSleeping;
     private int updateEntityTick;
     private final Teleporter worldTeleporter;
-    private final WorldEntitySpawner entitySpawner = new WorldEntitySpawner();
+    @Keep
+    private final WorldEntitySpawner entitySpawner;
     protected final VillageSiege villageSiege = new VillageSiege(this);
     private final WorldServer.ServerBlockEventList[] blockEventQueue = new WorldServer.ServerBlockEventList[] {new WorldServer.ServerBlockEventList(), new WorldServer.ServerBlockEventList()};
     private int blockEventCacheIndex;
     private final List<NextTickListEntry> pendingTickListEntriesThisTick = new ArrayList<>();
 
     /** Stores the recently processed (lighting) chunks */
-    //protected Set<ChunkPos> doneChunks = new Te4HashSet<>();
+    @Keep
     public List<Teleporter> customTeleporters = new ArrayList<>();
 
     private static final long spawnOnSetTickRate = 400L;
@@ -133,6 +136,13 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
         DimensionManager.setWorld(dimensionId, this, server);
 
         effectiveAcces = localSelector;
+        entitySpawner = makeWorldSpawner();
+    }
+
+
+    @Keep
+    protected WorldEntitySpawner makeWorldSpawner(){
+        return new CommonWorldEntitySpawner();
     }
 
 

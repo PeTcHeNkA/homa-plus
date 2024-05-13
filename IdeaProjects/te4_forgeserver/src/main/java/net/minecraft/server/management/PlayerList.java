@@ -54,16 +54,22 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import plus.fserver.ElcaConfig;
+import plus.fserver.api.Keep;
 import plus.fserver.api.PWorldServer;
 import plus.fserver.event.ElcaConnectEvent;
 import plus.fserver.server.chunk.io.TChunkExecutor;
 import plus.tson.utl.Te4HashSet;
 
 
+@Keep
 public abstract class PlayerList {
+    @Keep
     public static final File FILE_PLAYERBANS = new File("banned-players.json");
+    @Keep
     public static final File FILE_IPBANS = new File("banned-ips.json");
+    @Keep
     public static final File FILE_OPS = new File("ops.json");
+    @Keep
     public static final File FILE_WHITELIST = new File("whitelist.json");
     private static final Logger LOGGER = LogManager.getLogger();
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss z");
@@ -78,6 +84,7 @@ public abstract class PlayerList {
     private final Map<UUID, PlayerAdvancements> advancements;
     private IPlayerFileData playerDataManager;
     private boolean whiteListEnforced;
+    @Keep
     protected int maxPlayers;
     private int viewDistance;
     private GameType gameType;

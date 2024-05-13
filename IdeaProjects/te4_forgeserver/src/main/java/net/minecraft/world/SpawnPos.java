@@ -4,16 +4,17 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.chunk.Chunk;
 
-class SpawnPos extends BlockPos.MutableBlockPos {
-    final World world;
-    Chunk chunk;
 
-    SpawnPos(World world) {
+public final class SpawnPos extends BlockPos.MutableBlockPos {
+    public final World world;
+    public Chunk chunk;
+
+    public SpawnPos(World world) {
         this.world = world;
     }
 
 
-    void setRandomChunkPos(Chunk chunk) {
+    public void setRandomChunkPos(Chunk chunk) {
         this.chunk = chunk;
         int rand = world.rand.nextInt();
         int nX = (chunk.x << 4) + (rand & 15);
@@ -24,7 +25,7 @@ class SpawnPos extends BlockPos.MutableBlockPos {
     }
 
 
-    void setRandomChunkPos(int x, int z) {
+    public void setRandomChunkPos(int x, int z) {
         chunk = world.getChunk(x, z);
         int rand = world.rand.nextInt();
         int nX = (x << 4) + (rand & 15);

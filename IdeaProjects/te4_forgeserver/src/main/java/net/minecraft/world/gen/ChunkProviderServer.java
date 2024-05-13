@@ -5,7 +5,6 @@ import it.unimi.dsi.fastutil.objects.ObjectCollection;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nullable;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
@@ -27,21 +26,31 @@ import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.fml.common.FMLLog;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import plus.fserver.ElcaConfig;
+import plus.fserver.api.Keep;
 import plus.fserver.server.chunk.io.TChunkExecutor;
 import plus.fserver.server.chunk.io.TChunkGenProvider;
 import plus.fserver.utls.collections.ChunkPopulationTask;
 
 
 public class ChunkProviderServer implements IChunkProvider {
+    @Keep
     private static final Logger LOGGER = LogManager.getLogger();
+    @Keep
     private final LongSet droppedChunks = new LongOpenHashSet();
+    @Keep
     private final LongSet loadingChunks = new LongOpenHashSet();
+    @Keep
     public final IChunkGenerator chunkGenerator;
+    @Keep
     public final IChunkLoader chunkLoader;
+    @Keep
     public final Long2ObjectMap<Chunk> loadedChunks = new Long2ObjectOpenHashMap<>(8192);
+    @Keep
     public final WorldServer world;
     private final Long2ObjectOpenHashMap realLC = (Long2ObjectOpenHashMap) loadedChunks;
     private final ChunkPopulationTask task;
+    private final boolean asyncSaveChunks;
 
 
     public ChunkProviderServer(WorldServer worldObjIn, IChunkLoader chunkLoaderIn, IChunkGenerator chunkGeneratorIn) {
@@ -49,6 +58,7 @@ public class ChunkProviderServer implements IChunkProvider {
         this.chunkLoader = chunkLoaderIn;
         this.chunkGenerator = chunkGeneratorIn;
         task = chunkGeneratorIn.maybeAsync()?new ChunkPopulationTask(this):null;
+        asyncSaveChunks = (chunkLoaderIn instanceof AnvilChunkLoader) && ElcaConfig.ASYNC_SAVE_CHUNKS;
     }
 
 
@@ -170,6 +180,7 @@ public class ChunkProviderServer implements IChunkProvider {
     }
 
 
+    @Keep
     public void saveChunkExtraData(Chunk chunkIn) {
         try {
             this.chunkLoader.saveExtraChunkData(this.world, chunkIn);
@@ -180,6 +191,7 @@ public class ChunkProviderServer implements IChunkProvider {
     }
 
 
+    @Keep
     public void saveChunkData(Chunk chunk) {
         try {
             chunk.setLastSaveTime(this.world.getTotalWorldTime());
@@ -193,6 +205,7 @@ public class ChunkProviderServer implements IChunkProvider {
     }
 
 
+    @Keep
     public void saveChunkData(List<NextTickListEntry> pendings, Chunk chunkIn) {
         try {
             chunkIn.setLastSaveTime(this.world.getTotalWorldTime());
@@ -206,6 +219,7 @@ public class ChunkProviderServer implements IChunkProvider {
     }
 
 
+    @Keep
     public boolean saveChunks(boolean all) {
         int i = 0;
         ObjectCollection<Chunk> vs = this.loadedChunks.values();
@@ -267,16 +281,14 @@ public class ChunkProviderServer implements IChunkProvider {
                     if (chunk != null) {
                         if(chunk.maybeUnload()) {
                             chunk.onUnload();
-                            if(chunkLoader instanceof AnvilChunkLoader){
-                                //ForgeChunkManager.invalidate(olong, world);
+                            if(asyncSaveChunks){
                                 TChunkExecutor.queueChunkUnload(world, (AnvilChunkLoader)chunkLoader,this, chunk);
-                                loadedChunks.remove(olong);
                             } else {
                                 ForgeChunkManager.putDormantChunk(olong, chunk);
                                 this.saveChunkData(chunk);
                                 this.saveChunkExtraData(chunk);
-                                this.loadedChunks.remove(olong);
                             }
+                            loadedChunks.remove(olong);
                             ++i;
                             iterator.remove();
                         } else {
@@ -304,11 +316,17 @@ public class ChunkProviderServer implements IChunkProvider {
                             if (chunk.maybeUnload()) {
                                 long olong = ChunkPos.asLong(chunk.x, chunk.z);
                                 chunk.onUnload();
-                                ForgeChunkManager.putDormantChunk(olong, chunk);
-                                this.saveChunkData(chunk);
-                                this.saveChunkExtraData(chunk);
-                                iter.remove();
+
+                                if(asyncSaveChunks){
+                                    TChunkExecutor.queueChunkUnload(world, (AnvilChunkLoader)chunkLoader,this, chunk);
+                                } else {
+                                    ForgeChunkManager.putDormantChunk(olong, chunk);
+                                    this.saveChunkData(chunk);
+                                    this.saveChunkExtraData(chunk);
+                                }
+
                                 this.loadedChunks.remove(olong);
+                                iter.remove();
                                 ++limit;
                             } else {
                                 chunk.setRequested(false);

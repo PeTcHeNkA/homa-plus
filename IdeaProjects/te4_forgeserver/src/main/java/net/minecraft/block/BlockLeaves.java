@@ -18,19 +18,18 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.api.IBlockEAccess;
+import plus.fserver.api.Keep;
 import plus.fserver.block.BlockFs;
 import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.collections.LeavesCache;
 
 
 public abstract class BlockLeaves extends BlockFs implements net.minecraftforge.common.IShearable {
+    @Keep
     public static final PropertyBool DECAYABLE = PropertyBool.create("decayable");
+    @Keep
     public static final PropertyBool CHECK_DECAY = PropertyBool.create("check_decay");
-//    private static final int[][] updates = new int[][]{
-//            {-1,-1,-1}, {-1,-1,-0}, {-1,-1,1}, {0,-1,-1}, {0,-1,0}, {0,-1,1}, {1,-1,-1}, {1,-1,0}, {1,-1,-1},
-//            {-1, 0,-1}, {-1, 0,-0}, {-1, 0,1}, {0, 0,-1},           {0,-1,1}, {1,-1,-1}, {1,-1,0}, {1,-1,-1},
-//            {-1, 1,-1}, {-1, 1,-0}, {-1, 1,1}, {0, 1,-1}, {0, 1,0}, {0,-1,1}, {1,-1,-1}, {1,-1,0}, {1,-1,-1}
-//    };
+    @Keep
     protected boolean leavesFancy;
 
     public BlockLeaves() {
@@ -157,19 +156,23 @@ public abstract class BlockLeaves extends BlockFs implements net.minecraftforge.
     }
 
 
+    @Override
     public int quantityDropped(Random random) {
         return random.nextInt(20) == 0 ? 1 : 0;
     }
 
 
+    @Override
     public Item getItemDropped(IBlockState state, Random rand, int fortune) {
         return Item.getItemFromBlock(Blocks.SAPLING);
     }
 
 
+    @Override
     public void dropBlockAsItemWithChance(World worldIn, BlockPos pos, IBlockState state, float chance, int fortune) {
         super.dropBlockAsItemWithChance(worldIn, pos, state, chance, fortune);
     }
+
 
     protected void dropApple(World worldIn, BlockPos pos, IBlockState state, int chance) {}
 
@@ -179,6 +182,7 @@ public abstract class BlockLeaves extends BlockFs implements net.minecraftforge.
     }
 
 
+    @Override
     public boolean isOpaqueCube(IBlockState state) {
         return !this.leavesFancy;
     }
@@ -196,6 +200,7 @@ public abstract class BlockLeaves extends BlockFs implements net.minecraftforge.
     }
 
 
+    @Override
     public boolean causesSuffocation(IBlockState state) {
         return false;
     }

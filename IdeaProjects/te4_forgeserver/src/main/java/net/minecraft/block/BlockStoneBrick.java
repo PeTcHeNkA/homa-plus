@@ -8,14 +8,20 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.NonNullList;
+import plus.fserver.api.Keep;
 import plus.fserver.block.BlockFx;
 
 
 public class BlockStoneBrick extends BlockFx {
+    @Keep
     public static final PropertyEnum<BlockStoneBrick.EnumType> VARIANT = PropertyEnum.create("variant", BlockStoneBrick.EnumType.class);
+    @Keep
     public static final int DEFAULT_META = BlockStoneBrick.EnumType.DEFAULT.getMetadata();
+    @Keep
     public static final int MOSSY_META = BlockStoneBrick.EnumType.MOSSY.getMetadata();
+    @Keep
     public static final int CRACKED_META = BlockStoneBrick.EnumType.CRACKED.getMetadata();
+    @Keep
     public static final int CHISELED_META = BlockStoneBrick.EnumType.CHISELED.getMetadata();
 
     public BlockStoneBrick() {
@@ -57,6 +63,7 @@ public class BlockStoneBrick extends BlockFx {
     }
 
 
+    @Keep
     public enum EnumType implements IStringSerializable {
         DEFAULT(0, "stonebrick", "default"),
         MOSSY(1, "mossy_stonebrick", "mossy"),
@@ -80,6 +87,7 @@ public class BlockStoneBrick extends BlockFx {
         }
 
 
+        @Override
         public String toString() {
             return this.name;
         }
@@ -93,6 +101,7 @@ public class BlockStoneBrick extends BlockFx {
         }
 
 
+        @Override
         public String getName() {
             return this.name;
         }

@@ -11,24 +11,32 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.scoreboard.Team;
+import plus.fserver.api.Keep;
 
 
 public final class EntitySelectors {
+    @Keep
     public static final Predicate<Entity> IS_ALIVE = Entity::isEntityAlive;
+    @Keep
     public static final Predicate<Entity> IS_STANDALONE = entity -> entity.isEntityAlive() && !entity.isBeingRidden() && !entity.isRiding();
+    @Keep
     public static final Predicate<Entity> HAS_INVENTORY = entity -> entity instanceof IInventory && entity.isEntityAlive();
+    @Keep
     public static final Predicate<Entity> CAN_AI_TARGET = entity -> !(entity instanceof EntityPlayer) || !((EntityPlayer)entity).isSpectator()
             && !((EntityPlayer)entity).isCreative();
 
+    @Keep
     public static final Predicate<Entity> NOT_SPECTATING = entity -> !(entity instanceof EntityPlayer) || !((EntityPlayer)entity).isSpectator();
 
 
+    @Keep
     public static <T extends Entity> Predicate<T> withinRange(final double x, final double y, final double z, double range) {
         final double d0 = range * range;
         return entity -> entity != null && entity.getDistanceSq(x, y, z) <= d0;
     }
 
 
+    @Keep
     @Deprecated
     public static <T extends Entity> Predicate<T> getTeamCollisionPredicate(final Entity entityIn) {
         final Team team = entityIn.getTeam();
@@ -61,6 +69,7 @@ public final class EntitySelectors {
     }
 
 
+    @Keep
     public static Predicate<Entity> notRiding(final Entity src) {
         return new Predicate<Entity>() {
             public boolean apply(@Nullable Entity entity) {
@@ -79,6 +88,7 @@ public final class EntitySelectors {
     }
 
 
+    @Keep
     public static class ArmoredMob implements Predicate<Entity> {
         private final ItemStack armor;
 

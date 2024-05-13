@@ -15,6 +15,7 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.IBlockAccess;
+import plus.fserver.api.Keep;
 import plus.fserver.block.BlockFx;
 
 
@@ -78,6 +79,7 @@ public class BlockStone extends BlockFx {
     }
 
 
+    @Keep
     public enum EnumType implements IStringSerializable {
         STONE(0, MapColor.STONE, "stone", true),
         GRANITE(1, MapColor.DIRT, "granite", true),

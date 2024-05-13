@@ -6,6 +6,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import plus.fserver.api.Keep;
 import plus.fserver.server.elca.ChunkSelector;
 
 
@@ -13,6 +14,7 @@ public class WorldGenIcePath extends WorldGenerator {
     private final IBlockState state;
     private final int basePathWidth;
 
+    @Keep
     public WorldGenIcePath(int width) {
         this.state = Blocks.PACKED_ICE.getDefaultState();
         this.basePathWidth = width;

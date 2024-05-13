@@ -32,6 +32,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.minecart.MinecartCollisionEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.fserver.api.Keep;
 
 
 public abstract class EntityMinecart extends Entity implements IWorldNameable {
@@ -57,17 +58,25 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
     private double velocityZ;
 
     /* Forge: Minecart Compatibility Layer Integration. */
+    @Keep
     public static float defaultMaxSpeedAirLateral = 0.4f;
+    @Keep
     public static float defaultMaxSpeedAirVertical = -1f;
+    @Keep
     public static double defaultDragAir = 0.94999998807907104D;
+    @Keep
     protected boolean canUseRail = true;
+    @Keep
     protected boolean canBePushed = true;
     private static net.minecraftforge.common.IMinecartCollisionHandler collisionHandler = null;
 
     /* Instance versions of the above physics properties */
     private float currentSpeedRail = getMaxCartSpeedOnRail();
+    @Keep
     protected float maxSpeedAirLateral = defaultMaxSpeedAirLateral;
+    @Keep
     protected float maxSpeedAirVertical = defaultMaxSpeedAirVertical;
+    @Keep
     protected double dragAir = defaultDragAir;
 
     public EntityMinecart(World worldIn) {
@@ -115,15 +124,14 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
 
 
     @Nullable
-    public AxisAlignedBB getCollisionBox(Entity entityIn)
-    {
+    public AxisAlignedBB getCollisionBox(Entity entityIn) {
         if (getCollisionHandler() != null) return getCollisionHandler().getCollisionBox(this, entityIn);
         return entityIn.canBePushed() ? entityIn.getEntityBoundingBox() : null;
     }
 
+
     @Nullable
-    public AxisAlignedBB getCollisionBoundingBox()
-    {
+    public AxisAlignedBB getCollisionBoundingBox() {
         if (getCollisionHandler() != null) return getCollisionHandler().getBoundingBox(this);
         return null;
     }
@@ -193,6 +201,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
     }
 
 
+    @Override
     @SideOnly(Side.CLIENT)
     public void performHurtAnimation() {
         this.setRollingDirection(-this.getRollingDirection());
@@ -201,16 +210,19 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
     }
 
 
+    @Override
     public boolean canBeCollidedWith() {
         return !this.isDead;
     }
 
 
+    @Override
     public EnumFacing getAdjustedHorizontalFacing() {
         return this.isInReverse ? this.getHorizontalFacing().getOpposite().rotateY() : this.getHorizontalFacing().rotateY();
     }
 
 
+    @Override
     public void onUpdate() {
         if (this.getRollingAmplitude() > 0) {
             this.setRollingAmplitude(this.getRollingAmplitude() - 1);
@@ -360,15 +372,17 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
     }
 
 
-    protected double getMaximumSpeed()
-    {
+    @Keep
+    protected double getMaximumSpeed() {
         return 0.4D;
     }
 
 
+    @Keep
     public void onActivatorRailPass(int x, int y, int z, boolean receivingPower) {}
 
 
+    @Keep
     protected void moveDerailedMinecart() {
         double d0 = onGround ? this.getMaximumSpeed() : getMaxSpeedAirLateral();
         this.motionX = MathHelper.clamp(this.motionX, -d0, d0);
@@ -399,6 +413,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
     }
 
 
+    @Keep
     @SuppressWarnings("incomplete-switch")
     protected void moveAlongTrack(BlockPos pos, IBlockState state) {
         this.fallDistance = 0.0F;
@@ -567,6 +582,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
     }
 
 
+    @Keep
     protected void applyDrag() {
         if (this.isBeingRidden()) {
             this.motionX *= 0.996999979019165D;
@@ -580,6 +596,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
     }
 
 
+    @Override
     public void setPosition(double x, double y, double z) {
         this.posX = x;
         this.posY = y;
@@ -697,6 +714,8 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
         return this.hasDisplayTile() ? axisalignedbb.grow((double)Math.abs(this.getDisplayTileOffset()) / 16.0D) : axisalignedbb;
     }
 
+
+    @Keep
     public static void registerFixesMinecart(DataFixer fixer, Class<?> name) {}
 
 
@@ -825,14 +844,15 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
     }
 
 
+    @Keep
     public void setDamage(float damage) {
         this.dataManager.set(DAMAGE, damage);
     }
 
 
+    @Override
     @SideOnly(Side.CLIENT)
-    public void setVelocity(double x, double y, double z)
-    {
+    public void setVelocity(double x, double y, double z) {
         this.motionX = x;
         this.motionY = y;
         this.motionZ = z;
@@ -842,71 +862,85 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
     }
 
 
+    @Keep
     public float getDamage() {
         return this.dataManager.get(DAMAGE);
     }
 
 
+    @Keep
     public void setRollingAmplitude(int rollingAmplitude) {
         this.dataManager.set(ROLLING_AMPLITUDE, rollingAmplitude);
     }
 
 
+    @Keep
     public int getRollingAmplitude() {
         return this.dataManager.get(ROLLING_AMPLITUDE);
     }
 
 
+    @Keep
     public void setRollingDirection(int rollingDirection) {
         this.dataManager.set(ROLLING_DIRECTION, rollingDirection);
     }
 
 
+    @Keep
     public int getRollingDirection() {
         return this.dataManager.get(ROLLING_DIRECTION);
     }
 
 
+    @Keep
     public abstract EntityMinecart.Type getType();
 
 
+    @Keep
     public IBlockState getDisplayTile() {
         return !this.hasDisplayTile() ? this.getDefaultDisplayTile() : Block.getStateById(this.getDataManager().get(DISPLAY_TILE));
     }
 
 
+    @Keep
     public IBlockState getDefaultDisplayTile() {
         return BlockIDIndexes.AIR_STATE;
     }
 
 
+    @Keep
     public int getDisplayTileOffset() {
         return !this.hasDisplayTile() ? this.getDefaultDisplayTileOffset() : this.getDataManager().get(DISPLAY_TILE_OFFSET);
     }
 
 
+    @Keep
     public int getDefaultDisplayTileOffset() {
         return 6;
     }
 
 
+    @Keep
     public void setDisplayTile(IBlockState displayTile) {
         this.getDataManager().set(DISPLAY_TILE, Block.getStateId(displayTile));
         this.setHasDisplayTile(true);
     }
 
 
+    @Keep
     public void setDisplayTileOffset(int displayTileOffset) {
         this.getDataManager().set(DISPLAY_TILE_OFFSET, displayTileOffset);
         this.setHasDisplayTile(true);
     }
 
 
+    @Keep
     public boolean hasDisplayTile() {
         return this.getDataManager().get(SHOW_BLOCK);
     }
 
 
+    @Keep
     public void setHasDisplayTile(boolean showBlock) {
         this.getDataManager().set(SHOW_BLOCK, showBlock);
     }
@@ -928,6 +962,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
     }
 
 
+    @Keep
     protected double getMaxSpeed() {
         if (!canUseRail()) return getMaximumSpeed();
         BlockPos pos = this.getCurrentRailPosition();
@@ -942,6 +977,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
      * Moved to allow overrides.
      * This code handles minecart movement and speed capping when on a rail.
      */
+    @Keep
     public void moveMinecartOnRail(BlockPos pos) {
         double mX = this.motionX;
         double mZ = this.motionZ;
@@ -962,6 +998,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
      * is registered, returns null
      * @return The collision handler or null
      */
+    @Keep
     @Nullable
     public static net.minecraftforge.common.IMinecartCollisionHandler getCollisionHandler() {
         return collisionHandler;
@@ -972,6 +1009,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
      * that is currently set.
      * @param handler The new handler
      */
+    @Keep
     public static void setCollisionHandler(net.minecraftforge.common.IMinecartCollisionHandler handler) {
         collisionHandler = handler;
     }
@@ -982,6 +1020,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
      * but is not necessary the item the cart drops when destroyed.
      * @return An ItemStack that can be used to place the cart.
      */
+    @Keep
     public ItemStack getCartItem() {
         if (this instanceof EntityMinecartFurnace) {
             return new ItemStack(Items.FURNACE_MINECART);
@@ -1002,6 +1041,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
      * This function is mainly used to gracefully detach a minecart from a rail.
      * @return True if the minecart can use rails.
      */
+    @Keep
     public boolean canUseRail() {
         return canUseRail;
     }
@@ -1011,6 +1051,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
      * This function is mainly used to gracefully detach a minecart from a rail.
      * @param use Whether the minecart can currently use rails.
      */
+    @Keep
     public void setCanUseRail(boolean use) {
         canUseRail = use;
     }
@@ -1019,6 +1060,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
      * Return false if this cart should not call onMinecartPass() and should ignore Powered Rails.
      * @return True if this cart should call onMinecartPass().
      */
+    @Keep
     public boolean shouldDoRailFunctions() {
         return true;
     }
@@ -1027,6 +1069,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
      * Returns true if this cart is self propelled.
      * @return True if powered.
      */
+    @Keep
     public boolean isPoweredCart() {
         return getType() == EntityMinecart.Type.FURNACE;
     }
@@ -1035,6 +1078,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
      * Returns true if this cart can be ridden by an Entity.
      * @return True if this cart can be ridden.
      */
+    @Keep
     public boolean canBeRidden() {
         return this.getType() == EntityMinecart.Type.RIDEABLE;
     }
@@ -1052,6 +1096,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
      *
      * @return Carts max speed.
      */
+    @Keep
     public float getMaxCartSpeedOnRail() {
         return 1.2f;
     }
@@ -1064,47 +1109,56 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
      *
      * @return
      */
+    @Keep
     public final float getCurrentCartSpeedCapOnRail() {
         return currentSpeedRail;
     }
 
 
+    @Keep
     public final void setCurrentCartSpeedCapOnRail(float value) {
         value = Math.min(value, getMaxCartSpeedOnRail());
         currentSpeedRail = value;
     }
 
 
+    @Keep
     public float getMaxSpeedAirLateral() {
         return maxSpeedAirLateral;
     }
 
 
+    @Keep
     public void setMaxSpeedAirLateral(float value) {
         maxSpeedAirLateral = value;
     }
 
 
+    @Keep
     public float getMaxSpeedAirVertical() {
         return maxSpeedAirVertical;
     }
 
 
+    @Keep
     public void setMaxSpeedAirVertical(float value) {
         maxSpeedAirVertical = value;
     }
 
 
+    @Keep
     public double getDragAir() {
         return dragAir;
     }
 
 
+    @Keep
     public void setDragAir(double value) {
         dragAir = value;
     }
 
 
+    @Keep
     public double getSlopeAdjustment() {
         return 0.0078125D;
     }
@@ -1113,6 +1167,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
     /**
      * Called from Detector Rails to retrieve a redstone power level for comparators.
      */
+    @Keep
     public int getComparatorLevel() {
         return -1;
     }
@@ -1120,6 +1175,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
     /* =================================== FORGE END ===========================================*/
 
 
+    @Keep
     public static enum Type {
         RIDEABLE(0, "MinecartRideable"),
         CHEST(1, "MinecartChest"),

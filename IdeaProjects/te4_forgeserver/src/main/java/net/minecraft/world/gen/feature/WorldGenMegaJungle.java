@@ -8,10 +8,12 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
+import plus.fserver.api.Keep;
 import plus.fserver.server.elca.ChunkSelector;
 
 
 public class WorldGenMegaJungle extends WorldGenHugeTrees {
+    @Keep
     public WorldGenMegaJungle(boolean notify, int baseHeightIn, int extraRandomHeightIn, IBlockState woodMetadataIn, IBlockState leaves) {
         super(notify, baseHeightIn, extraRandomHeightIn, woodMetadataIn, leaves);
     }

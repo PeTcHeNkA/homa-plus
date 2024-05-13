@@ -14,6 +14,7 @@ import static net.minecraft.world.gen.feature.WorldGenGlowStone1.GLOW_STONE_DEF_
 
 
 public class WorldGenGlowStone2 extends WorldGenerator {
+    @Override
     public boolean generate(World worldIn, Random rand, BlockPos position) {
         if (!worldIn.isAirBlock(position)) {
             return false;

@@ -20,6 +20,7 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.fserver.api.Keep;
 import plus.fserver.block.BlockFs;
 import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.math.BlockPosDelta;
@@ -29,11 +30,17 @@ import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public class BlockRedstoneWire extends BlockFs {
+    @Keep
     public static final PropertyEnum<BlockRedstoneWire.EnumAttachPosition> NORTH = PropertyEnum.create("north", BlockRedstoneWire.EnumAttachPosition.class);
+    @Keep
     public static final PropertyEnum<BlockRedstoneWire.EnumAttachPosition> EAST = PropertyEnum.create("east", BlockRedstoneWire.EnumAttachPosition.class);
+    @Keep
     public static final PropertyEnum<BlockRedstoneWire.EnumAttachPosition> SOUTH = PropertyEnum.create("south", BlockRedstoneWire.EnumAttachPosition.class);
+    @Keep
     public static final PropertyEnum<BlockRedstoneWire.EnumAttachPosition> WEST = PropertyEnum.create("west", BlockRedstoneWire.EnumAttachPosition.class);
+    @Keep
     public static final PropertyInteger POWER = PropertyInteger.create("power", 0, 15);
+    @Keep
     protected static final AxisAlignedBB[] REDSTONE_WIRE_AABB = new AxisAlignedBB[] {
             new AxisAlignedBB(0.1875D, 0.0D, 0.1875D, 0.8125D, 0.0625D, 0.8125D),
             new AxisAlignedBB(0.1875D, 0.0D, 0.1875D, 0.8125D, 0.0625D, 1.0D),
@@ -440,6 +447,7 @@ public class BlockRedstoneWire extends BlockFs {
     }
 
 
+    @Keep
     public static enum EnumAttachPosition implements IStringSerializable {
         UP("up"),
         SIDE("side"),
@@ -451,9 +459,14 @@ public class BlockRedstoneWire extends BlockFs {
             this.name = name;
         }
 
+
+        @Override
         public String toString() {
             return this.getName();
         }
+
+
+        @Override
         public String getName() {
             return this.name;
         }
