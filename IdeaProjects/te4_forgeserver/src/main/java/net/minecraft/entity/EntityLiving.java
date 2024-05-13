@@ -55,6 +55,7 @@ import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.fserver.api.Keep;
 import plus.fserver.server.SStrings;
 import plus.fserver.utls.collections.FixedItemList;
 import static plus.fserver.ElcaCV.SERVER_COMPILE;
@@ -1102,6 +1103,7 @@ public abstract class EntityLiving extends EntityLivingBase {
     }
 
 
+    @Keep
     public static enum SpawnPlacementType {
         ON_GROUND,
         IN_AIR,
