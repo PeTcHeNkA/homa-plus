@@ -28,6 +28,7 @@ public class WorldEntitySpawner {
     ){return 0;}
 
 
+    @Keep
     public static void getRandomChunkPosition(SpawnPos pos, int x, int z) {
         Chunk chunk = pos.chunk = pos.world.getChunk(x, z);
         int rand = pos.world.rand.nextInt();
@@ -39,6 +40,7 @@ public class WorldEntitySpawner {
     }
 
 
+    @Keep
     public static boolean isValidEmptySpawnBlock(IBlockState state) {
         if (state.isBlockNormalCube()) {
             return false;
@@ -52,6 +54,7 @@ public class WorldEntitySpawner {
     }
 
 
+    @Keep
     public static boolean canCreatureTypeSpawnAtLocation(EntityLiving.SpawnPlacementType type, World world, BlockPos pos) {
         if (!world.getWorldBorder().contains(pos)) {
             return false;
@@ -61,6 +64,7 @@ public class WorldEntitySpawner {
     }
 
 
+    @Keep
     public static boolean canCreatureTypeSpawnBody(EntityLiving.SpawnPlacementType type, World world, BlockPos pos) {{
             IBlockState state = world.access().getBlockState(pos);
 
@@ -84,6 +88,7 @@ public class WorldEntitySpawner {
     }
 
 
+    @Keep
     public static void performWorldGenSpawning(World worldIn, Biome biomeIn, int centerX, int centerZ, int diameterX, int diameterZ, Random randomIn) {
         List<Biome.SpawnListEntry> list = biomeIn.getSpawnableList(EnumCreatureType.CREATURE);
 

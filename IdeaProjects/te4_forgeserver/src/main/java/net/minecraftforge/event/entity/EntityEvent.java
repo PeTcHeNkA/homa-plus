@@ -2,6 +2,8 @@ package net.minecraftforge.event.entity;
 
 import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraft.entity.Entity;
+import net.minecraftforge.fml.common.eventhandler.EventBus;
+import net.minecraftforge.fml.common.eventhandler.IEventListener;
 
 
 public class EntityEvent extends Event {
@@ -34,13 +36,29 @@ public class EntityEvent extends Event {
 
     public static class CanUpdate extends EntityEvent {
         private boolean canUpdate = false;
+        private IEventListener[] listeners;
         public CanUpdate(Entity entity) {
             super(entity);
         }
 
+        public CanUpdate forBus(EventBus bus){
+            listeners = getListenerList().getListeners(bus.id());
+            return this;
+        }
+
+
+        public boolean post(Entity entity){
+            canUpdate = false;
+            setEntity(entity);
+            for (IEventListener listener:listeners)listener.invoke(this);
+            return canUpdate;
+        }
+
+
         public boolean getCanUpdate() {
             return canUpdate;
         }
+
 
         public void setCanUpdate(boolean canUpdate) {
             this.canUpdate = canUpdate;

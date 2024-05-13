@@ -208,9 +208,9 @@ public class EntityBat extends EntityAmbientCreature {
 
 
     @Override
-    public void readEntityFromNBT(NBTTagCompound compound) {
-        super.readEntityFromNBT(compound);
-        this.dataManager.set(HANGING, Byte.valueOf(compound.getByte("BatFlags")));
+    public void readEntityFromNBT(NBTTagCompound nbt) {
+        super.readEntityFromNBT(nbt);
+        this.dataManager.set(HANGING, Byte.valueOf(nbt.getByte("BatFlags")));
     }
 
 

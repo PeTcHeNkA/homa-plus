@@ -797,82 +797,82 @@ public abstract class EntityPlayer extends EntityLivingBase {
     }
 
 
-    public void readEntityFromNBT(NBTTagCompound compound) {
-        super.readEntityFromNBT(compound);
+    public void readEntityFromNBT(NBTTagCompound nbt) {
+        super.readEntityFromNBT(nbt);
         this.setUniqueId(getUUID(this.gameProfile));
-        NBTTagList nbttaglist = compound.getTagList("Inventory", 10);
+        NBTTagList nbttaglist = nbt.getTagList("Inventory", 10);
         this.inventory.readFromNBT(nbttaglist);
-        this.inventory.currentItem = compound.getInteger("SelectedItemSlot");
-        this.sleeping = compound.getBoolean("Sleeping");
-        this.sleepTimer = compound.getShort("SleepTimer");
-        this.experience = compound.getFloat("XpP");
-        this.experienceLevel = compound.getInteger("XpLevel");
-        this.experienceTotal = compound.getInteger("XpTotal");
-        this.xpSeed = compound.getInteger("XpSeed");
+        this.inventory.currentItem = nbt.getInteger("SelectedItemSlot");
+        this.sleeping = nbt.getBoolean("Sleeping");
+        this.sleepTimer = nbt.getShort("SleepTimer");
+        this.experience = nbt.getFloat("XpP");
+        this.experienceLevel = nbt.getInteger("XpLevel");
+        this.experienceTotal = nbt.getInteger("XpTotal");
+        this.xpSeed = nbt.getInteger("XpSeed");
 
         if (this.xpSeed == 0) {
             this.xpSeed = this.rand.nextInt();
         }
 
-        this.setScore(compound.getInteger("Score"));
+        this.setScore(nbt.getInteger("Score"));
 
         if (this.sleeping) {
             this.bedLocation = new BlockPos(this);
             this.wakeUpPlayer(true, true, false);
         }
 
-        if (compound.hasKey("SpawnX", 99) && compound.hasKey("SpawnY", 99) && compound.hasKey("SpawnZ", 99)) {
-            this.spawnPos = new BlockPos(compound.getInteger("SpawnX"), compound.getInteger("SpawnY"), compound.getInteger("SpawnZ"));
-            this.spawnForced = compound.getBoolean("SpawnForced");
+        if (nbt.hasKey("SpawnX", 99) && nbt.hasKey("SpawnY", 99) && nbt.hasKey("SpawnZ", 99)) {
+            this.spawnPos = new BlockPos(nbt.getInteger("SpawnX"), nbt.getInteger("SpawnY"), nbt.getInteger("SpawnZ"));
+            this.spawnForced = nbt.getBoolean("SpawnForced");
         }
 
         NBTTagList spawnlist = null;
-        spawnlist = compound.getTagList("Spawns", 10);
+        spawnlist = nbt.getTagList("Spawns", 10);
         for (int i = 0; i < spawnlist.tagCount(); i++) {
             NBTTagCompound spawndata = spawnlist.getCompoundTagAt(i);
             int spawndim = spawndata.getInteger("Dim");
             this.spawnChunkMap.put(spawndim, new BlockPos(spawndata.getInteger("SpawnX"), spawndata.getInteger("SpawnY"), spawndata.getInteger("SpawnZ")));
             this.spawnForcedMap.put(spawndim, spawndata.getBoolean("SpawnForced"));
         }
-        this.spawnDimension = compound.getBoolean("HasSpawnDimensionSet") ? compound.getInteger("SpawnDimension") : null;
+        this.spawnDimension = nbt.getBoolean("HasSpawnDimensionSet") ? nbt.getInteger("SpawnDimension") : null;
 
-        this.foodStats.readNBT(compound);
-        this.capabilities.readCapabilitiesFromNBT(compound);
+        this.foodStats.readNBT(nbt);
+        this.capabilities.readCapabilitiesFromNBT(nbt);
 
-        if (compound.hasKey("EnderItems", 9)) {
-            NBTTagList nbttaglist1 = compound.getTagList("EnderItems", 10);
+        if (nbt.hasKey("EnderItems", 9)) {
+            NBTTagList nbttaglist1 = nbt.getTagList("EnderItems", 10);
             this.enderChest.loadInventoryFromNBT(nbttaglist1);
         }
 
-        if (compound.hasKey("ShoulderEntityLeft", 10)) {
-            this.setLeftShoulderEntity(compound.getCompoundTag("ShoulderEntityLeft"));
+        if (nbt.hasKey("ShoulderEntityLeft", 10)) {
+            this.setLeftShoulderEntity(nbt.getCompoundTag("ShoulderEntityLeft"));
         }
 
-        if (compound.hasKey("ShoulderEntityRight", 10)) {
-            this.setRightShoulderEntity(compound.getCompoundTag("ShoulderEntityRight"));
+        if (nbt.hasKey("ShoulderEntityRight", 10)) {
+            this.setRightShoulderEntity(nbt.getCompoundTag("ShoulderEntityRight"));
         }
     }
 
 
-    public void writeEntityToNBT(NBTTagCompound compound) {
-        super.writeEntityToNBT(compound);
-        compound.setInteger("DataVersion", 1343);
-        compound.setTag("Inventory", this.inventory.writeToNBT(new NBTTagList()));
-        compound.setInteger("SelectedItemSlot", this.inventory.currentItem);
-        compound.setBoolean("Sleeping", this.sleeping);
-        compound.setShort("SleepTimer", (short)this.sleepTimer);
-        compound.setFloat("XpP", this.experience);
-        compound.setInteger("XpLevel", this.experienceLevel);
-        compound.setInteger("XpTotal", this.experienceTotal);
-        compound.setInteger("XpSeed", this.xpSeed);
-        compound.setInteger("Score", this.getScore());
-        net.minecraftforge.fml.common.FMLCommonHandler.instance().getDataFixer().writeVersionData(compound); //Moved down so it doesn't keep missing every MC update.
+    public void writeEntityToNBT(NBTTagCompound nbt) {
+        super.writeEntityToNBT(nbt);
+        nbt.setInteger("DataVersion", 1343);
+        nbt.setTag("Inventory", this.inventory.writeToNBT(new NBTTagList()));
+        nbt.setInteger("SelectedItemSlot", this.inventory.currentItem);
+        nbt.setBoolean("Sleeping", this.sleeping);
+        nbt.setShort("SleepTimer", (short)this.sleepTimer);
+        nbt.setFloat("XpP", this.experience);
+        nbt.setInteger("XpLevel", this.experienceLevel);
+        nbt.setInteger("XpTotal", this.experienceTotal);
+        nbt.setInteger("XpSeed", this.xpSeed);
+        nbt.setInteger("Score", this.getScore());
+        net.minecraftforge.fml.common.FMLCommonHandler.instance().getDataFixer().writeVersionData(nbt); //Moved down so it doesn't keep missing every MC update.
 
         if (this.spawnPos != null) {
-            compound.setInteger("SpawnX", this.spawnPos.getX());
-            compound.setInteger("SpawnY", this.spawnPos.getY());
-            compound.setInteger("SpawnZ", this.spawnPos.getZ());
-            compound.setBoolean("SpawnForced", this.spawnForced);
+            nbt.setInteger("SpawnX", this.spawnPos.getX());
+            nbt.setInteger("SpawnY", this.spawnPos.getY());
+            nbt.setInteger("SpawnZ", this.spawnPos.getZ());
+            nbt.setBoolean("SpawnForced", this.spawnForced);
         }
 
         NBTTagList spawnlist = new NBTTagList();
@@ -889,22 +889,22 @@ public abstract class EntityPlayer extends EntityLivingBase {
             spawndata.setBoolean("SpawnForced", forced);
             spawnlist.appendTag(spawndata);
         }
-        compound.setTag("Spawns", spawnlist);
+        nbt.setTag("Spawns", spawnlist);
 
-        compound.setBoolean("HasSpawnDimensionSet", this.hasSpawnDimension());
+        nbt.setBoolean("HasSpawnDimensionSet", this.hasSpawnDimension());
         if (this.hasSpawnDimension())
-            compound.setInteger("SpawnDimension", this.getSpawnDimension());
+            nbt.setInteger("SpawnDimension", this.getSpawnDimension());
 
-        this.foodStats.writeNBT(compound);
-        this.capabilities.writeCapabilitiesToNBT(compound);
-        compound.setTag("EnderItems", this.enderChest.saveInventoryToNBT());
+        this.foodStats.writeNBT(nbt);
+        this.capabilities.writeCapabilitiesToNBT(nbt);
+        nbt.setTag("EnderItems", this.enderChest.saveInventoryToNBT());
 
         if (!this.getLeftShoulderEntity().isEmpty()) {
-            compound.setTag("ShoulderEntityLeft", this.getLeftShoulderEntity());
+            nbt.setTag("ShoulderEntityLeft", this.getLeftShoulderEntity());
         }
 
         if (!this.getRightShoulderEntity().isEmpty()) {
-            compound.setTag("ShoulderEntityRight", this.getRightShoulderEntity());
+            nbt.setTag("ShoulderEntityRight", this.getRightShoulderEntity());
         }
     }
 
@@ -985,7 +985,7 @@ public abstract class EntityPlayer extends EntityLivingBase {
 
             if (this.activeItemStack.isEmpty()) {
                 EnumHand enumhand = this.getActiveHand();
-                net.minecraftforge.event.ForgeEventFactory.onPlayerDestroyItem(this, copyBeforeUse, enumhand);
+                ForgeEventFactory.onPlayerDestroyItem(this, copyBeforeUse, enumhand);
 
                 if (enumhand == EnumHand.MAIN_HAND) {
                     this.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, ItemStack.EMPTY);

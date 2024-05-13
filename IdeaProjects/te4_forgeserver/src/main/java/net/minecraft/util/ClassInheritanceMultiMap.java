@@ -107,7 +107,7 @@ public class ClassInheritanceMultiMap<T> extends AbstractSet<T> {
 
     @Override
     public boolean isEmpty() {
-        return values.isEmpty();
+        return values.isEmptyC();
     }
 
 

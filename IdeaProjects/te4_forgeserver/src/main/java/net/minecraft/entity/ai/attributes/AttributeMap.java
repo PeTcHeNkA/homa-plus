@@ -41,6 +41,19 @@ public class AttributeMap extends AbstractAttributeMap {
 
 
     @Override
+    public IAttributeInstance registerAttributeUnsafe(IAttribute attribute) {
+        IAttributeInstance iattributeinstance = super.registerAttributeUnsafe(attribute);
+
+        if (attribute instanceof RangedAttribute) {
+            String dscr = ((RangedAttribute) attribute).getDescription();
+            if(dscr != null) this.instancesByName.put(dscr, iattributeinstance);
+        }
+
+        return iattributeinstance;
+    }
+
+
+    @Override
     protected IAttributeInstance createInstance(IAttribute attribute) {
         return new ModifiableAttributeInstance(this, attribute);
     }

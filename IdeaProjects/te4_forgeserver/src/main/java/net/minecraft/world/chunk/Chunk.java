@@ -38,6 +38,7 @@ import plus.fserver.api.BiomeIndexes;
 import plus.fserver.api.Keep;
 import plus.fserver.api.PWorldServer;
 import plus.fserver.ElcaCV;
+import plus.fserver.utls.math.MathUtls;
 import plus.fserver.world.light.api.ILightingEngine;
 import plus.fserver.world.light.api.ILightingEngineProvider;
 import plus.tson.utl.Te4HashMap;
@@ -805,15 +806,15 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
 
     public void getEntitiesWithinAABBForEntityLimited(@Nullable Entity entityIn, AxisAlignedBB aabb, List<Entity> listToFill, @Nullable Predicate <? super Entity > filter, int max) {
-        int i = MathHelper.clamp(MathHelper.floor(aabb.minY - World.MAX_ENTITY_RADIUS)>>4, 0, 15),
-            j = MathHelper.clamp(MathHelper.floor(aabb.maxY + World.MAX_ENTITY_RADIUS)>>4, 0, 15);
+        int i = MathUtls.clamp16c(aabb.minY - World.MAX_ENTITY_RADIUS),
+            j = MathUtls.clamp16c(aabb.maxY + World.MAX_ENTITY_RADIUS);
 
         Entity[] parts;
         Entity entity;
 
         if(filter == null) {
             for (;i <= j; ++i)
-                if (!this.entityLists[i].isEmptyC()) {
+                if (!this.entityLists[i].isEmptyC())
                     for (ClassInheritanceMultiMap<Entity>.FastIter iter = this.entityLists[i].fastIter();
                          iter.hasNext();
                     )
@@ -825,10 +826,9 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
                                         listToFill.add(entity1);
                             if(--max<0)return;
                         }
-                }
         } else {
             for (;i <= j; ++i)
-                if (!this.entityLists[i].isEmptyC()) {
+                if (!this.entityLists[i].isEmptyC())
                     for (ClassInheritanceMultiMap<Entity>.FastIter iter = this.entityLists[i].fastIter();
                          iter.hasNext();
                     )
@@ -842,22 +842,16 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
                                         listToFill.add(entity1);
                             if(--max<0)return;
                         }
-                }
         }
     }
 
 
     public void getEntitiesWithinAABBForEntity(@Nullable final Entity entityIn, final AxisAlignedBB aabb, final List<Entity> listToFill, @Nullable final Predicate <? super Entity > filter) {
-        int i = MathHelper.clamp(
-                    MathHelper.floor(aabb.minY - World.MAX_ENTITY_RADIUS)>>4,
-                    0, 15
-            ),
-            j = MathHelper.clamp(
-                    MathHelper.floor(aabb.maxY + World.MAX_ENTITY_RADIUS)>>4,
-                    0, 15
-            );
+        int i = MathUtls.clamp16c(aabb.minY - World.MAX_ENTITY_RADIUS),
+            j = MathUtls.clamp16c(aabb.maxY + World.MAX_ENTITY_RADIUS);
+
         if(filter == null) {
-            for (Entity entity;i <= j; ++i) if (!this.entityLists[i].isEmptyC()) {
+            for (Entity entity;i <= j; ++i) if (!this.entityLists[i].isEmptyC())
                 for (ClassInheritanceMultiMap<Entity>.FastIter iter = this.entityLists[i].fastIter();
                      iter.hasNext();
                 )
@@ -868,9 +862,8 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
                                 if (entity1 != entityIn && entity1.getEntityBoundingBox().intersects(aabb))
                                     listToFill.add(entity1);
                     }
-            }
         } else {
-            for (Entity entity;i <= j; ++i) if (!this.entityLists[i].isEmptyC()) {
+            for (Entity entity;i <= j; ++i) if (!this.entityLists[i].isEmptyC())
                 for (ClassInheritanceMultiMap<Entity>.FastIter iter = this.entityLists[i].fastIter();
                      iter.hasNext();
                 )
@@ -882,26 +875,17 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
                                         && (filter.apply(entity1)))
                                     listToFill.add(entity1);
                     }
-            }
         }
     }
 
 
     public <T extends Entity> void getEntitiesOfTypeWithinAABB(final Class <? extends T > entityClass, final AxisAlignedBB aabb, final List<T> listToFill, @Nullable final Predicate <? super T > filter) {
-        final int i = MathHelper.clamp(
-                MathHelper.floor(aabb.minY - World.MAX_ENTITY_RADIUS)>>4,
-                0, 15
-        ),
-                j = MathHelper.clamp(
-                        MathHelper.floor(aabb.maxY + World.MAX_ENTITY_RADIUS)>>4,
-                        0, 15
-                );
-        for (int k = i; k <= j; ++k) {
-            for (T t : this.entityLists[k].getByClass(entityClass)) {
+        final int i = MathUtls.clamp16c(aabb.minY - World.MAX_ENTITY_RADIUS),
+                  j = MathUtls.clamp16c(aabb.maxY + World.MAX_ENTITY_RADIUS);
+        for (int k = i; k <= j; ++k)
+            for (T t : this.entityLists[k].getByClass(entityClass))
                 if (t.getEntityBoundingBox().intersects(aabb) && (filter == null || filter.apply(t)))
                     listToFill.add(t);
-            }
-        }
     }
 
 

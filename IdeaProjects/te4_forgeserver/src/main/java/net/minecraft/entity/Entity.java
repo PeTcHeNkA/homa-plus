@@ -1608,10 +1608,10 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
     }
 
 
-    protected abstract void readEntityFromNBT(NBTTagCompound compound);
+    protected abstract void readEntityFromNBT(NBTTagCompound nbt);
 
 
-    protected abstract void writeEntityToNBT(NBTTagCompound compound);
+    protected abstract void writeEntityToNBT(NBTTagCompound nbt);
 
 
     protected NBTTagList newDoubleNBTList(double... numbers) {

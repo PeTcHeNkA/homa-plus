@@ -254,52 +254,52 @@ public class EntityFallingBlock extends Entity {
 
 
     @Override
-    protected void writeEntityToNBT(NBTTagCompound compound) {
+    protected void writeEntityToNBT(NBTTagCompound nbt) {
         Block block = this.fallTile != null ? this.fallTile.getBlock() : Blocks.AIR;
         ResourceLocation resourcelocation = Block.REGISTRY.getNameForObject(block);
-        compound.setString("Block", resourcelocation == null ? "" : resourcelocation.toString());
-        compound.setByte("Data", (byte)block.getMetaFromState(this.fallTile));
-        compound.setInteger("Time", this.fallTime);
-        compound.setBoolean("DropItem", this.shouldDropItem);
-        compound.setBoolean("HurtEntities", this.hurtEntities);
-        compound.setFloat("FallHurtAmount", this.fallHurtAmount);
-        compound.setInteger("FallHurtMax", this.fallHurtMax);
+        nbt.setString("Block", resourcelocation == null ? "" : resourcelocation.toString());
+        nbt.setByte("Data", (byte)block.getMetaFromState(this.fallTile));
+        nbt.setInteger("Time", this.fallTime);
+        nbt.setBoolean("DropItem", this.shouldDropItem);
+        nbt.setBoolean("HurtEntities", this.hurtEntities);
+        nbt.setFloat("FallHurtAmount", this.fallHurtAmount);
+        nbt.setInteger("FallHurtMax", this.fallHurtMax);
 
         if (this.tileEntityData != null) {
-            compound.setTag("TileEntityData", this.tileEntityData);
+            nbt.setTag("TileEntityData", this.tileEntityData);
         }
     }
 
 
     @Override
-    protected void readEntityFromNBT(NBTTagCompound compound) {
-        int i = compound.getByte("Data") & 255;
+    protected void readEntityFromNBT(NBTTagCompound nbt) {
+        int i = nbt.getByte("Data") & 255;
 
-        if (compound.hasKey("Block", 8)) {
-            this.fallTile = Block.getBlockFromName(compound.getString("Block")).getStateFromMeta(i);
-        } else if (compound.hasKey("TileID", 99)) {
-            this.fallTile = Block.getBlockById(compound.getInteger("TileID")).getStateFromMeta(i);
+        if (nbt.hasKey("Block", 8)) {
+            this.fallTile = Block.getBlockFromName(nbt.getString("Block")).getStateFromMeta(i);
+        } else if (nbt.hasKey("TileID", 99)) {
+            this.fallTile = Block.getBlockById(nbt.getInteger("TileID")).getStateFromMeta(i);
         } else {
-            this.fallTile = Block.getBlockById(compound.getByte("Tile") & 255).getStateFromMeta(i);
+            this.fallTile = Block.getBlockById(nbt.getByte("Tile") & 255).getStateFromMeta(i);
         }
 
-        this.fallTime = compound.getInteger("Time");
+        this.fallTime = nbt.getInteger("Time");
         Block block = this.fallTile.getBlock();
 
-        if (compound.hasKey("HurtEntities", 99)) {
-            this.hurtEntities = compound.getBoolean("HurtEntities");
-            this.fallHurtAmount = compound.getFloat("FallHurtAmount");
-            this.fallHurtMax = compound.getInteger("FallHurtMax");
+        if (nbt.hasKey("HurtEntities", 99)) {
+            this.hurtEntities = nbt.getBoolean("HurtEntities");
+            this.fallHurtAmount = nbt.getFloat("FallHurtAmount");
+            this.fallHurtMax = nbt.getInteger("FallHurtMax");
         } else if (block == Blocks.ANVIL) {
             this.hurtEntities = true;
         }
 
-        if (compound.hasKey("DropItem", 99)) {
-            this.shouldDropItem = compound.getBoolean("DropItem");
+        if (nbt.hasKey("DropItem", 99)) {
+            this.shouldDropItem = nbt.getBoolean("DropItem");
         }
 
-        if (compound.hasKey("TileEntityData", 10)) {
-            this.tileEntityData = compound.getCompoundTag("TileEntityData");
+        if (nbt.hasKey("TileEntityData", 10)) {
+            this.tileEntityData = nbt.getCompoundTag("TileEntityData");
         }
 
         if (block == null || block.getDefaultState().getMaterial() == Material.AIR) {

@@ -307,50 +307,50 @@ public class EntityItem extends Entity {
 
 
     @Override
-    public void writeEntityToNBT(NBTTagCompound compound) {
-        compound.setShort("Health", (short)this.health);
-        compound.setShort("Age", (short)this.age);
-        compound.setShort("PickupDelay", (short)this.pickupDelay);
-        compound.setInteger("Lifespan", lifespan);
+    public void writeEntityToNBT(NBTTagCompound nbt) {
+        nbt.setShort("Health", (short)this.health);
+        nbt.setShort("Age", (short)this.age);
+        nbt.setShort("PickupDelay", (short)this.pickupDelay);
+        nbt.setInteger("Lifespan", lifespan);
 
         if (this.getThrower() != null) {
-            compound.setString("Thrower", this.thrower);
+            nbt.setString("Thrower", this.thrower);
         }
 
         if (this.getOwner() != null) {
-            compound.setString("Owner", this.owner);
+            nbt.setString("Owner", this.owner);
         }
 
         if (!this.getItem().isEmpty()) {
-            compound.setTag("Item", this.getItem().writeToNBT(new NBTTagCompound()));
+            nbt.setTag("Item", this.getItem().writeToNBT(new NBTTagCompound()));
         }
     }
 
 
     @Override
-    public void readEntityFromNBT(NBTTagCompound compound) {
-        this.health = compound.getShort("Health");
-        this.age = compound.getShort("Age");
+    public void readEntityFromNBT(NBTTagCompound nbt) {
+        this.health = nbt.getShort("Health");
+        this.age = nbt.getShort("Age");
 
-        if (compound.hasKey("PickupDelay")) {
-            this.pickupDelay = compound.getShort("PickupDelay");
+        if (nbt.hasKey("PickupDelay")) {
+            this.pickupDelay = nbt.getShort("PickupDelay");
         }
 
-        if (compound.hasKey("Owner")) {
-            this.owner = compound.getString("Owner");
+        if (nbt.hasKey("Owner")) {
+            this.owner = nbt.getString("Owner");
         }
 
-        if (compound.hasKey("Thrower")) {
-            this.thrower = compound.getString("Thrower");
+        if (nbt.hasKey("Thrower")) {
+            this.thrower = nbt.getString("Thrower");
         }
 
-        NBTTagCompound nbttagcompound = compound.getCompoundTag("Item");
+        NBTTagCompound nbttagcompound = nbt.getCompoundTag("Item");
         this.setItem(new ItemStack(nbttagcompound));
 
         if (this.getItem().isEmpty()) {
             this.setDead();
         }
-        if (compound.hasKey("Lifespan")) lifespan = compound.getInteger("Lifespan");
+        if (nbt.hasKey("Lifespan")) lifespan = nbt.getInteger("Lifespan");
     }
 
 

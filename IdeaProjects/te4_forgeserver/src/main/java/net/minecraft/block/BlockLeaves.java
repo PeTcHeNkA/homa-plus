@@ -17,7 +17,6 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import plus.fserver.api.IBlockEAccess;
 import plus.fserver.api.Keep;
 import plus.fserver.block.BlockFs;
 import plus.fserver.server.elca.ChunkSelector;
@@ -78,10 +77,10 @@ public abstract class BlockLeaves extends BlockFs implements net.minecraftforge.
                     for (dx = -4; dx <= 4; ++dx) {
                         for (dz = -4; dz <= 4; ++dz) {
                             for (dy = -4; dy <= 4; ++dy) {
-                                IBlockState iblockstate = access.getState(cache.setPos(num1 + dx, cY + dy, num2 + dz));
+                                IBlockState cur = access.getState(cache.setPos(num1 + dx, cY + dy, num2 + dz));
 
-                                if (!(block = iblockstate.getBlock()).canSustainLeaves(iblockstate, world, cache)) {
-                                    if (block.isLeaves(iblockstate, world, cache))
+                                if (!(block = cur.getBlock()).canSustainLeaves(cur, world, cache)) {
+                                    if (block.isLeaves(cur, world, cache))
                                          cache.set(dx, dy, dz, -2);
                                     else cache.set(dx, dy, dz, -1);
                                 } else   cache.set(dx, dy, dz, 0);
@@ -131,16 +130,16 @@ public abstract class BlockLeaves extends BlockFs implements net.minecraftforge.
                     }
                     //int center = cache.get(0,0,0);
 
-                    if (cache.get(0,0,0) >= 0) world.setBlockState(pos, state.withProperty(CHECK_DECAY, Boolean.FALSE), 4);
-                    else this.destroy(world, access, pos);
+                    if (cache.get(0,0,0) >= 0) access.setBlockState(pos, state.withProperty(CHECK_DECAY, Boolean.FALSE), 4);
+                    else this.destroy(world, state, pos);
                 }
             }
         }
     }
 
 
-    private void destroy(World worldIn, IBlockEAccess access, BlockPos pos) {
-        this.dropBlockAsItem(worldIn, pos, access.getBlockState(pos), 0);
+    private void destroy(World worldIn, IBlockState state, BlockPos pos) {
+        this.dropBlockAsItem(worldIn, pos, state, 0);
         worldIn.setBlockToAir(pos);
     }
 

@@ -195,12 +195,12 @@ public abstract class EntityLivingBase extends Entity {
 
     protected void applyEntityAttributes() {
         AbstractAttributeMap map = this.getAttributeMap();
-        map.registerAttribute(SharedMonsterAttributes.MAX_HEALTH);
-        map.registerAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE);
-        map.registerAttribute(SharedMonsterAttributes.MOVEMENT_SPEED);
-        map.registerAttribute(SharedMonsterAttributes.ARMOR);
-        map.registerAttribute(SharedMonsterAttributes.ARMOR_TOUGHNESS);
-        map.registerAttribute(SWIM_SPEED);
+        map.registerAttributeUnsafe(SharedMonsterAttributes.MAX_HEALTH);
+        map.registerAttributeUnsafe(SharedMonsterAttributes.KNOCKBACK_RESISTANCE);
+        map.registerAttributeUnsafe(SharedMonsterAttributes.MOVEMENT_SPEED);
+        map.registerAttributeUnsafe(SharedMonsterAttributes.ARMOR);
+        map.registerAttributeUnsafe(SharedMonsterAttributes.ARMOR_TOUGHNESS);
+        map.registerAttributeUnsafe(SWIM_SPEED);
     }
 
 
@@ -236,7 +236,7 @@ public abstract class EntityLivingBase extends Entity {
             if (this.isEntityInsideOpaqueBlock()) {
                 //TODO try fix position
                 this.attackEntityFrom(DamageSource.IN_WALL, 1.0F);
-            } else if (flag && !this.world.getWorldBorder().contains(this.getEntityBoundingBox())) {
+            } else if (flag && !this.world.inInWorldBorder(this.getEntityBoundingBox())) {
                 double d0 = this.world.getWorldBorder().getClosestDistance(this) + this.world.getWorldBorder().getDamageBuffer();
 
                 if (d0 < 0.0D) {
@@ -252,9 +252,7 @@ public abstract class EntityLivingBase extends Entity {
             }
 
             if (!this.isInsideOfMaterial(Material.WATER)) {
-                EntityDataManager.DataEntry<Integer> entry = dataManager.getEntry(AIR);
-                if(entry.getValue() != 300) entry.updateAndNotify(dataManager, 300);
-                //this.setAir(300);
+                this.setAir(300);
             } else {
                 if (!this.canBreatheUnderwater() && !this.isPotionActive(MobEffects.WATER_BREATHING) && !(flag && ((EntityPlayer)this).capabilities.disableDamage)) {
                     int air = decreaseAirSupply(this.getAir());
@@ -435,77 +433,76 @@ public abstract class EntityLivingBase extends Entity {
 
 
     @Override
-    public void writeEntityToNBT(NBTTagCompound compound) {
-        compound.setFloat(SStrings.Health, this.getHealth());
-        compound.setShort(SStrings.HurtTime, (short)this.hurtTime);
-        compound.setInteger(SStrings.HurtByTimestamp, this.revengeTimer);
-        compound.setShort(SStrings.DeathTime, (short)this.deathTime);
-        compound.setFloat(SStrings.AbsorptionAmount, this.getAbsorptionAmount());
+    public void writeEntityToNBT(NBTTagCompound nbt) {
+        nbt.setFloat(SStrings.Health, this.getHealth());
+        nbt.setShort(SStrings.HurtTime, (short)this.hurtTime);
+        nbt.setInteger(SStrings.HurtByTimestamp, this.revengeTimer);
+        nbt.setShort(SStrings.DeathTime, (short)this.deathTime);
+        nbt.setFloat(SStrings.AbsorptionAmount, this.getAbsorptionAmount());
 
         for (EntityEquipmentSlot slot : EntityEquipmentSlot.VALUES) {
-            ItemStack itemstack = this.getItemStackFromSlot(slot);
+            ItemStack stack = this.getItemStackFromSlot(slot);
 
-            if (!itemstack.isEmpty()) {
-                this.getAttributeMap().removeAttributeModifiers(itemstack.getAttributeModifiers(slot));
+            if (!stack.isEmpty()) {
+                this.getAttributeMap().removeAttributeModifiers(stack.getAttributeModifiers(slot));
             }
         }
-        compound.setTag(SStrings.Attributes, SharedMonsterAttributes.writeBaseAttributeMapToNBT(this.getAttributeMap()));
+        nbt.setTag(SStrings.Attributes, SharedMonsterAttributes.writeBaseAttributeMapToNBT(this.getAttributeMap()));
 
         for (EntityEquipmentSlot slot : EntityEquipmentSlot.VALUES) {
-            ItemStack itemstack1 = this.getItemStackFromSlot(slot);
+            ItemStack stack = this.getItemStackFromSlot(slot);
 
-            if (!itemstack1.isEmpty()) {
-                this.getAttributeMap().applyAttributeModifiers(itemstack1.getAttributeModifiers(slot));
+            if (!stack.isEmpty()) {
+                this.getAttributeMap().applyAttributeModifiers(stack.getAttributeModifiers(slot));
             }
         }
 
         if (!this.activePotionsMap.isEmpty()) {
-            NBTTagList nbttaglist = new NBTTagList();
+            NBTTagList list = new NBTTagList();
 
             for (PotionEffect potioneffect : this.activePotionsMap.values()) {
-                nbttaglist.appendTag(potioneffect.writeCustomPotionEffectToNBT(new NBTTagCompound()));
+                list.appendTag(potioneffect.writeCustomPotionEffectToNBT(new NBTTagCompound()));
             }
-            compound.setTag(SStrings.ActiveEffects, nbttaglist);
+            nbt.setTag(SStrings.ActiveEffects, list);
         }
-        compound.setBoolean(SStrings.FallFlying, this.isElytraFlying());
+        nbt.setBoolean(SStrings.FallFlying, this.isElytraFlying());
     }
 
 
     @Override
-    public void readEntityFromNBT(NBTTagCompound compound) {
-        this.setAbsorptionAmount(compound.getFloat(SStrings.AbsorptionAmount));
+    public void readEntityFromNBT(NBTTagCompound nbt) {
+        this.setAbsorptionAmount(nbt.getFloat(SStrings.AbsorptionAmount));
 
-        if (compound.hasKey(SStrings.Attributes, 9) && this.world != null && (!this.world.isRemote || SERVER_COMPILE)) {
-            SharedMonsterAttributes.setAttributeModifiers(this.getAttributeMap(), compound.getTagList("Attributes", 10));
+        if (nbt.hasKey(SStrings.Attributes, 9) && this.world != null && (!this.world.isRemote || SERVER_COMPILE)) {
+            SharedMonsterAttributes.setAttributeModifiers(this.getAttributeMap(), nbt.getTagList("Attributes", 10));
         }
 
-        if (compound.hasKey(SStrings.ActiveEffects, 9)) {
-            NBTTagList nbttaglist = compound.getTagList(SStrings.ActiveEffects, 10);
+        if (nbt.hasKey(SStrings.ActiveEffects, 9)) {
+            NBTTagList list = nbt.getTagList(SStrings.ActiveEffects, 10);
 
-            for (int i = 0; i < nbttaglist.tagCount(); ++i) {
-                NBTTagCompound nbttagcompound = nbttaglist.getCompoundTagAt(i);
-                PotionEffect potioneffect = PotionEffect.readCustomPotionEffectFromNBT(nbttagcompound);
+            for (int i = 0; i < list.tagCount(); ++i) {
+                PotionEffect effect = PotionEffect.readCustomPotionEffectFromNBT(list.getCompoundTagAt(i));
 
-                if (potioneffect != null)
-                    this.activePotionsMap.put(potioneffect.getPotion(), potioneffect);
+                if (effect != null)
+                    this.activePotionsMap.put(effect.getPotion(), effect);
             }
         }
-        if (compound.hasKey(SStrings.Health, 99)) {
-            this.setHealth(compound.getFloat(SStrings.Health));
+        if (nbt.hasKey(SStrings.Health, 99)) {
+            this.setHealth(nbt.getFloat(SStrings.Health));
         }
 
-        this.hurtTime = compound.getShort(SStrings.HurtTime);
-        this.deathTime = compound.getShort(SStrings.DeathTime);
-        this.revengeTimer = compound.getInteger(SStrings.HurtByTimestamp);
+        this.hurtTime = nbt.getShort(SStrings.HurtTime);
+        this.deathTime = nbt.getShort(SStrings.DeathTime);
+        this.revengeTimer = nbt.getInteger(SStrings.HurtByTimestamp);
 
-        if (compound.hasKey(SStrings.Team, 8)) {
-            String s = compound.getString(SStrings.Team);
+        if (nbt.hasKey(SStrings.Team, 8)) {
+            String s = nbt.getString(SStrings.Team);
             boolean flag = this.world.getScoreboard().addPlayerToTeam(this.getCachedUniqueIdString(), s);
             if (!flag) {
                 LOGGER.warn("Unable to add mob to team \"" + s + "\" (that team probably doesn't exist)");
             }
         }
-        if (compound.getBoolean(SStrings.FallFlying))
+        if (nbt.getBoolean(SStrings.FallFlying))
             this.setFlag(7, true);
     }
 
@@ -997,7 +994,7 @@ public abstract class EntityLivingBase extends Entity {
 
 
     public boolean isOnLadder() {
-        if (this instanceof EntityPlayer && ((EntityPlayer)this).isSpectator()) return false;
+        if (isPlayer() && ((EntityPlayer)this).isSpectator()) return false;
         else {
             BlockPos blockpos;
             IBlockState iblockstate = this.world.access().getBlockState(blockpos = world.localTempPos2.setPos(
@@ -1519,12 +1516,9 @@ public abstract class EntityLivingBase extends Entity {
                             this.motionZ = MathHelper.clamp(this.motionZ, -0.15000000596046448D, 0.15000000596046448D);
                             this.fallDistance = 0.0F;
 
-                            if (this.motionY < -0.15D) {
-                                this.motionY = -0.15D;
-                            }
-                            boolean flag = this.isSneaking() && this instanceof EntityPlayer;
+                            if (this.motionY < -0.15D) this.motionY = -0.15D;
 
-                            if (flag && this.motionY < 0.0D) this.motionY = 0.0D;
+                            if (this.isSneaking() && isPlayer() && this.motionY < 0.0D) this.motionY = 0.0D;
                         }
 
                         this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);

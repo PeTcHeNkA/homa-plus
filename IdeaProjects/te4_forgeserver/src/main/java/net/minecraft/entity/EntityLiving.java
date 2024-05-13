@@ -119,7 +119,7 @@ public abstract class EntityLiving extends EntityLivingBase {
 
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
-        this.getAttributeMap().registerAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(16.0D);
+        this.getAttributeMap().registerAttributeUnsafe(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(16.0D);
     }
 
 
@@ -389,52 +389,52 @@ public abstract class EntityLiving extends EntityLivingBase {
 
 
     @Override
-    public void readEntityFromNBT(NBTTagCompound compound) {
-        super.readEntityFromNBT(compound);
-        if (compound.hasKey(SStrings.CanPickUpLoot, 1))
-            this.setCanPickUpLoot(compound.getBoolean(SStrings.CanPickUpLoot));
+    public void readEntityFromNBT(NBTTagCompound nbt) {
+        super.readEntityFromNBT(nbt);
+        if (nbt.hasKey(SStrings.CanPickUpLoot, 1))
+            this.setCanPickUpLoot(nbt.getBoolean(SStrings.CanPickUpLoot));
 
-        this.persistenceRequired = compound.getBoolean(SStrings.PersistenceRequired);
+        this.persistenceRequired = nbt.getBoolean(SStrings.PersistenceRequired);
 
-        if (compound.hasKey(SStrings.ArmorItems, 9)) {
-            NBTTagList nbttaglist = compound.getTagList(SStrings.ArmorItems, 10);
+        if (nbt.hasKey(SStrings.ArmorItems, 9)) {
+            NBTTagList nbttaglist = nbt.getTagList(SStrings.ArmorItems, 10);
 
             for (int i = 0; i < this.inventoryArmor.size(); ++i)
                 this.inventoryArmor.fSet(i, new ItemStack(nbttaglist.getCompoundTagAt(i)));
         }
 
-        if (compound.hasKey(SStrings.HandItems, 9)) {
-            NBTTagList nbttaglist1 = compound.getTagList(SStrings.HandItems, 10);
+        if (nbt.hasKey(SStrings.HandItems, 9)) {
+            NBTTagList nbttaglist1 = nbt.getTagList(SStrings.HandItems, 10);
 
             for (int j = 0; j < this.inventoryHands.size(); ++j)
                 this.inventoryHands.fSet(j, new ItemStack(nbttaglist1.getCompoundTagAt(j)));
         }
 
-        if (compound.hasKey(SStrings.ArmorDropChances, 9)) {
-            NBTTagList nbttaglist2 = compound.getTagList(SStrings.ArmorDropChances, 5);
+        if (nbt.hasKey(SStrings.ArmorDropChances, 9)) {
+            NBTTagList nbttaglist2 = nbt.getTagList(SStrings.ArmorDropChances, 5);
 
             for (int k = 0; k < nbttaglist2.tagCount(); ++k)
                 this.inventoryArmorDropChances[k] = nbttaglist2.getFloatAt(k);
         }
 
-        if (compound.hasKey(SStrings.HandDropChances, 9)) {
-            NBTTagList nbttaglist3 = compound.getTagList(SStrings.HandDropChances, 5);
+        if (nbt.hasKey(SStrings.HandDropChances, 9)) {
+            NBTTagList nbttaglist3 = nbt.getTagList(SStrings.HandDropChances, 5);
             for (int l = 0; l < nbttaglist3.tagCount(); ++l)
                 this.inventoryHandsDropChances[l] = nbttaglist3.getFloatAt(l);
         }
 
-        this.isLeashed = compound.getBoolean(SStrings.Leashed);
+        this.isLeashed = nbt.getBoolean(SStrings.Leashed);
 
-        if (this.isLeashed && compound.hasKey(SStrings.Leash, 10))
-            this.leashNBTTag = compound.getCompoundTag(SStrings.Leash);
+        if (this.isLeashed && nbt.hasKey(SStrings.Leash, 10))
+            this.leashNBTTag = nbt.getCompoundTag(SStrings.Leash);
 
-        this.setLeftHanded(compound.getBoolean(SStrings.LeftHanded));
+        this.setLeftHanded(nbt.getBoolean(SStrings.LeftHanded));
 
-        if (compound.hasKey(SStrings.DeathLootTable, 8)) {
-            this.deathLootTable = new ResourceLocation(compound.getString(SStrings.DeathLootTable));
-            this.deathLootTableSeed = compound.getLong(SStrings.DeathLootTableSeed);
+        if (nbt.hasKey(SStrings.DeathLootTable, 8)) {
+            this.deathLootTable = new ResourceLocation(nbt.getString(SStrings.DeathLootTable));
+            this.deathLootTableSeed = nbt.getLong(SStrings.DeathLootTableSeed);
         }
-        this.setNoAI(compound.getBoolean(SStrings.NoAI));
+        this.setNoAI(nbt.getBoolean(SStrings.NoAI));
     }
 
 

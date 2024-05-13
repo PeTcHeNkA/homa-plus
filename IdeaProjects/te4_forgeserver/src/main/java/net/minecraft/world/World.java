@@ -183,7 +183,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
         if(ElcaCV.MORE_MOBS_OPTIMIZER) {
             eeCache = new SyncListCache<>(10, 60);
-            bbCache = new SyncListCache<>(10, 90);
+            bbCache = new SyncListCache<>(10, 180);
         } else {
             eeCache = null;
             bbCache = null;
@@ -1544,10 +1544,11 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             }
         }
 
-        this.loadedEntityList.removeAll(this.unloadedEntityList);
+        List<Entity> unloadedEntityList;
+        this.loadedEntityList.removeAll(unloadedEntityList = this.unloadedEntityList);
 
-        for (int k = 0; k < this.unloadedEntityList.size(); ++k) {
-            Entity entity1 = this.unloadedEntityList.get(k);
+        for (int k = 0; k < unloadedEntityList.size(); ++k) {
+            Entity entity1 = unloadedEntityList.get(k);
             int j = entity1.chunkCoordX;
             int k1 = entity1.chunkCoordZ;
 
@@ -1556,11 +1557,11 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             }
         }
 
-        for (int l = 0; l < this.unloadedEntityList.size(); ++l) {
-            this.onEntityRemoved(this.unloadedEntityList.get(l));
+        for (int l = 0; l < unloadedEntityList.size(); ++l) {
+            this.onEntityRemoved(unloadedEntityList.get(l));
         }
 
-        this.unloadedEntityList.clear();
+        unloadedEntityList.clear();
         checkCanUpdate = false;
         this.tickPlayers();
 
@@ -1701,7 +1702,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             //boolean isForced = !this.isRemote && getPersistentChunks().containsKey(new net.minecraft.util.math.ChunkPos(j2 >> 4, k2 >> 4));
             //int range = isForced ? 0 : 32;
             //boolean canUpdate = !forceUpdate || this.isAreaLoaded(j2 - range, 0, k2 - range, j2 + range, 0, k2 + range, true);
-            if (!canUpdate) canUpdate = ForgeEventFactory.canEntityUpdate(entityIn);
+            if (!canUpdate) canUpdate = canUpdateEvent.post(entityIn);
             if (!canUpdate) return;
         }
 
@@ -3136,7 +3137,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
      */
     private final HoleListE6 hole = new HoleListE6();
     public boolean collidesWithAnyBlock(AxisAlignedBB bbox) {
-        return getCollisionBoxes(null, bbox, true, hole.free());
+        return !getCollisionBoxes(null, bbox, true, hole.free());
     }
 
 
@@ -3385,6 +3386,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public  final EntityEvent.EnteringChunk     enteringChunk = new EntityEvent.EnteringChunk(null,0,0,0,0);
     public  final ChunkWatchEvent             chunkWatchEvent = new ChunkWatchEvent.Watch().forBus(MinecraftForge.EVENT_BUS);
     public  final ChunkWatchEvent           chunkUnWatchEvent = new ChunkWatchEvent.UnWatch().forBus(MinecraftForge.EVENT_BUS);
+    public  final EntityEvent.CanUpdate       canUpdateEvent  = new EntityEvent.CanUpdate(null).forBus(MinecraftForge.EVENT_BUS);
     public  final Random              commonWorldEntityRandom = new FastRandom();
     public  final AxisAlignedBB         commonWorldEntityAABB = new AxisAlignedBB(0,0,0,0,0,0);
     public  final CollisionPredicate entityCP = new CollisionPredicate();

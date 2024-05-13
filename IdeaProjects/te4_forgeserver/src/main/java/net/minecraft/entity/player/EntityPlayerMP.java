@@ -183,25 +183,25 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
 
 
     @Override
-    public void readEntityFromNBT(NBTTagCompound compound) {
-        super.readEntityFromNBT(compound);
-        if (compound.hasKey("playerGameType", 99)) {
+    public void readEntityFromNBT(NBTTagCompound nbt) {
+        super.readEntityFromNBT(nbt);
+        if (nbt.hasKey("playerGameType", 99)) {
             if (this.getServer().getForceGamemode()) {
                 this.interactionManager.setGameType(this.getServer().getGameType());
             } else {
-                this.interactionManager.setGameType(GameType.getByID(compound.getInteger("playerGameType")));
+                this.interactionManager.setGameType(GameType.getByID(nbt.getInteger("playerGameType")));
             }
         }
 
-        if (compound.hasKey("enteredNetherPosition", 10)) {
-            NBTTagCompound nbttagcompound = compound.getCompoundTag("enteredNetherPosition");
+        if (nbt.hasKey("enteredNetherPosition", 10)) {
+            NBTTagCompound nbttagcompound = nbt.getCompoundTag("enteredNetherPosition");
             this.enteredNetherPosition = new Vec3d(nbttagcompound.getDouble("x"), nbttagcompound.getDouble("y"), nbttagcompound.getDouble("z"));
         }
 
-        this.seenCredits = compound.getBoolean("seenCredits");
+        this.seenCredits = nbt.getBoolean("seenCredits");
 
-        if (compound.hasKey("recipeBook", 10)) {
-            this.recipeBook.read(compound.getCompoundTag("recipeBook"));
+        if (nbt.hasKey("recipeBook", 10)) {
+            this.recipeBook.read(nbt.getCompoundTag("recipeBook"));
         }
     }
 
@@ -221,17 +221,17 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
 
 
     @Override
-    public void writeEntityToNBT(NBTTagCompound compound) {
-        super.writeEntityToNBT(compound);
-        compound.setInteger("playerGameType", this.interactionManager.getGameType().getID());
-        compound.setBoolean("seenCredits", this.seenCredits);
+    public void writeEntityToNBT(NBTTagCompound nbt) {
+        super.writeEntityToNBT(nbt);
+        nbt.setInteger("playerGameType", this.interactionManager.getGameType().getID());
+        nbt.setBoolean("seenCredits", this.seenCredits);
 
         if (this.enteredNetherPosition != null) {
             NBTTagCompound nbttagcompound = new NBTTagCompound();
             nbttagcompound.setDouble("x", this.enteredNetherPosition.x);
             nbttagcompound.setDouble("y", this.enteredNetherPosition.y);
             nbttagcompound.setDouble("z", this.enteredNetherPosition.z);
-            compound.setTag("enteredNetherPosition", nbttagcompound);
+            nbt.setTag("enteredNetherPosition", nbttagcompound);
         }
 
         Entity entity1 = this.getLowestRidingEntity();
@@ -243,9 +243,9 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
             entity1.writeToNBTOptional(nbttagcompound2);
             nbttagcompound1.setUniqueId("Attach", entity.getUniqueID());
             nbttagcompound1.setTag("Entity", nbttagcompound2);
-            compound.setTag("RootVehicle", nbttagcompound1);
+            nbt.setTag("RootVehicle", nbttagcompound1);
         }
-        compound.setTag("recipeBook", this.recipeBook.write());
+        nbt.setTag("recipeBook", this.recipeBook.write());
     }
 
 

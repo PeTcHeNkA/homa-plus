@@ -490,37 +490,42 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
     }
 
 
-    private void updateEntityWithOptionalForce0(Entity entityIn, boolean forceUpdate) {
+    private void updateEntityWithOptionalForce0(Entity entity, boolean forceUpdate) {
         if (checkCanUpdate) {
-            boolean canUpdate = chunkProviderServer.isChunkLoadedSafe(entityIn.chunkCoordX, entityIn.chunkCoordZ);
-            //todo make this pooled
-            if (!canUpdate) canUpdate = ForgeEventFactory.canEntityUpdate(entityIn);
+            Chunk chunk = chunkProviderServer.loadedChunks.get(ChunkPos.asLong(entity.chunkCoordX, entity.chunkCoordZ));
+
+            boolean canUpdate;
+            if(chunk != null){
+                localSelector.setChunk(chunk);
+                canUpdate = chunk.isNotUnloadQueued();
+            } else
+                canUpdate = canUpdateEvent.post(entity);
             if (!canUpdate) return;
         }
 
-        entityIn.lastTickPosX = entityIn.posX;
-        entityIn.lastTickPosY = entityIn.posY;
-        entityIn.lastTickPosZ = entityIn.posZ;
-        entityIn.prevRotationYaw = entityIn.rotationYaw;
-        entityIn.prevRotationPitch = entityIn.rotationPitch;
+        entity.lastTickPosX      = entity.posX         ;
+        entity.lastTickPosY      = entity.posY         ;
+        entity.lastTickPosZ      = entity.posZ         ;
+        entity.prevRotationYaw   = entity.rotationYaw  ;
+        entity.prevRotationPitch = entity.rotationPitch;
 
-        if (forceUpdate && entityIn.addedToChunk) try {
-            ++entityIn.ticksExisted;
+        if (forceUpdate && entity.addedToChunk) try {
+            ++entity.ticksExisted;
 
-            if (entityIn.isRiding())         entityIn.updateRidden();
-            else if(!entityIn.updateBlocked) entityIn.onUpdate();
+            if (entity.isRiding())         entity.updateRidden();
+            else if(!entity.updateBlocked) entity.onUpdate();
 
         } catch (Throwable exception){
-            server.ticker().onError(this, onEntityError(entityIn, exception));
+            server.ticker().onError(this, onEntityError(entity, exception));
         }
 
-        if (MathUtls.isInvalidDouble(entityIn.posX))          entityIn.posX = entityIn.lastTickPosX;
-        if (MathUtls.isInvalidDouble(entityIn.posY))          entityIn.posY = entityIn.lastTickPosY;
-        if (MathUtls.isInvalidDouble(entityIn.posZ))          entityIn.posZ = entityIn.lastTickPosZ;
-        if (MathUtls.isInvalidDouble(entityIn.rotationPitch)) entityIn.rotationPitch = entityIn.prevRotationPitch;
-        if (MathUtls.isInvalidDouble(entityIn.rotationYaw))   entityIn.rotationYaw = entityIn.prevRotationYaw;
+        if (MathUtls.isInvalidDouble(entity.posX))          entity.posX          = entity.lastTickPosX     ;
+        if (MathUtls.isInvalidDouble(entity.posY))          entity.posY          = entity.lastTickPosY     ;
+        if (MathUtls.isInvalidDouble(entity.posZ))          entity.posZ          = entity.lastTickPosZ     ;
+        if (MathUtls.isInvalidDouble(entity.rotationPitch)) entity.rotationPitch = entity.prevRotationPitch;
+        if (MathUtls.isInvalidDouble(entity.rotationYaw))   entity.rotationYaw   = entity.prevRotationYaw  ;
 
-        updateEntityChunkSection(entityIn, forceUpdate);
+        updateEntityChunkSection(entity, forceUpdate);
     }
 
 
@@ -1190,7 +1195,7 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
                     CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Ticking player");
                     CrashReportCategory crashreportcategory = crashreport.makeCategory("Player being ticked");
                     entity.addEntityCrashInfo(crashreportcategory);
-                    throw new ReportedException(crashreport);
+                    server.ticker().onError(this, new ReportedException(crashreport));
                 }
             }
             if (entity.isDead) {

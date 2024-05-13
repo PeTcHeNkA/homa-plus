@@ -384,10 +384,10 @@ public class ChunkProviderServer implements IChunkProvider {
     }
 
 
-    public boolean isChunkLoadedSafe(int x, int z) {
-        Chunk chunk = loadedChunks.get(ChunkPos.asLong(x, z));
-        return chunk == null || chunk.isNotUnloadQueued();
-    }
+//    public boolean isChunkLoadedSafe(int x, int z) {
+//        Chunk chunk = loadedChunks.get(ChunkPos.asLong(x, z));
+//        return chunk == null || chunk.isNotUnloadQueued();
+//    }
 
 
     @Override

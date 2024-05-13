@@ -46,11 +46,4 @@ public class BlockFx extends Block {
         else src = blockBox.offset(pos);
         if (entityBox.intersects(src)) list.addF(src);
     }
-
-
-    static {
-        if(ElcaCV2.LIBBUILD) {
-            throw new RuntimeException("THIS CLASS ONLY FOR COMPILE. NOT LOAD THIS");
-        }
-    }
 }

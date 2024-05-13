@@ -720,31 +720,31 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
 
 
     @Override
-    protected void readEntityFromNBT(NBTTagCompound compound) {
-        if (compound.getBoolean("CustomDisplayTile")) {
+    protected void readEntityFromNBT(NBTTagCompound nbt) {
+        if (nbt.getBoolean("CustomDisplayTile")) {
             Block block;
 
-            if (compound.hasKey("DisplayTile", 8)) {
-                block = Block.getBlockFromName(compound.getString("DisplayTile"));
+            if (nbt.hasKey("DisplayTile", 8)) {
+                block = Block.getBlockFromName(nbt.getString("DisplayTile"));
             } else {
-                block = Block.getBlockById(compound.getInteger("DisplayTile"));
+                block = Block.getBlockById(nbt.getInteger("DisplayTile"));
             }
-            int i = compound.getInteger("DisplayData");
+            int i = nbt.getInteger("DisplayData");
             this.setDisplayTile(block == null ? Blocks.AIR.getDefaultState() : block.getStateFromMeta(i));
-            this.setDisplayTileOffset(compound.getInteger("DisplayOffset"));
+            this.setDisplayTileOffset(nbt.getInteger("DisplayOffset"));
         }
     }
 
 
     @Override
-    protected void writeEntityToNBT(NBTTagCompound compound) {
+    protected void writeEntityToNBT(NBTTagCompound nbt) {
         if (this.hasDisplayTile()) {
-            compound.setBoolean("CustomDisplayTile", true);
+            nbt.setBoolean("CustomDisplayTile", true);
             IBlockState iblockstate = this.getDisplayTile();
             ResourceLocation resourcelocation = Block.REGISTRY.getNameForObject(iblockstate.getBlock());
-            compound.setString("DisplayTile", resourcelocation == null ? "" : resourcelocation.toString());
-            compound.setInteger("DisplayData", iblockstate.getBlock().getMetaFromState(iblockstate));
-            compound.setInteger("DisplayOffset", this.getDisplayTileOffset());
+            nbt.setString("DisplayTile", resourcelocation == null ? "" : resourcelocation.toString());
+            nbt.setInteger("DisplayData", iblockstate.getBlock().getMetaFromState(iblockstate));
+            nbt.setInteger("DisplayOffset", this.getDisplayTileOffset());
         }
     }
 

@@ -664,15 +664,15 @@ public class EntityBoat extends Entity {
 
 
     @Override
-    protected void writeEntityToNBT(NBTTagCompound compound) {
-        compound.setString("Type", this.getBoatType().getName());
+    protected void writeEntityToNBT(NBTTagCompound nbt) {
+        nbt.setString("Type", this.getBoatType().getName());
     }
 
 
     @Override
-    protected void readEntityFromNBT(NBTTagCompound compound) {
-        if (compound.hasKey("Type", 8)) {
-            this.setBoatType(EntityBoat.Type.getTypeFromString(compound.getString("Type")));
+    protected void readEntityFromNBT(NBTTagCompound nbt) {
+        if (nbt.hasKey("Type", 8)) {
+            this.setBoatType(EntityBoat.Type.getTypeFromString(nbt.getString("Type")));
         }
     }
 

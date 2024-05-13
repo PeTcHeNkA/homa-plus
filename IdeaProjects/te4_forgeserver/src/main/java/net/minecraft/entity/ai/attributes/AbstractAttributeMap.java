@@ -11,7 +11,7 @@ import plus.tson.utl.Te4HashMap;
 
 
 public abstract class AbstractAttributeMap {
-    protected final Map<IAttribute, IAttributeInstance> attributes = new Te4HashMap<>(4);
+    protected final Map<IAttribute, IAttributeInstance> attributes = new Te4HashMap<>(8);
     protected final Map<String, IAttributeInstance> attributesByName = new LowerStringMap<>();
     protected final Multimap<IAttribute, IAttribute> descendantsByParent = HashMultimap.create();
 
@@ -29,16 +29,29 @@ public abstract class AbstractAttributeMap {
         if (this.attributesByName.containsKey(attribute.getName())) {
             throw new IllegalArgumentException("Attribute is already registered!");
         } else {
-            IAttributeInstance iattributeinstance = this.createInstance(attribute);
-            this.attributesByName.put(attribute.getName(), iattributeinstance);
-            this.attributes.put(attribute, iattributeinstance);
+            IAttributeInstance instance = this.createInstance(attribute);
+            this.attributesByName.put(attribute.getName(), instance);
+            this.attributes.put(attribute, instance);
 
             for (IAttribute iattribute = attribute.getParent(); iattribute != null; iattribute = iattribute.getParent()) {
                 this.descendantsByParent.put(iattribute, attribute);
             }
 
-            return iattributeinstance;
+            return instance;
         }
+    }
+
+
+    public IAttributeInstance registerAttributeUnsafe(IAttribute attribute) {
+        IAttributeInstance instance = this.createInstance(attribute);
+        this.attributesByName.put(attribute.getName(), instance);
+        this.attributes.put(attribute, instance);
+
+        for (IAttribute iattribute = attribute.getParent(); iattribute != null; iattribute = iattribute.getParent()) {
+            this.descendantsByParent.put(iattribute, attribute);
+        }
+
+        return instance;
     }
 
 

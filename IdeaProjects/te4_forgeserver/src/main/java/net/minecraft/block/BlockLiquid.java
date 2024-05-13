@@ -229,12 +229,12 @@ public abstract class BlockLiquid extends Block {
                 z += facing.getZOffset() * l;
             }
         }
-
-        if (state.getValue(LEVEL) >= 8) {
+        //hotfix NullPointerException
+        Integer lvl = state.getValue(LEVEL);
+        if (lvl != null && lvl >= 8) {
             Vec3dMut mut = worldIn.commonEntityVec3d1.init(x, y, z);
-            //Vec3d vec3d = new Vec3d(x, y, z);
             for (EnumFacing facing : BlockIDIndexes.FACING_HORIZONTAL) {
-                blockPos.setPos(pos).move(facing);//TODO WTF NULL POINTER???
+                blockPos.setPos(pos).move(facing);
 
                 if (this.causesDownwardCurrent(access, blockPos, facing)) {
                     mut.normalize().add(0.0D, -6.0D, 0.0D);
