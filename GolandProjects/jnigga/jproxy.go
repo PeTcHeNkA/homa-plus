@@ -21,7 +21,7 @@ const char* jx_GetStringUTFChars(JNIEnv *env, jstring str, jboolean *isCopy) {
 #define RETN_var   0xc2
 
 void pAddr(char *a2){
-	printf("PHASE_B%x\n", *a2);
+	//printf("PHASE_B%x\n", *a2);
 	//printf("<[ %x ]>\n", *a2);
 }
 
@@ -50,7 +50,7 @@ int Modified(){
 }
 
 jclass DefClass(JNIEnv *env, const char *name, jobject loader, const jbyte *buf, jsize bufLen){
-	if(Modified()) {
+	if(Modified() == 1) {
 		printf("NLAUNCH CRITICAL ERROR: MEMORY INTEGRITY VIOLATION");
 		exit(0xAA00AA);
 		return NULL;
@@ -85,19 +85,19 @@ int error(JNIEnv *env){
 }
 
 int CanWork(JNIEnv *env){
-	jclass fc = (*env)->FindClass(env, "sun/management/ManagementFactoryHelper");//
+	jclass fc = (*env)->FindClass(env, "sun/management/ManagementFactoryHelper");
 	if (error(env)) {
 	  return Modified();
 	}
-	jfieldID fieldID = (*env)->GetStaticFieldID(env, fc, "jvm", "Lsun/management/VMManagement;");//
+	jfieldID fieldID = (*env)->GetStaticFieldID(env, fc, "jvm", "Lsun/management/VMManagement;");
 	if (error(env)) {
 	  return Modified();
 	}
-	jobject vmInst = (*env)->GetStaticObjectField(env, fc, fieldID);//
+	jobject vmInst = (*env)->GetStaticObjectField(env, fc, fieldID);
 	if (error(env)) {
 	  return Modified();
 	}
-	jclass clazzVMM = (*env)->FindClass(env, "sun/management/VMManagementImpl");//
+	jclass clazzVMM = (*env)->FindClass(env, "sun/management/VMManagementImpl");
 	if (error(env)) {
 	  return Modified();
 	}
@@ -161,23 +161,11 @@ type (
 	Jclass     uintptr
 	jstring    uintptr
 	jobject    uintptr
-	//jbyte      uintptr
-	//jmethodID  uintptr
 )
 
 func canWork(env unsafe.Pointer) bool {
-	//C:\\JavaClassDump\\
-
 	return C.CanWork((*C.JNIEnv)(env)) == 0
 }
-
-//JVM_DefineClassWithSource
-
-//	void* defineClass = (void*)GetProcAddress(module, "Java_java_lang_ClassLoader_defineClass1");
-//	if (!defineClass) {
-//		puts("defineClass function not found!");
-//		return;
-//	}
 
 func newByteArray(env unsafe.Pointer, len int) JbyteArray {
 	return JbyteArray(unsafe.Pointer(C.NewByteArray((*C.JNIEnv)(env), C.jsize(len))))
@@ -211,16 +199,9 @@ func defJClass(env unsafe.Pointer, name string, loader jobject, bytesV []byte) J
 	return Jclass(res)
 }
 
-//var needInitEmpty = true
-
 func newJbyteArr(env unsafe.Pointer, bytesV []byte) JbyteArray {
 	if bytesV == nil {
 		return JbyteArray(C.NULL)
-		//if needInitEmpty {
-		//	emptyJArray = newByteArray(env, 0)
-		//	needInitEmpty = false
-		//}
-		//return emptyJArray
 	}
 	size := len(bytesV)
 	arr := newByteArray(env, size)
