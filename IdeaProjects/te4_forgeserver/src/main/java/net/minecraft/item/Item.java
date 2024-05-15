@@ -2,8 +2,10 @@ package net.minecraft.item;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDirt;
@@ -36,7 +38,13 @@ import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.PotionEffect;
-import net.minecraft.util.*;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.EnumHandSide;
+import net.minecraft.util.NonNullList;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
@@ -1724,15 +1732,13 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
         return new ItemStack(this);
     }
 
-    public static class ToolMaterial implements IStringSerializable {
-        private static int id;
-        public static final ToolMaterial WOOD = new ToolMaterial("WOOD",0, 59, 2.0F, 0.0F, 15);
-        public static final ToolMaterial STONE = new ToolMaterial("STONE",1, 131, 4.0F, 1.0F, 5);
-        public static final ToolMaterial IRON = new ToolMaterial("IRON",2, 250, 6.0F, 2.0F, 14);
-        public static final ToolMaterial DIAMOND = new ToolMaterial("DIAMOND",3, 1561, 8.0F, 3.0F, 10);
-        public static final ToolMaterial GOLD = new ToolMaterial("GOLD",0, 32, 12.0F, 0.0F, 22);
-
-        private static ToolMaterial[] materials = new ToolMaterial[] {WOOD, STONE, IRON, DIAMOND, GOLD};
+    public static enum ToolMaterial
+    {
+        WOOD(0, 59, 2.0F, 0.0F, 15),
+        STONE(1, 131, 4.0F, 1.0F, 5),
+        IRON(2, 250, 6.0F, 2.0F, 14),
+        DIAMOND(3, 1561, 8.0F, 3.0F, 10),
+        GOLD(0, 32, 12.0F, 0.0F, 22);
 
         private final int harvestLevel;
         private final int maxUses;
@@ -1741,45 +1747,14 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
         private final int enchantability;
         //Added by forge for custom Tool materials.
         private ItemStack repairMaterial = ItemStack.EMPTY;
-        private final String name;
-        private final int ordinal = id++;
 
-        private ToolMaterial(String name, int harvestLevel, int maxUses, float efficiency, float damageVsEntity, int enchantability) {
-            this.name = name;
+        private ToolMaterial(int harvestLevel, int maxUses, float efficiency, float damageVsEntity, int enchantability)
+        {
             this.harvestLevel = harvestLevel;
             this.maxUses = maxUses;
             this.efficiency = efficiency;
             this.attackDamage = damageVsEntity;
             this.enchantability = enchantability;
-        }
-
-
-        public final int ordinal() {
-            return ordinal;
-        }
-
-
-        public static ToolMaterial insert(String name, int harvestLevel, int maxUses, float efficiency, float damageVsEntity, int enchantability){
-            ToolMaterial[] newMat = Arrays.copyOf(materials, materials.length+1);
-            ToolMaterial res = newMat[materials.length] = new ToolMaterial(name, harvestLevel, maxUses, efficiency, damageVsEntity, enchantability);
-            materials = newMat;
-            return res;
-        }
-
-        public static ToolMaterial valueOf(String name){
-            for (ToolMaterial material:materials){
-                if(material.name.equals(name))return material;
-            }
-            return null;
-        }
-
-        public static ToolMaterial[] values() {
-            return materials;
-        }
-
-
-        public String getName() {
-            return this.name;
         }
 
         public int getMaxUses()
@@ -1808,31 +1783,40 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
         }
 
         @Deprecated // Use getRepairItemStack below
-        public Item getRepairItem() {
-            if (this == WOOD) {
+        public Item getRepairItem()
+        {
+            if (this == WOOD)
+            {
                 return Item.getItemFromBlock(Blocks.PLANKS);
             }
-            else if (this == STONE) {
+            else if (this == STONE)
+            {
                 return Item.getItemFromBlock(Blocks.COBBLESTONE);
             }
-            else if (this == GOLD) {
+            else if (this == GOLD)
+            {
                 return Items.GOLD_INGOT;
             }
-            else if (this == IRON) {
+            else if (this == IRON)
+            {
                 return Items.IRON_INGOT;
-            } else {
+            }
+            else
+            {
                 return this == DIAMOND ? Items.DIAMOND : null;
             }
         }
 
-        public ToolMaterial setRepairItem(ItemStack stack) {
+        public ToolMaterial setRepairItem(ItemStack stack)
+        {
             if (!this.repairMaterial.isEmpty()) throw new RuntimeException("Repair material has already been set");
             if (this == WOOD || this == STONE || this == GOLD || this == IRON || this == DIAMOND) throw new RuntimeException("Can not change vanilla tool repair materials");
             this.repairMaterial = stack;
             return this;
         }
 
-        public ItemStack getRepairItemStack() {
+        public ItemStack getRepairItemStack()
+        {
             if (!repairMaterial.isEmpty()) return repairMaterial;
             Item ret = this.getRepairItem();
             if (ret != null) repairMaterial = new ItemStack(ret, 1, net.minecraftforge.oredict.OreDictionary.WILDCARD_VALUE);
