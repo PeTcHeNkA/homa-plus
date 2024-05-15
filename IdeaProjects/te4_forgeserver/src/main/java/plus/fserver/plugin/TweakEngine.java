@@ -43,7 +43,12 @@ public class TweakEngine implements IClassTransformer, Set<String> {
         }
         Enumeration<URL> urls = urls(point);
         header = urls.nextElement().getFile().split("!")[0];
-        if (urls.hasMoreElements()) throw new RuntimeException();
+        if (urls.hasMoreElements()) {
+            System.out.println("ELCA POINT: "+header);
+            while (urls.hasMoreElements()){
+                System.out.println("UNSOLVABLE: "+urls.nextElement());
+            }
+        }
     }
 
 
