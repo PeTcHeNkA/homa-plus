@@ -92,6 +92,25 @@ public class EntityDataManager {
     }
 
 
+    public <T> DataEntry<T> registerV(DataParameter<T> key, T value) {
+        int i = key.getId();
+        if (i > 254) {
+            throw new IllegalArgumentException("Data value id is too big with " + i + "! (Max is " + 254 + ")");
+        } else if (this.entries.containsKey(i)) {
+            throw new IllegalArgumentException("Duplicate id value for " + i + "!");
+        } else if (DataSerializers.getSerializerId(key.getSerializer()) < 0) {
+            throw new IllegalArgumentException("Unregistered serializer " + key.getSerializer() + " for " + i + "!");
+        } else {
+            DataEntry<T> dataentry = new DataEntry<T>(key, value);
+            this.lock.writeLock().lock();
+            this.entries.put(key.getId(), dataentry);
+            this.empty = false;
+            this.lock.writeLock().unlock();
+            return dataentry;
+        }
+    }
+
+
     private <T> void setEntry(DataParameter<T> key, T value) {
         DataEntry<T> dataentry = new DataEntry<T>(key, value);
         this.lock.writeLock().lock();

@@ -236,6 +236,7 @@ public abstract class EntityLivingBase extends Entity {
             if (this.isEntityInsideOpaqueBlock()) {
                 //TODO try fix position
                 this.attackEntityFrom(DamageSource.IN_WALL, 1.0F);
+                motionY += 0.125d;
             } else if (flag && !this.world.inInWorldBorder(this.getEntityBoundingBox())) {
                 double d0 = this.world.getWorldBorder().getClosestDistance(this) + this.world.getWorldBorder().getDamageBuffer();
 

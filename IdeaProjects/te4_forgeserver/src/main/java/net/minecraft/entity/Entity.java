@@ -643,6 +643,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
             }
 
             prev.expandTo(x, y, z, axisalignedbb);
+            axisalignedbb.minY -= 0.125;
 
             List<AxisAlignedBB> boxes = world.getCollisionBoxesLimited(this,
                     axisalignedbb, ElcaConfig.MAX_ENTITY_COLLISIONS_MOVE
@@ -754,12 +755,10 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
                     this.setEntityBoundingBox(axisalignedbb);
                 }
             }
-
             this.resetPositionToBB();
-            this.collidedHorizontally = dx1 != x || dz1 != z;
-            this.collidedVertically = dy1 != y;
-            this.onGround = this.collidedVertically && dy1 < 0.0D;
-            this.collided = this.collidedHorizontally || this.collidedVertically;
+
+            this.onGround = (collidedVertically = dy1 != y) && dy1 < 0.0D;
+            this.collided = (collidedHorizontally = dx1 != x || dz1 != z) || this.collidedVertically;
 
             BlockPos.MutableBlockPos pos;
             IBlockState state = world.access().getBlockState(

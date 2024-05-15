@@ -39,6 +39,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import plus.fserver.ElcaConfig;
 import plus.fserver.ElcaMobs;
 import plus.fserver.server.elca.ChunkSelector;
 import java.util.List;
@@ -46,7 +47,7 @@ import java.util.List;
 
 public class EntityItem extends Entity {
     private static final Logger LOGGER = LogManager.getLogger();
-    private static final DataParameter<ItemStack> ITEM = EntityDataManager.<ItemStack>createKey(EntityItem.class, DataSerializers.ITEM_STACK);
+    private static final DataParameter<ItemStack> ITEM = EntityDataManager.createKey(EntityItem.class, DataSerializers.ITEM_STACK);
     private int age;
     private int pickupDelay;
     private int health;
@@ -58,6 +59,7 @@ public class EntityItem extends Entity {
      * The maximum age of this EntityItem.  The item is expired once this is reached.
      */
     public int lifespan = 6000;
+    private EntityDataManager.DataEntry<ItemStack> item;
 
 
     public EntityItem(World worldIn, double x, double y, double z) {
@@ -97,21 +99,23 @@ public class EntityItem extends Entity {
 
     @Override
     protected void entityInit() {
-        this.getDataManager().register(ITEM, ItemStack.EMPTY);
+        item = this.getDataManager().registerV(ITEM, ItemStack.EMPTY);
     }
 
 
     @Override
     public void onUpdate() {
-        if (getItem().getItem().onEntityItemUpdate(this)) return;
-        if (this.getItem().isEmpty()) {
+        ItemStack item = this.getItem();
+        if (item.getItem().onEntityItemUpdate(this)) return;
+        if (item.isEmpty()) {
             this.setDead();
         } else {
-            onUpdateE();
-
             if (this.pickupDelay > 0 && this.pickupDelay != 32767) {
                 --this.pickupDelay;
             }
+            int lodLvl;
+            if(((lodLvl = lodLvl()) & ticksExisted) != lodLvl)return;
+            onUpdateE();
 
             this.prevPosX = this.posX;
             this.prevPosY = this.posY;
@@ -119,8 +123,6 @@ public class EntityItem extends Entity {
             double d0 = this.motionX;
             double d1 = this.motionY;
             double d2 = this.motionZ;
-
-            int lodLvl = lodLvl();
 
             if (lodLvl == 0 && !this.hasNoGravity() || (age & 1) == 1) {
                 this.motionY -= 0.03999999910593033D;
@@ -133,9 +135,8 @@ public class EntityItem extends Entity {
             }
 
             this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
-            boolean flag = (int)this.prevPosX != (int)this.posX || (int)this.prevPosY != (int)this.posY || (int)this.prevPosZ != (int)this.posZ;
 
-            if (flag || this.ticksExisted % 25 == 0) {
+            if (((int)this.prevPosX != (int)this.posX || (int)this.prevPosY != (int)this.posY || (int)this.prevPosZ != (int)this.posZ) || this.ticksExisted % 25 == 0) {
                 BlockPos blockpos = world.localTempPos3.setPos(this);
                 if (this.world.access().getBlockState(blockpos).getMaterial() == Material.LAVA) {
                     this.motionY = 0.20000000298023224D;
@@ -171,7 +172,7 @@ public class EntityItem extends Entity {
                 ++this.age;
             }
 
-            if(lodLvl == 0 || (age & lodLvl) == lodLvl) this.handleWaterMovement();
+            //this.handleWaterMovement();
 
             if (!this.world.isRemote) {
                 double d3 = this.motionX - d0;
@@ -184,14 +185,12 @@ public class EntityItem extends Entity {
                 }
             }
 
-            ItemStack item = this.getItem();
-
             if (!this.world.isRemote && this.age >= lifespan) {
                 int hook = ForgeEventFactory.onItemExpire(this, item);
                 if (hook < 0) this.setDead();
                 else          this.lifespan += hook;
             }
-            if (item.isEmpty()) this.setDead();
+            //if (item.isEmpty()) this.setDead();
         }
     }
 
@@ -362,7 +361,7 @@ public class EntityItem extends Entity {
             Item item = itemstack.getItem();
             int i = itemstack.getCount();
 
-            int hook = net.minecraftforge.event.ForgeEventFactory.onItemPickup(this, entityIn);
+            int hook = ForgeEventFactory.onItemPickup(this, entityIn);
             if (hook < 0) return;
             ItemStack clone = itemstack.copy();
 
@@ -405,13 +404,13 @@ public class EntityItem extends Entity {
 
 
     public ItemStack getItem() {
-        return this.getDataManager().get(ITEM);
+        return item.getValue();
     }
 
 
     public void setItem(ItemStack stack) {
-        this.getDataManager().set(ITEM, stack);
-        this.getDataManager().setDirty(ITEM);
+        item.setValue(stack);
+        item.setDirty(true);
     }
 
 
@@ -478,7 +477,7 @@ public class EntityItem extends Entity {
     private List<AxisAlignedBB> defBoxes(double x, double y, double z){
         AxisAlignedBB box = world.commonWorldEntityAABB;
         getEntityBoundingBox().expandTo(x, y, z, box);
-        return this.world.getCollisionBoxes(null, box);
+        return this.world.getCollisionBoxesLimited(null, box, ElcaConfig.MAX_ENTITY_COLLISIONS_MOVE);
     }
 
 
@@ -503,18 +502,18 @@ public class EntityItem extends Entity {
             double oldZ = z;
 
             List<AxisAlignedBB> boxes = null;
-            int temp;
+            int temp, curX, curY, curZ;
             if (y != 0.0D) {
                 boxes = defBoxes(x, y, z);
                 temp = 0;
-                for (int l = boxes.size(); temp < l; ++temp)
+                for (curY = boxes.size(); temp < curY; ++temp)
                     y = boxes.get(temp).calculateYOffset(this.getEntityBoundingBox(), y);
             }
             if (x != 0.0D) {
                 temp = 0;
                 if(boxes == null)boxes = defBoxes(x, y, z);
 
-                for (int l5 = boxes.size(); temp < l5; ++temp)
+                for (curX = boxes.size(); temp < curX; ++temp)
                     x = boxes.get(temp).calculateXOffset(this.getEntityBoundingBox(), x);
 
             }
@@ -523,7 +522,7 @@ public class EntityItem extends Entity {
                 temp = 0;
                 if(boxes == null)boxes = defBoxes(x, y, z);
 
-                for (int i6 = boxes.size(); temp < i6; ++temp)
+                for (curZ = boxes.size(); temp < curZ; ++temp)
                     z = boxes.get(temp).calculateZOffset(this.getEntityBoundingBox(), z);
 
             }
@@ -532,19 +531,19 @@ public class EntityItem extends Entity {
                 this.resetPositionToBB();
             }
 
-            this.collidedHorizontally = oldX != x || oldZ != z;
-            this.collidedVertically = oldY != y;
-            this.onGround = this.collidedVertically && oldY < 0.0D;
-            this.collided = this.collidedHorizontally || this.collidedVertically;
+            this.collided = (collidedVertically = oldY != y) || (collidedHorizontally = oldX != x || oldZ != z);
 
-            int curX = MathHelper.floor(this.posX);
-            int curY = MathHelper.floor(this.posY - 0.20000000298023224D);
-            int curZ = MathHelper.floor(this.posZ);
+            Chunk chunk;
+            IBlockState state = (chunk = this.world.getChunk(
+                    (curX = MathHelper.floor(this.posX)) >> 4,
+                    (curZ = MathHelper.floor(this.posZ)) >> 4
+            )).getBlockState(
+                    curX,
+                    (curY = MathHelper.floor(this.posY - 0.20000000298023224D)),
+                    curZ
+            );
 
-            Chunk chunk = this.world.getChunk(curX >> 4, curZ >> 4);
-            IBlockState state = chunk.getBlockState(curX, curY, curZ);
-
-            if(onGround) {
+            if(onGround = collidedVertically && oldY < 0.0D) {
                 if(fallDistance>0) {
                     BlockPos blockpos;
                     if (state.getMaterial() == Material.AIR) {
@@ -567,7 +566,6 @@ public class EntityItem extends Entity {
 
             if (oldX != x) this.motionX = 0.0D;
             if (oldZ != z) this.motionZ = 0.0D;
-
             if (oldY != y) state.getBlock().onLanded(this.world, this);
 
             try {
@@ -576,7 +574,7 @@ public class EntityItem extends Entity {
                 CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Checking entity block collision");
                 CrashReportCategory crashreportcategory = crashreport.makeCategory("Entity being checked for collision");
                 this.addEntityCrashInfo(crashreportcategory);
-                throw new ReportedException(crashreport);
+                world.getMinecraftServer().ticker().onError((WorldServer) world, new ReportedException(crashreport));
             }
 
             if (this.world.isFlammableWithin(this.getEntityBoundingBox().shrink(0.001D))) {

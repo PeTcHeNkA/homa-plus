@@ -42,23 +42,23 @@ public class ElcaMobs {
         }
 
         GLOBAL    = new EntityLodFunc(config.get("global"),   24, 48);
-        WATER     = new EntityLodFunc(config.get("water"),    24, 48);
-        MONSTERS  = new EntityLodFunc(config.get("monsters"), 24, 48);
-        ANIMALS   = new EntityLodFunc(config.get("animals"),  20, 40);
-        AMBIENT   = new EntityLodFunc(config.get("ambient"),  16, 32);
-        CREEPER   = new EntityLodFunc(config.get("creeper"),  32, 48);
-        SKELETON  = new EntityLodFunc(config.get("skeleton"), 32, 48);
+        WATER     = new EntityLodFunc(config.get("water"),    18, 36);
+        MONSTERS  = new EntityLodFunc(config.get("monsters"), 22, 40);
+        ANIMALS   = new EntityLodFunc(config.get("animals"),  18, 40);
+        AMBIENT   = new EntityLodFunc(config.get("ambient"),  14, 30);
+        CREEPER   = new EntityLodFunc(config.get("creeper"),  24, 36);
+        SKELETON  = new EntityLodFunc(config.get("skeleton"), 24, 36);
         SPIDER    = new EntityLodFunc(config.get("spider"),   20, 32);
-        ZOMBIE    = new EntityLodFunc(config.get("zombie"),   22, 44);
-        GUARDIAN  = new EntityLodFunc(config.get("guardian"), 32, 48);
-        BLAZE     = new EntityLodFunc(config.get("blaze"),    16, 32);
-        ENDERMAN  = new EntityLodFunc(config.get("enderman"), 48, 64);
-        WITCH     = new EntityLodFunc(config.get("witch"),    32, 64);
-        VILLAGER  = new EntityLodFunc(config.get("villager"), 48, 64);
-        ITEM      = new EntityLodFunc(config.get("item"),     12, 24);
-        FALLING   = new EntityLodFunc(config.get("falling"),  16, 32);
-        BAT       = new EntityLodFunc(config.get("bat"),      12, 24);
-        BOAT      = new EntityLodFunc(config.get("bat"),      12, 24);
+        ZOMBIE    = new EntityLodFunc(config.get("zombie"),   22, 36);
+        GUARDIAN  = new EntityLodFunc(config.get("guardian"), 26, 38);
+        BLAZE     = new EntityLodFunc(config.get("blaze"),    16, 28);
+        ENDERMAN  = new EntityLodFunc(config.get("enderman"), 24, 36);
+        WITCH     = new EntityLodFunc(config.get("witch"),    28, 38);
+        VILLAGER  = new EntityLodFunc(config.get("villager"), 28, 38);
+        ITEM      = new EntityLodFunc(config.get("item"),     10, 18);
+        FALLING   = new EntityLodFunc(config.get("falling"),  16, 28);
+        BAT       = new EntityLodFunc(config.get("bat"),      12, 18);
+        BOAT      = new EntityLodFunc(config.get("bat"),      12, 22);
 
 
         SPIDER_RIDER_PAWN_CHANCE   = getR(config, "spider.rider_spawn",   80  );
