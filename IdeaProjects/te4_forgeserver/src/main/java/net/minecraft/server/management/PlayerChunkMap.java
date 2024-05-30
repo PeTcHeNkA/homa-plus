@@ -239,8 +239,7 @@ public class PlayerChunkMap {
 
 
     public void updateMovingPlayer(EntityPlayerMP player) {
-        PlayerCMapSelector sel = getBy(player.renderRadius);
-        sel.updateMovingPlayer(this, player);
+        getBy(player.renderRadius).updateMovingPlayer(this, player);
     }
 
 

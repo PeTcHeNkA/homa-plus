@@ -30,7 +30,7 @@ public class ElcaConfig {
     public static int NETWORK_COMPRESSION_LVL    = 4;
     public static int VILLAGE_TICK_RATE          = 20;
     public static int NETWORK_TICK_RATE          = 25; //50 default,
-    public static int ASY_THREAD_POOL_SIZE       = Runtime.getRuntime().availableProcessors();
+    //public static int ASY_THREAD_POOL_SIZE       = Runtime.getRuntime().availableProcessors();
     //public static int ENTITY_TRACKER_UPDATE_RATE = 4;
 
 
@@ -88,7 +88,7 @@ public class ElcaConfig {
         NAVIGATE_RESET_RATE        = calc(file, "navigate-reset-rate"         , NAVIGATE_RESET_RATE        );
 
         NETWORK_COMPRESSION_LVL    = calc(file, "network-compression-lvl"     , NETWORK_COMPRESSION_LVL    );
-        ASY_THREAD_POOL_SIZE       = calc(file, "async-thread-pool-size"      , ASY_THREAD_POOL_SIZE       );
+        //ASY_THREAD_POOL_SIZE       = calc(file, "async-thread-pool-size"      , ASY_THREAD_POOL_SIZE       );
 
         MAX_ENTITY_COLLISIONS      = calc(file, "max-entity-collisions"       , MAX_ENTITY_COLLISIONS      );
         MAX_ENTITY_COLLISIONS_MOVE = calc(file, "max-entity-collisions-move"  , MAX_ENTITY_COLLISIONS_MOVE );

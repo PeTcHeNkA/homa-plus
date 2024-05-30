@@ -7,7 +7,6 @@ import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraftforge.fml.common.FMLLog;
-import plus.fserver.api.PWorldServer;
 
 
 public class TChunkExecutor {
@@ -18,7 +17,7 @@ public class TChunkExecutor {
         TChunkTask task = world.getChunkTasks().remove(key);
 
         if (task != null) {
-            completeTask(task);
+            task.await();
         } else {
             task = new TChunkIOProvider(key, loader, (ChunkProviderServer) provider);
             task.run();
@@ -60,34 +59,17 @@ public class TChunkExecutor {
                                       IChunkProvider provider, int x, int z) {
         TQueuedChunk key = new TQueuedChunk(x, z, world);
 
-        PWorldServer sworld = (PWorldServer) world;
+        WorldServer sworld = (WorldServer) world;
         TChunkTask task = sworld.getChunkTasks().remove(key);
 
         if (task != null) {
-            completeTask(task);
+            task.await();
         } else {
             task = new TChunkGenProvider(key, loader, (ChunkProviderServer) provider);
             task.run();
         }
         task.syncCallback();
         return task.getChunk();
-    }
-
-
-    public static void completeTask(TChunkTask task){
-        if (!task.world().getMinecraftServer().ticker().service.remove(task)){
-            synchronized(task) {
-                while (!task.runFinished()) {
-                    try {
-                        task.wait();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        } else {
-            task.run();
-        }
     }
 
 
@@ -110,7 +92,7 @@ public class TChunkExecutor {
     public static void dropQueuedChunkLoad(World world, int x, int z, Runnable runnable) {
         TQueuedChunk key = new TQueuedChunk(x, z, world);
 
-        PWorldServer sworld = (PWorldServer) world;
+        WorldServer sworld = (WorldServer) world;
         TChunkTask task = sworld.getChunkTasks().get(key);
 
         if (task == null) {
@@ -120,8 +102,8 @@ public class TChunkExecutor {
         }
         task.removeCallback(runnable);
         if (!task.hasCallback()) {
+            task.cansel();
             sworld.getChunkTasks().remove(key);
-            world.getMinecraftServer().ticker().service.remove(task);
         }
     }
 

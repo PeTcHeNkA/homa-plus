@@ -37,6 +37,7 @@ import net.minecraftforge.event.world.ChunkDataEvent;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import plus.fserver.server.SStrings;
 import plus.fserver.world.light.LightingHooks;
 import plus.fserver.world.light.api.IChunkLightingData;
 
@@ -67,7 +68,7 @@ public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO {
         if (data != null) {
             Chunk chunk = (Chunk) data[0];
             NBTTagCompound nbttagcompound = (NBTTagCompound) data[1];
-            this.loadEntities(worldIn, nbttagcompound.getCompoundTag("Level"), chunk);
+            this.loadEntities(worldIn, nbttagcompound.getCompoundTag(SStrings.CL_LEVEL), chunk);
             return chunk;
         }
 
@@ -111,13 +112,13 @@ public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO {
 
     @Nullable
     protected Object[] checkedReadChunkFromNBT__Async(World worldIn, int x, int z, NBTTagCompound compound) {
-        if (!compound.hasKey("Level", 10)) {
+        if (!compound.hasKey(SStrings.CL_LEVEL, 10)) {
             LOGGER.error("Chunk file at {},{} is missing level data, skipping", x, z);
             return null;
         } else {
-            NBTTagCompound nbttagcompound = compound.getCompoundTag("Level");
+            NBTTagCompound nbttagcompound = compound.getCompoundTag(SStrings.CL_LEVEL);
 
-            if (!nbttagcompound.hasKey("Sections", 9)) {
+            if (!nbttagcompound.hasKey(SStrings.CL_SECTIONS, 9)) {
                 LOGGER.error("Chunk file at {},{} is missing block data, skipping", x, z);
                 return null;
             } else {
@@ -158,7 +159,7 @@ public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO {
         try {
             NBTTagCompound compound = new NBTTagCompound();
             NBTTagCompound compound1 = new NBTTagCompound();
-            compound.setTag("Level", compound1);
+            compound.setTag(SStrings.CL_LEVEL, compound1);
             compound.setInteger("DataVersion", 1343);
             FMLCommonHandler.instance().getDataFixer().writeVersionData(compound);
             this.writeChunkToNBT(pendings, chunkIn, worldIn, compound1);
@@ -178,7 +179,7 @@ public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO {
         try {
             NBTTagCompound compound = new NBTTagCompound();
             NBTTagCompound compound1 = new NBTTagCompound();
-            compound.setTag("Level", compound1);
+            compound.setTag(SStrings.CL_LEVEL, compound1);
             compound.setInteger("DataVersion", 1343);
             FMLCommonHandler.instance().getDataFixer().writeVersionData(compound);
             this.writeChunkToNBT(chunkIn, worldIn, compound1);
@@ -264,9 +265,9 @@ public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO {
         {
             public NBTTagCompound process(IDataFixer fixer, NBTTagCompound compound, int versionIn)
             {
-                if (compound.hasKey("Level", 10))
+                if (compound.hasKey(SStrings.CL_LEVEL, 10))
                 {
-                    NBTTagCompound nbttagcompound = compound.getCompoundTag("Level");
+                    NBTTagCompound nbttagcompound = compound.getCompoundTag(SStrings.CL_LEVEL);
 
                     if (nbttagcompound.hasKey("Entities", 9))
                     {
@@ -386,7 +387,7 @@ public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO {
                 nbttagcompound1.setInteger("p", nextticklistentry.priority);
                 nbttaglist3.appendTag(nbttagcompound1);
             }
-            compound.setTag("TileTicks", nbttaglist3);
+            compound.setTag(SStrings.CL_TILE_TICKS, nbttaglist3);
         }
 
         if (chunkIn.getCapabilities() != null) {
@@ -468,21 +469,17 @@ public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO {
             }
         }
 
-        if (compound.hasKey("TileTicks", 9))
-        {
-            NBTTagList nbttaglist3 = compound.getTagList("TileTicks", 10);
 
-            for (int l1 = 0; l1 < nbttaglist3.tagCount(); ++l1)
-            {
+        if (compound.hasKey(SStrings.CL_TILE_TICKS, 9)) {
+            NBTTagList nbttaglist3 = compound.getTagList(SStrings.CL_TILE_TICKS, 10);
+
+            for (int l1 = 0; l1 < nbttaglist3.tagCount(); ++l1) {
                 NBTTagCompound nbttagcompound3 = nbttaglist3.getCompoundTagAt(l1);
                 Block block;
 
-                if (nbttagcompound3.hasKey("i", 8))
-                {
+                if (nbttagcompound3.hasKey("i", 8)) {
                     block = Block.getBlockFromName(nbttagcompound3.getString("i"));
-                }
-                else
-                {
+                } else {
                     block = Block.getBlockById(nbttagcompound3.getInteger("i"));
                 }
 
@@ -491,131 +488,98 @@ public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO {
         }
     }
 
+
     @Nullable
-    public static Entity readChunkEntity(NBTTagCompound compound, World worldIn, Chunk chunkIn)
-    {
+    public static Entity readChunkEntity(NBTTagCompound compound, World worldIn, Chunk chunkIn) {
         Entity entity = createEntityFromNBT(compound, worldIn);
-
-        if (entity == null)
-        {
+        if (entity == null) {
             return null;
-        }
-        else
-        {
+        } else {
             chunkIn.addEntity(entity);
+            if (compound.hasKey(SStrings.CL_PASSENGERS, 9)) {
+                NBTTagList nbttaglist = compound.getTagList(SStrings.CL_PASSENGERS, 10);
 
-            if (compound.hasKey("Passengers", 9))
-            {
-                NBTTagList nbttaglist = compound.getTagList("Passengers", 10);
-
-                for (int i = 0; i < nbttaglist.tagCount(); ++i)
-                {
+                for (int i = 0; i < nbttaglist.tagCount(); ++i) {
                     Entity entity1 = readChunkEntity(nbttaglist.getCompoundTagAt(i), worldIn, chunkIn);
 
-                    if (entity1 != null)
-                    {
+                    if (entity1 != null) {
                         entity1.startRiding(entity, true);
                     }
                 }
             }
-
             return entity;
         }
     }
 
+
     @Nullable
-    public static Entity readWorldEntityPos(NBTTagCompound compound, World worldIn, double x, double y, double z, boolean attemptSpawn)
-    {
+    public static Entity readWorldEntityPos(NBTTagCompound compound, World worldIn, double x, double y, double z, boolean attemptSpawn) {
         Entity entity = createEntityFromNBT(compound, worldIn);
 
-        if (entity == null)
-        {
+        if (entity == null) {
             return null;
-        }
-        else
-        {
+        } else {
             entity.setLocationAndAngles(x, y, z, entity.rotationYaw, entity.rotationPitch);
 
-            if (attemptSpawn && !worldIn.spawnEntity(entity))
-            {
+            if (attemptSpawn && !worldIn.spawnEntity(entity)) {
                 return null;
-            }
-            else
-            {
-                if (compound.hasKey("Passengers", 9))
-                {
-                    NBTTagList nbttaglist = compound.getTagList("Passengers", 10);
+            } else {
+                if (compound.hasKey(SStrings.CL_PASSENGERS, 9)) {
+                    NBTTagList nbttaglist = compound.getTagList(SStrings.CL_PASSENGERS, 10);
 
-                    for (int i = 0; i < nbttaglist.tagCount(); ++i)
-                    {
+                    for (int i = 0; i < nbttaglist.tagCount(); ++i) {
                         Entity entity1 = readWorldEntityPos(nbttaglist.getCompoundTagAt(i), worldIn, x, y, z, attemptSpawn);
 
-                        if (entity1 != null)
-                        {
+                        if (entity1 != null) {
                             entity1.startRiding(entity, true);
                         }
                     }
                 }
-
                 return entity;
             }
         }
     }
 
+
     @Nullable
-    protected static Entity createEntityFromNBT(NBTTagCompound compound, World worldIn)
-    {
-        try
-        {
+    protected static Entity createEntityFromNBT(NBTTagCompound compound, World worldIn) {
+        try {
             return EntityList.createEntityFromNBT(compound, worldIn);
-        }
-        catch (RuntimeException var3)
-        {
+        } catch (RuntimeException var3) {
             return null;
         }
     }
 
-    public static void spawnEntity(Entity entityIn, World worldIn)
-    {
-        if (worldIn.spawnEntity(entityIn) && entityIn.isBeingRidden())
-        {
-            for (Entity entity : entityIn.getPassengers())
-            {
+
+    public static void spawnEntity(Entity entityIn, World worldIn) {
+        if (worldIn.spawnEntity(entityIn) && entityIn.isBeingRidden()) {
+            for (Entity entity : entityIn.getPassengers()) {
                 spawnEntity(entity, worldIn);
             }
         }
     }
 
+
     @Nullable
-    public static Entity readWorldEntity(NBTTagCompound compound, World worldIn, boolean p_186051_2_)
-    {
+    public static Entity readWorldEntity(NBTTagCompound compound, World worldIn, boolean p_186051_2_) {
         Entity entity = createEntityFromNBT(compound, worldIn);
 
-        if (entity == null)
-        {
+        if (entity == null) {
             return null;
-        }
-        else if (p_186051_2_ && !worldIn.spawnEntity(entity))
-        {
+        } else if (p_186051_2_ && !worldIn.spawnEntity(entity)) {
             return null;
-        }
-        else
-        {
-            if (compound.hasKey("Passengers", 9))
-            {
-                NBTTagList nbttaglist = compound.getTagList("Passengers", 10);
+        } else {
+            if (compound.hasKey(SStrings.CL_PASSENGERS, 9)) {
+                NBTTagList nbttaglist = compound.getTagList(SStrings.CL_PASSENGERS, 10);
 
-                for (int i = 0; i < nbttaglist.tagCount(); ++i)
-                {
+                for (int i = 0; i < nbttaglist.tagCount(); ++i) {
                     Entity entity1 = readWorldEntity(nbttaglist.getCompoundTagAt(i), worldIn, p_186051_2_);
 
-                    if (entity1 != null)
-                    {
+                    if (entity1 != null) {
                         entity1.startRiding(entity, true);
                     }
                 }
             }
-
             return entity;
         }
     }

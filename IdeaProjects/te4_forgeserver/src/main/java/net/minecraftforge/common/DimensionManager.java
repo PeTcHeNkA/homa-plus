@@ -13,7 +13,6 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import it.unimi.dsi.fastutil.ints.IntIterator;
-import it.unimi.dsi.fastutil.ints.IntLinkedOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntRBTreeSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
@@ -26,7 +25,6 @@ import com.google.common.collect.Multiset;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.DimensionType;
-import net.minecraft.world.MinecraftException;
 import net.minecraft.world.World;
 import net.minecraft.world.ServerWorldEventHandler;
 import net.minecraft.world.WorldProvider;
@@ -54,7 +52,6 @@ public class DimensionManager {
     private static final Int2ObjectMap<WorldServer> worlds = Int2ObjectMaps.synchronize(new Int2ObjectLinkedOpenHashMap<>());
     private static final Int2ObjectMap<Dimension> dimensions = Int2ObjectMaps.synchronize(new Int2ObjectLinkedOpenHashMap<>());
     private static final IntSet keepLoaded = IntSets.synchronize(new IntOpenHashSet());
-    private static final IntSet unloadQueue = IntSets.synchronize(new IntLinkedOpenHashSet());
     private static final IntSet usedIds = new IntOpenHashSet();
     private static final ConcurrentMap<World, World> weakWorldMap = new MapMaker().weakKeys().weakValues().makeMap();
     private static final Multiset<Integer> leakedWorlds = HashMultiset.create();
@@ -195,36 +192,6 @@ public class DimensionManager {
         server.worlds = tmp.toArray(new WorldServer[0]);
     }
 
-//    public static void initDimension(int dim)
-//    {
-//        WorldServer overworld = getWorld(0);
-//        if (overworld == null)
-//        {
-//            throw new RuntimeException("Cannot Hotload Dim: Overworld is not Loaded!");
-//        }
-//        try
-//        {
-//            DimensionManager.getProviderType(dim);
-//        }
-//        catch (Exception e)
-//        {
-//            FMLLog.log.error("Cannot Hotload Dim: {}", dim, e);
-//            return; // If a provider hasn't been registered then we can't hotload the dim
-//        }
-//        MinecraftServer mcServer = overworld.getMinecraftServer();
-//        ISaveHandler savehandler = overworld.getSaveHandler();
-//        //WorldSettings worldSettings = new WorldSettings(overworld.getWorldInfo());
-//
-//        WorldServer world = (dim == 0 ? overworld : (WorldServer)(new WorldServerMulti(mcServer, savehandler, dim, overworld, mcServer.profiler).init()));
-//        world.addEventListener(new ServerWorldEventHandler(mcServer, world));
-//        MinecraftForge.EVENT_BUS.post(new WorldEvent.Load(world));
-//        if (!mcServer.isSinglePlayer())
-//        {
-//            world.getWorldInfo().setGameType(mcServer.getGameType());
-//        }
-//
-//        mcServer.setDifficultyForAllWorlds(mcServer.getDifficulty());
-//    }
 
     public static WorldServer getWorld(int id) {
         return getWorld(id, false);
@@ -232,7 +199,7 @@ public class DimensionManager {
 
 
     public static WorldServer getWorld(int id, boolean resetUnloadDelay) {
-        if (resetUnloadDelay && unloadQueue.contains(id)) {
+        if (resetUnloadDelay) {
             dimensions.get(id).ticksWaited = 0;
         }
         return worlds.get(id);
@@ -291,54 +258,57 @@ public class DimensionManager {
                 && !keepLoaded.contains(world.provider.getDimension());
     }
 
-    /**
-     * Queues a dimension to unload, if it can be unloaded.
-     * @param id The id of the dimension
-     */
-    public static void unloadWorld(int id) {
-        WorldServer world = worlds.get(id);
-        if (world == null || !canUnloadWorld(world)) return;
 
-        if (unloadQueue.add(id)) {
-            FMLLog.log.debug("Queueing dimension {} to unload", id);
-        }
+    @Deprecated
+    public static void unloadWorld(int id) {
+        throw new UnsupportedOperationException("Elca Server not support this!");
+//        WorldServer world = worlds.get(id);
+//        if (world == null || !canUnloadWorld(world)) return;
+//
+//        if (unloadQueue.add(id)) {
+//            FMLLog.log.debug("Queueing dimension {} to unload", id);
+//        }
     }
 
 
+    @Deprecated
     public static boolean isWorldQueuedToUnload(int id) {
-        return unloadQueue.contains(id);
+        return false;
+        //return unloadQueue.contains(id);
     }
 
     /*
      * To be called by the server at the appropriate time, do not call from mod code.
      */
+    @Deprecated
     public static void unloadWorlds(Hashtable<Integer, long[]> worldTickTimes) {
-        IntIterator queueIterator = unloadQueue.iterator();
-        while (queueIterator.hasNext()) {
-            int id = queueIterator.nextInt();
-            Dimension dimension = dimensions.get(id);
-            if (dimension.ticksWaited < ForgeModContainer.dimensionUnloadQueueDelay) {
-                dimension.ticksWaited++;
-                continue;
-            }
-            WorldServer world = worlds.get(id);
-            queueIterator.remove();
-            dimension.ticksWaited = 0;
-            // Don't unload the world if the status changed
-            if (world == null || !canUnloadWorld(world)) {
-                FMLLog.log.debug("Aborting unload for dimension {} as status changed", id);
-                continue;
-            } try {
-                world.onUnload();
-                world.saveAllChunks(true, null);
-            } catch (MinecraftException e) {
-                FMLLog.log.error("Caught an exception while saving all chunks:", e);
-            } finally {
-                MinecraftForge.EVENT_BUS.post(new WorldEvent.Unload(world));
-                world.flush();
-                setWorld(id, null, world.getMinecraftServer());
-            }
-        }
+        throw new UnsupportedOperationException("Elca Server not support this!");
+//        IntIterator queueIterator = unloadQueue.iterator();
+//        while (queueIterator.hasNext()) {
+//            int id = queueIterator.nextInt();
+//            Dimension dimension = dimensions.get(id);
+//            if (dimension.ticksWaited < ForgeModContainer.dimensionUnloadQueueDelay) {
+//                dimension.ticksWaited++;
+//                continue;
+//            }
+//            WorldServer world = worlds.get(id);
+//            queueIterator.remove();
+//            dimension.ticksWaited = 0;
+//            // Don't unload the world if the status changed
+//            if (world == null || !canUnloadWorld(world)) {
+//                FMLLog.log.debug("Aborting unload for dimension {} as status changed", id);
+//                continue;
+//            } try {
+//                world.onUnload();
+//                world.saveAllChunks(true, null);
+//            } catch (MinecraftException e) {
+//                FMLLog.log.error("Caught an exception while saving all chunks:", e);
+//            } finally {
+//                MinecraftForge.EVENT_BUS.post(new WorldEvent.Unload(world));
+//                world.flush();
+//                setWorld(id, null, world.getMinecraftServer());
+//            }
+//        }
     }
 
     /**

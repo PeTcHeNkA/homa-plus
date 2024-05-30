@@ -7,48 +7,25 @@ import net.minecraft.world.chunk.storage.AnvilChunkLoader;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.ChunkDataEvent;
+import plus.fserver.server.SStrings;
+
 import java.io.IOException;
 
 
 public class TChunkIOProvider extends TChunkTask {
     private NBTTagCompound nbt;
 
-
     TChunkIOProvider(TQueuedChunk chunk, AnvilChunkLoader loader, ChunkProviderServer provider) {
         super(chunk, loader, provider);
     }
 
 
-    public void addCallback(Runnable callback) {
-        this.callbacks.add(callback);
-    }
-
-
-    public void removeCallback(Runnable callback) {
-        this.callbacks.remove(callback);
-    }
-
-
     @Override
-    public void run() {
-        synchronized(this) {
-            try {
-                Object[] data = null;
-                try {
-                    data = this.loader.loadChunk__Async(chunkInfo.world, chunkInfo.x, chunkInfo.z);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                if (data != null) {
-                    this.nbt = (NBTTagCompound) data[1];
-                    this.chunk = (Chunk) data[0];
-                }
-            } catch (Throwable throwable) {
-                throwable.printStackTrace();
-            } finally {
-                this.finished = true;
-                this.notifyAll();
-            }
+    public void runTask() throws IOException {
+        Object[] data = this.loader.loadChunk__Async(chunkInfo.world, chunkInfo.x, chunkInfo.z);
+        if (data != null) {
+            this.nbt = (NBTTagCompound) data[1];
+            this.chunk = (Chunk) data[0];
         }
     }
 
@@ -57,7 +34,7 @@ public class TChunkIOProvider extends TChunkTask {
     public void syncCallback() {
         try {
             if (chunk != null) {
-                this.loader.loadEntities(this.chunkInfo.world, this.nbt.getCompoundTag("Level"), this.chunk);
+                this.loader.loadEntities(this.chunkInfo.world, this.nbt.getCompoundTag(SStrings.CL_LEVEL), this.chunk);
 
                 MinecraftForge.EVENT_BUS.post(new ChunkDataEvent.Load(this.chunk, this.nbt));
 

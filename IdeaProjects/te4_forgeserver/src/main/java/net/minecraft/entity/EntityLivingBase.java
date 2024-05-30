@@ -1299,9 +1299,22 @@ public abstract class EntityLivingBase extends Entity {
 
     public void setSprinting(boolean sprinting) {
         super.setSprinting(sprinting);
-        IAttributeInstance iattributeinstance = this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED);
-        if (iattributeinstance.getModifier(SPRINTING_SPEED_BOOST_ID) != null) iattributeinstance.removeModifier(SPRINTING_SPEED_BOOST);
-        if (sprinting) iattributeinstance.applyModifier(SPRINTING_SPEED_BOOST);
+        IAttributeInstance attr = this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED);
+        if (attr.getModifier(SPRINTING_SPEED_BOOST_ID) != null) attr.removeModifier(SPRINTING_SPEED_BOOST);
+        if (sprinting) attr.applyModifier(SPRINTING_SPEED_BOOST);
+    }
+
+
+    public void setSprintingTrue(){
+        super.setSprinting(true);
+        IAttributeInstance attr = this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED);
+        if (attr.getModifier(SPRINTING_SPEED_BOOST_ID) != null) attr.removeModifier(SPRINTING_SPEED_BOOST);
+        attr.applyModifier(SPRINTING_SPEED_BOOST);
+    }
+
+
+    public void setSprintingFalse(){
+        super.setSprinting(false);
     }
 
 

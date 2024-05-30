@@ -1409,8 +1409,8 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
     public static void registerFixes(DataFixer fixer) {
         fixer.registerWalker(FixTypes.ENTITY, new IDataWalker() {
             public NBTTagCompound process(IDataFixer fixer, NBTTagCompound compound, int versionIn) {
-                if (compound.hasKey("Passengers", 9)) {
-                    NBTTagList nbttaglist = compound.getTagList("Passengers", 10);
+                if (compound.hasKey(SStrings.Passengers, 9)) {
+                    NBTTagList nbttaglist = compound.getTagList(SStrings.Passengers, 10);
 
                     for (int i = 0; i < nbttaglist.tagCount(); ++i) {
                         nbttaglist.set(i, fixer.process(FixTypes.ENTITY, nbttaglist.getCompoundTagAt(i), versionIn));
@@ -1497,9 +1497,9 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
     public void readFromNBT(NBTTagCompound compound) {
         try {
-            NBTTagList pos = compound.getTagList("Pos", 6);
-            NBTTagList motion = compound.getTagList("Motion", 6);
-            NBTTagList rotation = compound.getTagList("Rotation", 5);
+            NBTTagList pos = compound.getTagList(SStrings.Pos, 6);
+            NBTTagList motion = compound.getTagList(SStrings.Motion, 6);
+            NBTTagList rotation = compound.getTagList(SStrings.Rotation, 5);
             this.motionX = motion.getDoubleAt(0);
             this.motionY = motion.getDoubleAt(1);
             this.motionZ = motion.getDoubleAt(2);
@@ -1531,48 +1531,48 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
             this.prevRotationPitch = this.rotationPitch;
             this.setRotationYawHead(this.rotationYaw);
             this.setRenderYawOffset(this.rotationYaw);
-            this.fallDistance = compound.getFloat("FallDistance");
-            this.fire = compound.getShort("Fire");
-            this.setAir(compound.getShort("Air"));
-            this.onGround = compound.getBoolean("OnGround");
+            this.fallDistance = compound.getFloat(SStrings.FallDistance);
+            this.fire = compound.getShort(SStrings.Fire);
+            this.setAir(compound.getShort(SStrings.Air));
+            this.onGround = compound.getBoolean(SStrings.OnGround);
 
-            if (compound.hasKey("Dimension")) {
-                this.dimension = compound.getInteger("Dimension");
+            if (compound.hasKey(SStrings.Dimension)) {
+                this.dimension = compound.getInteger(SStrings.Dimension);
             }
 
-            this.invulnerable = compound.getBoolean("Invulnerable");
-            this.timeUntilPortal = compound.getInteger("PortalCooldown");
+            this.invulnerable = compound.getBoolean(SStrings.Invulnerable);
+            this.timeUntilPortal = compound.getInteger(SStrings.PortalCooldown);
 
-            if (compound.hasUniqueId("UUID")) {
-                this.entityUniqueID = compound.getUniqueId("UUID");
+            if (compound.hasUniqueId(SStrings.UUID)) {
+                this.entityUniqueID = compound.getUniqueId(SStrings.UUID);
                 this.cachedUniqueIdString = this.entityUniqueID.toString();
             }
 
             this.mutPosition(this.posX, this.posY, this.posZ);
             this.setRotation(this.rotationYaw, this.rotationPitch);
 
-            if (compound.hasKey("CustomName", 8)) {
-                this.setCustomNameTag(compound.getString("CustomName"));
+            if (compound.hasKey(SStrings.CustomName, 8)) {
+                this.setCustomNameTag(compound.getString(SStrings.CustomName));
             }
 
-            this.setAlwaysRenderNameTag(compound.getBoolean("CustomNameVisible"));
+            this.setAlwaysRenderNameTag(compound.getBoolean(SStrings.CustomNameVisible));
 
             if(compound.hasKey("CommandStats", 10)){
                 if(cmdResultStats == null)this.cmdResultStats = new CommandResultStats();
                 this.cmdResultStats.readStatsFromNBT(compound);
             }
 
-            this.setSilent(compound.getBoolean("Silent"));
-            this.setNoGravity(compound.getBoolean("NoGravity"));
-            this.setGlowing(compound.getBoolean("Glowing"));
-            updateBlocked = compound.getBoolean("UpdateBlocked");
+            this.setSilent(compound.getBoolean(SStrings.Silent));
+            this.setNoGravity(compound.getBoolean(SStrings.NoGravity));
+            this.setGlowing(compound.getBoolean(SStrings.Glowing));
+            updateBlocked = compound.getBoolean(SStrings.UpdateBlocked);
 
-            if (compound.hasKey("ForgeData")) customEntityData = compound.getCompoundTag("ForgeData");
-            if (this.capabilities != null && compound.hasKey("ForgeCaps")) this.capabilities.deserializeNBT(compound.getCompoundTag("ForgeCaps"));
+            if (compound.hasKey(SStrings.ForgeData)) customEntityData = compound.getCompoundTag(SStrings.ForgeData);
+            if (this.capabilities != null && compound.hasKey(SStrings.ForgeCaps)) this.capabilities.deserializeNBT(compound.getCompoundTag("ForgeCaps"));
 
-            if (compound.hasKey("Tags", 9)) {
+            if (compound.hasKey(SStrings.Tags, 9)) {
                 this.tags.clear();
-                NBTTagList nbttaglist1 = compound.getTagList("Tags", 8);
+                NBTTagList nbttaglist1 = compound.getTagList(SStrings.Tags, 8);
                 int i = Math.min(nbttaglist1.tagCount(), 1024);
 
                 for (int j = 0; j < i; ++j) {
@@ -1585,8 +1585,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
             if (this.shouldSetPosAfterLoading()) {
                 this.mutPosition(this.posX, this.posY, this.posZ);
             }
-        }
-        catch (Throwable throwable) {
+        } catch (Throwable throwable) {
             CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Loading entity NBT");
             CrashReportCategory crashreportcategory = crashreport.makeCategory("Entity being loaded");
             this.addEntityCrashInfo(crashreportcategory);
@@ -2729,11 +2728,14 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         return capabilities == null ? null : capabilities.getCapability(capability, facing);
     }
 
+
+    @Override
     public void deserializeNBT(NBTTagCompound nbt) {
         this.readFromNBT(nbt);
     }
 
 
+    @Override
     public NBTTagCompound serializeNBT() {
         NBTTagCompound ret = new NBTTagCompound();
         ret.setString("id", this.getEntityString());

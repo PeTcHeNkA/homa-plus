@@ -11,11 +11,14 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ReportedException;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.DimensionManager;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import plus.fserver.ElcaConfig;
+import plus.fserver.api.ElcaServerUtls;
 import plus.fserver.api.PWorldServer;
 import plus.fserver.world.light.api.ILightingEngineProvider;
 import java.util.concurrent.*;
@@ -24,7 +27,7 @@ import java.util.concurrent.*;
 public final class AsyWorldTickerV2 implements ThreadFactory, IAsyWorldTicker{
     private static final boolean useSync = false;
     private static final Logger LOGGER = LogManager.getLogger();
-    public final ScheduledThreadPoolExecutor service;
+    public final ScheduledExecutorService service;
     private final ConcurrentHashMap<Integer, WorldInfo> infs = new ConcurrentHashMap<>();
     private final MinecraftServer server;
     private final int saveAllEvery = ElcaConfig.SAVE_WORLD_RATE;
@@ -34,6 +37,7 @@ public final class AsyWorldTickerV2 implements ThreadFactory, IAsyWorldTicker{
     private int tickCounter;
     private int countThreads = 0;
     private long lastError = 0;
+    private final ScheduledFuture<?> netFuture;
 
     static{
         System.out.printf("Async ticker V2 initialized\n");
@@ -44,9 +48,11 @@ public final class AsyWorldTickerV2 implements ThreadFactory, IAsyWorldTicker{
     public AsyWorldTickerV2(MinecraftServer server){
         this.server = server;
         this.ignoreErrors = ElcaConfig.IGNORE_ERRORS;
-        service = new AsyPoolTickerExecutor(ElcaConfig.ASY_THREAD_POOL_SIZE, this);
+        service = ElcaServerUtls.choosePool(server);
+        //service = new AsyPoolTickerExecutor(ElcaConfig.ASY_THREAD_POOL_SIZE, this);
         EnumConnectionState.optimizeAccess();
-        service.scheduleAtFixedRate(new NetworkTicker(), 0, ElcaConfig.NETWORK_TICK_RATE, TimeUnit.MILLISECONDS);
+
+        netFuture = service.scheduleAtFixedRate(new NetworkTicker(), 0, ElcaConfig.NETWORK_TICK_RATE, TimeUnit.MILLISECONDS);
     }
 
     class NetworkTicker implements Runnable{
@@ -73,12 +79,7 @@ public final class AsyWorldTickerV2 implements ThreadFactory, IAsyWorldTicker{
     public void stop(){
         if(!enabled)return;
         enabled = false;
-        service.shutdown();
-        try {
-            service.awaitTermination(10, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        netFuture.cancel(true);
     }
 
 
@@ -305,15 +306,17 @@ public final class AsyWorldTickerV2 implements ThreadFactory, IAsyWorldTicker{
     }
 
 
-    private void unload(WorldServer server, int id) {
+    private void unload(WorldServer world, int id) {
         try {
-            if(server.getChunkProvider().canSave()) {
-                server.saveAllChunks(true,null);
-                server.getChunkProvider().flushToDisk();
+            world.onUnload();
+            if(world.getChunkProvider().canSave()) {
+                world.saveAllChunks(true,null);
+                world.getChunkProvider().flushToDisk();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            onError(world, e);
         }
+        MinecraftForge.EVENT_BUS.post(new WorldEvent.Unload(world));
         DimensionManager.setWorld(id, null, this.server);
     }
 }

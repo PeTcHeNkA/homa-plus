@@ -1228,8 +1228,8 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
-    public final boolean inInWorldBorder(int x, int z) {
-        return x > worldBMinx && x < worldBMaxx && z > worldBMinz && z < worldBMaxz;
+    public final boolean inInWorldBorder(int blockX, int blockZ) {
+        return blockX > worldBMinx && blockX < worldBMaxx && blockZ > worldBMinz && blockZ < worldBMaxz;
     }
 
 
@@ -2660,11 +2660,11 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     public BlockPos getSpawnPoint() {
-        BlockPos blockpos1 = this.provider.getSpawnPoint();
-        if (!this.getWorldBorder().contains(blockpos1)) {
-            blockpos1 = this.getHeight(new BlockPos(this.getWorldBorder().getCenterX(), 0.0D, this.getWorldBorder().getCenterZ()));
+        BlockPos point = this.provider.getSpawnPoint();
+        if (!inInWorldBorder(point.getX(), point.getY())) {
+            point = this.getHeight(new BlockPos(this.getWorldBorder().getCenterX(), 0.0D, this.getWorldBorder().getCenterZ()));
         }
-        return blockpos1;
+        return point;
     }
 
 

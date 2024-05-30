@@ -1,10 +1,13 @@
 package plus.fserver.server.chunk.io;
 
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
 import net.minecraft.world.gen.ChunkProviderServer;
+import net.minecraftforge.fml.common.FMLLog;
 import java.util.concurrent.ConcurrentLinkedQueue;
+
 
 public abstract class TChunkTask implements Runnable{
     protected final TQueuedChunk chunkInfo;
@@ -22,6 +25,34 @@ public abstract class TChunkTask implements Runnable{
     }
 
 
+    @Override
+    public final void run() {
+        synchronized(this) {
+            if(finished)return;
+            try {
+                runTask();
+            } catch (Throwable throwable) {
+                FMLLog.log.error(
+                        "Exception run chunk task at ["+chunkInfo.x+", "+chunkInfo.z+"]",
+                        throwable
+                );
+            } finally {
+                this.finished = true;
+                this.notifyAll();
+            }
+        }
+    }
+
+
+    public final void await(){
+        if(finished)return;
+        run();
+    }
+
+
+    protected abstract void runTask() throws Exception;
+
+
     public abstract void syncCallback();
 
 
@@ -35,8 +66,16 @@ public abstract class TChunkTask implements Runnable{
     }
 
 
-    public boolean runFinished() {
+    public boolean isCompleted() {
         return this.finished;
+    }
+
+
+    public void cansel(){
+        if(finished)return;
+        synchronized(this) {
+            finished = true;
+        }
     }
 
 
@@ -65,5 +104,10 @@ public abstract class TChunkTask implements Runnable{
 
     public World world(){
         return chunkInfo.world;
+    }
+
+
+    public WorldServer worldServer(){
+        return (WorldServer) chunkInfo.world;
     }
 }

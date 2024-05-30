@@ -299,7 +299,7 @@ public class ChunkProviderServer implements IChunkProvider {
                 if(i > 10) realLC.trim();
             }
             if (this.loadedChunks.isEmpty()) {
-                DimensionManager.unloadWorld(this.world.provider.getDimension());
+                //DimensionManager.unloadWorld(this.world.provider.getDimension());
             } else {
                 if(++ticks>1200){
                     int limit = 0;

@@ -24,18 +24,12 @@ public class TChunkUnloadTask extends TChunkTask{
 
 
     @Override
-    public void run() {
-        synchronized(this) {
-            try {
-                provider.saveChunkData(pendings, chunk);
-                provider.saveChunkExtraData(chunk);
-            } catch (Throwable throwable) {
-                throwable.printStackTrace();
-            } finally {
-                this.finished = true;
-                this.chunk.setSaveStatus(false);
-                this.notifyAll();
-            }
+    public void runTask() {
+        try {
+            provider.saveChunkData(pendings, chunk);
+            provider.saveChunkExtraData(chunk);
+        } finally {
+            this.chunk.setSaveStatus(false);
         }
     }
 

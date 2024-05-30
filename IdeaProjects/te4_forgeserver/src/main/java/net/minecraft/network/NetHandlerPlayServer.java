@@ -86,6 +86,7 @@ import net.minecraft.network.play.server.SPacketRespawn;
 import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.network.play.server.SPacketTabComplete;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.stats.RecipeBookServer;
 import net.minecraft.tileentity.CommandBlockBaseLogic;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityCommandBlock;
@@ -356,100 +357,102 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
         if (isMovePlayerPacketInvalid(packetIn)) {
             this.disconnect(new TextComponentTranslation("multiplayer.disconnect.invalid_player_movement"));
         } else {
+            if (networkTickCount == 0) {
+                ++networkTickCount;
+                this.captureCurrentPosition();
+            }
             if (!this.player.queuedEndExit)
-                addToQueue(() -> processPacket0(packetIn));
+                addToQueue(() -> processPlayerSync(packetIn));
         }
     }
 
 
-    private void processPacket0(CPacketPlayer packetIn){
-        if (this.networkTickCount == 0) {
-            this.captureCurrentPosition();
-        }
+    private void processPlayerSync(CPacketPlayer packetIn){
         if (this.targetPos != null) {
             if (this.networkTickCount - this.lastPositionUpdate > 20) {
                 this.lastPositionUpdate = this.networkTickCount;
                 this.setPlayerLocation(this.targetPos.x, this.targetPos.y, this.targetPos.z, this.player.rotationYaw, this.player.rotationPitch);
             }
         } else {
-            WorldServer worldserver = this.server.getWorld(this.player.dimension);
+            final EntityPlayerMP player;
+            WorldServer worldserver = this.server.getWorld((player = this.player).dimension);
 
             this.lastPositionUpdate = this.networkTickCount;
 
-            if (this.player.isRiding()) {
-                this.player.setPositionAndRotation(this.player.posX, this.player.posY, this.player.posZ, packetIn.getYaw(this.player.rotationYaw), packetIn.getPitch(this.player.rotationPitch));
+            if (player.isRiding()) {
+                player.setPositionAndRotation(player.posX, player.posY, player.posZ, packetIn.getYaw(player.rotationYaw), packetIn.getPitch(player.rotationPitch));
 
-                worldserver.getPlayerChunkMap().updateMovingPlayer(this.player);
+                worldserver.getPlayerChunkMap().updateMovingPlayer(player);
             } else {
-                double d4 = packetIn.getX(this.player.posX);
-                double d5 = packetIn.getY(this.player.posY);
-                double d6 = packetIn.getZ(this.player.posZ);
-                float f = packetIn.getYaw(this.player.rotationYaw);
-                float f1 = packetIn.getPitch(this.player.rotationPitch);
+                double d4 = packetIn.getX(player.posX);
+                double d5 = packetIn.getY(player.posY);
+                double d6 = packetIn.getZ(player.posZ);
+                float f = packetIn.getYaw(player.rotationYaw);
+                float f1 = packetIn.getPitch(player.rotationPitch);
                 double d7 = d4 - this.firstGoodX;
                 double d8 = d5 - this.firstGoodY;
                 double d9 = d6 - this.firstGoodZ;
-                double d10 = this.player.motionX * this.player.motionX + this.player.motionY * this.player.motionY + this.player.motionZ * this.player.motionZ;
+                double d10 = player.motionX * player.motionX + player.motionY * player.motionY + player.motionZ * player.motionZ;
                 double d11 = d7 * d7 + d8 * d8 + d9 * d9;
 
-                if (this.player.isPlayerSleeping()) {
+                if (player.isPlayerSleeping()) {
                     if (d11 > 1.0D) {
-                        this.setPlayerLocation(this.player.posX, this.player.posY, this.player.posZ, packetIn.getYaw(this.player.rotationYaw), packetIn.getPitch(this.player.rotationPitch));
+                        this.setPlayerLocation(player.posX, player.posY, player.posZ, packetIn.getYaw(player.rotationYaw), packetIn.getPitch(player.rotationPitch));
                     }
                 } else {
                     ++this.movePacketCounter;
                     int i = this.movePacketCounter - this.lastMovePacketCounter;
 
                     if (i > 5) {
-                        LOGGER.debug("{} is sending move packets too frequently ({} packets since last tick)", this.player.getName(), i);
+                        LOGGER.debug("{} is sending move packets too frequently ({} packets since last tick)", player.getName(), i);
                         i = 1;
                     }
 
-                    if (!this.player.isInvulnerableDimensionChange()) {
-                        if (!this.player.isCreative() && d11 - d10 > ((this.player.isElytraFlying() ? 300.0F : 100.0F) * i)) {
-                            LOGGER.warn("{} moved too quickly! {},{},{}", this.player.getName(), d7, d8, d9);
-                            this.setPlayerLocation(this.player.posX, this.player.posY, this.player.posZ, this.player.rotationYaw, this.player.rotationPitch);
+                    if (!player.isInvulnerableDimensionChange()) {
+                        if (!player.isCreative() && d11 - d10 > ((player.isElytraFlying() ? 300.0F : 100.0F) * i)) {
+                            LOGGER.warn("{} moved too quickly! {},{},{}", player.getName(), d7, d8, d9);
+                            this.setPlayerLocation(player.posX, player.posY, player.posZ, player.rotationYaw, player.rotationPitch);
                             return;
                         }
                     }
-                    boolean flag2 = worldserver.getCollisionBoxes(this.player, this.player.getEntityBoundingBox().shrink(0.0625D)).isEmpty();
+                    boolean flag2 = worldserver.getCollisionBoxes(player, player.getEntityBoundingBox().shrink(0.0625D)).isEmpty();
 
-                    double d0 = this.player.posX,
-                            d1 = this.player.posY,
-                            d2 = this.player.posZ;
+                    double d0 = player.posX,
+                           d1 = player.posY,
+                           d2 = player.posZ;
 
                     d7 = d4 - this.lastGoodX;
                     d8 = d5 - this.lastGoodY;
                     d9 = d6 - this.lastGoodZ;
 
-                    if (this.player.onGround && !packetIn.isOnGround() && d8 > 0.0D) {
-                        this.player.jump();
+                    if (player.onGround && !packetIn.isOnGround() && d8 > 0.0D) {
+                        player.jump();
                     }
 
-                    this.player.move(MoverType.PLAYER, d7, d8, d9);
-                    this.player.onGround = packetIn.isOnGround();
+                    player.move(MoverType.PLAYER, d7, d8, d9);
+                    player.onGround = packetIn.isOnGround();
                     double d12 = d8;
-                    d7 = d4 - this.player.posX;
-                    d8 = d5 - this.player.posY;
+                    d7 = d4 - player.posX;
+                    d8 = d5 - player.posY;
 
                     if (d8 > -0.5D || d8 < 0.5D) {
                         d8 = 0.0D;
                     }
 
-                    d9 = d6 - this.player.posZ;
+                    d9 = d6 - player.posZ;
                     d11 = d7 * d7 + d8 * d8 + d9 * d9;
                     boolean flag = false;
 
-                    if (!this.player.isInvulnerableDimensionChange() && d11 > 0.0625D && !this.player.isPlayerSleeping() && !this.player.interactionManager.isCreative() && this.player.interactionManager.getGameType() != GameType.SPECTATOR) {
+                    if (!player.isInvulnerableDimensionChange() && d11 > 0.0625D && !player.isPlayerSleeping() && !player.interactionManager.isCreative() && player.interactionManager.getGameType() != GameType.SPECTATOR) {
                         flag = true;
-                        LOGGER.warn("{} moved wrongly!", this.player.getName());
+                        LOGGER.warn("{} moved wrongly!", player.getName());
                     }
 
-                    this.player.setPositionAndRotation(d4, d5, d6, f, f1);
-                    this.player.addMovementStat(this.player.posX - d0, this.player.posY - d1, this.player.posZ - d2);
+                    player.setPositionAndRotation(d4, d5, d6, f, f1);
+                    player.addMovementStat(player.posX - d0, player.posY - d1, player.posZ - d2);
 
-                    if (!this.player.noClip && !this.player.isPlayerSleeping()) {
-                        boolean flag1 = worldserver.getCollisionBoxes(this.player, this.player.getEntityBoundingBox().shrink(0.0625D)).isEmpty();
+                    if (!player.noClip && !player.isPlayerSleeping()) {
+                        boolean flag1 = worldserver.getCollisionBoxes(player, player.getEntityBoundingBox().shrink(0.0625D)).isEmpty();
 
                         if (flag2 && (flag || !flag1)) {
                             this.setPlayerLocation(d0, d1, d2, f, f1);
@@ -458,41 +461,39 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
                     }
 
                     this.floating = d12 >= -0.03125D;
-                    this.floating &= !this.server.isFlightAllowed() && !this.player.capabilities.allowFlying;
-                    this.floating &= !this.player.isPotionActive(MobEffects.LEVITATION) && !this.player.isElytraFlying()
+                    this.floating &= !this.server.isFlightAllowed() && !player.capabilities.allowFlying;
+                    this.floating &= !player.isPotionActive(MobEffects.LEVITATION) && !player.isElytraFlying()
                             && !worldserver.checkBlockCollision(
-                            this.player.getEntityBoundingBox().grow(0.0625D).expand(0.0D, -0.55D, 0.0D)
+                            player.getEntityBoundingBox().grow(0.0625D).expand(0.0D, -0.55D, 0.0D)
                     );
-                    this.player.onGround = packetIn.isOnGround();
-                    updateMoving();
-                    this.player.handleFalling(this.player.posY - d1, packetIn.isOnGround());
-                    this.lastGoodX = this.player.posX;
-                    this.lastGoodY = this.player.posY;
-                    this.lastGoodZ = this.player.posZ;
+                    player.onGround = packetIn.isOnGround();
+                    player.getServerWorld().getPlayerChunkMap().updateMovingPlayer(player);
+                    player.handleFalling(player.posY - d1, packetIn.isOnGround());
+                    this.lastGoodX = player.posX;
+                    this.lastGoodY = player.posY;
+                    this.lastGoodZ = player.posZ;
                 }
             }
         }
     }
 
 
-    private void updateMoving(){
-        this.player.getServerWorld().getPlayerChunkMap().updateMovingPlayer(this.player);
-    }
+//    private void updateMoving(){
+//        this.player.getServerWorld().getPlayerChunkMap().updateMovingPlayer(this.player);
+//    }
 
 
     /**
      * @author Te4hno
      */
     public void processPlayerDigging(@NotNull CPacketPlayerDigging packetIn) {
-        WorldServer worldserver = this.server.getWorld(this.player.dimension);
+        WorldServer worldserver = this.server.getWorld(player.dimension);
+        player.markPlayerActive();
         addToQueue(() -> processPlayerDigging0(packetIn, worldserver));
     }
 
 
     private void processPlayerDigging0(CPacketPlayerDigging packetIn, WorldServer world) {
-        BlockPos blockpos = packetIn.getPosition();
-        this.player.markPlayerActive();
-
         switch (packetIn.getAction()) {
             case SWAP_HELD_ITEMS:
                 if (!this.player.isSpectator()) {
@@ -517,28 +518,31 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
             case START_DESTROY_BLOCK:
             case ABORT_DESTROY_BLOCK:
             case STOP_DESTROY_BLOCK:
-                if(blockpos.getY() >= this.server.getBuildLimit())return;
-                double d0 = this.player.posX - ((double)blockpos.getX() + 0.5D);
-                double d1 = this.player.posY - ((double)blockpos.getY() + 0.5D) + 1.5D;
-                double d2 = this.player.posZ - ((double)blockpos.getZ() + 0.5D);
-                double d3 = d0 * d0 + d1 * d1 + d2 * d2;
+                BlockPos pos = packetIn.getPosition();
+                if(pos.getY() >= this.server.getBuildLimit())return;
+                final EntityPlayerMP player;
+                double d0 = (player = this.player).posX - ((double)pos.getX() + 0.5D);
+                double d1 =                 player.posY - ((double)pos.getY() + 0.5D) + 1.5D;
+                double d2 =                 player.posZ - ((double)pos.getZ() + 0.5D);
 
-                double dist = player.getEntityAttribute(EntityPlayer.REACH_DISTANCE).getAttributeValue() + 1;
+                d0 = d0 * d0 + d1 * d1 + d2 * d2;
 
-                if (d3 < dist * dist) {
+                d1 = player.getEntityAttribute(EntityPlayer.REACH_DISTANCE).getAttributeValue() + 1;
+
+                if (d0 < d1 * d1) {
                     if (packetIn.getAction() == CPacketPlayerDigging.Action.START_DESTROY_BLOCK) {
-                        if (world.getWorldBorder().contains(blockpos))
-                            this.player.interactionManager.onBlockClicked(blockpos, packetIn.getFacing());
+                        if (world.inInWorldBorder(pos.getX(), pos.getZ()))
+                            player.interactionManager.onBlockClicked(pos, packetIn.getFacing());
                         else
-                            this.player.connection.netManager.sendPacketE(new SPacketBlockChange(world, blockpos));
+                            player.connection.netManager.sendPacketE(new SPacketBlockChange(world, pos));
                     } else {
                         if (packetIn.getAction() == CPacketPlayerDigging.Action.STOP_DESTROY_BLOCK)
-                            this.player.interactionManager.blockRemoving(blockpos);
+                            player.interactionManager.blockRemoving(pos);
                         else
                             //if(packetIn.getAction() == CPacketPlayerDigging.Action.ABORT_DESTROY_BLOCK)
-                            this.player.interactionManager.cancelDestroyingBlock();
-                        if (world.localSelector.getBlockState(blockpos).getMaterial() != Material.AIR)
-                            this.player.connection.netManager.sendPacketE(new SPacketBlockChange(world, blockpos));
+                            player.interactionManager.cancelDestroyingBlock();
+                        if (world.localSelector.getBlockState(pos).getMaterial() != Material.AIR)
+                            player.connection.netManager.sendPacketE(new SPacketBlockChange(world, pos));
                     }
                 }
         }
@@ -558,9 +562,10 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
 
 
     private void processVehicleMove0(CPacketVehicleMove packetIn){
-        Entity entity = this.player.getLowestRidingEntity();
+        final EntityPlayerMP player;
+        Entity entity = (player = this.player).getLowestRidingEntity();
 
-        if (entity != this.player && entity.getControllingPassenger() == this.player && entity == this.lowestRiddenEnt) {
+        if (entity != player && entity.getControllingPassenger() == player && entity == this.lowestRiddenEnt) {
             double d3 = packetIn.getX();
             double d4 = packetIn.getY();
             double d5 = packetIn.getZ();
@@ -572,7 +577,7 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
             double d10 = d6 * d6 + d7 * d7 + d8 * d8;
 
             if (d10 - d9 > 100.0D && (!this.server.isSinglePlayer() || !this.server.getServerOwner().equals(entity.getName()))) {
-                LOGGER.warn("{} (vehicle of {}) moved too quickly! {},{},{}", entity.getName(), this.player.getName(), d6, d7, d8);
+                LOGGER.warn("{} (vehicle of {}) moved too quickly! {},{},{}", entity.getName(), player.getName(), d6, d7, d8);
                 netManager.sendPacketE(new SPacketMoveVehicle(entity));
                 return;
             }
@@ -584,7 +589,7 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
             float f = packetIn.getYaw(),
                     f1 = packetIn.getPitch();
 
-            WorldServer worldserver = this.player.getServerWorld();
+            WorldServer worldserver = player.getServerWorld();
 
             boolean flag = worldserver.getCollisionBoxes(entity, entity.getEntityBoundingBox().shrink(0.0625D)).isEmpty();
             d6 = d3 - this.lowestRiddenX1;
@@ -594,7 +599,7 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
             double d11 = d7;
 
             entity.setPositionAndRotation(d3, d4, d5, f, f1);
-            this.player.setPositionAndRotation(d3, d4, d5, this.player.rotationYaw, this.player.rotationPitch);
+            player.setPositionAndRotation(d3, d4, d5, player.rotationYaw, player.rotationPitch);
 
             if (flag) {
                 d6 = d3 - entity.posX;
@@ -605,13 +610,14 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
                     flag = !worldserver.getCollisionBoxes(entity, entity.getEntityBoundingBox().shrink(0.0625D)).isEmpty();
                 if(flag) {
                     entity.setPositionAndRotation(d0, d1, d2, f, f1);
-                    this.player.setPositionAndRotation(d0, d1, d2, this.player.rotationYaw, this.player.rotationPitch);
+                    player.setPositionAndRotation(d0, d1, d2, player.rotationYaw, player.rotationPitch);
                     netManager.sendPacketE(new SPacketMoveVehicle(entity));
                     return;
                 }
             }
-            updateMoving();
-            this.player.addMovementStat(this.player.posX - d0, this.player.posY - d1, this.player.posZ - d2);
+            worldserver.getPlayerChunkMap().updateMovingPlayer(player);
+            //updateMoving();
+            player.addMovementStat(player.posX - d0, player.posY - d1, player.posZ - d2);
             this.vehicleFloating = d11 >= -0.03125D && !this.server.isFlightAllowed() && !worldserver.checkBlockCollision(entity.getEntityBoundingBox().grow(0.0625D).expand(0.0D, -0.55D, 0.0D));
             this.lowestRiddenX1 = entity.posX;
             this.lowestRiddenY1 = entity.posY;
@@ -660,13 +666,12 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
      */
     //async
     public void handleRecipeBookUpdate(@NotNull CPacketRecipeInfo info) {
+        final RecipeBookServer book = player.getRecipeBook();
         if (info.getPurpose() == CPacketRecipeInfo.Purpose.SHOWN) {
-            addToQueue(() -> {
-                this.player.getRecipeBook().markSeen(info.getRecipe());
-            });
+            addToQueue(() -> book.markSeen(info.getRecipe()));
         } else if (info.getPurpose() == CPacketRecipeInfo.Purpose.SETTINGS) {
-            this.player.getRecipeBook().setGuiOpen(info.isGuiOpen());
-            this.player.getRecipeBook().setFilteringCraftable(info.isFilteringCraftable());
+            book.setGuiOpen(info.isGuiOpen());
+            book.setFilteringCraftable(info.isFilteringCraftable());
         }
     }
 
@@ -680,9 +685,8 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
             ResourceLocation resourcelocation = packet.getTab();
             Advancement advancement = this.server.getAdvancementManager().getAdvancement(resourcelocation);
 
-            if (advancement != null) {
+            if (advancement != null)
                 this.player.getAdvancements().setSelectedTab(advancement);
-            }
         }
     }
 
@@ -690,11 +694,12 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
     /**
      * @author Te4hno
      */
+    //async, is safe?
     public void handleAnimation(@NotNull CPacketAnimation packetIn) {
         this.player.markPlayerActive();
-        addToQueue(() -> {
-            this.player.swingArm(packetIn.getHand());
-        });
+        //addToQueue(() -> {
+        this.player.swingArm(packetIn.getHand());
+        //});
     }
 
 
@@ -703,12 +708,6 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
      */
     //async
     public void processChatMessage(@NotNull CPacketChatMessage packetIn) {
-        processChatMessage0(packetIn);
-        //packetQueue.add(() -> processChatMessage0(packetIn));
-    }
-
-
-    private void processChatMessage0(CPacketChatMessage packetIn) {
         if (this.player.getChatVisibility() == EntityPlayer.EnumChatVisibility.HIDDEN) {
             TextComponentTranslation textcomponenttranslation = new TextComponentTranslation("chat.cannotSend");
             textcomponenttranslation.getStyle().setColor(TextFormatting.RED);
@@ -746,20 +745,25 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
      */
     public void processEntityAction(@NotNull CPacketEntityAction packetIn) {
         this.player.markPlayerActive();
+        final CPacketEntityAction.Action action;
+
+        switch (action = packetIn.getAction()){
+            case START_SNEAKING:
+                this.player.setSneaking(true);
+                return;
+            case STOP_SNEAKING:
+                this.player.setSneaking(false);
+                return;
+            case START_SPRINTING:
+                addToQueue(player::setSprintingTrue);
+                return;
+            case STOP_SPRINTING:
+                this.player.setSprintingFalse();
+                return;
+        }
+
         addToQueue(() -> {
-            switch (packetIn.getAction()) {
-                case START_SNEAKING:
-                    this.player.setSneaking(true);
-                    break;
-                case STOP_SNEAKING:
-                    this.player.setSneaking(false);
-                    break;
-                case START_SPRINTING:
-                    this.player.setSprinting(true);
-                    break;
-                case STOP_SPRINTING:
-                    this.player.setSprinting(false);
-                    break;
+            switch (action) {
                 case STOP_SLEEPING:
                     if (this.player.isPlayerSleeping()) {
                         this.player.wakeUpPlayer(false, true, true);
@@ -798,7 +802,9 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
                     }
                     break;
                 default:
-                    throw new IllegalArgumentException("Invalid client command!");
+                    player.getServer().ticker().onError(player.getServerWorld(),
+                            new IllegalArgumentException("Invalid client command!")
+                    );
             }
         });
     }
@@ -883,33 +889,37 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
             if (this.player.isSpectator()) {
                 NonNullList<ItemStack> list = NonNullList.create();
 
-                for (int i = 0; i < this.player.openContainer.inventorySlots.size(); ++i) {
-                    list.add(this.player.openContainer.inventorySlots.get(i).getStack());
+                final Container openCtn;
+                for (int i = 0, s = (openCtn = this.player.openContainer).inventorySlots.size(); i < s; ++i) {
+                    list.add(openCtn.inventorySlots.get(i).getStack());
                 }
 
-                this.player.sendAllContents(this.player.openContainer, list);
+                this.player.sendAllContents(openCtn, list);
             } else {
                 addToQueue(() -> {
-                    ItemStack itemStack = this.player.openContainer.slotClick(packetIn.getSlotId(), packetIn.getUsedButton(), packetIn.getClickType(), this.player);
+                    final Container openCtn;
+                    ItemStack itemStack = (openCtn = this.player.openContainer)
+                            .slotClick(packetIn.getSlotId(), packetIn.getUsedButton(), packetIn.getClickType(), this.player);
 
                     if (ItemStack.areItemStacksEqualUsingNBTShareTag(packetIn.getClickedItem(), itemStack)) {
                         netManager.sendPacketE(new SPacketConfirmTransaction(packetIn.getWindowId(), packetIn.getActionNumber(), true));
                         this.player.isChangingQuantityOnly = true;
-                        this.player.openContainer.detectAndSendChanges();
+                        openCtn.detectAndSendChanges();
                         this.player.updateHeldItem();
                         this.player.isChangingQuantityOnly = false;
                     } else {
-                        this.pendingTransactions.addKey(this.player.openContainer.windowId, packetIn.getActionNumber());
+                        this.pendingTransactions.addKey(openCtn.windowId, packetIn.getActionNumber());
                         netManager.sendPacketE(new SPacketConfirmTransaction(packetIn.getWindowId(), packetIn.getActionNumber(), false));
-                        this.player.openContainer.setCanCraft(this.player, false);
-                        NonNullList<ItemStack> list = NonNullList.create();
+                        openCtn.setCanCraft(this.player, false);
 
-                        for (int j = 0; j < this.player.openContainer.inventorySlots.size(); ++j) {
-                            ItemStack itemstack = this.player.openContainer.inventorySlots.get(j).getStack();
-                            ItemStack itemstack1 = itemstack.isEmpty() ? ItemStack.EMPTY : itemstack;
-                            list.add(itemstack1);
+                        final int size = openCtn.inventorySlots.size();
+                        NonNullList<ItemStack> list = NonNullList.withSize(size, ItemStack.EMPTY);
+
+                        for (int j = 0; j < size; ++j) {
+                            ItemStack itemstack = openCtn.inventorySlots.get(j).getStack();
+                            if(!itemstack.isEmpty())list.set(j, itemstack);
                         }
-                        this.player.sendAllContents(this.player.openContainer, list);
+                        this.player.sendAllContents(openCtn, list);
                     }
                 });
             }
@@ -922,11 +932,11 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
      */
     public void func_194308_a(@NotNull CPacketPlaceRecipe packet) {
         this.player.markPlayerActive();
-        addToQueue(() -> {
-            if (!this.player.isSpectator() && this.player.openContainer.windowId == packet.func_194318_a() && this.player.openContainer.getCanCraft(this.player)) {
+        if (!this.player.isSpectator() && this.player.openContainer.windowId == packet.func_194318_a() && this.player.openContainer.getCanCraft(this.player)) {
+            addToQueue(() -> {
                 this.field_194309_H.func_194327_a(this.player, packet.func_194317_b(), packet.func_194319_c());
-            }
-        });
+            });
+        }
     }
 
 
@@ -1047,7 +1057,7 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
     /**
      * @author Te4hno
      */
-    public void processTryUseItemOnBlock(CPacketPlayerTryUseItemOnBlock packetIn) {
+    public void processTryUseItemOnBlock(final CPacketPlayerTryUseItemOnBlock packetIn) {
         WorldServer worldserver = server.getWorld(player.dimension);
         BlockPos blockpos = packetIn.getPos();
         player.markPlayerActive();
@@ -1057,7 +1067,7 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
             dist *= dist;
             if (targetPos == null && player.getDistanceSq(blockpos.getX() + 0.5, blockpos.getY() + 0.5, blockpos.getZ() + 0.5) < dist &&
                     !server.isBlockProtected(worldserver, blockpos, player)
-                    && worldserver.getWorldBorder().contains(blockpos)) {
+                    && worldserver.inInWorldBorder(blockpos.getX(), blockpos.getZ())) {
 
                 addToQueue(() -> {
                     player.interactionManager.processRightClickBlock(
@@ -1090,16 +1100,12 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
      */
     public void processTryUseItem(CPacketPlayerTryUseItem packetIn) {
         //todo fix glitch click to unloaded air
-        EnumHand enumhand = packetIn.getHand();
-        ItemStack itemstack = this.player.getHeldItem(enumhand);
+        final EnumHand enumhand = packetIn.getHand();
+        ItemStack itemstack = player.getHeldItem(enumhand);
         if (!itemstack.isEmpty()) {
-            this.player.markPlayerActive();
-            addToQueue(() -> {
-                this.player.interactionManager.processRightClick(
-                        this.player, this.server.getWorld(this.player.dimension),
-                        itemstack, enumhand
-                );
-            });
+            player.markPlayerActive();
+            final WorldServer world = this.server.getWorld(player.dimension);
+            addToQueue(() -> player.interactionManager.processRightClick(player, world, itemstack, enumhand));
         }
     }
 
@@ -1506,9 +1512,9 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
                     LOGGER.error("Couldn't pick item", exception);
                 }
                 break;
-            case "Elca:Check":
-                System.out.println("Elca detected!");
-                break;
+//            case "Elca:Check":
+//                System.out.println("Elca detected!");
+//                break;
         }
     }
 

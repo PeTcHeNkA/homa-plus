@@ -85,7 +85,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import plus.fserver.ElcaConfig;
-import plus.fserver.api.PStartServer;
 import plus.fserver.api.PWorldServer;
 import plus.fserver.api.PMinecraftServer;
 import plus.fserver.server.AsyWorldTickerV2;
@@ -170,12 +169,13 @@ public abstract class MinecraftServer implements PMinecraftServer, ICommandSende
         this.profileRepo = profileRepoIn;
         this.profileCache = profileCacheIn;
         this.anvilFile = anvilFileIn;
+
+        initTicker();
         this.networkSystem = new NetworkSystem(this);
+
         this.commandManager = this.createCommandManager();
         this.anvilConverterForAnvilFile = new AnvilSaveConverter(anvilFileIn, dataFixerIn);
         this.dataFixer = dataFixerIn;
-
-        initTicker();
     }
 
     static {
@@ -1316,7 +1316,6 @@ public abstract class MinecraftServer implements PMinecraftServer, ICommandSende
                 this.statusResponse.setServerDescription(new TextComponentString(this.motd));
                 this.statusResponse.setVersion(new ServerStatusResponse.Version("1.12.2", 340));
                 this.applyServerIconToResponse(this.statusResponse);
-                PStartServer.onServerStart(getServer());
 
                 while (this.serverRunning) {
                     long k = getCurrentTimeMillis();

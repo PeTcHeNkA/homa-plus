@@ -14,7 +14,6 @@ import net.minecraft.advancements.AdvancementManager;
 import net.minecraft.advancements.FunctionManager;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
-import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReport;
@@ -1044,7 +1043,7 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
         Iterator<TChunkTask> itr = _chunkTasks.values().iterator();
         while (itr.hasNext()) {
             TChunkTask task0 = itr.next();
-            if (task0.runFinished()) {
+            if (task0.isCompleted()) {
                 if (task0.hasCallback())
                     task0.syncCallback();
                 itr.remove();
@@ -1173,6 +1172,20 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
     @Override
     public ConcurrentHashMap<TQueuedChunk, TChunkTask> getChunkTasks() {
         return _chunkTasks;
+    }
+
+
+    @Override
+    public void onUnload(){
+        super.onUnload();
+        Set<Map.Entry<TQueuedChunk, TChunkTask>> entries = _chunkTasks.entrySet();
+        if(entries.isEmpty())return;
+        Iterator<Map.Entry<TQueuedChunk, TChunkTask>> itr = entries.iterator();
+        while (itr.hasNext()){
+            Map.Entry<TQueuedChunk, TChunkTask> res = itr.next();
+            res.getValue().await();
+            itr.remove();
+        }
     }
 
 
