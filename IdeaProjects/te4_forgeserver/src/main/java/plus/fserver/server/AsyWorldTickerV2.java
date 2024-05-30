@@ -48,7 +48,7 @@ public final class AsyWorldTickerV2 implements ThreadFactory, IAsyWorldTicker{
     public AsyWorldTickerV2(MinecraftServer server){
         this.server = server;
         this.ignoreErrors = ElcaConfig.IGNORE_ERRORS;
-        service = ElcaServerUtls.choosePool(server);
+        service = ElcaServerUtls.getPool(server);
         //service = new AsyPoolTickerExecutor(ElcaConfig.ASY_THREAD_POOL_SIZE, this);
         EnumConnectionState.optimizeAccess();
 

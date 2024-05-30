@@ -20,7 +20,8 @@ public final class ElcaServerUtls {
     }
 
 
-    public static ScheduledExecutorService choosePool(MinecraftServer server){
+    public static ScheduledExecutorService getPool(MinecraftServer server){
+        if(server.getNetworkSystem().usedPool != null)return server.getNetworkSystem().usedPool;
         LazyLoadBase<? extends EventLoopGroup> lazyloadbase;
 
         if (Epoll.isAvailable() && server.shouldUseNativeTransport()) {

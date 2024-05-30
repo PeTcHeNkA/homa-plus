@@ -70,7 +70,7 @@ public class NetworkSystem {
     public volatile boolean isAlive;
     private final List<ChannelFuture> endpoints = Collections.<ChannelFuture>synchronizedList(Lists.newArrayList());
     private final List<NetworkManager> networkManagers = Collections.<NetworkManager>synchronizedList(Lists.newArrayList());
-
+    public EventLoopGroup usedPool;
 
     public NetworkSystem(MinecraftServer server) {
         this.server = server;
@@ -113,7 +113,7 @@ public class NetworkSystem {
                     p_initChannel_1_.pipeline().addLast("packet_handler", networkmanager);
                     networkmanager.setNetHandler(new NetHandlerHandshakeTCP(NetworkSystem.this.server, networkmanager));
                 }
-            }).group(lazyloadbase.getValue()).localAddress(address, port)).bind().syncUninterruptibly());
+            }).group(usedPool = lazyloadbase.getValue()).localAddress(address, port)).bind().syncUninterruptibly());
         }
     }
 
@@ -133,7 +133,7 @@ public class NetworkSystem {
                     NetworkSystem.this.networkManagers.add(networkmanager);
                     p_initChannel_1_.pipeline().addLast("packet_handler", networkmanager);
                 }
-            }).group(SERVER_NIO_EVENTLOOP.getValue()).localAddress(LocalAddress.ANY)).bind().syncUninterruptibly();
+            }).group(usedPool = SERVER_NIO_EVENTLOOP.getValue()).localAddress(LocalAddress.ANY)).bind().syncUninterruptibly();
             this.endpoints.add(channelfuture);
         }
 
