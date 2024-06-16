@@ -55,7 +55,8 @@ public class ServerProxy {
                 ItemAccelerator.class,
                 ItemRegenShield.class,
                 ItemProtector.class,
-                ItemGun.class
+                ItemGun.class,
+                ItemCanister.class
         );
         network = NetworkRegistry.INSTANCE.newSimpleChannel(SpMain.MOD_ID);
         //TODO MOVE TO SERVER ONLY
