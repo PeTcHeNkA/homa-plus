@@ -1,7 +1,10 @@
 package plus.common.mashine.oxy;
 
+import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IContainerListener;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.Slot;
+import net.minecraft.item.ItemLeaves;
 import net.minecraft.item.ItemStack;
 import plus.common.etc.ESlot;
 import plus.common.etc.FESlot;
@@ -16,12 +19,11 @@ public class SpOxyChargerContainer extends PlayerExtendedBlockContainer {
     public SpOxyChargerContainer(IInventory playerInv, IInventory oxyInv) {
         super(oxyInv);
 
-        addSlotToContainer(new ESlot(oxyInv, 0, 44,    18, this::onEditModule));
-        addSlotToContainer(new ESlot(oxyInv, 1, 44+18, 18, this::onEditModule));
-        addSlotToContainer(new ESlot(oxyInv, 1, 44+36, 18, this::onEditModule));
-        addSlotToContainer(new ESlot(oxyInv, 1, 44+54, 18, this::onEditModule));
-        addSlotToContainer(new ESlot(oxyInv, 1, 44+72, 18, this::onEditModule));
-
+        addSlotToContainer(new SlotAddon(oxyInv, 0, 44,    18));
+        addSlotToContainer(new SlotAddon(oxyInv, 1, 44+18, 18));
+        addSlotToContainer(new SlotAddon(oxyInv, 1, 44+36, 18));
+        addSlotToContainer(new SlotAddon(oxyInv, 1, 44+54, 18));
+        addSlotToContainer(new SlotAddon(oxyInv, 1, 44+72, 18));
 
         addSlotToContainer(new FESlot(oxyInv, 2, 27,    47,
                 SpOxyChargerContainer::isOxyBallon,
@@ -36,6 +38,22 @@ public class SpOxyChargerContainer extends PlayerExtendedBlockContainer {
 
         addPlayerSlots(playerInv);
 
+    }
+
+    private class SlotAddon extends Slot {
+        public SlotAddon(IInventory inv, int i, int x, int y) {
+            super(inv, i, x, y);
+        }
+        @Override
+        public boolean isItemValid(ItemStack stack) {
+            return stack.getItem() instanceof ItemLeaves;
+        }
+
+        @Override
+        public void onSlotChanged() {
+            super.onSlotChanged();
+            onEditModule();
+        }
     }
 
 
