@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "   ",
+    "PVP",
+    " P "
+  ],
+  "key": {
+    "P": {"item": "te4_spships:plate_iron"},
+    "V": {"item": "minecraft:bucket"}
+  },
+  "result": {
+    "item": "te4_spships:empty_canister",
+    "count": 1
+  }
+}

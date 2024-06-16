@@ -5,6 +5,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -18,7 +19,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 import net.minecraftforge.event.ForgeEventFactory;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
 import javax.annotation.Nullable;
+import java.util.List;
 
 
 public class ItemCanister extends BasicItem{
@@ -32,10 +37,12 @@ public class ItemCanister extends BasicItem{
         super(name);
         setMaxStackSize(1);
         setMaxDamage(17);
+        setTranslationKey("canister."+block.getRegistryName().getPath());
         this.containedBlock = block;
     }
 
 
+    @Override
     public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand) {
         ItemStack itemstack = player.getHeldItem(hand);
         //boolean flag = itemstack.getItemDamage() >= 16;
@@ -99,36 +106,28 @@ public class ItemCanister extends BasicItem{
 
 
     private ItemStack fillBucket(ItemStack stack, EntityPlayer player, Item item) {
-        if (false && player.capabilities.isCreativeMode) {
-            return stack;
-        } else {
-            int dmg = stack.getItemDamage();
-            if(dmg >= 16) {
-                ItemStack result = new ItemStack(item);
-                result.setItemDamage(13);
-                return result;
-            }
-
-            stack.setItemDamage(dmg-4);
-            return stack;
+        int dmg = stack.getItemDamage();
+        if(dmg >= 16) {
+            ItemStack result = new ItemStack(item);
+            result.setItemDamage(13);
+            return result;
         }
+
+        stack.setItemDamage(dmg-4);
+        return stack;
     }
 
 
     private ItemStack freeBucket(ItemStack stack, EntityPlayer player) {
-        if (false && player.capabilities.isCreativeMode) {
-            return stack;
-        } else {
-            int dmg = stack.getItemDamage();
-            if(dmg >= 13) {
-                ItemStack result = new ItemStack(EMPTY_CANISTER);
-                result.setItemDamage(17);
-                return result;
-            }
-            if(dmg == 0)dmg = 1;
-            stack.setItemDamage(dmg+4);
-            return stack;
+        int dmg = stack.getItemDamage();
+        if(dmg >= 13) {
+            ItemStack result = new ItemStack(EMPTY_CANISTER);
+            result.setItemDamage(17);
+            return result;
         }
+        if(dmg == 0)dmg = 1;
+        stack.setItemDamage(dmg+4);
+        return stack;
     }
 
 
@@ -170,6 +169,14 @@ public class ItemCanister extends BasicItem{
     }
 
 
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void addInformation(ItemStack stack, @Nullable World world, List<String> lore, ITooltipFlag flag) {
+        int dmg = 16 - (stack.getItemDamage() - 1);
+        addLore(lore, "canister_lvl", dmg>>2);
+    }
+
+
     public void getSubItems(CreativeTabs tabs, NonNullList<ItemStack> stacks) {
         if (this.isInCreativeTab(tabs)) {
             ItemStack stack = new ItemStack(this);
@@ -180,5 +187,11 @@ public class ItemCanister extends BasicItem{
             }
             stacks.add(stack);
         }
+    }
+
+
+    @Override
+    public void onCreated(ItemStack stack, World world, EntityPlayer player) {
+        stack.setItemDamage(17);
     }
 }

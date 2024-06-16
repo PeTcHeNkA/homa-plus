@@ -1,0 +1,13 @@
+{"parent": "minecraft:recipes/root",
+  "requirements": [["has_item"]],
+  "rewards": {"recipes": [
+    "te4_spships:canister",
+    "te4_spships:ms_craft"
+  ]},
+  "criteria": {
+    "has_item": {"trigger": "minecraft:inventory_changed",
+      "conditions": {"items": [{
+        "item": "te4_spships:plate_iron"
+      }]}
+    }
+  }}

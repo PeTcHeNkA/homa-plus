@@ -61,6 +61,10 @@ item.sp_armor.name=§aКорабельная обшивка
 item.oxy_ballon_l1.name=§bКислородные баллоны
 item.oxy_ballon_l2.name=§aКислородные баллоны
 
+item.canister.air.name=§bПустая канистра
+item.canister.water.name=§bКанистра с водой
+item.canister.lava.name=§bКанистра с лавой
+
 item.spship_model.name=§dЛичный корабль
 
 item.sp_module_shield_l1.name=§bГенератор щита
@@ -138,7 +142,7 @@ sp_lore.protector_phys=Поглощение физ: §c%s%%/%sE
 sp_lore.protector_enrg=Поглощение эн: §c%s%%/%sE
 sp_lore.cur_oxy=Запас кислорода: §c%s/%sC
 
-
+sp_lore.canister_lvl=Вместимость: %s/4
 sp_lore.more_inf=§eБольше информации...
 sp_lore.teh_prc=Техпроцесс: §c%s
 sp_lore.teh_pow=Мощность:   §c%s
