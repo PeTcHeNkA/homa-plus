@@ -7,7 +7,6 @@
   "mixins": [
     "MixinCommand",
     "MixinContainerPlayer",
-    "MixinEntityTracker",
     "MixinInventoryPlayer",
     "MixinItem",
     "MixinPlayer"

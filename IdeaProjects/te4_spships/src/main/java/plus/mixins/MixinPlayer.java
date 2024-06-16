@@ -308,100 +308,6 @@ public abstract class MixinPlayer extends EntityLivingBase implements PlayerSpsh
         }
     }
 
-
-//    /**
-//     * @author Te4hno
-//     * @reason add Sp
-//     */
-//    @Overwrite
-//    public void travel(float strafe, float vertical, float forward) {
-//        double d0 = this.posX;
-//        double d1 = this.posY;
-//        double d2 = this.posZ;
-//
-//        if (this.capabilities.isFlying && !this.isRiding()) {
-//            double d3 = this.motionY;
-//            float f = this.jumpMovementFactor;
-//            this.jumpMovementFactor = this.capabilities.getFlySpeed() * (float)(this.isSprinting() ? 2 : 1);
-//
-//            if(isSpshipMode()){
-//                travel0(strafe, vertical, forward);
-//            } else {
-//                super.travel(strafe, vertical, forward);
-//            }
-//
-//            this.motionY = d3 * 0.6D;
-//            this.jumpMovementFactor = f;
-//            this.fallDistance = 0.0F;
-//            this.setFlag(7, false);
-//        } else {
-//            super.travel(strafe, vertical, forward);
-//        }
-//        this.addMovementStat(this.posX - d0, this.posY - d1, this.posZ - d2);
-//
-//    }
-//
-//    private void travel0(float strafe, float vertical, float forward) {
-//        float f6 = 0.91F;
-//        BlockPos.PooledMutableBlockPos pos = BlockPos.PooledMutableBlockPos.retain(this.posX, this.getEntityBoundingBox().minY - 1.0D, this.posZ);
-//
-//        if (this.onGround) {
-//            IBlockState underState = this.world.getBlockState(pos);
-//            f6 = underState.getBlock().getSlipperiness(underState, this.world, pos, this) * 0.91F;
-//        }
-//
-//        float f7 = 0.16277136F / (f6 * f6 * f6);
-//        float f8;
-//
-//        if (this.onGround) {
-//            f8 = this.getAIMoveSpeed() * f7;
-//        } else {
-//            f8 = this.jumpMovementFactor;
-//        }
-//
-//        this.moveRelative(strafe, vertical, forward, f8);
-//        f6 = 0.91F;
-//
-//        if (this.onGround) {
-//            IBlockState underState = this.world.getBlockState(pos.setPos(this.posX, this.getEntityBoundingBox().minY - 1.0D, this.posZ));
-//            f6 = underState.getBlock().getSlipperiness(underState, this.world, pos, this) * 0.91F;
-//        }
-//
-//        double prev = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
-//
-//        this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
-//
-//        if (this.collidedHorizontally) {
-//            double d11 = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
-//            System.out.println("NEN! w"+world.isRemote+";"+prev+"->"+d11);
-//            double d3 = prev - d11;
-//            float f5 = (float)(d3 * 10.0D - 3.0D);
-//
-//            if (f5 > 0.0F) {
-//                this.playSound(this.getFallSound((int)f5), 1.0F, 1.0F);
-//                this.attackEntityFrom(DamageSource.FLY_INTO_WALL, f5);
-//            }
-//        }
-//
-//        pos.setPos(this.posX, 0.0D, this.posZ);
-//
-//        if (!this.world.isRemote || this.world.isBlockLoaded(pos) && this.world.getChunk(pos).isLoaded()) {
-//            if (!this.hasNoGravity()) {
-//                this.motionY -= 0.08D;
-//            }
-//           } else if (this.posY > 0.0D) {
-//            this.motionY = -0.1D;
-//        } else {
-//            this.motionY = 0.0D;
-//        }
-//
-//        this.motionY *= 0.9800000190734863D;
-//        this.motionX *= f6;
-//        this.motionZ *= f6;
-//        pos.release();
-//    }
-//
-
     /**
      * @author Te4hno
      * @reason add Sp
@@ -654,39 +560,8 @@ public abstract class MixinPlayer extends EntityLivingBase implements PlayerSpsh
     }
 
 
-    /**
-     * @author Te4hno
-     * @reason add Sp
-     */
-    @Overwrite
-    public void onDeath(DamageSource cause){
-        super.onDeath(cause);
-        this.setSize(0.2F, 0.2F);
-        this.setPosition(this.posX, this.posY, this.posZ);
-        this.motionY = 0.1;
-
-        captureDrops = true;
-        capturedDrops.clear();
-
-        if (!this.isSpectator()) {
-            this.destroyVanishingCursedItems();
-            this.inventory.dropAllItems();
-        }
-
-        captureDrops = false;
-
-        if (cause != null) {
-            this.motionX = -MathHelper.cos((this.attackedAtYaw + this.rotationYaw) * 0.017453292F) * 0.1F;
-            this.motionZ = -MathHelper.sin((this.attackedAtYaw + this.rotationYaw) * 0.017453292F) * 0.1F;
-        } else {
-            this.motionX = 0.0D;
-            this.motionZ = 0.0D;
-        }
-
-        this.addStat(StatList.DEATHS);
-        this.takeStat(StatList.TIME_SINCE_DEATH);
-        this.extinguish();
-        this.setFlag(0, false);
+    @Inject(method = "onDeath", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;onDeath(Lnet/minecraft/util/DamageSource;)V"))
+    private void onDeathSp(DamageSource src, CallbackInfo ci){
         setSpMode(false);
     }
 }

@@ -63,10 +63,14 @@ task prepareAssets(type: Copy) {
 repositories {
     mavenCentral()
     maven { url = "https://repo.spongepowered.org/maven" }
+    flatDir {
+        dirs "C:/Users/Te4hnoPlus/IdeaProjects/REPO/"
+    }
 }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:1.12.2-14.23.5.2855"
+    implementation 'plus:mergetoolfixed:0.2.3.3'
+    minecraft "net.minecraftforge:forge:1.12.2-14.23.5.2859"
     implementation "org.spongepowered:mixin:0.8.3-SNAPSHOT"
     annotationProcessor 'org.spongepowered:mixin:0.8.3-SNAPSHOT:processor'
 }
@@ -90,7 +94,7 @@ jar.finalizedBy('reobfJar')
 sourceSets {
     main {
         java {
-            srcDir 'C:/Users/Te4hnoPlus/IdeaProjects/TsonConfigurations/src/main/java'
+            srcDir 'C:/Users/Te4hnoPlus/IdeaProjects/TsonConfigurations/core/src/main/java'
             srcDir 'C:/Users/Te4hnoPlus/IdeaProjects/te4_async_utls/src/main/java'
         }
     }
