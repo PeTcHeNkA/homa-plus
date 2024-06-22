@@ -19,12 +19,11 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import plus.fserver.ElcaConfig;
 import plus.fserver.api.ElcaServerUtls;
-import plus.fserver.api.PWorldServer;
 import plus.fserver.world.light.api.ILightingEngineProvider;
 import java.util.concurrent.*;
 
 
-public final class AsyWorldTickerV2 implements ThreadFactory, IAsyWorldTicker{
+public final class AsyWorldTickerV2 implements ThreadFactory{
     private static final boolean useSync = false;
     private static final Logger LOGGER = LogManager.getLogger();
     public final ScheduledExecutorService service;
@@ -68,14 +67,12 @@ public final class AsyWorldTickerV2 implements ThreadFactory, IAsyWorldTicker{
     }
 
 
-    @Override
     public void runAsync(Runnable task){
         if(enabled) service.execute(task);
         else task.run();
     }
 
 
-    @Override
     public void stop(){
         if(!enabled)return;
         enabled = false;
@@ -83,13 +80,11 @@ public final class AsyWorldTickerV2 implements ThreadFactory, IAsyWorldTicker{
     }
 
 
-    @Override
     public boolean isEnabled() {
         return enabled;
     }
 
 
-    @Override
     public void markNeedSave(){
         for(WorldInfo inf:infs.values()){
             inf.save = saveAllEvery;
@@ -97,7 +92,6 @@ public final class AsyWorldTickerV2 implements ThreadFactory, IAsyWorldTicker{
     }
 
 
-    @Override
     public void tick() throws Throwable {
         Integer[] ids = DimensionManager.getIDs(this.tickCounter++ % 300 == 0);
         for(int id:ids){
@@ -228,7 +222,7 @@ public final class AsyWorldTickerV2 implements ThreadFactory, IAsyWorldTicker{
             if(inf.checkToUnload++> ElcaConfig.CHECK_TO_UNLOAD_RATE) {
                 //todo fix join to unloading world
                 inf.checkToUnload = 0;
-                if (((PWorldServer)worldserver).canUnload()) {
+                if (worldserver.canUnload()) {
                     unload(worldserver, inf.id);
                     inf.save = 0;
                     inf.stop();

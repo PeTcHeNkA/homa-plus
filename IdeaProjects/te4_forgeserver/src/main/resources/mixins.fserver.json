@@ -12,8 +12,6 @@
     "light.MixinChunkProviderServer",
     "light.MixinExtendedBlockStorage",
     "light.MixinSPacketChunkData",
-    "md.VillageCollectionPatch",
-    "pf.EntitySheepPatch",
     "pf.EntityXPOrbPatch",
     "pf.GameDataPatch",
     "pf.SpawnListEntryPatch",
@@ -21,7 +19,6 @@
     "stabile.ForgeRegistryPatch",
     "stabile.ServerCommandPatch",
     "stabile.WorldInfoPatch",
-    "stabile.WorldProviderPatch",
     "stabile.WorldTypePatch"
   ],
   "server": [

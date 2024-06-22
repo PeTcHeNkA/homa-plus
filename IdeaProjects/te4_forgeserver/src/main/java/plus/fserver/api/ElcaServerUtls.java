@@ -5,6 +5,9 @@ import io.netty.channel.epoll.Epoll;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.LazyLoadBase;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.World;
+import net.minecraft.world.storage.ISaveHandler;
 import plus.fserver.ElcaCV2;
 import java.util.concurrent.ScheduledExecutorService;
 import static net.minecraft.network.NetworkSystem.SERVER_EPOLL_EVENTLOOP;
@@ -17,6 +20,17 @@ public final class ElcaServerUtls {
     public static TextComponentString textCompOf(String src){
         if(ElcaCV2.LIBBUILD)return new TextComponentString(src);
         return new TextComponentAuto(src);
+    }
+
+
+    public static ISaveHandler getSaveHandler(MinecraftServer server){
+        return server.getSaveHandler();
+    }
+
+
+    public static IBlockAccess access(World world){
+        if(ElcaCV2.LIBBUILD)return world;
+        else return world.access();
     }
 
 

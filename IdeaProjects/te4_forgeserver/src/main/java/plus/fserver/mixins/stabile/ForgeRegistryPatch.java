@@ -4,11 +4,11 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.spongepowered.asm.mixin.Mixin;
 import net.minecraftforge.registries.ForgeRegistry;
 import org.spongepowered.asm.mixin.Shadow;
-import plus.fserver.api.PForgeRegistry;
+import plus.fserver.api.ElcaForgeRegistry;
 
 
 @Mixin(value = ForgeRegistry.class, remap = false)
-public abstract class ForgeRegistryPatch<V extends IForgeRegistryEntry<V>> implements PForgeRegistry<V> {
+public abstract class ForgeRegistryPatch<V extends IForgeRegistryEntry<V>> implements ElcaForgeRegistry<V> {
     @Shadow abstract int add(int id, V value);
 
     @Override

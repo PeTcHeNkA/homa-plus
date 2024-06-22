@@ -11,8 +11,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ClassInheritanceMultiMap<T> extends AbstractSet<T> {
     private static final EmptySelfIter EMPTY_BY_CLASS = new EmptySelfIter();
     private static final Set<Class<?>> ALL_KNOWN = Collections.newSetFromMap(new ConcurrentHashMap<>());
-    private final IntObjectHashMap<ArrayRemSwapListE6<T>> map = new IntObjectHashMap<>();
-    private final Set<Class<?>> knownKeys = new IdentityTe4HashSet<>();
+    private final IntObjectHashMap<ArrayRemSwapListE6<T>> map = new IntObjectHashMap<>(4);
+    private final Set<Class<?>> knownKeys = new IdentityTe4HashSet<>(4);
     private final Class<T> baseClass;
     private final ArrayRemSwapListE6<T> values = new ArrayRemSwapListE6<>();
 
@@ -29,10 +29,10 @@ public class ClassInheritanceMultiMap<T> extends AbstractSet<T> {
 
 
     protected void createLookupOnInit(Class<?> clazz) {
+        final int key = clazz.hashCode();
         for (T t : this.values) {
-            if (clazz.isAssignableFrom(t.getClass())) {
-                this.addForClass(t, clazz);
-            }
+            if (clazz.isAssignableFrom(t.getClass()))
+                this.addForClassHash(t, key);
         }
         this.knownKeys.add(clazz);
     }
@@ -40,9 +40,10 @@ public class ClassInheritanceMultiMap<T> extends AbstractSet<T> {
 
     protected void createLookup(Class<?> clazz) {
         ALL_KNOWN.add(clazz);
+        final int key = clazz.hashCode();
         for (T obj : this.values) {
             if (clazz.isAssignableFrom(obj.getClass())) {
-                this.addForClass((T) obj, clazz);
+                this.addForClassHash(obj, key);
             }
         }
         this.knownKeys.add(clazz);
@@ -62,21 +63,26 @@ public class ClassInheritanceMultiMap<T> extends AbstractSet<T> {
 
 
     @Override
-    public boolean add(T obj) {
+    public boolean add(final T obj) {
+        ArrayListE6<T> list; int key;
+        final Class<?> clazz = obj.getClass();
         for (Class<?> oclass : this.knownKeys) {
-            if (oclass.isAssignableFrom(obj.getClass())) {
-                this.addForClass(obj, oclass);
+            if (oclass.isAssignableFrom(clazz)) {
+                if ((list = map.get(key = oclass.hashCode())) == null) {
+                    map.put(key, new ArrayRemSwapListE1V<>(obj));
+                } else {
+                    list.addF(obj);
+                }
             }
         }
         return true;
     }
 
 
-    private void addForClass(T value, Class<?> parentClass) {
-        int key = parentClass.hashCode();
-        ArrayListE6<T> list = this.map.get(key);
-        if (list == null) {
-            this.map.put(key, new ArrayRemSwapListE1V<>(value));
+    private void addForClassHash(final T value, final int key) {
+        final ArrayListE6<T> list;
+        if ((list = map.get(key)) == null) {
+            map.put(key, new ArrayRemSwapListE1V<>(value));
         } else {
             list.addF(value);
         }
@@ -84,15 +90,16 @@ public class ClassInheritanceMultiMap<T> extends AbstractSet<T> {
 
 
     @Override
-    public boolean remove(Object obj) {
+    public boolean remove(final Object obj) {
         boolean flag = false;
-        for (Class<?> oclass : this.knownKeys) {
-            if (oclass.isAssignableFrom(obj.getClass())) {
-                ArrayRemSwapListE6<T> list = this.map.get(oclass.hashCode());
+        final Class<?> clazz = obj.getClass();
 
-                if (list != null && list.remove(obj)) {
+        for (Class<?> oclass : this.knownKeys) {
+            if (oclass.isAssignableFrom(clazz)) {
+                ArrayRemSwapListE6<T> list;
+
+                if ((list = map.get(oclass.hashCode())) != null && list.remove(obj))
                     flag = true;
-                }
             }
         }
         return flag;
@@ -178,15 +185,21 @@ final class ByClass<S,T> implements Iterable<S>, Iterator<S> {
         }
         next = null;
     }
+
+
     @NotNull
     @Override
     public Iterator<S> iterator() {
         return this;
     }
+
+
     @Override
     public boolean hasNext() {
         return next != null;
     }
+
+
     @Override
     public S next() {
         S prev = (S) next;

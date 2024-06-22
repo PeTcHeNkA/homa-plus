@@ -85,13 +85,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import plus.fserver.ElcaConfig;
-import plus.fserver.api.PWorldServer;
-import plus.fserver.api.PMinecraftServer;
 import plus.fserver.server.AsyWorldTickerV2;
 import plus.fserver.server.ElcaCommands;
 
 
-public abstract class MinecraftServer implements PMinecraftServer, ICommandSender, Runnable, IThreadListener, ISnooperInfo{
+public abstract class MinecraftServer implements ICommandSender, Runnable, IThreadListener, ISnooperInfo{
     private static final Logger LOGGER = LogManager.getLogger();
     public static final File USER_CACHE_FILE = new File("usercache.json");
     private final ISaveFormat anvilConverterForAnvilFile;
@@ -170,8 +168,8 @@ public abstract class MinecraftServer implements PMinecraftServer, ICommandSende
         this.profileCache = profileCacheIn;
         this.anvilFile = anvilFileIn;
 
-        initTicker();
         this.networkSystem = new NetworkSystem(this);
+        initTicker();
 
         this.commandManager = this.createCommandManager();
         this.anvilConverterForAnvilFile = new AnvilSaveConverter(anvilFileIn, dataFixerIn);
@@ -1231,7 +1229,7 @@ public abstract class MinecraftServer implements PMinecraftServer, ICommandSende
 
 
     protected ISaveHandler saveHandler;
-    @Override
+
     public ISaveHandler getSaveHandler() {
         return saveHandler;
     }
@@ -1381,7 +1379,6 @@ public abstract class MinecraftServer implements PMinecraftServer, ICommandSende
 
 
     @NotNull
-    @Override
     public AsyWorldTickerV2 ticker() {
         return ticker;
     }
@@ -1432,7 +1429,7 @@ public abstract class MinecraftServer implements PMinecraftServer, ICommandSende
 
                 int fn1 = blockpos.getX() + l1 >> 4;
                 int fn2 = blockpos.getZ() + i2 >> 4;
-                ((PWorldServer)worldserver).addSyncTask(
+                worldserver.addSyncTask(
                         () -> worldserver.getChunkProvider().provideChunk(fn1, fn2)
                 );
             }

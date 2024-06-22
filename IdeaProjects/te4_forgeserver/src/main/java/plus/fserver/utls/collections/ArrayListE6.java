@@ -140,7 +140,7 @@ public class ArrayListE6<T> implements List<T> {
     }
 
 
-    private static class Itr<T> implements Iterator<T>{
+    public static final class Itr<T> implements Iterator<T>{
         private final Object[] data;
         private final int max;
         private int cursor = 0;
@@ -159,6 +159,11 @@ public class ArrayListE6<T> implements List<T> {
         @Override
         public T next() {
             return (T) data[cursor++];
+        }
+
+
+        public Object nextObj(){
+            return data[cursor++];
         }
 
 

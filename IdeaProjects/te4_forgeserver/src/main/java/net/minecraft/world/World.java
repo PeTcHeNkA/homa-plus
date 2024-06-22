@@ -28,6 +28,7 @@ import net.minecraft.pathfinding.PathWorldListener;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.tileentity.MobSpawnerBaseLogic;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
 import net.minecraft.util.math.*;
@@ -612,7 +613,9 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             } else {
                 BlockPos blockpos = new BlockPos(pos.getX(), this.getSeaLevel()-1, pos.getZ());
 
-                for (BlockPos blockpos1 = blockpos.down(); blockpos1.getY() > pos.getY(); blockpos1 = blockpos1.down()) {
+                for (BlockPos blockpos1 = blockpos.down(); blockpos1.getY() > pos.getY();
+                     BlockPos.unsafeEdit(blockpos1, blockpos1.getX(), blockpos1.getY() - 1, blockpos1.getZ())) {
+
                     IBlockState iblockstate = this.getBlockState(blockpos1);
 
                     if (iblockstate.getBlock().getLightOpacity(iblockstate, this, blockpos) > 0 && !iblockstate.getMaterial().isLiquid()) {
@@ -625,19 +628,13 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
-    public int getLight(BlockPos pos)
-    {
-        if (pos.getY() < 0)
-        {
+    public int getLight(BlockPos pos) {
+        if (pos.getY() < 0) {
             return 0;
-        }
-        else
-        {
-            if (pos.getY() >= 256)
-            {
+        } else {
+            if (pos.getY() >= 256) {
                 pos = new BlockPos(pos.getX(), 255, pos.getZ());
             }
-
             return this.getChunk(pos).getLightSubtracted(pos, 0);
         }
     }
@@ -653,26 +650,17 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
-    public int getHeight(int x, int z)
-    {
+    public int getHeight(int x, int z) {
         int i;
-
-        if (x >= -30000000 && z >= -30000000 && x < 30000000 && z < 30000000)
-        {
-            if (this.isChunkLoaded(x >> 4, z >> 4, true))
-            {
+        if (x >= -30000000 && z >= -30000000 && x < 30000000 && z < 30000000) {
+            if (this.isChunkLoaded(x >> 4, z >> 4, true)) {
                 i = this.getChunk(x >> 4, z >> 4).getHeightValue(x & 15, z & 15);
-            }
-            else
-            {
+            } else {
                 i = 0;
             }
-        }
-        else
-        {
+        } else {
             i = this.getSeaLevel() + 1;
         }
-
         return i;
     }
 
@@ -693,61 +681,35 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     @SideOnly(Side.CLIENT)
-    public int getLightFromNeighborsFor(EnumSkyBlock type, BlockPos pos)
-    {
-        if (!this.provider.hasSkyLight() && type == EnumSkyBlock.SKY)
-        {
+    public int getLightFromNeighborsFor(EnumSkyBlock type, BlockPos pos) {
+        if (!this.provider.hasSkyLight() && type == EnumSkyBlock.SKY) {
             return 0;
-        }
-        else
-        {
-            if (pos.getY() < 0)
-            {
+        } else {
+            if (pos.getY() < 0) {
                 pos = new BlockPos(pos.getX(), 0, pos.getZ());
             }
+            if (!this.isValid(pos)) {
+                return type.defaultLightValue;
 
-            if (!this.isValid(pos))
-            {
+            } else if (!this.isBlockLoaded(pos)) {
                 return type.defaultLightValue;
             }
-            else if (!this.isBlockLoaded(pos))
-            {
-                return type.defaultLightValue;
-            }
-            else if (this.getBlockState(pos).useNeighborBrightness())
-            {
+
+            else if (this.getBlockState(pos).useNeighborBrightness()) {
                 int i1 = this.getLightFor(type, pos.up());
                 int i = this.getLightFor(type, pos.east());
                 int j = this.getLightFor(type, pos.west());
                 int k = this.getLightFor(type, pos.south());
                 int l = this.getLightFor(type, pos.north());
 
-                if (i > i1)
-                {
-                    i1 = i;
-                }
-
-                if (j > i1)
-                {
-                    i1 = j;
-                }
-
-                if (k > i1)
-                {
-                    i1 = k;
-                }
-
-                if (l > i1)
-                {
-                    i1 = l;
-                }
+                if (i > i1) i1 = i;
+                if (j > i1) i1 = j;
+                if (k > i1) i1 = k;
+                if (l > i1) i1 = l;
 
                 return i1;
-            }
-            else
-            {
-                Chunk chunk = this.getChunk(pos);
-                return chunk.getLightFor(type, pos);
+            } else {
+                return this.getChunk(pos).getLightFor(type, pos);
             }
         }
     }
@@ -780,10 +742,10 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
-    public void notifyLightSet(BlockPos pos) {
-        for (int i = 0; i < this.eventListeners.size(); ++i) {
-            this.eventListeners.get(i).notifyLightSet(pos);
-        }
+    public final void notifyLightSet(BlockPos pos) {
+        List<IWorldEventListener> listeners = this.eventListeners;
+        for (int i = 0, s = listeners.size(); i < s; ++i)
+            listeners.get(i).notifyLightSet(pos);
     }
 
 
@@ -2937,13 +2899,18 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
-    public DifficultyInstance getDifficultyForLocation(BlockPos pos) {
+    public DifficultyInstance getDifficultyForLocation(BlockPos pos){
+        return getDifficultyForLocation(pos.getX(), pos.getZ());
+    }
+
+
+    public DifficultyInstance getDifficultyForLocation(int blockX, int blockZ) {
         long j2 = 0L;
         float f = 0.0F;
 
-        if (this.isBlockLoaded(pos)) {
+        if (this.isChunkLoaded(blockX>>4, blockZ>>4, true)) {
             f = this.getCurrentMoonPhaseFactor();
-            j2 = this.getChunk(pos).getInhabitedTime();
+            j2 = this.getChunk(blockX>>4, blockZ>>4).getInhabitedTime();
         }
         return new DifficultyInstance(this.getDifficulty(), this.getWorldTime(), j2, f);
     }
@@ -3383,6 +3350,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     private final LivingAttackEvent             attackEvent   = new LivingAttackEvent(null, null, 0);
     private final LivingHurtEvent               hurtEvent     = new LivingHurtEvent(null,null,0);
     private final LivingDamageEvent             damageEvent   = new LivingDamageEvent(null, null, 0);
+    private final LivingSpawnEvent.SpecialSpawn specialSpawn  = new LivingSpawnEvent.SpecialSpawn(null,this,0,0,0,null);
     public  final EntityEvent.EnteringChunk     enteringChunk = new EntityEvent.EnteringChunk(null,0,0,0,0);
     public  final ChunkWatchEvent             chunkWatchEvent = new ChunkWatchEvent.Watch().forBus(MinecraftForge.EVENT_BUS);
     public  final ChunkWatchEvent           chunkUnWatchEvent = new ChunkWatchEvent.UnWatch().forBus(MinecraftForge.EVENT_BUS);
@@ -3393,6 +3361,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public  final Vec3dMut                 commonEntityVec3d1 = new Vec3dMut(0,0,0);
     public  final Vec3dMut                 commonEntityVec3d2 = new Vec3dMut(0,0,0);
 
+
     protected void clearEvents(){
         jumpEvent.setEntity(null);
         updateEvent.setEntity(null);
@@ -3401,6 +3370,13 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         damageEvent.setEntity(null);
         enteringChunk.setEntity(null);
         mobGriefingEvent.setEntity(null);
+    }
+
+
+    public boolean doSpecialSpawn(EntityLiving entity, float x, float y, float z) {
+        LivingSpawnEvent.SpecialSpawn ev;
+        MinecraftForge.EVENT_BUS.postF(ev = specialSpawn.initSpecialSpawn(entity, this, x, y, z));
+        return ev.isCanceled() && !entity.isDead;
     }
 
 

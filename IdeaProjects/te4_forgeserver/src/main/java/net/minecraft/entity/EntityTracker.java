@@ -1,7 +1,6 @@
 package net.minecraft.entity;
 
 import com.google.common.collect.Lists;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -29,7 +28,6 @@ public class EntityTracker {
     private static final EntityTrackerFactory trackingTable = new EntityTrackerFactory();
     private static final Logger LOGGER = LogManager.getLogger();
     private final WorldServer world;
-    //private final Set<EntityTrackerEntry> entries = new IdentityTe4HashSet<>(); //is safe
     private int maxTrackingDistanceThreshold;
 
     public EntityTracker(WorldServer theWorldIn) {
@@ -124,9 +122,7 @@ public class EntityTracker {
                 if((entry = entity.trackerEntry) != null) {
                     entry.updatePlayerList(players);
                     if (entry.playerEntitiesUpdated) {
-
                         if (entity instanceof EntityPlayerMP) list.add((EntityPlayerMP) entity);
-
                     }
                 }
             }

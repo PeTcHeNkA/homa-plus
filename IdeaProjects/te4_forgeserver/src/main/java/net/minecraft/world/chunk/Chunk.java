@@ -23,6 +23,7 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
@@ -36,7 +37,6 @@ import org.apache.logging.log4j.Logger;
 import plus.asyutl.buf.FastBuffer;
 import plus.fserver.api.BiomeIndexes;
 import plus.fserver.api.Keep;
-import plus.fserver.api.PWorldServer;
 import plus.fserver.ElcaCV;
 import plus.fserver.utls.math.MathUtls;
 import plus.fserver.world.light.api.ILightingEngine;
@@ -285,11 +285,11 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
                         }
                         k1 -= j1;
                         if (k1 > 0) {
-                            ExtendedBlockStorage extendedblockstorage = this.storageArrays[i1 >> 4];
+                            ExtendedBlockStorage storage = this.storageArrays[i1 >> 4];
 
-                            if (extendedblockstorage != NULL_BLOCK_STORAGE) {
-                                extendedblockstorage.setSkyLight(xPos, i1 & 15, zPos, k1);
-                                this.world.notifyLightSet(new BlockPos((this.x << 4) + xPos, i1, (this.z << 4) + zPos));
+                            if (storage != null) {
+                                storage.setSkyLight(xPos, i1 & 15, zPos, k1);
+                                world.notifyLightSet(new BlockPos((this.x << 4) + xPos, i1, (this.z << 4) + zPos));
                             }
                         }
                         --i1;
@@ -941,7 +941,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
     protected void populate(IChunkGenerator generator) {
         if (isTerrainPopulated) {
             if(inhabitedTime < 3600L){
-                ((PWorldServer)world).addSyncTask(
+                ((WorldServer)world).addSyncTask(
                         () -> {
                             if (generator.generateStructures(Chunk.this, x, z)) {
                                 Chunk.this.markDirty();

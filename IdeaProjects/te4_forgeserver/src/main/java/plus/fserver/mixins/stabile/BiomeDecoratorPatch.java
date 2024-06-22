@@ -17,7 +17,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import plus.fserver.api.PWorldInfo;
+import plus.fserver.api.ElcaWorldInfo;
 import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.world.generator.ChunkGenSettingsPlus;
 import java.util.Random;
@@ -292,7 +292,7 @@ public abstract class BiomeDecoratorPatch {
     protected final void generateOres(final ChunkSelector selector, final World worldIn, final Random random, final BlockPos chunkPos) {
         MinecraftForge.ORE_GEN_BUS.post(new OreGenEvent.Pre(worldIn, random, chunkPos));
 
-        ChunkGenSettingsPlus settings = ((PWorldInfo) worldIn.getWorldInfo()).getChunkGenSettings();
+        ChunkGenSettingsPlus settings = ((ElcaWorldInfo) worldIn.getWorldInfo()).getChunkGenSettings();
 
         genOre1(selector, worldIn, chunkPos, random, settings.settings.dirtCount,    settings.dirtGen,     settings.settings.dirtMinHeight,    settings.settings.dirtMaxHeight    );
         genOre1(selector, worldIn, chunkPos, random, settings.settings.gravelCount,  settings.gravelOreGen,settings.settings.gravelMinHeight,  settings.settings.gravelMaxHeight  );

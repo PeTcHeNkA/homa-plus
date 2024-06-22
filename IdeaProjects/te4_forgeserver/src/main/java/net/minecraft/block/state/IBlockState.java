@@ -4,10 +4,10 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Collection;
 import net.minecraft.block.Block;
 import net.minecraft.block.properties.IProperty;
-import plus.fserver.api.PBlockState;
+import plus.fserver.api.ElcaBlockState;
 
 
-public interface IBlockState extends IBlockBehaviors, IBlockProperties, PBlockState {
+public interface IBlockState extends IBlockBehaviors, IBlockProperties, ElcaBlockState {
     Collection < IProperty<? >> getPropertyKeys();
 
     <T extends Comparable<T>> T getValue(IProperty<T> property);

@@ -2,10 +2,8 @@ package plus.fserver.api;
 
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import plus.tson.utl.Tuple;
 import java.util.ArrayList;
-import java.util.function.BiConsumer;
 
 
 public final class PBiomeRegistrator {
@@ -26,7 +24,7 @@ public final class PBiomeRegistrator {
         }
         ArrayList<Tuple<Biome, Integer>> biomes = INST.biomes;
         INST = null;
-        PForgeRegistry<Biome> registry = (PForgeRegistry<Biome>) e.getRegistry();
+        ElcaForgeRegistry<Biome> registry = (ElcaForgeRegistry<Biome>) e.getRegistry();
         for(Tuple<Biome, Integer> pair:biomes){
             registry.register(pair.B, pair.A);
         }

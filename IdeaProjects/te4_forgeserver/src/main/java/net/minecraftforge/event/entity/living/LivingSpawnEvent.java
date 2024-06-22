@@ -107,6 +107,14 @@ public class LivingSpawnEvent extends LivingEvent {
             this.spawner = spawner;
         }
 
+
+        public SpecialSpawn initSpecialSpawn(EntityLiving entity, World world, float x, float y, float z) {
+            initLivingSpawnEvent(entity, world, x, y, z);
+            setCanceled(false);
+            return this;
+        }
+
+
         @Nullable
         public MobSpawnerBaseLogic getSpawner() {
             return spawner;

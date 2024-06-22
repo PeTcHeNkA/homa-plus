@@ -3,6 +3,12 @@ package plus.fserver.world;
 import io.netty.util.collection.IntObjectHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceArrayMap;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.EntityBoat;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.item.EntityMinecart;
+import net.minecraft.entity.item.EntityTNTPrimed;
+import net.minecraft.entity.monster.*;
+import net.minecraft.entity.passive.*;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.FMLLog;
@@ -22,6 +28,38 @@ import java.util.function.Function;
 public class SpawnEntityFactory {
     private static final Map<ClassLoader, MethodHandles.Lookup> altLookups = new Reference2ReferenceArrayMap<>();
     public static final IntObjectHashMap<Function<World, ? extends Entity>> cache = new IntObjectHashMap<>();
+
+    private static void init(){
+        //item
+        add(EntityBoat.class     , EntityBoat     ::new);
+        add(EntityItem.class     , EntityItem     ::new);
+        add(EntityTNTPrimed.class, EntityTNTPrimed::new);
+
+        //monster
+        add(EntityBlaze.class    , EntityBlaze    ::new);
+        add(EntityCreeper.class  , EntityCreeper  ::new);
+        add(EntityEnderman.class , EntityEnderman ::new);
+        add(EntityGuardian.class , EntityGuardian ::new);
+        add(EntitySpider.class   , EntitySpider   ::new);
+        add(EntityWitch.class    , EntityWitch    ::new);
+        add(EntityZombie.class   , EntityZombie   ::new);
+
+        //passive
+        add(EntityBat.class      , EntityBat      ::new);
+        add(EntitySheep.class    , EntitySheep    ::new);
+        add(EntitySquid.class    , EntitySquid    ::new);
+        add(EntityVillager.class , EntityVillager ::new);
+        add(EntityCow.class      , EntityCow      ::new);
+        add(EntityChicken.class  , EntityChicken  ::new);
+        add(EntityPig.class      , EntityPig      ::new);
+        add(EntityWolf.class     , EntityWolf     ::new);
+    }
+
+
+    private static void add(Class<? extends Entity> cls, Function<World, ? extends Entity> func){
+        cache.put(cls.hashCode(), func);
+    }
+
 
     public static Function<World, ? extends Entity> make(Class<? extends Entity> cls){
         int hs;

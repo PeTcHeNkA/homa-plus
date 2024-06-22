@@ -95,6 +95,7 @@ public class WorldEntitySpawner {
         if (!list.isEmpty()) {
             while (randomIn.nextFloat() < biomeIn.getSpawningChance()) {
                 Biome.SpawnListEntry listEntry = WeightedRandom.getRandomItem(worldIn.rand, list);
+                EntityLiving prev = null;
                 int i = listEntry.minGroupCount + randomIn.nextInt(1 + listEntry.maxGroupCount - listEntry.minGroupCount);
                 IEntityLivingData ientitylivingdata = null;
                 int j = centerX + randomIn.nextInt(diameterX);
@@ -106,22 +107,24 @@ public class WorldEntitySpawner {
                     boolean flag = false;
 
                     for (int k1 = 0; !flag && k1 < 4; ++k1) {
-                        BlockPos blockpos = worldIn.getTopSolidOrLiquidBlock(new BlockPos(j, 0, k));
+                        BlockPos pos = worldIn.getTopSolidOrLiquidBlock(new BlockPos(j, 0, k));
 
-                        if (canCreatureTypeSpawnAtLocation(EntityLiving.SpawnPlacementType.ON_GROUND, worldIn, blockpos)) {
-                            EntityLiving entityliving;
+                        if (canCreatureTypeSpawnAtLocation(EntityLiving.SpawnPlacementType.ON_GROUND, worldIn, pos)) {
+                            EntityLiving toSpawn;
 
                             try {
-                                entityliving = listEntry.newInstance(worldIn);
+                                if(prev != null) toSpawn = prev;
+                                else toSpawn = prev = listEntry.newInstance(worldIn);
                             } catch (Exception exception) {
                                 exception.printStackTrace();
                                 continue;
                             }
 
-                            if (worldIn.canEntitySpawn(entityliving, j + 0.5f, (float) blockpos.getY(), k +0.5f) == Event.Result.DENY) continue;
-                            entityliving.setLocationAndAngles((float)j + 0.5F, blockpos.getY(), (float)k + 0.5F, randomIn.nextFloat() * 360.0F, 0.0F);
-                            worldIn.spawnEntity(entityliving);
-                            ientitylivingdata = entityliving.onInitialSpawn(worldIn.getDifficultyForLocation(new BlockPos(entityliving)), ientitylivingdata);
+                            if (worldIn.canEntitySpawn(toSpawn, j + 0.5f, (float) pos.getY(), k +0.5f) == Event.Result.DENY) continue;
+                            prev = null;
+                            toSpawn.setLocationAndAngles((float)j + 0.5F, pos.getY(), (float)k + 0.5F, randomIn.nextFloat() * 360.0F, 0.0F);
+                            worldIn.spawnEntity(toSpawn);
+                            ientitylivingdata = toSpawn.onInitialSpawn(worldIn.getDifficultyForLocation(new BlockPos(toSpawn)), ientitylivingdata);
                             flag = true;
                         }
 

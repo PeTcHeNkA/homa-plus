@@ -20,6 +20,7 @@ public class ElcaConfig {
     public static int CHUNK_TICK_RADIUS_2        = 5 * 16;
     public static int MEAN_BALANCE_MOB           = 40 * 12;
     public static int GOAL_TICK_RATE             = 4;
+    public static int RECHECK_CHUNKS_SPAWNER_RATE= 7;
     public static int RECHECK_SPAWNER_RATE       = 80;
     public static int CHECK_TO_UNLOAD_RATE       = 600;
     public static int SAVE_WORLD_RATE            = 600 * 20;
@@ -80,6 +81,7 @@ public class ElcaConfig {
         MEAN_BALANCE_MOB           = calc(file, "mean-balance-mob"            ,     40                 )*12;
         GOAL_TICK_RATE             = calc(file, "goal-tick-rate"              , GOAL_TICK_RATE             );
         RECHECK_SPAWNER_RATE       = calc(file, "recheck-spawner-rate"        , RECHECK_SPAWNER_RATE       );
+        RECHECK_CHUNKS_SPAWNER_RATE= calc(file, "recheck-chunks-spawner-rate" , RECHECK_CHUNKS_SPAWNER_RATE);
         CHECK_TO_UNLOAD_RATE       = calc(file, "check-to-unload-rate"        , CHECK_TO_UNLOAD_RATE       );
         SAVE_WORLD_RATE            = calc(file, "save-world-rate"             , SAVE_WORLD_RATE            );
         NAVIGATE_CACHE_CLEAN_RATE  = calc(file, "navigation-cache-clean-rate" , NAVIGATE_CACHE_CLEAN_RATE  );

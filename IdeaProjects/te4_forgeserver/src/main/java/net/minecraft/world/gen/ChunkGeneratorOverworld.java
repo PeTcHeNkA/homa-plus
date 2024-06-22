@@ -32,7 +32,6 @@ import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent;
 import net.minecraftforge.event.terraingen.TerrainGen;
 import plus.fserver.ElcaConfig;
-import plus.fserver.api.PWorldServer;
 import plus.fserver.world.generator.GenSession;
 import plus.fserver.world.generator.biome.BiomeProviderEx;
 import plus.fserver.world.generator.future.WorldGenStalactite;
@@ -443,7 +442,7 @@ public class ChunkGeneratorOverworld implements IChunkGenerator {
 
 
         Biome finalBiome = biome;
-        ((PWorldServer)world).addSyncTask(() -> {
+        ((WorldServer)world).addSyncTask(() -> {
             boolean flag0 = false;
             if (mapFeaturesEnabled) {
                 if (settings.useMineShafts) {

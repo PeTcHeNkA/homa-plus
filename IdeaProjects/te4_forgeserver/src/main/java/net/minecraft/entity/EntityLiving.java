@@ -876,14 +876,14 @@ public abstract class EntityLiving extends EntityLivingBase {
 
 
     @Nullable
-    public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, @Nullable IEntityLivingData livingdata) {
+    public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, @Nullable IEntityLivingData data) {
         this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).applyModifier(
                 new AttributeModifier("Random spawn bonus", this.rand.nextGaussian() * 0.05D, 1));
 
         if (this.rand.nextFloat() < 0.05F) this.setLeftHanded(true);
         else                               this.setLeftHanded(false);
 
-        return livingdata;
+        return data;
     }
 
 

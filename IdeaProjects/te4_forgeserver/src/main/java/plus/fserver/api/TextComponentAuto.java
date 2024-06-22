@@ -14,9 +14,13 @@ public class TextComponentAuto extends TextComponentString {
     }
 
     private final String nonColored;
+
+
     public TextComponentAuto(String str){
         this(str, true);
     }
+
+
     private TextComponentAuto(String str, boolean init){
         super("");
         if(init){

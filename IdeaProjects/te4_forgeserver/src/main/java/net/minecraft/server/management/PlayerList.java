@@ -55,7 +55,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import plus.fserver.ElcaConfig;
 import plus.fserver.api.Keep;
-import plus.fserver.api.PWorldServer;
 import plus.fserver.event.ElcaConnectEvent;
 import plus.fserver.server.chunk.io.TChunkExecutor;
 import plus.tson.utl.Te4HashSet;
@@ -987,7 +986,7 @@ public abstract class PlayerList {
 
 
     private void preparePlayer0(WorldServer newWorld, EntityPlayerMP playerIn, @Nullable WorldServer worldIn){
-        ((PWorldServer)newWorld).addSyncTask(() -> preparePlayer1(newWorld, playerIn, worldIn));
+        newWorld.addSyncTask(() -> preparePlayer1(newWorld, playerIn, worldIn));
     }
 
 
@@ -1025,7 +1024,7 @@ public abstract class PlayerList {
 
         WorldServer worldserver = this.server.getWorld(playerIn.dimension);
 
-        ((PWorldServer)worldserver).addSyncTask(() -> {
+        worldserver.addSyncTask(() -> {
             worldserver.spawnEntity(playerIn);
             this.preparePlayer(playerIn, null);
         });
@@ -1051,7 +1050,7 @@ public abstract class PlayerList {
         }
         worldserver.getPlayerChunkMap().removePlayer(player);
 
-        ((PWorldServer)newWorld).addSyncTask(() -> {
+        newWorld.addSyncTask(() -> {
             transferEntityToWorld0(player, oldId, worldserver, newWorld, teleporter);
 
             preparePlayer1(newWorld, player, worldserver);
@@ -1110,7 +1109,7 @@ public abstract class PlayerList {
 
     public void saveLocalPlayers(WorldServer worldServer){
         EntityPlayer[] players = playerEntityList.toArray(new EntityPlayerMP[0]);
-        ((PWorldServer)worldServer).addAsyncTask(() -> {
+        worldServer.addAsyncTask(() -> {
             for (EntityPlayer player:players){
                 if(player instanceof EntityPlayerMP) writePlayerData((EntityPlayerMP) player);
             }

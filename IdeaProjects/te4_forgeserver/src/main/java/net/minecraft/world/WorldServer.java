@@ -75,7 +75,7 @@ import org.jetbrains.annotations.NotNull;
 import plus.fserver.ElcaConfig;
 import plus.fserver.api.Keep;
 import plus.fserver.api.MeanTicker;
-import plus.fserver.api.PWorldServer;
+import plus.fserver.api.ElcaWorldServer;
 import plus.fserver.ElcaCV;
 import plus.fserver.server.chunk.io.TChunkTask;
 import plus.fserver.server.chunk.io.TQueuedChunk;
@@ -86,7 +86,7 @@ import plus.fserver.world.NavigationCache;
 import plus.tson.utl.Te4HashSet;
 
 
-public class WorldServer extends World implements IThreadListener, PWorldServer, MeanTicker {
+public class WorldServer extends World implements IThreadListener, ElcaWorldServer, MeanTicker {
     private static final Logger LOGGER = LogManager.getLogger();
     private final MinecraftServer server;
     private final EntityTracker entityTracker;
@@ -1169,7 +1169,6 @@ public class WorldServer extends World implements IThreadListener, PWorldServer,
     }
 
 
-    @Override
     public ConcurrentHashMap<TQueuedChunk, TChunkTask> getChunkTasks() {
         return _chunkTasks;
     }

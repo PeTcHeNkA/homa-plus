@@ -12,7 +12,7 @@ import net.minecraft.world.gen.ChunkGeneratorSettings;
 import net.minecraft.world.gen.layer.GenLayerEdge;
 import net.minecraft.world.storage.WorldInfo;
 import org.jetbrains.annotations.NotNull;
-import plus.fserver.api.PWorldInfo;
+import plus.fserver.api.ElcaWorldInfo;
 import plus.fserver.world.generator.GenSession;
 import plus.fserver.world.generator.biome.layers.*;
 import plus.tson.TsonMap;
@@ -39,7 +39,7 @@ public class BiomeProviderEx extends BiomeProvider{
     public BiomeProviderEx(long seed, WorldType worldTypeIn, WorldInfo info, BiomeLib lib) {
         this.seed = seed;
         if (worldTypeIn == WorldType.CUSTOMIZED && !info.getGeneratorOptions().isEmpty()) {
-            settings = ((PWorldInfo)info).getChunkGenSettings().settings;
+            settings = ((ElcaWorldInfo)info).getChunkGenSettings().settings;
         }
         EGenLayer[] agenlayer = createLayers(seed, worldTypeIn, settings, lib);
 
