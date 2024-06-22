@@ -2,13 +2,17 @@ package plus.fserver.api;
 
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.epoll.Epoll;
+import net.minecraft.entity.Entity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.LazyLoadBase;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.storage.ISaveHandler;
 import plus.fserver.ElcaCV2;
+import plus.fserver.utls.collections.EntityChunkIter;
+
 import java.util.concurrent.ScheduledExecutorService;
 import static net.minecraft.network.NetworkSystem.SERVER_EPOLL_EVENTLOOP;
 import static net.minecraft.network.NetworkSystem.SERVER_NIO_EVENTLOOP;
@@ -25,6 +29,11 @@ public final class ElcaServerUtls {
 
     public static ISaveHandler getSaveHandler(MinecraftServer server){
         return server.getSaveHandler();
+    }
+
+
+    public static Iterable<Entity> getEntities(Chunk chunk){
+        return new EntityChunkIter(chunk);
     }
 
 

@@ -124,8 +124,15 @@ public class LivingSpawnEvent extends LivingEvent {
 
     @HasResult
     public static class AllowDespawn extends LivingSpawnEvent {
+        public AllowDespawn(){}
+
         public AllowDespawn(EntityLiving entity) {
             super(entity, entity.world, (float)entity.posX, (float)entity.posY, (float)entity.posZ);
+        }
+
+
+        public void initAllowDespawn(EntityLiving entity){
+            initLivingSpawnEvent(entity, entity.world, (float)entity.posX, (float)entity.posY, (float)entity.posZ);
         }
     }
 }

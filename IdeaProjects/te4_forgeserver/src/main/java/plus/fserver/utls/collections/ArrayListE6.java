@@ -2,6 +2,7 @@ package plus.fserver.utls.collections;
 
 import org.jetbrains.annotations.NotNull;
 import java.util.*;
+import java.util.function.Consumer;
 
 
 public class ArrayListE6<T> implements List<T> {
@@ -50,13 +51,15 @@ public class ArrayListE6<T> implements List<T> {
 
     @Override
     public void clear() {
-        for (int i = 0; i < size; i++) data[i] = null;
+        Object[] data = this.data;
+        for (int i = 0, s = size; i < s; i++) data[i] = null;
         size = 0;
     }
 
 
     public void clearAll(){
-        for (int i = 0; i < data.length; i++) data[i] = null;
+        Object[] data = this.data;
+        for (int i = 0, s = data.length; i < s; i++) data[i] = null;
         size = 0;
     }
 
@@ -76,6 +79,12 @@ public class ArrayListE6<T> implements List<T> {
     public boolean containsRef(Object o){
         for (int i=0;i<size;i++) if(o == data[i])return true;
         return false;
+    }
+
+
+    @Override
+    public void forEach(Consumer<? super T> action) {
+        for (int i = 0, size = this.size; i < size; i++) action.accept((T) data[i]);
     }
 
 

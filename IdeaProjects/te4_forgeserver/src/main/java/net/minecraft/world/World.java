@@ -2469,28 +2469,30 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
     @Nullable
     public EntityPlayer getClosestPlayer(double posX, double posY, double posZ, double distance, boolean spectator) {
-        Predicate<Entity> predicate = spectator ? EntitySelectors.CAN_AI_TARGET : EntitySelectors.NOT_SPECTATING;
-        return this.getClosestPlayer(posX, posY, posZ, distance, predicate);
+        return this.getClosestPlayer(
+                posX, posY, posZ, distance,
+                spectator ? EntitySelectors.CAN_AI_TARGET : EntitySelectors.NOT_SPECTATING
+        );
     }
 
 
     @Nullable
     public EntityPlayer getClosestPlayer(double x, double y, double z, double distance, Predicate<Entity> predicate) {
+        if(distance > 0)distance = distance * distance;
+        else distance = Double.MAX_VALUE;
         double d0 = -1.0D;
-        EntityPlayer entityplayer = null;
-        for (int j2 = 0; j2 < this.playerEntities.size(); ++j2) {
-            EntityPlayer entityplayer1 = this.playerEntities.get(j2);
-
-            if (predicate.apply(entityplayer1)) {
-                double d1 = entityplayer1.getDistanceSq(x, y, z);
-
-                if ((distance < 0.0D || d1 < distance * distance) && (d0 == -1.0D || d1 < d0)) {
+        EntityPlayer result = null;
+        for (int i = 0, s = playerEntities.size(); i < s; ++i) {
+            EntityPlayer player;
+            if (predicate.apply(player = playerEntities.get(i))) {
+                double d1;
+                if (((d1 = player.getDistanceSq(x, y, z)) < distance) && (d0 == -1.0D || d1 < d0)) {
                     d0 = d1;
-                    entityplayer = entityplayer1;
+                    result = player;
                 }
             }
         }
-        return entityplayer;
+        return result;
     }
 
 
@@ -3279,14 +3281,13 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
-    //private List<Entity> lastList = ElcaCV.AABB_MEMORY_IMPROVEMENT?new ArrayListE6<>():null;
     @NotNull
     public List<Entity> getEntitiesInAABBexcludingLimited(@Nullable Entity entityIn, @NotNull AxisAlignedBB aabb,
                                                           @Nullable Predicate<? super Entity > predicate, int lim){
         if(ElcaCV.MORE_MOBS_OPTIMIZER) {
             AABKey key = eeCache.key(aabb);
             //AABKey key = new AABKey(aabb);
-            final ArrayListE6<Entity> entities = this.eeCache.getC(key);
+            final ArrayListE6<Entity> entities = eeCache.getC(key);
             if (entities != null) {
                 if (predicate != null && !entities.isEmptyC()) {
                     for (final Entity entity : entities) {
@@ -3295,17 +3296,17 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
                             getEntitiesInAABBexcludingNoCacheLimited(res, entityIn, aabb, predicate, lim);
 
-                            this.eeCache.add(key, res);
+                            eeCache.add(key, res);
                             return res;
                         }
                     }
                 }
                 return entities;
             } else {
-                ArrayListE6<Entity> res = eeCache.allocArr();
-                getEntitiesInAABBexcludingNoCacheLimited(res, entityIn, aabb, predicate, lim);
+                final ArrayListE6<Entity> res;
+                getEntitiesInAABBexcludingNoCacheLimited(res = eeCache.allocArr(), entityIn, aabb, predicate, lim);
 
-                this.eeCache.add(key, res);
+                eeCache.add(key, res);
                 return res;
             }
         } else {
@@ -3351,6 +3352,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     private final LivingHurtEvent               hurtEvent     = new LivingHurtEvent(null,null,0);
     private final LivingDamageEvent             damageEvent   = new LivingDamageEvent(null, null, 0);
     private final LivingSpawnEvent.SpecialSpawn specialSpawn  = new LivingSpawnEvent.SpecialSpawn(null,this,0,0,0,null);
+    private final LivingSpawnEvent.AllowDespawn allowDespawn  = new LivingSpawnEvent.AllowDespawn();
     public  final EntityEvent.EnteringChunk     enteringChunk = new EntityEvent.EnteringChunk(null,0,0,0,0);
     public  final ChunkWatchEvent             chunkWatchEvent = new ChunkWatchEvent.Watch().forBus(MinecraftForge.EVENT_BUS);
     public  final ChunkWatchEvent           chunkUnWatchEvent = new ChunkWatchEvent.UnWatch().forBus(MinecraftForge.EVENT_BUS);
@@ -3370,6 +3372,14 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         damageEvent.setEntity(null);
         enteringChunk.setEntity(null);
         mobGriefingEvent.setEntity(null);
+    }
+
+
+    public Event.Result canEntityDespawn(EntityLiving entity) {
+        LivingSpawnEvent.AllowDespawn event;
+        (event = allowDespawn).initAllowDespawn(entity);
+        MinecraftForge.EVENT_BUS.postF(event);
+        return event.getResult();
     }
 
 

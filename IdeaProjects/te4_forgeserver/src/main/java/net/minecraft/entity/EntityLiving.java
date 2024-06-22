@@ -587,11 +587,11 @@ public abstract class EntityLiving extends EntityLivingBase {
 
 
     protected void despawnEntity() {
-        net.minecraftforge.fml.common.eventhandler.Event.Result result = null;
+        Event.Result result;
         if (this.persistenceRequired) {
             this.idleTime = 0;
         }
-        else if ((this.idleTime & 0x1F) == 0x1F && (result = ForgeEventFactory.canEntityDespawn(this)) != Event.Result.DEFAULT) {
+        else if ((this.idleTime & 0x1F) == 0x1F && (result = world.canEntityDespawn(this)) != Event.Result.DEFAULT) {
             if (result == Event.Result.DENY)
                 this.idleTime = 0;
             else

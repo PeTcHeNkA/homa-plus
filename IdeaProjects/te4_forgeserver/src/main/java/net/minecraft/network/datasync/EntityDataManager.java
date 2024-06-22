@@ -121,7 +121,7 @@ public class EntityDataManager {
 
 
     public <T> DataEntry<T> getEntry(DataParameter<T> key) {
-        this.lock.readLock().lock();
+        //this.lock.readLock().lock();
         DataEntry dataentry;
         try {
             dataentry = this.entries.get(key.getId());
@@ -131,7 +131,7 @@ public class EntityDataManager {
             crashreportcategory.addCrashSection("Data ID", key);
             throw new ReportedException(crashreport);
         }
-        this.lock.readLock().unlock();
+        //this.lock.readLock().unlock();
         return dataentry;
     }
 

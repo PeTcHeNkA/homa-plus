@@ -131,16 +131,17 @@ public class PlayerChunkMapEntry extends ArrayListE6<EntityPlayerMP> implements 
                 return true;
             } else try {
                 Packet<?> packet = new SPacketChunkData(this.chunk, 65535);
-                for (int i=0;i<size;i++) {
-                    EntityPlayerMP player = get(i);
-                    player.connection.netManager.addToQueueE(packet);
-                    this.playerChunkMap.getWorldServer().getEntityTracker().sendLeashedEntitiesInChunk(player, this.chunk);
+                int size;
+                if((size = this.size) > 0){
+                    this.playerChunkMap.getWorldServer().getEntityTracker().sendLeashedEntitiesInChunk(this, this.chunk);
 
-                    player.world.chunkWatchEvent.post(chunk, player);
-                    //MinecraftForge.EVENT_BUS.post(player.world.chunkWatchEvent.init(chunk, player));
+                    for (int i = 0; i < size; i++) {
+                        EntityPlayerMP player = getC(i);
+                        player.connection.netManager.addToQueueE(packet);
+                        player.world.chunkWatchEvent.post(chunk, player);
+                    }
                 }
-                this.changes = 0;
-                this.changedSectionFilter = 0;
+                this.changes = changedSectionFilter = 0;
                 this.sentToPlayers = true;
                 return true;
             } catch (Exception e){

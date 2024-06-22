@@ -129,6 +129,11 @@ public class ClassInheritanceMultiMap<T> extends AbstractSet<T> {
     }
 
 
+    public ArrayRemSwapListE6<T> rawValues(){
+        return values;
+    }
+
+
     @Override
     public boolean contains(Object obj) {
         return Iterators.contains(this.getByClass(obj.getClass()).iterator(), obj);

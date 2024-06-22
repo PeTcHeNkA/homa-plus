@@ -42,6 +42,7 @@ import plus.fserver.utls.math.MathUtls;
 import plus.fserver.world.light.api.ILightingEngine;
 import plus.fserver.world.light.api.ILightingEngineProvider;
 import plus.tson.utl.Te4HashMap;
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public class Chunk implements net.minecraftforge.common.capabilities.ICapabilityProvider, ILightingEngineProvider {
@@ -304,7 +305,6 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
     private void propagateSkylightOcclusion(int x, int z) {
         updateSkylights[x] |= 1<<z;
-//        this.updateSkylightColumns[x + z * 16] = true;
         this.isGapLightingUpdated = true;
     }
 
@@ -960,8 +960,9 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
 
     public void onTick(boolean skipRecheckGaps) {
-        if (this.isGapLightingUpdated && this.world.provider.hasSkyLight() && !skipRecheckGaps) {
-            this.recheckGaps(this.world.isRemote);
+        if (!skipRecheckGaps && this.isGapLightingUpdated && world.provider.hasSkyLight()) {
+            if(SERVER_COMPILE)recheckGaps(false);
+            else this.recheckGaps(world.isRemote);
         }
         this.ticked = true;
 

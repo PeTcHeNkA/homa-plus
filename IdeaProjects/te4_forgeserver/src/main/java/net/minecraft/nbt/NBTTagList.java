@@ -1,63 +1,65 @@
 package net.minecraft.nbt;
 
-import com.google.common.collect.Lists;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import plus.fserver.utls.collections.ArrayListE6;
 
 
 public class NBTTagList extends NBTBase implements java.lang.Iterable<NBTBase> {
+    private static final int[] EMPTY = new int[0];
     private static final Logger LOGGER = LogManager.getLogger();
-    private List<NBTBase> tagList;
+    private ArrayListE6<NBTBase> tagList;
     private byte tagType = 0;
 
     public NBTTagList() {
-        tagList = new ArrayList<>();
+        tagList = new ArrayListE6<>();
     }
 
     public NBTTagList(int initSize) {
-        tagList = new ArrayList<>(initSize);
+        tagList = new ArrayListE6<>(initSize);
     }
 
 
+    @Override
     void write(DataOutput output) throws IOException {
-        if (this.tagList.isEmpty()) {
-            this.tagType = 0;
+        ArrayListE6<NBTBase> tagList;
+        if ((tagList = this.tagList).isEmptyC()) {
+            output.writeByte(this.tagType = 0);
         } else {
-            this.tagType = this.tagList.get(0).getId();
+            output.writeByte(this.tagType = tagList.getC(0).getId());
         }
 
-        output.writeByte(this.tagType);
-        output.writeInt(this.tagList.size());
+        final int size;
+        output.writeInt(size = tagList.sizeC());
 
-        for (int i = 0; i < this.tagList.size(); ++i) {
-            this.tagList.get(i).write(output);
+        for (int i = 0; i < size; ++i) {
+            tagList.getC(i).write(output);
         }
     }
 
 
+    @Override
     void read(DataInput input, int depth, NBTSizeTracker sizeTracker) throws IOException {
         sizeTracker.read(296L);
 
         if (depth > 512) {
             throw new RuntimeException("Tried to read NBT tag with too high complexity, depth > 512");
         } else {
-            this.tagType = input.readByte();
+            byte type = this.tagType = input.readByte();
             int size = input.readInt();
 
-            if (this.tagType == 0 && size > 0) {
+            if (type == 0 && size > 0) {
                 throw new RuntimeException("Missing type on ListTag");
             } else {
                 sizeTracker.read(32L * (long)size);
-                this.tagList = new ArrayList<>(size);
+                this.tagList = new ArrayListE6<>(size);
 
                 for (int j = 0; j < size; ++j) {
-                    NBTBase nbtbase = NBTBase.create(this.tagType);
+                    NBTBase nbtbase = NBTBase.create(type);
                     nbtbase.read(input, depth + 1, sizeTracker);
                     this.tagList.add(nbtbase);
                 }
@@ -66,22 +68,23 @@ public class NBTTagList extends NBTBase implements java.lang.Iterable<NBTBase> {
     }
 
 
+    @Override
     public byte getId() {
         return 9;
     }
 
 
+    @Override
     public String toString() {
-        StringBuilder stringbuilder = new StringBuilder("[");
+        StringBuilder builder = new StringBuilder("[");
 
-        for (int i = 0; i < this.tagList.size(); ++i) {
+        for (int i = 0, s = this.tagList.sizeC(); i < s; ++i) {
             if (i != 0) {
-                stringbuilder.append(',');
+                builder.append(',');
             }
-            stringbuilder.append(this.tagList.get(i));
+            builder.append(this.tagList.getC(i));
         }
-
-        return stringbuilder.append(']').toString();
+        return builder.append(']').toString();
     }
 
 
@@ -95,7 +98,7 @@ public class NBTTagList extends NBTBase implements java.lang.Iterable<NBTBase> {
                 LOGGER.warn("Adding mismatching tag types to tag list");
                 return;
             }
-            this.tagList.add(nbt);
+            this.tagList.addF(nbt);
         }
     }
 
@@ -118,18 +121,19 @@ public class NBTTagList extends NBTBase implements java.lang.Iterable<NBTBase> {
 
 
     public NBTBase removeTag(int i) {
-        return this.tagList.remove(i);
+        return tagList.remove(i);
     }
 
 
+    @Override
     public boolean isEmpty() {
-        return this.tagList.isEmpty();
+        return tagList.isEmptyC();
     }
 
 
     public NBTTagCompound getCompoundTagAt(int i) {
-        if (i >= 0 && i < this.tagList.size()) {
-            NBTBase nbtbase = this.tagList.get(i);
+        if (i >= 0 && i < tagList.sizeC()) {
+            NBTBase nbtbase = tagList.getC(i);
             if (nbtbase.getId() == 10) {
                 return (NBTTagCompound)nbtbase;
             }
@@ -138,9 +142,9 @@ public class NBTTagList extends NBTBase implements java.lang.Iterable<NBTBase> {
     }
 
 
-    public int getIntAt(int p_186858_1_) {
-        if (p_186858_1_ >= 0 && p_186858_1_ < this.tagList.size()) {
-            NBTBase nbtbase = this.tagList.get(p_186858_1_);
+    public int getIntAt(int pos) {
+        if (pos >= 0 && pos < tagList.sizeC()) {
+            NBTBase nbtbase = tagList.getC(pos);
             if (nbtbase.getId() == 3) {
                 return ((NBTTagInt)nbtbase).getInt();
             }
@@ -150,19 +154,19 @@ public class NBTTagList extends NBTBase implements java.lang.Iterable<NBTBase> {
 
 
     public int[] getIntArrayAt(int i) {
-        if (i >= 0 && i < this.tagList.size()) {
-            NBTBase nbtbase = this.tagList.get(i);
+        if (i >= 0 && i < tagList.sizeC()) {
+            NBTBase nbtbase = tagList.getC(i);
             if (nbtbase.getId() == 11) {
                 return ((NBTTagIntArray)nbtbase).getIntArray();
             }
         }
-        return new int[0];
+        return EMPTY;
     }
 
 
     public double getDoubleAt(int i) {
-        if (i >= 0 && i < this.tagList.size()) {
-            NBTBase nbtbase = this.tagList.get(i);
+        if (i >= 0 && i < tagList.sizeC()) {
+            NBTBase nbtbase = tagList.getC(i);
             if (nbtbase.getId() == 6) {
                 return ((NBTTagDouble)nbtbase).getDouble();
             }
@@ -172,8 +176,8 @@ public class NBTTagList extends NBTBase implements java.lang.Iterable<NBTBase> {
 
 
     public float getFloatAt(int i) {
-        if (i >= 0 && i < this.tagList.size()) {
-            NBTBase nbtbase = this.tagList.get(i);
+        if (i >= 0 && i < tagList.sizeC()) {
+            NBTBase nbtbase = tagList.getC(i);
             if (nbtbase.getId() == 5) {
                 return ((NBTTagFloat)nbtbase).getFloat();
             }
@@ -183,8 +187,8 @@ public class NBTTagList extends NBTBase implements java.lang.Iterable<NBTBase> {
 
 
     public String getStringTagAt(int i) {
-        if (i >= 0 && i < this.tagList.size()) {
-            NBTBase nbtbase = this.tagList.get(i);
+        if (i >= 0 && i < tagList.sizeC()) {
+            NBTBase nbtbase = tagList.getC(i);
             return nbtbase.getId() == 8 ? nbtbase.getString() : nbtbase.toString();
         } else {
             return "";
@@ -193,38 +197,39 @@ public class NBTTagList extends NBTBase implements java.lang.Iterable<NBTBase> {
 
 
     public NBTBase get(int idx) {
-        return idx >= 0 && idx < this.tagList.size() ? this.tagList.get(idx) : new NBTTagEnd();
+        return idx >= 0 && idx < tagList.sizeC() ? tagList.getC(idx) : new NBTTagEnd();
     }
 
 
     public int tagCount() {
-        return this.tagList.size();
+        return this.tagList.sizeC();
     }
 
 
+    @Override
     public NBTTagList copy() {
-        NBTTagList nbttaglist = new NBTTagList();
+        NBTTagList nbttaglist = new NBTTagList(this.tagList.sizeC());
         nbttaglist.tagType = this.tagType;
 
         for (NBTBase nbtbase : this.tagList) {
-            NBTBase nbtbase1 = nbtbase.copy();
-            nbttaglist.tagList.add(nbtbase1);
+            nbttaglist.tagList.addF(nbtbase.copy());
         }
-
         return nbttaglist;
     }
 
 
-    public boolean equals(Object p_equals_1_) {
-        if (!super.equals(p_equals_1_)) {
+    @Override
+    public boolean equals(Object other) {
+        if (!super.equals(other)) {
             return false;
         } else {
-            NBTTagList nbttaglist = (NBTTagList)p_equals_1_;
+            NBTTagList nbttaglist = (NBTTagList)other;
             return this.tagType == nbttaglist.tagType && Objects.equals(this.tagList, nbttaglist.tagList);
         }
     }
 
 
+    @Override
     public int hashCode() {
         return super.hashCode() ^ this.tagList.hashCode();
     }

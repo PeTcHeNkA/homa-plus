@@ -1637,55 +1637,51 @@ public abstract class EntityLivingBase extends Entity {
     }
 
 
+    private void updateSlot(EntityEquipmentSlot slot, ItemStack stack){
+        ItemStack other = this.getItemStackFromSlot(slot);
+
+        if (!ItemStack.areItemStacksEqual(other, stack)) {
+            if (!ItemStack.areItemStacksEqualUsingNBTShareTag(other, stack))
+                ((WorldServer)this.world).getEntityTracker().sendToTracking(this, new SPacketEntityEquipment(this.getEntityId(), slot, other));
+            MinecraftForge.EVENT_BUS.post(new LivingEquipmentChangeEvent(this, slot, stack, other));
+
+            if (!stack.isEmpty())
+                this.getAttributeMap().removeAttributeModifiers(stack.getAttributeModifiers(slot));
+
+
+            if (!other.isEmpty())
+                this.getAttributeMap().applyAttributeModifiers(other.getAttributeModifiers(slot));
+
+
+            switch (slot.getSlotType()) {
+                case HAND:
+                    this.handInventory.fSet(slot.getIndex(), other.isEmpty() ? ItemStack.EMPTY : other.copy());
+                    break;
+                case ARMOR:
+                    this.armorArray   .fSet(slot.getIndex(), other.isEmpty() ? ItemStack.EMPTY : other.copy());
+            }
+        }
+    }
+
+
+
     protected final void onUpdateB() {
         this.updateActiveHand();
 
         if (!this.world.isRemote || SERVER_COMPILE) {
-            int count = this.getArrowCountInEntity();
+            final int count;
 
-            if (count > 0) {
-                if (--this.arrowHitTimer <= 0) this.arrowHitTimer = 20 * (30 - count);
-                if (this.arrowHitTimer <= 0)   this.setArrowCountInEntity(count - 1);
+            if ((count = this.getArrowCountInEntity()) > 0) {
+                if (--arrowHitTimer <= 0) arrowHitTimer = 20 * (30 - count);
+                if (  arrowHitTimer <= 0) setArrowCountInEntity(count - 1);
             }
 
-
-            for (EntityEquipmentSlot slot : EntityEquipmentSlot.VALUES) {
-                ItemStack stack;
-
-                switch (slot.getSlotType()) {
-                    case HAND:
-                        stack = this.handInventory.get(slot.getIndex());
-                        break;
-                    case ARMOR:
-                        stack = this.armorArray.get(slot.getIndex());
-                        break;
-                    default:
-                        continue;
-                }
-                ItemStack other = this.getItemStackFromSlot(slot);
-
-                if (!ItemStack.areItemStacksEqual(other, stack)) {
-                    if (!ItemStack.areItemStacksEqualUsingNBTShareTag(other, stack))
-                        ((WorldServer)this.world).getEntityTracker().sendToTracking(this, new SPacketEntityEquipment(this.getEntityId(), slot, other));
-                    MinecraftForge.EVENT_BUS.post(new LivingEquipmentChangeEvent(this, slot, stack, other));
-
-                    if (!stack.isEmpty())
-                        this.getAttributeMap().removeAttributeModifiers(stack.getAttributeModifiers(slot));
-
-
-                    if (!other.isEmpty())
-                        this.getAttributeMap().applyAttributeModifiers(other.getAttributeModifiers(slot));
-
-
-                    switch (slot.getSlotType()) {
-                        case HAND:
-                            this.handInventory.fSet(slot.getIndex(), other.isEmpty() ? ItemStack.EMPTY : other.copy());
-                            break;
-                        case ARMOR:
-                            this.armorArray   .fSet(slot.getIndex(), other.isEmpty() ? ItemStack.EMPTY : other.copy());
-                    }
-                }
-            }
+            updateSlot(EntityEquipmentSlot.MAINHAND, handInventory.get(0));
+            updateSlot(EntityEquipmentSlot.OFFHAND , handInventory.get(1));
+            updateSlot(EntityEquipmentSlot.FEET    , armorArray   .get(0));
+            updateSlot(EntityEquipmentSlot.LEGS    , armorArray   .get(1));
+            updateSlot(EntityEquipmentSlot.CHEST   , armorArray   .get(2));
+            updateSlot(EntityEquipmentSlot.HEAD    , armorArray   .get(3));
 
             if (this.ticksExisted % 20 == 0) this.getCombatTracker().reset();
 

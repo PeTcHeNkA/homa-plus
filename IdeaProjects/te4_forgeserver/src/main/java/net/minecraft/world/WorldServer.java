@@ -1253,6 +1253,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
             int updateLCG = this.updateLCG;
             final int rts = getGameRules().randomTickSpeed.getInt();
             final boolean flag = isRaining(), flag1 = isThundering();
+            final boolean skipRecheck = (worldInfo.getWorldTotalTime() & 1) == 0;
             ChunkSelector selector = localSelector;
             Chunk chunk;
             BlockPos.MutableBlockPos mut = localUpdateBlocks;
@@ -1263,7 +1264,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
                 int j = chunk.x << 4;
                 int k = chunk.z << 4;
                 chunk.enqueueRelightChecks();
-                chunk.onTick(false);
+                chunk.onTick(skipRecheck);
 
                 if (flag && flag1 && provider.canDoLightning(chunk) && rand.nextInt(100000) == 0) {
                     updateLCG = updateLCG * 3 + 1013904223;

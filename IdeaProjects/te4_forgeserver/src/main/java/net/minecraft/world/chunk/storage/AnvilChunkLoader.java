@@ -447,24 +447,21 @@ public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO {
 
 
     public void loadEntities(World worldIn, NBTTagCompound compound, Chunk chunk) {
-        NBTTagList nbttaglist1 = compound.getTagList("Entities", 10);
+        NBTTagList list = compound.getTagList("Entities", 10);
 
-        for (int j1 = 0; j1 < nbttaglist1.tagCount(); ++j1)
-        {
-            NBTTagCompound nbttagcompound1 = nbttaglist1.getCompoundTagAt(j1);
-            readChunkEntity(nbttagcompound1, worldIn, chunk);
+        for (int j1 = 0; j1 < list.tagCount(); ++j1) {
+            NBTTagCompound tag = list.getCompoundTagAt(j1);
+            readChunkEntity(tag, worldIn, chunk);
             chunk.setHasEntities(true);
         }
 
         NBTTagList nbttaglist2 = compound.getTagList("TileEntities", 10);
 
-        for (int k1 = 0; k1 < nbttaglist2.tagCount(); ++k1)
-        {
+        for (int k1 = 0; k1 < nbttaglist2.tagCount(); ++k1) {
             NBTTagCompound nbttagcompound2 = nbttaglist2.getCompoundTagAt(k1);
             TileEntity tileentity = TileEntity.create(worldIn, nbttagcompound2);
 
-            if (tileentity != null)
-            {
+            if (tileentity != null) {
                 chunk.addTileEntity(tileentity);
             }
         }

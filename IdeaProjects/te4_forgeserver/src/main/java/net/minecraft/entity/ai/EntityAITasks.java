@@ -14,12 +14,11 @@ import plus.fserver.utls.collections.ArrayListEV;
 import plus.tson.utl.Te4HashSet;
 
 
-public class EntityAITasks {
+public class EntityAITasks extends ArrayListEV<CustomPriotizedSlowedGoal>{
     private static final Logger LOGGER = LogManager.getLogger();
     public static final CustomGoalTypeData            goalData = new CustomGoalTypeData();
     private final Set<CustomPriotizedSlowedGoal>         toAdd = new Te4HashSet<>(8),
                                                       toRemove = new Te4HashSet<>(8);
-    private final ArrayListEV<CustomPriotizedSlowedGoal> goals = new ArrayListEV<>(8);
 
     private int runningFlags = 0, runningNoOverRuleFlags = 0;
     private int avgTickCount, pauseTicks, pauseTickDelay, counter;
@@ -40,18 +39,20 @@ public class EntityAITasks {
 
 
     public EntityAITasks(MeanTicker ticker) {
+        super(8);
         this.ticker = ticker;
     }
 
 
     public void addTask(int priority, EntityAIBase task) {
-        if (this.goals.size() > 100) {
+        if (this.sizeC() > 100) {
             LOGGER.warn("Tried to add over 100 AI tasks, pausing ai and aborting");
             this.pauseTicks = 500;
             return;
         }
-        for (final CustomPriotizedSlowedGoal goal : this.goals) {
-            if (goal.goal == task) return;
+
+        for (int i = 0, s = size; i < s; ++i) {
+            if (this.getC(i).goal == task) return;
         }
         this.toAdd.add(goalData.getPriotizedGoalFor(priority, task));
         this.addedGoals = true;
@@ -59,7 +60,7 @@ public class EntityAITasks {
 
 
     public void removeTask(EntityAIBase task) {
-        for (final CustomPriotizedSlowedGoal goal : this.goals) {
+        for (final CustomPriotizedSlowedGoal goal : this) {
             if (goal.goal == task) {
                 this.resetGoal(goal);
                 this.toRemove.add(goal);
@@ -142,28 +143,29 @@ public class EntityAITasks {
 
     public void onUpdateTasks() {
         if (this.pauseTicks-- > 0) return;
-
-        this.pauseTicks = this.pauseTickDelay;
         long slowest = 0L;
         ++this.counter;
         this.runningFlags = 0;
-        long preTick = System.currentTimeMillis();
 
-        long preTask = this.pauseTickDelay >= 5 ? System.nanoTime() : 0;
+        long preTick = System.currentTimeMillis(),
+             preTask = (this.pauseTicks = this.pauseTickDelay) >= 5 ? System.nanoTime() : 0;
 
-        for (final CustomPriotizedSlowedGoal cur : goals) {
-            if (cur.isRunning() && (goalContainsDisabledFlag(cur) || (cur.goal.isInterruptible() && (runningFlags & cur.goal.getMutexBits()) != 0x0) || !cur.shouldContinueExecuting())) {
+        for (int i = 0, s = size; i < s; ++i) {
+            final CustomPriotizedSlowedGoal cur;
+            final EntityAIBase curGoal = (cur = this.getC(i)).goal;
+
+            if (cur.isRunning() && (goalContainsDisabledFlag(cur) || (curGoal.isInterruptible() && (runningFlags & curGoal.getMutexBits()) != 0x0) || !cur.shouldContinueExecuting())) {
                 this.resetGoal(cur);
             }
             if (this.counter == 1 && !cur.isrunning && !goalContainsDisabledFlag(cur) && isPreemptedByAll(cur) && cur.shouldExecute()) {
-                if (!cur.goal.isInterruptible()) {
-                    this.runningNoOverRuleFlags |= cur.goal.getMutexBits();
+                if (!curGoal.isInterruptible()) {
+                    this.runningNoOverRuleFlags |= curGoal.getMutexBits();
                 }
-                cur.goal.startExecuting();
+                curGoal.startExecuting();
                 cur.isrunning = true;
             }
             if (cur.isRunning()) {
-                this.runningFlags |= cur.goal.getMutexBits();
+                this.runningFlags |= curGoal.getMutexBits();
                 cur.updateTask();
             }
             if (this.pauseTickDelay >= 5) {
@@ -188,14 +190,14 @@ public class EntityAITasks {
         }
         if (this.removedGoals) {
             for (final CustomPriotizedSlowedGoal goal : this.toRemove) {
-                this.goals.remove(goal);
+                this.remove(goal);
             }
-            this.goals.sort(CustomPriotizedSlowedGoal::compareTo);
+            this.sort(CustomPriotizedSlowedGoal::compareTo);
             this.removedGoals = false;
         }
         if (this.addedGoals) {
-            this.goals.addAll(this.toAdd);
-            this.goals.sort(CustomPriotizedSlowedGoal::compareTo);
+            this.addAll(this.toAdd);
+            this.sort(CustomPriotizedSlowedGoal::compareTo);
             this.addedGoals = false;
         }
         if (this.counter > ElcaConfig.GOAL_TICK_RATE)

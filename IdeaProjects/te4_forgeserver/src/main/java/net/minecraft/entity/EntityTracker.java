@@ -21,6 +21,8 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import plus.fserver.utls.collections.ArrayListE6;
+import plus.fserver.utls.collections.EntityChunkIter;
 import plus.fserver.world.EntityTrackerFactory;
 
 
@@ -175,9 +177,47 @@ public class EntityTracker {
     }
 
 
+    public void sendLeashedEntitiesInChunk(final ArrayListE6<EntityPlayerMP> players, final Chunk chunk) {
+        final ArrayListE6<Entity> list = new ArrayListE6<>(), list1 = new ArrayListE6<>();
+        final int size = players.sizeC();
+        for (Entity entity : new EntityChunkIter(chunk)) {
+            final EntityTrackerEntry entry;
+            if ((entry = entity.trackerEntry) != null) {
+                for (int i = 0; i < size; ++i) {
+                    final EntityPlayerMP player;
+                    if (entity != (player = players.getC(i))) {
+                        entry.updatePlayerEntity(player);
+
+                        if (entity instanceof EntityLiving && ((EntityLiving) entity).getLeashHolder() != null){
+                            list.addF(entity);
+                        }
+
+                        if (!entity.getPassengers().isEmpty()) {
+                            list1.addF(entity);
+                        }
+                    }
+                }
+            }
+        }
+        if(list.isEmptyC() && list1.isEmptyC())return;
+        for (int i = 0; i < size; ++i) {
+            EntityPlayerMP player = players.get(i);
+            NetworkManager manager = player.connection.netManager;
+            manager.exec(() -> {
+                if (!list.isEmptyC())
+                    for (Entity entity1 : list)
+                        manager.sendPacketSync(new SPacketEntityAttach(entity1, ((EntityLiving) entity1).getLeashHolder()));
+
+                if (!list1.isEmptyC())
+                    for (Entity entity2 : list1) manager.sendPacketSync(new SPacketSetPassengers(entity2));
+            });
+        }
+    }
+
+
     public void sendLeashedEntitiesInChunk(EntityPlayerMP player, Chunk chunkIn) {
-        List<Entity> list = Lists.newArrayList();
-        List<Entity> list1 = Lists.newArrayList();
+        ArrayListE6<Entity> list  = new ArrayListE6<>();
+        ArrayListE6<Entity> list1 = new ArrayListE6<>();
         for (Entity entity : world.loadedEntityList) {
             EntityTrackerEntry entry = entity.trackerEntry;
             if (entry != null) {
@@ -185,19 +225,19 @@ public class EntityTracker {
                     entry.updatePlayerEntity(player);
 
                     if (entity instanceof EntityLiving && ((EntityLiving) entity).getLeashHolder() != null)
-                        list.add(entity);
+                        list.addF(entity);
 
-                    if (!entity.getPassengers().isEmpty()) list1.add(entity);
+                    if (!entity.getPassengers().isEmpty()) list1.addF(entity);
                 }
             }
         }
-        if(list.isEmpty()||list1.isEmpty())return;
+        if(list.isEmptyC() && list1.isEmptyC())return;
         NetworkManager manager = player.connection.netManager;
         manager.exec(() -> {
-            if (!list.isEmpty())
+            if (!list.isEmptyC())
                 for (Entity entity1 : list) manager.sendPacketSync(new SPacketEntityAttach(entity1, ((EntityLiving)entity1).getLeashHolder()));
 
-            if (!list1.isEmpty())
+            if (!list1.isEmptyC())
                 for (Entity entity2 : list1) manager.sendPacketSync(new SPacketSetPassengers(entity2));
         });
     }

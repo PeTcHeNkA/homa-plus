@@ -108,12 +108,10 @@ public class PlayerChunkMap {
             Iterator<PlayerChunkMapEntry> iterator = this.entriesWithoutChunks.iterator();
 
             while (iterator.hasNext()) {
-                PlayerChunkMapEntry entry = iterator.next();
+                final PlayerChunkMapEntry entry;
+                if ((entry = iterator.next()).getChunk() == null) {
 
-                if (entry.getChunk() == null) {
-                    boolean flag = entry.hasPlayerMatching(CAN_GENERATE_CHUNKS);
-
-                    if (entry.providePlayerChunk(flag)) {
+                    if (entry.providePlayerChunk(entry.hasPlayerMatching(CAN_GENERATE_CHUNKS))) {
                         iterator.remove();
                         if (entry.sendToPlayers()) {
                             this.pendingSendToPlayers.remove(entry);
@@ -129,28 +127,18 @@ public class PlayerChunkMap {
 
         if (!this.pendingSendToPlayers.isEmpty()) {
             int i1 = 81;
-            Iterator<PlayerChunkMapEntry> iterator1 = this.pendingSendToPlayers.iterator();
+            Iterator<PlayerChunkMapEntry> itr = this.pendingSendToPlayers.iterator();
 
-            while (iterator1.hasNext()) {
-                PlayerChunkMapEntry entry = iterator1.next();
-
-                if (entry.sendToPlayers()) {
-                    iterator1.remove();
-                    --i1;
-
-                    if (i1 < 0) {
-                        break;
-                    }
+            while (itr.hasNext()) {
+                if (itr.next().sendToPlayers()) {
+                    itr.remove();
+                    if (--i1 < 0) break;
                 }
             }
         }
 
-        if (this.players.isEmpty()) {
-            //WorldProvider worldprovider = this.world.provider;
-
-            //if (!worldprovider.canRespawnHere()) {
-            this.world.getChunkProvider().queueUnloadAll();
-            //}
+        if (this.players.isEmptyC()) {
+            world.getChunkProvider().queueUnloadAll();
         }
     }
 
@@ -267,7 +255,7 @@ public class PlayerChunkMap {
             int i = radius - this.playerViewRadius;
 
             Object[] data = players.toArray().clone();
-            int size = players.size();
+            int size = players.sizeC();
 
             for (int i2 = 0; i2 < size; i2++) {
                 EntityPlayerMP entityplayermp = (EntityPlayerMP) data[i2];
