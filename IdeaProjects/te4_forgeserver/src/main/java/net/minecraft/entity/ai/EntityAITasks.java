@@ -94,35 +94,6 @@ public class EntityAITasks extends ArrayListEV<CustomPriotizedSlowedGoal>{
     }
 
 
-    @Deprecated //removed by Elca Server
-    public class EntityAITaskEntry {
-        public final EntityAIBase action;
-        public final int priority;
-        public boolean using;
-
-        public EntityAITaskEntry(int priorityIn, EntityAIBase task) {
-            this.priority = priorityIn;
-            this.action = task;
-        }
-
-
-        @Override
-        public boolean equals(@Nullable Object other) {
-            if (this == other) {
-                return true;
-            } else {
-                return other != null && this.getClass() == other.getClass() && this.action.equals(((EntityAITaskEntry) other).action);
-            }
-        }
-
-
-        @Override
-        public int hashCode() {
-            return this.action.hashCode();
-        }
-    }
-
-
     private boolean goalContainsDisabledFlag(final CustomPriotizedSlowedGoal goal) {
         return (disabledControlFlags & goal.goal.getMutexBits()) != 0x0;
     }
@@ -154,7 +125,7 @@ public class EntityAITasks extends ArrayListEV<CustomPriotizedSlowedGoal>{
             final CustomPriotizedSlowedGoal cur;
             final EntityAIBase curGoal = (cur = this.getC(i)).goal;
 
-            if (cur.isRunning() && (goalContainsDisabledFlag(cur) || (curGoal.isInterruptible() && (runningFlags & curGoal.getMutexBits()) != 0x0) || !cur.shouldContinueExecuting())) {
+            if (cur.isrunning && (goalContainsDisabledFlag(cur) || (curGoal.isInterruptible() && (runningFlags & curGoal.getMutexBits()) != 0x0) || !cur.shouldContinueExecuting())) {
                 this.resetGoal(cur);
             }
             if (this.counter == 1 && !cur.isrunning && !goalContainsDisabledFlag(cur) && isPreemptedByAll(cur) && cur.shouldExecute()) {
@@ -164,7 +135,7 @@ public class EntityAITasks extends ArrayListEV<CustomPriotizedSlowedGoal>{
                 curGoal.startExecuting();
                 cur.isrunning = true;
             }
-            if (cur.isRunning()) {
+            if (cur.isrunning) {
                 this.runningFlags |= curGoal.getMutexBits();
                 cur.updateTask();
             }
@@ -180,7 +151,7 @@ public class EntityAITasks extends ArrayListEV<CustomPriotizedSlowedGoal>{
             if (ticker.meanTickTime() > ElcaConfig.MEAN_BALANCE_MOB) {
                 if (this.avgTick > 0L) {
                     this.pauseTicks = (int)this.avgTick * 100 / ElcaConfig.MEAN_BALANCE_MOB;
-                    if (this.pauseTicks > 20) this.pauseTicks = 200;
+                    if (this.pauseTicks > 200) this.pauseTicks = 200;
                 }
                 this.pauseTickDelay = this.pauseTicks;
             } else

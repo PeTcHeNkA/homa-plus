@@ -18,7 +18,7 @@ public class ElcaConfig {
     public static int TIME_PACKET_RATE           = 20 * 3;
     public static int CHUNK_TICK_RADIUS_1        = 4 * 16;
     public static int CHUNK_TICK_RADIUS_2        = 5 * 16;
-    public static int MEAN_BALANCE_MOB           = 40 * 12;
+    public static int MEAN_BALANCE_MOB           = 35 * 12;
     public static int GOAL_TICK_RATE             = 4;
     public static int RECHECK_CHUNKS_SPAWNER_RATE= 7;
     public static int RECHECK_SPAWNER_RATE       = 80;

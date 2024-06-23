@@ -158,7 +158,6 @@
 "net.minecraft.entity.ai.EntityAINearestAttackableTarget$Sorter"
 "net.minecraft.entity.ai.EntityAINearestAttackableTarget"
 "net.minecraft.entity.ai.EntityAIPanic"
-"net.minecraft.entity.ai.EntityAITasks$EntityAITaskEntry"
 "net.minecraft.entity.ai.EntityAITasks"
 "net.minecraft.entity.ai.EntitySenses"
 "net.minecraft.entity.Entity$1"
