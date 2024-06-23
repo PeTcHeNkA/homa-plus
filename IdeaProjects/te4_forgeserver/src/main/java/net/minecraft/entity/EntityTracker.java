@@ -1,6 +1,5 @@
 package net.minecraft.entity;
 
-import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -22,6 +21,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import plus.fserver.utls.collections.ArrayListE6;
+import plus.fserver.utls.collections.ArrayRemSwapListE15;
 import plus.fserver.utls.collections.EntityChunkIter;
 import plus.fserver.world.EntityTrackerFactory;
 
@@ -94,11 +94,15 @@ public class EntityTracker {
         EntityTrackerEntry entry;
         if (entityIn instanceof EntityPlayerMP) {
             EntityPlayerMP entityplayermp = (EntityPlayerMP)entityIn;
-            for (Entity entity : world.loadedEntityList) {
-                if((entry = entity.trackerEntry) != null)
-                    entry.removeFromTrackedPlayers(entityplayermp);
-                else
-                    System.out.println("WARN: TRYING TO REMOVE ENTITY WITH NULL TRACKER");
+
+            for (ArrayRemSwapListE15<Entity> list: world.realEntityList.getRaw()) {
+                for (int cursor = 0, s = list.sizeC(); cursor < s; ++cursor) {
+                    Entity entity = list.getC(cursor);
+                    if((entry = entity.trackerEntry) != null)
+                        entry.removeFromTrackedPlayers(entityplayermp);
+                    else
+                        System.out.println("WARN: TRYING TO REMOVE ENTITY WITH NULL TRACKER");
+                }
             }
         }
         entry = entityIn.trackerEntry;
@@ -114,39 +118,46 @@ public class EntityTracker {
         List<EntityPlayer> players = this.world.playerEntities;
         EntityTrackerEntry entry;
         if((world.getTotalWorldTime()&1)==0){
-            for (Entity entity : world.loadedEntityList) {
-                if((entry = entity.trackerEntry) != null)
-                    entry.updatePlayerList(players);
-            }
-        } else {
-            ArrayList<EntityPlayerMP> list = toUpdate;
-            for (Entity entity : world.loadedEntityList) {
-                if((entry = entity.trackerEntry) != null) {
-                    entry.updatePlayerList(players);
-                    if (entry.playerEntitiesUpdated) {
-                        if (entity instanceof EntityPlayerMP) list.add((EntityPlayerMP) entity);
-                    }
+            for (ArrayRemSwapListE15<Entity> list: world.realEntityList.getRaw()) {
+                for (int cursor = 0, s = list.sizeC(); cursor < s; ++cursor) {
+                    Entity entity = list.getC(cursor);
+                    if((entry = entity.trackerEntry) != null)
+                        entry.updatePlayerList(players);
                 }
             }
-            for (int i = 0; i < list.size(); ++i) {
-                EntityPlayerMP entityplayermp = list.get(i);
-                for (Entity entity : world.loadedEntityList)
-                    if((entry = entity.trackerEntry) != null)
-                        if (entry.getTrackedEntity() != entityplayermp)
-                            entry.updatePlayerEntity(entityplayermp);
+        } else {
+            ArrayList<EntityPlayerMP> toUpdate = this.toUpdate;
+
+            for (ArrayRemSwapListE15<Entity> list: world.realEntityList.getRaw())
+                for (int cursor = 0, s = list.sizeC(); cursor < s; ++cursor) {
+                    Entity entity = list.getC(cursor);
+                    if ((entry = entity.trackerEntry) != null) {
+                        entry.updatePlayerList(players);
+                        if (entry.playerEntitiesUpdated) {
+                            if (entity instanceof EntityPlayerMP) toUpdate.add((EntityPlayerMP) entity);
+                        }
+                    }
+                }
+
+            for (int i = 0; i < toUpdate.size(); ++i) {
+                updatePlayer1(toUpdate.get(i));
             }
-            list.clear();
+            toUpdate.clear();
         }
     }
 
 
     public void updateVisibility(EntityPlayerMP player) {
         EntityTrackerEntry entry;
-        for (Entity entity : world.loadedEntityList)
-            if((entry = entity.trackerEntry) != null) {
-                if (entity == player) entry.updatePlayerEntities(this.world.playerEntities);
-                else                  entry.updatePlayerEntity(player);
+        for (ArrayRemSwapListE15<Entity> list: world.realEntityList.getRaw()) {
+            for (int cursor = 0, s = list.sizeC(); cursor < s; ++cursor) {
+                Entity entity = list.getC(cursor);
+                if ((entry = entity.trackerEntry) != null) {
+                    if (entity == player) entry.updatePlayerEntities(this.world.playerEntities);
+                    else entry.updatePlayerEntity(player);
+                }
             }
+        }
     }
 
 
@@ -172,8 +183,12 @@ public class EntityTracker {
 
     public void removePlayerFromTrackers(EntityPlayerMP player) {
         EntityTrackerEntry entry;
-        for (Entity entity : player.world.loadedEntityList)
-            if((entry = entity.trackerEntry) != null) entry.removeTrackedPlayerSymmetric(player);
+        for (ArrayRemSwapListE15<Entity> list: world.realEntityList.getRaw()) {
+            for (int cursor = 0, s = list.sizeC(); cursor < s; ++cursor) {
+                Entity entity = list.getC(cursor);
+                if ((entry = entity.trackerEntry) != null) entry.removeTrackedPlayerSymmetric(player);
+            }
+        }
     }
 
 
@@ -216,29 +231,34 @@ public class EntityTracker {
 
 
     public void sendLeashedEntitiesInChunk(EntityPlayerMP player, Chunk chunkIn) {
-        ArrayListE6<Entity> list  = new ArrayListE6<>();
-        ArrayListE6<Entity> list1 = new ArrayListE6<>();
-        for (Entity entity : world.loadedEntityList) {
-            EntityTrackerEntry entry = entity.trackerEntry;
-            if (entry != null) {
-                if (entity != player && entity.chunkCoordX == chunkIn.x && entity.chunkCoordZ == chunkIn.z) {
-                    entry.updatePlayerEntity(player);
+        ArrayListE6<Entity> leashed  = new ArrayListE6<>();
+        ArrayListE6<Entity> passengers = new ArrayListE6<>();
 
-                    if (entity instanceof EntityLiving && ((EntityLiving) entity).getLeashHolder() != null)
-                        list.addF(entity);
+        for (ArrayRemSwapListE15<Entity> list: world.realEntityList.getRaw()) {
+            for (int cursor = 0, s = list.sizeC(); cursor < s; ++cursor) {
+                Entity entity = list.getC(cursor);
+                EntityTrackerEntry entry = entity.trackerEntry;
+                if (entry != null) {
+                    if (entity != player && entity.chunkCoordX == chunkIn.x && entity.chunkCoordZ == chunkIn.z) {
+                        entry.updatePlayerEntity(player);
 
-                    if (!entity.getPassengers().isEmpty()) list1.addF(entity);
+                        if (entity instanceof EntityLiving && ((EntityLiving) entity).getLeashHolder() != null)
+                            leashed.addF(entity);
+
+                        if (!entity.getPassengers().isEmpty()) passengers.addF(entity);
+                    }
                 }
             }
         }
-        if(list.isEmptyC() && list1.isEmptyC())return;
+
+        if(leashed.isEmptyC() && passengers.isEmptyC())return;
         NetworkManager manager = player.connection.netManager;
         manager.exec(() -> {
-            if (!list.isEmptyC())
-                for (Entity entity1 : list) manager.sendPacketSync(new SPacketEntityAttach(entity1, ((EntityLiving)entity1).getLeashHolder()));
+            if (!leashed.isEmptyC())
+                for (Entity entity1 : leashed) manager.sendPacketSync(new SPacketEntityAttach(entity1, ((EntityLiving)entity1).getLeashHolder()));
 
-            if (!list1.isEmptyC())
-                for (Entity entity2 : list1) manager.sendPacketSync(new SPacketSetPassengers(entity2));
+            if (!passengers.isEmptyC())
+                for (Entity entity2 : passengers) manager.sendPacketSync(new SPacketSetPassengers(entity2));
         });
     }
 
@@ -246,9 +266,13 @@ public class EntityTracker {
     public void setViewDistance(int distance) {
         this.maxTrackingDistanceThreshold = ((distance - 1) << 4);
         EntityTrackerEntry entry;
-        for (Entity entity : world.loadedEntityList)
-            if((entry = entity.trackerEntry) != null)
-                entry.setMaxRange(this.maxTrackingDistanceThreshold);
+        for (ArrayRemSwapListE15<Entity> list: world.realEntityList.getRaw()) {
+            for (int cursor = 0, s = list.sizeC(); cursor < s; ++cursor) {
+                Entity entity = list.getC(cursor);
+                if ((entry = entity.trackerEntry) != null)
+                    entry.setMaxRange(this.maxTrackingDistanceThreshold);
+            }
+        }
     }
 
 
@@ -258,16 +282,24 @@ public class EntityTracker {
         if (entityIn instanceof EntityPlayerMP) {
             this.track(entityIn, 512, 2);
             EntityPlayerMP entityplayermp = (EntityPlayerMP)entityIn;
-            EntityTrackerEntry entry;
-            for (Entity entity : world.loadedEntityList) {
-                if((entry = entity.trackerEntry) != null)
-                    if (entry.getTrackedEntity() != entityplayermp)
-                        entry.updatePlayerEntity(entityplayermp);
-            }
+            updatePlayer1(entityplayermp);
         } else {
             EntityTrackerFactory.TrackInfo inf = trackingTable.getFor(entityIn);
             if(inf==null)return;
             track(entityIn, inf.range, inf.updates, inf.sendVelocity);
+        }
+    }
+
+
+    private void updatePlayer1(EntityPlayerMP entityplayermp) {
+        EntityTrackerEntry entry;
+        for (ArrayRemSwapListE15<Entity> list: world.realEntityList.getRaw()) {
+            for (int cursor = 0, s = list.sizeC(); cursor < s; ++cursor) {
+                Entity entity = list.getC(cursor);
+                if ((entry = entity.trackerEntry) != null)
+                    if (entry.getTrackedEntity() != entityplayermp)
+                        entry.updatePlayerEntity(entityplayermp);
+            }
         }
     }
 }

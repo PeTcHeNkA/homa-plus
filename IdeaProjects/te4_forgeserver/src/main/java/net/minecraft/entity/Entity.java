@@ -265,7 +265,13 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
 
     public void setEntityId(int id) {
-        this.entityId = id;
+        if(world != null && isAddedToWorld) {
+            world.realEntityList.removeRefSwap(this);
+            this.entityId = id;
+            world.realEntityList.addF(this);
+        } else {
+            this.entityId = id;
+        }
     }
 
 

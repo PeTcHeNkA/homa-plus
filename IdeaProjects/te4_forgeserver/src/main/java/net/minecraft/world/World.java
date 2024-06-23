@@ -18,6 +18,7 @@ import net.minecraft.crash.ICrashReportDetail;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Biomes;
@@ -89,7 +90,8 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
     private int seaLevel = 63;
     protected boolean scheduledUpdatesAreImmediate;
-    public final List<Entity> loadedEntityList = new ArrayRemSwapListE15<>();
+    public final List<Entity> loadedEntityList;
+    public final EntityIDHashSplitedList realEntityList;
     protected final List<Entity> unloadedEntityList = Lists.newArrayList();
     public final List<TileEntity> loadedTileEntityList= new ArrayRemSwapListE15<>();
     public final ArrayRemSwapListE15<TileEntity> tickableTileEntities = new ArrayRemSwapListE15<>();
@@ -158,6 +160,14 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     ChunkProviderServer chunkProviderServer;
     //END UNSAFE
 
+    /*
+        for (ArrayRemSwapListE15<Entity> list: realEntityList.getRaw()) {
+            for (int cursor = 0, s = list.sizeC(); cursor < s; ++cursor) {
+                Entity entity = list.getC(cursor);
+            }
+        }
+    * */
+
     protected World(ISaveHandler saveHandlerIn, WorldInfo info, WorldProvider providerIn, Profiler profilerIn, boolean client) {
         this(null, saveHandlerIn, info, providerIn, profilerIn, client);
     }
@@ -178,6 +188,8 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         } else {
             this.isRemote = client;
         }
+
+        loadedEntityList = realEntityList = new EntityIDHashSplitedList();
 
         this.worldBorder = providerIn.createWorldBorder();
         perWorldStorage = new MapStorage((ISaveHandler)null);
@@ -1109,7 +1121,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
             if (MinecraftForge.EVENT_BUS.post(new EntityJoinWorldEvent(entityIn, this)) && !flag) return false;
             this.getChunk(i, j).addEntity(entityIn);
-            this.loadedEntityList.add(entityIn);
+            this.realEntityList.addF(entityIn);
             this.onEntityAdded(entityIn);
             return true;
         }
@@ -1164,7 +1176,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             this.getChunk(i, j).removeEntity(entityIn);
         }
 
-        this.loadedEntityList.remove(entityIn);
+        this.realEntityList.removeRefSwap(entityIn);
         this.onEntityRemoved(entityIn);
     }
 
@@ -1324,15 +1336,15 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     @SideOnly(Side.CLIENT)
-    public int getMoonPhase()
-    {
+    public int getMoonPhase() {
         return this.provider.getMoonPhase(this.getWorldTime());
     }
 
-    public float getCurrentMoonPhaseFactor()
-    {
+
+    public float getCurrentMoonPhaseFactor() {
         return provider.getCurrentMoonPhaseFactor();
     }
+
 
     public float getCurrentMoonPhaseFactorBody() {
         return WorldProvider.MOON_PHASE_FACTORS[this.provider.getMoonPhase(this.getWorldTime())];
@@ -1444,29 +1456,30 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     public void tickLoadedEntities(){
-        ArrayRemSwapListE15<Entity> list = (ArrayRemSwapListE15<Entity>) this.loadedEntityList;
-        for (int cursor = 0; cursor < list.sizeC(); ++cursor) {
-            Entity entity = list.get(cursor);
-            Entity ridding = entity.getRidingEntity();
+        for (ArrayRemSwapListE15<Entity> list:realEntityList.getRaw()) {
+            for (int cursor = 0; cursor < list.sizeC(); ++cursor) {
+                Entity entity = list.get(cursor);
+                Entity ridding = entity.getRidingEntity();
 
-            if (ridding != null) {
-                if (!ridding.isDead && ridding.isPassenger(entity))
-                    continue;
-                entity.dismountRidingEntity();
-            }
-
-            if (!entity.isDead && !(entity instanceof EntityPlayerMP))
-                this.updateEntity(entity);
-
-            if (entity.isDead) {
-                int l1 = entity.chunkCoordX;
-                int i2 = entity.chunkCoordZ;
-
-                if (entity.addedToChunk && this.isChunkLoaded(l1, i2, true)) {
-                    this.getChunk(l1, i2).removeEntity(entity);
+                if (ridding != null) {
+                    if (!ridding.isDead && ridding.isPassenger(entity))
+                        continue;
+                    entity.dismountRidingEntity();
                 }
-                list.remove(cursor--);
-                this.onEntityRemoved(entity);
+
+                if (!entity.isDead && !(entity instanceof EntityPlayerMP))
+                    this.updateEntity(entity);
+
+                if (entity.isDead) {
+                    int l1 = entity.chunkCoordX;
+                    int i2 = entity.chunkCoordZ;
+
+                    if (entity.addedToChunk && this.isChunkLoaded(l1, i2, true)) {
+                        this.getChunk(l1, i2).removeEntity(entity);
+                    }
+                    list.remove(cursor--);
+                    this.onEntityRemoved(entity);
+                }
             }
         }
     }
@@ -1504,7 +1517,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             if (entity.isDead) localList.remove(i--);
         }
 
-        this.loadedEntityList.removeAll(localList = this.unloadedEntityList);
+        this.realEntityList.removeRefSwapAll(localList = this.unloadedEntityList);
 
         for (int k = 0; k < localList.size(); ++k) {
             Entity entity1 = localList.get(k);
@@ -1876,7 +1889,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
     @SideOnly(Side.CLIENT)
     public String getDebugLoadedEntities() {
-        return "All: " + this.loadedEntityList.size();
+        return "All: " + this.realEntityList.size();
     }
 
 
@@ -2278,12 +2291,15 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
     @Keep
     public <T extends Entity> List<T> getEntities(Class <? extends T > entityType, Predicate <? super T > filter) {
-        List<T> list = Lists.<T>newArrayList();
-        for (Entity entity4 : this.loadedEntityList) {
-            if (entityType.isAssignableFrom(entity4.getClass()) && filter.apply((T)entity4))
-                list.add((T)entity4);
+        List<T> result = Lists.<T>newArrayList();
+        for (ArrayRemSwapListE15<Entity> list:realEntityList.getRaw()) {
+            for (int cursor = 0, s = list.sizeC(); cursor < s; ++cursor) {
+                Entity entity = list.getC(cursor);
+                if (entityType.isAssignableFrom(entity.getClass()) && filter.apply((T) entity))
+                    result.add((T) entity);
+            }
         }
-        return list;
+        return result;
     }
 
 
@@ -2346,21 +2362,23 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     public int countEntities(Class<?> entityType) {
-        int j2 = 0;
-
-        for (Entity entity4 : this.loadedEntityList) {
-            if ((!(entity4 instanceof EntityLiving) || !((EntityLiving)entity4).isNoDespawnRequired()) && entityType.isAssignableFrom(entity4.getClass())) {
-                ++j2;
+        int count = 0;
+        for (ArrayRemSwapListE15<Entity> list:realEntityList.getRaw()) {
+            for (int cursor = 0; cursor < list.sizeC(); ++cursor) {
+                Entity entity = list.get(cursor);
+                if ((!(entity instanceof EntityLiving) || !((EntityLiving) entity).isNoDespawnRequired()) && entityType.isAssignableFrom(entity.getClass())) {
+                    ++count;
+                }
             }
         }
-        return j2;
+        return count;
     }
 
 
     public void loadEntities(Collection<Entity> entityCollection) {
         for (Entity entity4 : entityCollection) {
             if (!MinecraftForge.EVENT_BUS.post(new EntityJoinWorldEvent(entity4, this))) {
-                loadedEntityList.add(entity4);
+                realEntityList.addF(entity4);
                 this.onEntityAdded(entity4);
             }
         }
@@ -2634,6 +2652,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
+    //TODO
     @SideOnly(Side.CLIENT)
     public void joinEntityInSurroundings(Entity entityIn) {
         int j2 = MathHelper.floor(entityIn.posX / 16.0D);
@@ -2645,9 +2664,9 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
                 this.getChunk(j2 + i3, k2 + j3);
         }
 
-        if (!this.loadedEntityList.contains(entityIn)) {
+        if (!this.realEntityList.containsRef(entityIn)) {
             if (!MinecraftForge.EVENT_BUS.post(new EntityJoinWorldEvent(entityIn, this)))
-                this.loadedEntityList.add(entityIn);
+                this.realEntityList.addF(entityIn);
         }
     }
 
@@ -3017,11 +3036,12 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     /**
      * Returns a count of entities that classify themselves as the specified creature type.
      */
-    public int countEntities(net.minecraft.entity.EnumCreatureType type, boolean forSpawnCount) {
+    public int countEntities(EnumCreatureType type, boolean forSpawnCount) {
         int count = 0;
-        for (int x = 0; x < loadedEntityList.size(); x++) {
-            if (loadedEntityList.get(x).isCreatureType(type, forSpawnCount)) {
-                count++;
+        for (ArrayRemSwapListE15<Entity> list: realEntityList.getRaw()) {
+            for (int cursor = 0, s = list.sizeC(); cursor < s; ++cursor) {
+                if(list.getC(cursor).isCreatureType(type, forSpawnCount))
+                    ++count;
             }
         }
         return count;

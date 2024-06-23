@@ -300,8 +300,6 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
 
 
     protected void playerCheckLight() {
-        this.profiler.startSection("playerCheckLight");
-
         if (!this.playerEntities.isEmpty()) {
             int i = this.rand.nextInt(this.playerEntities.size());
             EntityPlayer entityplayer = this.playerEntities.get(i);
@@ -310,7 +308,6 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
             int l = MathHelper.floor(entityplayer.posZ) + this.rand.nextInt(11) - 5;
             this.checkLight(new BlockPos(j, k, l));
         }
-        this.profiler.endSection();
     }
 
 
@@ -430,28 +427,30 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
 
     @Override
     public void tickLoadedEntities(){
-        ArrayRemSwapListE15<Entity> list = (ArrayRemSwapListE15<Entity>) this.loadedEntityList;
-        ChunkProviderServer cps = chunkProviderServer;
-        for (int cursor = 0; cursor < list.sizeC(); ++cursor) {
-            final Entity entity = list.getC(cursor);
-            final Entity ridding = entity.getRidingEntity();
+        for (ArrayRemSwapListE15<Entity> list:realEntityList.getRaw()) {
+            for (int cursor = 0; cursor < list.sizeC(); ++cursor) {
+                Entity entity = list.get(cursor);
+                Entity ridding = entity.getRidingEntity();
 
-            if (ridding != null) {
-                if (!ridding.isDead && ridding.isPassenger(entity))
-                    continue;
-                entity.dismountRidingEntity();
-            }
-
-            if (!entity.isDead && !(entity instanceof EntityPlayerMP))
-                this.updateEntity(entity);
-
-            if (entity.isDead) {
-                if (entity.addedToChunk) {
-                    Chunk chunk = cps.getLoadedChunk(entity.chunkCoordX, entity.chunkCoordZ);
-                    if(chunk != null) chunk.removeEntity(entity);
+                if (ridding != null) {
+                    if (!ridding.isDead && ridding.isPassenger(entity))
+                        continue;
+                    entity.dismountRidingEntity();
                 }
-                list.remove(cursor--);
-                this.onEntityRemoved(entity);
+
+                if (!entity.isDead && !(entity instanceof EntityPlayerMP))
+                    this.updateEntity(entity);
+
+                if (entity.isDead) {
+                    int l1 = entity.chunkCoordX;
+                    int i2 = entity.chunkCoordZ;
+
+                    if (entity.addedToChunk && this.isChunkLoaded(l1, i2, true)) {
+                        this.getChunk(l1, i2).removeEntity(entity);
+                    }
+                    list.remove(cursor--);
+                    this.onEntityRemoved(entity);
+                }
             }
         }
     }
@@ -729,7 +728,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         for (Entity entity : Lists.newArrayList(entityCollection)) {
             if (this.canAddEntity(entity) && !MinecraftForge.EVENT_BUS.post(
                     new EntityJoinWorldEvent(entity, this))) {
-                this.loadedEntityList.add(entity);
+                this.realEntityList.addF(entity);
                 this.onEntityAdded(entity);
             }
         }
@@ -1247,7 +1246,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
                     if(chunk != null)chunk.removeEntity(entity);
                 }
 
-                this.loadedEntityList.remove(entity);
+                this.realEntityList.removeRefSwap(entity);
                 this.onEntityRemoved(entity);
             }
         }
@@ -1276,7 +1275,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
     protected void updateBlocks() {
         this.playerCheckLight();
         if (this.worldInfo.getTerrainType() == WorldType.DEBUG_ALL_BLOCK_STATES) {
-            for (Iterator<Chunk> iterator = this.playerChunkMap.getChunkIterator(); iterator.hasNext(); this.profiler.endSection()){
+            for (Iterator<Chunk> iterator = this.playerChunkMap.getChunkIterator(); iterator.hasNext();){
                 iterator.next().onTick(false);
             }
         } else {
@@ -1288,7 +1287,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
             Chunk chunk;
             BlockPos.MutableBlockPos mut = localUpdateBlocks;
             BlockPos.MutableBlockPos mut2 = localUpdateBlocks2;
-            for (Iterator<Chunk> iterator = this.playerChunkMap.getChunkIterator(); iterator.hasNext(); this.profiler.endSection()){
+            for (Iterator<Chunk> iterator = this.playerChunkMap.getChunkIterator(); iterator.hasNext();){
                 selector.setChunk(chunk = iterator.next());
 
                 int j = chunk.x << 4;
