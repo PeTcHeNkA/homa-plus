@@ -279,6 +279,24 @@ public abstract class EntityLiving extends EntityLivingBase {
     }
 
 
+    @Override
+    public void onLivingUpdate() {
+        int lodLvl;
+        if((ticksExisted & (lodLvl = lodLvl())) == 0){
+            onLivingUpdateTick();
+            if(lodLvl < 2) this.collideWithNearbyEntities();
+        }
+
+        if (lodLvl == 0 && (!this.world.isRemote || SERVER_COMPILE) && this.canPickUpLoot() && !this.dead && world.getMobGrifering(this)) {
+            AxisAlignedBB box;
+            getEntityBoundingBox().growTo(1d,0d,1d, box = world.commonWorldEntityAABB);
+            for (EntityItem item : this.world.getEntitiesWithinAABB(EntityItem.class, box))
+                if (!item.isDead && !item.getItem().isEmpty() && !item.cannotPickup())
+                    this.updateEquipmentIfNeeded(item);
+        }
+    }
+
+
     @SideOnly(Side.CLIENT)
     protected float updateDistance(float f1, float f2) {
         this.bodyHelper.updateRenderAngles();
@@ -444,6 +462,7 @@ public abstract class EntityLiving extends EntityLivingBase {
     }
 
 
+    @Override
     protected void dropLoot(boolean wasRecentlyHit, int lootingModifier, DamageSource source) {
         ResourceLocation table = this.deathLootTable;
 
@@ -487,24 +506,6 @@ public abstract class EntityLiving extends EntityLivingBase {
     public void setAIMoveSpeed(float speedIn) {
         super.setAIMoveSpeed(speedIn);
         this.setMoveForward(speedIn);
-    }
-
-
-    @Override
-    public void onLivingUpdate() {
-        int lodLvl;
-        if((ticksExisted & (lodLvl = lodLvl())) == 0){
-            onLivingUpdateTick();
-            if(lodLvl < 2) this.collideWithNearbyEntities();
-        }
-
-        if (lodLvl == 0 && (!this.world.isRemote || SERVER_COMPILE) && this.canPickUpLoot() && !this.dead && world.getMobGrifering(this)) {
-            AxisAlignedBB box;
-            getEntityBoundingBox().growTo(1d,0d,1d, box = world.commonWorldEntityAABB);
-            for (EntityItem item : this.world.getEntitiesWithinAABB(EntityItem.class, box))
-                if (!item.isDead && !item.getItem().isEmpty() && !item.cannotPickup())
-                    this.updateEquipmentIfNeeded(item);
-        }
     }
 
 

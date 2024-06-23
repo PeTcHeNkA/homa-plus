@@ -41,20 +41,20 @@ public class ElcaMobs {
             config = new TsonMap();
         }
 
-        GLOBAL    = new EntityLodFunc(config.get("global"),   24, 48);
-        WATER     = new EntityLodFunc(config.get("water"),    18, 36);
-        MONSTERS  = new EntityLodFunc(config.get("monsters"), 22, 40);
-        ANIMALS   = new EntityLodFunc(config.get("animals"),  18, 40);
-        AMBIENT   = new EntityLodFunc(config.get("ambient"),  14, 30);
-        CREEPER   = new EntityLodFunc(config.get("creeper"),  24, 36);
-        SKELETON  = new EntityLodFunc(config.get("skeleton"), 24, 36);
-        SPIDER    = new EntityLodFunc(config.get("spider"),   20, 32);
-        ZOMBIE    = new EntityLodFunc(config.get("zombie"),   22, 36);
-        GUARDIAN  = new EntityLodFunc(config.get("guardian"), 26, 38);
-        BLAZE     = new EntityLodFunc(config.get("blaze"),    16, 28);
-        ENDERMAN  = new EntityLodFunc(config.get("enderman"), 24, 36);
-        WITCH     = new EntityLodFunc(config.get("witch"),    28, 38);
-        VILLAGER  = new EntityLodFunc(config.get("villager"), 28, 38);
+        GLOBAL    = new EntityLodFunc(config.get("global"),   24, 44);
+        WATER     = new EntityLodFunc(config.get("water"),    18, 34);
+        MONSTERS  = new EntityLodFunc(config.get("monsters"), 22, 38);
+        ANIMALS   = new EntityLodFunc(config.get("animals"),  18, 38);
+        AMBIENT   = new EntityLodFunc(config.get("ambient"),  14, 28);
+        CREEPER   = new EntityLodFunc(config.get("creeper"),  24, 34);
+        SKELETON  = new EntityLodFunc(config.get("skeleton"), 24, 34);
+        SPIDER    = new EntityLodFunc(config.get("spider"),   20, 30);
+        ZOMBIE    = new EntityLodFunc(config.get("zombie"),   22, 34);
+        GUARDIAN  = new EntityLodFunc(config.get("guardian"), 26, 36);
+        BLAZE     = new EntityLodFunc(config.get("blaze"),    16, 26);
+        ENDERMAN  = new EntityLodFunc(config.get("enderman"), 24, 34);
+        WITCH     = new EntityLodFunc(config.get("witch"),    28, 36);
+        VILLAGER  = new EntityLodFunc(config.get("villager"), 28, 36);
         ITEM      = new EntityLodFunc(config.get("item"),     10, 18);
         FALLING   = new EntityLodFunc(config.get("falling"),  16, 28);
         BAT       = new EntityLodFunc(config.get("bat"),      12, 18);

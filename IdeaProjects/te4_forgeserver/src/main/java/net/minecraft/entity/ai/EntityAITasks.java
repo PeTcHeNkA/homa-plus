@@ -128,12 +128,14 @@ public class EntityAITasks extends ArrayListEV<CustomPriotizedSlowedGoal>{
             if (cur.isrunning && (goalContainsDisabledFlag(cur) || (curGoal.isInterruptible() && (runningFlags & curGoal.getMutexBits()) != 0x0) || !cur.shouldContinueExecuting())) {
                 this.resetGoal(cur);
             }
-            if (this.counter == 1 && !cur.isrunning && !goalContainsDisabledFlag(cur) && isPreemptedByAll(cur) && cur.shouldExecute()) {
-                if (!curGoal.isInterruptible()) {
-                    this.runningNoOverRuleFlags |= curGoal.getMutexBits();
+            if (this.counter == 1 && !cur.isrunning && !goalContainsDisabledFlag(cur) && isPreemptedByAll(cur)) {
+                if(cur.shouldExecute()) {
+                    if (!curGoal.isInterruptible()) {
+                        this.runningNoOverRuleFlags |= curGoal.getMutexBits();
+                    }
+                    curGoal.startExecuting();
+                    cur.isrunning = true;
                 }
-                curGoal.startExecuting();
-                cur.isrunning = true;
             }
             if (cur.isrunning) {
                 this.runningFlags |= curGoal.getMutexBits();

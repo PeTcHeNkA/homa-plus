@@ -538,6 +538,18 @@ public class WorldClient extends World {
     }
 
 
+    @Override
+    protected boolean getCollisionBoxesTrue(@Nullable Entity entityIn, AxisAlignedBB aabb, ArrayListE6<AxisAlignedBB> outList) {
+        return getCollisionBoxes(entityIn, aabb, true, outList);
+    }
+
+
+    @Override
+    protected boolean getCollisionBoxesFalse(@Nullable Entity entityIn, AxisAlignedBB aabb, ArrayListE6<AxisAlignedBB> outList) {
+        return getCollisionBoxes(entityIn, aabb, false, outList);
+    }
+
+
     protected boolean getCollisionBoxes(@Nullable Entity entityIn, AxisAlignedBB aabb, boolean fastCheck, ArrayListE6<AxisAlignedBB> outList) {
         if (fastCheck){
             if(ElcaCV.ENABLE_COLLISION_EVENTS){
@@ -583,7 +595,7 @@ public class WorldClient extends World {
                                     state = chunk.getBlockState(xPos, i2, zPos);
                                 }
 
-                                state.addCollisionBoxToListF(this, pos.setPos(xPos, i2, zPos), aabb, outList, entityIn, false);
+                                state.addCollisionBoxToListF(this, pos.setPos(xPos, i2, zPos), aabb, outList);
 
                                 if (fastCheck) {
                                     if(ElcaCV.ENABLE_COLLISION_EVENTS){

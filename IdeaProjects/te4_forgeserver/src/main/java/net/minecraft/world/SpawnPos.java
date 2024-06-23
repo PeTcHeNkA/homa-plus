@@ -26,7 +26,7 @@ public final class SpawnPos extends BlockPos.MutableBlockPos {
 
 
     public void setRandomChunkPos(int x, int z) {
-        chunk = world.getChunk(x, z);
+        chunk = world.localSelector.getChunkI(x, z);
         int rand = world.rand.nextInt();
         int nX = (x << 4) + (rand & 15);
         int nZ = (z << 4) + ((rand >> 4) & 15);

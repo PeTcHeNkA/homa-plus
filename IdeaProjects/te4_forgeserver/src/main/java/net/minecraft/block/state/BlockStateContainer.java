@@ -455,13 +455,13 @@ public class BlockStateContainer {
 
 
         @Override
-        public void addCollisionBoxToList(World worldIn, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes, @Nullable Entity entityIn, boolean p_185908_6_) {
-            this.block.addCollisionBoxToList(this, worldIn, pos, entityBox, collidingBoxes, entityIn, p_185908_6_);
+        public void addCollisionBoxToList(World worldIn, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes, @Nullable Entity entityIn, boolean actual) {
+            this.block.addCollisionBoxToList(this, worldIn, pos, entityBox, collidingBoxes, entityIn, actual);
         }
 
 
         @Override
-        public void addCollisionBoxToListF(IBlockAccess worldIn, BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> collidingBoxes, @Nullable Entity entityIn, boolean p_185908_6_) {
+        public void addCollisionBoxToListF(IBlockAccess worldIn, BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> collidingBoxes) {
             this.block.addCollisionBoxToListF(this, worldIn, pos, entityBox, collidingBoxes);
         }
 

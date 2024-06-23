@@ -16,15 +16,8 @@ public class MathUtls {
     }
 
 
-//    public static void main(String[] args) {
-//        for (double d=-22;d<120;d+=3.4){
-//
-//            int res = MathHelper.clamp(
-//                    MathHelper.floor(d) >> 4,
-//                    0, 15
-//            );
-//
-//            assert clamp15(d) == res;
-//        }
-//    }
+    public static boolean checkAbs0_003D(double motion){
+        return motion < -0.003D || motion > 0.003D;
+        //Math.abs(this.motionX) < 0.003D)
+    }
 }

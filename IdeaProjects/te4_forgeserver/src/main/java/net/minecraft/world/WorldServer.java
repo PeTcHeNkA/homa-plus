@@ -80,6 +80,7 @@ import plus.fserver.ElcaCV;
 import plus.fserver.server.chunk.io.TChunkTask;
 import plus.fserver.server.chunk.io.TQueuedChunk;
 import plus.fserver.server.elca.ChunkSelector;
+import plus.fserver.utls.collections.ArrayRemSwapListE15;
 import plus.fserver.utls.math.MathUtls;
 import plus.fserver.world.CommonWorldEntitySpawner;
 import plus.fserver.world.NavigationCache;
@@ -427,6 +428,35 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
     }
 
 
+    @Override
+    public void tickLoadedEntities(){
+        ArrayRemSwapListE15<Entity> list = (ArrayRemSwapListE15<Entity>) this.loadedEntityList;
+        ChunkProviderServer cps = chunkProviderServer;
+        for (int cursor = 0; cursor < list.sizeC(); ++cursor) {
+            final Entity entity = list.getC(cursor);
+            final Entity ridding = entity.getRidingEntity();
+
+            if (ridding != null) {
+                if (!ridding.isDead && ridding.isPassenger(entity))
+                    continue;
+                entity.dismountRidingEntity();
+            }
+
+            if (!entity.isDead && !(entity instanceof EntityPlayerMP))
+                this.updateEntity(entity);
+
+            if (entity.isDead) {
+                if (entity.addedToChunk) {
+                    Chunk chunk = cps.getLoadedChunk(entity.chunkCoordX, entity.chunkCoordZ);
+                    if(chunk != null) chunk.removeEntity(entity);
+                }
+                list.remove(cursor--);
+                this.onEntityRemoved(entity);
+            }
+        }
+    }
+
+
     public void resetUpdateEntityTick() {
         this.updateEntityTick = 0;
     }
@@ -491,7 +521,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
 
     private void updateEntityWithOptionalForce0(Entity entity, boolean forceUpdate) {
         if (checkCanUpdate) {
-            Chunk chunk = chunkProviderServer.loadedChunks.get(ChunkPos.asLong(entity.chunkCoordX, entity.chunkCoordZ));
+            Chunk chunk = chunkProviderServer.getLoadedChunk(entity.chunkCoordX, entity.chunkCoordZ);
 
             boolean canUpdate;
             if(chunk != null){

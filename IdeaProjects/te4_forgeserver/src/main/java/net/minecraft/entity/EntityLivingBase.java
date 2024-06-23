@@ -80,6 +80,7 @@ import plus.fserver.utls.collections.FixedItemList;
 import plus.fserver.utls.math.Vec3dMut;
 import static plus.fserver.ElcaCV.SERVER_COMPILE;
 import static plus.fserver.utls.math.MathUtls.F_180_PI;
+import static plus.fserver.utls.math.MathUtls.checkAbs0_003D;
 
 
 public abstract class EntityLivingBase extends Entity {
@@ -94,7 +95,7 @@ public abstract class EntityLivingBase extends Entity {
     private static final DataParameter<Integer> ARROW_COUNT_IN_ENTITY = EntityDataManager.createKey(EntityLivingBase.class, DataSerializers.VARINT);
     private AbstractAttributeMap attributeMap;
     private final CombatTracker combatTracker = new CombatTracker(this);
-    private final Map<Potion, PotionEffect> activePotionsMap = Maps.newHashMap();
+    private final HashMap<Potion, PotionEffect> activePotionsMap = Maps.newHashMap();
     private final FixedItemList handInventory = new FixedItemList(2);
     private final FixedItemList armorArray = new FixedItemList(4);
     public boolean isSwingInProgress;
@@ -161,11 +162,6 @@ public abstract class EntityLivingBase extends Entity {
     private BlockPos prevBlockpos;
     private DamageSource lastDamageSource;
     private long lastDamageStamp;
-
-    public void onKillCommand() {
-        this.attackEntityFrom(DamageSource.OUT_OF_WORLD, Float.MAX_VALUE);
-    }
-
 
     public EntityLivingBase(World worldIn) {
         super(worldIn);
@@ -353,72 +349,6 @@ public abstract class EntityLivingBase extends Entity {
     }
 
 
-    protected boolean canDropLoot() {
-        return !this.isChild();
-    }
-
-
-    protected int decreaseAirSupply(int air) {
-        int i = EnchantmentHelper.getRespirationModifier(this);
-        return i > 0 && this.rand.nextInt(i + 1) > 0 ? air : air - 1;
-    }
-
-
-    protected int getExperiencePoints(EntityPlayer player) {
-        return 0;
-    }
-
-
-    protected boolean isPlayer() {
-        return false;
-    }
-
-
-    public Random getRNG() {
-        return this.rand;
-    }
-
-
-    @Nullable
-    public EntityLivingBase getRevengeTarget() {
-        return this.revengeTarget;
-    }
-
-
-    public int getRevengeTimer() {
-        return this.revengeTimer;
-    }
-
-
-    public void setRevengeTarget(@Nullable EntityLivingBase livingBase) {
-        this.revengeTarget = livingBase;
-        this.revengeTimer = this.ticksExisted;
-    }
-
-
-    public EntityLivingBase getLastAttackedEntity() {
-        return this.lastAttackedEntity;
-    }
-
-
-    public int getLastAttackedEntityTime() {
-        return this.lastAttackedEntityTime;
-    }
-
-
-    public void setLastAttackedEntity(Entity entityIn) {
-        if (entityIn instanceof EntityLivingBase)
-             this.lastAttackedEntity = (EntityLivingBase)entityIn;
-        else this.lastAttackedEntity = null;
-        this.lastAttackedEntityTime = this.ticksExisted;
-    }
-
-
-    public int getIdleTime() {
-        return this.idleTime;
-    }
-
-
     protected void playEquipSound(ItemStack stack) {
         if (!stack.isEmpty()) {
             SoundEvent soundevent = SoundEvents.ITEM_ARMOR_EQUIP_GENERIC;
@@ -510,12 +440,11 @@ public abstract class EntityLivingBase extends Entity {
 
     protected void updatePotionEffects() {
         if(activePotionsMap.isEmpty())return;
-        Iterator<Potion> iterator = this.activePotionsMap.keySet().iterator();
+        Iterator<PotionEffect> iterator = this.activePotionsMap.values().iterator();
 
         try {
             while (iterator.hasNext()) {
-                Potion potion = iterator.next();
-                PotionEffect potioneffect = this.activePotionsMap.get(potion);
+                PotionEffect potioneffect = iterator.next();
 
                 if (!potioneffect.onUpdate(this)) {
                     if ((!this.world.isRemote || SERVER_COMPILE) && !MinecraftForge.EVENT_BUS.post(
@@ -1118,11 +1047,6 @@ public abstract class EntityLivingBase extends Entity {
     }
 
 
-    public CombatTracker getCombatTracker() {
-        return this.combatTracker;
-    }
-
-
     @Nullable
     public EntityLivingBase getAttackingEntity() {
              if (this.combatTracker.getBestAttacker() != null) return this.combatTracker.getBestAttacker();
@@ -1609,60 +1533,11 @@ public abstract class EntityLivingBase extends Entity {
     }
 
 
-    public float getAIMoveSpeed() {
-        return this.landMovementFactor;
-    }
-
-
-    public void setAIMoveSpeed(float speedIn) {
-        this.landMovementFactor = speedIn;
-    }
-
-
-    public boolean attackEntityAsMob(Entity entityIn) {
-        this.setLastAttackedEntity(entityIn);
-        return false;
-    }
-
-
-    public boolean isPlayerSleeping() {
-        return false;
-    }
-
-
     public void onUpdate() {
         if (world.onLivingUpdate(this)) return;
         onUpdateE();
         onUpdateB();
     }
-
-
-    private void updateSlot(EntityEquipmentSlot slot, ItemStack stack){
-        ItemStack other = this.getItemStackFromSlot(slot);
-
-        if (!ItemStack.areItemStacksEqual(other, stack)) {
-            if (!ItemStack.areItemStacksEqualUsingNBTShareTag(other, stack))
-                ((WorldServer)this.world).getEntityTracker().sendToTracking(this, new SPacketEntityEquipment(this.getEntityId(), slot, other));
-            MinecraftForge.EVENT_BUS.post(new LivingEquipmentChangeEvent(this, slot, stack, other));
-
-            if (!stack.isEmpty())
-                this.getAttributeMap().removeAttributeModifiers(stack.getAttributeModifiers(slot));
-
-
-            if (!other.isEmpty())
-                this.getAttributeMap().applyAttributeModifiers(other.getAttributeModifiers(slot));
-
-
-            switch (slot.getSlotType()) {
-                case HAND:
-                    this.handInventory.fSet(slot.getIndex(), other.isEmpty() ? ItemStack.EMPTY : other.copy());
-                    break;
-                case ARMOR:
-                    this.armorArray   .fSet(slot.getIndex(), other.isEmpty() ? ItemStack.EMPTY : other.copy());
-            }
-        }
-    }
-
 
 
     protected final void onUpdateB() {
@@ -1683,7 +1558,7 @@ public abstract class EntityLivingBase extends Entity {
             updateSlot(EntityEquipmentSlot.CHEST   , armorArray   .get(2));
             updateSlot(EntityEquipmentSlot.HEAD    , armorArray   .get(3));
 
-            if (this.ticksExisted % 20 == 0) this.getCombatTracker().reset();
+            if ((this.ticksExisted & 31) == 0) this.getCombatTracker().reset();
 
             if (!this.glowing) {
                 boolean flag = this.isPotionActive(MobEffects.GLOWING);
@@ -1714,9 +1589,7 @@ public abstract class EntityLivingBase extends Entity {
         if (this.swingProgress > 0.0F) f4 = this.rotationYaw;
         if (!this.onGround) f = 0.0F;
 
-
         this.onGroundSpeedFactor += (f - this.onGroundSpeedFactor) * 0.3F;
-
 
         while (this.rotationYaw     - this.prevRotationYaw     < -180.0F) this.prevRotationYaw     -= 360.0F;
         while (this.rotationYaw     - this.prevRotationYaw     >= 180.0F) this.prevRotationYaw     += 360.0F;
@@ -1731,6 +1604,33 @@ public abstract class EntityLivingBase extends Entity {
 
         if (this.isElytraFlying()) ++this.ticksElytraFlying;
         else this.ticksElytraFlying = 0;
+    }
+
+
+    private void updateSlot(EntityEquipmentSlot slot, ItemStack stack){
+        ItemStack other = this.getItemStackFromSlot(slot);
+
+        if (!ItemStack.areItemStacksEqual(other, stack)) {
+            if (!ItemStack.areItemStacksEqualUsingNBTShareTag(other, stack))
+                ((WorldServer)this.world).getEntityTracker().sendToTracking(this, new SPacketEntityEquipment(this.getEntityId(), slot, other));
+            MinecraftForge.EVENT_BUS.post(new LivingEquipmentChangeEvent(this, slot, stack, other));
+
+            if (!stack.isEmpty())
+                this.getAttributeMap().removeAttributeModifiers(stack.getAttributeModifiers(slot));
+
+
+            if (!other.isEmpty())
+                this.getAttributeMap().applyAttributeModifiers(other.getAttributeModifiers(slot));
+
+
+            switch (slot.getSlotType()) {
+                case HAND:
+                    this.handInventory.fSet(slot.getIndex(), other.isEmpty() ? ItemStack.EMPTY : other.copy());
+                    break;
+                case ARMOR:
+                    this.armorArray   .fSet(slot.getIndex(), other.isEmpty() ? ItemStack.EMPTY : other.copy());
+            }
+        }
     }
 
 
@@ -1766,20 +1666,20 @@ public abstract class EntityLivingBase extends Entity {
 
 
     public void onLivingUpdateTick() {
-        if (this.jumpTicks > 0) {
-            --this.jumpTicks;
-        }
+        if (this.jumpTicks > 0) --this.jumpTicks;
 
         if (this.newPosRotationIncrements > 0 && !this.canPassengerSteer()) {
-            double d0 = this.posX + (this.interpTargetX - this.posX) / (double)this.newPosRotationIncrements;
-            double d1 = this.posY + (this.interpTargetY - this.posY) / (double)this.newPosRotationIncrements;
-            double d2 = this.posZ + (this.interpTargetZ - this.posZ) / (double)this.newPosRotationIncrements;
-            double d3 = MathHelper.wrapDegrees(this.interpTargetYaw - (double)this.rotationYaw);
-            this.rotationYaw = (float)((double)this.rotationYaw + d3 / (double)this.newPosRotationIncrements);
-            this.rotationPitch = (float)((double)this.rotationPitch + (this.interpTargetPitch - (double)this.rotationPitch) / (double)this.newPosRotationIncrements);
+            double dIncr = this.newPosRotationIncrements;
+            this.mutPosition(
+                    this.posX + (this.interpTargetX - this.posX) / dIncr,
+                    this.posY + (this.interpTargetY - this.posY) / dIncr,
+                    this.posZ + (this.interpTargetZ - this.posZ) / dIncr
+            );
+            this.setRotation(
+                    (float)((double)this.rotationYaw + MathHelper.wrapDegrees(this.interpTargetYaw - (double)this.rotationYaw) / dIncr),
+                    (float)((double)this.rotationPitch + (this.interpTargetPitch - (double)this.rotationPitch) / dIncr)
+            );
             --this.newPosRotationIncrements;
-            this.mutPosition(d0, d1, d2);
-            this.setRotation(this.rotationYaw, this.rotationPitch);
         }
         else if (!this.isServerWorld()) {
             this.motionX *= 0.98D;
@@ -1787,9 +1687,9 @@ public abstract class EntityLivingBase extends Entity {
             this.motionZ *= 0.98D;
         }
 
-        if (Math.abs(this.motionX) < 0.003D) this.motionX = 0.0D;
-        if (Math.abs(this.motionY) < 0.003D) this.motionY = 0.0D;
-        if (Math.abs(this.motionZ) < 0.003D) this.motionZ = 0.0D;
+        if (!checkAbs0_003D(motionX)) motionX = 0.0D;
+        if (!checkAbs0_003D(motionY)) motionY = 0.0D;
+        if (!checkAbs0_003D(motionZ)) motionZ = 0.0D;
 
 
         if (this.isMovementBlocked()) {
@@ -1948,6 +1848,98 @@ public abstract class EntityLivingBase extends Entity {
         float f = this.swingProgress - this.prevSwingProgress;
         if (f < 0.0F) ++f;
         return this.prevSwingProgress + f * partialTickTime;
+    }
+
+
+    public int getIdleTime() {
+        return this.idleTime;
+    }
+
+
+    protected boolean canDropLoot() {
+        return !this.isChild();
+    }
+
+
+    protected int decreaseAirSupply(int air) {
+        int i = EnchantmentHelper.getRespirationModifier(this);
+        return i > 0 && this.rand.nextInt(i + 1) > 0 ? air : air - 1;
+    }
+
+
+    protected int getExperiencePoints(EntityPlayer player) {
+        return 0;
+    }
+
+
+    protected boolean isPlayer() {
+        return false;
+    }
+
+
+    public Random getRNG() {
+        return this.rand;
+    }
+
+
+    @Nullable
+    public EntityLivingBase getRevengeTarget() {
+        return this.revengeTarget;
+    }
+
+
+    public int getRevengeTimer() {
+        return this.revengeTimer;
+    }
+
+
+    public void setRevengeTarget(@Nullable EntityLivingBase livingBase) {
+        this.revengeTarget = livingBase;
+        this.revengeTimer = this.ticksExisted;
+    }
+
+
+    public void setLastAttackedEntity(Entity entityIn) {
+        if (entityIn instanceof EntityLivingBase)
+            this.lastAttackedEntity = (EntityLivingBase)entityIn;
+        else this.lastAttackedEntity = null;
+        this.lastAttackedEntityTime = this.ticksExisted;
+    }
+
+
+    public EntityLivingBase getLastAttackedEntity() {
+        return this.lastAttackedEntity;
+    }
+
+
+    public int getLastAttackedEntityTime() {
+        return this.lastAttackedEntityTime;
+    }
+
+
+    public CombatTracker getCombatTracker() {
+        return this.combatTracker;
+    }
+
+
+    public float getAIMoveSpeed() {
+        return this.landMovementFactor;
+    }
+
+
+    public void setAIMoveSpeed(float speedIn) {
+        this.landMovementFactor = speedIn;
+    }
+
+
+    public boolean attackEntityAsMob(Entity entityIn) {
+        this.setLastAttackedEntity(entityIn);
+        return false;
+    }
+
+
+    public boolean isPlayerSleeping() {
+        return false;
     }
 
 
@@ -2272,6 +2264,12 @@ public abstract class EntityLivingBase extends Entity {
             }
             return true;
         }
+    }
+
+
+    @Override
+    public void onKillCommand() {
+        this.attackEntityFrom(DamageSource.OUT_OF_WORLD, Float.MAX_VALUE);
     }
 
 

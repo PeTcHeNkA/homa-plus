@@ -200,7 +200,7 @@ public final class AsyWorldTickerV2 implements ThreadFactory{
                     if(player instanceof EntityPlayerMP) {
                         EntityPlayerMP mp = (EntityPlayerMP) player;
                         mp.connection.onTickWorld();
-                        mp.connection.sendPacket(packet);
+                        mp.connection.netManager.sendPacketE(packet);
                     }
                 }
             } else {

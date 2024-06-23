@@ -80,6 +80,11 @@ public final class ChunkSelector implements IBlockEAccess {
     }
 
 
+    public Chunk getChunkI(final int x, final int z){
+        return chunk = provider.provideChunk(curX = x, curZ = z);
+    }
+
+
     public Chunk getLoadedE(final int x, final int z){
         if(curX == x && curZ == z)return chunk;
         Chunk temp = provider.getLoadedChunk(x, z);
