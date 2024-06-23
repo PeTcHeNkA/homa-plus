@@ -1,12 +1,11 @@
 package net.minecraft.server.management;
 
 import com.google.common.base.Predicate;
-import com.google.common.collect.AbstractIterator;
-import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -86,20 +85,12 @@ public class PlayerChunkMap {
 
         if (this.sortMissingChunks && i % 4L == 0L) {
             this.sortMissingChunks = false;
-            this.entriesWithoutChunks.sort((e1, e2) ->
-                    ComparisonChain.start().compare(
-                            e1.getClosestPlayerDistance(),
-                            e2.getClosestPlayerDistance()).result()
-            );
+            this.entriesWithoutChunks.sort(PlayerChunkMapEntry.COMPARATOR);
         }
 
         if (this.sortSendToPlayers && i % 4L == 2L) {
             this.sortSendToPlayers = false;
-            this.pendingSendToPlayers.sort((e1, e2) ->
-                    ComparisonChain.start().compare(
-                            e1.getClosestPlayerDistance(),
-                            e2.getClosestPlayerDistance()).result()
-            );
+            this.pendingSendToPlayers.sort(PlayerChunkMapEntry.COMPARATOR);
         }
 
         if (!this.entriesWithoutChunks.isEmpty()) {

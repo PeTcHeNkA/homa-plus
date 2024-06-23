@@ -2,9 +2,9 @@ package net.minecraft.server.management;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import java.util.Comparator;
 import java.util.List;
 import javax.annotation.Nullable;
-
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -20,7 +20,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraftforge.common.MinecraftForge;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import plus.fserver.ElcaConfig;
@@ -29,6 +28,15 @@ import plus.fserver.utls.collections.ArrayListE6;
 
 
 public class PlayerChunkMapEntry extends ArrayListE6<EntityPlayerMP> implements Runnable{
+
+    public static final Comparator<PlayerChunkMapEntry> COMPARATOR = (o1, o2) -> {
+        double d1 = o1.getClosestPlayerDistance();
+        double d2 = o2.getClosestPlayerDistance();
+        if (d1 < d2) return -1;
+        if (d1 > d2) return 1;
+        return 0;
+    };
+
     private static final Logger LOGGER = LogManager.getLogger();
     private final PlayerChunkMap playerChunkMap;
     //private final List<EntityPlayerMP> players = new ArrayListE6<>();
