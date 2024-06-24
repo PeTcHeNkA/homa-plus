@@ -1863,7 +1863,7 @@ public abstract class EntityPlayer extends EntityLivingBase {
     }
 
 
-    protected boolean isPlayer() {
+    public boolean isPlayer() {
         return true;
     }
 
