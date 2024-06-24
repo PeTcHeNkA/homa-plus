@@ -504,19 +504,20 @@ public class EntityItem extends Entity {
             double oldZ = z;
 
             ArrayListE6<AxisAlignedBB> boxes = null;
+            AxisAlignedBB curBox = this.getEntityBoundingBox();
             int temp, curX, curY, curZ;
             if (y != 0.0D) {
                 boxes = defBoxes(x, y, z);
                 temp = 0;
                 for (curY = boxes.sizeC(); temp < curY; ++temp)
-                    y = boxes.getC(temp).calculateYOffset(this.getEntityBoundingBox(), y);
+                    y = boxes.getC(temp).calculateYOffset(curBox, y);
             }
             if (x != 0.0D) {
                 temp = 0;
                 if(boxes == null)boxes = defBoxes(x, y, z);
 
                 for (curX = boxes.sizeC(); temp < curX; ++temp)
-                    x = boxes.getC(temp).calculateXOffset(this.getEntityBoundingBox(), x);
+                    x = boxes.getC(temp).calculateXOffset(curBox, x);
 
             }
 
@@ -525,11 +526,11 @@ public class EntityItem extends Entity {
                 if(boxes == null)boxes = defBoxes(x, y, z);
 
                 for (curZ = boxes.sizeC(); temp < curZ; ++temp)
-                    z = boxes.getC(temp).calculateZOffset(this.getEntityBoundingBox(), z);
+                    z = boxes.getC(temp).calculateZOffset(curBox, z);
 
             }
             if(boxes != null) {
-                this.getEntityBoundingBox().offsetMut(x, y, z);
+                curBox.offsetMut(x, y, z);
                 this.resetPositionToBB();
             }
 
@@ -579,7 +580,10 @@ public class EntityItem extends Entity {
                 world.getMinecraftServer().ticker().onError((WorldServer) world, new ReportedException(crashreport));
             }
 
-            if (this.world.isFlammableWithin(this.getEntityBoundingBox().shrink(0.001D))) {
+            AxisAlignedBB res;
+            curBox.growTo(-0.01D, -0.01D, -0.01D, res = world.commonWorldEntityAABB);
+
+            if (this.world.isFlammableWithin(res)) {
                 this.dealFireDamage(1);
                 if (!this.isWet()) this.setFire(8);
             }

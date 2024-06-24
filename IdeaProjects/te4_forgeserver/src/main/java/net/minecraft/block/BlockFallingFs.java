@@ -6,19 +6,22 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import plus.fserver.utls.collections.ArrayListE6;
-import static plus.fserver.block.BlockFs.addCollisionBoxToListFs;
 
 
 public class BlockFallingFs extends BlockFalling {
-    public BlockFallingFs(Material sand) {
-        super(sand);
+    public BlockFallingFs(Material material) {
+        super(material);
     }
 
     public BlockFallingFs() {}
 
 
     @Override
-    public void addCollisionBoxToListF(IBlockState state, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> collidingBoxes) {
-        addCollisionBoxToListFs(pos, entityBox, collidingBoxes, state.getCollisionBoundingBox(access, pos));
+    public void addCollisionBoxToListF(IBlockState state, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> list) {
+        AxisAlignedBB src;
+        AxisAlignedBB blockBox = getCollisionBoundingBox(state, access, pos);
+        if((src = list.getSafe(list.sizeC())) != null) blockBox.offsetTo(pos, src);
+        else src = blockBox.offset(pos);
+        if (entityBox.intersects(src)) list.addF(src);
     }
 }
