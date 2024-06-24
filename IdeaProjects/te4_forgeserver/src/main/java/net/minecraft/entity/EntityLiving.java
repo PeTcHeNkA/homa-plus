@@ -57,6 +57,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.api.Keep;
 import plus.fserver.server.SStrings;
+import plus.fserver.utls.EntityLodFunc;
 import plus.fserver.utls.collections.FixedItemList;
 import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
@@ -284,7 +285,7 @@ public abstract class EntityLiving extends EntityLivingBase {
         int lodLvl;
         if((ticksExisted & (lodLvl = lodLvl())) == 0){
             onLivingUpdateTick();
-            if(lodLvl < 2) this.collideWithNearbyEntities();
+            if(lodLvl < EntityLodFunc.LOW2_MASK) this.collideWithNearbyEntities();
         }
 
         if (lodLvl == 0 && (!this.world.isRemote || SERVER_COMPILE) && this.canPickUpLoot() && !this.dead && world.getMobGrifering(this)) {

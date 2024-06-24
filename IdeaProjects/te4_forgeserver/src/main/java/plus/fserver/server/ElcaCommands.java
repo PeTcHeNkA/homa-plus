@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityList;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.DimensionType;
@@ -19,13 +18,12 @@ import net.minecraftforge.server.command.TextComponentHelper;
 import org.jetbrains.annotations.Nullable;
 import plus.fserver.api.ServerCommand;
 import plus.fserver.plugin.SSPatchLoader;
+import plus.fserver.utls.EntityLodFunc;
 import plus.tson.TsonFile;
 import plus.tson.utl.ByteStrBuilder;
-
 import java.io.File;
 import java.text.DecimalFormat;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class ElcaCommands extends ServerCommand {
@@ -138,7 +136,7 @@ public class ElcaCommands extends ServerCommand {
     private static class MobInfo{
         final String name;
         int count;
-        int lod0, lod1, lod2;
+        int lod0, lod1, lod2, lod3;
 
         public MobInfo(Class<? extends Entity> clazz){
             EntityEntry entry0 = EntityRegistry.getEntry(clazz);
@@ -148,9 +146,10 @@ public class ElcaCommands extends ServerCommand {
         }
         public void add(int lodLvl){
             count++;
-            if(lodLvl==0)lod0++;
-            if(lodLvl==1)lod1++;
-            if(lodLvl==2)lod2++;
+            if(lodLvl== EntityLodFunc.NEAR_MASK)lod0++;
+            if(lodLvl==EntityLodFunc.LOW1_MASK) lod1++;
+            if(lodLvl==EntityLodFunc.LOW2_MASK) lod2++;
+            if(lodLvl==EntityLodFunc.LOW3_MASK) lod3++;
         }
 
 
@@ -197,8 +196,8 @@ public class ElcaCommands extends ServerCommand {
         int num = 0;
 
         for (MobInfo info:result){
-            reply(sender, primary+"%s&8|&a%s %s &e(%s, N:%s, L: %s)", formatNum(++num, numL),
-                    info.getName(maxName+1), info.count, info.lod0, info.lod1, info.lod2
+            reply(sender, primary+"%s&8|&a%s %s &e(%s, N:%s, M: %s, L: %s)", formatNum(++num, numL),
+                    info.getName(maxName+1), info.count, info.lod0, info.lod1, info.lod2, info.lod3
             );
         }
     }
@@ -214,7 +213,7 @@ public class ElcaCommands extends ServerCommand {
     public void info(MinecraftServer server, ICommandSender sender){
         reply(sender, warning+"Loaded worlds: "+primary+server.worlds.length);
         int curMobs = 0;
-        int lod0 = 0, lod1 = 0, lod2 = 0;
+        int lod0 = 0, lod1 = 0, lod2 = 0, lod3 = 0;
         int curChunks = 0;
         for (Integer dimId : DimensionManager.getIDs()) {
             WorldServer world = DimensionManager.getWorld(dimId);
@@ -223,19 +222,20 @@ public class ElcaCommands extends ServerCommand {
             for (Entity entity:world.loadedEntityList){
                 if(entity == null)continue;
                 int lodLvl = entity.lodLvl();
-                if(lodLvl == 0) lod0++;
-                if(lodLvl == 1) lod1++;
-                if(lodLvl == 2) lod2++;
+                if(lodLvl == EntityLodFunc.NEAR_MASK) lod0++;
+                if(lodLvl == EntityLodFunc.LOW1_MASK) lod1++;
+                if(lodLvl == EntityLodFunc.LOW2_MASK) lod2++;
+                if(lodLvl == EntityLodFunc.LOW3_MASK) lod3++;
             }
 
             curChunks = world.getChunkProvider().getLoadedChunkCount();
             double worldTickTime = mean(server.worldTickTimes.get(dimId)) * 1.0E-6D;
             double worldTPS = Math.min(1000.0/worldTickTime, 20);
-            reply(sender, primary+"[%s]: tt: %s, tps %s, chunk: %s, mob: %s (%s, N:%s, L: %s)",
+            reply(sender, primary+"[%s]: tt: %s, tps %s, chunk: %s, mob: %s (%s, N:%s, M: %s, L: %s)",
                     getDimensionPrefix(dimId),
                     formatTickTime(worldTickTime),
                     formatTps(worldTPS),
-                    curChunks, curMobs, lod0, lod1, lod2
+                    curChunks, curMobs, lod0, lod1, lod2, lod3
             );
         }
     }

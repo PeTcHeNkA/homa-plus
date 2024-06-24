@@ -38,6 +38,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.ElcaMobs;
 import plus.fserver.api.IBlockEAccess;
+import plus.fserver.utls.EntityLodFunc;
 
 
 //todo jump on boat
@@ -239,13 +240,13 @@ public class EntityBoat extends Entity {
         this.prevPosY = this.posY;
         this.prevPosZ = this.posZ;
 
-        int temp;
+        int lodLvl;
         float tempF;
-        if ((temp  = this.getTimeSinceHit()) > 0)   this.setTimeSinceHit(temp - 1     );
+        if ((lodLvl  = this.getTimeSinceHit()) > 0)   this.setTimeSinceHit(lodLvl - 1     );
         if ((tempF = this.getDamageTaken()) > 0.0F) this.setDamageTaken (tempF  - 1.0F);
-        temp = lodLvl();
+        lodLvl = lodLvl();
 
-        if((ticksExisted & temp) == temp) super.onUpdateE();
+        if((ticksExisted & lodLvl) == 0) super.onUpdateE();
 
         this.tickLerp();
 
@@ -268,7 +269,7 @@ public class EntityBoat extends Entity {
             this.motionZ = 0.0D;
         }
 
-        if((ticksExisted & temp) == temp) {
+        if((ticksExisted & lodLvl) == lodLvl) {
 
             for (int i = 0; i <= 1; ++i) {
                 if (this.getPaddleState(i)) {
@@ -286,7 +287,7 @@ public class EntityBoat extends Entity {
                 } else this.paddlePositions[i] = 0.0F;
             }
 
-            if (temp > 1) return;
+            if (lodLvl > EntityLodFunc.LOW1_MASK) return;
 
             this.doBlockCollisions();
             AxisAlignedBB box = world.commonWorldEntityAABB;

@@ -116,7 +116,7 @@ public class EntityItem extends Entity {
                 --this.pickupDelay;
             }
             int lodLvl;
-            if(((lodLvl = lodLvl()) & ticksExisted) != lodLvl)return;
+            if(((lodLvl = lodLvl()) & ticksExisted) != 0)return;
             onUpdateE();
 
             this.prevPosX = this.posX;
