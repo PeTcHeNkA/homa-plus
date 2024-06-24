@@ -50,6 +50,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.ElcaCV;
+import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.collections.ArrayListE6;
 import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
@@ -613,7 +614,7 @@ public class WorldClient extends World {
     }
 
 
-    protected void getEntitiesInAABBexcludingNoCacheLimited(List<Entity> list, @Nullable Entity entityIn, AxisAlignedBB boundingBox,
+    protected void getEntitiesInAABBexcludingNoCacheLimited(ArrayListE6<Entity> list, @Nullable Entity entityIn, AxisAlignedBB boundingBox,
                                                             @Nullable Predicate <? super Entity > predicate, int lim) {
         int k2 = MathHelper.floor((boundingBox.maxX + MAX_ENTITY_RADIUS) / 16.0D);
         int l2 = MathHelper.floor((boundingBox.minZ - MAX_ENTITY_RADIUS) / 16.0D);
@@ -622,7 +623,7 @@ public class WorldClient extends World {
         for (int j3 = MathHelper.floor((boundingBox.minX - MAX_ENTITY_RADIUS) / 16.0D); j3 <= k2; ++j3) {
             for (int k3 = l2; k3 <= i3; ++k3) {
                 if (this.isChunkLoaded(j3, k3, true)) {
-                    this.getChunk(j3, k3).getEntitiesWithinAABBForEntityLimited(entityIn, boundingBox, list, predicate, lim);
+                    this.getChunk(j3, k3).getEntitiesWithinAABBForEntityLimitedC(entityIn, boundingBox, list, predicate, lim);
                 }
             }
         }
@@ -813,6 +814,59 @@ public class WorldClient extends World {
             }
         }
         blockpos$pooledmutableblockpos.release();
+        return false;
+    }
+
+
+    public boolean checkBlockCollision(AxisAlignedBB bb) {
+        int minX = MathHelper.floor(bb.minX);
+        int maxX = MathHelper.ceil(bb.maxX);
+        int minY = MathHelper.floor(bb.minY);
+        if(minY < 0) minY = 0;
+        int maxY = MathHelper.ceil(bb.maxY);
+        if(maxY > 255)maxY = 255;
+        int minZ = MathHelper.floor(bb.minZ);
+        int maxZ = MathHelper.ceil(bb.maxZ);
+
+
+        for (int dx = minX; dx < maxX; ++dx) {
+            for (int dz = minZ; dz < maxZ; ++dz) {
+                Chunk chunk = getChunk(dx>>4, dz>>4);
+                for (int dy = minY; dy < maxY; ++dy) {
+                    if (chunk.getBlockStateUnchecked(dx, dy, dz).getMaterial() != Material.AIR)
+                        return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
+    public boolean containsAnyLiquid(AxisAlignedBB bb) {
+        int minX = MathHelper.floor(bb.minX);
+        int maxX = MathHelper.ceil(bb.maxX);
+        int minY = MathHelper.floor(bb.minY);
+        if(minY < 0) minY = 0;
+        int maxY = MathHelper.ceil(bb.maxY);
+        if(maxY > 255)maxY = 255;
+        int minZ = MathHelper.floor(bb.minZ);
+        int maxZ = MathHelper.ceil(bb.maxZ);
+
+        for (int dx = minX; dx < maxX; ++dx) {
+            for (int dz = minZ; dz < maxZ; ++dz) {
+                Chunk chunk = getChunk(dx>>4, dz>>4);
+                for (int dy = minY; dy < maxY; ++dy) {
+                    IBlockState state = chunk.getBlockStateUnchecked(dx, dy, dz);
+
+                    Boolean result = state.getBlock().isAABBInsideLiquid(this, tempPooledLocalPos.setPos(dx, dy, dz), bb);
+                    if (result != null) {
+                        if (!result) continue;
+                        return true;
+                    }
+                    if (state.getMaterial().isLiquid()) return true;
+                }
+            }
+        }
         return false;
     }
 }

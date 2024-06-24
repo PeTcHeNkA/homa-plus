@@ -427,9 +427,10 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
 
     @Override
     public void tickLoadedEntities(){
+        ChunkProviderServer cps = chunkProviderServer;
         for (ArrayRemSwapListE15<Entity> list:realEntityList.getRaw()) {
             for (int cursor = 0; cursor < list.sizeC(); ++cursor) {
-                Entity entity = list.get(cursor);
+                Entity entity = list.getC(cursor);
                 Entity ridding = entity.getRidingEntity();
 
                 if (ridding != null) {
@@ -442,13 +443,11 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
                     this.updateEntity(entity);
 
                 if (entity.isDead) {
-                    int l1 = entity.chunkCoordX;
-                    int i2 = entity.chunkCoordZ;
-
-                    if (entity.addedToChunk && this.isChunkLoaded(l1, i2, true)) {
-                        this.getChunk(l1, i2).removeEntity(entity);
+                    if (entity.addedToChunk) {
+                        Chunk chunk = cps.getLoadedChunk(entity.chunkCoordX, entity.chunkCoordZ);
+                        if(chunk != null) chunk.removeEntity(entity);
                     }
-                    list.remove(cursor--);
+                    list.removeSwap(cursor--);
                     this.onEntityRemoved(entity);
                 }
             }

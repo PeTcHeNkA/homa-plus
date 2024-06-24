@@ -97,8 +97,7 @@ public class EntityTracker {
 
             for (ArrayRemSwapListE15<Entity> list: world.realEntityList.getRaw()) {
                 for (int cursor = 0, s = list.sizeC(); cursor < s; ++cursor) {
-                    Entity entity = list.getC(cursor);
-                    if((entry = entity.trackerEntry) != null)
+                    if((entry = list.getC(cursor).trackerEntry) != null)
                         entry.removeFromTrackedPlayers(entityplayermp);
                     else
                         System.out.println("WARN: TRYING TO REMOVE ENTITY WITH NULL TRACKER");
@@ -120,8 +119,7 @@ public class EntityTracker {
         if((world.getTotalWorldTime()&1)==0){
             for (ArrayRemSwapListE15<Entity> list: world.realEntityList.getRaw()) {
                 for (int cursor = 0, s = list.sizeC(); cursor < s; ++cursor) {
-                    Entity entity = list.getC(cursor);
-                    if((entry = entity.trackerEntry) != null)
+                    if((entry = list.getC(cursor).trackerEntry) != null)
                         entry.updatePlayerList(players);
                 }
             }
@@ -185,8 +183,7 @@ public class EntityTracker {
         EntityTrackerEntry entry;
         for (ArrayRemSwapListE15<Entity> list: world.realEntityList.getRaw()) {
             for (int cursor = 0, s = list.sizeC(); cursor < s; ++cursor) {
-                Entity entity = list.getC(cursor);
-                if ((entry = entity.trackerEntry) != null) entry.removeTrackedPlayerSymmetric(player);
+                if ((entry = list.getC(cursor).trackerEntry) != null) entry.removeTrackedPlayerSymmetric(player);
             }
         }
     }
@@ -268,8 +265,7 @@ public class EntityTracker {
         EntityTrackerEntry entry;
         for (ArrayRemSwapListE15<Entity> list: world.realEntityList.getRaw()) {
             for (int cursor = 0, s = list.sizeC(); cursor < s; ++cursor) {
-                Entity entity = list.getC(cursor);
-                if ((entry = entity.trackerEntry) != null)
+                if ((entry = list.getC(cursor).trackerEntry) != null)
                     entry.setMaxRange(this.maxTrackingDistanceThreshold);
             }
         }
@@ -295,8 +291,7 @@ public class EntityTracker {
         EntityTrackerEntry entry;
         for (ArrayRemSwapListE15<Entity> list: world.realEntityList.getRaw()) {
             for (int cursor = 0, s = list.sizeC(); cursor < s; ++cursor) {
-                Entity entity = list.getC(cursor);
-                if ((entry = entity.trackerEntry) != null)
+                if ((entry = list.getC(cursor).trackerEntry) != null)
                     if (entry.getTrackedEntity() != entityplayermp)
                         entry.updatePlayerEntity(entityplayermp);
             }

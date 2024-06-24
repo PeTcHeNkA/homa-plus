@@ -16,7 +16,7 @@ public final class EntityLodFunc {
 
     private static double param(TsonObj obj, double def, String... keys) {
         double pre = getR(obj, def, keys);
-        return pre * pre * pre;
+        return pre * pre * 3;
     }
 
 

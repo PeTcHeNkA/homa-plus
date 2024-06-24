@@ -1569,13 +1569,11 @@ public abstract class EntityLivingBase extends Entity {
         this.onLivingUpdate();
         double d0 = this.posX - this.prevPosX;
         double d1 = this.posZ - this.prevPosZ;
-        float f3 = (float)(d0 * d0 + d1 * d1);
 
+        float f3 = (float)(d0 * d0 + d1 * d1);
         float f4 = this.renderYawOffset;
 
-        float f5 = 0.0F;
-        this.prevOnGroundSpeedFactor = this.onGroundSpeedFactor;
-        float f = 0.0F;
+        float f5, f; f5 = f = 0.0F;
 
         if (f3 > 0.0025000002F) {
             f = 1.0F;
@@ -1587,9 +1585,9 @@ public abstract class EntityLivingBase extends Entity {
         }
 
         if (this.swingProgress > 0.0F) f4 = this.rotationYaw;
-        if (!this.onGround) f = 0.0F;
 
-        this.onGroundSpeedFactor += (f - this.onGroundSpeedFactor) * 0.3F;
+        if (!this.onGround) f = 0.0F;
+        this.onGroundSpeedFactor += (f - (prevOnGroundSpeedFactor = onGroundSpeedFactor)) * 0.3F;
 
         while (this.rotationYaw     - this.prevRotationYaw     < -180.0F) this.prevRotationYaw     -= 360.0F;
         while (this.rotationYaw     - this.prevRotationYaw     >= 180.0F) this.prevRotationYaw     += 360.0F;
@@ -1636,6 +1634,7 @@ public abstract class EntityLivingBase extends Entity {
 
     @SideOnly(Side.CLIENT)
     protected float updateDistance(float num0, float num2) {
+        if(!world.isRemote || SERVER_COMPILE)return num2;
         float f = MathHelper.wrapDegrees(num0 - this.renderYawOffset);
         this.renderYawOffset += f * 0.3F;
         float f1 = MathHelper.wrapDegrees(this.rotationYaw - this.renderYawOffset);

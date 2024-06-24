@@ -1767,59 +1767,57 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     public boolean checkBlockCollision(AxisAlignedBB bb) {
-        int j2 = MathHelper.floor(bb.minX);
-        int k2 = MathHelper.ceil(bb.maxX);
-        int l2 = MathHelper.floor(bb.minY);
-        int i3 = MathHelper.ceil(bb.maxY);
-        int j3 = MathHelper.floor(bb.minZ);
-        int k3 = MathHelper.ceil(bb.maxZ);
-        BlockPos.PooledMutableBlockPos pooledPos = BlockPos.PooledMutableBlockPos.retain();
+        int minX = MathHelper.floor(bb.minX);
+        int maxX = MathHelper.ceil(bb.maxX);
+        int minY = MathHelper.floor(bb.minY);
+        if(minY < 0) minY = 0;
+        int maxY = MathHelper.ceil(bb.maxY);
+        if(maxY > 255)maxY = 255;
+        int minZ = MathHelper.floor(bb.minZ);
+        int maxZ = MathHelper.ceil(bb.maxZ);
+        ChunkSelector access = localSelector;
 
-        for (int l3 = j2; l3 < k2; ++l3) {
-            for (int i4 = l2; i4 < i3; ++i4) {
-                for (int j4 = j3; j4 < k3; ++j4) {
-                    IBlockState iblockstate1 = this.getBlockState(pooledPos.setPos(l3, i4, j4));
-
-                    if (iblockstate1.getMaterial() != Material.AIR) {
-                        pooledPos.release();
+        for (int dx = minX; dx < maxX; ++dx) {
+            for (int dz = minZ; dz < maxZ; ++dz) {
+                Chunk chunk = access.getChunkE(dx>>4, dz>>4);
+                for (int dy = minY; dy < maxY; ++dy) {
+                    if (chunk.getBlockStateUnchecked(dx, dy, dz).getMaterial() != Material.AIR)
                         return true;
-                    }
                 }
             }
         }
-        pooledPos.release();
         return false;
     }
 
 
     public boolean containsAnyLiquid(AxisAlignedBB bb) {
-        int j2 = MathHelper.floor(bb.minX);
-        int k2 = MathHelper.ceil(bb.maxX);
-        int l2 = MathHelper.floor(bb.minY);
-        int i3 = MathHelper.ceil(bb.maxY);
-        int j3 = MathHelper.floor(bb.minZ);
-        int k3 = MathHelper.ceil(bb.maxZ);
-        BlockPos.PooledMutableBlockPos pooledPos = BlockPos.PooledMutableBlockPos.retain();
+        int minX = MathHelper.floor(bb.minX);
+        int maxX = MathHelper.ceil(bb.maxX);
+        int minY = MathHelper.floor(bb.minY);
+        if(minY < 0) minY = 0;
+        int maxY = MathHelper.ceil(bb.maxY);
+        if(maxY > 255)maxY = 255;
+        int minZ = MathHelper.floor(bb.minZ);
+        int maxZ = MathHelper.ceil(bb.maxZ);
 
-        for (int l3 = j2; l3 < k2; ++l3) {
-            for (int i4 = l2; i4 < i3; ++i4) {
-                for (int j4 = j3; j4 < k3; ++j4) {
-                    IBlockState iblockstate1 = this.getBlockState(pooledPos.setPos(l3, i4, j4));
+        ChunkSelector access = localSelector;
+        BlockPos.MutableBlockPos pooledPos = tempPooledLocalPos;
 
-                    Boolean result = iblockstate1.getBlock().isAABBInsideLiquid(this, pooledPos, bb);
+        for (int dx = minX; dx < maxX; ++dx) {
+            for (int dz = minZ; dz < maxZ; ++dz) {
+                Chunk chunk = access.getChunkE(dx>>4, dz>>4);
+                for (int dy = minY; dy < maxY; ++dy) {
+                    IBlockState state = chunk.getBlockStateUnchecked(dx, dy, dz);
+
+                    Boolean result = state.getBlock().isAABBInsideLiquid(this, pooledPos.setPos(dx, dy, dz), bb);
                     if (result != null) {
                         if (!result) continue;
-                        pooledPos.release();
                         return true;
                     }
-                    if (iblockstate1.getMaterial().isLiquid()) {
-                        pooledPos.release();
-                        return true;
-                    }
+                    if (state.getMaterial().isLiquid()) return true;
                 }
             }
         }
-        pooledPos.release();
         return false;
     }
 
@@ -3167,6 +3165,22 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
+    public final ArrayListE6<AxisAlignedBB> getCollisionBoxesLimitedC(@Nullable Entity entityIn, @NotNull AxisAlignedBB aabb, int lim) {
+        if(ElcaCV.MORE_MOBS_OPTIMIZER) {
+            final AABKey key;
+            ArrayListE6<AxisAlignedBB> res;
+            if ((res = bbCache.getC(key = bbCache.key(aabb))) != null) return res;
+            getCollisionBoxesNoCacheLimited(res = bbCache.allocArr(), entityIn, aabb, lim);
+            bbCache.add(key, res);
+            return res;
+        } else {
+            final ArrayListE6<AxisAlignedBB> list;
+            getCollisionBoxesNoCacheLimited(list = new ArrayListE6<>(), entityIn, aabb, lim);
+            return list;
+        }
+    }
+
+
     /**
      * @author Te4hno
      */
@@ -3305,12 +3319,12 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
                                                           @Nullable Predicate<? super Entity > predicate, int lim){
         if(ElcaCV.MORE_MOBS_OPTIMIZER) {
             AABKey key = eeCache.key(aabb);
-            //AABKey key = new AABKey(aabb);
             final ArrayListE6<Entity> entities = eeCache.getC(key);
             if (entities != null) {
-                if (predicate != null && !entities.isEmptyC()) {
-                    for (final Entity entity : entities) {
-                        if (!predicate.apply(entity)) {
+                int size;
+                if (predicate != null && (size = entities.sizeC()) != 0) {
+                    for (int i = 0; i < size; ++i) {
+                        if (!predicate.apply(entities.getC(i))) {
                             ArrayListE6<Entity> res = eeCache.allocArr();
 
                             getEntitiesInAABBexcludingNoCacheLimited(res, entityIn, aabb, predicate, lim);
@@ -3329,7 +3343,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
                 return res;
             }
         } else {
-            List<Entity> res = new ArrayListE6<>();
+            ArrayListE6<Entity> res = new ArrayListE6<>();
             getEntitiesInAABBexcludingNoCacheLimited(res, entityIn, aabb, predicate, lim);
             return res;
         }
@@ -3500,7 +3514,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     //to merge ==============================================================================================================
-    private final BlockPos.MutableBlockPos tempPooledLocalPos = new BlockPos.MutableBlockPos();
+    protected final BlockPos.MutableBlockPos tempPooledLocalPos = new BlockPos.MutableBlockPos();
 
     //common
     public boolean isBlockFullCube(BlockPos pos) {
@@ -3775,19 +3789,21 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             IBlockState state;
             Block block;
             Boolean result;
+            ChunkSelector access = localSelector;
 
-            for (final BlockPos.MutableBlockPos acc = tempPooledLocalPos; xPos < maxX; ++xPos) {
+            for (final BlockPos.MutableBlockPos pos = tempPooledLocalPos; xPos < maxX; ++xPos) {
                 for (; zPos < maxZ; ++zPos) {
+                    Chunk chunk = access.getChunkE(xPos>>4,zPos>>4);
                     for (; yPos < maxY; ++yPos) {
-                        block = (state = localSelector.getStateUnchecked(xPos, yPos, zPos)).getBlock();
+                        block = (state = chunk.getBlockStateUnchecked(xPos, yPos, zPos)).getBlock();
 
-                        result = block.isEntityInsideMaterial(this, acc.setPos(xPos, yPos, zPos), state, entityIn, maxY, materialIn, false);
+                        result = block.isEntityInsideMaterial(access, pos.setPos(xPos, yPos, zPos), state, entityIn, maxY, materialIn, false);
                         if (result != null && result) {
                             // Forge: When requested call blocks modifyAcceleration method,
                             // and more importantly cause this method to return true,
                             // which results in an entity being "inWater"
                             flag = true;
-                            vec3d = block.modifyAcceleration(this, acc, entityIn, vec3d);
+                            vec3d = block.modifyAcceleration(this, pos, entityIn, vec3d);
                             continue;
                         } else if (result != null && !result) continue;
 
@@ -3796,7 +3812,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
                             if ((double)maxY >= d0) {
                                 flag = true;
-                                vec3d = block.modifyAcceleration(this, acc, entityIn, vec3d);
+                                vec3d = block.modifyAcceleration(this, pos, entityIn, vec3d);
                             }
                         }
                     }
@@ -3922,7 +3938,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     //collisions, no cache
-    protected void getEntitiesInAABBexcludingNoCacheLimited(List<Entity> list, @Nullable Entity entityIn, AxisAlignedBB boundingBox, @Nullable Predicate <? super Entity > predicate, int lim) {
+    protected void getEntitiesInAABBexcludingNoCacheLimited(ArrayListE6<Entity> list, @Nullable Entity entityIn, AxisAlignedBB boundingBox, @Nullable Predicate <? super Entity > predicate, int lim) {
         if(lim==0)return;
         int k2 = MathHelper.floor(boundingBox.maxX + MAX_ENTITY_RADIUS)>>4,
                 l2 = MathHelper.floor(boundingBox.minZ - MAX_ENTITY_RADIUS)>>4,
@@ -3933,7 +3949,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         for (int xPos = MathHelper.floor(boundingBox.minX - MAX_ENTITY_RADIUS)>>4; xPos <= k2; ++xPos)
             for (int zPos = l2; zPos <= i3; ++zPos)
                 if ((chunk = localSelector.getLoadedE(xPos, zPos)) != null)
-                    chunk.getEntitiesWithinAABBForEntityLimited(entityIn, boundingBox, list, predicate, lim);
+                    chunk.getEntitiesWithinAABBForEntityLimitedC(entityIn, boundingBox, list, predicate, lim);
     }
 
 

@@ -42,6 +42,8 @@ import org.apache.logging.log4j.Logger;
 import plus.fserver.ElcaConfig;
 import plus.fserver.ElcaMobs;
 import plus.fserver.server.elca.ChunkSelector;
+import plus.fserver.utls.collections.ArrayListE6;
+
 import java.util.List;
 
 
@@ -474,10 +476,10 @@ public class EntityItem extends Entity {
     }
 
 
-    private List<AxisAlignedBB> defBoxes(double x, double y, double z){
+    private ArrayListE6<AxisAlignedBB> defBoxes(double x, double y, double z){
         AxisAlignedBB box = world.commonWorldEntityAABB;
         getEntityBoundingBox().expandTo(x, y, z, box);
-        return this.world.getCollisionBoxesLimited(null, box, ElcaConfig.MAX_ENTITY_COLLISIONS_MOVE);
+        return this.world.getCollisionBoxesLimitedC(null, box, ElcaConfig.MAX_ENTITY_COLLISIONS_MOVE);
     }
 
 
@@ -501,20 +503,20 @@ public class EntityItem extends Entity {
             double oldY = y;
             double oldZ = z;
 
-            List<AxisAlignedBB> boxes = null;
+            ArrayListE6<AxisAlignedBB> boxes = null;
             int temp, curX, curY, curZ;
             if (y != 0.0D) {
                 boxes = defBoxes(x, y, z);
                 temp = 0;
-                for (curY = boxes.size(); temp < curY; ++temp)
-                    y = boxes.get(temp).calculateYOffset(this.getEntityBoundingBox(), y);
+                for (curY = boxes.sizeC(); temp < curY; ++temp)
+                    y = boxes.getC(temp).calculateYOffset(this.getEntityBoundingBox(), y);
             }
             if (x != 0.0D) {
                 temp = 0;
                 if(boxes == null)boxes = defBoxes(x, y, z);
 
-                for (curX = boxes.size(); temp < curX; ++temp)
-                    x = boxes.get(temp).calculateXOffset(this.getEntityBoundingBox(), x);
+                for (curX = boxes.sizeC(); temp < curX; ++temp)
+                    x = boxes.getC(temp).calculateXOffset(this.getEntityBoundingBox(), x);
 
             }
 
@@ -522,8 +524,8 @@ public class EntityItem extends Entity {
                 temp = 0;
                 if(boxes == null)boxes = defBoxes(x, y, z);
 
-                for (curZ = boxes.size(); temp < curZ; ++temp)
-                    z = boxes.get(temp).calculateZOffset(this.getEntityBoundingBox(), z);
+                for (curZ = boxes.sizeC(); temp < curZ; ++temp)
+                    z = boxes.getC(temp).calculateZOffset(this.getEntityBoundingBox(), z);
 
             }
             if(boxes != null) {

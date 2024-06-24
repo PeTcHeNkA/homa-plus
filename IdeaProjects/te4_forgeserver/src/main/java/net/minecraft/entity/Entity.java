@@ -651,7 +651,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
             prev.expandTo(x, y, z, axisalignedbb);
             axisalignedbb.minY -= 0.125;
 
-            List<AxisAlignedBB> boxes = world.getCollisionBoxesLimited(this,
+            ArrayListE6<AxisAlignedBB> boxes = world.getCollisionBoxesLimitedC(this,
                     axisalignedbb, ElcaConfig.MAX_ENTITY_COLLISIONS_MOVE
             );
 
@@ -659,14 +659,14 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
             boolean flag;
             if (flag = y != 0.0D) {
                 temp = 0;
-                for (num1 = boxes.size(); temp < num1; ++temp)
-                    y = boxes.get(temp).calculateYOffset(axisalignedbb, y);
+                for (num1 = boxes.sizeC(); temp < num1; ++temp)
+                    y = boxes.getC(temp).calculateYOffset(axisalignedbb, y);
 
             }
             if (x != 0.0D) {
                 temp = 0;
-                for (num1 = boxes.size(); temp < num1; ++temp)
-                    x = boxes.get(temp).calculateXOffset(axisalignedbb, x);
+                for (num1 = boxes.sizeC(); temp < num1; ++temp)
+                    x = boxes.getC(temp).calculateXOffset(axisalignedbb, x);
 
                 flag = true;
             }
@@ -674,8 +674,8 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
             if (z != 0.0D) {
                 temp = 0;
 
-                for (num1 = boxes.size(); temp < num1; ++temp)
-                    z = boxes.get(temp).calculateZOffset(axisalignedbb, z);
+                for (num1 = boxes.sizeC(); temp < num1; ++temp)
+                    z = boxes.getC(temp).calculateZOffset(axisalignedbb, z);
 
                 flag = true;
             }
@@ -699,23 +699,23 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
                 double d8 = y;
                 temp = 0;
 
-                for (num1 = boxes.size(); temp < num1; ++temp)
-                    d8 = boxes.get(temp).calculateYOffset(axisalignedbb, d8);
+                for (num1 = boxes.sizeC(); temp < num1; ++temp)
+                    d8 = boxes.getC(temp).calculateYOffset(axisalignedbb, d8);
 
                 aab2.offsetMut(0.0D, d8, 0.0D);
                 double d18 = dx1;
                 temp = 0;
 
-                for (num1 = boxes.size(); temp < num1; ++temp)
-                    d18 = boxes.get(temp).calculateXOffset(aab2, d18);
+                for (num1 = boxes.sizeC(); temp < num1; ++temp)
+                    d18 = boxes.getC(temp).calculateXOffset(aab2, d18);
 
                 aab2.offsetMut(d18, 0.0D, 0.0D);
 
                 double d19 = dz1;
                 temp = 0;
 
-                for (num1 = boxes.size(); temp < num1; ++temp)
-                    d19 = boxes.get(temp).calculateZOffset(aab2, d19);
+                for (num1 = boxes.sizeC(); temp < num1; ++temp)
+                    d19 = boxes.getC(temp).calculateZOffset(aab2, d19);
 
                 aab2.offsetMut(0.0D, 0.0D, d19);
 
@@ -723,20 +723,20 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
                 temp = 0;
 
                 axisalignedbb = boundingBox;
-                for (num1 = boxes.size(); temp < num1; ++temp)
-                    d20 = boxes.get(temp).calculateYOffset(axisalignedbb, d20);
+                for (num1 = boxes.sizeC(); temp < num1; ++temp)
+                    d20 = boxes.getC(temp).calculateYOffset(axisalignedbb, d20);
 
                 double d21 = dx1;
                 temp = 0;
 
-                for (num1 = boxes.size(); temp < num1; ++temp)
-                    d21 = boxes.get(temp).calculateXOffset(axisalignedbb, d21);
+                for (num1 = boxes.sizeC(); temp < num1; ++temp)
+                    d21 = boxes.getC(temp).calculateXOffset(axisalignedbb, d21);
 
                 double d22 = dz1;
                 temp = 0;
 
-                for (num1 = boxes.size(); temp < num1; ++temp)
-                    d22 = boxes.get(temp).calculateZOffset(axisalignedbb, d22);
+                for (num1 = boxes.sizeC(); temp < num1; ++temp)
+                    d22 = boxes.getC(temp).calculateZOffset(axisalignedbb, d22);
 
                 if (d18 * d18 + d19 * d19 > d21 * d21 + d22 * d22) {
                     x = d18;
@@ -748,8 +748,8 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
                 temp = 0;
 
-                for (num1 = boxes.size(); temp < num1; ++temp)
-                    y = boxes.get(temp).calculateYOffset(this.getEntityBoundingBox(), y);
+                for (num1 = boxes.sizeC(); temp < num1; ++temp)
+                    y = boxes.getC(temp).calculateYOffset(this.getEntityBoundingBox(), y);
 
                 if (dx2 * dx2 + dz2 * dz2 >= x * x + z * z) {
                     x = dx2;
