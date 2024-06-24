@@ -926,20 +926,21 @@ public abstract class EntityLivingBase extends Entity {
     public boolean isOnLadder() {
         if (isPlayer() && ((EntityPlayer)this).isSpectator()) return false;
         else {
-            BlockPos blockpos;
-            IBlockState iblockstate = this.world.access().getBlockState(blockpos = world.localTempPos2.setPos(
-                    MathHelper.floor(this.posX),
-                    MathHelper.floor(this.getEntityBoundingBox().minY),
-                    MathHelper.floor(this.posZ)
-            ));
-            return ForgeHooks.isLivingOnLadder(iblockstate, world, blockpos, this);
+            BlockPos pos;
+            return ForgeHooks.isLivingOnLadder(
+                    world.access().getBlockState(
+                            pos = world.localTempPos2.setPos(
+                                    posX, getEntityBoundingBox().minY, posZ
+                            )
+                    ), world, pos, this
+            );
         }
     }
 
 
     private boolean canGoThroughtTrapDoorOnLadder(BlockPos pos, IBlockState state) {
         if (state.getValue(BlockTrapDoor.OPEN)) {
-            IBlockState iblockstate = this.world.getBlockState(pos.down());
+            IBlockState iblockstate = this.world.access().getBlockState(pos.getX(), pos.getY() - 1, pos.getZ());
             return iblockstate.getBlock() == Blocks.LADDER && iblockstate.getValue(BlockLadder.FACING) == state.getValue(BlockTrapDoor.FACING);
         }
         return false;

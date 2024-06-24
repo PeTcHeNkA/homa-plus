@@ -2179,8 +2179,8 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             return true;
         } else {
             if (pos.getY() >= 0 && pos.getY() < 256 && this.getLightFor(EnumSkyBlock.BLOCK, pos) < 10) {
-                IBlockState iblockstate1 = this.getBlockState(pos);
-                if (iblockstate1.getBlock().isAir(iblockstate1, this, pos) && Blocks.SNOW_LAYER.canPlaceBlockAt(this, pos)) {
+                IBlockState state = this.getBlockState(pos);
+                if (state.getBlock().isAir(state, this, pos) && Blocks.SNOW_LAYER.canPlaceBlockAt(this, pos)) {
                     return true;
                 }
             }
@@ -2198,60 +2198,43 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
-    private int getRawLight(BlockPos pos, EnumSkyBlock lightType) {
-        if (lightType == EnumSkyBlock.SKY && this.canSeeSky(pos)) {
+    private int getRawLight(BlockPos pos, EnumSkyBlock type) {
+        if (type == EnumSkyBlock.SKY && this.canSeeSky(pos)) {
             return 15;
         } else {
-            IBlockState iblockstate1 = this.getBlockState(pos);
-            int j2 = lightType == EnumSkyBlock.SKY ? 0 : iblockstate1.getBlock().getLightValue(iblockstate1, this, pos);
-            int k2 = iblockstate1.getBlock().getLightOpacity(iblockstate1, this, pos);
+            IBlockState state = this.getBlockState(pos);
+            int j2 = type == EnumSkyBlock.SKY ? 0 : state.getBlock().getLightValue(state, this, pos);
+            int k2 = state.getBlock().getLightOpacity(state, this, pos);
 
-            if (false) // Forge: fix MC-119932
-            {
+            if (k2 < 1) {
                 k2 = 1;
             }
-
-            if (k2 < 1)
-            {
-                k2 = 1;
-            }
-
-            if (k2 >= 15)
-            {
+            if (k2 >= 15) {
                 return j2; // Forge: fix MC-119932
             }
-            else if (j2 >= 14)
-            {
+            else if (j2 >= 14) {
                 return j2;
             }
-            else
-            {
-                BlockPos.PooledMutableBlockPos blockpos$pooledmutableblockpos = BlockPos.PooledMutableBlockPos.retain();
+            else {
+                BlockPos.PooledMutableBlockPos pooled = BlockPos.PooledMutableBlockPos.retain();
 
-                try
-                {
-                    for (EnumFacing enumfacing : EnumFacing.values())
-                    {
-                        blockpos$pooledmutableblockpos.setPos(pos).move(enumfacing);
-                        int l2 = this.getLightFor(lightType, blockpos$pooledmutableblockpos) - k2;
+                try {
+                    for (EnumFacing enumfacing : EnumFacing.VALUES) {
+                        pooled.setPos(pos).move(enumfacing);
+                        int l2 = this.getLightFor(type, pooled) - k2;
 
-                        if (l2 > j2)
-                        {
+                        if (l2 > j2) {
                             j2 = l2;
                         }
 
-                        if (j2 >= 14)
-                        {
+                        if (j2 >= 14) {
                             int i3 = j2;
                             return i3;
                         }
                     }
-
                     return j2;
-                }
-                finally
-                {
-                    blockpos$pooledmutableblockpos.release();
+                } finally {
+                    pooled.release();
                 }
             }
         }

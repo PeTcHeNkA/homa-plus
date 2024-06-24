@@ -433,8 +433,6 @@ public class ForgeHooks {
 
 
     public static boolean isLivingOnLadder(@Nonnull IBlockState state, @Nonnull World world, @Nonnull BlockPos pos, @Nonnull EntityLivingBase entity) {
-        boolean isSpectator = (entity instanceof EntityPlayer && ((EntityPlayer)entity).isSpectator());
-        if (isSpectator) return false;
         if (!ForgeModContainer.fullBoundingBoxLadders) {
             return state.getBlock().isLadder(state, world, pos, entity);
         } else {

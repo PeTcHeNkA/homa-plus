@@ -337,7 +337,13 @@ public class BlockPos extends Vec3i {
 
 
         public BlockPos.MutableBlockPos setPos(double xIn, double yIn, double zIn) {
-            return this.setPos(MathHelper.floor(xIn), MathHelper.floor(yIn), MathHelper.floor(zIn));
+            int xi = (int) xIn, yi = (int) yIn, zi = (int) zIn;
+            editRoot(
+                    xIn < (double) xi?xi-1:xi,
+                    yIn < (double) yi?yi-1:yi,
+                    zIn < (double) zi?zi-1:zi
+            );
+            return this;
         }
 
 
@@ -374,7 +380,7 @@ public class BlockPos extends Vec3i {
 
     public static final class PooledMutableBlockPos extends BlockPos.MutableBlockPos {
         private boolean released;
-        private static final ThreadLocal<List<PooledMutableBlockPos>> pool = new ThreadLocal(){
+        private static final ThreadLocal<ArrayList<PooledMutableBlockPos>> pool = new ThreadLocal(){
             @Override
             protected Object initialValue() {
                 return new ArrayList<>();
