@@ -104,7 +104,7 @@ public abstract class PlayerList {
     }
 
 
-    public void initializeConnectionToPlayer(NetworkManager netManager, EntityPlayerMP playerIn, NetHandlerPlayServer nethandlerplayserver) {
+    public void initializeConnectionToPlayer(NetworkManager netManager, EntityPlayerMP playerIn, NetHandlerPlayServer connection) {
         GameProfile gameprofile = playerIn.getGameProfile();
         PlayerProfileCache playerprofilecache = this.server.getPlayerProfileCache();
         GameProfile gameprofile1 = playerprofilecache.getProfileByUUID(gameprofile.getId());
@@ -135,13 +135,13 @@ public abstract class PlayerList {
         WorldServer worldserver = this.server.getWorld(playerIn.dimension);
         WorldInfo worldinfo = worldserver.getWorldInfo();
         this.setPlayerGameTypeBasedOnOther(playerIn, (EntityPlayerMP)null, worldserver);
-        playerIn.connection = nethandlerplayserver;
+        playerIn.connection = connection;
         net.minecraftforge.fml.common.FMLCommonHandler.instance().fireServerConnectionEvent(netManager);
-        nethandlerplayserver.sendPacket(new SPacketJoinGame(playerIn.getEntityId(), playerIn.interactionManager.getGameType(), worldinfo.isHardcoreModeEnabled(), worldserver.provider.getDimension(), worldserver.getDifficulty(), this.getMaxPlayers(), worldinfo.getTerrainType(), worldserver.getGameRules().getBoolean("reducedDebugInfo")));
-        nethandlerplayserver.sendPacket(new SPacketCustomPayload("MC|Brand", (new PacketBuffer(Unpooled.buffer())).writeString(this.getServerInstance().getServerModName())));
-        nethandlerplayserver.sendPacket(new SPacketServerDifficulty(worldinfo.getDifficulty(), worldinfo.isDifficultyLocked()));
-        nethandlerplayserver.sendPacket(new SPacketPlayerAbilities(playerIn.capabilities));
-        nethandlerplayserver.sendPacket(new SPacketHeldItemChange(playerIn.inventory.currentItem));
+        connection.sendPacket(new SPacketJoinGame(playerIn.getEntityId(), playerIn.interactionManager.getGameType(), worldinfo.isHardcoreModeEnabled(), worldserver.provider.getDimension(), worldserver.getDifficulty(), this.getMaxPlayers(), worldinfo.getTerrainType(), worldserver.getGameRules().getBoolean("reducedDebugInfo")));
+        connection.sendPacket(new SPacketCustomPayload("MC|Brand", (new PacketBuffer(Unpooled.buffer())).writeString(this.getServerInstance().getServerModName())));
+        connection.sendPacket(new SPacketServerDifficulty(worldinfo.getDifficulty(), worldinfo.isDifficultyLocked()));
+        connection.sendPacket(new SPacketPlayerAbilities(playerIn.capabilities));
+        connection.sendPacket(new SPacketHeldItemChange(playerIn.inventory.currentItem));
         this.updatePermissionLevel(playerIn);
         playerIn.getStatFile().markAllDirty();
         playerIn.getRecipeBook().init(playerIn);
@@ -158,7 +158,7 @@ public abstract class PlayerList {
         textcomponenttranslation.getStyle().setColor(TextFormatting.YELLOW);
         this.sendMessage(textcomponenttranslation);
         this.playerLoggedIn(playerIn);
-        nethandlerplayserver.setPlayerLocation(playerIn.posX, playerIn.posY, playerIn.posZ, playerIn.rotationYaw, playerIn.rotationPitch);
+        connection.setPlayerLocation(playerIn.posX, playerIn.posY, playerIn.posZ, playerIn.rotationYaw, playerIn.rotationPitch);
         this.updateTimeAndWeatherForPlayer(playerIn, worldserver);
 
         if (!this.server.getResourcePackUrl().isEmpty()) {
@@ -166,7 +166,7 @@ public abstract class PlayerList {
         }
 
         for (PotionEffect potioneffect : playerIn.getActivePotionEffects()) {
-            nethandlerplayserver.sendPacket(new SPacketEntityEffect(playerIn.getEntityId(), potioneffect));
+            connection.sendPacket(new SPacketEntityEffect(playerIn.getEntityId(), potioneffect));
         }
 
         if (nbttagcompound != null && nbttagcompound.hasKey("RootVehicle", 10)) {
