@@ -4,9 +4,17 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.server.management.PlayerChunkMapEntry;
+import java.util.Comparator;
 
 
 public class PlayerCMapSelector{
+    private static final Comparator<Integer> COMPARATOR = (o1, o2) -> {
+        final int range1, range2;
+        if((range1 = o1>>16) == (range2 = o2>>16))return 0;
+        if(range1 > range2)return 1;
+        return -1;
+    };
+
     private final int[] mask;
     private final int radius;
 
@@ -45,11 +53,7 @@ public class PlayerCMapSelector{
                 }
             }
         }
-        list.sort((o1, o2) -> {
-            int range1 = o1>>16;
-            int range2 = o2>>16;
-            return Integer.compare(range1, range2);
-        });
+        list.sort(COMPARATOR);
         int[]mask = new int[list.size()];
         for (int i=0;i<mask.length;i++) {
             mask[i] = list.getInt(i) & 0xFFFF;

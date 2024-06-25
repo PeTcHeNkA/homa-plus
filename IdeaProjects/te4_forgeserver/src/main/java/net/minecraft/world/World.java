@@ -63,6 +63,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.jetbrains.annotations.NotNull;
 import plus.fserver.ElcaConfig;
+import plus.fserver.api.ElcaServerUtls;
 import plus.fserver.api.IBlockEAccess;
 import plus.fserver.ElcaCV;
 import plus.fserver.api.Keep;
@@ -160,13 +161,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     ChunkProviderServer chunkProviderServer;
     //END UNSAFE
 
-    /*
-        for (ArrayRemSwapListE15<Entity> list: realEntityList.getRaw()) {
-            for (int cursor = 0, s = list.sizeC(); cursor < s; ++cursor) {
-                Entity entity = list.getC(cursor);
-            }
-        }
-    * */
+    private final Object[] locals;
 
     protected World(ISaveHandler saveHandlerIn, WorldInfo info, WorldProvider providerIn, Profiler profilerIn, boolean client) {
         this(null, saveHandlerIn, info, providerIn, profilerIn, client);
@@ -203,6 +198,13 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         }
         localSelector = initSelector();
         effectiveAcces = this;
+
+        locals = ElcaServerUtls.createLocals(this);
+    }
+
+
+    public Object getLocal(int id){
+        return locals[id];
     }
 
 

@@ -323,7 +323,9 @@ public class PlayerChunkMapEntry extends ArrayListE6<EntityPlayerMP> implements 
         return posX ^ posZ;
     }
 
+
     public List<EntityPlayerMP> getWatchingPlayers() {
-        return isSentToPlayers() ? java.util.Collections.unmodifiableList(this) : java.util.Collections.emptyList();
+        if(isSentToPlayers())return java.util.Collections.unmodifiableList(this);
+        return java.util.Collections.emptyList();
     }
 }

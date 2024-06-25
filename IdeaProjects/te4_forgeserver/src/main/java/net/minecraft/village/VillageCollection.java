@@ -76,10 +76,10 @@ public class VillageCollection extends WorldSavedData {
 
 
     private void removeAnnihilatedVillages() {
-        ArrayListE6.Itr iterator = this.villageList.iterator();
+        Iterator<Village> iterator = this.villageList.remIterator();
 
         while(iterator.hasNext()) {
-            Village village = (Village)iterator.nextObj();
+            Village village = iterator.next();
             if (village.isAnnihilated()) {
                 iterator.remove();
                 this.markDirty();

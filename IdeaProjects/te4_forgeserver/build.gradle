@@ -23,7 +23,7 @@ apply plugin: 'com.github.gmazzo.buildconfig'
 
 def name = 'elca_server'
 
-version = "2.3.9.01"
+version = "2.4.1.01"
 group = "plus"
 archivesBaseName = name
 sourceCompatibility = targetCompatibility = 1.8
