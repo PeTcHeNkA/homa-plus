@@ -102,6 +102,21 @@ public class ArrayListE6<T> implements List<T> {
     }
 
 
+    public void trimToSize(){
+        int curSize;
+        if((curSize = size) == 0){
+            data = EMPTY_ARR;
+            return;
+        }
+        Object[] curData = this.data;
+        if(curData.length == curSize)return;
+
+        Object[] result = new Object[curSize];
+        System.arraycopy(curData, 0, result, 0, curSize);
+        this.data = result;
+    }
+
+
     @NotNull
     @Override
     public <T1> T1[] toArray(@NotNull T1[] a) {

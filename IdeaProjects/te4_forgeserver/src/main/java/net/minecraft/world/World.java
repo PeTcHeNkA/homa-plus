@@ -1914,6 +1914,18 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
+    public TileEntity getTileForAcces(ChunkSelector selector, BlockPos pos) {
+        if(this.isOutsideBuildHeight(pos))return null;
+        TileEntity tileEntity = null;
+        if (this.processingLoadedTiles) tileEntity = this.getPendingTileEntityAt(pos);
+
+        if (tileEntity == null)
+            tileEntity = selector.getChunk(pos).getTileEntity(pos, Chunk.EnumCreateEntityType.IMMEDIATE);
+
+        return tileEntity == null ? this.getPendingTileEntityAt(pos) : tileEntity;
+    }
+
+
     @Nullable
     private TileEntity getPendingTileEntityAt(BlockPos pos) {
         for (int j2 = 0; j2 < this.addedTileEntityList.size(); ++j2) {

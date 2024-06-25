@@ -291,17 +291,18 @@ public abstract class StructureComponent {
 
     protected void fillWithBlocks(ChunkSelector selector, StructureBoundingBox box,
                                   int xMin, int yMin, int zMin, int xMax, int yMax, int zMax,
-                                  IBlockState boundaryBlockState, IBlockState insideBlockState,
+                                  IBlockState bound, IBlockState inside,
                                   boolean existingOnly) {
-        for (int i = yMin; i <= yMax; ++i) {
-            for (int j = xMin; j <= xMax; ++j) {
-                for (int k = zMin; k <= zMax; ++k) {
-                    if (!existingOnly || this.getBlockStateFromPos(selector, j, i, k, box)
+
+        for (int x = xMin; x <= xMax; ++x) {
+            for (int z = zMin; z <= zMax; ++z) {
+                for (int y = yMin; y <= yMax; ++y) {
+                    if (!existingOnly || this.getBlockStateFromPos(selector, x, y, z, box)
                             .getMaterial() != Material.AIR) {
-                        if (i != yMin && i != yMax && j != xMin && j != xMax && k != zMin && k != zMax) {
-                            this.setBlockState(selector, insideBlockState, j, i, k, box);
+                        if (y != yMin && y != yMax && x != xMin && x != xMax && z != zMin && z != zMax) {
+                            this.setBlockState(selector, inside, x, y, z, box);
                         } else {
-                            this.setBlockState(selector, boundaryBlockState, j, i, k, box);
+                            this.setBlockState(selector, bound, x, y, z, box);
                         }
                     }
                 }

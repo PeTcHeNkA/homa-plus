@@ -103,7 +103,7 @@ public final class ChunkSelector implements IBlockEAccess {
     @Nullable
     @Override
     public TileEntity getTileEntity(BlockPos pos) {
-        return provider.world.getTileEntity(pos);
+        return provider.world.getTileForAcces(this, pos);
     }
 
 

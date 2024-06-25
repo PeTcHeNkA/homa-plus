@@ -212,8 +212,8 @@ public class BlockStateContainer {
 
         @Override //todo unsafe
         public <T extends Comparable<T>, V extends T> IBlockState withProperty(IProperty<T> property, V value) {
-            Comparable<?> comparable = this.properties.get(property);
-            return comparable == value?this:propertyValueTable.get(property, value);
+            if(properties.get(property) == value)return this;
+            return propertyValueTable.get(property, value);
         }
 
 
