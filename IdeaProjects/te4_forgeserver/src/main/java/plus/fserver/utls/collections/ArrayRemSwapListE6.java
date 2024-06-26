@@ -20,7 +20,8 @@ public class ArrayRemSwapListE6<T> extends ArrayListE6<T> {
 
     public void removeSwap(int index) {
         if(size == index+1){
-            data[size] = null;
+            data[--size] = null;
+            return;
         }
         Object swap = data[size-1];
         data[index] = swap;
@@ -31,14 +32,14 @@ public class ArrayRemSwapListE6<T> extends ArrayListE6<T> {
 
     @Override
     public boolean contains(Object o) {
-        for (int i =0 ; i < size; i++) if(o.equals(data[i]))return true;
+        for (int i = 0, s = size; i < s; i++) if(o.equals(data[i]))return true;
         return false;
     }
 
 
     @Override
     public boolean remove(Object o) {
-        for (int index = 0; index < size; index++)
+        for (int index = 0, s = size; index < s; index++)
             if (o.equals(data[index])) {
                 remove(index);
                 return true;
@@ -48,9 +49,9 @@ public class ArrayRemSwapListE6<T> extends ArrayListE6<T> {
 
 
     public boolean removeRefSwap(Object o) {
-        for (int index = 0; index < size; index++)
+        for (int index = 0, s = size; index < s; index++)
             if (o == data[index]) {
-                remove(index);
+                removeSwap(index);
                 return true;
             }
         return false;

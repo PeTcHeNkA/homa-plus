@@ -220,13 +220,28 @@ public class EntityIDHashSplitedList implements List<Entity> {
     }
 
 
+    @Override
+    public void forEach(Consumer<? super Entity> action) {
+        for (ArrayRemSwapListE15<Entity> list:lists){
+            for (int i = 0, s = list.sizeC();i < s;i++)
+                action.accept(list.getC(i));
+        }
+    }
+
+
     @NotNull
     @Override
     public Object[] toArray() {
-        Object[] arr = new Object[size()];
+        int size = 0;
+        ArrayRemSwapListE15<Entity>[] lists = this.lists;
+        for (int cursor = 0; cursor < SIZE; cursor++)size += lists[cursor].size;
+        Object[] arr = new Object[size];
+
         int i = 0;
-        for (Entity entity : this) {
-            arr[i++] = entity;
+        for (int cursor = 0; cursor < SIZE; cursor++){
+            ArrayRemSwapListE15<Entity> list = lists[cursor];
+            Object[] lData = list.data;
+            for (int e = 0, s = list.size; e < s; e++) arr[i++] = lData[e];
         }
         return arr;
     }
@@ -235,10 +250,17 @@ public class EntityIDHashSplitedList implements List<Entity> {
     @NotNull
     @Override
     public <T> T[] toArray(@NotNull T[] a) {
-        T[] arr = (T[]) new Object[size()];
+        int size = 0;
+        ArrayRemSwapListE15<Entity>[] lists = this.lists;
+        for (int cursor = 0; cursor < SIZE; cursor++)size += lists[cursor].size;
+
+        T[] arr = (T[]) new Object[size];
+
         int i = 0;
-        for (Entity entity : this) {
-            arr[i++] = (T) entity;
+        for (int cursor = 0; cursor < SIZE; cursor++){
+            ArrayRemSwapListE15<Entity> list = lists[cursor];
+            Object[] lData = list.data;
+            for (int e = 0, s = list.size; e < s; e++) arr[i++] = (T) lData[e];
         }
         return arr;
     }
@@ -247,7 +269,7 @@ public class EntityIDHashSplitedList implements List<Entity> {
     private static final class Itr implements Iterator<Entity>, Iterable<Entity> {
         private final ArrayRemSwapListE15<Entity>[] lists;
         private ArrayListE6<Entity> list;
-        private int cursor1 = 0, cursor2 = 0;
+        private int cursor1 = 1, cursor2 = 0;
         private Entity next;
 
         public Itr(ArrayRemSwapListE15<Entity>[] lists) {
