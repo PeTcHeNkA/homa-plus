@@ -1,9 +1,7 @@
 package plus.fserver.utls.collections;
 
-import net.minecraft.world.chunk.Chunk;
 
-
-public class ChunkMap {
+public class FlatMap<T> {
     private Node[] nodes = new Node[256];
     private int mask = 255;
     private int count = 0;
@@ -15,19 +13,22 @@ public class ChunkMap {
 
 
     private static class Node{
-        private Chunk chunk;
+        private int x, z;
+        private Object chunk;
         private Node next;
     }
 
 
-    public void put(Chunk chunk){
+    public void put(int x, int z, T chunk){
         final int hash;
-        final Node node = nodes[hash = hash(chunk.x, chunk.z)];
+        final Node node = nodes[hash = hash(x, z)];
         if(node != null){
             Node temp = node;
             while(temp != null){
                 if(temp.chunk == chunk)return;
                 if(temp.chunk == null){
+                    temp.x = x;
+                    temp.z = z;
                     temp.chunk = chunk;
                     onInsert();
                     return;
@@ -37,18 +38,18 @@ public class ChunkMap {
         }
         final Node cur;
         (nodes[hash] = cur = new Node()).chunk = chunk;
+        cur.x = x;
+        cur.z = z;
         cur.next = node;
-
         onInsert();
     }
 
 
-    public Chunk remove(int x, int z){
+    public T remove(int x, int z){
         final int hash;
         Node node = nodes[hash = hash(x, z)], prev = null;
         while (node != null){
-            Chunk chunk;
-            if((chunk = node.chunk).x == x && chunk.z == z){
+            if(node.x == x && node.z == z){
                 if(prev == null) {
                     if (node.next != null)
                         nodes[hash] = node.next;
@@ -58,7 +59,7 @@ public class ChunkMap {
                     prev.next   = node.next;
 
                 --count;
-                return chunk;
+                return (T) node.chunk;
             }
             node = (prev = node).next;
         }
@@ -76,7 +77,7 @@ public class ChunkMap {
         for(int i = 0, s = oldNodes.length; i < s; ++i){
             Node node = oldNodes[i];
             while(node != null){
-                put(node.chunk);
+                put(node.x, node.z, (T) node.chunk);
                 node = node.next;
             }
         }
@@ -95,16 +96,16 @@ public class ChunkMap {
         count = 0;
     }
 
+
     public int size(){
         return count;
     }
 
 
-    public Chunk get(int x, int z){
+    public T get(int x, int z){
         Node node = nodes[hash(x, z)];
-        Chunk chunk;
         while (node != null){
-            if((chunk = node.chunk).x == x && chunk.z == z)return chunk;
+            if(node.x == x && node.z == z)return (T) node.chunk;
             node = node.next;
         }
         return null;
@@ -113,9 +114,8 @@ public class ChunkMap {
 
     public boolean contains(int x, int z){
         Node node = nodes[hash(x, z)];
-        Chunk chunk;
         while (node != null){
-            if((chunk = node.chunk).x == x && chunk.z == z)return true;
+            if(node.x == x && node.z == z)return true;
             node = node.next;
         }
         return false;

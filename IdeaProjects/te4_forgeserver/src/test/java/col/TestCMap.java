@@ -3,13 +3,13 @@ package col;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.Chunk;
-import plus.fserver.utls.collections.ChunkMap;
+import plus.fserver.utls.collections.FlatMap;
 
 
 public class TestCMap {
     private static final int iters = 200;
-    private static final int cSize = 400;
-    private static final int count = 20;
+    private static final int cSize = 200;
+    private static final int count = 30;
 
     public static void main(String[] args) {
         Chunk[] chunks = new Chunk[cSize*cSize];
@@ -20,7 +20,7 @@ public class TestCMap {
         }
 
         Long2ObjectOpenHashMap<Chunk> def = new Long2ObjectOpenHashMap<>();
-        ChunkMap map = new ChunkMap();
+        FlatMap<Chunk> map = new FlatMap<>();
 
         for (int i=0;i<10;i++){
             testTime("def", () -> testBasic(def, chunks, count));
@@ -50,10 +50,10 @@ public class TestCMap {
     }
 
 
-    private static void testSelf(ChunkMap map, Chunk[] chunks, int count) {
+    private static void testSelf(FlatMap<Chunk> map, Chunk[] chunks, int count) {
         for (int i = 0; i < count; i++) {
             for (Chunk c : chunks) {
-                map.put(c);
+                map.put(c.x, c.z, c);
             }
             for (int j = 0; j < iters; j++) {
                 Chunk chunk = chunks[j];

@@ -1,7 +1,6 @@
 package net.minecraft.server.management;
 
 import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import java.util.Comparator;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -274,7 +273,10 @@ public class PlayerChunkMapEntry extends ArrayListE6<EntityPlayerMP> implements 
 
 
     public boolean hasPlayerMatching(Predicate<EntityPlayerMP> predicate) {
-        return Iterables.tryFind(this, predicate).isPresent();
+        for (int i = 0, s = size;i<s;i++) {
+            if(predicate.apply(getC(i)))return true;
+        }
+        return false;
     }
 
 

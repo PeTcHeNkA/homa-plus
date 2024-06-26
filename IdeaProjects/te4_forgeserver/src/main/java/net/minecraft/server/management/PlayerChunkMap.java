@@ -3,12 +3,10 @@ package net.minecraft.server.management;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
@@ -19,17 +17,17 @@ import plus.fserver.ElcaConfig;
 import plus.fserver.server.chunk.PlayerCMapSelector;
 import plus.fserver.utls.collections.ArrayRemSwapListE15;
 import plus.fserver.utls.collections.ChunkIterator;
+import plus.fserver.utls.collections.FlatMap;
 import plus.tson.utl.Te4HashSet;
 
 
-public class PlayerChunkMap {
+public class PlayerChunkMap extends FlatMap<PlayerChunkMapEntry>{
     public static final Predicate<EntityPlayerMP> NOT_SPECTATOR = player -> player != null && !player.isSpectator();
     public static final Predicate<EntityPlayerMP> CAN_GENERATE_CHUNKS = player -> player != null && (!player.isSpectator() || player.getServerWorld().getGameRules().getBoolean("spectatorsGenerateChunks"));
 
     private final WorldServer world;
     private final ArrayRemSwapListE15<EntityPlayerMP> players = new ArrayRemSwapListE15<>();
-    private final Long2ObjectMap<PlayerChunkMapEntry> entryMap = new Long2ObjectOpenHashMap<>(4096);
-    private Set<PlayerChunkMapEntry> dirtyEntries = new Te4HashSet<>();
+    private Te4HashSet<PlayerChunkMapEntry> dirtyEntries = new Te4HashSet<>();
     private final List<PlayerChunkMapEntry> pendingSendToPlayers = Lists.newLinkedList();
     private final List<PlayerChunkMapEntry> entriesWithoutChunks = Lists.newLinkedList();
     private final ArrayRemSwapListE15<PlayerChunkMapEntry> entries = new ArrayRemSwapListE15<>();
@@ -67,20 +65,21 @@ public class PlayerChunkMap {
         }
 
         if (i - this.previousTotalWorldTime > 8000L) {
+            ArrayRemSwapListE15<PlayerChunkMapEntry> entries = this.entries;
             this.previousTotalWorldTime = i;
-            for (int j = 0; j < this.entries.size(); ++j) {
-                PlayerChunkMapEntry playerchunkmapentry = this.entries.get(j);
-                playerchunkmapentry.update();
-                playerchunkmapentry.updateChunkInhabitedTime();
+            for (int j = 0, s = entries.sizeC(); j < s; ++j) {
+                PlayerChunkMapEntry entry = entries.getC(j);
+                entry.update();
+                entry.updateChunkInhabitedTime();
             }
         }
 
         //todo java.util.ConcurrentModificationException
         //todo fixed, used other set. maybe not uptimal (memory)
         if (!this.dirtyEntries.isEmpty()) {
-            Set<PlayerChunkMapEntry> old = dirtyEntries;
+            Te4HashSet<PlayerChunkMapEntry> old = dirtyEntries;
             dirtyEntries = new Te4HashSet<>();
-            for (PlayerChunkMapEntry entry:old) entry.update();
+            old.forEach(PlayerChunkMapEntry::update);
         }
 
         if (this.sortMissingChunks && i % 4L == 0L) {
@@ -134,27 +133,20 @@ public class PlayerChunkMap {
     }
 
 
-    public boolean contains(int chunkX, int chunkZ) {
-        long i = getIndex(chunkX, chunkZ);
-        return this.entryMap.get(i) != null;
-    }
-
-
     @Nullable
     public PlayerChunkMapEntry getEntry(int x, int z) {
-        return this.entryMap.get(getIndex(x, z));
+        return get(x, z);
     }
 
 
     public PlayerChunkMapEntry getOrCreateEntry(int chunkX, int chunkZ) {
-        long i = getIndex(chunkX, chunkZ);
-        PlayerChunkMapEntry entry = this.entryMap.get(i);
+        PlayerChunkMapEntry entry = get(chunkX, chunkZ);
 
         if (entry == null) {
             entry = new PlayerChunkMapEntry(this, chunkX, chunkZ);
             this.entries.addF(entry);
 
-            this.entryMap.put(i, entry);
+            put(chunkX, chunkZ, entry);
 
             if (entry.getChunk() == null) {
                 this.entriesWithoutChunks.add(entry);
@@ -169,12 +161,8 @@ public class PlayerChunkMap {
 
 
     public void markBlockForUpdate(BlockPos pos) {
-        int i = pos.getX() >> 4;
-        int j = pos.getZ() >> 4;
-        PlayerChunkMapEntry playerchunkmapentry = this.getEntry(i, j);
-        if (playerchunkmapentry != null) {
-            playerchunkmapentry.blockChanged(pos.getX() & 15, pos.getY(), pos.getZ() & 15);
-        }
+        PlayerChunkMapEntry entry = get(pos.getX() >> 4, pos.getZ() >> 4);
+        if (entry != null) entry.blockChanged(pos.getX() & 15, pos.getY(), pos.getZ() & 15);
     }
 
 
@@ -223,7 +211,7 @@ public class PlayerChunkMap {
 
 
     public boolean isPlayerWatchingChunk(EntityPlayerMP player, int chunkX, int chunkZ) {
-        PlayerChunkMapEntry entry = this.getEntry(chunkX, chunkZ);
+        PlayerChunkMapEntry entry = get(chunkX, chunkZ);
         return entry != null && entry.containsRef(player) && entry.isSentToPlayers();
     }
 
@@ -302,9 +290,8 @@ public class PlayerChunkMap {
 
 
     public void removeEntry(PlayerChunkMapEntry entry) {
-        long i = getIndex(entry.posX, entry.posZ);
         entry.updateChunkInhabitedTime();
-        this.entryMap.remove(i);
+        remove(entry.posX, entry.posZ);
         this.entries.removeRef(entry);
         this.dirtyEntries.remove(entry);
         this.pendingSendToPlayers.remove(entry);
