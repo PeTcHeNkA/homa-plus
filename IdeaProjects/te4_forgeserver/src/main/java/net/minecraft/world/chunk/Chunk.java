@@ -947,28 +947,28 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
     }
 
 
-    public void populate(IChunkProvider chunkProvider, IChunkGenerator chunkGenrator) {
-        Chunk chunk = chunkProvider.getLoadedChunk(this.x, this.z - 1);
-        Chunk chunk1 = chunkProvider.getLoadedChunk(this.x + 1, this.z);
-        Chunk chunk2 = chunkProvider.getLoadedChunk(this.x, this.z + 1);
-        Chunk chunk3 = chunkProvider.getLoadedChunk(this.x - 1, this.z);
+    public void populate(IChunkProvider provider, IChunkGenerator gen) {
+        Chunk chunk = provider.getLoadedChunk(this.x, this.z - 1);
+        Chunk chunk1 = provider.getLoadedChunk(this.x + 1, this.z);
+        Chunk chunk2 = provider.getLoadedChunk(this.x, this.z + 1);
+        Chunk chunk3 = provider.getLoadedChunk(this.x - 1, this.z);
 
-        if (chunk1 != null && chunk2 != null && chunkProvider.getLoadedChunk(this.x + 1, this.z + 1) != null) {
-            this.populate(chunkGenrator);
+        if (chunk1 != null && chunk2 != null && provider.getLoadedChunk(this.x + 1, this.z + 1) != null) {
+            this.populate(gen);
         }
 
-        if (chunk3 != null && chunk2 != null && chunkProvider.getLoadedChunk(this.x - 1, this.z + 1) != null) {
-            chunk3.populate(chunkGenrator);
+        if (chunk3 != null && chunk2 != null && provider.getLoadedChunk(this.x - 1, this.z + 1) != null) {
+            chunk3.populate(gen);
         }
 
-        if (chunk != null && chunk1 != null && chunkProvider.getLoadedChunk(this.x + 1, this.z - 1) != null) {
-            chunk.populate(chunkGenrator);
+        if (chunk != null && chunk1 != null && provider.getLoadedChunk(this.x + 1, this.z - 1) != null) {
+            chunk.populate(gen);
         }
 
         if (chunk != null && chunk3 != null) {
-            chunk = chunkProvider.getLoadedChunk(this.x - 1, this.z - 1);
+            chunk = provider.getLoadedChunk(this.x - 1, this.z - 1);
             if (chunk != null) {
-                chunk.populate(chunkGenrator);
+                chunk.populate(gen);
             }
         }
     }
@@ -1435,6 +1435,11 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
 
     public BlockPos getPrecipitationHeight(int x, int z) {
+        return new BlockPos(x, getPrecipitationHeightY(x, z), z);
+    }
+
+
+    public int getPrecipitationHeightY(int x, int z) {
         int i = x & 15, j = z & 15, k = i | j << 4;
         int pY = precipitationHeightMap[k];
         if (pY == -999) {
@@ -1451,6 +1456,6 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
             }
             this.precipitationHeightMap[k] = (short) i1;
         }
-        return new BlockPos(x, this.precipitationHeightMap[k], z);
+        return this.precipitationHeightMap[k];
     }
 }

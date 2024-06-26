@@ -1056,10 +1056,10 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         }
 
         this.chunkProvider.tick();
-        int j = this.calculateSkylightSubtracted(1.0F);
+        int light = this.calculateSkylightSubtracted(1.0F);
 
-        if (j != this.getSkylightSubtracted()) {
-            this.setSkylightSubtracted(j);
+        if (light != this.getSkylightSubtracted()) {
+            this.setSkylightSubtracted(light);
         }
 
         this.worldInfo.setWorldTotalTime(prevWorldTotalTime + 1L);
@@ -1289,8 +1289,8 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
             for (Iterator<Chunk> iterator = this.playerChunkMap.getChunkIterator(); iterator.hasNext();){
                 selector.setChunk(chunk = iterator.next());
 
-                int j = chunk.x << 4;
-                int k = chunk.z << 4;
+                int startCX = chunk.x << 4;
+                int startCZ = chunk.z << 4;
                 chunk.enqueueRelightChecks();
                 chunk.onTick(skipRecheck);
 
@@ -1298,7 +1298,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
                     updateLCG = updateLCG * 3 + 1013904223;
                     int updSeed = updateLCG >> 2;
                     BlockPos blockpos = adjustPosToNearbyEntity(
-                            mut.setPos(j + (updSeed & 15), 0, k + (updSeed >> 8 & 15))
+                            mut.setPos(startCX + (updSeed & 15), 0, startCZ + (updSeed >> 8 & 15))
                     );
 
                     if (isRainingAt(chunk, blockpos)) {
@@ -1319,20 +1319,21 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
 
                 if (provider.canDoRainSnowIce(chunk) && rand.nextInt(16) == 0) {
                     updateLCG = updateLCG * 3 + 1013904223;
-                    int j2 = updateLCG >> 2;
-                    BlockPos pos1 = getPrecipitationHeight(
-                            mut.setPos(j + (j2 & 15), 0, k + (j2 >> 8 & 15))
-                    );
-                    mut2.setPos(pos1.getX(), pos1.getY()-1, pos1.getZ());
+                    int rNum = updateLCG >> 2;
+                    int posX = startCX + (rNum & 15);
+                    int posZ = startCZ + (rNum >> 8 & 15);
+                    int posY = chunk.getPrecipitationHeightY(posX, posZ);
+
+                    mut2.setPosB(posX, posY-1, posX);
 
                     if (isAreaLoaded(mut2, 1) && canBlockFreezeNoWater(mut2))
                         setBlockState(mut2, Blocks.ICE.getDefaultState());
 
                     if (flag) {
-                        if(canSnowAt(pos1, true))
-                            setBlockState(pos1, Blocks.SNOW_LAYER.getDefaultState());
+                        if(canSnowAt(mut.setPos(posX, posY, posZ), true))
+                            setBlockState(mut, Blocks.SNOW_LAYER.getDefaultState());
 
-                        if (getBiome(mut2).canRain())
+                        if (selector.getBiome(mut2).canRain())
                             getBlockState(mut2).getBlock().fillWithRain(WorldServer.this, mut2);
                     }
                 }
@@ -1350,7 +1351,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
 
                                 if ((block = state.getBlock()).getTickRandomly()) {
                                     block.randomTick(WorldServer.this,
-                                            mut2.setPos(dx + j, dy + storage.getYLocation(), dz + k), state, this.rand
+                                            mut2.setPos(dx + startCX, dy + storage.getYLocation(), dz + startCZ), state, this.rand
                                     );
                                 }
                             }

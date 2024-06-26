@@ -40,19 +40,19 @@ public class BiomeSwamp extends Biome {
 
 
     @Override
-    public WorldGenAbstractTree getRandomTreeFeature(Random p_150567_1_) {
+    public WorldGenAbstractTree getRandomTreeFeature(Random rand) {
         return SWAMP_FEATURE;
     }
 
 
     @Override
-    public BlockFlower.EnumFlowerType pickRandomFlower(Random p_180623_1_, BlockPos p_180623_2_) {
+    public BlockFlower.EnumFlowerType pickRandomFlower(Random rand, BlockPos pos) {
         return EnumFlowerType.BLUE_ORCHID;
     }
 
 
     @Override
-    public void genTerrainBlocks(World world, Random rand, ChunkPrimer primer, int bX, int bZ, double seed) {
+    public void genTerrainBlocks(World world, Random rand, ChunkPrimer primer, int bX, int bZ, double num) {
         double d0 = GRASS_COLOR_NOISE.getValue((double) bX * 0.25, (double)bZ * 0.25);
         if (d0 > 0.0) {
             int x = bX & 15;
@@ -71,7 +71,7 @@ public class BiomeSwamp extends Biome {
             }
         }
 
-        this.generateBiomeTerrain(world, rand, primer, bX, bZ, seed);
+        this.generateBiomeTerrain(world, rand, primer, bX, bZ, num);
     }
 
 
@@ -85,8 +85,8 @@ public class BiomeSwamp extends Biome {
 
 
     @SideOnly(Side.CLIENT)
-    public int getGrassColorAtPos(BlockPos p_180627_1_) {
-        double d0 = GRASS_COLOR_NOISE.getValue((double)p_180627_1_.getX() * 0.0225, (double)p_180627_1_.getZ() * 0.0225);
+    public int getGrassColorAtPos(BlockPos pos) {
+        double d0 = GRASS_COLOR_NOISE.getValue((double) pos.getX() * 0.0225, (double) pos.getZ() * 0.0225);
         return this.getModdedBiomeGrassColor(d0 < -0.1 ? 5011004 : 6975545);
     }
 

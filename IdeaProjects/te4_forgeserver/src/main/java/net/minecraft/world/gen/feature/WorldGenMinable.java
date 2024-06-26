@@ -32,8 +32,8 @@ public class WorldGenMinable extends CWorldGenerator {
 
     @Override
     public boolean generate(World worldIn, ChunkSelector selector, Random rand, BlockPos position) {
-        float f = rand.nextFloat() * (float)Math.PI,
-              d4 = MathHelper.sin(f), d5 = MathHelper.cos(f),
+        float fl1 = rand.nextFloat() * (float)Math.PI,
+              d4 = MathHelper.sin(fl1), d5 = MathHelper.cos(fl1),
               d10 = this.numberOfBlocks >> 3;
 
         float d0 = (position.getX() + 8) + d4 * d10;
@@ -45,43 +45,44 @@ public class WorldGenMinable extends CWorldGenerator {
         d5 = position.getY() + rand.nextInt(3) - 2;
 
         BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+        Predicate<IBlockState> predicate = this.predicate;
 
-        for (int i = 0; i < this.numberOfBlocks; ++i) {
-            float f1 = (float)i / (float)this.numberOfBlocks;
+        for (int i = 0, num = this.numberOfBlocks; i < num; ++i) {
+            float f1 = (float)i / (float)num;
             float d6 = d0 + (d1 - d0) * f1;
             float d7 = d4 + (d5 - d4) * f1;
             float d8 = d2 + (d3 - d2) * f1;
-            float d9 = rand.nextFloat() * (this.numberOfBlocks >> 4);
+            float d9 = rand.nextFloat() * (num >> 4);
 
             d10 = (MathHelper.sin((float)Math.PI * f1) + 1.0F) * d9 + 1;
 
-            int j = MathHelper.floor(d6 - d10 / 2);
-            int startY = MathHelper.floor(d7 - d10 / 2);
+            int startX = MathHelper.floor(d6 - d10 * 0.5f);
+            int startY = MathHelper.floor(d7 - d10 * 0.5f);
             if(startY<1)startY = 1;
-            int l = MathHelper.floor(d8 - d10 / 2);
-            int i1 = MathHelper.floor(d6 + d10 / 2);
-            int lastY = MathHelper.floor(d7 + d10 / 2);
+            int l = MathHelper.floor(d8 - d10 * 0.5f);
+            int i1 = MathHelper.floor(d6 + d10 * 0.5f);
+            int lastY = MathHelper.floor(d7 + d10 * 0.5f);
             if(lastY>255)lastY = 255;
-            int k1 = MathHelper.floor(d8 + d10 / 2);
+            int k1 = MathHelper.floor(d8 + d10 * 0.5f);
+            float d10N2 = 1/(d10 * 0.5f);
 
-            for (int xPos = j; xPos <= i1; ++xPos) {
-                float d12 = (xPos + 0.5f - d6) / (d10 / 2);
-                d12 *= d12;
+            for (int xPos = startX; xPos <= i1; ++xPos) {
+                float d12 = (xPos + 0.5f - d6) * d10N2;
 
-                if (d12 < 1) {
+                if ((d12 *= d12) < 1) {
                     for (int yPos = startY; yPos <= lastY; ++yPos) {
 
-                        float d13 = (yPos + 0.5f - d7) / (d10 / 2);
+                        float d13 = (yPos + 0.5f - d7) * d10N2;
                         d13 *= d13;
 
-                        if (d12 + d13 < 1) {
+                        if ((fl1 = d12 + d13) < 1) {
                             for (int zPos = l; zPos <= k1; ++zPos) {
-                                float d14 = (zPos + 0.5f - d8) / (d10 / 2);
+                                float d14 = (zPos + 0.5f - d8) * d10N2;
 
-                                if (d12 + d13 + d14 * d14 < 1) {
+                                if (fl1 + d14 * d14 < 1) {
 
-                                    IBlockState state = selector.getBlockState(xPos, yPos, zPos);
-                                    if (state.getBlock().isReplaceableOreGen(state, worldIn, mut.setPos(xPos, yPos, zPos), this.predicate)) {
+                                    IBlockState state = selector.getStateUnchecked(xPos, yPos, zPos);
+                                    if (state.getBlock().isReplaceableOreGen(state, worldIn, mut.setPos(xPos, yPos, zPos), predicate)) {
                                         selector.setCurStateFast(xPos, yPos, zPos, this.oreBlock);
                                     }
                                 }

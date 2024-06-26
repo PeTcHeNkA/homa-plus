@@ -31,11 +31,13 @@ public class WorldGenStalactite extends CWorldGenerator {
     public boolean generate(World worldIn, ChunkSelector selector, Random rand, BlockPos start) {
         if(start.getY() < 1 || start.getY() > 255)return false;
         BlockPos.MutableBlockPos shifted = new BlockPos.MutableBlockPos();
-        for(int num = 0; num < 32; ++num) {
+        for(int num = 0; num < 24; ++num) {
             FastRandom.INST.setRandom8x8x4(shifted, start);
-            shifted.setY(rand.nextInt() & 255);
+            shifted.setY(
+                    rand.nextInt(selector.getPrecipitationHeight(shifted.getX(), shifted.getZ())) & 255
+            );
 
-            while (growStalactite(selector, rand, shifted) && ++num < 32)
+            while (growStalactite(selector, rand, shifted) && ++num < 24)
                 FastRandom.INST.setRandom8x8x4(
                         shifted,
                         start = new BlockPos(shifted.getX(), shifted.getY(), shifted.getZ())

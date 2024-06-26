@@ -100,6 +100,11 @@ public final class ChunkSelector implements IBlockEAccess {
     }
 
 
+    public int getPrecipitationHeight(int x, int z) {
+        return getChunkE(x>>4, z>>4).getPrecipitationHeightY(x, z);
+    }
+
+
     @Nullable
     @Override
     public TileEntity getTileEntity(BlockPos pos) {

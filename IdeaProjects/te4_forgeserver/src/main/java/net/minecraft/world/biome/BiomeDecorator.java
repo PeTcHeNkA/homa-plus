@@ -1,74 +1,104 @@
-package plus.fserver.mixins.stabile;
+package net.minecraft.world.biome;
 
+import java.util.Random;
 import net.minecraft.block.BlockFlower;
+import net.minecraft.block.BlockFlower.EnumFlowerType;
 import net.minecraft.block.material.Material;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.BiomeDecorator;
-import net.minecraft.world.gen.feature.*;
+import net.minecraft.world.gen.ChunkGeneratorSettings;
+import net.minecraft.world.gen.feature.WorldGenAbstractTree;
+import net.minecraft.world.gen.feature.WorldGenBigMushroom;
+import net.minecraft.world.gen.feature.WorldGenBush;
+import net.minecraft.world.gen.feature.WorldGenCactus;
+import net.minecraft.world.gen.feature.WorldGenClay;
+import net.minecraft.world.gen.feature.WorldGenDeadBush;
+import net.minecraft.world.gen.feature.WorldGenFlowers;
+import net.minecraft.world.gen.feature.WorldGenLiquids;
+import net.minecraft.world.gen.feature.WorldGenPumpkin;
+import net.minecraft.world.gen.feature.WorldGenReed;
+import net.minecraft.world.gen.feature.WorldGenSand;
+import net.minecraft.world.gen.feature.WorldGenWaterlily;
+import net.minecraft.world.gen.feature.WorldGenerator;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.terraingen.DecorateBiomeEvent;
 import net.minecraftforge.event.terraingen.OreGenEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
 import plus.fserver.api.ElcaWorldInfo;
 import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.world.generator.ChunkGenSettingsPlus;
-import java.util.Random;
 
 
-@Mixin(BiomeDecorator.class)
-public abstract class BiomeDecoratorPatch {
-    @SideOnly(Side.CLIENT)
-    @Shadow public int sandPatchesPerChunk;
-    @Shadow public WorldGenerator sandGen;
-    @Shadow public int clayPerChunk;
-    @Shadow public WorldGenerator clayGen;
-    @Shadow public int gravelPatchesPerChunk;
-    @Shadow public WorldGenerator gravelGen;
-    @Shadow public int treesPerChunk;
-    @Shadow public float extraTreeChance;
-    @Shadow public int bigMushroomsPerChunk;
-    @Shadow public WorldGenerator bigMushroomGen;
-    @Shadow public int flowersPerChunk;
-    @Shadow public WorldGenFlowers flowerGen;
-    @Shadow public int grassPerChunk;
-    @Shadow public int deadBushPerChunk;
-    @Shadow public int waterlilyPerChunk;
-    @Shadow public WorldGenerator waterlilyGen;
-    @Shadow public int mushroomsPerChunk;
-    @Shadow public WorldGenerator mushroomRedGen;
-    @Shadow public WorldGenerator mushroomBrownGen;
-    @Shadow public WorldGenerator reedGen;
-    @Shadow public int cactiPerChunk;
-    @Shadow public WorldGenerator cactusGen;
-    @Shadow public boolean generateFalls;
-    @Shadow public int reedsPerChunk;
+public class BiomeDecorator {
+    public boolean decorating;
+    public BlockPos chunkPos;
+    public ChunkGeneratorSettings chunkProviderSettings;
+    public WorldGenerator clayGen = new WorldGenClay(4);
+    public WorldGenerator sandGen;
+    public WorldGenerator gravelGen;
+    public WorldGenerator dirtGen;
+    public WorldGenerator gravelOreGen;
+    public WorldGenerator graniteGen;
+    public WorldGenerator dioriteGen;
+    public WorldGenerator andesiteGen;
+    public WorldGenerator coalGen;
+    public WorldGenerator ironGen;
+    public WorldGenerator goldGen;
+    public WorldGenerator redstoneGen;
+    public WorldGenerator diamondGen;
+    public WorldGenerator lapisGen;
+    public WorldGenFlowers flowerGen;
+    public WorldGenerator mushroomBrownGen;
+    public WorldGenerator mushroomRedGen;
+    public WorldGenerator bigMushroomGen;
+    public WorldGenerator reedGen;
+    public WorldGenerator cactusGen;
+    public WorldGenerator waterlilyGen;
+    public int waterlilyPerChunk;
+    public int treesPerChunk;
+    public float extraTreeChance;
+    public int flowersPerChunk;
+    public int grassPerChunk;
+    public int deadBushPerChunk;
+    public int mushroomsPerChunk;
+    public int reedsPerChunk;
+    public int cactiPerChunk;
+    public int gravelPatchesPerChunk;
+    public int sandPatchesPerChunk;
+    public int clayPerChunk;
+    public int bigMushroomsPerChunk;
+    public boolean generateFalls;
 
-
-    /**
-     * @author Te4hno
-     * @reason Performance patch
-     */
-    @Overwrite
-    public void decorate(World worldIn, Random random, Biome biome, BlockPos chunkPos) {
-        this.genDecorations(biome, worldIn, random, chunkPos);
+    public BiomeDecorator() {
+        this.sandGen = new WorldGenSand(Blocks.SAND, 7);
+        this.gravelGen = new WorldGenSand(Blocks.GRAVEL, 6);
+        this.flowerGen = new WorldGenFlowers(Blocks.YELLOW_FLOWER, EnumFlowerType.DANDELION);
+        this.mushroomBrownGen = new WorldGenBush(Blocks.BROWN_MUSHROOM);
+        this.mushroomRedGen = new WorldGenBush(Blocks.RED_MUSHROOM);
+        this.bigMushroomGen = new WorldGenBigMushroom();
+        this.reedGen = new WorldGenReed();
+        this.cactusGen = new WorldGenCactus();
+        this.waterlilyGen = new WorldGenWaterlily();
+        this.extraTreeChance = 0.1F;
+        this.flowersPerChunk = 2;
+        this.grassPerChunk = 1;
+        this.gravelPatchesPerChunk = 1;
+        this.sandPatchesPerChunk = 3;
+        this.clayPerChunk = 1;
+        this.generateFalls = true;
     }
 
 
-    /**
-     * @author Te4hno
-     * Remove event catch and async patch
-     */
-    protected void genDecorations(Biome biome, World worldIn, Random random, BlockPos chunkPos) {
-        ChunkPos forgeChunkPos = new ChunkPos(chunkPos);
-        MinecraftForge.EVENT_BUS.post(new DecorateBiomeEvent.Pre(worldIn, random, forgeChunkPos));
+    public void decorate(final World worldIn, final Random random, final Biome biome, final BlockPos chunkPos) {
+        genDecorations(biome, worldIn, random, chunkPos);
+    }
+
+
+    protected void genDecorations(final Biome biome, final World worldIn, final Random random, final BlockPos chunkPos) {
+        ChunkPos fPos = new ChunkPos(chunkPos);
+
+        MinecraftForge.EVENT_BUS.post(new DecorateBiomeEvent.Pre(worldIn, random, fPos));
 
         ChunkSelector selector = new ChunkSelector(worldIn);
         WorldGenerator gen = new WorldGenDeadBush();
@@ -284,9 +314,51 @@ public abstract class BiomeDecoratorPatch {
                 gen.generate(worldIn, random, blockpos3);
             }
         }
-        MinecraftForge.EVENT_BUS.post(new DecorateBiomeEvent.Post(worldIn, random, forgeChunkPos));
+        MinecraftForge.EVENT_BUS.post(new DecorateBiomeEvent.Post(worldIn, random, fPos));
     }
 
+
+    @Deprecated
+    protected void genDecorations(Biome biome, World world, Random rand) {
+        genDecorations(biome, world, rand, this.chunkPos);
+    }
+
+
+    @Deprecated
+    protected void generateOres(World world, Random rand) {
+        generateOres(new ChunkSelector(world), world, rand, this.chunkPos);
+    }
+
+
+    @Deprecated
+    protected void genStandardOre1(World world, Random rand, int max, WorldGenerator gen, int minY, int maxY) {
+        int j;
+        if (maxY < minY) {
+            j = minY;
+            minY = maxY;
+            maxY = j;
+        } else if (maxY == minY) {
+            if (minY < 255) {
+                ++maxY;
+            } else {
+                --minY;
+            }
+        }
+
+        for(j = 0; j < max; ++j) {
+            BlockPos blockpos = this.chunkPos.add(rand.nextInt(16), rand.nextInt(maxY - minY) + minY, rand.nextInt(16));
+            gen.generate(world, rand, blockpos);
+        }
+    }
+
+
+    @Deprecated
+    protected void genStandardOre2(World world, Random rand, int max, WorldGenerator gen, int yf1, int yf2) {
+        for(int i = 0; i < max; ++i) {
+            BlockPos blockpos = this.chunkPos.add(rand.nextInt(16), rand.nextInt(yf2) + rand.nextInt(yf2) + yf1 - yf2, rand.nextInt(16));
+            gen.generate(world, rand, blockpos);
+        }
+    }
 
 
     protected final void generateOres(final ChunkSelector selector, final World worldIn, final Random random, final BlockPos chunkPos) {
@@ -322,18 +394,19 @@ public abstract class BiomeDecoratorPatch {
                 --minHeight;
             }
         }
-        for (int j = 0; j < blockCount; ++j) {
+        for (int i = 0; i < blockCount; ++i) {
+            int rNum = random.nextInt();
             BlockPos blockpos = chunkPos.add(
-                       random.nextInt(16),
+                    rNum & 15,
                     random.nextInt(maxHeight - minHeight) + minHeight,
-                       random.nextInt(16)
+                    (rNum >> 4) &15
             );
             generator.generate(worldIn, selector, random, blockpos);
         }
     }
 
 
-    protected final void genOre2(ChunkSelector selector, final World worldIn, final BlockPos chunkPos, final Random random, int blockCount, WorldGenerator generator, int centerHeight, int spread) {
+    protected final void genOre2(final ChunkSelector selector, final World worldIn, final BlockPos chunkPos, final Random random, int blockCount, WorldGenerator generator, int centerHeight, int spread) {
         for (int i = 0; i < blockCount; ++i) {
             BlockPos blockpos = chunkPos.add(random.nextInt(16), random.nextInt(spread) + random.nextInt(spread) + centerHeight - spread, random.nextInt(16));
             generator.generate(worldIn, selector, random, blockpos);

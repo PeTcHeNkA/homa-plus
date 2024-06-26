@@ -1,30 +1,21 @@
 package net.minecraft.world.chunk;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockIDIndexes;
 
 
 public class ChunkPrimer {
     private final char[] data = new char[65536];
-
     public ChunkPrimer() {}
-
 
     public IBlockState getBlockState(int x, int y, int z) {
         IBlockState state = BlockIDIndexes.BLOCK_INDEX.get(
-                //this.data[getBlockIndex(x, y, z)]
                 this.data[x << 12 | z << 8 | y]
         );
-        return state == null ? BlockIDIndexes.AIR_STATE : state;
+        if(state == null)return BlockIDIndexes.AIR_STATE;
+        return state;
     }
 
-
-//    public IBlockState getBlockState(int x, int y, int z)
-//    {
-//        IBlockState iblockstate = Block.BLOCK_STATE_IDS.getByValue(this.data[getBlockIndex(x, y, z)]);
-//        return iblockstate == null ? DEFAULT_STATE : iblockstate;
-//    }
 
     public int getBlockStateId(int x, int y, int z){
         return this.data[x << 12 | z << 8 | y];
@@ -32,7 +23,6 @@ public class ChunkPrimer {
 
 
     public void setBlockState(int x, int y, int z, IBlockState state) {
-        //this.data[getBlockIndex(x, y, z)] = (char)state.getId();
         this.data[x << 12 | z << 8 | y] = (char)state.getId();
     }
 
