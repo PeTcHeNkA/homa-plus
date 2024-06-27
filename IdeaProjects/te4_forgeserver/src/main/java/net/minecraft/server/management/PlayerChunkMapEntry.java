@@ -21,6 +21,7 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import plus.fserver.ElcaCV;
 import plus.fserver.ElcaConfig;
 import plus.fserver.server.chunk.io.TChunkExecutor;
 import plus.fserver.utls.collections.ArrayListE6;
@@ -50,6 +51,7 @@ public class PlayerChunkMapEntry extends ArrayListE6<EntityPlayerMP> implements 
     public PlayerChunkMapEntry(PlayerChunkMap mapIn, int chunkX, int chunkZ) {
         this.playerChunkMap = mapIn;
         this.posX = chunkX;this.posZ = chunkZ;
+        if(ElcaCV.DEBUG_NO_SERVER)return;
         mapIn.getWorldServer().getChunkProvider().loadChunk(chunkX, chunkZ, this);
     }
 

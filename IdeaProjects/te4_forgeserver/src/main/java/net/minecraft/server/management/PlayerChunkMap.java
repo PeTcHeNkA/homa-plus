@@ -5,8 +5,6 @@ import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
-import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
@@ -293,7 +291,7 @@ public class PlayerChunkMap extends FlatMap<PlayerChunkMapEntry>{
         entry.updateChunkInhabitedTime();
         remove(entry.posX, entry.posZ);
         this.entries.removeRef(entry);
-        this.dirtyEntries.remove(entry);
+        //this.dirtyEntries.remove(entry);
         this.pendingSendToPlayers.remove(entry);
         this.entriesWithoutChunks.remove(entry);
         Chunk chunk = entry.getChunk();
