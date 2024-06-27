@@ -20,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import plus.fserver.ElcaConfig;
 import plus.fserver.api.ElcaServerUtls;
 import plus.fserver.world.light.api.ILightingEngineProvider;
+import java.util.List;
 import java.util.concurrent.*;
 
 
@@ -190,13 +191,14 @@ public final class AsyWorldTickerV2 implements ThreadFactory{
         long curNanoTime = System.nanoTime();
         try {
             worldserver.tickSyncTasks();
+            List<EntityPlayer> players = worldserver.playerEntities;
             if (inf.tickCounter % ElcaConfig.TIME_PACKET_RATE == 0) {
                 SPacketTimeUpdate packet = new SPacketTimeUpdate(
                         worldserver.getTotalWorldTime(), worldserver.getWorldTime(),
                         worldserver.getGameRules().doDaylightCycle.getBoolean());
                 EntityPlayer player;
-                for (int i=0;i<worldserver.playerEntities.size();i++){
-                    player = worldserver.playerEntities.get(i);
+                for (int i = 0, s = players.size(); i < s; i++){
+                    player = players.get(i);
                     if(player instanceof EntityPlayerMP) {
                         EntityPlayerMP mp = (EntityPlayerMP) player;
                         mp.connection.onTickWorld();
@@ -205,8 +207,8 @@ public final class AsyWorldTickerV2 implements ThreadFactory{
                 }
             } else {
                 EntityPlayer player;
-                for (int i=0;i<worldserver.playerEntities.size();i++){
-                    player = worldserver.playerEntities.get(i);
+                for (int i = 0, s = players.size(); i < s; i++){
+                    player = players.get(i);
                     if(player instanceof EntityPlayerMP) {
                         EntityPlayerMP mp = (EntityPlayerMP) player;
                         mp.connection.onTickWorld();
