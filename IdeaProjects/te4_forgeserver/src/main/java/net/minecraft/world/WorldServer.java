@@ -425,6 +425,27 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
     }
 
 
+    protected void unloadEntites(){
+        final List<Entity> toUnload = this.unloadedEntityList;
+        final int size = toUnload.size();
+        if(size > 0) {
+            realEntityList.removeRefSwapAll(toUnload);
+            ChunkProviderServer cps = chunkProviderServer;
+
+            for (int i = 0; i < size; ++i) {
+                Entity entity = toUnload.get(i);
+
+                if (entity.addedToChunk) {
+                    Chunk chunk = cps.getLoadedChunk(entity.chunkCoordX, entity.chunkCoordZ);
+                    if(chunk != null) chunk.removeEntity(entity);
+                }
+                onEntityRemoved(entity);
+            }
+            toUnload.clear();
+        }
+    }
+
+
     @Override
     public void tickLoadedEntities(){
         ChunkProviderServer cps = chunkProviderServer;
@@ -1080,9 +1101,22 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         //end tasks
 
         this.tickUpdates(false);
-        this.updateBlocks();
-        this.getPlayerChunkMap().tick();
 
+        int balanceBlock;
+        if (meanTickTime() > ElcaConfig.MEAN_BALANCE_MOB) {
+            balanceBlock = ElcaConfig.BALANCE_BLOCK_CRITICAL;
+        } else {
+            balanceBlock = ElcaConfig.BALANCE_BLOCK_TICK;
+        }
+        if(balanceBlock == 0) {
+            this.updateBlocks();
+        } else {
+            if(prevWorldTotalTime % balanceBlock == 0) {
+                this.updateBlocks(balanceBlock);
+            }
+        }
+
+        this.getPlayerChunkMap().tick();
 
         if(ElcaConfig.VILLAGE_TICK_RATE!=-1){
             if(prevWorldTotalTime % ElcaConfig.VILLAGE_TICK_RATE==0) {
@@ -1270,8 +1304,15 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
 
     private final BlockPos.MutableBlockPos localUpdateBlocks = new BlockPos.MutableBlockPos();
     private final BlockPos.MutableBlockPos localUpdateBlocks2 = new BlockPos.MutableBlockPos();
+    private boolean skipRecheck = true;
+
     @Override
     protected void updateBlocks() {
+        updateBlocks(1);
+    }
+
+
+    protected void updateBlocks(final int factor) {
         this.playerCheckLight();
         if (this.worldInfo.getTerrainType() == WorldType.DEBUG_ALL_BLOCK_STATES) {
             for (Iterator<Chunk> iterator = this.playerChunkMap.getChunkIterator(); iterator.hasNext();){
@@ -1279,13 +1320,18 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
             }
         } else {
             int updateLCG = this.updateLCG;
-            final int rts = getGameRules().randomTickSpeed.getInt();
-            final boolean flag = isRaining(), flag1 = isThundering();
-            final boolean skipRecheck = (worldInfo.getWorldTotalTime() & 1) == 0;
+            final boolean raining = isRaining(), thundering = isThundering();
+            final boolean skipRecheck = this.skipRecheck;
+            this.skipRecheck = !skipRecheck;
             ChunkSelector selector = localSelector;
             Chunk chunk;
             BlockPos.MutableBlockPos mut = localUpdateBlocks;
             BlockPos.MutableBlockPos mut2 = localUpdateBlocks2;
+            final int rts = getGameRules().randomTickSpeed.getInt() * factor;
+            final int lightChance = 100000 / factor;
+            final int snowChance  = 16 / factor;
+            final Random rand = this.rand;
+
             for (Iterator<Chunk> iterator = this.playerChunkMap.getChunkIterator(); iterator.hasNext();){
                 selector.setChunk(chunk = iterator.next());
 
@@ -1294,7 +1340,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
                 chunk.enqueueRelightChecks();
                 chunk.onTick(skipRecheck);
 
-                if (flag && flag1 && provider.canDoLightning(chunk) && rand.nextInt(100000) == 0) {
+                if (raining && thundering && provider.canDoLightning(chunk) && rand.nextInt(lightChance) == 0) {
                     updateLCG = updateLCG * 3 + 1013904223;
                     int updSeed = updateLCG >> 2;
                     BlockPos blockpos = adjustPosToNearbyEntity(
@@ -1317,7 +1363,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
                     }
                 }
 
-                if (provider.canDoRainSnowIce(chunk) && rand.nextInt(16) == 0) {
+                if (provider.canDoRainSnowIce(chunk) && rand.nextInt(snowChance) == 0) {
                     updateLCG = updateLCG * 3 + 1013904223;
                     int rNum = updateLCG >> 2;
                     int posX = startCX + (rNum & 15);
@@ -1329,7 +1375,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
                     if (isAreaLoaded(mut2, 1) && canBlockFreezeNoWater(mut2))
                         setBlockState(mut2, Blocks.ICE.getDefaultState());
 
-                    if (flag) {
+                    if (raining) {
                         if(canSnowAt(mut.setPos(posX, posY, posZ), true))
                             setBlockState(mut, Blocks.SNOW_LAYER.getDefaultState());
 
@@ -1345,9 +1391,9 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
                         if (storage != Chunk.NULL_BLOCK_STORAGE && storage.needsRandomTick()) {
                             for (int i1 = 0; i1 < rts; ++i1) {
                                 updateLCG = updateLCG * 3 + 1013904223;
-                                int rand = updateLCG >> 2;
+                                int rNum = updateLCG >> 2;
 
-                                IBlockState state = storage.get(dx = rand & 15, dy = rand >> 16 & 15, dz = rand >> 8 & 15);
+                                IBlockState state = storage.get(dx = rNum & 15, dy = rNum >> 16 & 15, dz = rNum >> 8 & 15);
 
                                 if ((block = state.getBlock()).getTickRandomly()) {
                                     block.randomTick(WorldServer.this,

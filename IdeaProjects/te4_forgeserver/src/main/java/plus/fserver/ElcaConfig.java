@@ -19,6 +19,7 @@ public class ElcaConfig {
     public static int CHUNK_TICK_RADIUS_1        = 4 * 16;
     public static int CHUNK_TICK_RADIUS_2        = 5 * 16;
     public static int MEAN_BALANCE_MOB           = 35 * 12;
+    public static int MEAN_BALANCE_BLOCK         = 35 * 12;
     public static int GOAL_TICK_RATE             = 4;
     public static int RECHECK_CHUNKS_SPAWNER_RATE= 7;
     public static int RECHECK_SPAWNER_RATE       = 80;
@@ -43,6 +44,8 @@ public class ElcaConfig {
     public static int MIN_CHANGED_BLOCKS_BUF     = 24;
     public static int RESET_LOW_LEVEL_MOBS       = 200;
     public static int MAX_WORLD_SPAWNER_RANGE    = 7;
+    public static int BALANCE_BLOCK_TICK         = 3;
+    public static int BALANCE_BLOCK_CRITICAL     = 7;
 
     //public static boolean FAST_LIGHT                 = true;
     public static boolean SLOW_SWIM_AI               = true;
@@ -74,11 +77,15 @@ public class ElcaConfig {
 
         NATIVES                    = dir(file.getOrDefaultStr("elca-natives", "elca_natives"));
 
-        TIME_PACKET_RATE           = calc(file, "time-packet-rate"            ,  TIME_PACKET_RATE          );
+        TIME_PACKET_RATE           = calc(file, "time-packet-rate"            , TIME_PACKET_RATE           );
         CHUNK_TICK_RADIUS_1        = calc(file, "chunk-tick-radius-m"         , CHUNK_TICK_RADIUS_1        );
         CHUNK_TICK_RADIUS_2        = calc(file, "chunk-tick-radius-s"         , CHUNK_TICK_RADIUS_2        );
+        BALANCE_BLOCK_TICK         = calc(file, "balance-block-tick"          , BALANCE_BLOCK_TICK         );
+        BALANCE_BLOCK_CRITICAL     = calc(file, "balance-block-critical"      , BALANCE_BLOCK_CRITICAL     );
 
-        MEAN_BALANCE_MOB           = calc(file, "mean-balance-mob"            ,     40                 )*12;
+        MEAN_BALANCE_BLOCK         = calc(file, "mean-balance-block"          ,     35                 )*12;
+        MEAN_BALANCE_MOB           = calc(file, "mean-balance-mob"            ,     35                 )*12;
+
         GOAL_TICK_RATE             = calc(file, "goal-tick-rate"              , GOAL_TICK_RATE             );
         RECHECK_SPAWNER_RATE       = calc(file, "recheck-spawner-rate"        , RECHECK_SPAWNER_RATE       );
         RECHECK_CHUNKS_SPAWNER_RATE= calc(file, "recheck-chunks-spawner-rate" , RECHECK_CHUNKS_SPAWNER_RATE);

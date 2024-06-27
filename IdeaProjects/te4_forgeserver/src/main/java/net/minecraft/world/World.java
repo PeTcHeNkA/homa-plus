@@ -1504,11 +1504,29 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
+    protected void unloadEntites(){
+        final List<Entity> toUnload;
+        this.realEntityList.removeRefSwapAll(toUnload = this.unloadedEntityList);
+
+        for (int k = 0; k < toUnload.size(); ++k) {
+            Entity entity = toUnload.get(k);
+            int cX = entity.chunkCoordX;
+            int cZ = entity.chunkCoordZ;
+
+            if (entity.addedToChunk && this.isChunkLoaded(cX, cZ, true)) {
+                this.getChunk(cX, cZ).removeEntity(entity);
+            }
+            onEntityRemoved(entity);
+        }
+        toUnload.clear();
+    }
+
+
     protected boolean checkCanUpdate;
     public void updateEntities() {
-        List<Entity> localList = this.weatherEffects;
-        for (int i = 0; i < localList.size(); ++i) {
-            Entity entity = localList.get(i);
+        final List<Entity> effects = this.weatherEffects;
+        for (int i = 0; i < effects.size(); ++i) {
+            Entity entity = effects.get(i);
             try {
                 if(entity.updateBlocked) continue;
                 ++entity.ticksExisted;
@@ -1516,26 +1534,10 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             } catch (Throwable throwable2) {
                 throw onEntityError(entity, throwable2);
             }
-            if (entity.isDead) localList.remove(i--);
+            if (entity.isDead) effects.remove(i--);
         }
 
-        this.realEntityList.removeRefSwapAll(localList = this.unloadedEntityList);
-
-        for (int k = 0; k < localList.size(); ++k) {
-            Entity entity1 = localList.get(k);
-            int j = entity1.chunkCoordX;
-            int k1 = entity1.chunkCoordZ;
-
-            if (entity1.addedToChunk && this.isChunkLoaded(j, k1, true)) {
-                this.getChunk(j, k1).removeEntity(entity1);
-            }
-        }
-
-        for (int l = 0, s = localList.size(); l < s; ++l) {
-            this.onEntityRemoved(localList.get(l));
-        }
-
-        localList.clear();
+        unloadEntites();
         checkCanUpdate = false;
         this.tickPlayers();
 
