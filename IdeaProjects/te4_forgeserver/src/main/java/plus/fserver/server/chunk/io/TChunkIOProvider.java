@@ -40,9 +40,8 @@ public class TChunkIOProvider extends TChunkTask {
 
                 this.chunk.setLastSaveTime(provider.world.getTotalWorldTime());
                 this.provider.chunkGenerator.recreateStructures(this.chunk, this.chunkInfo.x, this.chunkInfo.z);
-                provider.loadedChunks.put(ChunkPos.asLong(this.chunkInfo.x, this.chunkInfo.z), this.chunk);
-                this.chunk.onLoad();
-                this.chunk.populate(provider, provider.chunkGenerator);
+
+                worldServer().getChunkProvider().onComplete(this);
             }
 
             this.runCallbacks();

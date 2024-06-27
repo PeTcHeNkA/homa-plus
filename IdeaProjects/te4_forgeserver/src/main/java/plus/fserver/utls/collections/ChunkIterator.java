@@ -1,39 +1,43 @@
 package plus.fserver.utls.collections;
 
-import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.world.chunk.Chunk;
 import org.jetbrains.annotations.NotNull;
 import java.util.Iterator;
 
 
-public class ChunkIterator implements Iterator<Chunk>, Iterable<Chunk> {
+public final class ChunkIterator implements Iterator<Chunk>, Iterable<Chunk> {
     private final ArrayListE6<PlayerChunkMapEntry> entries;
-    private final int radius;
+    private final int radiusSq;
     private Chunk next;
     private int cursor;
 
     public ChunkIterator(ArrayListE6<PlayerChunkMapEntry> entries, int radius) {
         this.entries = entries;
-        this.radius = radius;
-        next = calcNext();
+        this.radiusSq = radius*radius;
+        calcNext();
     }
 
 
-    private Chunk calcNext(){
+    private void calcNext(){
         Object[] data = entries.data;
         while (cursor < entries.size) {
             PlayerChunkMapEntry entry = (PlayerChunkMapEntry) data[cursor++];
             Chunk chunk = entry.getChunk();
             if (chunk == null) continue;
-            if (chunk.isPersistent())return chunk;
-            if (!chunk.isLightPopulated() && chunk.isTerrainPopulated()) return chunk;
-            if (!chunk.wasTicked()) return chunk;
-
-            if (!entry.hasPlayerMatchingInRange(radius, PlayerChunkMap.NOT_SPECTATOR)) continue;
-            return chunk;
+            if (chunk.isPersistent()){
+                next = chunk;
+                return;
+            }
+            if (!chunk.isLightPopulated() && chunk.isTerrainPopulated() || !chunk.wasTicked()) {
+                next = chunk;
+                return;
+            }
+            if (!entry.hasCommonPlayerInRangeSq(radiusSq)) continue;
+            next = chunk;
+            return;
         }
-        return null;
+        next = null;
     }
 
 
@@ -53,7 +57,7 @@ public class ChunkIterator implements Iterator<Chunk>, Iterable<Chunk> {
     @Override
     public Chunk next() {
         Chunk result = next;
-        next = calcNext();
+        calcNext();
         return result;
     }
 }

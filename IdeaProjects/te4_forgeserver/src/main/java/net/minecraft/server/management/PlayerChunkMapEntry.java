@@ -294,6 +294,15 @@ public class PlayerChunkMapEntry extends ArrayListE6<EntityPlayerMP> implements 
     }
 
 
+    public boolean hasCommonPlayerInRangeSq(double range) {
+        for (int j = size, i = 0; i < j; ++i) {
+            EntityPlayerMP player = get(i);
+            if (!player.isSpectator() && getDistanceSq(player) < range) return true;
+        }
+        return false;
+    }
+
+
     public boolean isSentToPlayers() {
         return this.sentToPlayers;
     }

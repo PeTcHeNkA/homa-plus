@@ -21,7 +21,6 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
 import net.minecraft.world.chunk.storage.IChunkLoader;
-import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.fml.common.FMLLog;
 import org.apache.logging.log4j.LogManager;
@@ -29,7 +28,7 @@ import org.apache.logging.log4j.Logger;
 import plus.fserver.ElcaConfig;
 import plus.fserver.api.Keep;
 import plus.fserver.server.chunk.io.TChunkExecutor;
-import plus.fserver.server.chunk.io.TChunkGenProvider;
+import plus.fserver.server.chunk.io.TChunkTask;
 import plus.fserver.utls.collections.ChunkPopulationTask;
 
 
@@ -57,7 +56,7 @@ public class ChunkProviderServer implements IChunkProvider {
         this.world = worldObjIn;
         this.chunkLoader = chunkLoaderIn;
         this.chunkGenerator = chunkGeneratorIn;
-        task = chunkGeneratorIn.maybeAsync()?new ChunkPopulationTask(this):null;
+        task = chunkGeneratorIn.maybeAsyncPopulate()?new ChunkPopulationTask(this):null;
         asyncSaveChunks = (chunkLoaderIn instanceof AnvilChunkLoader) && ElcaConfig.ASYNC_SAVE_CHUNKS;
     }
 
@@ -246,14 +245,14 @@ public class ChunkProviderServer implements IChunkProvider {
     }
 
 
-    public void onComplete(TChunkGenProvider provider){
-        Chunk chunk = provider.getChunk();
+    public void onComplete(TChunkTask task){
+        Chunk chunk = task.getChunk();
         realLC.put(ChunkPos.asLong(chunk.x, chunk.z), chunk);
         chunk.onLoad();
-        if(task != null) {
-            task.add(provider.getChunk());
+        if(this.task != null) {
+            this.task.add(task.getChunk());
         } else {
-            provider.getChunk().populate(ChunkProviderServer.this, chunkGenerator);
+            task.getChunk().populate(ChunkProviderServer.this, chunkGenerator);
         }
     }
 
@@ -376,6 +375,11 @@ public class ChunkProviderServer implements IChunkProvider {
 
     public int getLoadedChunkCount() {
         return realLC.size();
+    }
+
+
+    public boolean isEmpty(){
+        return realLC.isEmpty();
     }
 
 

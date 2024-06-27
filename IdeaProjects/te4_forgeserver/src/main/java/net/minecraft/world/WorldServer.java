@@ -1023,7 +1023,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
     public boolean canUnload() {
         return     playerEntities.isEmpty()
                 && _syncTasks.isEmpty()
-                && ((ChunkProviderServer)chunkProvider).loadedChunks.isEmpty() &&
+                && ((ChunkProviderServer)chunkProvider).isEmpty() &&
                 !provider.getDimensionType().shouldLoadSpawn();
     }
 
