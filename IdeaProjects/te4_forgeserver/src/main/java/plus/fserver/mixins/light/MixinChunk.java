@@ -124,15 +124,15 @@ public abstract class MixinChunk implements IChunkLighting, IChunkLightingData, 
     }
 
 
-    /**
-     * @author Phosphor
-     * @reason faster light
-     */
-    @Overwrite
-    public void checkLight() {
-        this.isTerrainPopulated = true;
-        LightingHooks.checkChunkLighting((Chunk)(Object)this, this.world);
-    }
+//    /**
+//     * @author Phosphor
+//     * @reason faster light
+//     */
+//    @Overwrite
+//    public void checkLight() {
+//        this.isTerrainPopulated = true;
+//        LightingHooks.checkChunkLighting((Chunk)(Object)this, this.world);
+//    }
 
 
     /**
@@ -160,11 +160,13 @@ public abstract class MixinChunk implements IChunkLighting, IChunkLightingData, 
         final int mask = 1<<z;
         if ((updateSkylights[x] & mask) == mask) {
             updateSkylights[x] &= ~mask;
-            final int height = this.getHeightValue(x, z);
-            final int x2 = this.x * 16 + x;
-            final int z2 = this.z * 16 + z;
-            final int max = this.recheckGapsGetLowestHeight(slice, x2, z2);
-            this.recheckGapsSkylightNeighborHeight(slice, x2, z2, height, max);
+            final int x2 = (this.x << 4) + x;
+            final int z2 = (this.z << 4) + z;
+            this.recheckGapsSkylightNeighborHeight(
+                    slice, x2, z2,
+                    getHeightValue(x, z),
+                    recheckGapsGetLowestHeight(slice, x2, z2)
+            );
             return true;
         }
         return false;
@@ -174,11 +176,12 @@ public abstract class MixinChunk implements IChunkLighting, IChunkLightingData, 
     private int recheckGapsGetLowestHeight(final WorldChunkSlice slice, final int x, final int z) {
         int max = Integer.MAX_VALUE;
         for (final EnumFacing facing : HORIZONTAL) {
-            final int j = x + facing.getXOffset();
-            final int k = z + facing.getZOffset();
-            final Chunk chunk = slice.getChunkFromWorldCoords(j, k);
+            final Chunk chunk = slice.getChunkFromWorldCoords(
+                    x + facing.getXOffset(),
+                    z + facing.getZOffset()
+            );
             if (chunk != null) {
-                max = Math.min(max, slice.getChunkFromWorldCoords(j, k).getLowestHeight());
+                max = Math.min(max, chunk.getLowestHeight());
             }
         }
         return max;

@@ -1531,7 +1531,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             }
         }
 
-        for (int l = 0; l < localList.size(); ++l) {
+        for (int l = 0, s = localList.size(); l < s; ++l) {
             this.onEntityRemoved(localList.get(l));
         }
 

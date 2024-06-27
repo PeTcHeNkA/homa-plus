@@ -8,6 +8,7 @@ import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
+import net.minecraft.util.BlockIDIndexes;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -17,6 +18,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.EnumPlantType;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.fserver.api.IBlockEAccess;
 
 
 public class BlockBush extends Block implements net.minecraftforge.common.IPlantable {
@@ -48,8 +50,10 @@ public class BlockBush extends Block implements net.minecraftforge.common.IPlant
 
     @Override
     public boolean canPlaceBlockAt(World worldIn, BlockPos pos) {
-        IBlockState soil = worldIn.getBlockState(pos.down());
-        return super.canPlaceBlockAt(worldIn, pos) && soil.getBlock().canSustainPlant(soil, worldIn, pos.down(), net.minecraft.util.EnumFacing.UP, this);
+        IBlockEAccess access = worldIn.access();
+        IBlockState soil = access.getBlockState(pos.getX(), pos.getY()-1, pos.getZ());
+        return super.canPlaceBlockAt(worldIn, pos) &&
+                soil.getBlock().canSustainPlant(soil, access, pos.down(), EnumFacing.UP, this);
     }
 
 
@@ -73,22 +77,19 @@ public class BlockBush extends Block implements net.minecraftforge.common.IPlant
     protected void checkAndDropBlock(World worldIn, BlockPos pos, IBlockState state) {
         if (!this.canBlockStay(worldIn, pos, state)) {
             this.dropBlockAsItem(worldIn, pos, state, 0);
-            worldIn.setBlockState(pos, Blocks.AIR.getDefaultState(), 3);
+            worldIn.access().setBlockState(pos, BlockIDIndexes.AIR_STATE, 3);
         }
     }
 
 
     public boolean canBlockStay(World worldIn, BlockPos pos, IBlockState state) {
-        //BlockPos down = pos.down();
-        if (state.getBlock() == this)
-            //Forge: This function is called during world gen and placement,
-            // before this block is set, so if we are not 'here' then assume it's the pre-check.
-        {
-            BlockPos down = worldIn.localTempPos3.setPos(pos.getX(),pos.getY()-1,pos.getZ());
-            IBlockState soil = worldIn.access().getBlockState(down);
-            return soil.getBlock().canSustainPlant(soil, worldIn, down, net.minecraft.util.EnumFacing.UP, this);
+        if (state.getBlock() == this) {
+            BlockPos down = worldIn.localTempPos3.setPos(pos.getX(),pos.getY()-1, pos.getZ());
+            IBlockEAccess access = worldIn.access();
+            IBlockState soil = access.getBlockState(down);
+            return soil.getBlock().canSustainPlant(soil, access, down, EnumFacing.UP, this);
         }
-        return this.canSustainBush(worldIn.getBlockState(pos.getX(), pos.getY()-1, pos.getZ()));
+        return this.canSustainBush(worldIn.access().getBlockState(pos.getX(), pos.getY()-1, pos.getZ()));
     }
 
 
@@ -134,12 +135,12 @@ public class BlockBush extends Block implements net.minecraftforge.common.IPlant
         if (this == Blocks.DOUBLE_PLANT)   return EnumPlantType.Plains;
         if (this == Blocks.RED_FLOWER)     return EnumPlantType.Plains;
         if (this == Blocks.YELLOW_FLOWER)  return EnumPlantType.Plains;
-        return net.minecraftforge.common.EnumPlantType.Plains;
+        return EnumPlantType.Plains;
     }
 
 
     @Override
-    public IBlockState getPlant(net.minecraft.world.IBlockAccess world, BlockPos pos) {
+    public IBlockState getPlant(IBlockAccess world, BlockPos pos) {
         IBlockState state = world.getBlockState(pos);
         if (state.getBlock() != this) return getDefaultState();
         return state;

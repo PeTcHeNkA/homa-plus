@@ -414,6 +414,13 @@ public class EntityTrackerEntry {
     }
 
 
+    private void updateDistancesFor(EntityPlayer player) {
+        trackedEntity.elcaMinRange = 1073741824d;
+        double distance = trackedEntity.getDistanceSq(player.posX, player.posY, player.posZ);
+        if (distance < trackedEntity.elcaMinRange) trackedEntity.elcaMinRange = distance;
+    }
+
+
     public void updatePlayerList(List<EntityPlayer> players) {
         Entity trackedEntity = this.trackedEntity;
         if (this.playerEntitiesUpdated = (!this.updatedPlayerVisibility ||
@@ -424,11 +431,7 @@ public class EntityTrackerEntry {
             this.updatedPlayerVisibility = true;
             this.updatePlayerEntities(players);
         } else if(this.updateCounter % ElcaConfig.RESET_LOW_LEVEL_MOBS == 0) {
-            for (EntityPlayer player : trackingPlayers) {
-                trackedEntity.elcaMinRange = 1073741824d;
-                double distance = trackedEntity.getDistanceSq(player.posX, player.posY, player.posZ);
-                if (distance < trackedEntity.elcaMinRange) trackedEntity.elcaMinRange = distance;
-            }
+            trackingPlayers.forEach(this::updateDistancesFor);
         }
 
         List<Entity> list = trackedEntity.getPassengers();

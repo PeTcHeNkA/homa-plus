@@ -11,6 +11,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.feature.WorldGenBigMushroom;
 import net.minecraft.world.gen.feature.WorldGenerator;
+import plus.fserver.ElcaCV;
 import plus.fserver.api.Keep;
 import plus.fserver.server.elca.ChunkSelector;
 
@@ -80,18 +81,24 @@ public class BlockMushroom extends BlockBush implements IGrowable {
 
 
     @Override
-    public boolean canBlockStay(World worldIn, BlockPos pos, IBlockState state) {
+    public boolean canBlockStay(World world, BlockPos pos, IBlockState state) {
         if (pos.getY() >= 0 && pos.getY() < 256) {
-            Chunk chunk = worldIn.getChunk(pos);
-            IBlockState iblockstate = chunk.getBlockState(pos.getX(), pos.getY()-1, pos.getZ());
+            Chunk chunk;
+            if(!world.isRemote || ElcaCV.SERVER_COMPILE){
+                chunk = world.localSelector.getChunkE(pos.getX()>>4, pos.getZ()>>4);
+            } else {
+                chunk = world.getChunk(pos.getX()>>4, pos.getZ()>>4);
+            }
 
-            if (iblockstate.getBlock() == Blocks.MYCELIUM) {
+            IBlockState ground = chunk.getBlockState(pos.getX(), pos.getY()-1, pos.getZ());
+
+            if (ground.getBlock() == Blocks.MYCELIUM) {
                 return true;
-            } else if (iblockstate.getBlock() == Blocks.DIRT
-                    && iblockstate.getValue(BlockDirt.VARIANT) == BlockDirt.DirtType.PODZOL) {
+            } else if (ground.getBlock() == Blocks.DIRT
+                    && ground.getValue(BlockDirt.VARIANT) == BlockDirt.DirtType.PODZOL) {
                 return true;
             } else {
-                return chunk.getLightSubtracted(pos,0) < 13 && iblockstate.getBlock().canSustainPlant(iblockstate, worldIn, pos.down(), EnumFacing.UP, this);
+                return chunk.getLightSubtracted(pos,0) < 13 && ground.getBlock().canSustainPlant(ground, world, pos.down(), EnumFacing.UP, this);
             }
         } else {
             return false;

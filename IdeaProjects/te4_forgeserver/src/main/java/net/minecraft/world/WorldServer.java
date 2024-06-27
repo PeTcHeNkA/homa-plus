@@ -1161,16 +1161,16 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
                 iterator.remove();
 
                 if (this.isAreaLoaded(entry.position.add(0, 0, 0), entry.position.add(0, 0, 0))) {
-                    IBlockState iblockstate = this.getBlockState(entry.position);
+                    IBlockState state = this.getBlockState(entry.position);
 
-                    if (iblockstate.getMaterial() != Material.AIR && Block.isEqualTo(iblockstate.getBlock(), entry.getBlock())) {
+                    if (state.getMaterial() != Material.AIR && Block.isEqualTo(state.getBlock(), entry.getBlock())) {
                         try {
-                            iblockstate.getBlock().updateTick(this, entry.position, iblockstate, this.rand);
+                            state.getBlock().updateTick(this, entry.position, state, this.rand);
                         }
                         catch (Throwable throwable) {
                             CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Exception while ticking a block");
                             CrashReportCategory crashreportcategory = crashreport.makeCategory("Block being ticked");
-                            CrashReportCategory.addBlockInfo(crashreportcategory, entry.position, iblockstate);
+                            CrashReportCategory.addBlockInfo(crashreportcategory, entry.position, state);
                             throw new ReportedException(crashreport);
                         }
                     }

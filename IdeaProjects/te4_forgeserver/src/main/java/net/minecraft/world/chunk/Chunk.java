@@ -34,6 +34,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.asm.mixin.Overwrite;
 import plus.asyutl.buf.FastBuffer;
 import plus.fserver.api.BiomeIndexes;
 import plus.fserver.api.Keep;
@@ -41,6 +42,8 @@ import plus.fserver.ElcaCV;
 import plus.fserver.utls.collections.ArrayListE6;
 import plus.fserver.utls.collections.ArrayRemSwapListE6;
 import plus.fserver.utls.math.MathUtls;
+import plus.fserver.world.light.LightingHooks;
+import plus.fserver.world.light.api.IChunkLightingData;
 import plus.fserver.world.light.api.ILightingEngine;
 import plus.fserver.world.light.api.ILightingEngineProvider;
 import plus.tson.utl.Te4HashMap;
@@ -1181,34 +1184,26 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
     }
 
 
-    //Overwrited
+    /**
+     * @author Phosphor
+     * @reason faster light
+     */
     public void checkLight() {
         this.isTerrainPopulated = true;
-        this.isLightPopulated = true;
-        BlockPos blockpos = new BlockPos(this.x << 4, 0, this.z << 4);
-
-        if (this.world.provider.hasSkyLight()) {
-            if (this.world.isAreaLoaded(blockpos.add(-1, 0, -1), blockpos.add(16, this.world.getSeaLevel(), 16))) {
-                label44:
-                for (int i = 0; i < 16; ++i) {
-                    for (int j = 0; j < 16; ++j) {
-                        if (!this.checkLight(i, j)) {
-                            this.isLightPopulated = false;
-                            break label44;
-                        }
+        if (!((IChunkLightingData)this).isLightInitialized()) {
+            LightingHooks.initChunkLighting(this, world);
+        }
+        for (int x = -1; x <= 1; ++x) {
+            for (int z = -1; z <= 1; ++z) {
+                if (x != 0 || z != 0) {
+                    final Chunk nChunk = world.getChunkProvider().getLoadedChunk(this.x + x, this.z + z);
+                    if (nChunk == null || !((IChunkLightingData)nChunk).isLightInitialized()) {
+                        return;
                     }
                 }
-                if (this.isLightPopulated) {
-                    for (EnumFacing enumfacing : HORIZONTAL) {
-                        int k = enumfacing.getAxisDirection() == EnumFacing.AxisDirection.POSITIVE ? 16 : 1;
-                        this.world.getChunk(blockpos.offset(enumfacing, k)).checkLightSide(enumfacing.getOpposite());
-                    }
-                    this.setSkylightUpdated();
-                }
-            } else {
-                this.isLightPopulated = false;
             }
         }
+        isLightPopulated = true;
     }
 
 
