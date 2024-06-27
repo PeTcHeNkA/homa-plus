@@ -57,11 +57,6 @@ public class BlockStaticLiquid extends BlockLiquid {
                                 blockpos.getY()+1,
                                 blockpos.getZ()+(rand.nextInt(3) - 1)
                         );
-//                        blockpos = blockpos.add(
-//                                rand.nextInt(3) - 1,
-//                                1,
-//                                rand.nextInt(3) - 1
-//                        );
 
                         if (blockpos.getY() >= 0 && blockpos.getY() < worldIn.getHeight() && !worldIn.isBlockLoaded(blockpos)) {
                             return;
@@ -81,11 +76,6 @@ public class BlockStaticLiquid extends BlockLiquid {
                 } else {
                     BlockPos temp;
                     for (int k = 0; k < 3; ++k) {
-//                        BlockPos blockpos1 = pos.add(
-//                                rand.nextInt(3) - 1,
-//                                0,
-//                                rand.nextInt(3) - 1
-//                        );
                         BlockPos blockpos1 = worldIn.localTempPos.setPos(
                                 pos.getX()+(rand.nextInt(3) - 1),
                                 pos.getY()+1,
@@ -101,7 +91,7 @@ public class BlockStaticLiquid extends BlockLiquid {
                         );
 
                         if (selector.isAirBlock(temp) && this.getCanBlockBurn(worldIn, selector, blockpos1)) {
-                            selector.setBlockState(temp, net.minecraftforge.event.ForgeEventFactory.fireFluidPlaceBlockEvent(worldIn, temp, pos, Blocks.FIRE.getDefaultState()), 3);
+                            selector.setBlockState(temp, ForgeEventFactory.fireFluidPlaceBlockEvent(worldIn, temp, pos, Blocks.FIRE.getDefaultState()), 3);
                         }
                     }
                 }

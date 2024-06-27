@@ -287,13 +287,13 @@ public class EntityTracker {
     }
 
 
-    private void updatePlayer1(EntityPlayerMP entityplayermp) {
+    private void updatePlayer1(EntityPlayerMP player) {
         EntityTrackerEntry entry;
         for (ArrayRemSwapListE15<Entity> list: world.realEntityList.getRaw()) {
             for (int cursor = 0, s = list.sizeC(); cursor < s; ++cursor) {
                 if ((entry = list.getC(cursor).trackerEntry) != null)
-                    if (entry.getTrackedEntity() != entityplayermp)
-                        entry.updatePlayerEntity(entityplayermp);
+                    if (entry.getTrackedEntity() != player)
+                        entry.updatePlayerEntity(player);
             }
         }
     }

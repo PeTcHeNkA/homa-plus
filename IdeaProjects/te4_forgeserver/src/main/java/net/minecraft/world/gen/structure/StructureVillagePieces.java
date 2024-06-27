@@ -470,78 +470,73 @@ public class StructureVillagePieces {
             return canVillageGoDeeper(structureboundingbox) && StructureComponent.findIntersecting(p_175851_1_, structureboundingbox) == null ? new StructureVillagePieces.Field1(start, p_175851_7_, rand, structureboundingbox, facing) : null;
         }
 
-        public boolean addComponentParts(World worldIn, Random randomIn, StructureBoundingBox structureBoundingBoxIn)
-        {
-            if (this.averageGroundLvl < 0)
-            {
-                this.averageGroundLvl = this.getAverageGroundLevel(worldIn, structureBoundingBoxIn);
 
-                if (this.averageGroundLvl < 0)
-                {
+        @Override
+        public boolean addComponentParts(World world, Random randomIn, StructureBoundingBox box) {
+            if (this.averageGroundLvl < 0) {
+                this.averageGroundLvl = this.getAverageGroundLevel(world, box);
+
+                if (this.averageGroundLvl < 0) {
                     return true;
                 }
-
                 this.boundingBox.offset(0, this.averageGroundLvl - this.boundingBox.maxY + 4 - 1, 0);
             }
 
-            IBlockState iblockstate = this.getBiomeSpecificBlockState(Blocks.LOG.getDefaultState());
-            this.fillWithBlocks(worldIn, structureBoundingBoxIn, 0, 1, 0, 12, 4, 8, Blocks.AIR.getDefaultState(), Blocks.AIR.getDefaultState(), false);
-            this.fillWithBlocks(worldIn, structureBoundingBoxIn, 1, 0, 1, 2, 0, 7, Blocks.FARMLAND.getDefaultState(), Blocks.FARMLAND.getDefaultState(), false);
-            this.fillWithBlocks(worldIn, structureBoundingBoxIn, 4, 0, 1, 5, 0, 7, Blocks.FARMLAND.getDefaultState(), Blocks.FARMLAND.getDefaultState(), false);
-            this.fillWithBlocks(worldIn, structureBoundingBoxIn, 7, 0, 1, 8, 0, 7, Blocks.FARMLAND.getDefaultState(), Blocks.FARMLAND.getDefaultState(), false);
-            this.fillWithBlocks(worldIn, structureBoundingBoxIn, 10, 0, 1, 11, 0, 7, Blocks.FARMLAND.getDefaultState(), Blocks.FARMLAND.getDefaultState(), false);
-            this.fillWithBlocks(worldIn, structureBoundingBoxIn, 0, 0, 0, 0, 0, 8, iblockstate, iblockstate, false);
-            this.fillWithBlocks(worldIn, structureBoundingBoxIn, 6, 0, 0, 6, 0, 8, iblockstate, iblockstate, false);
-            this.fillWithBlocks(worldIn, structureBoundingBoxIn, 12, 0, 0, 12, 0, 8, iblockstate, iblockstate, false);
-            this.fillWithBlocks(worldIn, structureBoundingBoxIn, 1, 0, 0, 11, 0, 0, iblockstate, iblockstate, false);
-            this.fillWithBlocks(worldIn, structureBoundingBoxIn, 1, 0, 8, 11, 0, 8, iblockstate, iblockstate, false);
-            this.fillWithBlocks(worldIn, structureBoundingBoxIn, 3, 0, 1, 3, 0, 7, Blocks.WATER.getDefaultState(), Blocks.WATER.getDefaultState(), false);
-            this.fillWithBlocks(worldIn, structureBoundingBoxIn, 9, 0, 1, 9, 0, 7, Blocks.WATER.getDefaultState(), Blocks.WATER.getDefaultState(), false);
+            IBlockState state = this.getBiomeSpecificBlockState(Blocks.LOG.getDefaultState());
+            ChunkSelector selector = new ChunkSelector(world);
+
+            this.fillWithBlocks(selector, box, 0, 1, 0, 12, 4, 8, Blocks.AIR.getDefaultState(), Blocks.AIR.getDefaultState(), false);
+            this.fillWithBlocks(selector, box, 1, 0, 1, 2, 0, 7, Blocks.FARMLAND.getDefaultState(), Blocks.FARMLAND.getDefaultState(), false);
+            this.fillWithBlocks(selector, box, 4, 0, 1, 5, 0, 7, Blocks.FARMLAND.getDefaultState(), Blocks.FARMLAND.getDefaultState(), false);
+            this.fillWithBlocks(selector, box, 7, 0, 1, 8, 0, 7, Blocks.FARMLAND.getDefaultState(), Blocks.FARMLAND.getDefaultState(), false);
+            this.fillWithBlocks(selector, box, 10, 0, 1, 11, 0, 7, Blocks.FARMLAND.getDefaultState(), Blocks.FARMLAND.getDefaultState(), false);
+            this.fillWithBlocks(selector, box, 0, 0, 0, 0, 0, 8, state, state, false);
+            this.fillWithBlocks(selector, box, 6, 0, 0, 6, 0, 8, state, state, false);
+            this.fillWithBlocks(selector, box, 12, 0, 0, 12, 0, 8, state, state, false);
+            this.fillWithBlocks(selector, box, 1, 0, 0, 11, 0, 0, state, state, false);
+            this.fillWithBlocks(selector, box, 1, 0, 8, 11, 0, 8, state, state, false);
+            this.fillWithBlocks(selector, box, 3, 0, 1, 3, 0, 7, Blocks.WATER.getDefaultState(), Blocks.WATER.getDefaultState(), false);
+            this.fillWithBlocks(selector, box, 9, 0, 1, 9, 0, 7, Blocks.WATER.getDefaultState(), Blocks.WATER.getDefaultState(), false);
 
             for (int i = 1; i <= 7; ++i)
             {
                 int j = ((BlockCrops)this.cropTypeA).getMaxAge();
                 int k = j / 3;
-                this.setBlockState(worldIn, this.cropTypeA.getStateFromMeta(MathHelper.getInt(randomIn, k, j)), 1, 1, i, structureBoundingBoxIn);
-                this.setBlockState(worldIn, this.cropTypeA.getStateFromMeta(MathHelper.getInt(randomIn, k, j)), 2, 1, i, structureBoundingBoxIn);
+                this.setBlockState(selector, this.cropTypeA.getStateFromMeta(MathHelper.getInt(randomIn, k, j)), 1, 1, i, box);
+                this.setBlockState(selector, this.cropTypeA.getStateFromMeta(MathHelper.getInt(randomIn, k, j)), 2, 1, i, box);
                 int l = ((BlockCrops)this.cropTypeB).getMaxAge();
                 int i1 = l / 3;
-                this.setBlockState(worldIn, this.cropTypeB.getStateFromMeta(MathHelper.getInt(randomIn, i1, l)), 4, 1, i, structureBoundingBoxIn);
-                this.setBlockState(worldIn, this.cropTypeB.getStateFromMeta(MathHelper.getInt(randomIn, i1, l)), 5, 1, i, structureBoundingBoxIn);
+                this.setBlockState(selector, this.cropTypeB.getStateFromMeta(MathHelper.getInt(randomIn, i1, l)), 4, 1, i, box);
+                this.setBlockState(selector, this.cropTypeB.getStateFromMeta(MathHelper.getInt(randomIn, i1, l)), 5, 1, i, box);
                 int j1 = ((BlockCrops)this.cropTypeC).getMaxAge();
                 int k1 = j1 / 3;
-                this.setBlockState(worldIn, this.cropTypeC.getStateFromMeta(MathHelper.getInt(randomIn, k1, j1)), 7, 1, i, structureBoundingBoxIn);
-                this.setBlockState(worldIn, this.cropTypeC.getStateFromMeta(MathHelper.getInt(randomIn, k1, j1)), 8, 1, i, structureBoundingBoxIn);
+                this.setBlockState(selector, this.cropTypeC.getStateFromMeta(MathHelper.getInt(randomIn, k1, j1)), 7, 1, i, box);
+                this.setBlockState(selector, this.cropTypeC.getStateFromMeta(MathHelper.getInt(randomIn, k1, j1)), 8, 1, i, box);
                 int l1 = ((BlockCrops)this.cropTypeD).getMaxAge();
                 int i2 = l1 / 3;
-                this.setBlockState(worldIn, this.cropTypeD.getStateFromMeta(MathHelper.getInt(randomIn, i2, l1)), 10, 1, i, structureBoundingBoxIn);
-                this.setBlockState(worldIn, this.cropTypeD.getStateFromMeta(MathHelper.getInt(randomIn, i2, l1)), 11, 1, i, structureBoundingBoxIn);
+                this.setBlockState(selector, this.cropTypeD.getStateFromMeta(MathHelper.getInt(randomIn, i2, l1)), 10, 1, i, box);
+                this.setBlockState(selector, this.cropTypeD.getStateFromMeta(MathHelper.getInt(randomIn, i2, l1)), 11, 1, i, box);
             }
 
-            for (int j2 = 0; j2 < 9; ++j2)
-            {
-                for (int k2 = 0; k2 < 13; ++k2)
-                {
-                    this.clearCurrentPositionBlocksUpwards(worldIn, k2, 4, j2, structureBoundingBoxIn);
-                    this.replaceAirAndLiquidDownwards(worldIn, Blocks.DIRT.getDefaultState(), k2, -1, j2, structureBoundingBoxIn);
+            for (int j2 = 0; j2 < 9; ++j2) {
+                for (int k2 = 0; k2 < 13; ++k2) {
+                    this.clearCurrentPositionBlocksUpwards(selector, k2, 4, j2, box);
+                    this.replaceAirAndLiquidDownwards(selector, Blocks.DIRT.getDefaultState(), k2, -1, j2, box);
                 }
             }
-
             return true;
         }
     }
 
-    public static class Field2 extends StructureVillagePieces.Village
-    {
+
+    public static class Field2 extends StructureVillagePieces.Village {
         private Block cropTypeA;
         private Block cropTypeB;
 
-        public Field2()
-        {
-        }
+        public Field2() {}
 
-        public Field2(StructureVillagePieces.Start start, int p_i45569_2_, Random rand, StructureBoundingBox p_i45569_4_, EnumFacing facing)
-        {
+
+        public Field2(StructureVillagePieces.Start start, int p_i45569_2_, Random rand, StructureBoundingBox p_i45569_4_, EnumFacing facing) {
             super(start, p_i45569_2_);
             this.setCoordBaseMode(facing);
             this.boundingBox = p_i45569_4_;
@@ -549,24 +544,23 @@ public class StructureVillagePieces {
             this.cropTypeB = this.getRandomCropType(rand);
         }
 
-        protected void writeStructureToNBT(NBTTagCompound tagCompound)
-        {
+
+        protected void writeStructureToNBT(NBTTagCompound tagCompound) {
             super.writeStructureToNBT(tagCompound);
             tagCompound.setInteger("CA", Block.REGISTRY.getIDForObject(this.cropTypeA));
             tagCompound.setInteger("CB", Block.REGISTRY.getIDForObject(this.cropTypeB));
         }
 
-        protected void readStructureFromNBT(NBTTagCompound tagCompound, TemplateManager p_143011_2_)
-        {
+
+        protected void readStructureFromNBT(NBTTagCompound tagCompound, TemplateManager p_143011_2_) {
             super.readStructureFromNBT(tagCompound, p_143011_2_);
             this.cropTypeA = Block.getBlockById(tagCompound.getInteger("CA"));
             this.cropTypeB = Block.getBlockById(tagCompound.getInteger("CB"));
         }
 
-        private Block getRandomCropType(Random rand)
-        {
-            switch (rand.nextInt(10))
-            {
+
+        private Block getRandomCropType(Random rand) {
+            switch (rand.nextInt(10)) {
                 case 0:
                 case 1:
                     return Blocks.CARROTS;
@@ -580,54 +574,53 @@ public class StructureVillagePieces {
             }
         }
 
-        public static StructureVillagePieces.Field2 createPiece(StructureVillagePieces.Start start, List<StructureComponent> p_175852_1_, Random rand, int p_175852_3_, int p_175852_4_, int p_175852_5_, EnumFacing facing, int p_175852_7_)
-        {
+
+        public static StructureVillagePieces.Field2 createPiece(StructureVillagePieces.Start start, List<StructureComponent> p_175852_1_, Random rand, int p_175852_3_, int p_175852_4_, int p_175852_5_, EnumFacing facing, int p_175852_7_) {
             StructureBoundingBox structureboundingbox = StructureBoundingBox.getComponentToAddBoundingBox(p_175852_3_, p_175852_4_, p_175852_5_, 0, 0, 0, 7, 4, 9, facing);
             return canVillageGoDeeper(structureboundingbox) && StructureComponent.findIntersecting(p_175852_1_, structureboundingbox) == null ? new StructureVillagePieces.Field2(start, p_175852_7_, rand, structureboundingbox, facing) : null;
         }
 
-        public boolean addComponentParts(World worldIn, Random randomIn, StructureBoundingBox structureBoundingBoxIn)
-        {
-            if (this.averageGroundLvl < 0)
-            {
-                this.averageGroundLvl = this.getAverageGroundLevel(worldIn, structureBoundingBoxIn);
 
-                if (this.averageGroundLvl < 0)
-                {
+        public boolean addComponentParts(World world, Random randomIn, StructureBoundingBox box) {
+            if (this.averageGroundLvl < 0) {
+                this.averageGroundLvl = this.getAverageGroundLevel(world, box);
+
+                if (this.averageGroundLvl < 0) {
                     return true;
                 }
-
                 this.boundingBox.offset(0, this.averageGroundLvl - this.boundingBox.maxY + 4 - 1, 0);
             }
 
+            ChunkSelector selector = new ChunkSelector(world);
             IBlockState iblockstate = this.getBiomeSpecificBlockState(Blocks.LOG.getDefaultState());
-            this.fillWithBlocks(worldIn, structureBoundingBoxIn, 0, 1, 0, 6, 4, 8, Blocks.AIR.getDefaultState(), Blocks.AIR.getDefaultState(), false);
-            this.fillWithBlocks(worldIn, structureBoundingBoxIn, 1, 0, 1, 2, 0, 7, Blocks.FARMLAND.getDefaultState(), Blocks.FARMLAND.getDefaultState(), false);
-            this.fillWithBlocks(worldIn, structureBoundingBoxIn, 4, 0, 1, 5, 0, 7, Blocks.FARMLAND.getDefaultState(), Blocks.FARMLAND.getDefaultState(), false);
-            this.fillWithBlocks(worldIn, structureBoundingBoxIn, 0, 0, 0, 0, 0, 8, iblockstate, iblockstate, false);
-            this.fillWithBlocks(worldIn, structureBoundingBoxIn, 6, 0, 0, 6, 0, 8, iblockstate, iblockstate, false);
-            this.fillWithBlocks(worldIn, structureBoundingBoxIn, 1, 0, 0, 5, 0, 0, iblockstate, iblockstate, false);
-            this.fillWithBlocks(worldIn, structureBoundingBoxIn, 1, 0, 8, 5, 0, 8, iblockstate, iblockstate, false);
-            this.fillWithBlocks(worldIn, structureBoundingBoxIn, 3, 0, 1, 3, 0, 7, Blocks.WATER.getDefaultState(), Blocks.WATER.getDefaultState(), false);
+
+            this.fillWithBlocks(selector, box, 0, 1, 0, 6, 4, 8, Blocks.AIR.getDefaultState(), Blocks.AIR.getDefaultState(), false);
+            this.fillWithBlocks(selector, box, 1, 0, 1, 2, 0, 7, Blocks.FARMLAND.getDefaultState(), Blocks.FARMLAND.getDefaultState(), false);
+            this.fillWithBlocks(selector, box, 4, 0, 1, 5, 0, 7, Blocks.FARMLAND.getDefaultState(), Blocks.FARMLAND.getDefaultState(), false);
+            this.fillWithBlocks(selector, box, 0, 0, 0, 0, 0, 8, iblockstate, iblockstate, false);
+            this.fillWithBlocks(selector, box, 6, 0, 0, 6, 0, 8, iblockstate, iblockstate, false);
+            this.fillWithBlocks(selector, box, 1, 0, 0, 5, 0, 0, iblockstate, iblockstate, false);
+            this.fillWithBlocks(selector, box, 1, 0, 8, 5, 0, 8, iblockstate, iblockstate, false);
+            this.fillWithBlocks(selector, box, 3, 0, 1, 3, 0, 7, Blocks.WATER.getDefaultState(), Blocks.WATER.getDefaultState(), false);
 
             for (int i = 1; i <= 7; ++i)
             {
                 int j = ((BlockCrops)this.cropTypeA).getMaxAge();
                 int k = j / 3;
-                this.setBlockState(worldIn, this.cropTypeA.getStateFromMeta(MathHelper.getInt(randomIn, k, j)), 1, 1, i, structureBoundingBoxIn);
-                this.setBlockState(worldIn, this.cropTypeA.getStateFromMeta(MathHelper.getInt(randomIn, k, j)), 2, 1, i, structureBoundingBoxIn);
+                this.setBlockState(selector, this.cropTypeA.getStateFromMeta(MathHelper.getInt(randomIn, k, j)), 1, 1, i, box);
+                this.setBlockState(selector, this.cropTypeA.getStateFromMeta(MathHelper.getInt(randomIn, k, j)), 2, 1, i, box);
                 int l = ((BlockCrops)this.cropTypeB).getMaxAge();
                 int i1 = l / 3;
-                this.setBlockState(worldIn, this.cropTypeB.getStateFromMeta(MathHelper.getInt(randomIn, i1, l)), 4, 1, i, structureBoundingBoxIn);
-                this.setBlockState(worldIn, this.cropTypeB.getStateFromMeta(MathHelper.getInt(randomIn, i1, l)), 5, 1, i, structureBoundingBoxIn);
+                this.setBlockState(selector, this.cropTypeB.getStateFromMeta(MathHelper.getInt(randomIn, i1, l)), 4, 1, i, box);
+                this.setBlockState(selector, this.cropTypeB.getStateFromMeta(MathHelper.getInt(randomIn, i1, l)), 5, 1, i, box);
             }
 
             for (int j1 = 0; j1 < 9; ++j1)
             {
                 for (int k1 = 0; k1 < 7; ++k1)
                 {
-                    this.clearCurrentPositionBlocksUpwards(worldIn, k1, 4, j1, structureBoundingBoxIn);
-                    this.replaceAirAndLiquidDownwards(worldIn, Blocks.DIRT.getDefaultState(), k1, -1, j1, structureBoundingBoxIn);
+                    this.clearCurrentPositionBlocksUpwards(selector, k1, 4, j1, box);
+                    this.replaceAirAndLiquidDownwards(selector, Blocks.DIRT.getDefaultState(), k1, -1, j1, box);
                 }
             }
 

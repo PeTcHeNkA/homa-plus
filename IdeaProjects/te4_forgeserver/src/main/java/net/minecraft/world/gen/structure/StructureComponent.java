@@ -214,6 +214,26 @@ public abstract class StructureComponent {
     }
 
 
+    protected void setBlockStateM(BlockPos.MutableBlockPos mut, ChunkSelector selector, IBlockState state,
+                                 int x, int y, int z, StructureBoundingBox box) {
+        mut.setPosB(
+                this.getXWithOffset(x, z),
+                this.getYWithOffset(y),
+                this.getZWithOffset(x, z)
+        );
+
+        if (box.isVecInside(mut)) {
+            if (this.mirror != Mirror.NONE) {
+                state = state.withMirror(this.mirror);
+            }
+            if (this.rotation != Rotation.NONE) {
+                state = state.withRotation(this.rotation);
+            }
+            selector.setBlockState(mut, state, 2);
+        }
+    }
+
+
     protected void setBlockState(ChunkSelector selector, IBlockState state,
                                  int x, int y, int z, StructureBoundingBox box) {
         BlockPos blockpos = new BlockPos(
@@ -294,16 +314,36 @@ public abstract class StructureComponent {
                                   IBlockState bound, IBlockState inside,
                                   boolean existingOnly) {
 
+        BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
         for (int x = xMin; x <= xMax; ++x) {
             for (int z = zMin; z <= zMax; ++z) {
                 for (int y = yMin; y <= yMax; ++y) {
                     if (!existingOnly || this.getBlockStateFromPos(selector, x, y, z, box)
                             .getMaterial() != Material.AIR) {
                         if (y != yMin && y != yMax && x != xMin && x != xMax && z != zMin && z != zMax) {
-                            this.setBlockState(selector, inside, x, y, z, box);
+                            this.setBlockStateM(mut, selector, inside, x, y, z, box);
                         } else {
-                            this.setBlockState(selector, bound, x, y, z, box);
+                            this.setBlockStateM(mut, selector, bound, x, y, z, box);
                         }
+                    }
+                }
+            }
+        }
+    }
+
+
+    protected void fillWithBlocks(ChunkSelector selector, StructureBoundingBox box,
+                                  int xMin, int yMin, int zMin, int xMax, int yMax, int zMax,
+                                  IBlockState fill,
+                                  boolean existingOnly) {
+
+        BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+        for (int x = xMin; x <= xMax; ++x) {
+            for (int z = zMin; z <= zMax; ++z) {
+                for (int y = yMin; y <= yMax; ++y) {
+                    if (!existingOnly || this.getBlockStateFromPos(selector, x, y, z, box)
+                            .getMaterial() != Material.AIR) {
+                        this.setBlockStateM(mut, selector, fill, x, y, z, box);
                     }
                 }
             }
@@ -326,16 +366,20 @@ public abstract class StructureComponent {
 
 
     protected void generateMaybeBox(ChunkSelector selector, StructureBoundingBox sbb, Random rand, float chance, int x1, int y1, int z1, int x2, int y2, int z2, IBlockState edgeState, IBlockState state, boolean requireNonAir, int requiredSkylight) {
+        BlockPos.MutableBlockPos pos = null;
         for (int i = y1; i <= y2; ++i) {
             for (int j = x1; j <= x2; ++j) {
                 for (int k = z1; k <= z2; ++k) {
                     if (rand.nextFloat() <= chance && (!requireNonAir ||
                             this.getBlockStateFromPos(selector, j, i, k, sbb).getMaterial() != Material.AIR) && (requiredSkylight <= 0 ||
                             this.getSkyBrightness(selector, j, i, k, sbb) < requiredSkylight)) {
+
+                        if(pos==null)pos = new BlockPos.MutableBlockPos();
+
                         if (i != y1 && i != y2 && j != x1 && j != x2 && k != z1 && k != z2) {
-                            this.setBlockState(selector, state, j, i, k, sbb);
+                            this.setBlockStateM(pos, selector, state, j, i, k, sbb);
                         } else {
-                            this.setBlockState(selector, edgeState, j, i, k, sbb);
+                            this.setBlockStateM(pos, selector, edgeState, j, i, k, sbb);
                         }
                     }
                 }
