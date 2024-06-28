@@ -614,11 +614,11 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         }
 
         if (forceUpdate && entity.addedToChunk) {
-            for (Entity entity4 : entity.getPassengers()) {
-                if (!entity4.isDead && entity4.getRidingEntity() == entity) {
-                    this.updateEntity(entity4);
+            for (Entity passenger : entity.getPassengers()) {
+                if (!passenger.isDead && passenger.getRidingEntity() == entity) {
+                    this.updateEntity(passenger);
                 } else {
-                    entity4.dismountRidingEntity();
+                    passenger.dismountRidingEntity();
                 }
             }
         }

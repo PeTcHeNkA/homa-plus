@@ -3837,7 +3837,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
                 if ((!flag2 || !flag3) && (chunk = selector.getLoadedE(xPos >> 4, zPos >> 4)) != null)
                     for (int yPos = minY; yPos < maxY; ++yPos)
                         if (!flag2 && !flag3 || yPos != maxY - 1) {
-                            if (flag == flag1) entityIn.setOutsideBorder(!flag1);
+                            if (entityIn != null && flag == flag1) entityIn.setOutsideBorder(!flag1);
 
                             if (flag1 && !inInWorldBorder(xPos, zPos)) {
                                 BlockIDIndexes.STONE_STATE

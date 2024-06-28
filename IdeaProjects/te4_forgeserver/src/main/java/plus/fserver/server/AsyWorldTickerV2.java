@@ -277,6 +277,7 @@ public final class AsyWorldTickerV2 implements ThreadFactory{
             if(exception instanceof ReportedException){
                 CrashReport report = ((ReportedException)exception).getCrashReport();
                 LOGGER.error("", report.getCrashCause());
+                LOGGER.error("", exception);
             } else {
                 LOGGER.error("", exception);
             }
