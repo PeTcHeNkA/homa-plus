@@ -137,7 +137,7 @@ public class EntityTracker {
                     }
                 }
 
-            for (int i = 0; i < toUpdate.size(); ++i) {
+            for (int i = 0, s = toUpdate.size(); i < s; ++i) {
                 updatePlayer1(toUpdate.get(i));
             }
             toUpdate.clear();

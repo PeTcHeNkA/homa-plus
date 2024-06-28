@@ -522,7 +522,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
     public void setFire(int seconds) {
         int i = seconds * 20;
-        if (this instanceof EntityLivingBase) {
+        if (isLiving()) {
             i = EnchantmentProtection.getFireTimeForEntity((EntityLivingBase)this, i);
         }
         if (this.fire < i) {
@@ -2476,6 +2476,11 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
     }
 
 
+    public boolean isLiving(){
+        return false;
+    }
+
+
     public BlockPos getPosition() {
         return new BlockPos(this.posX, this.posY + 0.5D, this.posZ);
     }
@@ -2545,7 +2550,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
 
     protected void applyEnchantments(EntityLivingBase entityLivingBaseIn, Entity entityIn) {
-        if (entityIn instanceof EntityLivingBase) {
+        if (entityIn.isLiving()) {
             EnchantmentHelper.applyThornEnchantments((EntityLivingBase)entityIn, entityLivingBaseIn);
         }
         EnchantmentHelper.applyArthropodEnchantments(entityLivingBaseIn, entityIn);
@@ -2651,12 +2656,9 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         else if (this instanceof net.minecraft.entity.item.EntityEnderCrystal)
         {
             return new ItemStack(net.minecraft.init.Items.END_CRYSTAL);
-        }
-        else
-        {
+        } else {
             ResourceLocation name = EntityList.getKey(this);
-            if (name != null && EntityList.ENTITY_EGGS.containsKey(name))
-            {
+            if (name != null && EntityList.ENTITY_EGGS.containsKey(name)) {
                 ItemStack stack = new ItemStack(net.minecraft.init.Items.SPAWN_EGG);
                 net.minecraft.item.ItemMonsterPlacer.applyEntityIdToItemStack(stack, name);
                 return stack;
@@ -2665,8 +2667,8 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         return ItemStack.EMPTY;
     }
 
-    public UUID getPersistentID()
-    {
+
+    public UUID getPersistentID() {
         return entityUniqueID;
     }
 
@@ -2674,13 +2676,12 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
      * Reset the entity ID to a new value. Not to be used from Mod code
      */
     @Deprecated // TODO: remove (1.13?)
-    public final void resetEntityId()
-    {
+    public final void resetEntityId() {
         this.entityId = nextEntityID++;
     }
 
-    public boolean shouldRenderInPass(int pass)
-    {
+
+    public boolean shouldRenderInPass(int pass) {
         return pass == 0;
     }
 
@@ -2718,7 +2719,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
      * @return if the entity should be dismounted when under water
      */
     public boolean shouldDismountInWater(Entity rider) {
-        return this instanceof EntityLivingBase;
+        return isLiving();
     }
 
 

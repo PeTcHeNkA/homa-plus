@@ -67,6 +67,7 @@ import plus.fserver.api.ElcaServerUtls;
 import plus.fserver.api.IBlockEAccess;
 import plus.fserver.ElcaCV;
 import plus.fserver.api.Keep;
+import plus.fserver.utls.math.MathUtls;
 import plus.fserver.world.CollisionPredicate;
 import plus.fserver.server.elca.AABKey;
 import plus.fserver.utls.collections.*;
@@ -1671,54 +1672,37 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
-    public void updateEntityWithOptionalForce(Entity entityIn, boolean forceUpdate) {
+    public void updateEntityWithOptionalForce(Entity entity, boolean forceUpdate) {
         if (checkCanUpdate) {
-            boolean canUpdate = isChunkLoaded(entityIn.chunkCoordX, entityIn.chunkCoordZ, true);
+            boolean canUpdate = isChunkLoaded(entity.chunkCoordX, entity.chunkCoordZ, true);
 
-            //boolean isForced = !this.isRemote && getPersistentChunks().containsKey(new net.minecraft.util.math.ChunkPos(j2 >> 4, k2 >> 4));
-            //int range = isForced ? 0 : 32;
-            //boolean canUpdate = !forceUpdate || this.isAreaLoaded(j2 - range, 0, k2 - range, j2 + range, 0, k2 + range, true);
-            if (!canUpdate) canUpdate = canUpdateEvent.post(entityIn);
+            if (!canUpdate) canUpdate = canUpdateEvent.post(entity);
             if (!canUpdate) return;
         }
 
-        entityIn.lastTickPosX = entityIn.posX;
-        entityIn.lastTickPosY = entityIn.posY;
-        entityIn.lastTickPosZ = entityIn.posZ;
-        entityIn.prevRotationYaw = entityIn.rotationYaw;
-        entityIn.prevRotationPitch = entityIn.rotationPitch;
+        entity.lastTickPosX      = entity.posX;
+        entity.lastTickPosY      = entity.posY;
+        entity.lastTickPosZ      = entity.posZ;
+        entity.prevRotationYaw   = entity.rotationYaw;
+        entity.prevRotationPitch = entity.rotationPitch;
 
-        if (forceUpdate && entityIn.addedToChunk) {
-            ++entityIn.ticksExisted;
+        if (forceUpdate && entity.addedToChunk) {
+            ++entity.ticksExisted;
 
-            if (entityIn.isRiding()) {
-                entityIn.updateRidden();
+            if (entity.isRiding()) {
+                entity.updateRidden();
             } else {
-                if(!entityIn.updateBlocked) entityIn.onUpdate();
+                if(!entity.updateBlocked) entity.onUpdate();
             }
         }
 
-        if (Double.isNaN(entityIn.posX) || Double.isInfinite(entityIn.posX)) {
-            entityIn.posX = entityIn.lastTickPosX;
-        }
+        if (MathUtls.isInvalidDouble(entity.posX))          entity.posX          = entity.lastTickPosX     ;
+        if (MathUtls.isInvalidDouble(entity.posY))          entity.posY          = entity.lastTickPosY     ;
+        if (MathUtls.isInvalidDouble(entity.posZ))          entity.posZ          = entity.lastTickPosZ     ;
+        if (MathUtls.isInvalidDouble(entity.rotationPitch)) entity.rotationPitch = entity.prevRotationPitch;
+        if (MathUtls.isInvalidDouble(entity.rotationYaw))   entity.rotationYaw   = entity.prevRotationYaw  ;
 
-        if (Double.isNaN(entityIn.posY) || Double.isInfinite(entityIn.posY)) {
-            entityIn.posY = entityIn.lastTickPosY;
-        }
-
-        if (Double.isNaN(entityIn.posZ) || Double.isInfinite(entityIn.posZ)) {
-            entityIn.posZ = entityIn.lastTickPosZ;
-        }
-
-        if (Double.isNaN(entityIn.rotationPitch) || Double.isInfinite(entityIn.rotationPitch)) {
-            entityIn.rotationPitch = entityIn.prevRotationPitch;
-        }
-
-        if (Double.isNaN(entityIn.rotationYaw) || Double.isInfinite(entityIn.rotationYaw)) {
-            entityIn.rotationYaw = entityIn.prevRotationYaw;
-        }
-
-        updateEntityChunkSection(entityIn, forceUpdate);
+        updateEntityChunkSection(entity, forceUpdate);
     }
 
 
@@ -3840,8 +3824,8 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         int minZ = MathHelper.floor(aabb.minZ) - 1;
         int maxZ = MathHelper.ceil(aabb.maxZ) + 1;
 
-        boolean flag = entityIn != null && entityIn.isOutsideBorder(),
-                flag1 = entityIn != null && this.isInsideWorldBorder(entityIn);
+        boolean flag  = entityIn != null && entityIn.isOutsideBorder(),
+                flag1 = entityIn != null && isInsideWorldBorder(entityIn);
         ChunkSelector selector = localSelector;
         Chunk chunk;
 
@@ -3853,7 +3837,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
                 if ((!flag2 || !flag3) && (chunk = selector.getLoadedE(xPos >> 4, zPos >> 4)) != null)
                     for (int yPos = minY; yPos < maxY; ++yPos)
                         if (!flag2 && !flag3 || yPos != maxY - 1) {
-                            if (entityIn != null && flag == flag1) entityIn.setOutsideBorder(!flag1);
+                            if (flag == flag1) entityIn.setOutsideBorder(!flag1);
 
                             if (flag1 && !inInWorldBorder(xPos, zPos)) {
                                 BlockIDIndexes.STONE_STATE

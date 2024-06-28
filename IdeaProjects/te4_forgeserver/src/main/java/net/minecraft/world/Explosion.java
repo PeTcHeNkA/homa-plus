@@ -158,7 +158,7 @@ public class Explosion {
                         entity.attackEntityFrom(DamageSource.causeExplosionDamage(this), (float)((int)((d10 * d10 + d10) / 2.0D * 7.0D * (double)fSize + 1.0D)));
                         double d11 = d10;
 
-                        if (entity instanceof EntityLivingBase) {
+                        if (entity.isLiving()) {
                             d11 = EnchantmentProtection.getBlastDamageReduction((EntityLivingBase)entity, d10);
                         }
 
@@ -245,7 +245,7 @@ public class Explosion {
         } else if (this.exploder instanceof EntityTNTPrimed) {
             return ((EntityTNTPrimed)this.exploder).getTntPlacedBy();
         } else {
-            return this.exploder instanceof EntityLivingBase ? (EntityLivingBase)this.exploder : null;
+            return this.exploder.isLiving() ? (EntityLivingBase)this.exploder : null;
         }
     }
 

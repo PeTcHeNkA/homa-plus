@@ -477,7 +477,8 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
     public IBlockState getBlockStateUnchecked(final int x, final int y, final int z){
         ExtendedBlockStorage storage;
-        return ((storage = this.storageArrays[y >> 4]) == null) ? BlockIDIndexes.AIR_STATE : storage.get(x & 15, y & 15, z & 15);
+        if((storage = this.storageArrays[y >> 4]) == null) return BlockIDIndexes.AIR_STATE;
+        return storage.get(x & 15, y & 15, z & 15);
     }
 
 

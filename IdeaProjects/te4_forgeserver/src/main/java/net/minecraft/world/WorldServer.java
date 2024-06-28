@@ -446,8 +446,12 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
     }
 
 
+    private boolean spawnAnimals = true, spawnNpc = true;
     @Override
     public void tickLoadedEntities(){
+        if(spawnAnimals != canSpawnAnimals() || spawnNpc != canSpawnNPCs()){
+            recheckEntities();
+        }
         ChunkProviderServer cps = chunkProviderServer;
         for (ArrayRemSwapListE15<Entity> list:realEntityList.getRaw()) {
             for (int cursor = 0; cursor < list.sizeC(); ++cursor) {
@@ -470,6 +474,25 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
                     }
                     list.removeSwap(cursor--);
                     this.onEntityRemoved(entity);
+                }
+            }
+        }
+    }
+
+
+    private void recheckEntities(){
+        boolean spawnAnimals = this.spawnAnimals = canSpawnAnimals();
+        boolean spawnNpc     = this.spawnNpc = canSpawnNPCs();
+        for (ArrayRemSwapListE15<Entity> list:realEntityList.getRaw()) {
+            for (int cursor = 0; cursor < list.sizeC(); ++cursor) {
+                Entity entity = list.getC(cursor);
+                if(!spawnAnimals){
+                    if((entity instanceof EntityAnimal || entity instanceof EntityWaterMob)){
+                        entity.setDead();
+                    }
+                }
+                if(!spawnNpc){
+                    if(entity instanceof INpc)entity.setDead();
                 }
             }
         }
@@ -527,18 +550,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
 
 
     @Override
-    public void updateEntityWithOptionalForce(Entity entityIn, boolean forceUpdate) {
-        if (!this.canSpawnAnimals() && (entityIn instanceof EntityAnimal || entityIn instanceof EntityWaterMob)) {
-            entityIn.setDead();
-        }
-        if (!this.canSpawnNPCs() && entityIn instanceof INpc) {
-            entityIn.setDead();
-        }
-        updateEntityWithOptionalForce0(entityIn, forceUpdate);
-    }
-
-
-    private void updateEntityWithOptionalForce0(Entity entity, boolean forceUpdate) {
+    public void updateEntityWithOptionalForce(Entity entity, boolean forceUpdate) {
         if (checkCanUpdate) {
             Chunk chunk = chunkProviderServer.getLoadedChunk(entity.chunkCoordX, entity.chunkCoordZ);
 
@@ -755,24 +767,32 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
     }
 
 
-    private boolean canAddEntity(Entity entityIn) {
-        if (entityIn.isDead) {
-            LOGGER.warn("Tried to add entity {} but it was marked as removed already", (Object)EntityList.getKey(entityIn));
+    private boolean canAddEntity(Entity entity) {
+        if (entity.isDead) {
+            LOGGER.warn("Tried to add entity {} but it was marked as removed already", (Object)EntityList.getKey(entity));
             return false;
         } else {
-            UUID uuid = entityIn.getUniqueID();
+            UUID uuid = entity.getUniqueID();
             if (this.entitiesByUuid.containsKey(uuid)) {
-                Entity entity = this.entitiesByUuid.get(uuid);
-                if (this.unloadedEntityList.contains(entity)) {
-                    this.unloadedEntityList.remove(entity);
+                Entity current = this.entitiesByUuid.get(uuid);
+                if (this.unloadedEntityList.contains(current)) {
+                    this.unloadedEntityList.remove(current);
                 } else {
-                    if (!(entityIn instanceof EntityPlayer)) {
-                        LOGGER.warn("Keeping entity {} that already exists with UUID {}", EntityList.getKey(entity), uuid.toString());
+                    if (!(entity instanceof EntityPlayer)) {
+                        LOGGER.warn("Keeping entity {} that already exists with UUID {}", EntityList.getKey(current), uuid.toString());
                         return false;
                     }
                     LOGGER.warn("Force-added player with duplicate UUID {}", (Object)uuid.toString());
                 }
-                this.removeEntityDangerously(entity);
+                this.removeEntityDangerously(current);
+            }
+            if(!spawnAnimals){
+                if((entity instanceof EntityAnimal || entity instanceof EntityWaterMob)){
+                    entity.setDead();
+                }
+            }
+            if(!spawnNpc){
+                if(entity instanceof INpc)entity.setDead();
             }
             return true;
         }
@@ -1272,8 +1292,9 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
     protected void tickPlayers() {
         super.tickPlayers();
         Entity entity, entity1;
-        for (int i = 0; i < this.playerEntities.size(); ++i) {
-            entity = this.playerEntities.get(i);
+        List<EntityPlayer> players = this.playerEntities;
+        for (int i = 0; i < players.size(); ++i) {
+            entity = players.get(i);
             if ((entity1 = entity.getRidingEntity()) != null) {
                 if (!entity1.isDead && entity1.isPassenger(entity)) continue;
 

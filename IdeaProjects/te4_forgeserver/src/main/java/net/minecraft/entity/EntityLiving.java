@@ -381,7 +381,7 @@ public abstract class EntityLiving extends EntityLivingBase {
         if (this.leashHolder != null) {
             NBTTagCompound tag = new NBTTagCompound();
 
-            if (this.leashHolder instanceof EntityLivingBase) {
+            if (this.leashHolder.isLiving()) {
                 UUID uuid = this.leashHolder.getUniqueID();
                 tag.setUniqueId(SStrings.UUID, uuid);
             } else if (this.leashHolder instanceof EntityHanging) {
@@ -653,7 +653,7 @@ public abstract class EntityLiving extends EntityLivingBase {
         double d0 = entityIn.posX - this.posX;
         double d2 = entityIn.posZ - this.posZ;
         double d1;
-        if (entityIn instanceof EntityLivingBase) {
+        if (entityIn.isLiving()) {
             EntityLivingBase entitylivingbase = (EntityLivingBase)entityIn;
             d1 = entitylivingbase.posY + (double)entitylivingbase.getEyeHeight() - (this.posY + (double)this.getEyeHeight());
         } else {

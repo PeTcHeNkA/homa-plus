@@ -1900,7 +1900,7 @@ public abstract class EntityLivingBase extends Entity {
 
 
     public void setLastAttackedEntity(Entity entityIn) {
-        if (entityIn instanceof EntityLivingBase)
+        if (entityIn.isLiving())
             this.lastAttackedEntity = (EntityLivingBase)entityIn;
         else this.lastAttackedEntity = null;
         this.lastAttackedEntityTime = this.ticksExisted;
@@ -1940,6 +1940,11 @@ public abstract class EntityLivingBase extends Entity {
 
     public boolean isPlayerSleeping() {
         return false;
+    }
+
+
+    public final boolean isLiving(){
+        return true;
     }
 
 
