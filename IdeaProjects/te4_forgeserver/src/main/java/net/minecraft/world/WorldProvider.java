@@ -37,11 +37,11 @@ public abstract class WorldProvider implements ElcaWorldProvider {
     @SideOnly(Side.CLIENT)
     private float[] colorsSunriseSunset;
     @SideOnly(Side.CLIENT)
-    private IRenderHandler skyRenderer = null;
+    private IRenderHandler skyRenderer;
     @SideOnly(Side.CLIENT)
-    private IRenderHandler cloudRenderer = null;
+    private IRenderHandler cloudRenderer;
     @SideOnly(Side.CLIENT)
-    private IRenderHandler weatherRenderer = null;
+    private IRenderHandler weatherRenderer;
     private int dimensionId;
 
     public WorldProvider() {}
