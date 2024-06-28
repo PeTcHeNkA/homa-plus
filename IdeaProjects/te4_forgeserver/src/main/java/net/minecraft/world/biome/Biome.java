@@ -61,25 +61,42 @@ import net.minecraftforge.registries.GameData;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import plus.fserver.api.Keep;
 
 
 public abstract class Biome extends IForgeRegistryEntry.Impl<Biome> {
     private static final Logger LOGGER = LogManager.getLogger();
+    @Keep
     protected static final IBlockState STONE;
+    @Keep
     protected static final IBlockState AIR;
+    @Keep
     protected static final IBlockState BEDROCK;
+    @Keep
     protected static final IBlockState GRAVEL;
+    @Keep
     protected static final IBlockState RED_SANDSTONE;
+    @Keep
     protected static final IBlockState SANDSTONE;
+    @Keep
     protected static final IBlockState ICE;
+    @Keep
     protected static final IBlockState WATER;
+    @Keep
     public static final ObjectIntIdentityMap<Biome> MUTATION_TO_BASE_ID_MAP;
+    @Keep
     protected static final NoiseGeneratorPerlin TEMPERATURE_NOISE;
+    @Keep
     protected static final NoiseGeneratorPerlin GRASS_COLOR_NOISE;
+    @Keep
     protected static final WorldGenDoublePlant DOUBLE_PLANT_GENERATOR;
+    @Keep
     protected static final WorldGenTrees TREE_FEATURE;
+    @Keep
     protected static final WorldGenBigTree BIG_TREE_FEATURE;
+    @Keep
     protected static final WorldGenSwamp SWAMP_FEATURE;
+    @Keep
     public static final RegistryNamespaced<ResourceLocation, Biome> REGISTRY;
     private final String biomeName;
     private final float baseHeight;
@@ -91,14 +108,23 @@ public abstract class Biome extends IForgeRegistryEntry.Impl<Biome> {
     private final boolean enableRain;
     @Nullable
     private final String baseBiomeRegName;
+    @Keep
     public IBlockState topBlock;
+    @Keep
     public IBlockState fillerBlock;
+    @Keep
     public BiomeDecorator decorator;
+    @Keep
     protected List<SpawnListEntry> spawnableMonsterList;
+    @Keep
     protected List<SpawnListEntry> spawnableCreatureList;
+    @Keep
     protected List<SpawnListEntry> spawnableWaterCreatureList;
+    @Keep
     protected List<SpawnListEntry> spawnableCaveCreatureList;
+    @Keep
     protected Map<EnumCreatureType, List<SpawnListEntry>> modSpawnableLists;
+    @Keep
     protected List<FlowerEntry> flowers;
 
     public static int getIdForBiome(Biome biome) {
@@ -325,6 +351,7 @@ public abstract class Biome extends IForgeRegistryEntry.Impl<Biome> {
     }
 
 
+    @Keep
     public Class<? extends Biome> getBiomeClass() {
         return this.getClass();
     }
@@ -432,7 +459,7 @@ public abstract class Biome extends IForgeRegistryEntry.Impl<Biome> {
 
     public void plantFlower(World world, Random rand, BlockPos pos) {
         if (!this.flowers.isEmpty()) {
-            FlowerEntry flower = (FlowerEntry)WeightedRandom.getRandomItem(rand, this.flowers);
+            FlowerEntry flower = WeightedRandom.getRandomItem(rand, this.flowers);
             if (flower != null && flower.state != null && (!(flower.state.getBlock() instanceof BlockBush) || ((BlockBush)flower.state.getBlock()).canBlockStay(world, pos, flower.state))) {
                 world.setBlockState(pos, flower.state, 3);
             }
@@ -440,6 +467,7 @@ public abstract class Biome extends IForgeRegistryEntry.Impl<Biome> {
     }
 
 
+    @Keep
     public static void registerBiomes() {
         registerBiome(0, "ocean", new BiomeOcean((new BiomeProperties("Ocean")).setBaseHeight(-1.0F).setHeightVariation(0.1F)));
         registerBiome(1, "plains", new BiomePlains(false, (new BiomeProperties("Plains")).setBaseHeight(0.125F).setHeightVariation(0.05F).setTemperature(0.8F).setRainfall(0.4F)));
@@ -506,6 +534,7 @@ public abstract class Biome extends IForgeRegistryEntry.Impl<Biome> {
     }
 
 
+    @Keep
     public static void registerBiome(int id, String name, Biome b) {
         REGISTRY.register(id, new ResourceLocation(name), b);
         if (b.isMutation()) {
@@ -534,6 +563,7 @@ public abstract class Biome extends IForgeRegistryEntry.Impl<Biome> {
     }
 
 
+    @Keep
     public static enum TempCategory {
         OCEAN,
         COLD,
@@ -544,6 +574,7 @@ public abstract class Biome extends IForgeRegistryEntry.Impl<Biome> {
     }
 
 
+    @Keep
     public static class SpawnListEntry extends WeightedRandom.Item {
         public Class<? extends EntityLiving> entityClass;
         public int minGroupCount;
@@ -567,6 +598,7 @@ public abstract class Biome extends IForgeRegistryEntry.Impl<Biome> {
     }
 
 
+    @Keep
     public static class BiomeProperties {
         private final String biomeName;
         private float baseHeight = 0.1F;
@@ -636,7 +668,9 @@ public abstract class Biome extends IForgeRegistryEntry.Impl<Biome> {
     }
 
 
+    @Keep
     public static class FlowerEntry extends WeightedRandom.Item {
+        @Keep
         public final IBlockState state;
 
         public FlowerEntry(IBlockState state, int weight) {
