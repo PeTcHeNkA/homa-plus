@@ -12,6 +12,7 @@ public class ElcaConfig {
     public static final String DEFAULT_REJECT_MSG   = "Connection rejected";
     public static final String REJECT_SERVER_FULL   = "The server is full!";
     public static final String REJECT_NON_WHITELIST = "You are not white-listed on this server!";
+    public static final int MEAN_OVERLOAD           = 50 * 12;
 
     public static int END_PORTAL_TRANSFER_DIM    = 1;
 

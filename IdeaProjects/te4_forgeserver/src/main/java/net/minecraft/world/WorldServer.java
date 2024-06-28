@@ -1112,7 +1112,25 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
             this.updateBlocks();
         } else {
             if(prevWorldTotalTime % balanceBlock == 0) {
-                this.updateBlocks(balanceBlock);
+                if(meanTickTime() > ElcaConfig.MEAN_OVERLOAD){
+                    if(blockUpdateDebt < 200) {
+                        int am = balanceBlock >> 1 + 1;
+                        if (am > balanceBlock) {
+                            am = balanceBlock;
+                        }
+                        balanceBlock -= am;
+                        blockUpdateDebt += am;
+                    }
+                } else {
+                    if(blockUpdateDebt > 50){
+                        balanceBlock    += 5;
+                        blockUpdateDebt -= 5;
+                    } else if(blockUpdateDebt > 0){
+                        balanceBlock    += 1;
+                        blockUpdateDebt -= 1;
+                    }
+                }
+                if(balanceBlock>0) updateBlocks(balanceBlock);
             }
         }
 
@@ -1304,7 +1322,8 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
 
     private final BlockPos.MutableBlockPos localUpdateBlocks = new BlockPos.MutableBlockPos();
     private final BlockPos.MutableBlockPos localUpdateBlocks2 = new BlockPos.MutableBlockPos();
-    private boolean skipRecheck = true;
+    private int blockUpdateFlags   = 0;
+    private int blockUpdateDebt    = 0;
 
     @Override
     protected void updateBlocks() {
@@ -1321,8 +1340,16 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         } else {
             int updateLCG = this.updateLCG;
             final boolean raining = isRaining(), thundering = isThundering();
-            final boolean skipRecheck = this.skipRecheck;
-            this.skipRecheck = !skipRecheck;
+            final boolean skipRecheck = (blockUpdateFlags & 1) == 1;
+
+            int radius;
+            if((blockUpdateFlags & 2) == 2){
+                radius = ElcaConfig.CHUNK_TICK_RADIUS_1;
+            } else {
+                radius = ElcaConfig.CHUNK_TICK_RADIUS_2;
+            }
+            ++blockUpdateFlags;
+
             ChunkSelector selector = localSelector;
             Chunk chunk;
             BlockPos.MutableBlockPos mut = localUpdateBlocks;
@@ -1332,7 +1359,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
             final int snowChance  = 16 / factor;
             final Random rand = this.rand;
 
-            for (Iterator<Chunk> iterator = this.playerChunkMap.getChunkIterator(); iterator.hasNext();){
+            for (Iterator<Chunk> iterator = this.playerChunkMap.getChunkIterator(radius); iterator.hasNext();){
                 selector.setChunk(chunk = iterator.next());
 
                 int startCX = chunk.x << 4;

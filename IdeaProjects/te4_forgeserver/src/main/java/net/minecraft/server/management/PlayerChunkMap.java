@@ -14,6 +14,7 @@ import net.minecraft.world.chunk.Chunk;
 import plus.fserver.ElcaConfig;
 import plus.fserver.server.chunk.PlayerCMapSelector;
 import plus.fserver.utls.collections.ArrayRemSwapListE15;
+import plus.fserver.utls.collections.ArrayRemSwapListE6;
 import plus.fserver.utls.collections.ChunkIterator;
 import plus.fserver.utls.collections.FlatMap;
 import plus.tson.utl.Te4HashSet;
@@ -49,10 +50,18 @@ public class PlayerChunkMap extends FlatMap<PlayerChunkMapEntry>{
     }
 
 
-    //todo сделать динамическую выборку
     public ChunkIterator getChunkIterator() {
-        int radius = ((world.getTotalWorldTime()&1)==1)?ElcaConfig.CHUNK_TICK_RADIUS_1:ElcaConfig.CHUNK_TICK_RADIUS_2;
+        return new ChunkIterator(entries, ElcaConfig.CHUNK_TICK_RADIUS_2);
+    }
+
+
+    public ChunkIterator getChunkIterator(int radius) {
         return new ChunkIterator(entries, radius);
+    }
+
+
+    public ArrayRemSwapListE6<PlayerChunkMapEntry> getEntries() {
+        return entries;
     }
 
 
