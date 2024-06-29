@@ -8,28 +8,31 @@ import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.server.management.PlayerChunkMapEntry;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.SpawnPos;
 import net.minecraft.world.WorldEntitySpawner;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import plus.fserver.ElcaConfig;
 import plus.fserver.api.Keep;
+import plus.fserver.server.elca.ChunkSelector;
+import plus.fserver.utls.collections.FlatMap;
 import plus.fserver.utls.math.FastRandom;
-import plus.tson.utl.Te4HashSet;
+
 import java.util.Arrays;
+import java.util.Random;
 
 
 @Keep
 public class CommonWorldEntitySpawner extends WorldEntitySpawner {
     private static final int MOB_COUNT_DIV = (int)Math.pow(17.0D, 2.0D);
-    private final Te4HashSet<ChunkPos> eligibleChunksForSpawning = new Te4HashSet<>();
+    private final FlatMap<Chunk> eligibleChunksForSpawning = new FlatMap<>(128);
     private final int[] countCache = new int[TYPES.length];
     private int recheck = 0, prevFactor;
-    private ChunkPos[] shuffled;
+    private Chunk[] shuffled;
 
     public CommonWorldEntitySpawner(){
         Arrays.fill(countCache, -1);
@@ -43,36 +46,43 @@ public class CommonWorldEntitySpawner extends WorldEntitySpawner {
                                      boolean spawnOnSetTickRate
     ) {
         if (!spawnHostileMobs && !spawnPeacefulMobs) {
+            if(this.shuffled != null) {
+                this.shuffled = null;
+            }
+            if(this.eligibleChunksForSpawning.size() > 0) {
+                this.eligibleChunksForSpawning.clear();
+            }
             return 0;
         } else {
-            Te4HashSet<ChunkPos> posSet = this.eligibleChunksForSpawning;
+            FlatMap<Chunk> chunkSet = this.eligibleChunksForSpawning;
 
             final int factor;
-            ChunkPos[] shuffled;
+            Chunk[] shuffled;
             if((recheck & ElcaConfig.RECHECK_CHUNKS_SPAWNER_RATE)==0) {
                 shuffled = this.shuffled = null;
                 int preFactor = 0;
-                posSet.clear();
+                chunkSet.clear();
                 PlayerChunkMap map = world.getPlayerChunkMap();
                 int range = ElcaConfig.MAX_WORLD_SPAWNER_RANGE;
 
                 for (EntityPlayer player : world.playerEntities) {
                     if (!player.isSpectator()) {
-                        int j = MathHelper.floor(player.posX * 0.0625); // 0.0625 = 1/16
-                        int k = MathHelper.floor(player.posZ * 0.0625);
+                        int cX = MathHelper.floor(player.posX * 0.0625); // 0.0625 = 1/16
+                        int cZ = MathHelper.floor(player.posZ * 0.0625);
 
-                        for (int i1 = -range; i1 <= range; ++i1) {
-                            for (int j1 = -range; j1 <= range; ++j1) {
-                                ChunkPos pos = new ChunkPos(i1 + j, j1 + k);
+                        for (int dx = -range; dx <= range; ++dx) {
+                            for (int dz = -range; dz <= range; ++dz) {
+                                //ChunkPos pos = new ChunkPos(dx + cX, dz + cZ);
+                                int chunkX = dx + cX, chunkZ = dz + cZ;
 
-                                if (!posSet.contains(pos)) {
+                                if (!chunkSet.contains(chunkX, chunkZ)) {
                                     ++preFactor;
 
-                                    if (!(i1 == -range || i1 == range || j1 == -range || j1 == range) && world.inInWorldBorder(pos)) {
-                                        PlayerChunkMapEntry entry = map.getEntry(pos.x, pos.z);
+                                    if (!(dx == -range || dx == range || dz == -range || dz == range) && world.isInWorldBorderChunk(chunkX, chunkZ)) {
+                                        PlayerChunkMapEntry entry = map.getEntry(dx + cX, dz + cZ);
 
                                         if (entry != null && entry.isSentToPlayers()) {
-                                            posSet.add(pos);
+                                            chunkSet.put(chunkX, chunkZ, entry.getChunk());
                                         }
                                     }
                                 }
@@ -93,6 +103,8 @@ public class CommonWorldEntitySpawner extends WorldEntitySpawner {
             }
 
             SpawnPos spawnPos = null;
+            ChunkSelector selector = world.localSelector;
+            Random rand = world.rand;
 
             for (EnumCreatureType creatureType : TYPES) {
                 if ((!creatureType.getPeacefulCreature() || spawnPeacefulMobs) && (creatureType.getPeacefulCreature() || spawnHostileMobs) && (!creatureType.getAnimal() || spawnOnSetTickRate)) {
@@ -105,16 +117,17 @@ public class CommonWorldEntitySpawner extends WorldEntitySpawner {
                     if (count <= maxCount) {
                         if(spawnPos==null) spawnPos = new SpawnPos(world);
                         if(shuffled == null) {
-                            shuffled = this.shuffled = posSet.toArray(new ChunkPos[0]);
+                            shuffled = this.shuffled = chunkSet.toArray(new Chunk[chunkSet.size()]);
                         }
                         FastRandom.INST.shuffle(shuffled);
 
                         inner:
 
-                        for (ChunkPos pos : shuffled) {
-                            spawnPos.setRandomChunkPos(pos.x, pos.z);
+                        for (Chunk chunk : shuffled) {
+                            spawnPos.setRandomChunkPos(chunk);
+                            selector.setChunk(chunk);
                             int sX, sY, sZ;
-                            IBlockState state = spawnPos.chunk.getBlockStateUnchecked(sX = spawnPos.getX(), sY = spawnPos.getY(), sZ = spawnPos.getZ());
+                            IBlockState state = chunk.getBlockStateUnchecked(sX = spawnPos.getX(), sY = spawnPos.getY(), sZ = spawnPos.getZ());
 
                             if (!state.isNormalCube()) {
                                 int pack = 0;
@@ -125,11 +138,11 @@ public class CommonWorldEntitySpawner extends WorldEntitySpawner {
                                     Biome.SpawnListEntry entry = null;
                                     EntityLiving prev = null;
                                     IEntityLivingData data = null;
-                                    int l3 = MathHelper.ceil(world.rand.nextFloat() * 4);
+                                    int l3 = MathHelper.ceil(rand.nextFloat() * 4);
 
                                     for (int i4 = 0; i4 < l3; ++i4) {
-                                        l2 += world.rand.nextInt(6) - world.rand.nextInt(6);
-                                        j3 += world.rand.nextInt(6) - world.rand.nextInt(6);
+                                        l2 += rand.nextInt(6) - rand.nextInt(6);
+                                        j3 += rand.nextInt(6) - rand.nextInt(6);
                                         spawnPos.setPos(l2, sY, j3);
                                         float f = (float)l2 + 0.5F;
                                         float f1 = (float)j3 + 0.5F;

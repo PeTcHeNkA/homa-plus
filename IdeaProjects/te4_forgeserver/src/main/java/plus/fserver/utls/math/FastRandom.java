@@ -39,18 +39,23 @@ public class FastRandom extends Random {
 
 
     public void shuffle(Object[] array){
-        if(array.length==0)return;
+        shuffle(array, array.length);
+    }
+
+
+    public void shuffle(Object[] array, int to){
+        if(to==0)return;
         int i=0, e;
         Object swap;
         do{
-            swap = array[e=nextInt(array.length)];
+            swap = array[e=nextInt(to)];
             array[e] = array[i];
             array[i] = swap;
             i+=2;
-        } while (array.length>i);
-        if(array.length!=i)return;
-        swap = array[i = array.length-1];
-        array[i] = array[e=nextInt(array.length)];
+        } while (to>i);
+        if(to!=i)return;
+        swap = array[i = to-1];
+        array[i] = array[e=nextInt(to)];
         array[e] = swap;
     }
 

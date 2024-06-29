@@ -531,7 +531,7 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
 
                 if (d0 < d1 * d1) {
                     if (packetIn.getAction() == CPacketPlayerDigging.Action.START_DESTROY_BLOCK) {
-                        if (world.inInWorldBorder(pos.getX(), pos.getZ()))
+                        if (world.isInWorldBorder(pos.getX(), pos.getZ()))
                             player.interactionManager.onBlockClicked(pos, packetIn.getFacing());
                         else
                             player.connection.netManager.sendPacketE(new SPacketBlockChange(world, pos));
@@ -1067,7 +1067,7 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
             dist *= dist;
             if (targetPos == null && player.getDistanceSq(blockpos.getX() + 0.5, blockpos.getY() + 0.5, blockpos.getZ() + 0.5) < dist &&
                     !server.isBlockProtected(worldserver, blockpos, player)
-                    && worldserver.inInWorldBorder(blockpos.getX(), blockpos.getZ())) {
+                    && worldserver.isInWorldBorder(blockpos.getX(), blockpos.getZ())) {
 
                 addToQueue(() -> {
                     player.interactionManager.processRightClickBlock(

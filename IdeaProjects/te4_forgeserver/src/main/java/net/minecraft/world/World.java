@@ -29,7 +29,6 @@ import net.minecraft.pathfinding.PathWorldListener;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.tileentity.MobSpawnerBaseLogic;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
 import net.minecraft.util.math.*;
@@ -78,7 +77,7 @@ import plus.fserver.utls.math.Vec3dMut;
 import plus.fserver.world.RedstoneEngine;
 import plus.fserver.world.light.LightingEngine;
 import plus.fserver.world.light.api.ILightingEngineProvider;
-import static plus.fserver.ElcaCV.CLIENT_COMPILE;
+
 import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
@@ -1194,18 +1193,24 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
-    public final boolean inInWorldBorder(AxisAlignedBB bb){
+    public final boolean isInWorldBorder(AxisAlignedBB bb){
         return bb.maxX > worldBMinx && bb.minX < worldBMaxx && bb.maxZ > worldBMinz && bb.minZ < worldBMaxz;
     }
 
 
-    public final boolean inInWorldBorder(ChunkPos range) {
+    public final boolean isInWorldBorder(ChunkPos range) {
         return (double)range.getXEnd() > worldBMinx && (double)range.getXStart() < worldBMaxx &&
                 (double)range.getZEnd() > worldBMinz && (double)range.getZStart() < worldBMaxz;
     }
 
 
-    public final boolean inInWorldBorder(int blockX, int blockZ) {
+    public final boolean isInWorldBorderChunk(int chunkX, int chunkZ) {
+        return  (chunkX<<4)+15 > worldBMinx && (chunkX<<4) < worldBMaxx &&
+                (chunkZ<<4)+15 > worldBMinz && (chunkZ<<4) < worldBMaxz;
+    }
+
+
+    public final boolean isInWorldBorder(int blockX, int blockZ) {
         return blockX > worldBMinx && blockX < worldBMaxx && blockZ > worldBMinz && blockZ < worldBMaxz;
     }
 
@@ -2621,7 +2626,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
     public BlockPos getSpawnPoint() {
         BlockPos point = this.provider.getSpawnPoint();
-        if (!inInWorldBorder(point.getX(), point.getY())) {
+        if (!isInWorldBorder(point.getX(), point.getY())) {
             point = this.getHeight(new BlockPos(this.getWorldBorder().getCenterX(), 0.0D, this.getWorldBorder().getCenterZ()));
         }
         return point;
@@ -3839,7 +3844,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
                         if (!flag2 && !flag3 || yPos != maxY - 1) {
                             if (entityIn != null && flag == flag1) entityIn.setOutsideBorder(!flag1);
 
-                            if (flag1 && !inInWorldBorder(xPos, zPos)) {
+                            if (flag1 && !isInWorldBorder(xPos, zPos)) {
                                 BlockIDIndexes.STONE_STATE
                                         .addCollisionBoxToListF(selector, tempPooledLocalPos.setPos(xPos, yPos, zPos), aabb, outList);
                             } else {
@@ -3888,7 +3893,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
                             } else if (entityIn != null && flag == flag1) entityIn.setOutsideBorder(!flag1);
 
-                            ((!true && flag1 && !inInWorldBorder(xPos, zPos))?
+                            ((!true && flag1 && !isInWorldBorder(xPos, zPos))?
                                     BlockIDIndexes.STONE_STATE : chunk.getBlockStateUnchecked(xPos, yPos, zPos))
 
                                     .addCollisionBoxToListF(selector, tempPooledLocalPos.setPos(xPos, yPos, zPos), aabb, outList);

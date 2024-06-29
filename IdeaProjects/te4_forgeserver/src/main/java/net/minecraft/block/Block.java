@@ -1043,64 +1043,51 @@ public class Block extends net.minecraftforge.registries.IForgeRegistryEntry.Imp
     /**
      * Checks if the block is a solid face on the given side, used by placement logic.
      *
-     * @param base_state The base state, getActualState should be called first
-     * @param world The current world
-     * @param pos Block position in world
+     * @param baseState The base state, getActualState should be called first
+     * @param access The current access
+     * @param pos Block position in access
      * @param side The side to check
      * @return True if the block is solid on the specified side.
      */
     @Deprecated //Use IBlockState.getBlockFaceShape
-    public boolean isSideSolid(IBlockState base_state, IBlockAccess world, BlockPos pos, EnumFacing side)
-    {
-        if (base_state.isTopSolid() && side == EnumFacing.UP) // Short circuit to vanilla function if its true
+    public boolean isSideSolid(IBlockState baseState, IBlockAccess access, BlockPos pos, EnumFacing side) {
+        if (baseState.isTopSolid() && side == EnumFacing.UP) // Short circuit to vanilla function if its true
             return true;
 
-        if (this instanceof BlockSlab)
-        {
-            IBlockState state = this.getActualState(base_state, world, pos);
-            return base_state.isFullBlock()
+        if (this instanceof BlockSlab) {
+            IBlockState state = this.getActualState(baseState, access, pos);
+            return baseState.isFullBlock()
                     || (state.getValue(BlockSlab.HALF) == BlockSlab.EnumBlockHalf.TOP    && side == EnumFacing.UP  )
                     || (state.getValue(BlockSlab.HALF) == BlockSlab.EnumBlockHalf.BOTTOM && side == EnumFacing.DOWN);
         }
-        else if (this instanceof BlockFarmland)
-        {
+        else if (this instanceof BlockFarmland) {
             return (side != EnumFacing.DOWN && side != EnumFacing.UP);
-        }
-        else if (this instanceof BlockStairs)
-        {
-            IBlockState state = this.getActualState(base_state, world, pos);
+        } else if (this instanceof BlockStairs) {
+            IBlockState state = this.getActualState(baseState, access, pos);
             boolean flipped = state.getValue(BlockStairs.HALF) == BlockStairs.EnumHalf.TOP;
             BlockStairs.EnumShape shape = state.getValue(BlockStairs.SHAPE);
             EnumFacing facing = state.getValue(BlockStairs.FACING);
             if (side == EnumFacing.UP) return flipped;
             if (side == EnumFacing.DOWN) return !flipped;
             if (facing == side) return true;
-            if (flipped)
-            {
+            if (flipped) {
                 if (shape == BlockStairs.EnumShape.INNER_LEFT ) return side == facing.rotateYCCW();
                 if (shape == BlockStairs.EnumShape.INNER_RIGHT) return side == facing.rotateY();
-            }
-            else
-            {
+            } else {
                 if (shape == BlockStairs.EnumShape.INNER_LEFT ) return side == facing.rotateY();
                 if (shape == BlockStairs.EnumShape.INNER_RIGHT) return side == facing.rotateYCCW();
             }
             return false;
         }
-        else if (this instanceof BlockSnow)
-        {
-            IBlockState state = this.getActualState(base_state, world, pos);
-            return ((Integer)state.getValue(BlockSnow.LAYERS)) >= 8;
-        }
-        else if (this instanceof BlockHopper && side == EnumFacing.UP)
-        {
+        else if (this instanceof BlockSnow) {
+            IBlockState state = this.getActualState(baseState, access, pos);
+            return state.getValue(BlockSnow.LAYERS) >= 8;
+        } else if (this instanceof BlockHopper && side == EnumFacing.UP) {
+            return true;
+        } else if (this instanceof BlockCompressedPowered) {
             return true;
         }
-        else if (this instanceof BlockCompressedPowered)
-        {
-            return true;
-        }
-        return isNormalCube(base_state, world, pos);
+        return isNormalCube(baseState, access, pos);
     }
 
     /**
