@@ -51,7 +51,8 @@ public abstract class MixinChunk implements IChunkLighting, IChunkLightingData, 
      */
     @Overwrite
     public int getLightSubtracted(BlockPos pos, int amount) {
-        if(world.isRemote)this.getLightingEngine().processLightUpdates();
+        this.getLightingEngine().processLightUpdates();
+
         int i = pos.getX() & 15, j = pos.getY(), k = pos.getZ() & 15;
         ExtendedBlockStorage storage = this.storageArrays[j >> 4];
         if (storage == null) {
@@ -119,7 +120,8 @@ public abstract class MixinChunk implements IChunkLighting, IChunkLightingData, 
      */
     @Overwrite
     public int getLightFor(final EnumSkyBlock type, final BlockPos pos) {
-        if(world.isRemote)this.getLightingEngine().processLightUpdatesForType(type);
+        this.getLightingEngine().processLightUpdatesForType(type);
+
         return this.getCachedLightFor(type, pos);
     }
 

@@ -34,7 +34,6 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.spongepowered.asm.mixin.Overwrite;
 import plus.asyutl.buf.FastBuffer;
 import plus.fserver.api.BiomeIndexes;
 import plus.fserver.api.Keep;
@@ -1453,5 +1452,37 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
             this.precipitationHeightMap[k] = (short) i1;
         }
         return this.precipitationHeightMap[k];
+    }
+
+
+    @Override
+    public String toString() {
+        String base = "Chunk["+x+", "+z+"]";
+        if(isEmpty()){
+            base += ", empty";
+        } else {
+            if(world != null){
+                if(world.isRemote){
+                    base += ", remote";
+                }
+                base += ", dim:" + world.provider.getDimension();
+            }
+            if(isLoaded()) {
+                base += ", loaded";
+            }
+            if(isPopulated()){
+                base += ", populated";
+            }
+            if(isNowSaving()){
+                base += ", saving";
+            }
+            if(isLightPopulated()){
+                base += ", lighted";
+            }
+            if(dirty){
+                base += ", dirty";
+            }
+        }
+        return base;
     }
 }

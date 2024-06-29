@@ -19,8 +19,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.ServerSocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.timeout.ReadTimeoutHandler;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.GenericFutureListener;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.SocketAddress;
@@ -30,7 +29,7 @@ import java.util.List;
 import net.minecraft.client.network.NetHandlerHandshakeMemory;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
-import net.minecraft.crash.ICrashReportDetail;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.server.SPacketDisconnect;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.NetHandlerHandshakeTCP;
@@ -41,6 +40,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import plus.fserver.server.network.ElcaFireWall;
 
 
 public class NetworkSystem {
@@ -68,9 +68,10 @@ public class NetworkSystem {
 
     private final MinecraftServer server;
     public volatile boolean isAlive;
-    private final List<ChannelFuture> endpoints = Collections.<ChannelFuture>synchronizedList(Lists.newArrayList());
-    private final List<NetworkManager> networkManagers = Collections.<NetworkManager>synchronizedList(Lists.newArrayList());
+    private final List<ChannelFuture> endpoints = Collections.synchronizedList(Lists.newArrayList());
+    private final List<NetworkManager> networkManagers = Collections.synchronizedList(Lists.newArrayList());
     public EventLoopGroup usedPool;
+    private ElcaFireWall<Channel> fireWall;
 
     public NetworkSystem(MinecraftServer server) {
         this.server = server;
@@ -94,127 +95,131 @@ public class NetworkSystem {
                 LOGGER.info("Using default channel type");
             }
 
-            this.endpoints.add(((ServerBootstrap)((ServerBootstrap)(new ServerBootstrap()).channel(oclass)).childHandler(new ChannelInitializer<Channel>()
-            {
-                protected void initChannel(Channel p_initChannel_1_) throws Exception
-                {
-                    try
-                    {
-                        p_initChannel_1_.config().setOption(ChannelOption.TCP_NODELAY, Boolean.valueOf(true));
-                    }
-                    catch (ChannelException var3)
-                    {
-                        ;
-                    }
+            this.endpoints.add((new ServerBootstrap()).channel(oclass).childHandler(
+                    fireWall = new ElcaFireWall<Channel>(lazyloadbase.getValue()) {
+                protected void postInit(Channel chan) throws Exception {
+                    try {
+                        chan.config().setOption(ChannelOption.TCP_NODELAY, Boolean.TRUE);
+                    } catch (ChannelException var3) {}
 
-                    p_initChannel_1_.pipeline().addLast("timeout", new ReadTimeoutHandler(net.minecraftforge.fml.common.network.internal.FMLNetworkHandler.READ_TIMEOUT)).addLast("legacy_query", new LegacyPingHandler(NetworkSystem.this)).addLast("splitter", new NettyVarint21FrameDecoder()).addLast("decoder", new NettyPacketDecoder(EnumPacketDirection.SERVERBOUND)).addLast("prepender", new NettyVarint21FrameEncoder()).addLast("encoder", new NettyPacketEncoder(EnumPacketDirection.CLIENTBOUND));
-                    NetworkManager networkmanager = new NetworkManager(EnumPacketDirection.SERVERBOUND);
-                    NetworkSystem.this.networkManagers.add(networkmanager);
-                    p_initChannel_1_.pipeline().addLast("packet_handler", networkmanager);
-                    networkmanager.setNetHandler(new NetHandlerHandshakeTCP(NetworkSystem.this.server, networkmanager));
+                    chan.pipeline().addLast("timeout", new ReadTimeoutHandler(net.minecraftforge.fml.common.network.internal.FMLNetworkHandler.READ_TIMEOUT)).addLast("legacy_query", new LegacyPingHandler(NetworkSystem.this)).addLast("splitter", new NettyVarint21FrameDecoder()).addLast("decoder", new NettyPacketDecoder(EnumPacketDirection.SERVERBOUND)).addLast("prepender", new NettyVarint21FrameEncoder()).addLast("encoder", new NettyPacketEncoder(EnumPacketDirection.CLIENTBOUND));
+                    NetworkManager manager = new NetworkManager(EnumPacketDirection.SERVERBOUND);
+                    NetworkSystem.this.networkManagers.add(manager);
+                    chan.pipeline().addLast("packet_handler", manager);
+                    manager.setNetHandler(new NetHandlerHandshakeTCP(NetworkSystem.this.server, manager));
                 }
-            }).group(usedPool = lazyloadbase.getValue()).localAddress(address, port)).bind().syncUninterruptibly());
+            }).group(usedPool = lazyloadbase.getValue()).localAddress(address, port).bind().syncUninterruptibly());
         }
     }
 
+
+    public void softBan(EntityPlayerMP player, long time){
+        fireWall.softSet(player, time, false);
+    }
+
+
+    public void softBan(InetAddress address, long time){
+        fireWall.softSet(address, time, false);
+    }
+
+
+    public void softAllow(EntityPlayerMP player, long time){
+        fireWall.softSet(player, time, true);
+    }
+
+
+    public void softAllow(InetAddress address, long time){
+        fireWall.softSet(address, time, true);
+    }
+
+
+    public boolean hasFirewall(){
+        return fireWall != null;
+    }
+
+
+    public boolean fireWallEnabled(){
+        return fireWall != null && fireWall.isBreakUnknown();
+    }
+
+
+    public void setFireWallEnabled(boolean enabled){
+        if(fireWall != null) fireWall.setBreakUnknown(enabled);
+    }
+
+
+    public ElcaFireWall<Channel> fireWall() {
+        return fireWall;
+    }
+
+
     @SideOnly(Side.CLIENT)
-    public SocketAddress addLocalEndpoint()
-    {
+    public SocketAddress addLocalEndpoint() {
         ChannelFuture channelfuture;
 
-        synchronized (this.endpoints)
-        {
-            channelfuture = ((ServerBootstrap)((ServerBootstrap)(new ServerBootstrap()).channel(LocalServerChannel.class)).childHandler(new ChannelInitializer<Channel>()
-            {
-                protected void initChannel(Channel p_initChannel_1_) throws Exception
-                {
-                    NetworkManager networkmanager = new NetworkManager(EnumPacketDirection.SERVERBOUND);
-                    networkmanager.setNetHandler(new NetHandlerHandshakeMemory(NetworkSystem.this.server, networkmanager));
-                    NetworkSystem.this.networkManagers.add(networkmanager);
-                    p_initChannel_1_.pipeline().addLast("packet_handler", networkmanager);
+        synchronized (this.endpoints) {
+            channelfuture = (new ServerBootstrap()).channel(LocalServerChannel.class).childHandler(new ChannelInitializer<Channel>() {
+                protected void initChannel(Channel chan) throws Exception {
+                    NetworkManager manager = new NetworkManager(EnumPacketDirection.SERVERBOUND);
+                    manager.setNetHandler(new NetHandlerHandshakeMemory(NetworkSystem.this.server, manager));
+                    NetworkSystem.this.networkManagers.add(manager);
+                    chan.pipeline().addLast("packet_handler", manager);
                 }
-            }).group(usedPool = SERVER_NIO_EVENTLOOP.getValue()).localAddress(LocalAddress.ANY)).bind().syncUninterruptibly();
+            }).group(usedPool = SERVER_NIO_EVENTLOOP.getValue()).localAddress(LocalAddress.ANY).bind().syncUninterruptibly();
             this.endpoints.add(channelfuture);
         }
-
         return channelfuture.channel().localAddress();
     }
 
-    public void terminateEndpoints()
-    {
-        this.isAlive = false;
 
-        for (ChannelFuture channelfuture : this.endpoints)
-        {
-            try
-            {
+    public void terminateEndpoints() {
+        this.isAlive = false;
+        if(fireWall != null) fireWall.destroy();
+        for (ChannelFuture channelfuture : this.endpoints) {
+            try {
                 channelfuture.channel().close().sync();
-            }
-            catch (InterruptedException var4)
-            {
+            } catch (InterruptedException var4) {
                 LOGGER.error("Interrupted whilst closing channel");
             }
         }
     }
 
-    public void networkTick()
-    {
-        synchronized (this.networkManagers)
-        {
+
+    public void networkTick() {
+        synchronized (this.networkManagers) {
             Iterator<NetworkManager> iterator = this.networkManagers.iterator();
 
-            while (iterator.hasNext())
-            {
-                final NetworkManager networkmanager = iterator.next();
+            while (iterator.hasNext()) {
+                final NetworkManager manager = iterator.next();
 
-                if (!networkmanager.hasNoChannel())
-                {
-                    if (networkmanager.isChannelOpen())
-                    {
-                        try
-                        {
-                            networkmanager.processReceivedPackets();
-                        }
-                        catch (Exception exception)
-                        {
-                            if (networkmanager.isLocalChannel())
-                            {
+                if (!manager.hasNoChannel()) {
+                    if (manager.isChannelOpen()) {
+                        try {
+                            manager.processReceivedPackets();
+                        } catch (Exception exception) {
+                            if (manager.isLocalChannel()) {
                                 CrashReport crashreport = CrashReport.makeCrashReport(exception, "Ticking memory connection");
                                 CrashReportCategory crashreportcategory = crashreport.makeCategory("Ticking connection");
-                                crashreportcategory.addDetail("Connection", new ICrashReportDetail<String>()
-                                {
-                                    public String call() throws Exception
-                                    {
-                                        return networkmanager.toString();
-                                    }
-                                });
+                                crashreportcategory.addDetail("Connection", manager::toString);
                                 throw new ReportedException(crashreport);
                             }
 
-                            LOGGER.warn("Failed to handle packet for {}", networkmanager.getRemoteAddress(), exception);
+                            LOGGER.warn("Failed to handle packet for {}", manager.getRemoteAddress(), exception);
                             final TextComponentString textcomponentstring = new TextComponentString("Internal server error");
-                            networkmanager.sendPacket(new SPacketDisconnect(textcomponentstring), new GenericFutureListener < Future <? super Void >> ()
-                            {
-                                public void operationComplete(Future <? super Void > p_operationComplete_1_) throws Exception
-                                {
-                                    networkmanager.closeChannel(textcomponentstring);
-                                }
-                            });
-                            networkmanager.disableAutoRead();
+                            manager.sendPacket(new SPacketDisconnect(textcomponentstring), future -> manager.closeChannel(textcomponentstring));
+                            manager.disableAutoRead();
                         }
-                    }
-                    else
-                    {
+                    } else {
                         iterator.remove();
-                        networkmanager.handleDisconnection();
+                        manager.handleDisconnection();
                     }
                 }
             }
         }
     }
 
-    public MinecraftServer getServer()
-    {
+
+    public MinecraftServer getServer() {
         return this.server;
     }
 }

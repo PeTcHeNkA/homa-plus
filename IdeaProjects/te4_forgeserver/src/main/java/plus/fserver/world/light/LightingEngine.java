@@ -89,6 +89,13 @@ public class LightingEngine implements ILightingEngine {
 
 
     @Override
+    public void awaitUnlock() {
+        lock.lock();
+        lock.unlock();
+    }
+
+
+    @Override
     public void processLightUpdatesForType(final EnumSkyBlock lightType) {
         if (this.updating || this.world.isRemote && !this.isCallingFromMainThread()) {
             return;

@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.NetworkSystem;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.DimensionType;
@@ -16,12 +18,16 @@ import net.minecraftforge.fml.common.registry.EntityEntry;
 import net.minecraftforge.fml.common.registry.EntityRegistry;
 import net.minecraftforge.server.command.TextComponentHelper;
 import org.jetbrains.annotations.Nullable;
+import plus.fserver.ElcaConfig;
 import plus.fserver.api.ServerCommand;
 import plus.fserver.plugin.SSPatchLoader;
 import plus.fserver.utls.EntityLodFunc;
 import plus.tson.TsonFile;
 import plus.tson.utl.ByteStrBuilder;
 import java.io.File;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.text.DecimalFormat;
 import java.util.*;
 
@@ -77,6 +83,108 @@ public class ElcaCommands extends ServerCommand {
             } else {
                 mobs(server, sender);
             }
+        }
+        if(arg0.equalsIgnoreCase("soft")){
+            soft(server, sender, args);
+        }
+    }
+
+
+    private void soft(MinecraftServer server, ICommandSender sender, String[] args){
+        NetworkSystem networkSystem = server.getNetworkSystem();
+        if(args.length > 1){
+            if(!networkSystem.hasFirewall()){
+                reply(sender, "Firewall not exists");
+                return;
+            }
+            boolean flag = false;
+            String sub = args[1];
+            switch (sub){
+                case "enable":
+                    networkSystem.setFireWallEnabled(true);
+                    networkSystem.fireWall().softSetAll(server, ElcaConfig.DEFAULT_SOFT_TIME, true);
+                    break;
+                case "disable":
+                    networkSystem.setFireWallEnabled(false);
+                    break;
+                case "log":{
+                    if(args.length > 2){
+                        String sub2 = args[2];
+                        switch (sub2){
+                            case "e":
+                            case "enable":
+                                networkSystem.fireWall().setLog(true);
+                                break;
+                            case "d":
+                            case "disable":
+                                networkSystem.fireWall().setLog(false);
+                                break;
+                        }
+                    }
+                    reply(sender, "Invalid args. Use /elca soft log 'enable/disable'");
+                    return;
+                }
+                case "uset":
+                    flag = true;
+                case "set":{
+                    boolean allow;
+                    InetAddress addr = null;
+                    long time;
+                    l1: if(args.length > 3){
+                        String arg2 = args[2];
+                        String arg3 = args[3];
+                        switch (arg3){
+                            case "a":
+                            case "allow":
+                                allow = true;
+                                break;
+                            case "d":
+                            case "deny":
+                                allow = false;
+                                break;
+                            default:
+                                break l1;
+                        }
+                        try {
+                            if(args.length > 4){
+                                time = Long.parseLong(args[4]);
+                            } else {
+                                time = ElcaConfig.DEFAULT_SOFT_TIME;
+                            }
+                            l2: if(flag){
+                                ArrayList<EntityPlayerMP> players = new ArrayList<>(server.getPlayerList().getPlayers());
+                                for (EntityPlayerMP player : players) {
+                                    if(player.getName().equalsIgnoreCase(arg2)){
+                                        SocketAddress sock = player.connection.netManager.channel().remoteAddress();
+                                        addr = ((InetSocketAddress)sock).getAddress();
+                                        break l2;
+                                    }
+                                }
+                                reply(sender, "Player [%s] not founded", arg2);
+                            } else {
+                                addr = InetAddress.getByName(arg2);
+                            }
+                        } catch (Exception e){
+                            reply(sender, "Critical error, see console");
+                            e.printStackTrace();
+                            return;
+                        }
+
+                        networkSystem.fireWall().softSet(addr, allow);
+
+                        reply(sender, "Set [%s] to [%s] on [%s]"
+                                , addr, allow ? "allow" : "deny",
+                                new Date(System.currentTimeMillis() + time)
+                        );
+                    }
+                    reply(sender, "Invalid args. Use /elca soft set 'ip' 'allow/deny' 'time'");
+                    return;
+                }
+            }
+        } else {
+            reply(sender, "Firewall: %s, enabled: %s",
+                    networkSystem.hasFirewall(), networkSystem.fireWallEnabled()
+            );
         }
     }
 

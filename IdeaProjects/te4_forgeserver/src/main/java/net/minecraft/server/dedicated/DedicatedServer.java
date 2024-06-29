@@ -71,7 +71,6 @@ public class DedicatedServer extends MinecraftServer implements IServer {
     public static boolean allowPlayerLogins = false;
 
 
-
     public DedicatedServer(File anvilFileIn, DataFixer dataFixerIn, YggdrasilAuthenticationService authServiceIn, MinecraftSessionService sessionServiceIn, GameProfileRepository profileRepoIn, PlayerProfileCache profileCacheIn) {
         super(anvilFileIn, Proxy.NO_PROXY, dataFixerIn, authServiceIn, sessionServiceIn, profileRepoIn, profileCacheIn);
 //        Thread thread = new Thread("Server Infinisleeper") {{
@@ -122,20 +121,14 @@ public class DedicatedServer extends MinecraftServer implements IServer {
         this.settings = new PropertyManager(new File("server.properties"));
         this.eula = new ServerEula(new File("eula.txt"));
 
-        if (!this.eula.hasAcceptedEULA())
-        {
+        if (!this.eula.hasAcceptedEULA()) {
             LOGGER.info("You need to agree to the EULA in order to run the server. Go to eula.txt for more info.");
             this.eula.createEULAFile();
             return false;
-        }
-        else
-        {
-            if (this.isSinglePlayer())
-            {
+        } else {
+            if (this.isSinglePlayer()) {
                 this.setHostname("127.0.0.1");
-            }
-            else
-            {
+            } else {
                 this.setOnlineMode(this.settings.getBooleanProperty("online-mode", true));
                 this.setPreventProxyConnections(this.settings.getBooleanProperty("prevent-proxy-connections", false));
                 this.setHostname(this.settings.getStringProperty("server-ip", ""));
@@ -150,13 +143,11 @@ public class DedicatedServer extends MinecraftServer implements IServer {
             this.setForceGamemode(this.settings.getBooleanProperty("force-gamemode", false));
             this.setPlayerIdleTimeout(this.settings.getIntProperty("player-idle-timeout", 0));
 
-            if (this.settings.getIntProperty("difficulty", 1) < 0)
-            {
-                this.settings.setProperty("difficulty", Integer.valueOf(0));
+            if (this.settings.getIntProperty("difficulty", 1) < 0) {
+                this.settings.setProperty("difficulty", 0);
             }
-            else if (this.settings.getIntProperty("difficulty", 1) > 3)
-            {
-                this.settings.setProperty("difficulty", Integer.valueOf(3));
+            else if (this.settings.getIntProperty("difficulty", 1) > 3) {
+                this.settings.setProperty("difficulty", 3);
             }
 
             this.canSpawnStructures = this.settings.getBooleanProperty("generate-structures", true);
@@ -165,13 +156,11 @@ public class DedicatedServer extends MinecraftServer implements IServer {
             LOGGER.info("Default game type: {}", (Object)this.gameType);
             InetAddress inetaddress = null;
 
-            if (!this.getServerHostname().isEmpty())
-            {
+            if (!this.getServerHostname().isEmpty()) {
                 inetaddress = InetAddress.getByName(this.getServerHostname());
             }
 
-            if (this.getServerPort() < 0)
-            {
+            if (this.getServerPort() < 0) {
                 this.setServerPort(this.settings.getIntProperty("server-port", 25565));
             }
 
@@ -179,43 +168,34 @@ public class DedicatedServer extends MinecraftServer implements IServer {
             this.setKeyPair(CryptManager.generateKeyPair());
             LOGGER.info("Starting Minecraft server on {}:{}", this.getServerHostname().isEmpty() ? "*" : this.getServerHostname(), Integer.valueOf(this.getServerPort()));
 
-            try
-            {
+            try {
                 this.getNetworkSystem().addEndpoint(inetaddress, this.getServerPort());
-            }
-            catch (IOException ioexception)
-            {
+            } catch (IOException ioexception) {
                 LOGGER.warn("**** FAILED TO BIND TO PORT!");
                 LOGGER.warn("The exception was: {}", (Object)ioexception.toString());
                 LOGGER.warn("Perhaps a server is already running on that port?");
                 return false;
             }
 
-            if (!this.isServerInOnlineMode())
-            {
+            if (!this.isServerInOnlineMode()) {
                 LOGGER.warn("**** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!");
                 LOGGER.warn("The server will make no attempt to authenticate usernames. Beware.");
                 LOGGER.warn("While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose.");
                 LOGGER.warn("To change this, set \"online-mode\" to \"true\" in the server.properties file.");
             }
 
-            if (this.convertFiles())
-            {
+            if (this.convertFiles()) {
                 this.getPlayerProfileCache().save();
             }
 
-            if (!PreYggdrasilConverter.tryConvert(this.settings))
-            {
+            if (!PreYggdrasilConverter.tryConvert(this.settings)) {
                 return false;
-            }
-            else
-            {
+            } else {
                 net.minecraftforge.fml.common.FMLCommonHandler.instance().onServerStarted();
                 this.setPlayerList(new DedicatedPlayerList(this));
                 long j = System.nanoTime();
 
-                if (this.getFolderName() == null)
-                {
+                if (this.getFolderName() == null) {
                     this.setFolderName(this.settings.getStringProperty("level-name", "world"));
                 }
 
@@ -224,27 +204,21 @@ public class DedicatedServer extends MinecraftServer implements IServer {
                 String s2 = this.settings.getStringProperty("generator-settings", "");
                 long k = (new Random()).nextLong();
 
-                if (!s.isEmpty())
-                {
-                    try
-                    {
+                if (!s.isEmpty()) {
+                    try {
                         long l = Long.parseLong(s);
 
-                        if (l != 0L)
-                        {
+                        if (l != 0L) {
                             k = l;
                         }
-                    }
-                    catch (NumberFormatException var16)
-                    {
+                    } catch (NumberFormatException var16) {
                         k = (long)s.hashCode();
                     }
                 }
 
                 WorldType worldtype = WorldType.byName(s1);
 
-                if (worldtype == null)
-                {
+                if (worldtype == null) {
                     worldtype = WorldType.DEFAULT;
                 }
 
@@ -267,22 +241,19 @@ public class DedicatedServer extends MinecraftServer implements IServer {
                 LOGGER.info("Done ({})! For help, type \"help\" or \"?\"", (Object)s3);
                 this.currentTime = getCurrentTimeMillis();
 
-                if (this.settings.hasProperty("announce-player-achievements"))
-                {
+                if (this.settings.hasProperty("announce-player-achievements")) {
                     this.worlds[0].getGameRules().setOrCreateGameRule("announceAdvancements", this.settings.getBooleanProperty("announce-player-achievements", true) ? "true" : "false");
                     this.settings.removeProperty("announce-player-achievements");
                     this.settings.saveProperties();
                 }
 
-                if (this.settings.getBooleanProperty("enable-query", false))
-                {
+                if (this.settings.getBooleanProperty("enable-query", false)) {
                     LOGGER.info("Starting GS4 status listener");
                     this.rconQueryThread = new RConThreadQuery(this);
                     this.rconQueryThread.startThread();
                 }
 
-                if (this.settings.getBooleanProperty("enable-rcon", false))
-                {
+                if (this.settings.getBooleanProperty("enable-rcon", false)) {
                     LOGGER.info("Starting remote control listener");
                     this.rconThread = new RConThreadMain(this);
                     this.rconThread.startThread();

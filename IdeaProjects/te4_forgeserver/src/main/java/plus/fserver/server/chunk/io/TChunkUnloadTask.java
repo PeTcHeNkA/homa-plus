@@ -18,7 +18,9 @@ public class TChunkUnloadTask extends TChunkTask{
         this.chunk = chunk;
         this.chunk.setSaveStatus(true);
 
-        if(ElcaConfig.PROCESS_LIGHT_ON_SAVE) chunk.getLightingEngine().processLightUpdates();
+        //if(ElcaConfig.PROCESS_LIGHT_ON_SAVE) {
+            //chunk.getLightingEngine().processLightUpdates();
+        //}
         pendings = chunk.getWorld().getPendingBlockUpdates(chunk, false);
     }
 
@@ -26,6 +28,7 @@ public class TChunkUnloadTask extends TChunkTask{
     @Override
     public void runTask() {
         try {
+            chunk.getLightingEngine().awaitUnlock();
             provider.saveChunkData(pendings, chunk);
             provider.saveChunkExtraData(chunk);
         } finally {

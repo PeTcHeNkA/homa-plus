@@ -17,7 +17,8 @@ public abstract class MixinSPacketChunkData {
      */
     @Overwrite
     protected int calculateChunkSize(Chunk chunkIn, boolean flag, int num) {
-        //((ILightingEngineProvider)chunkIn).getLightingEngine().processLightUpdates();
+        ((ILightingEngineProvider)chunkIn).getLightingEngine().processLightUpdates();
+
         int i = 0;
         ExtendedBlockStorage[] storageArray = chunkIn.getBlockStorageArray();
         int j = 0;

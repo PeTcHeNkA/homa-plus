@@ -13,6 +13,7 @@ public class ElcaConfig {
     public static final String REJECT_SERVER_FULL   = "The server is full!";
     public static final String REJECT_NON_WHITELIST = "You are not white-listed on this server!";
     public static final int MEAN_OVERLOAD           = 50 * 12;
+    public static final long DEFAULT_SOFT_TIME = 1000*60*60;
 
     public static int END_PORTAL_TRANSFER_DIM    = 1;
 
@@ -61,7 +62,7 @@ public class ElcaConfig {
     public static boolean REMOVE_SERVER_THREAD       = false;
     public static boolean SKIP_CHECK_NETWORK         = true;
     public static boolean PRINT_CAUSE_SERVER_STOP    = true;
-    public static boolean PROCESS_LIGHT_ON_SAVE      = false;
+    //public static boolean PROCESS_LIGHT_ON_SAVE      = false;
     public static boolean ASYNC_SAVE_CHUNKS          = true;
 
 

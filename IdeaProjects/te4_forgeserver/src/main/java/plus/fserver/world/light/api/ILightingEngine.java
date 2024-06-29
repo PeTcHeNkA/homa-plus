@@ -11,6 +11,9 @@ public interface ILightingEngine {
     void processLightUpdates();
 
 
+    default void awaitUnlock(){};
+
+
     void processLightUpdatesForType(final EnumSkyBlock p0);
 
 

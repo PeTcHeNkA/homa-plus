@@ -49,7 +49,7 @@ public class WorldGenStalactite extends CWorldGenerator {
 
     private boolean growStalactite(ChunkSelector selector, Random rand, BlockPos.MutableBlockPos pos) {
         if (selector.isAirBlock(pos))
-            for (int limit = 10, start = pos.getY(), curY = start; curY < 255 && limit-- > 0; curY++) {
+            for (int limit = 10, start = pos.getY()+1, curY = start; curY < 255 && limit-- > 0; curY++) {
                 pos.setY(curY);
                 IBlockState state;
                 if ((state = selector.getCurState(pos)).getBlock().getMaterial(state) == canGrowAt) {

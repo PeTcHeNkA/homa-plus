@@ -125,7 +125,6 @@ public abstract class MinecraftServer implements ICommandSender, Runnable, IThre
     public final long[] tickTimeArray = new long[100];
     //public long[][] timeOfLastDimensionTick;
 
-//    public java.util.Hashtable<Integer, long[]> worldTickTimes = new java.util.Hashtable<>();
     public java.util.Hashtable<Integer, long[]> worldTickTimes = new java.util.Hashtable<>();
 
     private KeyPair serverKeyPair;
