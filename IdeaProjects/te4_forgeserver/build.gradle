@@ -163,7 +163,7 @@ sourceSets {
     }
 }
 
-//jar.finalizedBy('proguard')
+jar.finalizedBy('proguard')
 
 tasks.register('proguard', ProGuardTask) {
 

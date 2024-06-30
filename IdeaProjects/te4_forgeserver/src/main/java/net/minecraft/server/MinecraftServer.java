@@ -87,6 +87,7 @@ import org.jetbrains.annotations.NotNull;
 import plus.fserver.ElcaConfig;
 import plus.fserver.server.AsyWorldTickerV2;
 import plus.fserver.server.ElcaCommands;
+import plus.tson.TsonFile;
 
 
 public abstract class MinecraftServer implements ICommandSender, Runnable, IThreadListener, ISnooperInfo{
@@ -166,6 +167,7 @@ public abstract class MinecraftServer implements ICommandSender, Runnable, IThre
         this.profileRepo = profileRepoIn;
         this.profileCache = profileCacheIn;
         this.anvilFile = anvilFileIn;
+        preInit();
 
         this.networkSystem = new NetworkSystem(this);
         initTicker();
@@ -174,6 +176,12 @@ public abstract class MinecraftServer implements ICommandSender, Runnable, IThre
         this.anvilConverterForAnvilFile = new AnvilSaveConverter(anvilFileIn, dataFixerIn);
         this.dataFixer = dataFixerIn;
     }
+
+
+    protected void preInit(){
+        ElcaConfig.load();
+    }
+
 
     static {
         ElcaCommands.init();
@@ -1212,7 +1220,7 @@ public abstract class MinecraftServer implements ICommandSender, Runnable, IThre
 
 
 
-    public void initTicker(){
+    protected void initTicker(){
         ticker = new AsyWorldTickerV2(this);
     }
 

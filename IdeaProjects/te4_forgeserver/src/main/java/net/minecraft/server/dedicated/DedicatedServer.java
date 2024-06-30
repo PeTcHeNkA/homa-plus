@@ -73,19 +73,6 @@ public class DedicatedServer extends MinecraftServer implements IServer {
 
     public DedicatedServer(File anvilFileIn, DataFixer dataFixerIn, YggdrasilAuthenticationService authServiceIn, MinecraftSessionService sessionServiceIn, GameProfileRepository profileRepoIn, PlayerProfileCache profileCacheIn) {
         super(anvilFileIn, Proxy.NO_PROXY, dataFixerIn, authServiceIn, sessionServiceIn, profileRepoIn, profileCacheIn);
-//        Thread thread = new Thread("Server Infinisleeper") {{
-//                this.setDaemon(true);
-//                this.start();
-//            }
-//            public void run() {
-//                while (true) {
-//                    try {
-//                        Thread.sleep(2147483647L);
-//                    } catch (InterruptedException var2) {
-//                        ;}
-//                }
-//            }
-//        };
         SSPatchLoader.printLogo();
     }
 

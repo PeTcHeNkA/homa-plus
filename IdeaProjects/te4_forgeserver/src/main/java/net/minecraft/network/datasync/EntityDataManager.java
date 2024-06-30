@@ -11,7 +11,6 @@ import java.util.Objects;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.annotation.Nullable;
-
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
@@ -20,7 +19,6 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ReportedException;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -51,10 +49,10 @@ public class EntityDataManager {
                 }
             } catch (ClassNotFoundException ignored) {}
         }
-        int j;
+        int id;
 
         if (NEXT_ID_MAP.containsKey(clazz)) {
-            j = NEXT_ID_MAP.get(clazz).intValue() + 1;
+            id = NEXT_ID_MAP.get(clazz).intValue() + 1;
         } else {
             int i = 0;
             Class<?> oclass1 = clazz;
@@ -67,13 +65,13 @@ public class EntityDataManager {
                     break;
                 }
             }
-            j = i;
+            id = i;
         }
-        if (j > 254) {
-            throw new IllegalArgumentException("Data value id is too big with " + j + "! (Max is " + 254 + ")");
+        if (id > 254) {
+            throw new IllegalArgumentException("Data value id is too big with " + id + "! (Max is " + 254 + ")");
         } else {
-            NEXT_ID_MAP.put(clazz, Integer.valueOf(j));
-            return serializer.createKey(j);
+            NEXT_ID_MAP.put(clazz, Integer.valueOf(id));
+            return serializer.createKey(id);
         }
     }
 

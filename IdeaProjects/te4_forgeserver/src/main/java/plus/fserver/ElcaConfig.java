@@ -1,6 +1,8 @@
 package plus.fserver;
 
 import plus.tson.TsonFile;
+import plus.tson.TsonMap;
+
 import java.io.File;
 import static plus.tson.ext.TsonNumUtils.*;
 import static plus.tson.ext.TsonBoolUtils.*;
@@ -74,52 +76,57 @@ public class ElcaConfig {
     }
 
 
-    static {
+    public static TsonFile load(){
         TsonFile file = new TsonFile("elca-config.tson");
+        init(file);
+        return file;
+    }
 
-        NATIVES                    = dir(file.getOrDefaultStr("elca-natives", "elca_natives"));
 
-        TIME_PACKET_RATE           = calc(file, "time-packet-rate"            , TIME_PACKET_RATE           );
-        CHUNK_TICK_RADIUS_1        = calc(file, "chunk-tick-radius-m"         , CHUNK_TICK_RADIUS_1        );
-        CHUNK_TICK_RADIUS_2        = calc(file, "chunk-tick-radius-s"         , CHUNK_TICK_RADIUS_2        );
-        BALANCE_BLOCK_TICK         = calc(file, "balance-block-tick"          , BALANCE_BLOCK_TICK         );
-        BALANCE_BLOCK_CRITICAL     = calc(file, "balance-block-critical"      , BALANCE_BLOCK_CRITICAL     );
+    public static void init(TsonMap map){
+        NATIVES                    = dir(map.getOrDefaultStr("elca-natives", "elca_natives"));
 
-        MEAN_BALANCE_BLOCK         = calc(file, "mean-balance-block"          ,     35                 )*12;
-        MEAN_BALANCE_MOB           = calc(file, "mean-balance-mob"            ,     35                 )*12;
+        TIME_PACKET_RATE           = calc(map, "time-packet-rate"            , TIME_PACKET_RATE           );
+        CHUNK_TICK_RADIUS_1        = calc(map, "chunk-tick-radius-m"         , CHUNK_TICK_RADIUS_1        );
+        CHUNK_TICK_RADIUS_2        = calc(map, "chunk-tick-radius-s"         , CHUNK_TICK_RADIUS_2        );
+        BALANCE_BLOCK_TICK         = calc(map, "balance-block-tick"          , BALANCE_BLOCK_TICK         );
+        BALANCE_BLOCK_CRITICAL     = calc(map, "balance-block-critical"      , BALANCE_BLOCK_CRITICAL     );
 
-        GOAL_TICK_RATE             = calc(file, "goal-tick-rate"              , GOAL_TICK_RATE             );
-        RECHECK_SPAWNER_RATE       = calc(file, "recheck-spawner-rate"        , RECHECK_SPAWNER_RATE       );
-        RECHECK_CHUNKS_SPAWNER_RATE= calc(file, "recheck-chunks-spawner-rate" , RECHECK_CHUNKS_SPAWNER_RATE);
-        CHECK_TO_UNLOAD_RATE       = calc(file, "check-to-unload-rate"        , CHECK_TO_UNLOAD_RATE       );
-        SAVE_WORLD_RATE            = calc(file, "save-world-rate"             , SAVE_WORLD_RATE            );
-        NAVIGATE_CACHE_CLEAN_RATE  = calc(file, "navigation-cache-clean-rate" , NAVIGATE_CACHE_CLEAN_RATE  );
-        STD_UPDATE_NAVIGATION_RATE = calc(file, "std-update-navigation-rate"  , STD_UPDATE_NAVIGATION_RATE );
-        MAX_UPDATE_NAVIGATION_RATE = calc(file, "max-update-navigation-rate"  , MAX_UPDATE_NAVIGATION_RATE );
-        NAVIGATE_RESET_RATE        = calc(file, "navigate-reset-rate"         , NAVIGATE_RESET_RATE        );
+        MEAN_BALANCE_BLOCK         = calc(map, "mean-balance-block"          ,     35                 )*12;
+        MEAN_BALANCE_MOB           = calc(map, "mean-balance-mob"            ,     35                 )*12;
 
-        NETWORK_COMPRESSION_LVL    = calc(file, "network-compression-lvl"     , NETWORK_COMPRESSION_LVL    );
+        GOAL_TICK_RATE             = calc(map, "goal-tick-rate"              , GOAL_TICK_RATE             );
+        RECHECK_SPAWNER_RATE       = calc(map, "recheck-spawner-rate"        , RECHECK_SPAWNER_RATE       );
+        RECHECK_CHUNKS_SPAWNER_RATE= calc(map, "recheck-chunks-spawner-rate" , RECHECK_CHUNKS_SPAWNER_RATE);
+        CHECK_TO_UNLOAD_RATE       = calc(map, "check-to-unload-rate"        , CHECK_TO_UNLOAD_RATE       );
+        SAVE_WORLD_RATE            = calc(map, "save-world-rate"             , SAVE_WORLD_RATE            );
+        NAVIGATE_CACHE_CLEAN_RATE  = calc(map, "navigation-cache-clean-rate" , NAVIGATE_CACHE_CLEAN_RATE  );
+        STD_UPDATE_NAVIGATION_RATE = calc(map, "std-update-navigation-rate"  , STD_UPDATE_NAVIGATION_RATE );
+        MAX_UPDATE_NAVIGATION_RATE = calc(map, "max-update-navigation-rate"  , MAX_UPDATE_NAVIGATION_RATE );
+        NAVIGATE_RESET_RATE        = calc(map, "navigate-reset-rate"         , NAVIGATE_RESET_RATE        );
+
+        NETWORK_COMPRESSION_LVL    = calc(map, "network-compression-lvl"     , NETWORK_COMPRESSION_LVL    );
         //ASY_THREAD_POOL_SIZE       = calc(file, "async-thread-pool-size"      , ASY_THREAD_POOL_SIZE       );
 
-        MAX_ENTITY_COLLISIONS      = calc(file, "max-entity-collisions"       , MAX_ENTITY_COLLISIONS      );
-        MAX_ENTITY_COLLISIONS_MOVE = calc(file, "max-entity-collisions-move"  , MAX_ENTITY_COLLISIONS_MOVE );
-        MIN_CHANGED_BLOCKS_BUF     = calc(file, "min-changed-blocks-buf"      , MIN_CHANGED_BLOCKS_BUF     );
-        RESET_LOW_LEVEL_MOBS       = calc(file, "reset-low-level-mobs"        , RESET_LOW_LEVEL_MOBS       );
-        MAX_WORLD_SPAWNER_RANGE    = calc(file, "max-world-spawner-range"     , MAX_WORLD_SPAWNER_RANGE    );
+        MAX_ENTITY_COLLISIONS      = calc(map, "max-entity-collisions"       , MAX_ENTITY_COLLISIONS      );
+        MAX_ENTITY_COLLISIONS_MOVE = calc(map, "max-entity-collisions-move"  , MAX_ENTITY_COLLISIONS_MOVE );
+        MIN_CHANGED_BLOCKS_BUF     = calc(map, "min-changed-blocks-buf"      , MIN_CHANGED_BLOCKS_BUF     );
+        RESET_LOW_LEVEL_MOBS       = calc(map, "reset-low-level-mobs"        , RESET_LOW_LEVEL_MOBS       );
+        MAX_WORLD_SPAWNER_RANGE    = calc(map, "max-world-spawner-range"     , MAX_WORLD_SPAWNER_RANGE    );
 
-        MAX_SPONGE_POWER           = calc(file, "max-sponge-power"            , MAX_SPONGE_POWER           );
-        MAX_PISTON_POWER           = calc(file, "max-piston-power"            , MAX_PISTON_POWER           );
+        MAX_SPONGE_POWER           = calc(map, "max-sponge-power"            , MAX_SPONGE_POWER           );
+        MAX_PISTON_POWER           = calc(map, "max-piston-power"            , MAX_PISTON_POWER           );
 
-        SLOW_SWIM_AI               = calc(file, "slow-swim-ai"                , SLOW_SWIM_AI               );
-        SLOW_TEMP_CHECK            = calc(file, "slow-temp-check"             , SLOW_TEMP_CHECK            );
-        SLOW_WANDER                = calc(file, "slow-wander"                 , SLOW_WANDER                );
-        DISABLE_SESSION_LOCK       = calc(file, "disable-session-lock"        , DISABLE_SESSION_LOCK       );
+        SLOW_SWIM_AI               = calc(map, "slow-swim-ai"                , SLOW_SWIM_AI               );
+        SLOW_TEMP_CHECK            = calc(map, "slow-temp-check"             , SLOW_TEMP_CHECK            );
+        SLOW_WANDER                = calc(map, "slow-wander"                 , SLOW_WANDER                );
+        DISABLE_SESSION_LOCK       = calc(map, "disable-session-lock"        , DISABLE_SESSION_LOCK       );
 
-        IGNORE_ERRORS              = calc(file, "ignore-errors"               , IGNORE_ERRORS              );
-        REMOVE_ERROR_ENTITIES      = calc(file, "remove-error-entities"       , REMOVE_ERROR_ENTITIES      );
+        IGNORE_ERRORS              = calc(map, "ignore-errors"               , IGNORE_ERRORS              );
+        REMOVE_ERROR_ENTITIES      = calc(map, "remove-error-entities"       , REMOVE_ERROR_ENTITIES      );
 
-        OVERWORLD_ASYNC_POPULATION = calc(file, "overworld-async-population"  , OVERWORLD_ASYNC_POPULATION );
-        SKIP_CHECK_NETWORK         = calc(file, "skip-check-network"          , SKIP_CHECK_NETWORK         );
-        PRINT_CAUSE_SERVER_STOP    = calc(file, "print-case-stop"             , PRINT_CAUSE_SERVER_STOP    );
+        OVERWORLD_ASYNC_POPULATION = calc(map, "overworld-async-population"  , OVERWORLD_ASYNC_POPULATION );
+        SKIP_CHECK_NETWORK         = calc(map, "skip-check-network"          , SKIP_CHECK_NETWORK         );
+        PRINT_CAUSE_SERVER_STOP    = calc(map, "print-case-stop"             , PRINT_CAUSE_SERVER_STOP    );
     }
 }
