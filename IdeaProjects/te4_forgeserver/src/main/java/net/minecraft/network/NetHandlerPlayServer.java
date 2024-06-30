@@ -1227,13 +1227,20 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
      * @author Te4hno
      */
     public void processCustomPayload(@NotNull CPacketCustomPayload packetIn){
-        addToQueue(() -> processCustomPayload0(packetIn));
+        PacketBuffer buf = packetIn.getAndRemData();
+        addToQueue(() -> {
+            try {
+                processCustomPayload0(packetIn, buf);
+            } finally {
+                buf.release();
+            }
+        });
     }
 
 
-    private void processCustomPayload0(@NotNull CPacketCustomPayload packetIn) {
+    private void processCustomPayload0(@NotNull CPacketCustomPayload packetIn, PacketBuffer buf) {
         String s = packetIn.getChannelName();
-        PacketBuffer buf = packetIn.getBufferData();
+
         switch (s) {
             case "MC|BEdit":
                 try {
@@ -1282,7 +1289,7 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
                 break;
             case "MC|TrSel":
                 try {
-                    int k = packetIn.getBufferData().readInt();
+                    int k = buf.readInt();
                     Container container = this.player.openContainer;
 
                     if (container instanceof ContainerMerchant) {
@@ -1424,11 +1431,11 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
                 }
                 break;
             case "MC|ItemName":
-                if (this.player.openContainer instanceof ContainerRepair) {
+                if (this.player.openContainer instanceof ContainerRepair) try {
                     ContainerRepair containerrepair = (ContainerRepair) this.player.openContainer;
 
-                    if (packetIn.getBufferData() != null && packetIn.getBufferData().readableBytes() >= 1) {
-                        String s5 = ChatAllowedCharacters.filterAllowedCharacters(packetIn.getBufferData().readString(32767));
+                    if (buf != null && buf.readableBytes() >= 1) {
+                        String s5 = ChatAllowedCharacters.filterAllowedCharacters(buf.readString(32767));
 
                         if (s5.length() <= 35) {
                             containerrepair.updateItemName(s5);
@@ -1436,6 +1443,8 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
                     } else {
                         containerrepair.updateItemName("");
                     }
+                } catch (Exception e){
+                    LOGGER.error("Couldn't process [MC|ItemName]", e);
                 }
                 break;
             case "MC|Struct":
@@ -1512,9 +1521,9 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
                     LOGGER.error("Couldn't pick item", exception);
                 }
                 break;
-//            case "Elca:Check":
-//                System.out.println("Elca detected!");
-//                break;
+            case "Elca|Check":
+                LOGGER.info("User [{}] has Elca client", player.getName());
+                break;
         }
     }
 
