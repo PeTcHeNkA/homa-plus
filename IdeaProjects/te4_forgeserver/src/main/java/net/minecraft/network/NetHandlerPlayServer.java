@@ -92,17 +92,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityCommandBlock;
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.tileentity.TileEntityStructure;
-import net.minecraft.util.ChatAllowedCharacters;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.ITickable;
-import net.minecraft.util.IntHashMap;
-import net.minecraft.util.Mirror;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ReportedException;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Rotation;
-import net.minecraft.util.ServerRecipeBookHelper;
+import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -114,6 +104,7 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.ForgeHooks;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -1058,8 +1049,8 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
      * @author Te4hno
      */
     public void processTryUseItemOnBlock(final CPacketPlayerTryUseItemOnBlock packetIn) {
-        WorldServer worldserver = server.getWorld(player.dimension);
-        BlockPos blockpos = packetIn.getPos();
+        final WorldServer worldserver = server.getWorld(player.dimension);
+        final BlockPos blockpos = packetIn.getPos();
         player.markPlayerActive();
 
         if (blockpos.getY() < this.server.getBuildLimit() - 1 || packetIn.getDirection() != EnumFacing.UP && blockpos.getY() < server.getBuildLimit()) {
@@ -1069,13 +1060,22 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
                     !server.isBlockProtected(worldserver, blockpos, player)
                     && worldserver.isInWorldBorder(blockpos.getX(), blockpos.getZ())) {
 
+                final BlockPos blockPos2 = blockpos.offset(packetIn.getDirection());
+
                 addToQueue(() -> {
                     player.interactionManager.processRightClickBlock(
                             player, worldserver, player.getHeldItem(packetIn.getHand()),
                             packetIn.getHand(), blockpos, packetIn.getDirection(), packetIn.getFacingX(),
                             packetIn.getFacingY(), packetIn.getFacingZ()
                     );
-                    netManager.exec(() -> afterPlace(worldserver, blockpos, packetIn.getDirection()));
+
+                    IBlockState state1 = worldserver.localSelector.getState(blockpos);
+                    IBlockState state2 = worldserver.localSelector.getState(blockPos2);
+
+                    netManager.exec(() -> {
+                        netManager.sendPacketSync(new SPacketBlockChange(state1, blockpos));
+                        netManager.sendPacketSync(new SPacketBlockChange(state2, blockPos2));
+                    });
                 });
             }
         } else {
@@ -1083,15 +1083,23 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
             msg.getStyle().setColor(TextFormatting.RED);
             sendPacket(new SPacketChat(msg, ChatType.GAME_INFO));
 
-            afterPlace(worldserver, blockpos, packetIn.getDirection());
+            int cX1 = blockpos.getX()>>4, cZ1 = blockpos.getZ()>>4;
+            Chunk chunk = worldserver.getLoadedChunk(cX1, cZ1);
+            IBlockState state1 = (chunk == null)?BlockIDIndexes.AIR_STATE:chunk.getBlockState(blockpos);
+
+            BlockPos blockPos2 = blockpos.offset(packetIn.getDirection());
+            int cX2 = blockPos2.getX()>>4, cZ2 = blockPos2.getZ()>>4;
+
+            if(cX1 != cX2 || cZ1 != cZ2){
+                chunk = worldserver.getLoadedChunk(cX2, cZ2);
+            }
+            IBlockState state2 = (chunk == null)?BlockIDIndexes.AIR_STATE:chunk.getBlockState(blockpos);
+
+            netManager.exec(() -> {
+                netManager.sendPacketSync(new SPacketBlockChange(state1, blockpos));
+                netManager.sendPacketSync(new SPacketBlockChange(state2, blockPos2));
+            });
         }
-    }
-
-
-    private void afterPlace(WorldServer world, BlockPos pos, EnumFacing facing){
-        netManager.sendPacketSync(new SPacketBlockChange(world.localSelector.getState(pos), pos));
-        pos = pos.offset(facing);
-        netManager.sendPacketSync(new SPacketBlockChange(world.localSelector.getState(pos), pos));
     }
 
 

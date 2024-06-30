@@ -2,6 +2,7 @@ package net.minecraft.block;
 
 import java.util.Random;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
@@ -93,18 +94,21 @@ public class BlockGrass extends BlockFx implements IGrowable {
     public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand) {
         if (!worldIn.isRemote) {
             if (!worldIn.isAreaLoaded(pos, 3)) return;
-            pos = worldIn.localTempPos.setPos(pos.getX(), pos.getY()+1, pos.getZ());
+            BlockPos.MutableBlockPos up =
+                    worldIn.localTempPos.setPos(pos.getX(), pos.getY()+1, pos.getZ());
 
             ChunkSelector selector = worldIn.localSelector;
             Chunk chunk = selector.getChunkE(pos.getX()>>4, pos.getZ()>>4);
 
-            int light = worldIn.getLightFromNeighbors(pos);
-
-            if (light < 4 && chunk.getBlockState(pos).getLightOpacity(selector, pos) > 2) {
+            int light = worldIn.getLightFromNeighbors(up);
+            IBlockState swap;
+            if (light < 4 && (swap = chunk.getBlockState(up)).getLightOpacity(selector, up) > 2) {
+                IBlockState newState;
                 chunk.setBlockStateFastNoTile(
                         pos.getX(), pos.getY(), pos.getZ(),
-                        Blocks.DIRT.getDefaultState()
+                        newState = Blocks.DIRT.getDefaultState()
                 );
+                worldIn.notifyBlockUpdate(pos, swap, newState, 2);
             } else {
                 if (light >= 9) {
                     BlockPos.MutableBlockPos blockpos;
@@ -121,17 +125,16 @@ public class BlockGrass extends BlockFx implements IGrowable {
                         chunk = selector.getChunk(pos.getX()>>4, pos.getZ()>>4);
 
                         state = chunk.getBlockState(blockpos);
-                        blockpos.setY(blockpos.getY()+1);
+                        up.setPos(blockpos.getX(), blockpos.getY()+1, blockpos.getZ());
 
-                        if (state.getBlock() == Blocks.DIRT &&
-                                state.getValue(BlockDirt.VARIANT) == BlockDirt.DirtType.DIRT
-                                && worldIn.getLightFromNeighbors(blockpos) >= 4
-                                && chunk.getBlockState(blockpos).getLightOpacity(selector, pos) <= 2) {
+                        if (state.getBlock() == Blocks.DIRT && state.getValue(BlockDirt.VARIANT) == BlockDirt.DirtType.DIRT
+                                && worldIn.getLightFromNeighbors(up) >= 4 && chunk.getBlockState(up).getLightOpacity(worldIn, up) <= 2) {
 
                             chunk.setBlockStateFastNoTile(
-                                    blockpos.getX(), blockpos.getY()-1, blockpos.getZ(),
-                                    Blocks.GRASS.getDefaultState()
+                                    blockpos.getX(), blockpos.getY(), blockpos.getZ(),
+                                    swap = Blocks.GRASS.getDefaultState()
                             );
+                            worldIn.notifyBlockUpdate(blockpos, state, swap, 2);
                         }
                     }
                 }

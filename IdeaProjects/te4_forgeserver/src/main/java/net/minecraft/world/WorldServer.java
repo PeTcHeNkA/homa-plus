@@ -1477,6 +1477,12 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
     }
 
 
+    @Nullable
+    public Chunk getLoadedChunk(int chunkX, int chunkZ){
+        return chunkProviderServer.getLoadedChunk(chunkX, chunkZ);
+    }
+
+
     @Override
     public void checkSessionLock() throws MinecraftException {
         if(ElcaConfig.DISABLE_SESSION_LOCK)return;
