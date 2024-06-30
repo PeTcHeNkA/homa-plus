@@ -36,6 +36,7 @@ public class ElcaConfig {
     public static int NETWORK_COMPRESSION_LVL    = 4;
     public static int VILLAGE_TICK_RATE          = 20;
     public static int NETWORK_TICK_RATE          = 25; //50 default,
+    public static int BEACON_TICK_RATE           = 85;
     //public static int ASY_THREAD_POOL_SIZE       = Runtime.getRuntime().availableProcessors();
     //public static int ENTITY_TRACKER_UPDATE_RATE = 4;
 
@@ -116,6 +117,7 @@ public class ElcaConfig {
 
         MAX_SPONGE_POWER           = calc(map, "max-sponge-power"            , MAX_SPONGE_POWER           );
         MAX_PISTON_POWER           = calc(map, "max-piston-power"            , MAX_PISTON_POWER           );
+        BEACON_TICK_RATE           = calc(map, "beacon-tick-rate"            , BEACON_TICK_RATE           );
 
         SLOW_SWIM_AI               = calc(map, "slow-swim-ai"                , SLOW_SWIM_AI               );
         SLOW_TEMP_CHECK            = calc(map, "slow-temp-check"             , SLOW_TEMP_CHECK            );
