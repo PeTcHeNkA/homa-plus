@@ -3221,7 +3221,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
                     if (!clazz.isInstance(entity) || filter != null && !filter.apply((T) entity)) {
                         ArrayListE6<T> res = (ArrayListE6<T>) eeCache.allocArr();
 
-                                //List<T> res = getEntitiesWithinAABB0(clazz, aabb, filter);
+                        getEntitiesWithinAABB0(res, clazz, aabb, filter);
                         eeCache.add(key, (ArrayListE6<Entity>) res);
                         return res;
                     }
