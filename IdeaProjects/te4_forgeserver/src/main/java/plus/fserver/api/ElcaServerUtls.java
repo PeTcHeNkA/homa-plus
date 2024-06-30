@@ -80,6 +80,18 @@ public final class ElcaServerUtls {
     }
 
 
+    public FireWall getFireWall(MinecraftServer server){
+        if(ElcaCV2.LIBBUILD)return null;
+        return server.getNetworkSystem().fireWall();
+    }
+
+
+    public void setFireWallLog(MinecraftServer server, boolean b){
+        if(ElcaCV2.LIBBUILD)return;
+        server.getNetworkSystem().fireWall().setLog(b);
+    }
+
+
     public static ScheduledExecutorService getPool(MinecraftServer server){
         if(server.getNetworkSystem().usedPool != null)return server.getNetworkSystem().usedPool;
         LazyLoadBase<? extends EventLoopGroup> lazyloadbase;

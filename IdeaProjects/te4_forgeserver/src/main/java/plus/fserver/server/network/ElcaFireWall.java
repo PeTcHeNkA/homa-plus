@@ -5,15 +5,13 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.EventLoopGroup;
 import io.netty.util.concurrent.ScheduledFuture;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.server.MinecraftServer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
+import plus.fserver.api.FireWall;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
@@ -22,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 import static plus.fserver.ElcaConfig.DEFAULT_SOFT_TIME;
 
 
-public abstract class ElcaFireWall<T extends Channel> extends ChannelInitializer<T> {
+public abstract class ElcaFireWall<T extends Channel> extends ChannelInitializer<T> implements FireWall {
     private static final Logger LOGGER = LogManager.getLogger("FIREWALL");
     private final ConcurrentHashMap<Key,Item> map = new ConcurrentHashMap<>();
     private boolean breakUnknown = false;
@@ -80,19 +78,6 @@ public abstract class ElcaFireWall<T extends Channel> extends ChannelInitializer
     }
 
 
-    public void softSetAll(MinecraftServer server, long time, boolean allow){
-        ArrayList<EntityPlayerMP> list = new ArrayList<>(server.getPlayerList().getPlayers());
-        for(EntityPlayerMP player : list){
-            softSet(player, time, allow);
-        }
-    }
-
-
-    public boolean softSet(EntityPlayerMP player, boolean allow){
-        return softSet(player, DEFAULT_SOFT_TIME, allow);
-    }
-
-
     public boolean softSet(EntityPlayerMP player, long time, boolean allow){
         if(player.connection != null){
             Channel channel = player.connection.netManager.channel();
@@ -104,11 +89,13 @@ public abstract class ElcaFireWall<T extends Channel> extends ChannelInitializer
     }
 
 
+    @Override
     public void softSet(InetAddress address, long time, boolean allow){
         softSet(new Key(address), time, allow);
     }
 
 
+    @Override
     public void softSet(InetAddress address, boolean allow){
         softSet(new Key(address), DEFAULT_SOFT_TIME, allow);
     }

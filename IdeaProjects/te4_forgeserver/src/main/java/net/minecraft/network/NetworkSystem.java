@@ -19,7 +19,6 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.ServerSocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.timeout.ReadTimeoutHandler;
-
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.SocketAddress;
@@ -40,9 +39,11 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import plus.fserver.api.Keep;
 import plus.fserver.server.network.ElcaFireWall;
 
 
+@Keep
 public class NetworkSystem {
     private static final Logger LOGGER = LogManager.getLogger();
     public static final LazyLoadBase<NioEventLoopGroup> SERVER_NIO_EVENTLOOP = new LazyLoadBase<NioEventLoopGroup>() {
