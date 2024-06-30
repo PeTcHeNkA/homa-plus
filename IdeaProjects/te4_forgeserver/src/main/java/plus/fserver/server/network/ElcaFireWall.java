@@ -26,7 +26,7 @@ public abstract class ElcaFireWall<T extends Channel> extends ChannelInitializer
     private boolean breakUnknown = false;
     private boolean dirty = false;
     private ScheduledFuture<?> future;
-    private boolean logHistory = false;
+    private boolean logHistory = true;
 
     public ElcaFireWall(EventLoopGroup group){
         group.execute(() -> {

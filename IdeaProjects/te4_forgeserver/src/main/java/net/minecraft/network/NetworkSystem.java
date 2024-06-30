@@ -46,20 +46,21 @@ import plus.fserver.server.network.ElcaFireWall;
 @Keep
 public class NetworkSystem {
     private static final Logger LOGGER = LogManager.getLogger();
+    @Keep
     public static final LazyLoadBase<NioEventLoopGroup> SERVER_NIO_EVENTLOOP = new LazyLoadBase<NioEventLoopGroup>() {
         protected NioEventLoopGroup load() {
             return new NioEventLoopGroup(0, (new ThreadFactoryBuilder()).setNameFormat("Elca Server #%d").setDaemon(true).setThreadFactory(net.minecraftforge.fml.common.thread.SidedThreadGroups.SERVER).build());
         }
     };
 
-
+    @Keep
     public static final LazyLoadBase<EpollEventLoopGroup> SERVER_EPOLL_EVENTLOOP = new LazyLoadBase<EpollEventLoopGroup>() {
         protected EpollEventLoopGroup load() {
             return new EpollEventLoopGroup(0, (new ThreadFactoryBuilder()).setNameFormat("Elca Epoll Server #%d").setDaemon(true).setThreadFactory(net.minecraftforge.fml.common.thread.SidedThreadGroups.SERVER).build());
         }
     };
 
-
+    @Keep
     public static final LazyLoadBase<LocalEventLoopGroup> SERVER_LOCAL_EVENTLOOP = new LazyLoadBase<LocalEventLoopGroup>() {
         protected LocalEventLoopGroup load() {
             return new LocalEventLoopGroup(0, (new ThreadFactoryBuilder()).setNameFormat("Netty Local Server IO #%d").setDaemon(true).setThreadFactory(net.minecraftforge.fml.common.thread.SidedThreadGroups.CLIENT).build());
@@ -68,6 +69,7 @@ public class NetworkSystem {
 
 
     private final MinecraftServer server;
+    @Keep
     public volatile boolean isAlive;
     private final List<ChannelFuture> endpoints = Collections.synchronizedList(Lists.newArrayList());
     private final List<NetworkManager> networkManagers = Collections.synchronizedList(Lists.newArrayList());

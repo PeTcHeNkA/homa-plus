@@ -55,6 +55,7 @@ import plus.fserver.server.network.NativeCompressionEncoder;
 
 
 public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >> {
+    @Keep
     private static final GenericFutureListener[] emptyFuture = new GenericFutureListener[0];
     private static final Logger LOGGER = LogManager.getLogger();
     @Keep

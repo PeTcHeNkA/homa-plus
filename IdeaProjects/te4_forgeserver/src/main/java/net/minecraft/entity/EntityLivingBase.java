@@ -1381,42 +1381,44 @@ public abstract class EntityLivingBase extends Entity {
                         if (this.motionY > -0.5D) this.fallDistance = 1.0F;
 
                         Vec3d vec3d = this.getLookVec();
-                        float f = this.rotationPitch * 0.017453292F;
-                        double d6 = Math.sqrt(vec3d.x * vec3d.x + vec3d.z * vec3d.z);
-                        double d8 = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
-                        double d1 = vec3d.length();
-                        float f4 = MathHelper.cos(f);
-                        f4 = (float)((double)f4 * (double)f4 * Math.min(1.0D, d1 / 0.4D));
+                        float rPith = this.rotationPitch * 0.017453292F;
+                        double lookVec = vec3d.x * vec3d.x + vec3d.z * vec3d.z;
+                        double lookXZ = Math.sqrt(lookVec);
+                        double motXZ = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
+                        lookVec = Math.sqrt(lookVec + vec3d.y * vec3d.y);
+                        float f4 = MathHelper.cos(rPith);
+                        f4 = (float)((double)f4 * (double)f4 * Math.min(1.0D, lookVec * 2.5D));
                         this.motionY += -0.08D + (double)f4 * 0.06D;
+                        double temp;
 
-                        if (this.motionY < 0.0D && d6 > 0.0D) {
+                        if (this.motionY < 0.0D && lookXZ > 0.0D) {
                             double d2 = this.motionY * -0.1D * (double)f4;
                             this.motionY += d2;
-                            this.motionX += vec3d.x * d2 / d6;
-                            this.motionZ += vec3d.z * d2 / d6;
+                            this.motionX += vec3d.x * (temp = (d2 / lookXZ));
+                            this.motionZ += vec3d.z * temp;
                         }
 
-                        if (f < 0.0F) {
-                            double d10 = d8 * (double)(-MathHelper.sin(f)) * 0.04D;
+                        if (rPith < 0.0F) {
+                            double d10 = motXZ * (double)(-MathHelper.sin(rPith)) * 0.04D;
                             this.motionY += d10 * 3.2D;
-                            this.motionX -= vec3d.x * d10 / d6;
-                            this.motionZ -= vec3d.z * d10 / d6;
+                            this.motionX -= vec3d.x * (temp = (d10 / lookXZ));
+                            this.motionZ -= vec3d.z * temp;
                         }
 
-                        if (d6 > 0.0D) {
-                            this.motionX += (vec3d.x / d6 * d8 - this.motionX) * 0.1D;
-                            this.motionZ += (vec3d.z / d6 * d8 - this.motionZ) * 0.1D;
+                        if (lookXZ > 0.0D) {
+                            this.motionX += (vec3d.x / (temp = lookXZ * motXZ) - this.motionX) * 0.1D;
+                            this.motionZ += (vec3d.z / temp - this.motionZ) * 0.1D;
                         }
 
-                        this.motionX *= 0.9900000095367432D;
-                        this.motionY *= 0.9800000190734863D;
-                        this.motionZ *= 0.9900000095367432D;
-                        this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
+                        this.move(MoverType.SELF,
+                                this.motionX *= 0.9900000095367432D,
+                                this.motionY *= 0.9800000190734863D,
+                                this.motionZ *= 0.9900000095367432D
+                        );
 
                         if (this.collidedHorizontally && (!this.world.isRemote || SERVER_COMPILE)) {
-                            double d11 = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
-                            double d3 = d8 - d11;
-                            float f5 = (float)(d3 * 10.0D - 3.0D);
+                            temp = motXZ - Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
+                            float f5 = (float)(temp * 10.0D - 3.0D);
 
                             if (f5 > 0.0F) {
                                 this.playSound(this.getFallSound((int)f5), 1.0F, 1.0F);
@@ -1427,27 +1429,26 @@ public abstract class EntityLivingBase extends Entity {
                         if (this.onGround && (!this.world.isRemote || SERVER_COMPILE)) this.setFlag(7, false);
 
                     } else {
-                        float f6 = 0.91F;
+                        float fl0 = 0.91F;
                         BlockPos.MutableBlockPos blockPos = world.localTempPos;
                         IBlockEAccess access = world.access();
 
                         if (this.onGround) {
                             IBlockState underState = access.getBlockState(blockPos.setPos(this.posX, this.getEntityBoundingBox().minY - 1.0D, this.posZ));
-                            f6 = underState.getBlock().getSlipperiness(underState, access, blockPos, this) * 0.91F;
+                            fl0 = underState.getBlock().getSlipperiness(underState, access, blockPos, this) * 0.91F;
                         }
 
-                        float f7 = 0.16277136F / (f6 * f6 * f6);
-                        float f8;
+                        float fl1;
 
-                        if (this.onGround) f8 = this.getAIMoveSpeed() * f7;
-                        else f8 = this.jumpMovementFactor;
+                        if (this.onGround) fl1 = this.getAIMoveSpeed() * (0.16277136F / (fl0 * fl0 * fl0));
+                        else fl1 = this.jumpMovementFactor;
 
-                        this.moveRelative(strafe, vertical, forward, f8);
-                        f6 = 0.91F;
+                        this.moveRelative(strafe, vertical, forward, fl1);
+                        fl0 = 0.91F;
 
                         if (this.onGround) {
                             IBlockState underState = access.getBlockState(blockPos.setPos(this.posX, this.getEntityBoundingBox().minY - 1.0D, this.posZ));
-                            f6 = underState.getBlock().getSlipperiness(underState, access, blockPos, this) * 0.91F;
+                            fl0 = underState.getBlock().getSlipperiness(underState, access, blockPos, this) * 0.91F;
                         }
 
                         if (this.isOnLadder()) {
@@ -1477,8 +1478,8 @@ public abstract class EntityLivingBase extends Entity {
                             else this.motionY = 0.0D;
                         }
                         this.motionY *= 0.9800000190734863D;
-                        this.motionX *= f6;
-                        this.motionZ *= f6;
+                        this.motionX *= fl0;
+                        this.motionZ *= fl0;
                     }
                 } else {
                     double d4 = this.posY;

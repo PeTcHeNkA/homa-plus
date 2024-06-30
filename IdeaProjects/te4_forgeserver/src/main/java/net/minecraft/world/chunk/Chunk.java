@@ -604,6 +604,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
     }
 
 
+    @Keep
     public int getLightFor(EnumSkyBlock type, BlockPos pos) {
         int i = pos.getX() & 15;
         int j = pos.getY();
@@ -620,15 +621,14 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
     }
 
 
-    public void setLightFor(EnumSkyBlock type, BlockPos pos, int value) {
-        int i = pos.getX() & 15;
-        int j = pos.getY();
-        int k = pos.getZ() & 15;
-        ExtendedBlockStorage extendedblockstorage = this.storageArrays[j >> 4];
+    @Keep
+    public void setLightFor(final EnumSkyBlock type, final BlockPos pos, final int value) {
+        final int ax = pos.getX() & 15, ay = pos.getY(), az = pos.getZ() & 15;
+        ExtendedBlockStorage storage = this.storageArrays[ay >> 4];
 
-        if (extendedblockstorage == NULL_BLOCK_STORAGE) {
-            extendedblockstorage = new ExtendedBlockStorage(j >> 4 << 4, this.world.provider.hasSkyLight());
-            this.storageArrays[j >> 4] = extendedblockstorage;
+        if (storage == NULL_BLOCK_STORAGE) {
+            storage = new ExtendedBlockStorage(ay >> 4 << 4, this.world.provider.hasSkyLight());
+            this.storageArrays[ay >> 4] = storage;
             this.generateSkylightMap();
         }
 
@@ -636,10 +636,10 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
         if (type == EnumSkyBlock.SKY) {
             if (this.world.provider.hasSkyLight()) {
-                extendedblockstorage.setSkyLight(i, j & 15, k, value);
+                storage.setSkyLight(ax, ay & 15, az, value);
             }
         } else if (type == EnumSkyBlock.BLOCK) {
-            extendedblockstorage.setBlockLight(i, j & 15, k, value);
+            storage.setBlockLight(ax, ay & 15, az, value);
         }
     }
 

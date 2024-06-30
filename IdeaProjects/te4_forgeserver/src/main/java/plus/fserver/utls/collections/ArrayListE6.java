@@ -102,6 +102,11 @@ public class ArrayListE6<T> implements List<T> {
     }
 
 
+    public Object[] raw(){
+        return data;
+    }
+
+
     public void trimToSize(){
         int curSize;
         if((curSize = size) == 0){
