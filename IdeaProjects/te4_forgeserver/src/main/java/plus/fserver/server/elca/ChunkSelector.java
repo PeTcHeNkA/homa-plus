@@ -243,17 +243,15 @@ public final class ChunkSelector implements IBlockEAccess {
     public boolean setBlockState(BlockPos pos, IBlockState newState, int flags) {
         if (pos.getY() > 255 || pos.getY() < 1) return false;
         Chunk chunk = getChunkE(pos.getX()>>4, pos.getZ()>>4);
-        IBlockState oldState = chunk.getBlockStateUnchecked((pos = pos.toImmutable()).getX(), pos.getY(), pos.getZ());
+        IBlockState oldState = chunk.getBlockStateUnchecked(pos.getX(), pos.getY(), pos.getZ());
 
         if (newState.getLightOpacity(this, pos) != oldState.getLightOpacity(this, pos) ||
                 newState.getLightValue(this, pos) != oldState.getLightValue(this, pos)) {
             chunk.setBlockState(pos, newState);
             getWorld().checkLight(pos);
         } else {
-//            oldState.getBlock().breakBlock(getWorld(), pos, oldState);
             chunk.setBlockStateFast(pos.getX(), pos.getY(), pos.getZ(), oldState, newState);
         }
-
         provider.world.markAndNotifyBlock(pos, chunk, oldState, newState, flags);
         return true;
     }

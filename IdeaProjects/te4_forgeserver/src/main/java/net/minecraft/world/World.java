@@ -3618,6 +3618,13 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
+    public int getLight(int x, int y, int z, boolean checkNeighbors) {
+        if (x >= -30000000 && y >= -30000000 && z < 30000000 && x < 30000000)
+            return getLight0(x, y, z, checkNeighbors);
+        else return 15;
+    }
+
+
     //ligh
     public int getLight(BlockPos pos, boolean checkNeighbors){
         if (pos.getX() >= -30000000 && pos.getZ() >= -30000000 && pos.getX() < 30000000 && pos.getZ() < 30000000)

@@ -681,6 +681,11 @@ public class WorldClient extends World {
     }
 
 
+    public int getLight(int x, int y, int z, boolean checkNeighbors) {
+        return getLight(new BlockPos(x, y, z), checkNeighbors);
+    }
+
+
     public int getLight(BlockPos pos, boolean checkNeighbors) {
         if (pos.getX() >= -30000000 && pos.getZ() >= -30000000 && pos.getX() < 30000000 && pos.getZ() < 30000000) {
             if (checkNeighbors && this.getBlockState(pos).useNeighborBrightness()) {
