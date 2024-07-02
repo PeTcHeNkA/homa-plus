@@ -91,7 +91,7 @@ public class BlockGrass extends BlockFx implements IGrowable {
 
 
     @Override
-    public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand) {
+    public void updateTick(final World worldIn, final BlockPos pos, IBlockState state, final Random rand) {
         if (!worldIn.isRemote) {
             if (!worldIn.isAreaLoaded(pos, 3)) return;
             BlockPos.MutableBlockPos up =
@@ -101,40 +101,46 @@ public class BlockGrass extends BlockFx implements IGrowable {
             Chunk chunk = selector.getChunkE(pos.getX()>>4, pos.getZ()>>4);
 
             int light = worldIn.getLightFromNeighbors(up);
-            IBlockState swap;
-            if (light < 4 && (swap = chunk.getBlockState(up)).getLightOpacity(selector, up) > 2) {
+            if (light < 4 && chunk.getBlockState(up).getLightOpacity(selector, up) > 2) {
                 IBlockState newState;
                 chunk.setBlockStateFastNoTile(
                         pos.getX(), pos.getY(), pos.getZ(),
                         newState = Blocks.DIRT.getDefaultState()
                 );
-                worldIn.notifyBlockUpdate(pos, swap, newState, 2);
+                worldIn.notifyBlockUpdate(pos, state, newState, 2);
             } else {
                 if (light >= 9) {
-                    BlockPos.MutableBlockPos blockpos;
+                    BlockPos.MutableBlockPos blockPos = worldIn.localTempPos2;
                     for (int i = 0; i < 4; ++i) {
-                        blockpos = worldIn.localTempPos2.setPos(
+                        blockPos.setPosB(
                                 pos.getX()+(rand.nextInt(3) - 1),
-                                pos.getY()+(rand.nextInt(5) - 4),
+                                pos.getY()+(rand.nextInt(5) - 3),
                                 pos.getZ()+(rand.nextInt(3) - 1)
                         );
 
-                        if (blockpos.getY() < 0 || blockpos.getY() > 255 || !worldIn.isBlockLoaded(blockpos))
-                            return;
+                        if (blockPos.getY() < 0 || blockPos.getY() > 255) return;
 
-                        chunk = selector.getChunk(pos.getX()>>4, pos.getZ()>>4);
+                        chunk = selector.getLoadedE(blockPos.getX()>>4, blockPos.getZ()>>4);
+                        if(chunk == null)return;
 
-                        state = chunk.getBlockState(blockpos);
-                        up.setPos(blockpos.getX(), blockpos.getY()+1, blockpos.getZ());
+                        state = chunk.getBlockStateUnchecked(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+                        up.setPosB(blockPos.getX(), blockPos.getY()+1, blockPos.getZ());
 
                         if (state.getBlock() == Blocks.DIRT && state.getValue(BlockDirt.VARIANT) == BlockDirt.DirtType.DIRT
-                                && worldIn.getLightFromNeighbors(up) >= 4 && chunk.getBlockState(up).getLightOpacity(worldIn, up) <= 2) {
+                                && worldIn.getLightFromNeighbors(up) >= 4) {
 
-                            chunk.setBlockStateFastNoTile(
-                                    blockpos.getX(), blockpos.getY(), blockpos.getZ(),
-                                    swap = Blocks.GRASS.getDefaultState()
-                            );
-                            worldIn.notifyBlockUpdate(blockpos, state, swap, 2);
+                            chunk = selector.getChunk(pos.getX(), pos.getZ());
+                            up.setPosB(pos.getX(), pos.getY()+1, pos.getZ());
+
+                            if(chunk.getBlockState(up).getLightOpacity(worldIn, up) <= 2) {
+                                IBlockState swap;
+
+                                chunk.setBlockStateFastNoTile(
+                                        blockPos.getX(), blockPos.getY(), blockPos.getZ(),
+                                        swap = Blocks.GRASS.getDefaultState()
+                                );
+                                worldIn.notifyBlockUpdate(blockPos, state, swap, 2);
+                            }
                         }
                     }
                 }
