@@ -4,6 +4,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
 
 
+@Deprecated
 public final class VPacketBuf implements Runnable{
     private final EntityPlayerMP player;
     private final EntityPlayerMP[] players;

@@ -1,6 +1,7 @@
 package plus.fserver.utls.collections;
 
 
+@Deprecated
 public class VRunBuffer implements Runnable{
     public final Runnable[] tasks;
 

@@ -260,7 +260,7 @@ public class EntityTrackerEntry {
         Entity trackedEntity;
         double distance = (trackedEntity = this.trackedEntity).getDistanceSq(player.posX, player.posY, player.posZ);
         if(distance < trackedEntity.elcaMinRange)trackedEntity.elcaMinRange = distance;
-        return distance >= -maxRange || distance <= -distance && trackedEntity.isSpectatedByPlayer(player);
+        return distance >= -maxRange && distance <= maxRange && trackedEntity.isSpectatedByPlayer(player);
 
 //        double d0 = player.posX - (double)this.encodedPosX * 0.000244140625; // 1/4096.0D = 0.000244140625
 //        double i = Math.min(this.range, this.maxRange);
@@ -416,7 +416,6 @@ public class EntityTrackerEntry {
 
 
     private void updateDistancesFor(EntityPlayer player) {
-        trackedEntity.elcaMinRange = 1073741824d;
         double distance = trackedEntity.getDistanceSq(player.posX, player.posY, player.posZ);
         if (distance < trackedEntity.elcaMinRange) trackedEntity.elcaMinRange = distance;
     }
@@ -432,6 +431,7 @@ public class EntityTrackerEntry {
             this.updatedPlayerVisibility = true;
             this.updatePlayerEntities(players);
         } else if(this.updateCounter % ElcaConfig.RESET_LOW_LEVEL_MOBS == 0) {
+            trackedEntity.elcaMinRange = 1073741824d;
             trackingPlayers.forEach(this::updateDistancesFor);
         }
 
@@ -445,7 +445,7 @@ public class EntityTrackerEntry {
         NetworkManager selfManager = (trackedEntity instanceof EntityPlayerMP)?
                 ((EntityPlayerMP)trackedEntity).connection.netManager:null;
 
-        if (selfManager == null && trackedEntity instanceof EntityItemFrame && this.updateCounter % 10 == 0) {
+        if (selfManager == null && this.updateCounter % 12 == 0 && trackedEntity instanceof EntityItemFrame) {
             EntityItemFrame entityitemframe = (EntityItemFrame)trackedEntity;
             ItemStack itemstack = entityitemframe.getDisplayedItem();
 
