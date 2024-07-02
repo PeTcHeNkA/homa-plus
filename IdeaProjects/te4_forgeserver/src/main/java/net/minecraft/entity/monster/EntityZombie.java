@@ -39,6 +39,8 @@ import net.minecraftforge.common.ForgeModContainer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.ElcaMobs;
+import plus.fserver.api.IBlockEAccess;
+
 import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
@@ -223,17 +225,18 @@ public class EntityZombie extends EntityMob {
                 } else {
                     zombie = new EntityZombie(this.world);
                 }
+                IBlockEAccess access = world.access();
 
                 for (int l = 0; l < 50; ++l) {
-                    int i1 = i + MathHelper.getInt(this.rand, 7, 40) * MathHelper.getInt(this.rand, -1, 1);
-                    int j1 = j + MathHelper.getInt(this.rand, 7, 40) * MathHelper.getInt(this.rand, -1, 1);
-                    int k1 = k + MathHelper.getInt(this.rand, 7, 40) * MathHelper.getInt(this.rand, -1, 1);
+                    int bX = i + MathHelper.getInt(this.rand, 7, 40) * MathHelper.getInt(this.rand, -1, 1);
+                    int bY = j + MathHelper.getInt(this.rand, 7, 40) * MathHelper.getInt(this.rand, -1, 1);
+                    int bZ = k + MathHelper.getInt(this.rand, 7, 40) * MathHelper.getInt(this.rand, -1, 1);
 
-                    if (this.world.getBlockState(new BlockPos(i1, j1 - 1, k1)).isSideSolid(this.world,
-                            new BlockPos(i1, j1 - 1, k1), EnumFacing.UP) && this.world.getLightFromNeighbors(new BlockPos(i1, j1, k1)) < 10) {
-                        zombie.mutPosition(i1, j1, k1);
+                    if (access.getBlockState(bX, bY - 1, bZ).isSideSolid(this.world,
+                            new BlockPos(bX, bY - 1, bZ), EnumFacing.UP) && this.world.getLight(bX, bY, bZ, true) < 10) {
+                        zombie.mutPosition(bX, bY, bZ);
 
-                        if (!this.world.isAnyPlayerWithinRangeAt(i1, j1, k1, 7.0D) && this.world.checkNoEntityCollision(zombie.getEntityBoundingBox(), zombie) && this.world.getCollisionBoxes(zombie, zombie.getEntityBoundingBox()).isEmpty() && !this.world.containsAnyLiquid(zombie.getEntityBoundingBox())) {
+                        if (!this.world.isAnyPlayerWithinRangeAt(bX, bY, bZ, 7.0D) && this.world.checkNoEntityCollision(zombie.getEntityBoundingBox(), zombie) && this.world.getCollisionBoxes(zombie, zombie.getEntityBoundingBox()).isEmpty() && !this.world.containsAnyLiquid(zombie.getEntityBoundingBox())) {
                             this.world.spawnEntity(zombie);
                             if (entitylivingbase != null) zombie.setAttackTarget(entitylivingbase);
                             zombie.onInitialSpawn(this.world.getDifficultyForLocation(new BlockPos(zombie)), (IEntityLivingData)null);
