@@ -72,9 +72,11 @@ import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.util.ITeleporter;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -2186,18 +2188,17 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
 
     @Nullable // Forge: Entities that require custom handling should override this method, not the other
-    public Entity changeDimension(int dimensionIn, net.minecraftforge.common.util.ITeleporter teleporter) {
+    public Entity changeDimension(int dimensionIn, ITeleporter teleporter) {
         if ((!this.world.isRemote || SERVER_COMPILE) && !this.isDead) {
             if (!ForgeHooks.onTravelToDimension(this, dimensionIn)) return null;
-            MinecraftServer minecraftserver = this.getServer();
+            MinecraftServer server = this.getServer();
             int i = this.dimension;
-            WorldServer worldserver = minecraftserver.getWorld(i);
-            WorldServer worldserver1 = minecraftserver.getWorld(dimensionIn);
+            WorldServer wFrom = server.getWorld(i);
+            WorldServer wTo = server.getWorld(dimensionIn);
             this.dimension = dimensionIn;
 
-            if (i == 1 && dimensionIn == 1 && teleporter.isVanilla())
-            {
-                worldserver1 = minecraftserver.getWorld(0);
+            if (i == 1 && dimensionIn == 1 && teleporter.isVanilla()) {
+                wTo = server.getWorld(0);
                 this.dimension = 0;
             }
 
@@ -2206,43 +2207,47 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
             BlockPos blockpos;
 
             if (dimensionIn == 1 && teleporter.isVanilla()) {
-                blockpos = worldserver1.getSpawnCoordinate();
+                blockpos = wTo.getSpawnCoordinate();
             } else {
-                double moveFactor = worldserver.provider.getMovementFactor() / worldserver1.provider.getMovementFactor();
-                double d0 = MathHelper.clamp(this.posX * moveFactor, worldserver1.getWorldBorder().minX() + 16.0D, worldserver1.getWorldBorder().maxX() - 16.0D);
-                double d1 = MathHelper.clamp(this.posZ * moveFactor, worldserver1.getWorldBorder().minZ() + 16.0D, worldserver1.getWorldBorder().maxZ() - 16.0D);
+                double moveFactor = wFrom.provider.getMovementFactor() / wTo.provider.getMovementFactor();
+                WorldBorder border = wTo.getWorldBorder();
+                double xPos = MathHelper.clamp(this.posX * moveFactor, border.minX() + 16.0D, border.maxX() - 16.0D);
+                double zPos = MathHelper.clamp(this.posZ * moveFactor, border.minZ() + 16.0D, border.maxZ() - 16.0D);
 
-                d0 = MathHelper.clamp((int)d0, -29999872, 29999872);
-                d1 = MathHelper.clamp((int)d1, -29999872, 29999872);
+                xPos = MathHelper.clamp((int)xPos, -29999872, 29999872);
+                zPos = MathHelper.clamp((int)zPos, -29999872, 29999872);
                 float f = this.rotationYaw;
-                this.setLocationAndAngles(d0, this.posY, d1, 90.0F, 0.0F);
-                teleporter.placeEntity(worldserver1, this, f);
+                this.setLocationAndAngles(xPos, this.posY, zPos, 90.0F, 0.0F);
+                teleporter.placeEntity(wTo, this, f);
                 blockpos = new BlockPos(this);
             }
 
-            worldserver.updateEntityWithOptionalForce(this, false);
-            Entity entity = EntityList.newEntity(this.getClass(), worldserver1);
+            wFrom.updateEntityWithOptionalForce(this, false);
+
+            Entity entity = EntityList.newEntity(this.getClass(), wTo);
+            this.isDead = true;
+            wFrom.resetUpdateEntityTick();
 
             if (entity != null) {
                 entity.copyDataFromOld(this);
 
                 if (i == 1 && dimensionIn == 1 && teleporter.isVanilla()) {
-                    BlockPos blockpos1 = worldserver1.getTopSolidOrLiquidBlock(worldserver1.getSpawnPoint());
+                    BlockPos blockpos1 = wTo.getTopSolidOrLiquidBlock(wTo.getSpawnPoint());
                     entity.moveToBlockPosAndAngles(blockpos1, entity.rotationYaw, entity.rotationPitch);
                 } else {
                     entity.moveToBlockPosAndAngles(blockpos, entity.rotationYaw, entity.rotationPitch);
                 }
 
-                boolean flag = entity.forceSpawn;
-                entity.forceSpawn = true;
-                worldserver1.spawnEntity(entity);
-                entity.forceSpawn = flag;
-                worldserver1.updateEntityWithOptionalForce(entity, false);
+                WorldServer worldTo = wTo;
+                wTo.addSyncTask(() -> {
+                    boolean flag = entity.forceSpawn;
+                    entity.forceSpawn = true;
+                    worldTo.spawnEntity(entity);
+                    entity.forceSpawn = flag;
+                    worldTo.updateEntityWithOptionalForce(entity, false);
+                    worldTo.resetUpdateEntityTick();
+                });
             }
-
-            this.isDead = true;
-            worldserver.resetUpdateEntityTick();
-            worldserver1.resetUpdateEntityTick();
             return entity;
         } else {
             return null;

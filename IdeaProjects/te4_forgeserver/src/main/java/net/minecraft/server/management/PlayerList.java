@@ -1040,7 +1040,14 @@ public abstract class PlayerList {
         WorldServer worldserver = this.server.getWorld(oldId);
         player.dimension = dimensionIn;
         WorldServer newWorld = this.server.getWorld(player.dimension);
-        player.connection.netManager.sendPacketE(new SPacketRespawn(player.dimension, newWorld.getDifficulty(), newWorld.getWorldInfo().getTerrainType(), player.interactionManager.getGameType())); // Forge: Use new dimensions information
+        player.connection.netManager.sendPacketE(
+                new SPacketRespawn(
+                        player.dimension,
+                        newWorld.getDifficulty(),
+                        newWorld.getWorldInfo().getTerrainType(),
+                        player.interactionManager.getGameType()
+                )
+        );
         this.updatePermissionLevel(player);
         worldserver.removeEntityDangerously(player);
         player.isDead = false;

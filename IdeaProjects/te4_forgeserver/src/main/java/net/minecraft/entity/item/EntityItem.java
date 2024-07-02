@@ -1,6 +1,5 @@
 package net.minecraft.entity.item;
 
-import javax.annotation.Nullable;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFence;
 import net.minecraft.block.BlockFenceGate;
@@ -43,8 +42,6 @@ import plus.fserver.ElcaConfig;
 import plus.fserver.ElcaMobs;
 import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.collections.ArrayListE6;
-
-import java.util.List;
 
 
 public class EntityItem extends Entity {
@@ -392,17 +389,17 @@ public class EntityItem extends Entity {
     public boolean canBeAttackedWithItem() {
         return false;
     }
-
-
-    @Nullable
-    public Entity changeDimension(int dimensionIn, net.minecraftforge.common.util.ITeleporter teleporter) {
-        Entity entity = super.changeDimension(dimensionIn, teleporter);
-
-        if (!this.world.isRemote && entity instanceof EntityItem) {
-            ((EntityItem)entity).searchForOtherItemsNearby();
-        }
-        return entity;
-    }
+//
+//
+//    @Nullable
+//    public Entity changeDimension(int dimensionIn, ITeleporter teleporter) {
+//        Entity entity = super.changeDimension(dimensionIn, teleporter);
+//
+//        if (!this.world.isRemote && entity instanceof EntityItem) {
+//            ((EntityItem)entity).searchForOtherItemsNearby();
+//        }
+//        return entity;
+//    }
 
 
     public ItemStack getItem() {
