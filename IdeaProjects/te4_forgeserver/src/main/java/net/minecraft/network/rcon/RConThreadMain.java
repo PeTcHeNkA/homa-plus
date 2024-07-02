@@ -2,6 +2,8 @@ package net.minecraft.network.rcon;
 
 import net.minecraftforge.fml.relauncher.*;
 import com.google.common.collect.*;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.*;
 import java.io.*;
 import java.net.*;
@@ -69,6 +71,7 @@ public class RConThreadMain extends RConThreadBase {
         return lastAccept < System.currentTimeMillis();
     }
 
+
     private void updateRate(){
         lastAccept = System.currentTimeMillis() + acceptRate;
     }
@@ -115,10 +118,37 @@ public class RConThreadMain extends RConThreadBase {
     }
 
 
+    @Nullable
+    private String validPassword(){
+        String psw = this.rconPassword;
+        if(psw.length() < 20)return "Password should be >= 20 chars";
+        char[] chars = psw.toCharArray();
+        boolean hasNums = false;
+        boolean hasUppers = false;
+        boolean hasLowers = false;
+        for(char c : chars){
+            if(Character.isDigit(c)){
+                hasNums = true;
+            }
+            if(Character.isUpperCase(c)){
+                hasUppers = true;
+            }
+            if(Character.isLowerCase(c)){
+                hasLowers = true;
+            }
+        }
+        if(!hasNums) return "Password must contain at least one number";
+        if(!hasUppers) return "Password must contain at least one uppercase letter";
+        if(!hasLowers) return "Password must contain at least one lowercase letter";
+        return null;
+    }
+
+
     @Override
     public void startThread() {
-        if (this.rconPassword.isEmpty()) {
-            this.logWarning("No rcon password set in '" + this.server.getSettingsFilename() + "', rcon disabled!");
+        String msg = validPassword();
+        if (msg != null) {
+            this.logWarning("Unsafe password: ["+msg+"], rcon disabled!");
             return;
         }
         if (0 >= this.rconPort || 65535 < this.rconPort) {
