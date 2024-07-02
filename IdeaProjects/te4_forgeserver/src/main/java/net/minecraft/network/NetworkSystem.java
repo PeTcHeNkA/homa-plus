@@ -35,6 +35,7 @@ import net.minecraft.server.network.NetHandlerHandshakeTCP;
 import net.minecraft.util.LazyLoadBase;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraftforge.fml.common.network.internal.FMLNetworkHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
@@ -105,10 +106,18 @@ public class NetworkSystem {
                         chan.config().setOption(ChannelOption.TCP_NODELAY, Boolean.TRUE);
                     } catch (ChannelException var3) {}
 
-                    chan.pipeline().addLast("timeout", new ReadTimeoutHandler(net.minecraftforge.fml.common.network.internal.FMLNetworkHandler.READ_TIMEOUT)).addLast("legacy_query", new LegacyPingHandler(NetworkSystem.this)).addLast("splitter", new NettyVarint21FrameDecoder()).addLast("decoder", new NettyPacketDecoder(EnumPacketDirection.SERVERBOUND)).addLast("prepender", new NettyVarint21FrameEncoder()).addLast("encoder", new NettyPacketEncoder(EnumPacketDirection.CLIENTBOUND));
+                    chan.pipeline()
+                            .addLast("timeout"     , new ReadTimeoutHandler(FMLNetworkHandler.READ_TIMEOUT))
+                            .addLast("legacy_query", new LegacyPingHandler(NetworkSystem.this))
+                            .addLast("splitter"    , new NettyVarint21FrameDecoder())
+                            .addLast("decoder"     , new NettyPacketDecoder(EnumPacketDirection.SERVERBOUND))
+                            .addLast("prepender"   , new NettyVarint21FrameEncoder())
+                            .addLast("encoder"     , new NettyPacketEncoder(EnumPacketDirection.CLIENTBOUND));
+
                     NetworkManager manager = new NetworkManager(EnumPacketDirection.SERVERBOUND);
                     NetworkSystem.this.networkManagers.add(manager);
-                    chan.pipeline().addLast("packet_handler", manager);
+                    chan.pipeline()
+                            .addLast("packet_handler", manager);
                     manager.setNetHandler(new NetHandlerHandshakeTCP(NetworkSystem.this.server, manager));
                 }
             }).group(usedPool = lazyloadbase.getValue()).localAddress(address, port).bind().syncUninterruptibly());

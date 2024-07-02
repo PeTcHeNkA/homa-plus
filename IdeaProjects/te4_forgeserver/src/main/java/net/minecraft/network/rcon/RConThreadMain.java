@@ -86,7 +86,7 @@ public class RConThreadMain extends RConThreadBase {
                     final Socket sock = this.serverSocket.accept();
                     if(!checkRate()){
                         sock.close();
-                        return;
+                        continue;
                     }
                     sock.setSoTimeout(500);
                     if(!canAccept()) {
@@ -94,7 +94,7 @@ public class RConThreadMain extends RConThreadBase {
                     }
                     if(!canAccept()) {
                         sock.close();
-                        return;
+                        continue;
                     }
                     updateRate();
                     final RConThreadClient cli = new RConThreadClient(this.server, sock);
