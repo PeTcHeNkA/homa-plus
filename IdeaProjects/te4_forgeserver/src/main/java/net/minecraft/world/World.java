@@ -3621,27 +3621,19 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     //ligh
     public int getLight(BlockPos pos, boolean checkNeighbors){
         if (pos.getX() >= -30000000 && pos.getZ() >= -30000000 && pos.getX() < 30000000 && pos.getZ() < 30000000)
-            return getLight0(pos, checkNeighbors);
+            return getLight0(pos.getX(), pos.getY(), pos.getZ(), checkNeighbors);
         else return 15;
     }
 
 
-    private int getLight0(BlockPos pos, boolean checkNeighbors) {
-        if (checkNeighbors && localSelector.getState(pos).useNeighborBrightness()) {
-            BlockPos.MutableBlockPos temp = new BlockPos.MutableBlockPos(
-                    pos.getX(), pos.getY()+1, pos.getZ()
-            );
-            int i1 = this.getLight0(temp,   false);
-            int i =  this.getLight0(
-                    temp.setPos(pos.getX()+1, pos.getY(), pos.getZ()), false
-            );
-            temp.setX(pos.getX()-1);
-            int j =  this.getLight0(temp, false);
-            int k =  this.getLight0(
-                    temp.setPos(pos.getX(), pos.getY(), pos.getZ()+1),false
-            );
-            temp.setZ(pos.getZ()-1);
-            int l =  this.getLight0(temp,false);
+    private final BlockPos.MutableBlockPos lightTemp = new BlockPos.MutableBlockPos();
+    private int getLight0(int posX, int posY, int posZ, boolean checkNeighbors) {
+        if (checkNeighbors && localSelector.getState(posX, posY, posZ).useNeighborBrightness()) {
+            int i1 = this.getLight0U(     posX  , posY+1,     posZ  );
+            int i =  this.getLight0U(posX+1,      posY  ,     posZ  );
+            int j =  this.getLight0U(posX-1,      posY  ,     posZ  );
+            int k =  this.getLight0U(     posX  ,      posY  ,posZ+1);
+            int l =  this.getLight0U(     posX  ,      posY  ,posZ-1);
 
             if (i > i1) i1 = i;
             if (j > i1) i1 = j;
@@ -3649,14 +3641,19 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             if (l > i1) i1 = l;
 
             return i1;
-        } else if (pos.getY() < 0) {
+        } else if (posY < 0) {
             return 0;
         } else {
-            if (pos.getY() >= 256) {
-                pos = new BlockPos(pos.getX(), 255, pos.getZ());
-            }
-            return localSelector.getChunk(pos).getLightSubtracted(pos, getSkylightSubtracted());
+            if (posY > 255) posY = 255;
+            return localSelector.getChunk(posX, posZ).getLightSubtracted(posX, posY, posZ, getSkylightSubtracted());
         }
+    }
+
+
+    private int getLight0U(int posX, int posY, int posZ) {
+        if (posY < 0) return 0;
+        if (posY > 255) posY = 255;
+        return localSelector.getChunk(posX, posZ).getLightSubtracted(posX, posY, posZ, getSkylightSubtracted());
     }
 
 
