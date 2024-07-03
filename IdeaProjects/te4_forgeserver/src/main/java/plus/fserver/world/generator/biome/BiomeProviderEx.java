@@ -12,6 +12,7 @@ import net.minecraft.world.gen.ChunkGeneratorSettings;
 import net.minecraft.world.gen.layer.GenLayerEdge;
 import net.minecraft.world.storage.WorldInfo;
 import org.jetbrains.annotations.NotNull;
+import plus.fserver.api.BiomeIndexes;
 import plus.fserver.api.ElcaWorldInfo;
 import plus.fserver.world.generator.GenSession;
 import plus.fserver.world.generator.biome.layers.*;
@@ -179,7 +180,7 @@ public class BiomeProviderEx extends BiomeProvider{
 
         try {
             for (int i = 0; i < width * height; ++i) {
-                biomes[i] = Biome.getBiome(aint[i], Biomes.DEFAULT);
+                biomes[i] = BiomeIndexes.get(aint[i], Biomes.DEFAULT);
             }
             return biomes;
         }
@@ -228,7 +229,7 @@ public class BiomeProviderEx extends BiomeProvider{
                 aint = biomeIndex.getInts(cache, x, z, width, length);
 
                 for (int i = 0; i < width * length; ++i) {
-                    listToReuse[i] = Biome.getBiome(aint[i], Biomes.DEFAULT);
+                    listToReuse[i] = BiomeIndexes.get(aint[i], Biomes.DEFAULT);
                 }
             }
 
@@ -249,7 +250,7 @@ public class BiomeProviderEx extends BiomeProvider{
 
         try {
             for (int k1 = 0; k1 < i1 * j1; ++k1) {
-                Biome biome = Biome.getBiome(aint[k1]);
+                Biome biome = BiomeIndexes.get(aint[k1]);
                 if (!allowed.contains(biome)) {
                     return false;
                 }
@@ -287,7 +288,7 @@ public class BiomeProviderEx extends BiomeProvider{
         for (int l1 = 0; l1 < i1 * j1; ++l1) {
             int i2 = i + l1 % i1 << 2;
             int j2 = j + l1 / i1 << 2;
-            Biome biome = Biome.getBiome(aint[l1]);
+            Biome biome = BiomeIndexes.get(aint[l1]);
             if (biomes.contains(biome) && (blockpos == null || random.nextInt(k1 + 1) == 0)) {
                 blockpos = new BlockPos(i2, 0, j2);
                 ++k1;

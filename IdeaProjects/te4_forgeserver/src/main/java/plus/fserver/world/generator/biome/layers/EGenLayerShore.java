@@ -4,6 +4,7 @@ import net.minecraft.init.Biomes;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeJungle;
 import net.minecraft.world.biome.BiomeMesa;
+import plus.fserver.api.BiomeIndexes;
 import plus.fserver.world.generator.biome.EIntCache;
 
 
@@ -51,7 +52,7 @@ public class EGenLayerShore extends EGenLayer{
                         intCache[j + i * areaWidth] = ID_JUNGLE_EDGE;
                     }
                 } else if (biomeId != ID_EXTREME_HILLS && biomeId != ID_EXTREME_HILLS_WITH_TREES && biomeId != ID_EXTREME_HILLS_EDGE) {
-                    Biome biome = Biome.getBiome(biomeId);
+                    Biome biome = BiomeIndexes.get(biomeId);
                     if (biome != null && biome.isSnowyBiome()) {
                         this.replaceIfNeighborOcean(ints, intCache, j, i, areaWidth, biomeId, ID_COLD_BEACH);
                     } else if (biomeId != ID_MESA && biomeId != ID_MESA_ROCK) {
@@ -110,21 +111,21 @@ public class EGenLayerShore extends EGenLayer{
     }
 
 
-    private boolean isJungleCompatible(int i) {
-        Biome biome = Biome.getBiome(i);
+    private boolean isJungleCompatible(int id) {
+        Biome biome = BiomeIndexes.get(id);
         if (biome != null && biome.getBiomeClass() == BiomeJungle.class) {
             return true;
         } else {
-            return i == ID_JUNGLE_EDGE ||
-                    i == Biome.getIdForBiome(Biomes.JUNGLE) ||
-                    i == Biome.getIdForBiome(Biomes.JUNGLE_HILLS) ||
-                    i == Biome.getIdForBiome(Biomes.FOREST) ||
-                    i == Biome.getIdForBiome(Biomes.TAIGA) || isBiomeOceanic(i);
+            return id == ID_JUNGLE_EDGE ||
+                    id == Biome.getIdForBiome(Biomes.JUNGLE) ||
+                    id == Biome.getIdForBiome(Biomes.JUNGLE_HILLS) ||
+                    id == Biome.getIdForBiome(Biomes.FOREST) ||
+                    id == Biome.getIdForBiome(Biomes.TAIGA) || isBiomeOceanic(id);
         }
     }
 
 
     private boolean isMesa(int id) {
-        return Biome.getBiome(id) instanceof BiomeMesa;
+        return BiomeIndexes.get(id) instanceof BiomeMesa;
     }
 }

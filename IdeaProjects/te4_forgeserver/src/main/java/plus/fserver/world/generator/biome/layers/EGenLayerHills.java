@@ -4,6 +4,7 @@ import net.minecraft.init.Biomes;
 import net.minecraft.world.biome.Biome;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import plus.fserver.api.BiomeIndexes;
 import plus.fserver.world.generator.biome.EIntCache;
 
 
@@ -34,7 +35,7 @@ public class EGenLayerHills extends EGenLayer {
                     LOGGER.debug("old! {}", biomeId);
                 }
 
-                Biome biome = Biome.getBiomeForId(biomeId);
+                Biome biome = BiomeIndexes.get(biomeId);
                 boolean flag2 = biome != null && biome.isMutation();
                 Biome mutated;
                 if (biomeId != 0 && biomeId2 >= 2 && (biomeId2 - 2) % 29 == 1 && !flag2) {

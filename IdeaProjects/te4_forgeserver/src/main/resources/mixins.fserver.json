@@ -16,7 +16,6 @@
     "pf.EntityXPOrbPatch",
     "pf.GameDataPatch",
     "pf.SpawnListEntryPatch",
-    "server.GameDataPath",
     "stabile.ForgeRegistryPatch",
     "stabile.ServerCommandPatch",
     "stabile.WorldInfoPatch",

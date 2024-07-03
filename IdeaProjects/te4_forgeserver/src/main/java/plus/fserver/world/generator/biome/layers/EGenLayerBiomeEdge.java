@@ -2,6 +2,7 @@ package plus.fserver.world.generator.biome.layers;
 
 import net.minecraft.init.Biomes;
 import net.minecraft.world.biome.Biome;
+import plus.fserver.api.BiomeIndexes;
 import plus.fserver.world.generator.biome.EIntCache;
 
 
@@ -106,12 +107,12 @@ public class EGenLayerBiomeEdge extends EGenLayer {
     }
 
 
-    private boolean canBiomesBeNeighbors(int i1, int i2) {
-        if (biomesEqualOrMesaPlateau(i1, i2)) {
+    private boolean canBiomesBeNeighbors(int id1, int id2) {
+        if (biomesEqualOrMesaPlateau(id1, id2)) {
             return true;
         } else {
-            Biome biome = Biome.getBiome(i1);
-            Biome biome1 = Biome.getBiome(i2);
+            Biome biome = BiomeIndexes.get(id1);
+            Biome biome1 = BiomeIndexes.get(id2);
 
             if (biome != null && biome1 != null) {
                 Biome.TempCategory category = biome.getTempCategory();

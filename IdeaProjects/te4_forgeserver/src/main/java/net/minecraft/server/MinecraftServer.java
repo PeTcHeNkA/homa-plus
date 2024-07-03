@@ -85,9 +85,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import plus.fserver.ElcaConfig;
+import plus.fserver.api.BiomeIndexes;
 import plus.fserver.server.AsyWorldTickerV2;
 import plus.fserver.server.ElcaCommands;
-import plus.tson.TsonFile;
 
 
 public abstract class MinecraftServer implements ICommandSender, Runnable, IThreadListener, ISnooperInfo{
@@ -160,6 +160,7 @@ public abstract class MinecraftServer implements ICommandSender, Runnable, IThre
         if(!hasIndex){
             hasIndex = true;
             BlockIDIndexes.makeIndex();
+            BiomeIndexes.makeIndexIfNed();
         }
         this.serverProxy = proxyIn;
         this.authService = authServiceIn;

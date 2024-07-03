@@ -2,6 +2,8 @@ package plus.fserver.world.generator.biome.layers;
 
 import net.minecraft.init.Biomes;
 import net.minecraft.world.biome.Biome;
+import net.minecraftforge.common.BiomeManager;
+import plus.fserver.api.BiomeIndexes;
 import plus.fserver.world.generator.biome.EIntCache;
 
 
@@ -67,8 +69,8 @@ public abstract class EGenLayer{
         if (biomeIDA == biomeIDB) {
             return true;
         } else {
-            Biome biome = Biome.getBiome(biomeIDA);
-            Biome biome1 = Biome.getBiome(biomeIDB);
+            Biome biome = BiomeIndexes.get(biomeIDA);
+            Biome biome1 = BiomeIndexes.get(biomeIDB);
 
             if (biome != null && biome1 != null) {
                 if (biome != Biomes.MESA_ROCK && biome != Biomes.MESA_CLEAR_ROCK) {
@@ -84,7 +86,7 @@ public abstract class EGenLayer{
 
 
     protected static boolean isBiomeOceanic(int id) {
-        return net.minecraftforge.common.BiomeManager.oceanBiomes.contains(Biome.getBiome(id));
+        return BiomeManager.oceanBiomes.contains(BiomeIndexes.get(id));
     }
 
     /* ======================================== FORGE START =====================================*/

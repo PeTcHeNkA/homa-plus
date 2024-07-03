@@ -38,19 +38,19 @@ public final class ElcaBiomeRegistrator {
     }
 
 
-    public static void registerAll(){
-        if(INST == null){
-            System.out.println("This biomes lib is ready registered!");
-            return;
-        }
-        ArrayList<Tuple<Biome, Integer>> biomes = INST.biomes;
-        INST = null;
-        ElcaForgeRegistry<Biome> registry = (ElcaForgeRegistry<Biome>) Biome.REGISTRY;
-        for(Tuple<Biome, Integer> pair:biomes){
-            registry.register(pair.B, pair.A);
-        }
-        System.out.println("PATCHED BIOMES LOADED");
-    }
+//    public static void registerAll(){
+//        if(INST == null){
+//            System.out.println("This biomes lib is ready registered!");
+//            return;
+//        }
+//        ArrayList<Tuple<Biome, Integer>> biomes = INST.biomes;
+//        INST = null;
+//        ElcaForgeRegistry<Biome> registry = (ElcaForgeRegistry<Biome>) Biome.REGISTRY;
+//        for(Tuple<Biome, Integer> pair:biomes){
+//            registry.register(pair.B, pair.A);
+//        }
+//        System.out.println("PATCHED BIOMES LOADED");
+//    }
 
 
     private static ElcaBiomeRegistrator INST = new ElcaBiomeRegistrator();

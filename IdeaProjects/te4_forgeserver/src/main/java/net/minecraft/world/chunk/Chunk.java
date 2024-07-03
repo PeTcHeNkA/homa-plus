@@ -1116,7 +1116,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
             this.blockBiomeArray[z << 4 | x] = (byte)(k & 255);
         }
 
-        Biome biome1 = Biome.getBiome(k);
+        Biome biome1 = BiomeIndexes.get(k);
         return biome1 == null ? Biomes.PLAINS : biome1;
     }
 
