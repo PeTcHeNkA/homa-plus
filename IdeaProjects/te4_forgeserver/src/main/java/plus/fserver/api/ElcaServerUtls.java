@@ -63,7 +63,7 @@ public final class ElcaServerUtls {
     }
 
 
-    public static WoldLocal registerWorldLocal(String name, Function<World,Object> func){
+    public static WoldLocal registerWorldLocal(String name, Function<World, Object> func){
         if(ElcaCV2.LIBBUILD)throw new UnsupportedOperationException("Use only on Elca Server!");
         synchronized (localRegistry) {
             if (localRegistry.containsKey(name)) {
@@ -115,7 +115,7 @@ public final class ElcaServerUtls {
     }
 
 
-    public static final class WoldLocal{
+    public static final class WoldLocal implements Function<World,Object>{
         private final int id;
         private final Function<World,Object> factory;
 
@@ -133,6 +133,12 @@ public final class ElcaServerUtls {
         public Object get(World world){
             if(ElcaCV2.LIBBUILD)throw new UnsupportedOperationException("Use only on Elca Server!");
             return world.getLocal(id);
+        }
+
+
+        @Override
+        public Object apply(World world) {
+            return get(world);
         }
     }
 }

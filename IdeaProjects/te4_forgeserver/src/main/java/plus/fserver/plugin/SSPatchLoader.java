@@ -10,7 +10,6 @@ import plus.tson.TsonCSVParser;
 import plus.tson.TsonList;
 import plus.tson.TsonObj;
 import plus.tson.security.ClassManager;
-
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.List;
@@ -116,11 +115,6 @@ public class SSPatchLoader extends TweakEngine implements IClassTransformer, ITw
             classLoader.registerTransformer("plus.fserver.plugin.SSPatchLoader");
         }
         preLoadClasses();
-        try {
-            ElcaBiomes.registerIfNeed();
-        } catch (Throwable t){
-            t.printStackTrace();
-        }
     }
 
 

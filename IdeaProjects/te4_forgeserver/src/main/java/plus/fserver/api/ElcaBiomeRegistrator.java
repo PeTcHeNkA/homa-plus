@@ -6,14 +6,20 @@ import plus.tson.utl.Tuple;
 import java.util.ArrayList;
 
 
-public final class PBiomeRegistrator {
+public final class ElcaBiomeRegistrator {
     private final ArrayList<Tuple<Biome, Integer>> biomes = new ArrayList<>();
 
-    private PBiomeRegistrator(){}
+    private ElcaBiomeRegistrator(){}
 
 
     public static void addToQueue(Biome biome, int id){
+        if(INST == null)throw new RuntimeException("READY REGISTERED!");
         INST.biomes.add(new Tuple<>(biome, id));
+    }
+
+
+    public static boolean isRegistered(){
+        return INST == null;
     }
 
 
@@ -32,5 +38,20 @@ public final class PBiomeRegistrator {
     }
 
 
-    private static PBiomeRegistrator INST = new PBiomeRegistrator();
+    public static void registerAll(){
+        if(INST == null){
+            System.out.println("This biomes lib is ready registered!");
+            return;
+        }
+        ArrayList<Tuple<Biome, Integer>> biomes = INST.biomes;
+        INST = null;
+        ElcaForgeRegistry<Biome> registry = (ElcaForgeRegistry<Biome>) Biome.REGISTRY;
+        for(Tuple<Biome, Integer> pair:biomes){
+            registry.register(pair.B, pair.A);
+        }
+        System.out.println("PATCHED BIOMES LOADED");
+    }
+
+
+    private static ElcaBiomeRegistrator INST = new ElcaBiomeRegistrator();
 }

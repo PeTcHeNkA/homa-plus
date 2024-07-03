@@ -5,6 +5,7 @@
   "package": "plus.fserver.mixins",
   "refmap": "mixins.fserver.refmap.json",
   "plugin": "plus.fserver.plugin.SSLightLoader",
+  "target": "@env(DEFAULT)",
   "mixins": [
     "exp.RegionFilePatch",
     "expmem.ItemStackPatch",
@@ -15,6 +16,7 @@
     "pf.EntityXPOrbPatch",
     "pf.GameDataPatch",
     "pf.SpawnListEntryPatch",
+    "server.GameDataPath",
     "stabile.ForgeRegistryPatch",
     "stabile.ServerCommandPatch",
     "stabile.WorldInfoPatch",
