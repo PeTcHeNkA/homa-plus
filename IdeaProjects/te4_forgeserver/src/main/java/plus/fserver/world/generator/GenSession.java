@@ -7,7 +7,7 @@ import plus.fserver.world.generator.biome.layers.EGenLayer;
 import java.util.Random;
 
 
-public final class GenSession extends EIntCache{
+public class GenSession extends EIntCache{
     public double[] mainNoiseRegion;
     public double[] minLimitRegion;
     public double[] maxLimitRegion;

@@ -1008,6 +1008,7 @@ public abstract class PlayerList {
      * @author Te4hno
      */
     public void playerLoggedIn(final EntityPlayerMP playerIn) {
+        playerIn.connection.setLock(true);
         this.playerEntityList.add(playerIn);
         this.uuidToPlayerMap.put(playerIn.getUniqueID(), playerIn);
 
@@ -1023,11 +1024,14 @@ public abstract class PlayerList {
         });
 
         WorldServer worldserver = this.server.getWorld(playerIn.dimension);
-
-        worldserver.addSyncTask(() -> {
-            worldserver.spawnEntity(playerIn);
-            this.preparePlayer(playerIn, null);
-        });
+        worldserver.getChunkProvider().loadChunk(
+                MathHelper.floor(playerIn.posX) >> 4, MathHelper.floor(playerIn.posZ) >> 4,
+                () -> {
+                    worldserver.spawnEntity(playerIn);
+                    PlayerList.this.preparePlayer(playerIn, null);
+                    playerIn.connection.setLock(false);
+                }
+        );
     }
 
 

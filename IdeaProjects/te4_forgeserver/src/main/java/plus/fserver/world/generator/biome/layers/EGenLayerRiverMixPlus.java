@@ -2,6 +2,7 @@ package plus.fserver.world.generator.biome.layers;
 
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.gen.ChunkGeneratorSettings;
 import plus.fserver.api.BiomeIndexes;
 import plus.fserver.api.ExBiome;
 import plus.fserver.world.generator.biome.BiomeLib;
@@ -46,7 +47,8 @@ public class EGenLayerRiverMixPlus extends EGenLayer {
     private static boolean isBad(int id){
         Biome biome = BiomeIndexes.get(id);
         if(biome instanceof ExBiome){
-            return ((ExBiome) biome).getSelfSettings().riverSize == 0;
+            ChunkGeneratorSettings stn = ((ExBiome) biome).getSelfSettings();
+            if(stn != null)return stn.riverSize == 0;
         }
         return false;
     }
