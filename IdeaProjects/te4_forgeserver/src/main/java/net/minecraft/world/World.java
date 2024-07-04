@@ -90,7 +90,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public static double MAX_ENTITY_RADIUS = 2.0D;
 
     private int seaLevel = 63;
-    protected boolean scheduledUpdatesAreImmediate;
+    protected int scheduledUpdatesAreImmediate = 0;
     public final List<Entity> loadedEntityList;
     public final EntityIDHashSplitedList realEntityList;
     protected final List<Entity> unloadedEntityList = Lists.newArrayList();
@@ -2117,9 +2117,9 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     public void immediateBlockTick(BlockPos pos, IBlockState state, Random random) {
-        this.scheduledUpdatesAreImmediate = true;
+        this.scheduledUpdatesAreImmediate = ElcaConfig.IMMEDIATE_UPDATE_LIMIT;
         state.getBlock().updateTick(this, pos, state, random);
-        this.scheduledUpdatesAreImmediate = false;
+        this.scheduledUpdatesAreImmediate = 0;
     }
 
 

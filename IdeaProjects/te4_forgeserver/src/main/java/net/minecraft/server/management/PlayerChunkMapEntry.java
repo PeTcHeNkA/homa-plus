@@ -58,7 +58,7 @@ public class PlayerChunkMapEntry extends ArrayListE6<EntityPlayerMP> implements 
 
     @Override
     public void run() {
-        chunk = PlayerChunkMapEntry.this.playerChunkMap.getWorldServer().getChunkProvider().loadChunk(posX, posZ);
+        chunk = this.playerChunkMap.getWorldServer().getChunkProvider().loadChunk(posX, posZ);
         if(chunk != null)chunk.setUnloadQueued(false);
         loading = false;
     }

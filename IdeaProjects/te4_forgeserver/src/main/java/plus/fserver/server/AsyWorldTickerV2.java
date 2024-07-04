@@ -248,7 +248,7 @@ public final class AsyWorldTickerV2 implements ThreadFactory{
             worldserver.getEntityTracker().tick();
 
             server.worldTickTimes.get(inf.id)[inf.tickCounter % 100] = System.nanoTime() - curNanoTime;
-        } catch (Exception exception){
+        } catch (Exception | StackOverflowError exception){
             onError(worldserver, exception);
         } catch (OutOfMemoryError error){
             long curTime = System.currentTimeMillis();

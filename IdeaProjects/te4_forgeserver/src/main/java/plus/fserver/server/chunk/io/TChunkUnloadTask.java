@@ -18,10 +18,13 @@ public class TChunkUnloadTask extends TChunkTask{
         this.chunk = chunk;
         this.chunk.setSaveStatus(true);
 
-        //if(ElcaConfig.PROCESS_LIGHT_ON_SAVE) {
-            //chunk.getLightingEngine().processLightUpdates();
-        //}
-        pendings = chunk.getWorld().getPendingBlockUpdates(chunk, false);
+        List<NextTickListEntry> pendings = null;
+        try {
+            pendings = chunk.getWorld().getPendingBlockUpdates(chunk, false);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        this.pendings = pendings;
     }
 
 
@@ -29,7 +32,7 @@ public class TChunkUnloadTask extends TChunkTask{
     public void runTask() {
         try {
             chunk.getLightingEngine().awaitUnlock();
-            provider.saveChunkData(pendings, chunk);
+            if(pendings != null) provider.saveChunkData(pendings, chunk);
             provider.saveChunkExtraData(chunk);
         } finally {
             this.chunk.setSaveStatus(false);

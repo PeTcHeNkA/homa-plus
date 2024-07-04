@@ -306,15 +306,16 @@ public abstract class BlockLiquid extends Block {
 
 
     public boolean checkForMixing(World worldIn, BlockPos pos, IBlockState state) {
-        return checkForMixing(worldIn, new ChunkSelector(worldIn), pos, state);
+        return checkForMixing(worldIn, null, pos, state);
     }
 
 
     public boolean checkForMixing(World worldIn, ChunkSelector selector, BlockPos pos, IBlockState state) {
         if (this.material == Material.LAVA) {
+            if(selector == null)selector = new ChunkSelector(worldIn);
             boolean flag = false;
 
-            for (EnumFacing enumfacing : EnumFacing.values()) {
+            for (EnumFacing enumfacing : EnumFacing.VALUES) {
                 if (enumfacing != EnumFacing.DOWN
                         && selector.getState(pos.offset(enumfacing)).getMaterial() == Material.WATER) {
                     flag = true;

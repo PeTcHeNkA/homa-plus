@@ -360,7 +360,8 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
     public void updateBlockTick(BlockPos pos, Block blockIn, int delay, int priority) {
         Material material = blockIn.getDefaultState().getMaterial();
 
-        if (this.scheduledUpdatesAreImmediate && material != Material.AIR) {
+        if (this.scheduledUpdatesAreImmediate > 0 && material != Material.AIR) {
+            --this.scheduledUpdatesAreImmediate;
             if (blockIn.requiresUpdates()) {
                 //Keeping here as a note for future when it may be restored.
                 //boolean isForced = false;// getPersistentChunks().containsKey(new ChunkPos(pos));

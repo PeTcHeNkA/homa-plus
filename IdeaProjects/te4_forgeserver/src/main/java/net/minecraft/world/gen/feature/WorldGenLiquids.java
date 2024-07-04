@@ -6,6 +6,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import plus.fserver.api.Keep;
 import plus.fserver.server.elca.ChunkSelector;
@@ -75,8 +76,8 @@ public class WorldGenLiquids extends WorldGenerator {
                 if (i == 3 && j == 1) {
                     selector.setStateFast(position.getX(), position.getY(), position.getZ(), state);
                     selector.current().relight(position);
-                    worldIn.scheduleBlockUpdate(position, state.getBlock(), 0, 0);
-                    //worldIn.immediateBlockTick(position, state, rand);
+                    //worldIn.scheduleBlockUpdate(position, state.getBlock(), 0, 0);/
+                    ((WorldServer)worldIn).addSyncTask(() -> worldIn.immediateBlockTick(position, state, rand));
                 }
                 return true;
             }
