@@ -244,9 +244,9 @@ public class BlockDynamicLiquid extends BlockLiquid {
 
 
     @Override
-    public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state) {
-        if (!this.checkForMixing(worldIn, pos, state)) {
-            worldIn.scheduleUpdate(pos, this, this.tickRate(worldIn));
+    public void onBlockAdded(World world, BlockPos pos, IBlockState state) {
+        if (!this.checkForMixing(world, pos, state)) {
+            world.scheduleUpdate(pos, this, this.tickRate(world));
         }
     }
 }

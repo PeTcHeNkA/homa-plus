@@ -23,14 +23,14 @@ public class BlockStaticLiquid extends BlockLiquid {
 
 
     @Override
-    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos) {
-        ChunkSelector selector = new ChunkSelector(worldIn);
-        if (!this.checkForMixing(worldIn, selector, pos, state)) {
+    public void neighborChanged(IBlockState state, World world, BlockPos pos, Block blockIn, BlockPos fromPos) {
+        ChunkSelector selector = new ChunkSelector(world);
+        if (!this.checkForMixing(world, selector, pos, state)) {
             BlockDynamicLiquid blockdynamicliquid = getFlowingBlock(this.material);
             selector.setBlockState(pos,
                     blockdynamicliquid.getDefaultState().withProperty(LEVEL, state.getValue(LEVEL)), 2
             );
-            worldIn.scheduleUpdate(pos, blockdynamicliquid, this.tickRate(worldIn));
+            world.scheduleUpdate(pos, blockdynamicliquid, this.tickRate(world));
         }
     }
 

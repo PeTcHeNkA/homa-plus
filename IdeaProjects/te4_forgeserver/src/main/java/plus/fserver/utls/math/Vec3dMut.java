@@ -81,6 +81,11 @@ public class Vec3dMut {
     }
 
 
+    public void addY(double y) {
+        this.y += y;
+    }
+
+
     public double distanceTo(double x, double y, double z) {
         double d0 = x - this.x;
         double d1 = y - this.y;
