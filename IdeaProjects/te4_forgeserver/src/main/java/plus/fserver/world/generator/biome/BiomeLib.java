@@ -12,6 +12,7 @@ import java.util.ArrayList;
 
 
 public class BiomeLib {
+    private static final int[][][] EMPTY = new int[0][][];
     public final ArrayList<EGenLayerBiomePlus.BiomeEntry>[] biomes =
             new ArrayList[BiomeManager.BiomeType.values().length];
 
@@ -84,7 +85,7 @@ public class BiomeLib {
 
 
     private static int[][][] readBounds(BiomeLib lib, TsonObj obj0){
-        if(obj0 == null)return null;
+        if(obj0 == null)return EMPTY;
         TsonList list1 = obj0.getList();
         ArrayList<int[][]> result1 = new ArrayList<>(list1.size());
 
@@ -117,7 +118,7 @@ public class BiomeLib {
             }
             if(!result.isEmpty()) result1.add(result.toArray(new int[][]{}));
         }
-        return result1.toArray(new int[][][]{});
+        return result1.toArray(EMPTY);
     }
 
 
