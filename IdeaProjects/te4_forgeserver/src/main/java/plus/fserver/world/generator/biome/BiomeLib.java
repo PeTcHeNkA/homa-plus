@@ -89,7 +89,7 @@ public class BiomeLib {
         TsonList list1 = obj0.getList();
         ArrayList<int[][]> result1 = new ArrayList<>(list1.size());
 
-        for(int cur=0;cur<result1.size();cur++) {
+        for(int cur=0;cur<list1.size();cur++) {
             TsonList list = list1.getList(cur);
             ArrayList<int[]> result = new ArrayList<>(list.size());
 
