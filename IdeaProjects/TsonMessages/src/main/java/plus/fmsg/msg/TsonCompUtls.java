@@ -13,12 +13,6 @@ import static plus.tson.ext.TsonBoolUtils.*;
 
 
 public class TsonCompUtls {
-    public static <T> T tryCast(TsonObj obj){
-        if(!obj.isCustom())throw new RuntimeException("Only custom objects is supported");
-        return (T) (obj.getField());
-    }
-
-
     public static ITextComponent msgFromTson(TsonObj obj){
         if(obj.isString())return new TextComponentAuto(obj.getStr());
         if(obj.isMap()) {
