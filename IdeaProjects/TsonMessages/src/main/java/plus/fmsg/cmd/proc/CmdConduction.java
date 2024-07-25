@@ -4,9 +4,9 @@ import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import plus.fmsg.cmd.CmdMessage;
 import plus.fmsg.cmd.McVarProvider;
-import plus.tson.TsonList;
 import plus.tson.TsonMap;
 import plus.tson.TsonObj;
+import plus.tson.ext.TsonFuncUtils;
 
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -14,20 +14,14 @@ import java.util.function.Predicate;
 
 public class CmdConduction  {
     public static Predicate<CmdMessage> ofTson(TsonObj obj) {
-        if(obj != null) {
-            if (obj.isMap()) return ofMap(obj.getMap());
-            if (obj.isString()) return ofStr(obj.getStr());
-        }
-        return msg -> true;
+        return TsonFuncUtils.predicateOf(obj, CmdConduction::ofTsonBase);
     }
 
 
-    private static Predicate<CmdMessage>[] buildAll(TsonList list) {
-        final Predicate<CmdMessage>[] parents = new Predicate[list.size()];
-        for(int i = 0; i < list.size(); i++) {
-            parents[i] = ofMap(list.getMap(i));
-        }
-        return parents;
+    protected static Predicate<CmdMessage> ofTsonBase(TsonObj obj) {
+        if (obj.isMap()) return ofMap(obj.getMap());
+        if (obj.isString()) return ofStr(obj.getStr());
+        return TsonFuncUtils.ALWAYS_TRUE;
     }
 
 
@@ -65,33 +59,7 @@ public class CmdConduction  {
     private static Predicate<CmdMessage> ofMap(TsonMap map) {
         String type = map.getStr("type");
         if(type == null){
-            if(map.containsKey("or")){
-                type = "or";
-            }else if(map.containsKey("and")){
-                type = "and";
-            }
-            if(type == null) return msg -> true;
-        }
-
-        switch (type){
-            case "or":{
-                final Predicate<CmdMessage>[] parents = buildAll(map.getList("or"));
-                return msg -> {
-                    for(Predicate<CmdMessage> parent : parents) {
-                        if(parent.test(msg)) return true;
-                    }
-                    return false;
-                };
-            }
-            case "and":{
-                final Predicate<CmdMessage>[] parents = buildAll(map.getList("and"));
-                return msg -> {
-                    for(Predicate<CmdMessage> parent : parents) {
-                        if(!parent.test(msg)) return false;
-                    }
-                    return true;
-                };
-            }
+            return msg -> true;
         }
 
         if(type.startsWith("player:")){
@@ -113,7 +81,6 @@ public class CmdConduction  {
                 }
             }
         }
-
         return msg -> true;
     }
 

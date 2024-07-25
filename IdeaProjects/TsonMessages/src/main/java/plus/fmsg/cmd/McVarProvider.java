@@ -4,7 +4,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.*;
 import net.minecraft.util.math.MathHelper;
-import plus.tson.TsonMap;
 import plus.tson.TsonObj;
 import plus.tson.format.IVarGetter;
 import plus.tson.format.IVarProvider;
@@ -18,6 +17,12 @@ public class McVarProvider implements IVarProvider<CmdMessage> {
         if (name.startsWith("user:")) {
             name = name.substring(5);
             switch (name) {
+                case "hp":
+                    return msg -> {
+                        if(msg.fromPlayer()){
+                            return String.format("%.1f", msg.getPlayer().getHealth());
+                        } else return "<infinity>";
+                    };
                 case "name":
                     return CmdMessage::getName;
                 case "uuid":

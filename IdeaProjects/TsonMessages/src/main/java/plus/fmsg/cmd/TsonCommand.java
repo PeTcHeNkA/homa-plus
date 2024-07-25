@@ -29,14 +29,14 @@ public class TsonCommand implements ICommand {
     public TsonCommand(TsonMap map){
         this.name = map.getStr("name");
         this.usage = map.getOrDefaultStr("usage", "/"+name);
-        this.task = CmdMsgProcessor.fromTson(map.get("task"));
-        this.completer = CompleteCmdProc.fromTson(map.get("completer"));
+        this.task = CmdMsgProcessor.ofTson(map.get("task"));
+        this.completer = CompleteCmdProc.ofTson(map.get("completer"));
         this.permLvl = map.getOrDefaultInt("permLvl", 4);
-        this.aliases = readAliaces(map.get("aliases"));
+        this.aliases = readAliases(map.get("aliases"));
     }
 
 
-    private static List<String> readAliaces(TsonObj obj){
+    private static List<String> readAliases(TsonObj obj){
         if(obj == null)return Collections.emptyList();
         if(obj.isList()){
             TsonList list = obj.getList();
