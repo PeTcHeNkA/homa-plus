@@ -1,0 +1,1150 @@
+{
+    "parent": "spaceworlds:item/block_star_base",
+    "overrides": [
+        {
+            "predicate": {
+                "id": 0
+            },
+            "model": "spaceworlds:item/block_star_base"
+        },
+        {
+            "predicate": {
+                "id": 1
+            },
+            "model": "spaceworlds:item/var_item_block_star_base/_1"
+        },
+        {
+            "predicate": {
+                "id": 2
+            },
+            "model": "spaceworlds:item/var_item_block_star_base/_2"
+        },
+        {
+            "predicate": {
+                "id": 3
+            },
+            "model": "spaceworlds:item/var_item_block_star_base/_3"
+        },
+        {
+            "predicate": {
+                "id": 4
+            },
+            "model": "spaceworlds:item/var_item_block_star_base/_4"
+        },
+        {
+            "predicate": {
+                "id": 5
+            },
+            "model": "spaceworlds:item/var_item_block_star_base/_5"
+        },
+        {
+            "predicate": {
+                "id": 6
+            },
+            "model": "spaceworlds:item/var_item_block_star_base/_6"
+        },
+        {
+            "predicate": {
+                "id": 7
+            },
+            "model": "spaceworlds:item/var_item_block_star_base/_7"
+        },
+        {
+            "predicate": {
+                "id": 8
+            },
+            "model": "spaceworlds:item/var_item_block_star_base/_8"
+        },
+        {
+            "predicate": {
+                "id": 12
+            },
+            "model": "spaceworlds:item/var_item_sellection_base/_12"
+        },
+        {
+            "predicate": {
+                "id": 13
+            },
+            "model": "spaceworlds:item/var_item_sellection_base/_13"
+        },
+        {
+            "predicate": {
+                "id": 20
+            },
+            "model": "spaceworlds:item/var_item_station_v1/_20"
+        },
+        {
+            "predicate": {
+                "id": 21
+            },
+            "model": "spaceworlds:item/var_item_station_v1/_21"
+        },
+        {
+            "predicate": {
+                "id": 22
+            },
+            "model": "spaceworlds:item/var_item_station_v1/_22"
+        },
+        {
+            "predicate": {
+                "id": 23
+            },
+            "model": "spaceworlds:item/var_item_station_v1/_23"
+        },
+        {
+            "predicate": {
+                "id": 24
+            },
+            "model": "spaceworlds:item/var_item_station_v2/_24"
+        },
+        {
+            "predicate": {
+                "id": 25
+            },
+            "model": "spaceworlds:item/var_item_station_v2/_25"
+        },
+        {
+            "predicate": {
+                "id": 26
+            },
+            "model": "spaceworlds:item/var_item_station_v2/_26"
+        },
+        {
+            "predicate": {
+                "id": 27
+            },
+            "model": "spaceworlds:item/var_item_station_v2/_27"
+        },
+        {
+            "predicate": {
+                "id": 28
+            },
+            "model": "spaceworlds:item/var_item_station_v3/_28"
+        },
+        {
+            "predicate": {
+                "id": 29
+            },
+            "model": "spaceworlds:item/var_item_station_v3/_29"
+        },
+        {
+            "predicate": {
+                "id": 30
+            },
+            "model": "spaceworlds:item/var_item_station_v3/_30"
+        },
+        {
+            "predicate": {
+                "id": 31
+            },
+            "model": "spaceworlds:item/var_item_station_v3/_31"
+        },
+        {
+            "predicate": {
+                "id": 32
+            },
+            "model": "spaceworlds:item/var_item_station_v4/_32"
+        },
+        {
+            "predicate": {
+                "id": 33
+            },
+            "model": "spaceworlds:item/var_item_station_v4/_33"
+        },
+        {
+            "predicate": {
+                "id": 34
+            },
+            "model": "spaceworlds:item/var_item_station_v4/_34"
+        },
+        {
+            "predicate": {
+                "id": 35
+            },
+            "model": "spaceworlds:item/var_item_station_v4/_35"
+        },
+        {
+            "predicate": {
+                "id": 51
+            },
+            "model": "spaceworlds:item/var_item_mets_v1/_51"
+        },
+        {
+            "predicate": {
+                "id": 52
+            },
+            "model": "spaceworlds:item/var_item_mets_v1/_52"
+        },
+        {
+            "predicate": {
+                "id": 53
+            },
+            "model": "spaceworlds:item/var_item_mets_v1/_53"
+        },
+        {
+            "predicate": {
+                "id": 54
+            },
+            "model": "spaceworlds:item/var_item_mets_v1/_54"
+        },
+        {
+            "predicate": {
+                "id": 55
+            },
+            "model": "spaceworlds:item/var_item_mets_v1/_55"
+        },
+        {
+            "predicate": {
+                "id": 56
+            },
+            "model": "spaceworlds:item/var_item_mets_v1/_56"
+        },
+        {
+            "predicate": {
+                "id": 57
+            },
+            "model": "spaceworlds:item/var_item_mets_v1/_57"
+        },
+        {
+            "predicate": {
+                "id": 58
+            },
+            "model": "spaceworlds:item/var_item_mets_v1/_58"
+        },
+        {
+            "predicate": {
+                "id": 59
+            },
+            "model": "spaceworlds:item/var_item_mets_v2/_59"
+        },
+        {
+            "predicate": {
+                "id": 60
+            },
+            "model": "spaceworlds:item/var_item_mets_v2/_60"
+        },
+        {
+            "predicate": {
+                "id": 61
+            },
+            "model": "spaceworlds:item/var_item_mets_v2/_61"
+        },
+        {
+            "predicate": {
+                "id": 62
+            },
+            "model": "spaceworlds:item/var_item_mets_v2/_62"
+        },
+        {
+            "predicate": {
+                "id": 63
+            },
+            "model": "spaceworlds:item/var_item_mets_v2/_63"
+        },
+        {
+            "predicate": {
+                "id": 64
+            },
+            "model": "spaceworlds:item/var_item_mets_v2/_64"
+        },
+        {
+            "predicate": {
+                "id": 65
+            },
+            "model": "spaceworlds:item/var_item_mets_v2/_65"
+        },
+        {
+            "predicate": {
+                "id": 66
+            },
+            "model": "spaceworlds:item/var_item_mets_v2/_66"
+        },
+        {
+            "predicate": {
+                "id": 67
+            },
+            "model": "spaceworlds:item/var_item_mets_v3/_67"
+        },
+        {
+            "predicate": {
+                "id": 68
+            },
+            "model": "spaceworlds:item/var_item_mets_v3/_68"
+        },
+        {
+            "predicate": {
+                "id": 69
+            },
+            "model": "spaceworlds:item/var_item_mets_v3/_69"
+        },
+        {
+            "predicate": {
+                "id": 70
+            },
+            "model": "spaceworlds:item/var_item_mets_v3/_70"
+        },
+        {
+            "predicate": {
+                "id": 71
+            },
+            "model": "spaceworlds:item/var_item_mets_v3/_71"
+        },
+        {
+            "predicate": {
+                "id": 72
+            },
+            "model": "spaceworlds:item/var_item_mets_v3/_72"
+        },
+        {
+            "predicate": {
+                "id": 73
+            },
+            "model": "spaceworlds:item/var_item_mets_v3/_73"
+        },
+        {
+            "predicate": {
+                "id": 74
+            },
+            "model": "spaceworlds:item/var_item_mets_v3/_74"
+        },{
+            "predicate": {
+                "id": 81
+            },
+            "model": "spaceworlds:item/var_item_setelite_base/_81"
+        },
+        {
+            "predicate": {
+                "id": 82
+            },
+            "model": "spaceworlds:item/var_item_setelite_base/_82"
+        },
+        {
+            "predicate": {
+                "id": 83
+            },
+            "model": "spaceworlds:item/var_item_setelite_base/_83"
+        },
+        {
+            "predicate": {
+                "id": 84
+            },
+            "model": "spaceworlds:item/var_item_setelite_base/_84"
+        },
+        {
+            "predicate": {
+                "id": 85
+            },
+            "model": "spaceworlds:item/var_item_setelite_base/_85"
+        },
+        {
+            "predicate": {
+                "id": 86
+            },
+            "model": "spaceworlds:item/var_item_setelite_base/_86"
+        },
+        {
+            "predicate": {
+                "id": 87
+            },
+            "model": "spaceworlds:item/var_item_setelite_base/_87"
+        },
+        {
+            "predicate": {
+                "id": 88
+            },
+            "model": "spaceworlds:item/var_item_setelite_base/_88"
+        },
+        {
+            "predicate": {
+                "id": 89
+            },
+            "model": "spaceworlds:item/var_item_setelite_base/_89"
+        },
+        {
+            "predicate": {
+                "id": 90
+            },
+            "model": "spaceworlds:item/var_item_setelite_base/_90"
+        },
+        {
+            "predicate": {
+                "id": 91
+            },
+            "model": "spaceworlds:item/var_item_setelite_base/_91"
+        },
+        {
+            "predicate": {
+                "id": 92
+            },
+            "model": "spaceworlds:item/var_item_setelite_base/_92"
+        },
+        {
+            "predicate": {
+                "id": 93
+            },
+            "model": "spaceworlds:item/var_item_setelite_base/_93"
+        },
+        {
+            "predicate": {
+                "id": 94
+            },
+            "model": "spaceworlds:item/var_item_setelite_base/_94"
+        },
+        {
+            "predicate": {
+                "id": 95
+            },
+            "model": "spaceworlds:item/var_item_setelite_base/_95"
+        },
+        {
+            "predicate": {
+                "id": 96
+            },
+            "model": "spaceworlds:item/var_item_setelite_base/_96"
+        },
+        {
+            "predicate": {
+                "id": 97
+            },
+            "model": "spaceworlds:item/var_item_setelite_base/_97"
+        },
+        {
+            "predicate": {
+                "id": 98
+            },
+            "model": "spaceworlds:item/var_item_setelite_base/_98"
+        },
+        {
+            "predicate": {
+                "id": 99
+            },
+            "model": "spaceworlds:item/var_item_setelite_base/_99"
+        },
+        {
+            "predicate": {
+                "id": 100
+            },
+            "model": "spaceworlds:item/var_item_setelite_base/_100"
+        },
+        {
+            "predicate": {
+                "id": 101
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_101"
+        },
+        {
+            "predicate": {
+                "id": 102
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_102"
+        },
+        {
+            "predicate": {
+                "id": 103
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_103"
+        },
+        {
+            "predicate": {
+                "id": 104
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_104"
+        },
+        {
+            "predicate": {
+                "id": 105
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_105"
+        },
+        {
+            "predicate": {
+                "id": 106
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_106"
+        },
+        {
+            "predicate": {
+                "id": 107
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_107"
+        },
+        {
+            "predicate": {
+                "id": 108
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_108"
+        },
+        {
+            "predicate": {
+                "id": 109
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_109"
+        },
+        {
+            "predicate": {
+                "id": 110
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_110"
+        },
+        {
+            "predicate": {
+                "id": 111
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_111"
+        },
+        {
+            "predicate": {
+                "id": 112
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_112"
+        },
+        {
+            "predicate": {
+                "id": 113
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_113"
+        },
+        {
+            "predicate": {
+                "id": 114
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_114"
+        },
+        {
+            "predicate": {
+                "id": 115
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_115"
+        },
+        {
+            "predicate": {
+                "id": 116
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_116"
+        },
+        {
+            "predicate": {
+                "id": 117
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_117"
+        },
+        {
+            "predicate": {
+                "id": 118
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_118"
+        },
+        {
+            "predicate": {
+                "id": 119
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_119"
+        },
+        {
+            "predicate": {
+                "id": 120
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_120"
+        },
+        {
+            "predicate": {
+                "id": 121
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_121"
+        },
+        {
+            "predicate": {
+                "id": 122
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_122"
+        },
+        {
+            "predicate": {
+                "id": 123
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_123"
+        },
+        {
+            "predicate": {
+                "id": 124
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_124"
+        },
+        {
+            "predicate": {
+                "id": 125
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_125"
+        },
+        {
+            "predicate": {
+                "id": 126
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_126"
+        },
+        {
+            "predicate": {
+                "id": 127
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_127"
+        },
+        {
+            "predicate": {
+                "id": 128
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_128"
+        },
+        {
+            "predicate": {
+                "id": 129
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_129"
+        },
+        {
+            "predicate": {
+                "id": 130
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_130"
+        },
+        {
+            "predicate": {
+                "id": 131
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_131"
+        },
+        {
+            "predicate": {
+                "id": 132
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_132"
+        },
+        {
+            "predicate": {
+                "id": 133
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_133"
+        },
+        {
+            "predicate": {
+                "id": 134
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_134"
+        },
+        {
+            "predicate": {
+                "id": 135
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_135"
+        },
+        {
+            "predicate": {
+                "id": 136
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_136"
+        },
+        {
+            "predicate": {
+                "id": 137
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_137"
+        },
+        {
+            "predicate": {
+                "id": 138
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_138"
+        },
+        {
+            "predicate": {
+                "id": 139
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_139"
+        },
+        {
+            "predicate": {
+                "id": 140
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_140"
+        },
+        {
+            "predicate": {
+                "id": 141
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_141"
+        },
+        {
+            "predicate": {
+                "id": 142
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_142"
+        },
+        {
+            "predicate": {
+                "id": 143
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_143"
+        },
+        {
+            "predicate": {
+                "id": 144
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_144"
+        },
+        {
+            "predicate": {
+                "id": 145
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_145"
+        },
+        {
+            "predicate": {
+                "id": 146
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_146"
+        },
+        {
+            "predicate": {
+                "id": 147
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_147"
+        },
+        {
+            "predicate": {
+                "id": 148
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_148"
+        },
+        {
+            "predicate": {
+                "id": 149
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_149"
+        },
+        {
+            "predicate": {
+                "id": 150
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_150"
+        },
+        {
+            "predicate": {
+                "id": 151
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_151"
+        },
+        {
+            "predicate": {
+                "id": 152
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_152"
+        },
+        {
+            "predicate": {
+                "id": 153
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_153"
+        },
+        {
+            "predicate": {
+                "id": 154
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_154"
+        },
+        {
+            "predicate": {
+                "id": 155
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_155"
+        },
+        {
+            "predicate": {
+                "id": 156
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_156"
+        },
+        {
+            "predicate": {
+                "id": 157
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_157"
+        },
+        {
+            "predicate": {
+                "id": 158
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_158"
+        },
+        {
+            "predicate": {
+                "id": 159
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_159"
+        },
+        {
+            "predicate": {
+                "id": 160
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_160"
+        },
+        {
+            "predicate": {
+                "id": 161
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_161"
+        },
+        {
+            "predicate": {
+                "id": 162
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_162"
+        },
+        {
+            "predicate": {
+                "id": 163
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_163"
+        },
+        {
+            "predicate": {
+                "id": 164
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_164"
+        },
+        {
+            "predicate": {
+                "id": 165
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_165"
+        },
+        {
+            "predicate": {
+                "id": 166
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_166"
+        },
+        {
+            "predicate": {
+                "id": 167
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_167"
+        },
+        {
+            "predicate": {
+                "id": 168
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_168"
+        },
+        {
+            "predicate": {
+                "id": 169
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_169"
+        },
+        {
+            "predicate": {
+                "id": 170
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_170"
+        },
+        {
+            "predicate": {
+                "id": 171
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_171"
+        },
+        {
+            "predicate": {
+                "id": 172
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_172"
+        },
+        {
+            "predicate": {
+                "id": 173
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_173"
+        },
+        {
+            "predicate": {
+                "id": 174
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_174"
+        },
+        {
+            "predicate": {
+                "id": 175
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_175"
+        },
+        {
+            "predicate": {
+                "id": 176
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_176"
+        },
+        {
+            "predicate": {
+                "id": 177
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_177"
+        },
+        {
+            "predicate": {
+                "id": 178
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_178"
+        },
+        {
+            "predicate": {
+                "id": 179
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_179"
+        },
+        {
+            "predicate": {
+                "id": 180
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_180"
+        },
+        {
+            "predicate": {
+                "id": 181
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_181"
+        },
+        {
+            "predicate": {
+                "id": 182
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_182"
+        },
+        {
+            "predicate": {
+                "id": 183
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_183"
+        },
+        {
+            "predicate": {
+                "id": 184
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_184"
+        },
+        {
+            "predicate": {
+                "id": 185
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_185"
+        },
+        {
+            "predicate": {
+                "id": 186
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_186"
+        },
+        {
+            "predicate": {
+                "id": 187
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_187"
+        },
+        {
+            "predicate": {
+                "id": 188
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_188"
+        },
+        {
+            "predicate": {
+                "id": 189
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_189"
+        },
+        {
+            "predicate": {
+                "id": 190
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_190"
+        },
+        {
+            "predicate": {
+                "id": 191
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_191"
+        },
+        {
+            "predicate": {
+                "id": 192
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_192"
+        },
+        {
+            "predicate": {
+                "id": 193
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_193"
+        },
+        {
+            "predicate": {
+                "id": 194
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_194"
+        },
+        {
+            "predicate": {
+                "id": 195
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_195"
+        },
+        {
+            "predicate": {
+                "id": 196
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_196"
+        },
+        {
+            "predicate": {
+                "id": 197
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_197"
+        },
+        {
+            "predicate": {
+                "id": 198
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_198"
+        },
+        {
+            "predicate": {
+                "id": 199
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_199"
+        },
+        {
+            "predicate": {
+                "id": 200
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_200"
+        },
+        {
+            "predicate": {
+                "id": 201
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_201"
+        },
+        {
+            "predicate": {
+                "id": 202
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_202"
+        },
+        {
+            "predicate": {
+                "id": 203
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_203"
+        },
+        {
+            "predicate": {
+                "id": 204
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_204"
+        },
+        {
+            "predicate": {
+                "id": 205
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_205"
+        },
+        {
+            "predicate": {
+                "id": 206
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_206"
+        },
+        {
+            "predicate": {
+                "id": 207
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_207"
+        },
+        {
+            "predicate": {
+                "id": 208
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_208"
+        },
+        {
+            "predicate": {
+                "id": 209
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_209"
+        },
+        {
+            "predicate": {
+                "id": 210
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_210"
+        },
+        {
+            "predicate": {
+                "id": 211
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_211"
+        },
+        {
+            "predicate": {
+                "id": 212
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_212"
+        },
+        {
+            "predicate": {
+                "id": 213
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_213"
+        },
+        {
+            "predicate": {
+                "id": 214
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_214"
+        },
+        {
+            "predicate": {
+                "id": 215
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_215"
+        },
+        {
+            "predicate": {
+                "id": 216
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_216"
+        },
+        {
+            "predicate": {
+                "id": 217
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_217"
+        },
+        {
+            "predicate": {
+                "id": 218
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_218"
+        },
+        {
+            "predicate": {
+                "id": 219
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_219"
+        },
+        {
+            "predicate": {
+                "id": 220
+            },
+            "model": "spaceworlds:item/var_item_block_planet_base/_220"
+        }
+    ]
+}
