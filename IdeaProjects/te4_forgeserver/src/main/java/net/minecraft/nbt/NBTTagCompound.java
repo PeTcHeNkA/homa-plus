@@ -4,6 +4,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import net.minecraft.crash.CrashReport;
@@ -11,7 +12,8 @@ import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.util.ReportedException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import plus.fserver.utls.FastValidators;
+import plus.fserver.ElcaCV;
+import plus.fserver.utls.NbtUtils;
 import plus.tson.utl.Te4HashMap;
 
 
@@ -40,7 +42,7 @@ public class NBTTagCompound extends NBTBase {
             byte b0;
 
             while ((b0 = readType(input, sizeTracker)) != 0) {
-                String s = readKey(input, sizeTracker);
+                String s = readKey(input);
                 sizeTracker.read(224 + 16L * s.length());
                 NBTBase nbtbase = readNBT(b0, s, input, depth + 1, sizeTracker);
 
@@ -82,13 +84,28 @@ public class NBTTagCompound extends NBTBase {
     }
 
 
+    public void setByteU(String key, byte value){
+        this.tagMap.fput(key, NbtUtils.create(value));
+    }
+
+
     public void setShort(String key, short value) {
         this.tagMap.fput(key, new NBTTagShort(value));
     }
 
 
+    public void setShortU(String key, short value) {
+        this.tagMap.fput(key, NbtUtils.create(value));
+    }
+
+
     public void setInteger(String key, int value) {
         this.tagMap.fput(key, new NBTTagInt(value));
+    }
+
+
+    public void setIntegerU(String key, int value) {
+        this.tagMap.fput(key, NbtUtils.create(value));
     }
 
 
@@ -140,7 +157,7 @@ public class NBTTagCompound extends NBTBase {
 
 
     public void setBoolean(String key, boolean value) {
-        this.setByte(key, (byte)(value ? 1 : 0));
+        this.tagMap.fput(key, NbtUtils.create(value));
     }
 
 
@@ -354,6 +371,7 @@ public class NBTTagCompound extends NBTBase {
     }
 
 
+    @Override
     public NBTTagCompound copy() {
         NBTTagCompound nbttagcompound = new NBTTagCompound();
         for (Map.Entry<String, NBTBase> node: this.tagMap.entrySet())
@@ -390,17 +408,18 @@ public class NBTTagCompound extends NBTBase {
     }
 
 
-    private static String readKey(DataInput input, NBTSizeTracker sizeTracker) throws IOException {
+    private static String readKey(DataInput input) throws IOException {
+        if(ElcaCV.INTERN_NBT_KEYS) return input.readUTF().intern();
         return input.readUTF();
     }
 
 
-    static NBTBase readNBT(byte id, String key, DataInput input, int depth, NBTSizeTracker sizeTracker) throws IOException {
-        sizeTracker.read(32); //Forge: 4 extra bytes for the object allocation.
+    static NBTBase readNBT(byte id, String key, DataInput input, int depth, NBTSizeTracker tracker) throws IOException {
+        tracker.read(32); //Forge: 4 extra bytes for the object allocation.
         NBTBase nbtbase = NBTBase.create(id);
 
         try {
-            nbtbase.read(input, depth, sizeTracker);
+            nbtbase.read(input, depth, tracker);
             return nbtbase;
         }
         catch (IOException ioexception) {
@@ -409,6 +428,55 @@ public class NBTTagCompound extends NBTBase {
             crashreportcategory.addCrashSection("Tag name", key);
             crashreportcategory.addCrashSection("Tag type", id);
             throw new ReportedException(crashreport);
+        }
+    }
+
+
+    protected static NBTBase createAndRead(byte b, DataInput input, int depth, NBTSizeTracker tracker) throws IOException {
+        switch (b) {
+            case 0:
+                return NBTTagEnd.read(tracker);
+            case 1:
+                return NBTTagByte.read(input, tracker);
+            case 2:
+                return NBTTagShort.read(input, tracker);
+            case 3:
+                return NBTTagInt.read(input, tracker);
+            case 4:
+                return NBTTagLong.read(input, tracker);
+            case 5:
+                return NBTTagFloat.read(input, tracker);
+            case 6:
+                return NBTTagDouble.read(input, tracker);
+            case 7: {
+                NBTTagByteArray arr = new NBTTagByteArray();
+                arr.read(input, depth, tracker);
+                return arr;
+            }
+            case 8: {
+                NBTTagString str = new NBTTagString();
+                str.read(input, depth, tracker);
+                return str;
+            }
+            case 9:
+                return NBTTagList.createAndRead(input, depth, tracker);
+            case 10: {
+                NBTTagCompound nbt = new NBTTagCompound();
+                nbt.read(input, depth, tracker);
+                return nbt;
+            }
+            case 11: {
+                NBTTagIntArray nbt = new NBTTagIntArray();
+                nbt.read(input, depth, tracker);
+                return nbt;
+            }
+            case 12:{
+                NBTTagLongArray arr = new NBTTagLongArray();
+                arr.read(input, depth, tracker);
+                return arr;
+            }
+            default:
+                return null;
         }
     }
 

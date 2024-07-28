@@ -95,6 +95,8 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.ElcaCV;
+import plus.fserver.utls.NbtUtils;
+
 import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
@@ -854,16 +856,17 @@ public abstract class EntityPlayer extends EntityLivingBase {
     }
 
 
+    @Override
     public void writeEntityToNBT(NBTTagCompound nbt) {
         super.writeEntityToNBT(nbt);
-        nbt.setInteger("DataVersion", 1343);
+        nbt.setTag("DataVersion", NbtUtils.DATA_VERSION);
         nbt.setTag("Inventory", this.inventory.writeToNBT(new NBTTagList()));
-        nbt.setInteger("SelectedItemSlot", this.inventory.currentItem);
+        nbt.setIntegerU("SelectedItemSlot", this.inventory.currentItem);
         nbt.setBoolean("Sleeping", this.sleeping);
-        nbt.setShort("SleepTimer", (short)this.sleepTimer);
+        nbt.setShortU("SleepTimer", (short)this.sleepTimer);
         nbt.setFloat("XpP", this.experience);
-        nbt.setInteger("XpLevel", this.experienceLevel);
-        nbt.setInteger("XpTotal", this.experienceTotal);
+        nbt.setIntegerU("XpLevel", this.experienceLevel);
+        nbt.setIntegerU("XpTotal", this.experienceTotal);
         nbt.setInteger("XpSeed", this.xpSeed);
         nbt.setInteger("Score", this.getScore());
         net.minecraftforge.fml.common.FMLCommonHandler.instance().getDataFixer().writeVersionData(nbt); //Moved down so it doesn't keep missing every MC update.

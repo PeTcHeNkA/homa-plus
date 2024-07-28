@@ -12,7 +12,7 @@ import plus.fserver.api.Keep;
 import plus.fserver.server.elca.ChunkSelector;
 
 
-public class WorldGenClay extends WorldGenerator {
+public class WorldGenClay extends CWorldGenerator {
     private final IBlockState state = Blocks.CLAY.getDefaultState();
     private final int numberOfBlocks;
 
@@ -23,12 +23,10 @@ public class WorldGenClay extends WorldGenerator {
 
 
     @Override
-    public boolean generate(World worldIn, Random rand, BlockPos position) {
-        Chunk chunk = worldIn.getChunk(position);
-        if (chunk.getBlockState(position).getMaterial() != Material.WATER) {
+    public boolean generate(World worldIn, ChunkSelector selector, Random rand, BlockPos position) {
+        if (selector.getBlockState(position).getMaterial() != Material.WATER) {
             return false;
         } else {
-            ChunkSelector selector = new ChunkSelector(chunk);
             Block block;
             int i = rand.nextInt(this.numberOfBlocks - 2) + 2;
 

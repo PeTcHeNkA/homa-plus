@@ -93,7 +93,7 @@ public class BiomeLib {
             TsonList list = list1.getList(cur);
             ArrayList<int[]> result = new ArrayList<>(list.size());
 
-            for (int i = 0; i < result.size(); i++) {
+            for (int i = 0; i < list.size(); i++) {
                 TsonObj obj = list.get(i);
                 int[] res;
                 if (obj.isList()) {

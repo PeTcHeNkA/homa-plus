@@ -306,9 +306,9 @@ public class EntityItem extends Entity {
 
     @Override
     public void writeEntityToNBT(NBTTagCompound nbt) {
-        nbt.setShort("Health", (short)this.health);
+        nbt.setShortU("Health", (short)this.health);
         nbt.setShort("Age", (short)this.age);
-        nbt.setShort("PickupDelay", (short)this.pickupDelay);
+        nbt.setShortU("PickupDelay", (short)this.pickupDelay);
         nbt.setInteger("Lifespan", lifespan);
 
         if (this.getThrower() != null) {

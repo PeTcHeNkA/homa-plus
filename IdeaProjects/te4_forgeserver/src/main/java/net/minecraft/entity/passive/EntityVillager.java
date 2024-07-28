@@ -288,11 +288,11 @@ public class EntityVillager extends EntityAgeable implements INpc, IMerchant {
     @Override
     public void writeEntityToNBT(NBTTagCompound tag) {
         super.writeEntityToNBT(tag);
-        tag.setInteger("Profession", this.getProfession());
+        tag.setIntegerU("Profession", this.getProfession());
         tag.setString("ProfessionName", this.getProfessionForge().getRegistryName().toString());
-        tag.setInteger("Riches", this.wealth);
-        tag.setInteger("Career", this.careerId);
-        tag.setInteger("CareerLevel", this.careerLevel);
+        tag.setIntegerU("Riches", this.wealth);
+        tag.setIntegerU("Career", this.careerId);
+        tag.setIntegerU("CareerLevel", this.careerLevel);
         tag.setBoolean("Willing", this.isWillingToMate);
 
         if (this.buyingList != null) {

@@ -109,8 +109,8 @@ public class EntityCreeper extends EntityMob {
         if (this.dataManager.get(POWERED)) {
             nbt.setBoolean("powered", true);
         }
-        nbt.setShort("Fuse", (short)this.fuseTime);
-        nbt.setByte("ExplosionRadius", (byte)this.explosionRadius);
+        nbt.setShortU("Fuse", (short)this.fuseTime);
+        nbt.setByteU("ExplosionRadius", (byte)this.explosionRadius);
         nbt.setBoolean("ignited", this.hasIgnited());
     }
 

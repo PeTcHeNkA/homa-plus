@@ -316,7 +316,18 @@ public final class ChunkSelector implements IBlockEAccess {
     }
 
 
+    public int getHeightY(BlockPos pos) {
+        return getHeight(pos.getX(), pos.getZ());
+    }
+
+
     public BlockPos getHeight(BlockPos pos) {
         return new BlockPos(pos.getX(), getHeight(pos.getX(), pos.getZ()), pos.getZ());
+    }
+
+
+    public BlockPos getHeightMut(BlockPos pos) {
+        BlockPos.unsafeEdit(pos, pos.getX(), getHeight(pos.getX(), pos.getZ()), pos.getZ());
+        return pos;
     }
 }

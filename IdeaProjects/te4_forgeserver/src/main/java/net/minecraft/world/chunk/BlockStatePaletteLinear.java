@@ -1,11 +1,13 @@
 package net.minecraft.world.chunk;
 
+import io.netty.buffer.ByteBuf;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.BlockIDIndexes;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.fserver.utls.NetUtils;
 
 
 public class BlockStatePaletteLinear implements IBlockStatePalette {
@@ -23,17 +25,17 @@ public class BlockStatePaletteLinear implements IBlockStatePalette {
 
     @Override
     public int idFor(IBlockState state) {
-        for (int i = 0; i < this.arraySize; ++i) {
-            if (this.states[i] == state) {
-                return i;
-            }
-        }
-        int j = this.arraySize;
+        final IBlockState[] states = this.states;
+        final int size = this.arraySize;
 
-        if (j < this.states.length) {
-            this.states[j] = state;
+        for (int i = 0; i < size; ++i) {
+            if (states[i] == state) return i;
+        }
+
+        if (size < states.length) {
+            states[size] = state;
             ++this.arraySize;
-            return j;
+            return size;
         } else {
             return this.resizeHandler.onResize(this.bits + 1, state);
         }
@@ -63,6 +65,19 @@ public class BlockStatePaletteLinear implements IBlockStatePalette {
         for (int i = 0; i < this.arraySize; ++i) {
             state = this.states[i];
             buf.writeVarInt(state==null?BlockIDIndexes.AIR_STATE_ID:state.getId());
+        }
+    }
+
+
+    @Override
+    public void write(ByteBuf buf) {
+        final int size = this.arraySize;
+        IBlockState[] states = this.states;
+        NetUtils.writeVarInt(buf, size);
+        IBlockState state;
+        for (int i = 0; i < size; ++i) {
+            state = states[i];
+            NetUtils.writeVarInt(buf, state==null?BlockIDIndexes.AIR_STATE_ID:state.getId());
         }
     }
 

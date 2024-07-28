@@ -1,5 +1,6 @@
 package net.minecraft.world.chunk;
 
+import io.netty.buffer.ByteBuf;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.relauncher.Side;
@@ -22,6 +23,9 @@ public interface IBlockStatePalette {
 
 
     void write(PacketBuffer buf);
+
+
+    void write(ByteBuf buf);
 
 
     int getSerializedSize();

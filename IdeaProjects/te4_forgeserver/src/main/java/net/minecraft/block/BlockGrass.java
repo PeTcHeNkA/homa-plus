@@ -100,7 +100,7 @@ public class BlockGrass extends BlockFx implements IGrowable {
                 BlockPos up = world.localTempPos.setPos(pos.getX(), pos.getY() + 1, pos.getZ());
 
                 if (light < 4 && selector.getState(up).getLightOpacity(world, up) > 2) {
-                    selector.setBlockState(pos, Blocks.DIRT.getDefaultState());
+                    selector.setBlockState(pos, Blocks.DIRT.getDefaultState(), 2);
                 } else if (light >= 9) {
                     BlockPos.MutableBlockPos blockPos = world.localTempPos2;
                     for (int i = 0; i < 4; ++i) {

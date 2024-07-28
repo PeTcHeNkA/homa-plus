@@ -15,13 +15,17 @@ public class TextComponentAuto extends TextComponentString {
 
     private final String nonColored;
 
-
     public TextComponentAuto(String str){
-        this(str, true);
+        this(str, new Style(), true);
     }
 
 
-    private TextComponentAuto(String str, boolean init){
+    public TextComponentAuto(String str, Style style){
+        this(str, style, true);
+    }
+
+
+    private TextComponentAuto(String str, Style style, boolean init){
         super("");
         if(init){
             nonColored = str.replace("§","");
@@ -29,7 +33,6 @@ public class TextComponentAuto extends TextComponentString {
             nonColored = str;
             return;
         }
-        Style style = new Style();
         String[] items = str.split("§");
         if(str.charAt(0)!='§'){
             items[0] = "f"+items[0];
@@ -69,13 +72,7 @@ public class TextComponentAuto extends TextComponentString {
                 }
                 siblings.add(new TextComponentString(item).setStyle(style));
                 Style prev = style;
-                style = new Style();
-                style.setColor(prev.getColor());
-                style.setBold(prev.getBold());
-                style.setStrikethrough(prev.getStrikethrough());
-                style.setUnderlined(prev.getUnderlined());
-                style.setObfuscated(prev.getObfuscated());
-                style.setItalic(prev.getItalic());
+                style = prev.createDeepCopy();
             }
         }
     }
@@ -89,7 +86,7 @@ public class TextComponentAuto extends TextComponentString {
 
     @Override
     public TextComponentAuto createCopy() {
-        TextComponentAuto copy = new TextComponentAuto(nonColored, false);
+        TextComponentAuto copy = new TextComponentAuto(nonColored, null, false);
         for (ITextComponent comp:siblings){
             copy.siblings.add(comp.createCopy());
         }

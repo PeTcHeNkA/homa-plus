@@ -12,7 +12,7 @@ import plus.fserver.api.Keep;
 import plus.fserver.server.elca.ChunkSelector;
 
 
-public class WorldGenLiquids extends WorldGenerator {
+public class WorldGenLiquids extends CWorldGenerator {
     private final IBlockState state;
 
     @Keep
@@ -22,62 +22,61 @@ public class WorldGenLiquids extends WorldGenerator {
 
 
     @Override
-    public boolean generate(World worldIn, Random rand, BlockPos position) {
-        Chunk chunk = worldIn.getChunk(position.getX()>>4, position.getZ()>>4);
-        if (chunk.getBlockState(position.up()).getBlock() != Blocks.STONE) {
+    public boolean generate(World worldIn, ChunkSelector selector, Random rand, BlockPos pos) {
+        Chunk chunk = worldIn.getChunk(pos.getX()>>4, pos.getZ()>>4);
+        if (chunk.getBlockState(pos.getX(), pos.getY()+1, pos.getZ()).getBlock() != Blocks.STONE) {
             return false;
         }
-        else if (worldIn.getBlockState(position.down()).getBlock() != Blocks.STONE) {
+        else if (worldIn.getBlockState(pos.down()).getBlock() != Blocks.STONE) {
             return false;
         } else {
-            IBlockState iblockstate = chunk.getBlockState(position);
+            IBlockState iblockstate = chunk.getBlockState(pos);
 
-            if (!iblockstate.getBlock().isAir(iblockstate, worldIn, position)
+            if (!iblockstate.getBlock().isAir(iblockstate, worldIn, pos)
                     && iblockstate.getBlock() != Blocks.STONE) {
                 return false;
             } else {
                 int i = 0;
-                ChunkSelector selector = new ChunkSelector(chunk);
 
-                if (selector.getState(position.west()).getBlock() == Blocks.STONE) {
+                if (selector.getState(pos.west()).getBlock() == Blocks.STONE) {
                     ++i;
                 }
 
-                if (selector.getState(position.east()).getBlock() == Blocks.STONE) {
+                if (selector.getState(pos.east()).getBlock() == Blocks.STONE) {
                     ++i;
                 }
 
-                if (selector.getState(position.north()).getBlock() == Blocks.STONE) {
+                if (selector.getState(pos.north()).getBlock() == Blocks.STONE) {
                     ++i;
                 }
 
-                if (selector.getState(position.south()).getBlock() == Blocks.STONE) {
+                if (selector.getState(pos.south()).getBlock() == Blocks.STONE) {
                     ++i;
                 }
 
                 int j = 0;
 
-                if (selector.isAirBlock(position.west())) {
+                if (selector.isAirBlock(pos.west())) {
                     ++j;
                 }
 
-                if (selector.isAirBlock(position.east())) {
+                if (selector.isAirBlock(pos.east())) {
                     ++j;
                 }
 
-                if (selector.isAirBlock(position.north())) {
+                if (selector.isAirBlock(pos.north())) {
                     ++j;
                 }
 
-                if (selector.isAirBlock(position.south())) {
+                if (selector.isAirBlock(pos.south())) {
                     ++j;
                 }
 
                 if (i == 3 && j == 1) {
-                    selector.setStateFast(position.getX(), position.getY(), position.getZ(), state);
-                    selector.current().relight(position);
-                    //worldIn.scheduleBlockUpdate(position, state.getBlock(), 0, 0);/
-                    ((WorldServer)worldIn).addSyncTask(() -> worldIn.immediateBlockTick(position, state, rand));
+                    selector.setStateFast(pos.getX(), pos.getY(), pos.getZ(), state);
+                    selector.current().relight(pos);
+                    //worldIn.scheduleBlockUpdate(pos, state.getBlock(), 0, 0);/
+                    ((WorldServer)worldIn).addSyncTask(() -> worldIn.immediateBlockTick(pos, state, rand));
                 }
                 return true;
             }

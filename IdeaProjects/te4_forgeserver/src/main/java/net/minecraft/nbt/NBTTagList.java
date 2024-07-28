@@ -44,24 +44,37 @@ public class NBTTagList extends NBTBase implements java.lang.Iterable<NBTBase> {
 
     @Override
     void read(DataInput input, int depth, NBTSizeTracker sizeTracker) throws IOException {
-        sizeTracker.read(296L);
+        fill(this, input, depth, sizeTracker);
+    }
+
+
+    public static NBTTagList createAndRead(DataInput input, int depth, NBTSizeTracker sizeTracker) throws IOException {
+        NBTTagList list;
+        fill(list = new NBTTagList(), input, depth, sizeTracker);
+        return list;
+    }
+
+
+    private static void fill(NBTTagList src, DataInput input, int depth, NBTSizeTracker tracker) throws IOException {
+        tracker.read(296L);
 
         if (depth > 512) {
             throw new RuntimeException("Tried to read NBT tag with too high complexity, depth > 512");
         } else {
-            byte type = this.tagType = input.readByte();
+            byte type = src.tagType = input.readByte();
             int size = input.readInt();
 
             if (type == 0 && size > 0) {
                 throw new RuntimeException("Missing type on ListTag");
             } else {
-                sizeTracker.read(32L * (long)size);
-                this.tagList = new ArrayListE6<>(size);
+                tracker.read(32L * (long)size);
+                ArrayListE6<NBTBase> tagList = src.tagList = new ArrayListE6<>(size);
 
                 for (int j = 0; j < size; ++j) {
-                    NBTBase nbtbase = NBTBase.create(type);
-                    nbtbase.read(input, depth + 1, sizeTracker);
-                    this.tagList.add(nbtbase);
+                    NBTBase nbtbase = NBTTagCompound.createAndRead(
+                            type, input,depth + 1, tracker
+                    );
+                    tagList.add(nbtbase);
                 }
             }
         }

@@ -38,6 +38,7 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import plus.fserver.server.SStrings;
+import plus.fserver.utls.NbtUtils;
 import plus.fserver.world.light.LightingHooks;
 import plus.fserver.world.light.api.IChunkLightingData;
 
@@ -160,7 +161,7 @@ public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO {
             NBTTagCompound compound = new NBTTagCompound();
             NBTTagCompound compound1 = new NBTTagCompound();
             compound.setTag(SStrings.CL_LEVEL, compound1);
-            compound.setInteger("DataVersion", 1343);
+            compound.setTag("DataVersion", NbtUtils.DATA_VERSION);
             FMLCommonHandler.instance().getDataFixer().writeVersionData(compound);
             this.writeChunkToNBT(pendings, chunkIn, worldIn, compound1);
             ForgeChunkManager.storeChunkNBT(chunkIn, compound1);

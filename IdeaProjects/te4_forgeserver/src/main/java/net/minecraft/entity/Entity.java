@@ -1438,8 +1438,8 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
             tag.setTag(SStrings.Motion,             this.newDoubleNBTList(this.motionX, this.motionY, this.motionZ));
             tag.setTag(SStrings.Rotation,           this.newFloatNBTList(this.rotationYaw, this.rotationPitch));
             tag.setFloat(SStrings.FallDistance,     this.fallDistance);
-            tag.setShort(SStrings.Fire, (short)     this.fire);
-            tag.setShort(SStrings.Air, (short)      this.getAir());
+            tag.setShortU(SStrings.Fire, (short)     this.fire);
+            tag.setShortU(SStrings.Air, (short)      this.getAir());
             tag.setBoolean(SStrings.OnGround,       this.onGround);
             tag.setInteger(SStrings.Dimension,      this.dimension);
             tag.setBoolean(SStrings.Invulnerable,   this.invulnerable);

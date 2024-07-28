@@ -27,6 +27,7 @@ import net.minecraftforge.event.terraingen.DecorateBiomeEvent;
 import net.minecraftforge.event.terraingen.OreGenEvent;
 import plus.fserver.api.ElcaWorldInfo;
 import plus.fserver.server.elca.ChunkSelector;
+import plus.fserver.utls.math.BlockPosDelta;
 import plus.fserver.world.generator.ChunkGenSettingsPlus;
 
 
@@ -95,226 +96,212 @@ public class BiomeDecorator {
     }
 
 
-    protected void genDecorations(final Biome biome, final World worldIn, final Random random, final BlockPos chunkPos) {
+    protected void genDecorations(final Biome biome, final World world, final Random rand, final BlockPos chunkPos) {
         ChunkPos fPos = new ChunkPos(chunkPos);
 
-        MinecraftForge.EVENT_BUS.post(new DecorateBiomeEvent.Pre(worldIn, random, fPos));
+        MinecraftForge.EVENT_BUS.post(new DecorateBiomeEvent.Pre(world, rand, fPos));
 
-        ChunkSelector selector = new ChunkSelector(worldIn);
+        ChunkSelector selector = new ChunkSelector(world);
         WorldGenerator gen = new WorldGenDeadBush();
 
-        this.generateOres(selector, worldIn, random, chunkPos);
+        this.generateOres(selector, world, rand, chunkPos);
+        BlockPosDelta cRel = new BlockPosDelta(chunkPos);
 
-        for (int i = 0; i < this.sandPatchesPerChunk; ++i) {
-            int j = random.nextInt(16) + 8;
-            int k = random.nextInt(16) + 8;
-            this.sandGen.generate(worldIn, random, selector.getTopSolidOrLiquidBlock(chunkPos.add(j, 0, k)));
+        int rX, rY, rZ, i;
+
+        for (i = 0; i < this.sandPatchesPerChunk; ++i) {
+            rX = (rand.nextInt() & 15) + 8;
+            rZ = (rand.nextInt() & 15) + 8;
+            this.sandGen.generate(world, selector, rand, selector.getTopSolidOrLiquidBlock(cRel.delta(rX, 0, rZ)));
         }
 
-        for (int i1 = 0; i1 < this.clayPerChunk; ++i1) {
-            int l1 = random.nextInt(16) + 8;
-            int i6 = random.nextInt(16) + 8;
-            this.clayGen.generate(worldIn, random, selector.getTopSolidOrLiquidBlock(chunkPos.add(l1, 0, i6)));
+        for (i = 0; i < this.clayPerChunk; ++i) {
+            rX = (rand.nextInt() & 15) + 8;
+            rZ = (rand.nextInt() & 15) + 8;
+            this.clayGen.generate(world, selector, rand, selector.getTopSolidOrLiquidBlock(cRel.delta(rX, 0, rZ)));
         }
 
-        for (int j1 = 0; j1 < this.gravelPatchesPerChunk; ++j1) {
-            int i2 = random.nextInt(16) + 8;
-            int j6 = random.nextInt(16) + 8;
-            this.gravelGen.generate(worldIn, random, selector.getTopSolidOrLiquidBlock(chunkPos.add(i2, 0, j6)));
+        for (i = 0; i < this.gravelPatchesPerChunk; ++i) {
+            rX = (rand.nextInt() & 15) + 8;
+            rZ = (rand.nextInt() & 15) + 8;
+            this.gravelGen.generate(world, selector, rand, selector.getTopSolidOrLiquidBlock(cRel.delta(rX, 0, rZ)));
         }
 
         int k1 = this.treesPerChunk;
 
-        if (random.nextFloat() < this.extraTreeChance) {
+        if (rand.nextFloat() < this.extraTreeChance) {
             ++k1;
         }
 
-        for (int j2 = 0; j2 < k1; ++j2) {
-            int k6 = random.nextInt(16) + 8;
-            int l = random.nextInt(16) + 8;
-            WorldGenAbstractTree threeGen = biome.getRandomTreeFeature(random);
+        for (i = 0; i < k1; ++i) {
+            rX = (rand.nextInt() & 15) + 8;
+            rZ = (rand.nextInt() & 15) + 8;
+            WorldGenAbstractTree threeGen = biome.getRandomTreeFeature(rand);
             threeGen.setDecorationDefaults();
-            BlockPos blockpos = selector.getHeight(chunkPos.add(k6, 0, l));
+            BlockPos blockpos = selector.getHeightMut(cRel.delta(rX, 0, rZ));
 
-            if (threeGen.generate(worldIn, random, blockpos)) {
-                threeGen.generateSaplings(worldIn, random, blockpos);
+            if (threeGen.generate(world, selector, rand, blockpos)) {
+                threeGen.generateSaplings(world, rand, blockpos);
             }
         }
 
-        for (int k2 = 0; k2 < this.bigMushroomsPerChunk; ++k2) {
-            int l6 = random.nextInt(16) + 8;
-            int k10 = random.nextInt(16) + 8;
-            this.bigMushroomGen.generate(worldIn, selector, random, selector.getHeight(chunkPos.add(l6, 0, k10)));
+        for (i = 0; i < this.bigMushroomsPerChunk; ++i) {
+            rX = (rand.nextInt() & 15) + 8;
+            rZ = (rand.nextInt() & 15) + 8;
+            this.bigMushroomGen.generate(world, selector, rand, selector.getHeightMut(cRel.delta(rX, 0, rZ)));
         }
 
-        for (int l2 = 0; l2 < this.flowersPerChunk; ++l2) {
-            int i7 = random.nextInt(16) + 8;
-            int l10 = random.nextInt(16) + 8;
-            int j14 = selector.getHeight(chunkPos.add(i7, 0, l10)).getY() + 32;
+        for (i = 0; i < this.flowersPerChunk; ++i) {
+            rX = (rand.nextInt() & 15) + 8;
+            rZ = (rand.nextInt() & 15) + 8;
+            rY = selector.getHeightY(cRel.delta(rX, 0, rZ)) + 32;
 
-            if (j14 > 0) {
-                int k17 = random.nextInt(j14);
-                BlockPos blockpos1 = chunkPos.add(i7, k17, l10);
-                BlockFlower.EnumFlowerType flowerType = biome.pickRandomFlower(random, blockpos1);
+            if (rY > 0) {
+                int k17 = rand.nextInt(rY);
+                BlockPos blockpos1 = cRel.delta(rX, k17, rZ);
+                BlockFlower.EnumFlowerType flowerType = biome.pickRandomFlower(rand, blockpos1);
                 BlockFlower blockflower = flowerType.getBlockType().getBlock();
 
                 //todo fix async
                 if (blockflower.getDefaultState().getMaterial() != Material.AIR) {
                     this.flowerGen.setGeneratedBlock(blockflower, flowerType);
-                    this.flowerGen.generate(worldIn, selector, random, blockpos1);
+                    this.flowerGen.generate(world, selector, rand, blockpos1);
                 }
             }
         }
 
-        for (int i3 = 0; i3 < this.grassPerChunk; ++i3) {
-            int j7 = random.nextInt(16) + 8;
-            int i11 = random.nextInt(16) + 8;
-            int k14 = selector.getHeight(chunkPos.add(j7, 0, i11)).getY() * 2;
+        for (i = 0; i < this.grassPerChunk; ++i) {
+            rX = (rand.nextInt() & 15) + 8;
+            rZ = (rand.nextInt() & 15) + 8;
+            rY = selector.getHeightY(cRel.delta(rX, 0, rZ)) * 2;
 
-            if (k14 > 0) {
-                int l17 = random.nextInt(k14);
-                biome.getRandomWorldGenForGrass(random).generate(worldIn, selector, random, chunkPos.add(j7, l17, i11));
+            if (rY > 0) {
+                int l17 = rand.nextInt(rY);
+                biome.getRandomWorldGenForGrass(rand).generate(world, selector, rand, cRel.delta(rX, l17, rZ));
             }
         }
 
-        for (int j3 = 0; j3 < this.deadBushPerChunk; ++j3) {
-            int k7 = random.nextInt(16) + 8;
-            int j11 = random.nextInt(16) + 8;
-            int l14 = selector.getHeight(chunkPos.add(k7, 0, j11)).getY() * 2;
+        for (i = 0; i < this.deadBushPerChunk; ++i) {
+            rX = (rand.nextInt() & 15) + 8;
+            rZ = (rand.nextInt() & 15) + 8;
+            rY = selector.getHeightY(cRel.delta(rX, 0, rZ)) * 2;
 
-            if (l14 > 0) {
-                int i18 = random.nextInt(l14);
-                gen.generate(worldIn, selector, random, chunkPos.add(k7, i18, j11));
+            if (rY > 0) {
+                int i18 = rand.nextInt(rY);
+                gen.generate(world, selector, rand, cRel.delta(rX, i18, rZ));
             }
         }
 
-        for (int k3 = 0; k3 < this.waterlilyPerChunk; ++k3) {
-            int l7 = random.nextInt(16) + 8;
-            int k11 = random.nextInt(16) + 8;
-            int i15 = selector.getHeight(chunkPos.add(l7, 0, k11)).getY() * 2;
+        for (i = 0; i < this.waterlilyPerChunk; ++i) {
+            rX = (rand.nextInt() & 15) + 8;
+            rZ = (rand.nextInt() & 15) + 8;
+            rY = selector.getHeightY(cRel.delta(rX, 0, rZ)) * 2;
 
-            if (i15 > 0) {
-                int j18 = random.nextInt(i15);
-                BlockPos blockpos4;
-                BlockPos blockpos7;
+            if (rY > 0) {
+                int j18 = rand.nextInt(rY);
+                BlockPos blockpos4, blockpos7;
 
-                for (blockpos4 = chunkPos.add(l7, j18, k11);blockpos4.getY() > 0;blockpos4 = blockpos7) {
+                for (blockpos4 = cRel.delta(rX, j18, rZ);blockpos4.getY() > 0;blockpos4 = blockpos7) {
                     blockpos7 = blockpos4.down();
                     if (!selector.isAirBlock(blockpos7)) {
                         break;
                     }
                 }
-                this.waterlilyGen.generate(worldIn, selector, random, blockpos4);
+                this.waterlilyGen.generate(world, selector, rand, blockpos4);
             }
         }
 
-        for (int l3 = 0; l3 < this.mushroomsPerChunk; ++l3) {
-            if (random.nextInt(4) == 0) {
-                int i8 = random.nextInt(16) + 8;
-                int l11 = random.nextInt(16) + 8;
-                BlockPos blockpos2 = selector.getHeight(chunkPos.add(i8, 0, l11));
-                this.mushroomBrownGen.generate(worldIn, selector, random, blockpos2);
+        for (i = 0; i < this.mushroomsPerChunk; ++i) {
+            if (rand.nextInt(4) == 0) {
+                rX = (rand.nextInt() & 15) + 8;
+                rZ = (rand.nextInt() & 15) + 8;
+
+                BlockPos blockpos2 = selector.getHeightMut(cRel.delta(rX, 0, rZ));
+
+                this.mushroomBrownGen.generate(world, selector, rand, blockpos2);
             }
 
-            if (random.nextInt(8) == 0) {
-                int j8 = random.nextInt(16) + 8;
-                int i12 = random.nextInt(16) + 8;
-                int j15 = selector.getHeight(chunkPos.add(j8, 0, i12)).getY() * 2;
+            if (rand.nextInt(8) == 0) {
+                rX = (rand.nextInt() & 15) + 8;
+                rZ = (rand.nextInt() & 15) + 8;
+                rY = selector.getHeightY(cRel.delta(rX, 0, rZ)) * 2;
 
-                if (j15 > 0) {
-                    int k18 = random.nextInt(j15);
-                    BlockPos blockpos5 = chunkPos.add(j8, k18, i12);
-                    this.mushroomRedGen.generate(worldIn, selector, random, blockpos5);
+                if (rY > 0) {
+                    this.mushroomRedGen.generate(world, selector, rand, cRel.delta(rX, rand.nextInt(rY), rZ));
                 }
             }
         }
 
-        if (random.nextInt(4) == 0) {
-            int i4 = random.nextInt(16) + 8;
-            int k8 = random.nextInt(16) + 8;
-            int j12 = selector.getHeight(chunkPos.add(i4, 0, k8)).getY() * 2;
+        if (rand.nextInt(4) == 0) {
+            rX = (rand.nextInt() & 15) + 8;
+            rZ = (rand.nextInt() & 15) + 8;
+            rY = selector.getHeightY(cRel.delta(rX, 0, rZ)) * 2;
 
-            if (j12 > 0) {
-                int k15 = random.nextInt(j12);
-                this.mushroomBrownGen.generate(worldIn, selector, random, chunkPos.add(i4, k15, k8));
+            if (rY > 0) {
+                this.mushroomBrownGen.generate(world, selector, rand, cRel.delta(rX, rand.nextInt(rY), rZ));
             }
         }
 
-        if (random.nextInt(8) == 0) {
-            int j4 = random.nextInt(16) + 8;
-            int l8 = random.nextInt(16) + 8;
-            int k12 = selector.getHeight(chunkPos.add(j4, 0, l8)).getY() * 2;
-            if (k12 > 0) {
-                int l15 = random.nextInt(k12);
-                this.mushroomRedGen.generate(worldIn, selector, random, chunkPos.add(j4, l15, l8));
+        if (rand.nextInt(8) == 0) {
+            rX = (rand.nextInt() & 15) + 8;
+            rZ = (rand.nextInt() & 15) + 8;
+            rY = selector.getHeightY(cRel.delta(rX, 0, rZ)) * 2;
+
+            if (rY > 0) {
+                this.mushroomRedGen.generate(world, selector, rand, cRel.delta(rX, rand.nextInt(rY), rZ));
             }
         }
 
-        for (int k4 = 0; k4 < this.reedsPerChunk; ++k4) {
-            int i9 = random.nextInt(16) + 8;
-            int l12 = random.nextInt(16) + 8;
-            int i16 = selector.getHeight(chunkPos.add(i9, 0, l12)).getY() * 2;
+        for (i = -10; i < this.reedsPerChunk; ++i) {
+            rX = (rand.nextInt() & 15) + 8;
+            rZ = (rand.nextInt() & 15) + 8;
+            rY = selector.getHeightY(cRel.delta(rX, 0, rZ)) * 2;
 
-            if (i16 > 0) {
-                int l18 = random.nextInt(i16);
-                this.reedGen.generate(worldIn, selector, random, chunkPos.add(i9, l18, l12));
+            if (rY > 0) {
+                this.reedGen.generate(world, selector, rand, cRel.delta(rX, rand.nextInt(rY), rZ));
             }
         }
 
-        for (int l4 = 0; l4 < 10; ++l4) {
-            int j9 = random.nextInt(16) + 8;
-            int i13 = random.nextInt(16) + 8;
-            int j16 = selector.getHeight(chunkPos.add(j9, 0, i13)).getY() * 2;
+        if (rand.nextInt(32) == 0) {
+            rX = (rand.nextInt() & 15) + 8;
+            rZ = (rand.nextInt() & 15) + 8;
+            rY = selector.getHeightY(cRel.delta(rX, 0, rZ)) * 2;
 
-            if (j16 > 0) {
-                int i19 = random.nextInt(j16);
-                this.reedGen.generate(worldIn, selector, random, chunkPos.add(j9, i19, i13));
+            if (rY > 0) {
+                (new WorldGenPumpkin()).generate(world, selector, rand, cRel.delta(rX, rand.nextInt(rY), rZ));
             }
         }
 
-        if (random.nextInt(32) == 0) {
-            int i5 = random.nextInt(16) + 8;
-            int k9 = random.nextInt(16) + 8;
-            int j13 = selector.getHeight(chunkPos.add(i5, 0, k9)).getY() * 2;
-            if (j13 > 0) {
-                int k16 = random.nextInt(j13);
-                (new WorldGenPumpkin()).generate(worldIn, selector, random, chunkPos.add(i5, k16, k9));
-            }
-        }
+        for (i = 0; i < this.cactiPerChunk; ++i) {
+            rX = (rand.nextInt() & 15) + 8;
+            rZ = (rand.nextInt() & 15) + 8;
+            rY = selector.getHeightY(cRel.delta(rX, 0, rZ)) * 2;
 
-        for (int j5 = 0; j5 < this.cactiPerChunk; ++j5) {
-            int l9 = random.nextInt(16) + 8;
-            int k13 = random.nextInt(16) + 8;
-            int l16 = selector.getHeight(chunkPos.add(l9, 0, k13)).getY() * 2;
-
-            if (l16 > 0) {
-                int j19 = random.nextInt(l16);
-                this.cactusGen.generate(worldIn, selector, random, chunkPos.add(l9, j19, k13));
+            if (rY > 0) {
+                this.cactusGen.generate(world, selector, rand, cRel.delta(rX, rand.nextInt(rY), rZ));
             }
         }
 
         if (this.generateFalls) {
             gen = new WorldGenLiquids(Blocks.FLOWING_WATER);
-            for (int k5 = 0; k5 < 50; ++k5) {
-                int i10 = random.nextInt(16) + 8;
-                int l13 = random.nextInt(16) + 8;
-                int i17 = random.nextInt(248) + 8;
+            for (i = 0; i < 50; ++i) {
+                rX = (rand.nextInt() & 15) + 8;
+                rZ = (rand.nextInt() & 15) + 8;
+                rY = rand.nextInt(248) + 8;
 
-                int k19 = random.nextInt(i17);
-                BlockPos blockpos6 = chunkPos.add(i10, k19, l13);
-                gen.generate(worldIn, random, blockpos6);
+                gen.generate(world, selector, rand, cRel.delta(rX, rand.nextInt(rY), rZ));
             }
             gen = new WorldGenLiquids(Blocks.FLOWING_LAVA);
 
-            for (int l5 = 0; l5 < 20; ++l5) {
-                int j10 = random.nextInt(16) + 8;
-                int i14 = random.nextInt(16) + 8;
-                int j17 = random.nextInt(random.nextInt(random.nextInt(240) + 8) + 8);
-                BlockPos blockpos3 = chunkPos.add(j10, j17, i14);
-                gen.generate(worldIn, random, blockpos3);
+            for (i = 0; i < 20; ++i) {
+                rX = (rand.nextInt() & 15) + 8;
+                rZ = (rand.nextInt() & 15) + 8;
+                rY = rand.nextInt(rand.nextInt(rand.nextInt(240) + 8) + 8);
+
+                gen.generate(world, selector, rand, cRel.delta(rX, rY, rZ));
             }
         }
-        MinecraftForge.EVENT_BUS.post(new DecorateBiomeEvent.Post(worldIn, random, fPos));
+        MinecraftForge.EVENT_BUS.post(new DecorateBiomeEvent.Post(world, rand, fPos));
     }
 
 

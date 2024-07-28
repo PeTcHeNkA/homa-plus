@@ -1,6 +1,7 @@
 package net.minecraft.world.chunk;
 
 import javax.annotation.Nullable;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -10,6 +11,7 @@ import net.minecraft.util.BlockIDIndexes;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.fserver.utls.NetUtils;
 
 
 public class BlockStateContainer implements IBlockStatePaletteResizer {
@@ -120,6 +122,13 @@ public class BlockStateContainer implements IBlockStatePaletteResizer {
         buf.writeByte(this.bits);
         this.palette.write(buf);
         buf.writeLongArray(this.storage.getBackingLongArray());
+    }
+
+
+    public void write(ByteBuf buf) {
+        buf.writeByte(this.bits);
+        this.palette.write(buf);
+        NetUtils.writeLongArray(buf, this.storage.getBackingLongArray());
     }
 
 

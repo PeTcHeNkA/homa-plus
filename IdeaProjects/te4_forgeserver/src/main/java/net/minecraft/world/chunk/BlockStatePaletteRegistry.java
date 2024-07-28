@@ -1,10 +1,12 @@
 package net.minecraft.world.chunk;
 
+import io.netty.buffer.ByteBuf;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.BlockIDIndexes;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.fserver.utls.NetUtils;
 
 
 public class BlockStatePaletteRegistry implements IBlockStatePalette {
@@ -31,6 +33,12 @@ public class BlockStatePaletteRegistry implements IBlockStatePalette {
     @Override
     public void write(PacketBuffer buf) {
         buf.writeVarInt(0);
+    }
+
+
+    @Override
+    public void write(ByteBuf buf) {
+        NetUtils.writeVarInt(buf, 0);
     }
 
 

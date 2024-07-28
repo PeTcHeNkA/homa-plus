@@ -24,6 +24,7 @@ public class ElcaCV {
 
     public static final boolean SERVER_COMPILE                = false;
     public static final boolean CLIENT_COMPILE                = !SERVER_COMPILE;
+    public static final boolean INTERN_NBT_KEYS               = false;
 
     static {
         if(DEBUG_NO_SERVER) {

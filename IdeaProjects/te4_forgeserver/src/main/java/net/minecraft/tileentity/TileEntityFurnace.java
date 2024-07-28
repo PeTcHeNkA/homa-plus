@@ -144,8 +144,8 @@ public class TileEntityFurnace extends TileEntityLockable implements ITickable, 
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound compound) {
         super.writeToNBT(compound);
-        compound.setInteger("BurnTime", (short)this.furnaceBurnTime);
-        compound.setInteger("CookTime", (short)this.cookTime);
+        compound.setIntegerU("BurnTime", (short)this.furnaceBurnTime);
+        compound.setIntegerU("CookTime", (short)this.cookTime);
         compound.setInteger("CookTimeTotal", (short)this.totalCookTime);
         FixedItemList.saveAllItems(compound, this.furnaceItemStacks);
 

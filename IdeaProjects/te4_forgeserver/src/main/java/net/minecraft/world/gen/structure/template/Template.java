@@ -39,6 +39,7 @@ import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import org.jetbrains.annotations.NotNull;
 import plus.fserver.server.elca.ChunkSelector;
+import plus.fserver.utls.NbtUtils;
 
 
 public class Template {
@@ -500,24 +501,24 @@ public class Template {
 
 
     public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
-        BasicPalette template$basicpalette = new BasicPalette();
-        NBTTagList nbttaglist = new NBTTagList();
+        BasicPalette palette = new BasicPalette();
+        NBTTagList list1 = new NBTTagList();
 
         NBTTagCompound nbttagcompound;
-        for(Iterator var4 = this.blocks.iterator(); var4.hasNext(); nbttaglist.appendTag(nbttagcompound)) {
+        for(Iterator var4 = this.blocks.iterator(); var4.hasNext(); list1.appendTag(nbttagcompound)) {
             BlockInfo template$blockinfo = (BlockInfo)var4.next();
             nbttagcompound = new NBTTagCompound();
             nbttagcompound.setTag("pos", this.writeInts(template$blockinfo.pos.getX(), template$blockinfo.pos.getY(), template$blockinfo.pos.getZ()));
-            nbttagcompound.setInteger("state", template$basicpalette.idFor(template$blockinfo.blockState));
+            nbttagcompound.setInteger("state", palette.idFor(template$blockinfo.blockState));
             if (template$blockinfo.tileentityData != null) {
                 nbttagcompound.setTag("nbt", template$blockinfo.tileentityData);
             }
         }
 
-        NBTTagList nbttaglist1 = new NBTTagList();
+        NBTTagList list2 = new NBTTagList();
 
         NBTTagCompound nbttagcompound1;
-        for(Iterator var9 = this.entities.iterator(); var9.hasNext(); nbttaglist1.appendTag(nbttagcompound1)) {
+        for(Iterator var9 = this.entities.iterator(); var9.hasNext(); list2.appendTag(nbttagcompound1)) {
             EntityInfo template$entityinfo = (EntityInfo)var9.next();
             nbttagcompound1 = new NBTTagCompound();
             nbttagcompound1.setTag("pos", this.writeDoubles(template$entityinfo.pos.x, template$entityinfo.pos.y, template$entityinfo.pos.z));
@@ -528,7 +529,7 @@ public class Template {
         }
 
         NBTTagList nbttaglist2 = new NBTTagList();
-        Iterator var12 = template$basicpalette.iterator();
+        Iterator var12 = palette.iterator();
 
         while(var12.hasNext()) {
             IBlockState iblockstate = (IBlockState)var12.next();
@@ -537,11 +538,11 @@ public class Template {
 
         FMLCommonHandler.instance().getDataFixer().writeVersionData(nbt);
         nbt.setTag("palette", nbttaglist2);
-        nbt.setTag("blocks", nbttaglist);
-        nbt.setTag("entities", nbttaglist1);
+        nbt.setTag("blocks", list1);
+        nbt.setTag("entities", list2);
         nbt.setTag("size", this.writeInts(this.size.getX(), this.size.getY(), this.size.getZ()));
         nbt.setString("author", this.author);
-        nbt.setInteger("DataVersion", 1343);
+        nbt.setTag("DataVersion", NbtUtils.DATA_VERSION);
         return nbt;
     }
 

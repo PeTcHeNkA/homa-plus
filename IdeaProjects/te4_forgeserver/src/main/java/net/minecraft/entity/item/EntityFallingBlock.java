@@ -258,12 +258,12 @@ public class EntityFallingBlock extends Entity {
         Block block = this.fallTile != null ? this.fallTile.getBlock() : Blocks.AIR;
         ResourceLocation resourcelocation = Block.REGISTRY.getNameForObject(block);
         nbt.setString("Block", resourcelocation == null ? "" : resourcelocation.toString());
-        nbt.setByte("Data", (byte)block.getMetaFromState(this.fallTile));
-        nbt.setInteger("Time", this.fallTime);
+        nbt.setByteU("Data", (byte)block.getMetaFromState(this.fallTile));
+        nbt.setIntegerU("Time", this.fallTime);
         nbt.setBoolean("DropItem", this.shouldDropItem);
         nbt.setBoolean("HurtEntities", this.hurtEntities);
         nbt.setFloat("FallHurtAmount", this.fallHurtAmount);
-        nbt.setInteger("FallHurtMax", this.fallHurtMax);
+        nbt.setIntegerU("FallHurtMax", this.fallHurtMax);
 
         if (this.tileEntityData != null) {
             nbt.setTag("TileEntityData", this.tileEntityData);
