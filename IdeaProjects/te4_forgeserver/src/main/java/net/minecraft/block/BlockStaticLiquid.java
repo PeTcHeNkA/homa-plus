@@ -22,6 +22,7 @@ public class BlockStaticLiquid extends BlockLiquid {
     }
 
 
+
     @Override
     public void neighborChanged(IBlockState state, World world, BlockPos pos, Block blockIn, BlockPos fromPos) {
         ChunkSelector selector = new ChunkSelector(world);

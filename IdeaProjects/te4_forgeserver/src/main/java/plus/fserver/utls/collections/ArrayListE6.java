@@ -84,6 +84,7 @@ public class ArrayListE6<T> implements List<T> {
 
     @Override
     public void forEach(Consumer<? super T> action) {
+        Object[] data = this.data;
         for (int i = 0, size = this.size; i < size; i++) action.accept((T) data[i]);
     }
 

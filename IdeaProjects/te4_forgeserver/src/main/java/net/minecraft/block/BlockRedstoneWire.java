@@ -20,6 +20,7 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.fserver.api.IBlockEAccess;
 import plus.fserver.api.Keep;
 import plus.fserver.block.BlockFs;
 import plus.fserver.server.elca.ChunkSelector;
@@ -147,8 +148,8 @@ public class BlockRedstoneWire extends BlockFs {
 
     @Override
     public boolean canPlaceBlockAt(final World worldIn, BlockPos pos) {
-        IBlockAccess access = worldIn.access();
-        final IBlockState downState = access.getBlockState(pos = pos.down());
+        IBlockEAccess access = worldIn.access();
+        final IBlockState downState = access.getBlockState(pos.getX(), pos.getY(), pos.getZ());
         return downState.isTopSolid() || downState.getBlockFaceShape(worldIn, pos, EnumFacing.UP) == BlockFaceShape.SOLID ||
                 access.getBlockState(pos).getBlock() == Blocks.GLOWSTONE;
     }

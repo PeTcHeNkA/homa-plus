@@ -2,6 +2,7 @@ package net.minecraft.world.gen.feature;
 
 import java.util.Random;
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
@@ -27,7 +28,7 @@ public class WorldGenLiquids extends CWorldGenerator {
         if (chunk.getBlockState(pos.getX(), pos.getY()+1, pos.getZ()).getBlock() != Blocks.STONE) {
             return false;
         }
-        else if (worldIn.getBlockState(pos.down()).getBlock() != Blocks.STONE) {
+        else if (worldIn.getBlockState(pos.getX(), pos.getY()-1, pos.getZ()).getBlock() != Blocks.STONE) {
             return false;
         } else {
             IBlockState iblockstate = chunk.getBlockState(pos);
@@ -36,43 +37,38 @@ public class WorldGenLiquids extends CWorldGenerator {
                     && iblockstate.getBlock() != Blocks.STONE) {
                 return false;
             } else {
-                int i = 0;
+                int stone = 0, air = 0;
 
-                if (selector.getState(pos.west()).getBlock() == Blocks.STONE) {
-                    ++i;
+                IBlockState state1 = selector.getState(pos.getX()-1, pos.getY(), pos.getZ());
+                IBlockState state2 = selector.getState(pos.getX()+1, pos.getY(), pos.getZ());
+                IBlockState state3 = selector.getState(pos.getX(), pos.getY(), pos.getZ()+1);
+                IBlockState state4 = selector.getState(pos.getX(), pos.getY(), pos.getZ()-1);
+
+                if(state1 == Blocks.STONE){
+                    ++stone;
+                } else if(state1.getMaterial() == Material.AIR){
+                    ++air;
                 }
 
-                if (selector.getState(pos.east()).getBlock() == Blocks.STONE) {
-                    ++i;
+                if(state2 == Blocks.STONE){
+                    ++stone;
+                } else if(state2.getMaterial() == Material.AIR){
+                    ++air;
                 }
 
-                if (selector.getState(pos.north()).getBlock() == Blocks.STONE) {
-                    ++i;
+                if(state3 == Blocks.STONE){
+                    ++stone;
+                } else if(state3.getMaterial() == Material.AIR){
+                    ++air;
                 }
 
-                if (selector.getState(pos.south()).getBlock() == Blocks.STONE) {
-                    ++i;
+                if(state4 == Blocks.STONE){
+                    ++stone;
+                } else if(state4.getMaterial() == Material.AIR){
+                    ++air;
                 }
 
-                int j = 0;
-
-                if (selector.isAirBlock(pos.west())) {
-                    ++j;
-                }
-
-                if (selector.isAirBlock(pos.east())) {
-                    ++j;
-                }
-
-                if (selector.isAirBlock(pos.north())) {
-                    ++j;
-                }
-
-                if (selector.isAirBlock(pos.south())) {
-                    ++j;
-                }
-
-                if (i == 3 && j == 1) {
+                if (stone == 3 && air == 1) {
                     selector.setStateFast(pos.getX(), pos.getY(), pos.getZ(), state);
                     selector.current().relight(pos);
                     //worldIn.scheduleBlockUpdate(pos, state.getBlock(), 0, 0);/

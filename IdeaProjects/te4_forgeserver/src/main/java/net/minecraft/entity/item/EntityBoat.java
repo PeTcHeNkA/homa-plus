@@ -104,7 +104,6 @@ public class EntityBoat extends Entity {
         for (DataParameter<Boolean> dataparameter : DATA_ID_PADDLE) {
             manager.register(dataparameter, Boolean.FALSE);
         }
-        manager.trim();
     }
 
 

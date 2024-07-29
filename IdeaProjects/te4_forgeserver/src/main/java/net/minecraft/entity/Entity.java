@@ -243,6 +243,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         manager.register(NO_GRAVITY, Boolean.FALSE);
 
         this.entityInit();
+        manager.trim();
 
         MinecraftForge.EVENT_BUS.post(
                 new EntityEvent.EntityConstructing(this)
@@ -2012,7 +2013,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
 
     public void setAir(int air) {
-        this.dataManager.set(AIR, air);
+        this.dataManager.setU(AIR, air);
     }
 
 

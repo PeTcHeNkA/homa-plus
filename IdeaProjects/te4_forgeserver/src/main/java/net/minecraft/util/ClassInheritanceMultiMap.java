@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import plus.fserver.utls.collections.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 
 public class ClassInheritanceMultiMap<T> extends AbstractSet<T> {
@@ -22,9 +23,7 @@ public class ClassInheritanceMultiMap<T> extends AbstractSet<T> {
         ALL_KNOWN.add(baseClassIn);
         this.map.put(baseClassIn.hashCode(), this.values);
 
-        for (Class<?> oclass : ALL_KNOWN) {
-            this.createLookupOnInit(oclass);
-        }
+        ALL_KNOWN.forEach(this::createLookupOnInit);
     }
 
 

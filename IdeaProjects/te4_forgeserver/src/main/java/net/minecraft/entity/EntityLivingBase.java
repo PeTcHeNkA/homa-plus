@@ -1,6 +1,5 @@
 package net.minecraft.entity;
 
-import com.google.common.collect.Maps;
 import java.util.*;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -95,7 +94,7 @@ public abstract class EntityLivingBase extends Entity {
     private static final DataParameter<Integer> ARROW_COUNT_IN_ENTITY = EntityDataManager.createKey(EntityLivingBase.class, DataSerializers.VARINT);
     private AbstractAttributeMap attributeMap;
     private final CombatTracker combatTracker = new CombatTracker(this);
-    private final HashMap<Potion, PotionEffect> activePotionsMap = Maps.newHashMap();
+    private final HashMap<Potion, PotionEffect> activePotionsMap = new HashMap<>(3);
     private final FixedItemList handInventory = new FixedItemList(2);
     private final FixedItemList armorArray = new FixedItemList(4);
     public boolean isSwingInProgress;
@@ -185,7 +184,6 @@ public abstract class EntityLivingBase extends Entity {
         manager.register(HIDE_PARTICLES, Boolean.FALSE);
         manager.register(ARROW_COUNT_IN_ENTITY, 0);
         manager.register(HEALTH, 1.0F);
-        manager.trim();
     }
 
 
@@ -1067,7 +1065,7 @@ public abstract class EntityLivingBase extends Entity {
 
 
     public final void setArrowCountInEntity(int count) {
-        this.dataManager.set(ARROW_COUNT_IN_ENTITY, count);
+        this.dataManager.setU(ARROW_COUNT_IN_ENTITY, count);
     }
 
 

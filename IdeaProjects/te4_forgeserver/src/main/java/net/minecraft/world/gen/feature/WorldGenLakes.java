@@ -43,9 +43,9 @@ public class WorldGenLakes extends WorldGenerator {
                 double d0 = rand.nextDouble() * 6 + 3;
                 double d1 = rand.nextDouble() * 4 + 2;
                 double d2 = rand.nextDouble() * 6 + 3;
-                double d3 = rand.nextDouble() * (16 - d0 - 2) + 1.0D + d0 / 2;
-                double d4 = rand.nextDouble() * (8 - d1 - 4) + 2.0D + d1 / 2;
-                double d5 = rand.nextDouble() * (16 - d2 - 2) + 1.0D + d2 / 2;
+                double d3 = rand.nextDouble() * (16 - d0 - 2) + 1.0D + d0 * 0.5;
+                double d4 = rand.nextDouble() * ( 8 - d1 - 4) + 2.0D + d1 * 0.5;
+                double d5 = rand.nextDouble() * (16 - d2 - 2) + 1.0D + d2 * 0.5;
 
                 for (int l = 1; l < 15; ++l) {
                     for (int i1 = 1; i1 < 15; ++i1) {
@@ -63,68 +63,97 @@ public class WorldGenLakes extends WorldGenerator {
                 }
             }
             IBlockState tempState;
-            for (int k1 = 0; k1 < 16; ++k1)
-                for (int l2 = 0; l2 < 16; ++l2) {
-                    for (int k = 0; k < 8; ++k) {
-                        boolean flag = !aboolean[(k1 * 16 + l2) * 8 + k] && (k1 < 15 && aboolean[((k1 + 1) * 16 + l2) * 8 + k] || k1 > 0 && aboolean[((k1 - 1) * 16 + l2) * 8 + k] || l2 < 15 && aboolean[(k1 * 16 + l2 + 1) * 8 + k] || l2 > 0 && aboolean[(k1 * 16 + (l2 - 1)) * 8 + k] || k < 7 && aboolean[(k1 * 16 + l2) * 8 + k + 1] || k > 0 && aboolean[(k1 * 16 + l2) * 8 + (k - 1)]);
+            for (int dx = 0; dx < 16; ++dx)
+                for (int dz = 0; dz < 16; ++dz) {
+                    for (int dy = 0; dy < 8; ++dy) {
+                        boolean flag = !aboolean[(dx * 16 + dz) * 8 + dy] && (dx < 15 && aboolean[((dx + 1) * 16 + dz) * 8 + dy] || dx > 0 && aboolean[((dx - 1) * 16 + dz) * 8 + dy] || dz < 15 && aboolean[(dx * 16 + dz + 1) * 8 + dy] || dz > 0 && aboolean[(dx * 16 + (dz - 1)) * 8 + dy] || dy < 7 && aboolean[(dx * 16 + dz) * 8 + dy + 1] || dy > 0 && aboolean[(dx * 16 + dz) * 8 + (dy - 1)]);
 
                         if (flag) {
-                            Material material = (tempState = selector.getState(position.add(k1, k, l2)))
+                            mutPos.setPosB(
+                                    position.getX() + dx,
+                                    position.getY() + dy,
+                                    position.getZ() + dz
+                            );
+                            Material material = (tempState = selector.getState(mutPos))
                                     .getMaterial();
 
-                            if (k >= 4 && material.isLiquid())
+                            if (dy >= 4 && material.isLiquid())
                                 return false;
-                            if (k < 4 && !material.isSolid() && tempState.getBlock() != state.getBlock())
+                            if (dy < 4 && !material.isSolid() && tempState.getBlock() != state.getBlock())
                                 return false;
                         }
                     }
                 }
 
-            for (int l1 = 0; l1 < 16; ++l1)
-                for (int i3 = 0; i3 < 16; ++i3)
-                    for (int i4 = 0; i4 < 8; ++i4) {
-                        if (aboolean[(l1 * 16 + i3) * 8 + i4])
-                            selector.setBlockState(position.add(l1, i4, i3), i4 >= 4 ?
+            for (int dx = 0; dx < 16; ++dx)
+                for (int dz = 0; dz < 16; ++dz)
+                    for (int dy = 0; dy < 8; ++dy) {
+                        if (aboolean[(dx * 16 + dz) * 8 + dy]) {
+                            mutPos.setPosB(
+                                    position.getX() + dx,
+                                    position.getY() + dy,
+                                    position.getZ() + dz
+                            );
+                            selector.setBlockState(mutPos, dy >= 4 ?
                                     BlockIDIndexes.AIR_STATE : state);
+                        }
                     }
 
-            for (int i2 = 0; i2 < 16; ++i2)
-                for (int j3 = 0; j3 < 16; ++j3)
-                    for (int j4 = 4; j4 < 8; ++j4)
-                        if (aboolean[(i2 * 16 + j3) * 8 + j4]) {
-                            BlockPos blockpos = position.add(i2, j4 - 1, j3);
+            for (int dx = 0; dx < 16; ++dx)
+                for (int dz = 0; dz < 16; ++dz)
+                    for (int dy = 4; dy < 8; ++dy)
+                        if (aboolean[(dx * 16 + dz) * 8 + dy]) {
+                            mutPos.setPosB(
+                                    position.getX() + dx,
+                                    position.getY() + dy - 1,
+                                    position.getZ() + dz
+                            );
 
-                            if (selector.getState(blockpos).getBlock() == Blocks.DIRT
-                                    && selector.current().getLightFor(EnumSkyBlock.SKY, position.add(i2, j4, j3)) > 0) {
+                            if (selector.getState(mutPos).getBlock() == Blocks.DIRT
+                                    && selector.current().getLightFor(EnumSkyBlock.SKY, position.add(dx, dy, dz)) > 0) {
 
-                                Biome biome = selector.getBiome(blockpos);
+                                Biome biome = selector.getBiome(mutPos);
 
                                 if (biome.topBlock.getBlock() == Blocks.MYCELIUM)
-                                    selector.setCurState(blockpos, Blocks.MYCELIUM.getDefaultState());
+                                    selector.setCurState(mutPos, Blocks.MYCELIUM.getDefaultState());
                                 else
-                                    selector.setCurState(blockpos, Blocks.GRASS.getDefaultState());
+                                    selector.setCurState(mutPos, Blocks.GRASS.getDefaultState());
                             }
                         }
 
-            BlockPos temp;
+            //BlockPos temp;
 
             if (this.state.getMaterial() == Material.LAVA)
-                for (int j2 = 0; j2 < 16; ++j2)
-                    for (int k3 = 0; k3 < 16; ++k3)
-                        for (int k4 = 0; k4 < 8; ++k4) {
-                            boolean flag1 = !aboolean[(j2 * 16 + k3) * 8 + k4] && (j2 < 15 && aboolean[((j2 + 1) * 16 + k3) * 8 + k4] || j2 > 0 && aboolean[((j2 - 1) * 16 + k3) * 8 + k4] || k3 < 15 && aboolean[(j2 * 16 + k3 + 1) * 8 + k4] || k3 > 0 && aboolean[(j2 * 16 + (k3 - 1)) * 8 + k4] || k4 < 7 && aboolean[(j2 * 16 + k3) * 8 + k4 + 1] || k4 > 0 && aboolean[(j2 * 16 + k3) * 8 + (k4 - 1)]);
-                            if (flag1 && (k4 < 4 || rand.nextInt(2) != 0)
-                                    && selector.getState(temp = position.add(j2, k4, k3)).getMaterial().isSolid())
-                                selector.setCurState(temp, BlockIDIndexes.STONE_STATE);
+                for (int dx = 0; dx < 16; ++dx)
+                    for (int dz = 0; dz < 16; ++dz)
+                        for (int dy = 0; dy < 8; ++dy) {
+                            boolean flag1 = !aboolean[(dx * 16 + dz) * 8 + dy] && (dx < 15 && aboolean[((dx + 1) * 16 + dz) * 8 + dy] || dx > 0 && aboolean[((dx - 1) * 16 + dz) * 8 + dy] || dz < 15 && aboolean[(dx * 16 + dz + 1) * 8 + dy] || dz > 0 && aboolean[(dx * 16 + (dz - 1)) * 8 + dy] || dy < 7 && aboolean[(dx * 16 + dz) * 8 + dy + 1] || dy > 0 && aboolean[(dx * 16 + dz) * 8 + (dy - 1)]);
+                            if (flag1 && (dy < 4 || rand.nextInt(2) != 0)) {
+                                mutPos.setPosB(
+                                        position.getX() + dx,
+                                        position.getY() + dy,
+                                        position.getZ() + dz
+                                );
+
+                                if(selector.getState(mutPos).getMaterial().isSolid())
+                                    selector.setCurState(mutPos, BlockIDIndexes.STONE_STATE);
+                            }
                         }
 
             if (this.state.getMaterial() == Material.WATER)
-                for (int k2 = 0; k2 < 16; ++k2)
-                    for (int l3 = 0; l3 < 16; ++l3)
-                        if (worldIn.canBlockFreezeWater(temp = position.add(k2, 4, l3))) {
-                            int flag = net.minecraftforge.common.ForgeModContainer.fixVanillaCascading ? 2| 16 : 2;
-                            selector.setBlockState(temp, Blocks.ICE.getDefaultState(), flag);
+                for (int dx = 0; dx < 16; ++dx)
+                    for (int dz = 0; dz < 16; ++dz) {
+                        mutPos.setPosB(
+                                position.getX() + dx,
+                                position.getY() + 4,
+                                position.getZ() + dz
+                        );
+
+                        if (worldIn.canBlockFreeze(mutPos, false)) {
+                            int flag = net.minecraftforge.common.ForgeModContainer.fixVanillaCascading ? 2 | 16 : 2;
+                            selector.setBlockState(mutPos, Blocks.ICE.getDefaultState(), flag);
                         }
+                    }
             return true;
         }
     }

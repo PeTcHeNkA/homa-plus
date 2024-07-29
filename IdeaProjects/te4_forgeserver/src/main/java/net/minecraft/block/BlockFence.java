@@ -186,10 +186,11 @@ public class BlockFence extends Block {
 
     @Override
     public IBlockState getActualState(IBlockState state, IBlockAccess access, BlockPos pos) {
-        return state.withProperty(NORTH, canFenceConnectTo(access, pos, EnumFacing.NORTH))
-                    .withProperty(EAST,  canFenceConnectTo(access, pos, EnumFacing.EAST))
-                    .withProperty(SOUTH, canFenceConnectTo(access, pos, EnumFacing.SOUTH))
-                    .withProperty(WEST,  canFenceConnectTo(access, pos, EnumFacing.WEST));
+        final BlockPos.MutableBlockPos mut = access.getWorld().localTempPos3;
+        return state.withProperty(NORTH, canFenceConnectTo(access, pos, mut, EnumFacing.NORTH))
+                    .withProperty(EAST,  canFenceConnectTo(access, pos, mut, EnumFacing.EAST))
+                    .withProperty(SOUTH, canFenceConnectTo(access, pos, mut, EnumFacing.SOUTH))
+                    .withProperty(WEST,  canFenceConnectTo(access, pos, mut, EnumFacing.WEST));
     }
 
 
@@ -236,8 +237,12 @@ public class BlockFence extends Block {
     }
 
 
-    private boolean canFenceConnectTo(IBlockAccess access, BlockPos pos, EnumFacing facing) {
-        BlockPos other = pos.offset(facing);
+    private boolean canFenceConnectTo(IBlockAccess access, BlockPos pos, BlockPos.MutableBlockPos other, EnumFacing facing) {
+        other.setPosB(
+                facing.getXOffset() + pos.getX(),
+                facing.getYOffset() + pos.getY(),
+                facing.getZOffset() + pos.getZ()
+        );
         return access.getBlockState(other).getBlock().canBeConnectedTo(access, other, facing.getOpposite()) || canConnectTo(access, other, facing.getOpposite());
     }
 

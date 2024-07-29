@@ -12,6 +12,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.utls.NetUtils;
+import plus.fserver.utls.collections.IntBlockIndex;
 
 
 public class BlockStateContainer implements IBlockStatePaletteResizer {
@@ -60,13 +61,10 @@ public class BlockStateContainer implements IBlockStatePaletteResizer {
     @Override
     public int onResize(int bits, IBlockState state) {
         BitArray bitarray = this.storage;
-        IBlockStatePalette state1 = this.palette;
+        IBlockStatePalette palette = this.palette;
         this.setBits(bits);
-        for (int i = 0; i < bitarray.size(); ++i) {
-            IBlockState iblockstate = state1.get(bitarray.getAt(i));
-            if (iblockstate != null) {
-                this.set(i, iblockstate);
-            }
+        for (int i = 0, size = bitarray.size(); i < size; ++i) {
+            this.set(i, palette.get(bitarray.getAt(i)));
         }
         return this.palette.idFor(state);
     }
@@ -88,7 +86,7 @@ public class BlockStateContainer implements IBlockStatePaletteResizer {
     }
 
 
-    public IBlockState update(int x, int y, int z, IBlockState state){
+    public IBlockState update(int x, int y, int z, final IBlockState state){
         IBlockState result = this.palette.get(this.storage.getAt(x = (y << 8 | z << 4 | x)));
         y = palette.idFor(state);
         storage.setAt(x, y);
@@ -134,30 +132,38 @@ public class BlockStateContainer implements IBlockStatePaletteResizer {
 
     @Nullable
     public NibbleArray getDataForNBT(byte[] blockIds, NibbleArray data) {
-        NibbleArray nibblearray = null;
-        for (int i = 0, j, k, l, i1; i < 4096; ++i) {
-            k = i & 15;
-            l = i >> 8 & 15;
-            i1 = i >> 4 & 15;
+        NibbleArray array = null;
+        for (int i = 0, j, x, y, z; i < 4096; ++i) {
+            x = i & 15;
+            y = i >> 8 & 15;
+            z = i >> 4 & 15;
             if (((j = getId(i)) >> 12 & 15) != 0) {
-                if (nibblearray == null) nibblearray = new NibbleArray();
-                nibblearray.set(k, l, i1, j >> 12 & 15);
+                if (array == null) array = new NibbleArray();
+                array.set(x, y, z, j >> 12 & 15);
             }
             blockIds[i] = (byte)(j >> 4 & 255);
-            data.set(k, l, i1, j & 15);
+            data.set(x, y, z, j & 15);
         }
-        return nibblearray;
+        return array;
     }
 
 
-    public void setDataFromNBT(byte[] blockIds, NibbleArray data, @Nullable NibbleArray blockIdExtension) {
-        for (int i = 0, j, k, l; i < 4096; ++i) {
-            j = i & 15;
-            k = i >> 8 & 15;
-            l = i >> 4 & 15;
-            this.set(i, BlockIDIndexes.BLOCK_INDEX.get(
-                    (blockIdExtension == null ? 0 : blockIdExtension.get(j, k, l) << 12) |
-                            (blockIds[i] & 255) << 4 | data.get(j, k, l)));
+    public void setDataFromNBT(final byte[] blockIds, final NibbleArray data, final @Nullable NibbleArray arr) {
+        final IntBlockIndex index = BlockIDIndexes.BLOCK_INDEX;
+        if(arr == null) {
+            for (int i = 0, x, y, z; i < 4096; ++i) {
+                x = i & 15;
+                y = i >> 8 & 15;
+                z = i >> 4 & 15;
+                this.set(i, index.get((blockIds[i] & 255) << 4 | data.get(x, y, z)));
+            }
+        } else {
+            for (int i = 0, x, y, z; i < 4096; ++i) {
+                x = i & 15;
+                y = i >> 8 & 15;
+                z = i >> 4 & 15;
+                this.set(i, index.get(arr.get(x, y, z) << 12 | (blockIds[i] & 255) << 4 | data.get(x, y, z)));
+            }
         }
     }
 

@@ -157,18 +157,19 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
         this.tileEntities = new Te4HashMap<>();
         this.queuedLightChecks = 4096;
         this.tileEntityPosQueue = new FastBuffer<>();
-        this.entityLists = new ClassInheritanceMultiMap[16];
         this.world = worldIn;
         this.x = x;
         this.z = z;
         this.heightMap = new int[256];
 
-        for (int i = 0; i < this.entityLists.length; ++i) {
-            this.entityLists[i] = new ClassInheritanceMultiMap<>(Entity.class);
-        }
-
         Arrays.fill(this.precipitationHeightMap, (short) -999);
         Arrays.fill(this.blockBiomeArray, (byte) - 1);
+
+        ClassInheritanceMultiMap[] lists = this.entityLists = new ClassInheritanceMultiMap[16];
+
+        for (int i = 0; i < lists.length; ++i) {
+            lists[i] = new ClassInheritanceMultiMap<>(Entity.class);
+        }
         //capabilities = ForgeEventFactory.gatherCapabilities(this);
     }
 
@@ -183,20 +184,20 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
         this(worldIn, x, z);
         boolean flag = worldIn.provider.hasSkyLight(), flag2 = false;
         IBlockState state = null;
+        ExtendedBlockStorage[] storageArrays = this.storageArrays;
         for (int yPos = 0, xPos, sae, zPOs, ids, pids=-10; yPos < 256; ++yPos) {
-            sae = yPos >> 4;
+            ExtendedBlockStorage arr = storageArrays[sae = yPos >> 4];
             for (xPos = 0; xPos < 16; ++xPos) {
                 for (zPOs = 0; zPOs < 16; ++zPOs) {
-                    ids = primer.getBlockStateId(xPos, yPos, zPOs);
-                    if (ids != pids)
+                    if ((ids = primer.getBlockStateId(xPos, yPos, zPOs)) != pids)
                         flag2 = (state = BlockIDIndexes.BLOCK_INDEX.get(pids = ids)) != null
                                 && state.getMaterial() != Material.AIR;
 
                     if (flag2) {
-                        if (this.storageArrays[sae] == null) {
-                            this.storageArrays[sae] = new ExtendedBlockStorage(sae << 4, flag);
+                        if (arr == null) {
+                            storageArrays[sae] = arr = new ExtendedBlockStorage(sae << 4, flag);
                         }
-                        this.storageArrays[sae].set(xPos, yPos & 15, zPOs, state);
+                        arr.set(xPos, yPos & 15, zPOs, state);
                     }
                 }
             }
@@ -1068,20 +1069,20 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
         boolean flag = this.world.provider.hasSkyLight();
 
         for (int i = 0; i < this.storageArrays.length; ++i) {
-            ExtendedBlockStorage extendedblockstorage = this.storageArrays[i];
+            ExtendedBlockStorage array = this.storageArrays[i];
             if ((availableSections & 1 << i) == 0) {
-                if (groundUpContinuous && extendedblockstorage != null) {
+                if (groundUpContinuous && array != null) {
                     this.storageArrays[i] = null;
                 }
             } else {
-                if (extendedblockstorage == null) {
-                    extendedblockstorage = new ExtendedBlockStorage(i << 4, flag);
-                    this.storageArrays[i] = extendedblockstorage;
+                if (array == null) {
+                    array = new ExtendedBlockStorage(i << 4, flag);
+                    this.storageArrays[i] = array;
                 }
-                extendedblockstorage.getData().read(buf);
-                buf.readBytes(extendedblockstorage.getBlockLight().getData());
+                array.getData().read(buf);
+                buf.readBytes(array.getBlockLight().getData());
                 if (flag) {
-                    buf.readBytes(extendedblockstorage.getSkyLight().getData());
+                    buf.readBytes(array.getSkyLight().getData());
                 }
             }
         }

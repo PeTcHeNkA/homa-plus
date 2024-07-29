@@ -417,9 +417,13 @@ public class ChunkGeneratorOverworld implements IChunkGenerator {
                 int l2 = this.rand.nextInt(this.rand.nextInt(248) + 8);
                 int k3 = this.rand.nextInt(16) + 8;
 
-                if (l2 < this.world.getSeaLevel() || this.rand.nextInt(this.settings.lavaLakeChance / 8) == 0)
-                {
-                    (new WorldGenLakes(Blocks.LAVA)).generate(this.world, this.rand, blockpos.add(i2, l2, k3));
+                if (l2 < this.world.getSeaLevel() || this.rand.nextInt(this.settings.lavaLakeChance / 8) == 0) {
+                    if(maybeAsyncPopulate()){
+                        BlockPos lavaPos = blockpos.add(i2, l2, k3);
+                        ((WorldServer)world).addSyncTask(() -> (new WorldGenLakes(Blocks.LAVA)).generate(world, rand, lavaPos));
+                    } else {
+                        (new WorldGenLakes(Blocks.LAVA)).generate(this.world, this.rand, blockpos.add(i2, l2, k3));
+                    }
                 }
             }
 
