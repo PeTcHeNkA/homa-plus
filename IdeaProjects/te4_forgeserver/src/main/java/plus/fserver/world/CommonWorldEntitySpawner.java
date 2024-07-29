@@ -82,7 +82,8 @@ public class CommonWorldEntitySpawner extends WorldEntitySpawner {
                                         PlayerChunkMapEntry entry = map.getEntry(dx + cX, dz + cZ);
 
                                         if (entry != null && entry.isSentToPlayers()) {
-                                            chunkSet.put(chunkX, chunkZ, entry.getChunk());
+                                            Chunk chunk = entry.getChunk();
+                                            if(chunk != null)chunkSet.put(chunkX, chunkZ, chunk);
                                         }
                                     }
                                 }

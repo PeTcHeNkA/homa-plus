@@ -269,4 +269,10 @@ public class VillageCollection extends WorldSavedData {
     public static String fileNameForProvider(WorldProvider provider) {
         return "villages" + provider.getDimensionType().getSuffix();
     }
+
+
+    @Override
+    public boolean shouldCopyNbtOnAsync() {
+        return false;
+    }
 }

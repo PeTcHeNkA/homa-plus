@@ -107,7 +107,11 @@ public class MapStorage {
 
         private SaveTask(File file, WorldSavedData data) {
             this.file = file;
-            this.data = data.writeToNBT(new NBTTagCompound());
+            NBTTagCompound nbt = data.writeToNBT(new NBTTagCompound());
+            if(data.shouldCopyNbtOnAsync()){
+                nbt = nbt.copy();
+            }
+            this.data = nbt;
             data.markDirty();
         }
 
