@@ -7,21 +7,23 @@ import java.util.Iterator;
 
 
 public final class ChunkIterator implements Iterator<Chunk>, Iterable<Chunk> {
-    private final ArrayListE6<PlayerChunkMapEntry> entries;
+    private final Object[] data;
+    private final int size;
     private final int radiusSq;
     private Chunk next;
     private int cursor;
 
     public ChunkIterator(ArrayListE6<PlayerChunkMapEntry> entries, int radius) {
-        this.entries = entries;
+        this.data = entries.data;
+        this.size = entries.size;
         this.radiusSq = radius*radius;
         calcNext();
     }
 
 
     private void calcNext(){
-        Object[] data = entries.data;
-        while (cursor < entries.size) {
+        Object[] data = this.data;
+        while (cursor < this.size) {
             PlayerChunkMapEntry entry = (PlayerChunkMapEntry) data[cursor++];
             Chunk chunk = entry.getChunk();
             if (chunk == null) continue;

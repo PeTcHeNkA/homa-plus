@@ -8,21 +8,23 @@ import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.server.management.PlayerChunkMapEntry;
+import net.minecraft.util.WeightedRandom;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.SpawnPos;
 import net.minecraft.world.WorldEntitySpawner;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraftforge.event.ForgeEventFactory;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.living.LivingPackSizeEvent;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import plus.fserver.ElcaConfig;
 import plus.fserver.api.Keep;
 import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.collections.FlatMap;
 import plus.fserver.utls.math.FastRandom;
-
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 
@@ -106,6 +108,7 @@ public class CommonWorldEntitySpawner extends WorldEntitySpawner {
             SpawnPos spawnPos = null;
             ChunkSelector selector = world.localSelector;
             Random rand = world.rand;
+            LivingPackSizeEvent.EventProxy proxy = null;
 
             for (EnumCreatureType creatureType : TYPES) {
                 if ((!creatureType.getPeacefulCreature() || spawnPeacefulMobs) && (creatureType.getPeacefulCreature() || spawnHostileMobs) && (!creatureType.getAnimal() || spawnOnSetTickRate)) {
@@ -116,14 +119,13 @@ public class CommonWorldEntitySpawner extends WorldEntitySpawner {
                     int maxCount = creatureType.getMaxNumberOfCreature() * factor / MOB_COUNT_DIV;
 
                     if (count <= maxCount) {
-                        if(spawnPos==null) spawnPos = new SpawnPos(world);
+                        if(spawnPos == null) spawnPos = new SpawnPos(world);
                         if(shuffled == null) {
                             shuffled = this.shuffled = chunkSet.toArray(new Chunk[chunkSet.size()]);
                         }
                         FastRandom.INST.shuffle(shuffled);
 
                         inner:
-
                         for (Chunk chunk : shuffled) {
                             spawnPos.setRandomChunkPos(chunk);
                             selector.setChunk(chunk);
@@ -132,29 +134,34 @@ public class CommonWorldEntitySpawner extends WorldEntitySpawner {
 
                             if (!state.isNormalCube()) {
                                 int pack = 0;
+                                int bits = rand.nextInt();
 
-                                for (int k2 = 0; k2 < 3; ++k2) {
-                                    int l2 = sX;
-                                    int j3 = sZ;
+                                for (int attempts = 0; attempts < 3; ++attempts) {
+                                    bits = bits * 17 + attempts;
+                                    int sx2 = sX;
+                                    int sz2 = sZ;
                                     Biome.SpawnListEntry entry = null;
                                     EntityLiving prev = null;
                                     IEntityLivingData data = null;
-                                    int l3 = MathHelper.ceil(rand.nextFloat() * 4);
+                                    int max = MathHelper.ceil(rand.nextFloat() * 4);
 
-                                    for (int i4 = 0; i4 < l3; ++i4) {
-                                        l2 += rand.nextInt(6) - rand.nextInt(6);
-                                        j3 += rand.nextInt(6) - rand.nextInt(6);
-                                        spawnPos.setPos(l2, sY, j3);
-                                        float f = (float)l2 + 0.5F;
-                                        float f1 = (float)j3 + 0.5F;
+                                    for (int mob = 0; mob < max; ++mob) {
+                                        bits >>= mob;
 
-                                        if (!world.isAnyPlayerWithinRangeAt(f, sY, f1, 24.0D)) {
+                                        sx2 += (((bits & 7) % 5) - ((bits>>3 & 7) % 5));
+                                        sz2 += (((bits>>6 & 7) % 5) - ((bits>>9 & 7) % 5));
+
+                                        spawnPos.setPos(sx2, sY, sz2);
+                                        float px = (float)sx2 + 0.5F;
+                                        float pz = (float)sz2 + 0.5F;
+
+                                        if (entry != null || !world.isAnyPlayerWithinRangeAt(px, sY, pz, 24.0D)) {
                                             if (entry == null) {
                                                 entry = world.getSpawnListEntryForTypeAt(creatureType, spawnPos);
 
                                                 if (entry == null) break;
                                             }
-                                            if (world.canCreatureTypeSpawnHere(creatureType, entry, spawnPos) && canCreatureTypeSpawnAtLocation(EntitySpawnPlacementRegistry.getPlacementForEntity(entry.entityClass), world, spawnPos)) {
+                                            if (canCreatureTypeSpawnAtLocation(EntitySpawnPlacementRegistry.getPlacementForEntity(entry.entityClass), world, spawnPos)) {
                                                 EntityLiving entity;
 
                                                 try {
@@ -165,13 +172,13 @@ public class CommonWorldEntitySpawner extends WorldEntitySpawner {
                                                     return spawned;
                                                 }
 
-                                                entity.setLocationAndAngles(f, sY, f1, world.rand.nextFloat() * 360.0F, 0.0F);
+                                                entity.setLocationAndAngles(px, sY, pz, rand.nextFloat() * 360.0F, 0.0F);
 
                                                 //todo
-                                                Event.Result canSpawn = world.canEntitySpawn(entity, f, sY, f1);
+                                                Event.Result canSpawn = world.canEntitySpawn(entity, px, sY, pz);
                                                 if (canSpawn == Event.Result.ALLOW || (canSpawn == Event.Result.DEFAULT && (entity.getCanSpawnHere() && entity.isNotColliding()))) {
                                                     prev = null;
-                                                    if (!world.doSpecialSpawn(entity, f, sY, f1))
+                                                    if (!world.doSpecialSpawn(entity, px, sY, pz))
                                                         data = entity.onInitialSpawn(
                                                                 world.getDifficultyForLocation(
                                                                         MathHelper.floor(entity.posX), MathHelper.floor(entity.posY)
@@ -185,7 +192,11 @@ public class CommonWorldEntitySpawner extends WorldEntitySpawner {
                                                         entity.setDead();
                                                     }
 
-                                                    if (pack >= ForgeEventFactory.getMaxSpawnPackSize(entity)) {
+                                                    if(proxy == null){
+                                                        proxy = new LivingPackSizeEvent().forBus(MinecraftForge.EVENT_BUS);
+                                                    }
+
+                                                    if (pack >= proxy.post(entity)) {
                                                         continue inner;
                                                     }
                                                 }

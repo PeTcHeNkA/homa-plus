@@ -89,25 +89,27 @@ public class WorldEntitySpawner {
 
 
     @Keep
-    public static void performWorldGenSpawning(World worldIn, Biome biomeIn, int centerX, int centerZ, int diameterX, int diameterZ, Random randomIn) {
+    public static void performWorldGenSpawning(World worldIn, Biome biomeIn, int centerX, int centerZ, int diameterX, int diameterZ, Random rand) {
         List<Biome.SpawnListEntry> list = biomeIn.getSpawnableList(EnumCreatureType.CREATURE);
 
         if (!list.isEmpty()) {
-            while (randomIn.nextFloat() < biomeIn.getSpawningChance()) {
+            while (rand.nextFloat() < biomeIn.getSpawningChance()) {
                 Biome.SpawnListEntry listEntry = WeightedRandom.getRandomItem(worldIn.rand, list);
                 EntityLiving prev = null;
-                int i = listEntry.minGroupCount + randomIn.nextInt(1 + listEntry.maxGroupCount - listEntry.minGroupCount);
+                int i = listEntry.minGroupCount + rand.nextInt(1 + listEntry.maxGroupCount - listEntry.minGroupCount);
                 IEntityLivingData ientitylivingdata = null;
-                int j = centerX + randomIn.nextInt(diameterX);
-                int k = centerZ + randomIn.nextInt(diameterZ);
-                int l = j;
-                int i1 = k;
+
+                int px = centerX + rand.nextInt(diameterX);
+                int pz = centerZ + rand.nextInt(diameterZ);
+
+                int px2 = px;
+                int pz2 = pz;
 
                 for (int j1 = 0; j1 < i; ++j1) {
                     boolean flag = false;
 
                     for (int k1 = 0; !flag && k1 < 4; ++k1) {
-                        BlockPos pos = worldIn.getTopSolidOrLiquidBlock(new BlockPos(j, 0, k));
+                        BlockPos pos = worldIn.getTopSolidOrLiquidBlock(new BlockPos(px, 0, pz));
 
                         if (canCreatureTypeSpawnAtLocation(EntityLiving.SpawnPlacementType.ON_GROUND, worldIn, pos)) {
                             EntityLiving toSpawn;
@@ -120,18 +122,22 @@ public class WorldEntitySpawner {
                                 continue;
                             }
 
-                            if (worldIn.canEntitySpawn(toSpawn, j + 0.5f, (float) pos.getY(), k +0.5f) == Event.Result.DENY) continue;
+                            if (worldIn.canEntitySpawn(toSpawn, px + 0.5f, (float) pos.getY(), pz +0.5f) == Event.Result.DENY) continue;
                             prev = null;
-                            toSpawn.setLocationAndAngles((float)j + 0.5F, pos.getY(), (float)k + 0.5F, randomIn.nextFloat() * 360.0F, 0.0F);
+                            toSpawn.setLocationAndAngles((float)px + 0.5F, pos.getY(), (float)pz + 0.5F, rand.nextFloat() * 360.0F, 0.0F);
                             worldIn.spawnEntity(toSpawn);
                             ientitylivingdata = toSpawn.onInitialSpawn(worldIn.getDifficultyForLocation(new BlockPos(toSpawn)), ientitylivingdata);
                             flag = true;
                         }
 
-                        j += randomIn.nextInt(5) - randomIn.nextInt(5);
+                        int bits = rand.nextInt();
 
-                        for (k += randomIn.nextInt(5) - randomIn.nextInt(5); j < centerX || j >= centerX + diameterX || k < centerZ || k >= centerZ + diameterX; k = i1 + randomIn.nextInt(5) - randomIn.nextInt(5)) {
-                            j = l + randomIn.nextInt(5) - randomIn.nextInt(5);
+                        px += (((bits & 7) % 5) - ((bits>>3 & 7) % 5));
+                        //px += rand.nextInt(5) - rand.nextInt(5);
+
+                        for (pz += rand.nextInt(5) - rand.nextInt(5); px < centerX || px >= centerX + diameterX || pz < centerZ || pz >= centerZ + diameterX; pz = pz2 + rand.nextInt(5) - rand.nextInt(5)) {
+                            bits = rand.nextInt();
+                            px = px2 + (((bits & 7) % 5) - ((bits>>3 & 7) % 5));
                         }
                     }
                 }

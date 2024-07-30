@@ -1,7 +1,23 @@
 package plus.fserver.utls.collections;
 
+import java.util.Collection;
+
 
 public class ArrayRemSwapListE6<T> extends ArrayListE6<T> {
+    public ArrayRemSwapListE6(){}
+
+    public ArrayRemSwapListE6(Object[] data, int len){
+        this.data = data;
+        this.size = len;
+    }
+
+
+    public ArrayRemSwapListE6(Object... data){
+        this.data = data;
+        this.size = data.length;
+    }
+
+
     @Override
     public T remove(int index) {
         if(size == index+1){
@@ -15,6 +31,25 @@ public class ArrayRemSwapListE6<T> extends ArrayListE6<T> {
         data[size-1] = null;
         --size;
         return prev;
+    }
+
+
+    @Override
+    public boolean removeAll(Collection<?> c) {
+        Object[] data = this.data;
+        int size, prevSize = size = this.size;
+        Object swap;
+        for (int i = 0; i < size; i++){
+            if(c.contains(data[i])){
+                if (i != --size) {
+                    swap = data[size];
+                    data[i--] = swap;
+                }
+                data[size] = null;
+            }
+        }
+        this.size = size;
+        return size != prevSize;
     }
 
 

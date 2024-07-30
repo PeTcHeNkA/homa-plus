@@ -46,6 +46,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.village.VillageCollection;
 import net.minecraft.village.VillageSiege;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.chunk.BlockStateContainer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
@@ -81,6 +82,7 @@ import plus.fserver.server.chunk.io.TChunkTask;
 import plus.fserver.server.chunk.io.TQueuedChunk;
 import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.collections.ArrayRemSwapListE15;
+import plus.fserver.utls.collections.ChunkIterator;
 import plus.fserver.utls.math.MathUtls;
 import plus.fserver.world.CommonWorldEntitySpawner;
 import plus.fserver.world.NavigationCache;
@@ -672,6 +674,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
 
 
     private void setDebugWorldSettings() {
+        isDebug = true;
         this.worldInfo.setMapFeaturesEnabled(false);
         this.worldInfo.setAllowCommands(true);
         this.worldInfo.setRaining(false);
@@ -689,7 +692,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
     private void createSpawnPosition(WorldSettings settings) {
         if (!this.provider.canRespawnHere()) {
             this.worldInfo.setSpawn(BlockPos.ORIGIN.up(this.provider.getAverageGroundLevel()));
-        } else if (this.worldInfo.getTerrainType() == WorldType.DEBUG_ALL_BLOCK_STATES) {
+        } else if (isDebug) {
             this.worldInfo.setSpawn(BlockPos.ORIGIN.up());
         } else {
            ForgeEventFactory.onCreateWorldSpawn(this, settings);
@@ -1205,7 +1208,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
 
     @Override
     public boolean tickUpdates(boolean runAllPending) {
-        if (this.worldInfo.getTerrainType() == WorldType.DEBUG_ALL_BLOCK_STATES) {
+        if (isDebug) {
             return false;
         } else {
             NextTickListEntry nextticklistentry = null;
@@ -1355,7 +1358,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
 
     protected void updateBlocks(final int factor) {
         this.playerCheckLight();
-        if (this.worldInfo.getTerrainType() == WorldType.DEBUG_ALL_BLOCK_STATES) {
+        if (isDebug) {
             for (Iterator<Chunk> iterator = this.playerChunkMap.getChunkIterator(); iterator.hasNext();){
                 iterator.next().onTick(false);
             }
@@ -1381,8 +1384,8 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
             final int snowChance  = 16 / factor;
             final Random rand = this.rand;
 
-            for (Iterator<Chunk> iterator = this.playerChunkMap.getChunkIterator(radius); iterator.hasNext();){
-                selector.setChunk(chunk = iterator.next());
+            for (ChunkIterator iter = this.playerChunkMap.getChunkIterator(radius); iter.hasNext();){
+                selector.setChunk(chunk = iter.next());
 
                 int startCX = chunk.x << 4;
                 int startCZ = chunk.z << 4;
@@ -1429,7 +1432,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
                             setBlockState(mut, Blocks.SNOW_LAYER.getDefaultState());
 
                         if (selector.getBiome(mut2).canRain())
-                            getBlockState(mut2).getBlock().fillWithRain(WorldServer.this, mut2);
+                            selector.getState(mut2).getBlock().fillWithRain(WorldServer.this, mut2);
                     }
                 }
 
@@ -1438,15 +1441,18 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
                     Block block;
                     for (ExtendedBlockStorage storage : chunk.getBlockStorageArray()) {
                         if (storage != Chunk.NULL_BLOCK_STORAGE && storage.needsRandomTick()) {
-                            for (int i1 = 0; i1 < rts; ++i1) {
+                            final BlockStateContainer data = storage.getData();
+                            for (int lim = 0, yLoc = storage.getYLocation(); lim < rts; ++lim) {
                                 updateLCG = updateLCG * 3 + 1013904223;
                                 int rNum = updateLCG >> 2;
 
-                                IBlockState state = storage.get(dx = rNum & 15, dy = rNum >> 16 & 15, dz = rNum >> 8 & 15);
+                                IBlockState state = data.get(dx = rNum & 15, dy = rNum >> 16 & 15, dz = rNum >> 8 & 15);
 
                                 if ((block = state.getBlock()).getTickRandomly()) {
-                                    block.randomTick(WorldServer.this,
-                                            mut2.setPos(dx + startCX, dy + storage.getYLocation(), dz + startCZ), state, this.rand
+                                    block.randomTick(
+                                            this,
+                                            mut2.setPos(dx + startCX, dy + yLoc, dz + startCZ),
+                                            state, rand
                                     );
                                 }
                             }
@@ -1454,7 +1460,6 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
                     }
                 }
             }
-
             this.updateLCG = updateLCG;
         }
     }

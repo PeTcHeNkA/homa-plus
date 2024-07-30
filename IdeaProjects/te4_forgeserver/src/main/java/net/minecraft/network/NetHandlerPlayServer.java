@@ -265,23 +265,31 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
     public void onTickWorld(){
         if(locked)return;
 
-        this.captureCurrentPosition();
-        this.player.onUpdateEntity();
-        this.player.setPositionAndRotation(this.firstGoodX, this.firstGoodY, this.firstGoodZ, this.player.rotationYaw, this.player.rotationPitch);
+        final EntityPlayerMP player = this.player;
+
+        this.firstGoodX = player.posX;
+        this.firstGoodY = player.posY;
+        this.firstGoodZ = player.posZ;
+        this.lastGoodX  = player.posX;
+        this.lastGoodY  = player.posY;
+        this.lastGoodZ  = player.posZ;
+
+        player.onUpdateEntity();
+        player.setPositionAndRotation(this.firstGoodX, this.firstGoodY, this.firstGoodZ, player.rotationYaw, player.rotationPitch);
         ++this.networkTickCount;
         this.lastMovePacketCounter = this.movePacketCounter;
         if (this.floating) {
             if (++this.floatingTickCount > 80) {
-                LOGGER.warn("{} was kicked for floating too long!", this.player.getName());
+                LOGGER.warn("{} was kicked for floating too long!", player.getName());
                 this.disconnect(new TextComponentTranslation("multiplayer.disconnect.flying"));
                 return;
             }
         } else {
             this.floatingTickCount = 0;
         }
-        this.lowestRiddenEnt = this.player.getLowestRidingEntity();
+        this.lowestRiddenEnt = player.getLowestRidingEntity();
 
-        if (this.lowestRiddenEnt != this.player && this.lowestRiddenEnt.getControllingPassenger() == this.player) {
+        if (this.lowestRiddenEnt != player && this.lowestRiddenEnt.getControllingPassenger() == player) {
             this.lowestRiddenX = this.lowestRiddenEnt.posX;
             this.lowestRiddenY = this.lowestRiddenEnt.posY;
             this.lowestRiddenZ = this.lowestRiddenEnt.posZ;
@@ -289,9 +297,9 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
             this.lowestRiddenY1 = this.lowestRiddenEnt.posY;
             this.lowestRiddenZ1 = this.lowestRiddenEnt.posZ;
 
-            if (this.vehicleFloating && this.player.getLowestRidingEntity().getControllingPassenger() == this.player) {
+            if (this.vehicleFloating && player.getLowestRidingEntity().getControllingPassenger() == player) {
                 if (++this.vehicleFloatingTickCount > 80) {
-                    LOGGER.warn("{} was kicked for floating a vehicle too long!", this.player.getName());
+                    LOGGER.warn("{} was kicked for floating a vehicle too long!", player.getName());
                     this.disconnect(new TextComponentTranslation("multiplayer.disconnect.flying"));
                     return;
                 }
@@ -322,7 +330,7 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
         if (this.itemDropThreshold > 0) --this.itemDropThreshold;
 
 
-        if (this.player.getLastActiveTime() > 0L && this.server.getMaxPlayerIdleMinutes() > 0 && MinecraftServer.getCurrentTimeMillis() - this.player.getLastActiveTime() > (long)(this.server.getMaxPlayerIdleMinutes() * 1000 * 60)) {
+        if (player.getLastActiveTime() > 0L && this.server.getMaxPlayerIdleMinutes() > 0 && MinecraftServer.getCurrentTimeMillis() - player.getLastActiveTime() > (long)(this.server.getMaxPlayerIdleMinutes() * 1000 * 60)) {
             this.disconnect(new TextComponentTranslation("multiplayer.disconnect.idling"));
         }
     }

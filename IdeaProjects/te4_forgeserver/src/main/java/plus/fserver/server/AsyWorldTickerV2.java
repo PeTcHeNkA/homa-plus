@@ -97,7 +97,7 @@ public final class AsyWorldTickerV2 implements ThreadFactory{
         Integer[] ids = DimensionManager.getIDs(this.tickCounter++ % 300 == 0);
         for(int id:ids){
             WorldInfo result = infs.get(id);
-            if(result==null){
+            if(result == null){
                 WorldServer worldServer = DimensionManager.getWorld(id);
                 if(worldServer != null) {
                     result = new WorldInfo(id);
@@ -181,7 +181,7 @@ public final class AsyWorldTickerV2 implements ThreadFactory{
             return;
         }
         WorldServer worldserver = DimensionManager.getWorld(inf.id);
-        if(worldserver==null || !worldserver.loaded){
+        if(worldserver == null || !worldserver.loaded){
             inf.stop();
             return;
         }

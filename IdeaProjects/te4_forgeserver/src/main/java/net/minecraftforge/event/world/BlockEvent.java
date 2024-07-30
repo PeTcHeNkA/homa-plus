@@ -270,6 +270,12 @@ public class BlockEvent extends Event {
         public List<BlockSnapshot> getReplacedBlockSnapshots() {
             return blockSnapshots;
         }
+
+
+        @Override
+        public boolean isCancelable() {
+            return true;
+        }
     }
 
 
@@ -333,6 +339,11 @@ public class BlockEvent extends Event {
         public CreateFluidSourceEvent(World world, BlockPos pos, IBlockState state) {
             super(world, pos, state);
         }
+
+        @Override
+        public boolean hasResult() {
+            return true;
+        }
     }
 
 
@@ -382,8 +393,7 @@ public class BlockEvent extends Event {
      *
      */
     public static class CropGrowEvent extends BlockEvent {
-        public CropGrowEvent(World world, BlockPos pos, IBlockState state)
-        {
+        public CropGrowEvent(World world, BlockPos pos, IBlockState state) {
             super(world, pos, state);
         }
 
@@ -400,21 +410,18 @@ public class BlockEvent extends Event {
          */
         @HasResult
         public static class Pre extends CropGrowEvent {
-            public Pre(World world, BlockPos pos, IBlockState state)
-            {
+            public Pre(World world, BlockPos pos, IBlockState state) {
                 super(world, pos, state);
+            }
+
+
+            @Override
+            public boolean hasResult() {
+                return true;
             }
         }
 
-        /**
-         * Fired when "growing age" blocks (for example cacti, chorus plants, or crops
-         * in vanilla) have successfully grown. The block's original state is available,
-         * in addition to its new state.<br>
-         * <br>
-         * This event is not {@link Cancelable}.<br>
-         * <br>
-         * This event does not have a result. {@link HasResult}<br>
-         */
+
         public static class Post extends CropGrowEvent {
             private final IBlockState originalState;
 
@@ -454,6 +461,12 @@ public class BlockEvent extends Event {
 
         public float getFallDistance() {
             return fallDistance;
+        }
+
+
+        @Override
+        public boolean isCancelable() {
+            return true;
         }
     }
 

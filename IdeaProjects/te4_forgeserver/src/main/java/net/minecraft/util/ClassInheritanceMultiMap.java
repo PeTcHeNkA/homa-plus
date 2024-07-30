@@ -140,7 +140,7 @@ public class ClassInheritanceMultiMap<T> extends AbstractSet<T> {
 
 
     public <S> Iterable<S> getByClass(final Class<S> clazz) {
-        List<T> list = map.get(initializeClassLookup(clazz).hashCode());
+        ArrayRemSwapListE6<T> list = map.get(initializeClassLookup(clazz).hashCode());
         if(list == null || list.isEmpty())return (Iterable<S>) EMPTY_BY_CLASS;
         return new ByClass<>(clazz, list);
     }
@@ -169,18 +169,17 @@ final class ByClass<S,T> implements Iterable<S>, Iterator<S> {
     private final Class<S> clazz;
     private T next;
     private int cursor = 0;
-    private final List<T> src;
+    private final ArrayRemSwapListE6<T> src;
 
-    ByClass(Class<S> clazz, List<T> src) {
+    ByClass(Class<S> clazz, ArrayRemSwapListE6<T> src) {
         this.clazz = clazz;
         this.src = src;
-        calcNext();
     }
 
 
     private void calcNext(){
-        while (cursor<src.size()){
-            T temp = src.get(cursor);
+        while (cursor<src.sizeC()){
+            T temp = src.getC(cursor);
             ++cursor;
             if(clazz.isInstance(temp)){
                 next = temp;
@@ -194,6 +193,8 @@ final class ByClass<S,T> implements Iterable<S>, Iterator<S> {
     @NotNull
     @Override
     public Iterator<S> iterator() {
+        cursor = 0;
+        calcNext();
         return this;
     }
 
@@ -201,6 +202,19 @@ final class ByClass<S,T> implements Iterable<S>, Iterator<S> {
     @Override
     public boolean hasNext() {
         return next != null;
+    }
+
+
+    @Override
+    public void forEach(Consumer<? super S> action) {
+        int cursor = 0, size = src.sizeC();
+        Object[] data = src.raw();
+        Class<S> clazz = this.clazz;
+        Object temp;
+        while (cursor < size) {
+            if (clazz.isInstance(temp = data[cursor])) action.accept((S) temp);
+            ++cursor;
+        }
     }
 
 

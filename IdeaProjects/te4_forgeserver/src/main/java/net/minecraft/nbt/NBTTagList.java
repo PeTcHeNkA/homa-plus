@@ -119,7 +119,7 @@ public class NBTTagList extends NBTBase implements java.lang.Iterable<NBTBase> {
     public void set(int idx, NBTBase nbt) {
         if (nbt.getId() == 0) {
             LOGGER.warn("Invalid TagEnd added to ListTag");
-        } else if (idx >= 0 && idx < this.tagList.size()) {
+        } else if (idx >= 0 && idx < this.tagList.sizeC()) {
             if (this.tagType == 0) {
                 this.tagType = nbt.getId();
             } else if (this.tagType != nbt.getId()) {

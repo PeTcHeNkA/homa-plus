@@ -13,9 +13,14 @@ public class ArrayListE6<T> implements List<T> {
 
     public ArrayListE6(){}
 
+    public ArrayListE6(int size){
+        data = new Object[size];
+    }
+
 
     public ArrayListE6(Object... data){
         this.data = data;
+        this.size = data.length;
     }
 
 
@@ -293,12 +298,25 @@ public class ArrayListE6<T> implements List<T> {
 
     @Override
     public boolean removeAll(@NotNull Collection<?> c) {
-        boolean rem = false;
-        for (Object obj:c){
-            rem = true;
-            remove(obj);
+        final Object[] data = this.data;
+        int r = 0, w = 0;
+        boolean modified = false;
+        try {
+            for (; r < size; r++)
+                if (c.contains(data[r])) data[w++] = data[r];
+        } finally {
+            if (r != size) {
+                System.arraycopy(data, r, data, w, size - r);
+                w += size - r;
+            }
+            if (w != size) {
+                for (int i = w; i < size; i++)
+                    data[i] = null;
+                size = w;
+                modified = true;
+            }
         }
-        return rem;
+        return modified;
     }
 
 

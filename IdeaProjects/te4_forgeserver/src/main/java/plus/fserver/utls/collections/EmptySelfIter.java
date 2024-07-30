@@ -2,6 +2,7 @@ package plus.fserver.utls.collections;
 
 import org.jetbrains.annotations.NotNull;
 import java.util.Iterator;
+import java.util.function.Consumer;
 
 
 public final class EmptySelfIter<S> implements Iterable<S>, Iterator<S> {
@@ -22,4 +23,8 @@ public final class EmptySelfIter<S> implements Iterable<S>, Iterator<S> {
     public S next() {
         return null;
     }
+
+
+    @Override
+    public void forEach(Consumer<? super S> action) {}
 }

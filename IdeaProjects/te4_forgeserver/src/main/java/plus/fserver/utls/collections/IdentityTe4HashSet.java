@@ -1,6 +1,8 @@
 package plus.fserver.utls.collections;
 
 
+import org.jetbrains.annotations.NotNull;
+
 import java.lang.reflect.Array;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -181,6 +183,11 @@ public class IdentityTe4HashSet<K> extends AbstractSet<K> implements Set<K> {
         if (++size > threshold)
             resize();
         return true;
+    }
+
+
+    public void addAllFast(@NotNull Collection<? extends K> c) {
+        c.forEach(this::add);
     }
 
 

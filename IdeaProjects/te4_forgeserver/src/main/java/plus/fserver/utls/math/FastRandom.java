@@ -44,18 +44,20 @@ public class FastRandom extends Random {
 
 
     public void shuffle(Object[] array, int to){
-        if(to==0)return;
-        int i=0, e;
+        if(to == 0)return;
+        int i = 0, e;
         Object swap;
+        int seed = nextInt();
         do{
-            swap = array[e=nextInt(to)];
+            swap = array[e = (seed & 0x7FFFFFFF) % to];
             array[e] = array[i];
             array[i] = swap;
             i+=2;
+            seed = seed * 363 + 21 + i;
         } while (to>i);
         if(to!=i)return;
         swap = array[i = to-1];
-        array[i] = array[e=nextInt(to)];
+        array[i] = array[e = (seed & 0x7FFFFFFF) % to];
         array[e] = swap;
     }
 

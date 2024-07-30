@@ -88,6 +88,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
      * of one of there entities.
      */
     public static double MAX_ENTITY_RADIUS = 2.0D;
+    static boolean isDebug = false;
 
     private int seaLevel = 63;
     protected int scheduledUpdatesAreImmediate = 0;
@@ -383,8 +384,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public boolean setBlockState(BlockPos pos, IBlockState newState, int flags) {
         if (this.isOutsideBuildHeight(pos)) {
             return false;
-        } else if ((!this.isRemote || SERVER_COMPILE) && this.worldInfo.getTerrainType()
-                == WorldType.DEBUG_ALL_BLOCK_STATES) {
+        } else if ((!this.isRemote || SERVER_COMPILE) && isDebug) {
             return false;
         } else {
             Chunk chunk = this.getChunk(pos);
@@ -471,7 +471,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     public void notifyNeighborsRespectDebug(BlockPos pos, Block blockType, boolean updateObservers) {
-        if (this.worldInfo.getTerrainType() != WorldType.DEBUG_ALL_BLOCK_STATES)
+        if (!isDebug)
             this.notifyNeighborsOfStateChange(pos, blockType, updateObservers);
     }
 
@@ -1559,9 +1559,9 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
                 ((TileEntity)tile).onChunkUnload();
             }
 
-            // forge: faster "contains" makes this removal much more efficient
-            java.util.Set<TileEntity> remove = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
-            remove.addAll(tileEntitiesToBeRemoved);
+            IdentityTe4HashSet<TileEntity> remove = new IdentityTe4HashSet<>();
+            remove.addAllFast(tileEntitiesToBeRemoved);
+
             this.tickableTileEntities.removeAll(remove);
             this.loadedTileEntityList.removeAll(remove);
             this.tileEntitiesToBeRemoved.clear();
@@ -2497,12 +2497,13 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
-    public boolean isAnyPlayerWithinRangeAt(double x, double y, double z, double range) {
-        double rangeSq = range * range;
-        for (int j2 = 0; j2 < this.playerEntities.size(); ++j2) {
-            EntityPlayer entityplayer = this.playerEntities.get(j2);
-            if (EntitySelectors.NOT_SPECTATING.apply(entityplayer)) {
-                if (range < 0.0D || entityplayer.getDistanceSq(x, y, z) < rangeSq) {
+    public boolean isAnyPlayerWithinRangeAt(final double x, final double y, final double z, final double range) {
+        final double rangeSq = range * range;
+        final List<EntityPlayer> players = this.playerEntities;
+        for (int i = 0, s = players.size(); i < s; ++i) {
+            EntityPlayer player = players.get(i);
+            if (!player.isSpectator()) {
+                if (range < 0.0D || player.getDistanceSq(x, y, z) < rangeSq) {
                     return true;
                 }
             }
@@ -2526,21 +2527,22 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     @Nullable
     public EntityPlayer getNearestAttackablePlayer(double posX, double posY, double posZ, double maxXZDistance, double maxYDistance, @Nullable Function<EntityPlayer, Double> playerToDouble, @Nullable Predicate<EntityPlayer> predicate) {
         double d0 = -1.0D;
-        EntityPlayer entityplayer = null;
+        EntityPlayer nearest = null;
+        final List<EntityPlayer> players = this.playerEntities;
 
-        for (int j2 = 0; j2 < this.playerEntities.size(); ++j2) {
-            EntityPlayer entityplayer1 = this.playerEntities.get(j2);
+        for (int i = 0, s = players.size(); i < s; ++i) {
+            EntityPlayer player = players.get(i);
 
-            if (!entityplayer1.capabilities.disableDamage && entityplayer1.isEntityAlive() && !entityplayer1.isSpectator() && (predicate == null || predicate.apply(entityplayer1))) {
-                double d1 = entityplayer1.getDistanceSq(posX, entityplayer1.posY, posZ);
+            if (!player.capabilities.disableDamage && player.isEntityAlive() && !player.isSpectator() && (predicate == null || predicate.apply(player))) {
+                double d1 = player.getDistanceSq(posX, player.posY, posZ);
                 double d2 = maxXZDistance;
 
-                if (entityplayer1.isSneaking()) {
+                if (player.isSneaking()) {
                     d2 = maxXZDistance * 0.800000011920929D;
                 }
 
-                if (entityplayer1.isInvisible()) {
-                    float f = entityplayer1.getArmorVisibility();
+                if (player.isInvisible()) {
+                    float f = player.getArmorVisibility();
 
                     if (f < 0.1F) {
                         f = 0.1F;
@@ -2549,18 +2551,18 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
                 }
 
                 if (playerToDouble != null) {
-                    d2 *= ((Double)MoreObjects.firstNonNull(playerToDouble.apply(entityplayer1), Double.valueOf(1.0D))).doubleValue();
+                    d2 *= ((Double)MoreObjects.firstNonNull(playerToDouble.apply(player), Double.valueOf(1.0D))).doubleValue();
                 }
 
-                d2 = net.minecraftforge.common.ForgeHooks.getPlayerVisibilityDistance(entityplayer1, d2, maxYDistance);
+                d2 = net.minecraftforge.common.ForgeHooks.getPlayerVisibilityDistance(player, d2, maxYDistance);
 
-                if ((maxYDistance < 0.0D || Math.abs(entityplayer1.posY - posY) < maxYDistance * maxYDistance) && (maxXZDistance < 0.0D || d1 < d2 * d2) && (d0 == -1.0D || d1 < d0)) {
+                if ((maxYDistance < 0.0D || Math.abs(player.posY - posY) < maxYDistance * maxYDistance) && (maxXZDistance < 0.0D || d1 < d2 * d2) && (d0 == -1.0D || d1 < d0)) {
                     d0 = d1;
-                    entityplayer = entityplayer1;
+                    nearest = player;
                 }
             }
         }
-        return entityplayer;
+        return nearest;
     }
 
 
@@ -3019,6 +3021,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         return getChunk(pos).getBlockLightOpacity(pos);
     }
 
+
     /**
      * Returns a count of entities that classify themselves as the specified creature type.
      */
@@ -3032,6 +3035,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         }
         return count;
     }
+
 
     @Deprecated // remove in 1.13
     public void markTileEntitiesInChunkForRemoval(Chunk chunk) {

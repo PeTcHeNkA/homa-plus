@@ -87,6 +87,12 @@ public class LivingSpawnEvent extends LivingEvent {
         public MobSpawnerBaseLogic getSpawner() {
             return spawner;
         }
+
+
+        @Override
+        public boolean hasResult() {
+            return true;
+        }
     }
 
 

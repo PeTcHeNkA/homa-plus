@@ -484,32 +484,32 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
     @Nullable
     public IBlockState setBlockState(final BlockPos pos, final IBlockState state) {
-        int i = pos.getX() & 15, j = pos.getY(), k = pos.getZ() & 15, l = k << 4 | i;
+        int px = pos.getX() & 15, py = pos.getY(), pz = pos.getZ() & 15, xzIndex = pz << 4 | px;
 
-        if (j >= this.precipitationHeightMap[l] - 1) {
-            this.precipitationHeightMap[l] = -999;
+        if (py >= this.precipitationHeightMap[xzIndex] - 1) {
+            this.precipitationHeightMap[xzIndex] = -999;
         }
         IBlockState prev = this.getBlockState(pos);
 
         if (prev == state) {
             return null;
         } else {
-            int i1 = this.heightMap[l];
+            int i1 = this.heightMap[xzIndex];
             Block block = state.getBlock(), prevBlock = prev.getBlock();
             int k1 = prev.getLightOpacity(this.world, pos); // Relocate old light value lookup here, so that it is called before TE is removed.
-            ExtendedBlockStorage storage = this.storageArrays[j >> 4];
+            ExtendedBlockStorage storage = this.storageArrays[py >> 4];
             boolean flag = false;
 
             if (storage == null) {
                 if (block == Blocks.AIR) {
                     return null;
                 }
-                storage = new ExtendedBlockStorage(j >> 4 << 4, this.world.provider.hasSkyLight());
-                this.storageArrays[j >> 4] = storage;
-                flag = j >= i1;
+                storage = new ExtendedBlockStorage(py >> 4 << 4, this.world.provider.hasSkyLight());
+                this.storageArrays[py >> 4] = storage;
+                flag = py >= i1;
             }
 
-            storage.set(i, j & 15, k, state);
+            storage.set(px, py & 15, pz, state);
 
             if (!this.world.isRemote) {
                 if (prevBlock != block) prevBlock.breakBlock(this.world, pos, prev);
@@ -524,7 +524,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
                     this.world.removeTileEntity(pos);
             }
 
-            if (storage.get(i, j & 15, k).getBlock() != block) {
+            if (storage.get(px, py & 15, pz).getBlock() != block) {
                 return null;
             } else {
                 if (flag) {
@@ -533,15 +533,15 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
                     int j1 = state.getLightOpacity(this.world, pos);
 
                     if (j1 > 0) {
-                        if (j >= i1) {
-                            this.relightBlock(i, j + 1, k);
+                        if (py >= i1) {
+                            this.relightBlock(px, py + 1, pz);
                         }
-                    } else if (j == i1 - 1) {
-                        this.relightBlock(i, j, k);
+                    } else if (py == i1 - 1) {
+                        this.relightBlock(px, py, pz);
                     }
 
                     if (j1 != k1 && (j1 < k1 || this.getLightFor(EnumSkyBlock.SKY, pos) > 0 || this.getLightFor(EnumSkyBlock.BLOCK, pos) > 0)) {
-                        this.propagateSkylightOcclusion(i, k);
+                        this.propagateSkylightOcclusion(px, pz);
                     }
                 }
 
@@ -794,7 +794,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
 
     public void onUnload() {
-        java.util.Arrays.stream(entityLists).forEach(multimap -> com.google.common.collect.Lists.newArrayList(multimap.getByClass(net.minecraft.entity.player.EntityPlayer.class)).forEach(player -> world.updateEntityWithOptionalForce(player, false))); // FORGE - Fix for MC-92916
+        java.util.Arrays.stream(entityLists).forEach(map -> map.getByClass(net.minecraft.entity.player.EntityPlayer.class).forEach(pl -> world.updateEntityWithOptionalForce(pl, false))); // FORGE - Fix for MC-92916
         this.loaded = false;
         for (TileEntity tileentity : this.tileEntities.values()) {
             this.world.markTileEntityForRemoval(tileentity);
