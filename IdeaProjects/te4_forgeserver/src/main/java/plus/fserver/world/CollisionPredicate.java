@@ -11,6 +11,11 @@ public class CollisionPredicate implements Predicate<Entity> {
     private Team team = null;
     private Team.CollisionRule rule;
 
+    public void reset(){
+        team = null;
+        rule = null;
+    }
+
     public Predicate<Entity> forEntity(final Entity entityIn) {
         final Team team = entityIn.getTeam();
         final Team.CollisionRule rule = team == null ? Team.CollisionRule.ALWAYS : team.getCollisionRule();

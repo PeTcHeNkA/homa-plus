@@ -122,6 +122,7 @@ public class CommonWorldEntitySpawner extends WorldEntitySpawner {
                         if(spawnPos == null) spawnPos = new SpawnPos(world);
                         if(shuffled == null) {
                             shuffled = this.shuffled = chunkSet.toArray(new Chunk[chunkSet.size()]);
+                            //todo error NULL
                         }
                         FastRandom.INST.shuffle(shuffled);
 

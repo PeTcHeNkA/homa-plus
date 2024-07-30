@@ -30,6 +30,7 @@ public class ElcaMobs {
     public static final EntityLodFunc BAT      ;
     public static final EntityLodFunc BOAT     ;
     public static final EntityLodFunc RABBIT   ;
+    public static final EntityLodFunc MINECART ;
 
 
     static {
@@ -60,6 +61,7 @@ public class ElcaMobs {
         FALLING   = new EntityLodFunc(config.get("falling"),  16, 28);
         BAT       = new EntityLodFunc(config.get("bat"),      12, 18);
         BOAT      = new EntityLodFunc(config.get("bat"),      12, 22);
+        MINECART  = new EntityLodFunc(config.get("minecart"), 24, 28);
         RABBIT    = new EntityLodFunc(config.get("rabbit"),   16, 32);
 
 

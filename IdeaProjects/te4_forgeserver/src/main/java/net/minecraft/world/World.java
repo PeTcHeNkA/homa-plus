@@ -5,6 +5,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import java.util.*;
+import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.AdvancementManager;
 import net.minecraft.advancements.FunctionManager;
@@ -1555,12 +1556,10 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
         //tile entities
         if (!this.tileEntitiesToBeRemoved.isEmpty()) {
-            for (Object tile : tileEntitiesToBeRemoved) {
-                ((TileEntity)tile).onChunkUnload();
-            }
-
             IdentityTe4HashSet<TileEntity> remove = new IdentityTe4HashSet<>();
-            remove.addAllFast(tileEntitiesToBeRemoved);
+            for (TileEntity tile : tileEntitiesToBeRemoved) {
+                if(remove.add(tile)) tile.onChunkUnload();
+            }
 
             this.tickableTileEntities.removeAll(remove);
             this.loadedTileEntityList.removeAll(remove);
@@ -3384,7 +3383,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public  final EntityEvent.CanUpdate       canUpdateEvent  = new EntityEvent.CanUpdate(null).forBus(MinecraftForge.EVENT_BUS);
     public  final Random              commonWorldEntityRandom = new FastRandom();
     public  final AxisAlignedBB         commonWorldEntityAABB = new AxisAlignedBB(0,0,0,0,0,0);
-    public  final CollisionPredicate entityCP = new CollisionPredicate();
+    public  final CollisionPredicate                 entityCP = new CollisionPredicate();
     public  final Vec3dMut                 commonEntityVec3d1 = new Vec3dMut(0,0,0);
     public  final Vec3dMut                 commonEntityVec3d2 = new Vec3dMut(0,0,0);
 
@@ -3397,6 +3396,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         damageEvent.setEntity(null);
         enteringChunk.setEntity(null);
         mobGriefingEvent.setEntity(null);
+        entityCP.reset();
     }
 
 

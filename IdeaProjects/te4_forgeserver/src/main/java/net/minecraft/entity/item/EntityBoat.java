@@ -291,7 +291,7 @@ public class EntityBoat extends Entity {
             this.doBlockCollisions();
             AxisAlignedBB box = world.commonWorldEntityAABB;
             this.getEntityBoundingBox().growTo(0.20000000298023224D, -0.009999999776482582D, 0.20000000298023224D, box);
-            List<Entity> list = this.world.getEntitiesInAABBexcluding(this, box, EntitySelectors.getTeamCollisionPredicate(this));
+            List<Entity> list = this.world.getEntitiesInAABBexcluding(this, box, world.entityCP.forEntity(this));
 
             if (!list.isEmpty()) {
                 boolean flag = !this.world.isRemote && !(this.getControllingPassenger() instanceof EntityPlayer);

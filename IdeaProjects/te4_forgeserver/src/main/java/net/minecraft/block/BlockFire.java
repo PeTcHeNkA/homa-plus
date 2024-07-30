@@ -12,6 +12,7 @@ import net.minecraftforge.fml.relauncher.*;
 import net.minecraft.util.*;
 import net.minecraft.block.state.*;
 import plus.fserver.server.elca.ChunkSelector;
+import plus.fserver.utls.collections.ArrayListE6;
 
 
 public class BlockFire extends Block {
@@ -96,6 +97,10 @@ public class BlockFire extends Block {
     public AxisAlignedBB getCollisionBoundingBox(final IBlockState blockState, final IBlockAccess worldIn, final BlockPos pos) {
         return BlockFire.NULL_AABB;
     }
+
+
+    @Override
+    public void addCollisionBoxToListF(IBlockState state, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> collidingBoxes) {}
 
 
     @Override

@@ -37,11 +37,11 @@ public final class EntitySelectors {
 
 
     @Keep
-    @Deprecated
+    @Deprecated //use CollisionPredicate (or world.entityCP.forEntity())
     public static <T extends Entity> Predicate<T> getTeamCollisionPredicate(final Entity entityIn) {
         final Team team = entityIn.getTeam();
-        final Team.CollisionRule team$collisionrule = team == null ? Team.CollisionRule.ALWAYS : team.getCollisionRule();
-        Predicate<?> ret = team$collisionrule == Team.CollisionRule.NEVER ? Predicates.alwaysFalse() :
+        final Team.CollisionRule rule = team == null ? Team.CollisionRule.ALWAYS : team.getCollisionRule();
+        Predicate<?> ret = rule == Team.CollisionRule.NEVER ? Predicates.alwaysFalse() :
                 Predicates.and(NOT_SPECTATING, entity -> {
             if (!entity.canBePushed()) {
                 return false;
@@ -55,10 +55,10 @@ public final class EntitySelectors {
                 } else {
                     boolean flag = team != null && team.isSameTeam(team1);
 
-                    if ((team$collisionrule == Team.CollisionRule.HIDE_FOR_OWN_TEAM || team$collisionrule1 == Team.CollisionRule.HIDE_FOR_OWN_TEAM) && flag) {
+                    if ((rule == Team.CollisionRule.HIDE_FOR_OWN_TEAM || team$collisionrule1 == Team.CollisionRule.HIDE_FOR_OWN_TEAM) && flag) {
                         return false;
                     } else {
-                        return team$collisionrule != Team.CollisionRule.HIDE_FOR_OTHER_TEAMS && team$collisionrule1 != Team.CollisionRule.HIDE_FOR_OTHER_TEAMS || flag;
+                        return rule != Team.CollisionRule.HIDE_FOR_OTHER_TEAMS && team$collisionrule1 != Team.CollisionRule.HIDE_FOR_OTHER_TEAMS || flag;
                     }
                 }
             } else {

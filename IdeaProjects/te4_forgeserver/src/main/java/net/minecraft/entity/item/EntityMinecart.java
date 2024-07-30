@@ -30,9 +30,11 @@ import net.minecraft.world.IWorldNameable;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.minecart.MinecartCollisionEvent;
+import net.minecraftforge.event.entity.minecart.MinecartUpdateEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.api.Keep;
+import plus.fserver.server.elca.ChunkSelector;
 
 
 public abstract class EntityMinecart extends Entity implements IWorldNameable {
@@ -237,14 +239,12 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
         }
 
         if (!this.world.isRemote) {
-            this.world.profiler.startSection("portal");
-            MinecraftServer minecraftserver = this.world.getMinecraftServer();
-            int i = this.getMaxInPortalTime();
-
             if (this.inPortal) {
-                if (minecraftserver.getAllowNether()) {
-                    if (!this.isRiding() && this.portalCounter++ >= i) {
-                        this.portalCounter = (byte) i;
+                MinecraftServer server = this.world.getMinecraftServer();
+                if (server.getAllowNether()) {
+                    int maxTime = this.getMaxInPortalTime();
+                    if (!this.isRiding() && this.portalCounter++ >= maxTime) {
+                        this.portalCounter = (byte) maxTime;
                         this.timeUntilPortal = this.getPortalCooldown();
                         int j;
 
@@ -262,18 +262,14 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
                 if (this.portalCounter > 0) {
                     this.portalCounter -= 4;
                 }
-
                 if (this.portalCounter < 0) {
                     this.portalCounter = 0;
                 }
             }
-
             if (this.timeUntilPortal > 0) {
                 --this.timeUntilPortal;
             }
-            this.world.profiler.endSection();
         }
-
         if (this.world.isRemote) {
             if (this.turnProgress > 0) {
                 double d4 = this.posX + (this.minecartX - this.posX) / (double)this.turnProgress;
@@ -283,10 +279,10 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
                 this.rotationYaw = (float)((double)this.rotationYaw + d1 / (double)this.turnProgress);
                 this.rotationPitch = (float)((double)this.rotationPitch + (this.minecartPitch - (double)this.rotationPitch) / (double)this.turnProgress);
                 --this.turnProgress;
-                this.setPosition(d4, d5, d6);
+                this.mutPosition(d4, d5, d6);
                 this.setRotation(this.rotationYaw, this.rotationPitch);
             } else {
-                this.setPosition(this.posX, this.posY, this.posZ);
+                this.mutPosition(this.posX, this.posY, this.posZ);
                 this.setRotation(this.rotationYaw, this.rotationPitch);
             }
         } else {
@@ -298,22 +294,27 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
                 this.motionY -= 0.03999999910593033D;
             }
 
-            int k = MathHelper.floor(this.posX);
-            int l = MathHelper.floor(this.posY);
-            int i1 = MathHelper.floor(this.posZ);
+            int px = MathHelper.floor(this.posX);
+            int py = MathHelper.floor(this.posY);
+            int pz = MathHelper.floor(this.posZ);
 
-            if (BlockRailBase.isRailBlock(this.world, new BlockPos(k, l - 1, i1))) {
-                --l;
+            ChunkSelector selector = world.localSelector;
+
+            IBlockState state;
+            if (BlockRailBase.isRailBlock(state = selector.getState(px, py - 1, pz))) {
+                --py;
+            } else {
+                state = selector.getCurState(px, py, pz);
             }
 
-            BlockPos blockpos = new BlockPos(k, l, i1);
-            IBlockState iblockstate = this.world.getBlockState(blockpos);
+            //BlockPos blockpos = new BlockPos(px, py, pz);
+            //IBlockState state = selector.getBlockState(px, py, pz);
 
-            if (canUseRail() && BlockRailBase.isRailBlock(iblockstate)) {
-                this.moveAlongTrack(blockpos, iblockstate);
+            if (canUseRail() && BlockRailBase.isRailBlock(state)) {
+                this.moveAlongTrack(world.localTempPos2.setPos(px, py, pz), state);
 
-                if (iblockstate.getBlock() == Blocks.ACTIVATOR_RAIL) {
-                    this.onActivatorRailPass(k, l, i1, ((Boolean)iblockstate.getValue(BlockRailPowered.POWERED)).booleanValue());
+                if (state.getBlock() == Blocks.ACTIVATOR_RAIL) {
+                    this.onActivatorRailPass(px, py, pz, state.getValue(BlockRailPowered.POWERED));
                 }
             } else {
                 this.moveDerailedMinecart();
@@ -330,6 +331,8 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
                 if (this.isInReverse) {
                     this.rotationYaw += 180.0F;
                 }
+            } else {
+                if((ticksExisted & lodLvl()) != 0)return;
             }
 
             double d3 = MathHelper.wrapDegrees(this.rotationYaw - this.prevRotationYaw);
@@ -346,7 +349,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
             else                               box = this.getEntityBoundingBox().grow(0.20000000298023224D, 0.0D, 0.20000000298023224D);
 
             if (canBeRidden() && this.motionX * this.motionX + this.motionZ * this.motionZ > 0.01D) {
-                List<Entity> list = this.world.getEntitiesInAABBexcluding(this, box, EntitySelectors.getTeamCollisionPredicate(this));
+                List<Entity> list = this.world.getEntitiesInAABBexcluding(this, box, world.entityCP.forEntity(this));
 
                 if (!list.isEmpty()) {
                     for (int j1 = 0; j1 < list.size(); ++j1) {
@@ -367,7 +370,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
                 }
             }
             this.handleWaterMovement();
-            net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.minecart.MinecartUpdateEvent(this, this.getCurrentRailPosition()));
+            MinecraftForge.EVENT_BUS.post(new MinecartUpdateEvent(this, this.getCurrentRailPosition()));
         }
     }
 
@@ -421,17 +424,17 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
         this.posY = pos.getY();
         boolean flag = false;
         boolean flag1 = false;
-        BlockRailBase blockrailbase = (BlockRailBase)state.getBlock();
+        BlockRailBase rail = (BlockRailBase)state.getBlock();
 
-        if (blockrailbase == Blocks.GOLDEN_RAIL) {
+        if (rail == Blocks.GOLDEN_RAIL) {
             flag = state.getValue(BlockRailPowered.POWERED);
             flag1 = !flag;
         }
 
         double slopeAdjustment = getSlopeAdjustment();
-        BlockRailBase.EnumRailDirection direction = blockrailbase.getRailDirection(world, pos, state, this);
+        BlockRailBase.EnumRailDirection dir = rail.getRailDirection(world, pos, state, this);
 
-        switch (direction) {
+        switch (dir) {
             case ASCENDING_EAST:
                 this.motionX -= slopeAdjustment;
                 ++this.posY;
@@ -449,7 +452,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
                 ++this.posY;
         }
 
-        int[][] aint = MATRIX[direction.getMetadata()];
+        int[][] aint = MATRIX[dir.getMetadata()];
         double d1 = aint[1][0] - aint[0][0];
         double d2 = aint[1][2] - aint[0][2];
         double d3 = Math.sqrt(d1 * d1 + d2 * d2);
@@ -468,7 +471,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
 
         this.motionX = d5 * d1 / d3;
         this.motionZ = d5 * d2 / d3;
-        Entity entity = this.getPassengers().isEmpty() ? null : (Entity)this.getPassengers().get(0);
+        Entity entity = this.getPassengers().isEmpty() ? null : this.getPassengers().get(0);
 
         if (entity instanceof EntityLivingBase) {
             double d6 = ((EntityLivingBase)entity).moveForward;
@@ -522,13 +525,13 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
 
         this.posX = d18 + d1 * d10;
         this.posZ = d19 + d2 * d10;
-        this.setPosition(this.posX, this.posY, this.posZ);
+        this.mutPosition(this.posX, this.posY, this.posZ);
         this.moveMinecartOnRail(pos);
 
         if (aint[0][1] != 0 && MathHelper.floor(this.posX) - pos.getX() == aint[0][0] && MathHelper.floor(this.posZ) - pos.getZ() == aint[0][2]) {
-            this.setPosition(this.posX, this.posY + (double)aint[0][1], this.posZ);
+            this.mutPosition(this.posX, this.posY + (double)aint[0][1], this.posZ);
         } else if (aint[1][1] != 0 && MathHelper.floor(this.posX) - pos.getX() == aint[1][0] && MathHelper.floor(this.posZ) - pos.getZ() == aint[1][2]) {
-            this.setPosition(this.posX, this.posY + (double)aint[1][1], this.posZ);
+            this.mutPosition(this.posX, this.posY + (double)aint[1][1], this.posZ);
         }
 
         this.applyDrag();
@@ -542,7 +545,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
                 this.motionX = this.motionX / d5 * (d5 + d14);
                 this.motionZ = this.motionZ / d5 * (d5 + d14);
             }
-            this.setPosition(this.posX, vec3d1.y, this.posZ);
+            this.mutPosition(this.posX, vec3d1.y, this.posZ);
         }
 
         int j = MathHelper.floor(this.posX);
@@ -562,19 +565,18 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
             double d15 = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
 
             if (d15 > 0.01D) {
-                double d16 = 0.06D;
                 this.motionX += this.motionX / d15 * 0.06D;
                 this.motionZ += this.motionZ / d15 * 0.06D;
-            } else if (direction == BlockRailBase.EnumRailDirection.EAST_WEST) {
-                if (this.world.getBlockState(pos.west()).isNormalCube()) {
+            } else if (dir == BlockRailBase.EnumRailDirection.EAST_WEST) {
+                if (this.world.access().getBlockState(pos.getX()-1, pos.getY(), pos.getZ()).isNormalCube()) {
                     this.motionX = 0.02D;
-                } else if (this.world.getBlockState(pos.east()).isNormalCube()) {
+                } else if (this.world.access().getBlockState(pos.getX()+1, pos.getY(), pos.getZ()).isNormalCube()) {
                     this.motionX = -0.02D;
                 }
-            } else if (direction == BlockRailBase.EnumRailDirection.NORTH_SOUTH) {
-                if (this.world.getBlockState(pos.north()).isNormalCube()) {
+            } else if (dir == BlockRailBase.EnumRailDirection.NORTH_SOUTH) {
+                if (this.world.access().getBlockState(pos.getX(), pos.getY(), pos.getZ()-1).isNormalCube()) {
                     this.motionZ = 0.02D;
-                } else if (this.world.getBlockState(pos.south()).isNormalCube()) {
+                } else if (this.world.access().getBlockState(pos.getX(), pos.getY(), pos.getZ()+1).isNormalCube()) {
                     this.motionZ = -0.02D;
                 }
             }
@@ -611,25 +613,25 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
     @Nullable
     @SideOnly(Side.CLIENT)
     public Vec3d getPosOffset(double x, double y, double z, double offset) {
-        int i = MathHelper.floor(x);
-        int j = MathHelper.floor(y);
-        int k = MathHelper.floor(z);
+        int sX = MathHelper.floor(x);
+        int sY = MathHelper.floor(y);
+        int sZ = MathHelper.floor(z);
 
-        if (BlockRailBase.isRailBlock(this.world, new BlockPos(i, j - 1, k))) {
-            --j;
+        if (BlockRailBase.isRailBlock(this.world, new BlockPos(sX, sY - 1, sZ))) {
+            --sY;
         }
 
-        IBlockState iblockstate = this.world.getBlockState(new BlockPos(i, j, k));
+        IBlockState state = this.world.getBlockState(sX, sY, sZ);
 
-        if (BlockRailBase.isRailBlock(iblockstate)) {
-            BlockRailBase.EnumRailDirection blockrailbase$enumraildirection = ((BlockRailBase)iblockstate.getBlock()).getRailDirection(world, new BlockPos(i, j, k), iblockstate, this);
-            y = j;
+        if (BlockRailBase.isRailBlock(state)) {
+            BlockRailBase.EnumRailDirection dir = ((BlockRailBase)state.getBlock()).getRailDirection(world, new BlockPos(sX, sY, sZ), state, this);
+            y = sY;
 
-            if (blockrailbase$enumraildirection.isAscending()) {
-                y = j + 1;
+            if (dir.isAscending()) {
+                y = sY + 1;
             }
 
-            int[][] aint = MATRIX[blockrailbase$enumraildirection.getMetadata()];
+            int[][] aint = MATRIX[dir.getMetadata()];
             double d0 = aint[1][0] - aint[0][0];
             double d1 = aint[1][2] - aint[0][2];
             double d2 = Math.sqrt(d0 * d0 + d1 * d1);
@@ -638,10 +640,10 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
             x = x + d0 * offset;
             z = z + d1 * offset;
 
-            if (aint[0][1] != 0 && MathHelper.floor(x) - i == aint[0][0] && MathHelper.floor(z) - k == aint[0][2]) {
-                y += (double)aint[0][1];
-            } else if (aint[1][1] != 0 && MathHelper.floor(x) - i == aint[1][0] && MathHelper.floor(z) - k == aint[1][2]) {
-                y += (double)aint[1][1];
+            if (aint[0][1] != 0 && MathHelper.floor(x) - sX == aint[0][0] && MathHelper.floor(z) - sZ == aint[0][2]) {
+                y += aint[0][1];
+            } else if (aint[1][1] != 0 && MathHelper.floor(x) - sX == aint[1][0] && MathHelper.floor(z) - sZ == aint[1][2]) {
+                y += aint[1][1];
             }
             return this.getPos(x, y, z);
         } else {
@@ -656,16 +658,26 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
         int sY = MathHelper.floor(y);
         int sZ = MathHelper.floor(z);
 
-        if (BlockRailBase.isRailBlock(this.world, world.localTempPos.setPos(sX, sY - 1, sZ))) {
-            --sY;
+        IBlockState state;
+        if(world.isRemote){
+            if (BlockRailBase.isRailBlock(this.world, new BlockPos(sX, sY - 1, sZ))) {
+                --sY;
+            }
+
+            state = this.world.getBlockState(sX, sY, sZ);
+        } else {
+            ChunkSelector selector = world.localSelector;
+
+            if (BlockRailBase.isRailBlock(state = selector.getState(sX, sY - 1, sZ))) {
+                --sY;
+            } else {
+                state = selector.getCurState(sX, sY, sZ);
+            }
         }
 
-        BlockPos blockpos = world.localTempPos.setPos(sX, sY, sZ);
-        IBlockState iblockstate = this.world.getBlockState(blockpos);
-
-        if (BlockRailBase.isRailBlock(iblockstate)) {
-            BlockRailBase.EnumRailDirection direction = ((BlockRailBase)iblockstate.getBlock()).getRailDirection(
-                    world, blockpos, iblockstate, this);
+        if (BlockRailBase.isRailBlock(state)) {
+            BlockRailBase.EnumRailDirection direction = ((BlockRailBase)state.getBlock()).getRailDirection(
+                    world, world.localTempPos.setPos(sX, sY, sZ), state, this);
             int[][] aint = MATRIX[direction.getMetadata()];
             double d0 = (double)sX + 0.5D + (double)aint[0][0] * 0.5D;
             double d1 = (double)sY + 0.0625D + (double)aint[0][1] * 0.5D;
