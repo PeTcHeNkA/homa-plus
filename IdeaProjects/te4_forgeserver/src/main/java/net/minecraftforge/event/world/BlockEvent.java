@@ -29,6 +29,8 @@ public class BlockEvent extends Event {
     private BlockPos pos;
     private IBlockState state;
 
+    public BlockEvent(){}
+
     public BlockEvent(World world, BlockPos pos, IBlockState state) {
         this.pos = pos;
         this.world = world;
@@ -393,6 +395,8 @@ public class BlockEvent extends Event {
      *
      */
     public static class CropGrowEvent extends BlockEvent {
+        public CropGrowEvent(){}
+
         public CropGrowEvent(World world, BlockPos pos, IBlockState state) {
             super(world, pos, state);
         }
@@ -410,8 +414,16 @@ public class BlockEvent extends Event {
          */
         @HasResult
         public static class Pre extends CropGrowEvent {
+            public Pre(){}
+
             public Pre(World world, BlockPos pos, IBlockState state) {
                 super(world, pos, state);
+            }
+
+            public CropGrowEvent initCropPre(World world, BlockPos pos, IBlockState state){
+                initBlockEvent(world, pos, state);
+                setResult(Result.DEFAULT);
+                return this;
             }
 
 
@@ -423,12 +435,21 @@ public class BlockEvent extends Event {
 
 
         public static class Post extends CropGrowEvent {
-            private final IBlockState originalState;
+            private IBlockState originalState;
+            public Post(){}
 
             public Post(World world, BlockPos pos, IBlockState original, IBlockState state) {
                 super(world, pos, state);
                 originalState = original;
             }
+
+
+            public CropGrowEvent initCropPre(World world, BlockPos pos, IBlockState original, IBlockState state){
+                initBlockEvent(world, pos, state);
+                originalState = original;
+                return this;
+            }
+
 
             public IBlockState getOriginalState() {
                 return originalState;

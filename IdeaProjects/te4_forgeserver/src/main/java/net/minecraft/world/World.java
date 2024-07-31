@@ -78,7 +78,6 @@ import plus.fserver.utls.math.Vec3dMut;
 import plus.fserver.world.RedstoneEngine;
 import plus.fserver.world.light.LightingEngine;
 import plus.fserver.world.light.api.ILightingEngineProvider;
-
 import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
@@ -801,6 +800,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         return this.rayTraceBlocks(start, end, false, false, false);
     }
 
+
     @Nullable
     public RayTraceResult rayTraceBlocks(Vec3d start, Vec3d end, boolean stopOnLiquid) {
         return this.rayTraceBlocks(start, end, stopOnLiquid, false, false);
@@ -901,7 +901,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
                     );
 
                     if (!ignoreBlockWithoutBoundingBox || state != BlockIDIndexes.AIR_STATE && (state.isFullBlock() || state.getMaterial() == Material.PORTAL || state.getCollisionBoundingBox(this, blockPos) != Block.NULL_AABB)) {
-                        blockPos.setPos(xPos, yPos, zPos);
+                        blockPos.setPosB(xPos, yPos, zPos);
                         if (state.getBlock().canCollideCheck(state, stopOnLiquid)) {
                             RayTraceResult rtxResult = state.collisionRayTrace(this, blockPos, new Vec3d(vecX, vecY, vecZ), vec32);
 
@@ -1017,7 +1017,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
                     );
 
                     if (!ignoreBlockWithoutBoundingBox || state != BlockIDIndexes.AIR_STATE && (state.isFullCube() || state.getMaterial() == Material.PORTAL || state.getCollisionBoundingBox(this, blockPos) != Block.NULL_AABB)) {
-                        blockPos.setPos(xPos, yPos, zPos);
+                        blockPos.setPosB(xPos, yPos, zPos);
                         if (state.getBlock().canCollideCheck(state, stopOnLiquid)) {
                             RayTraceResult rtxResult = state.collisionRayTrace(this, blockPos, new Vec3d(vecX, vecY, vecZ), vec32);
 
@@ -3377,6 +3377,9 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     private final LivingDamageEvent             damageEvent   = new LivingDamageEvent(null, null, 0);
     private final LivingSpawnEvent.SpecialSpawn specialSpawn  = new LivingSpawnEvent.SpecialSpawn(null,this,0,0,0,null);
     private final LivingSpawnEvent.AllowDespawn allowDespawn  = new LivingSpawnEvent.AllowDespawn();
+    private final BlockEvent.CropGrowEvent.Pre  cropGrowPre   = new BlockEvent.CropGrowEvent.Pre();
+    private final BlockEvent.CropGrowEvent.Post croptGrowPost = new BlockEvent.CropGrowEvent.Post();
+
     public  final EntityEvent.EnteringChunk     enteringChunk = new EntityEvent.EnteringChunk(null,0,0,0,0);
     public  final ChunkWatchEvent             chunkWatchEvent = new ChunkWatchEvent.Watch().forBus(MinecraftForge.EVENT_BUS);
     public  final ChunkWatchEvent           chunkUnWatchEvent = new ChunkWatchEvent.UnWatch().forBus(MinecraftForge.EVENT_BUS);
@@ -3397,6 +3400,20 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         enteringChunk.setEntity(null);
         mobGriefingEvent.setEntity(null);
         entityCP.reset();
+    }
+
+
+    public boolean onCropsGrowPre(BlockPos pos, IBlockState state, boolean def) {
+        BlockEvent ev = cropGrowPre.initCropPre(this, pos, state);
+        MinecraftForge.EVENT_BUS.postF(ev);
+        return (ev.getResult() == Event.Result.ALLOW || (ev.getResult() == Event.Result.DEFAULT && def));
+    }
+
+
+    public void onCropsGrowPost(BlockPos pos, IBlockState state, IBlockState other) {
+        MinecraftForge.EVENT_BUS.postF(
+                croptGrowPost.initCropPre(this, pos, state, this.access().getBlockState(pos))
+        );
     }
 
 

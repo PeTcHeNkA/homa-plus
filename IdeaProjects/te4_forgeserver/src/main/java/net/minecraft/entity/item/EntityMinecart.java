@@ -1,6 +1,7 @@
 package net.minecraft.entity.item;
 
 import java.util.List;
+import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.block.Block;
@@ -33,8 +34,10 @@ import net.minecraftforge.event.entity.minecart.MinecartCollisionEvent;
 import net.minecraftforge.event.entity.minecart.MinecartUpdateEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.fserver.ElcaMobs;
 import plus.fserver.api.Keep;
 import plus.fserver.server.elca.ChunkSelector;
+import plus.fserver.utls.collections.ArrayListE6;
 
 
 public abstract class EntityMinecart extends Entity implements IWorldNameable {
@@ -325,6 +328,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
             double d0 = this.prevPosX - this.posX;
             double d2 = this.prevPosZ - this.posZ;
 
+            int num = lodLvl();
             if (d0 * d0 + d2 * d2 > 0.001D) {
                 this.rotationYaw = (float)(MathHelper.atan2(d2, d0) * 180.0D / Math.PI);
 
@@ -332,7 +336,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
                     this.rotationYaw += 180.0F;
                 }
             } else {
-                if((ticksExisted & lodLvl()) != 0)return;
+                if((ticksExisted & num) != 0)return;
             }
 
             double d3 = MathHelper.wrapDegrees(this.rotationYaw - this.prevRotationYaw);
@@ -348,12 +352,18 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
             if (getCollisionHandler() != null) box = getCollisionHandler().getMinecartCollisionBox(this);
             else                               box = this.getEntityBoundingBox().grow(0.20000000298023224D, 0.0D, 0.20000000298023224D);
 
-            if (canBeRidden() && this.motionX * this.motionX + this.motionZ * this.motionZ > 0.01D) {
-                List<Entity> list = this.world.getEntitiesInAABBexcluding(this, box, world.entityCP.forEntity(this));
+            if(num == 0){
+                num = 7;
+            } else {
+                num = 5-num;
+            }
 
-                if (!list.isEmpty()) {
-                    for (int j1 = 0; j1 < list.size(); ++j1) {
-                        Entity entity1 = list.get(j1);
+            if (canBeRidden() && this.motionX * this.motionX + this.motionZ * this.motionZ > 0.01D) {
+                ArrayListE6<Entity> list = (ArrayListE6<Entity>)this.world.getEntitiesInAABBexcludingLimited(this, box, world.entityCP.forEntity(this), num);
+
+                if (!list.isEmptyC()) {
+                    for (int j1 = 0; j1 < list.sizeC(); ++j1) {
+                        Entity entity1 = list.getC(j1);
 
                         if (!(entity1 instanceof EntityPlayer) && !(entity1 instanceof EntityIronGolem) && !(entity1 instanceof EntityMinecart) && !this.isBeingRidden() && !entity1.isRiding()) {
                             entity1.startRiding(this);
@@ -363,7 +373,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
                     }
                 }
             } else {
-                for (Entity entity : this.world.getEntitiesWithinAABBExcludingEntity(this, box)) {
+                for (Entity entity : this.world.getEntitiesInAABBexcludingLimited(this, box, null, num)) {
                     if (!this.isPassenger(entity) && entity.canBePushed() && entity instanceof EntityMinecart) {
                         entity.applyEntityCollision(this);
                     }
@@ -798,7 +808,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
                             double d4 = entityIn.posX - this.posX;
                             double d5 = entityIn.posZ - this.posZ;
                             Vec3d vec3d = (new Vec3d(d4, 0.0D, d5)).normalize();
-                            Vec3d vec3d1 = (new Vec3d((double)MathHelper.cos(this.rotationYaw * 0.017453292F), 0.0D, (double)MathHelper.sin(this.rotationYaw * 0.017453292F))).normalize();
+                            Vec3d vec3d1 = (new Vec3d(MathHelper.cos(this.rotationYaw * 0.017453292F), 0.0D, (double)MathHelper.sin(this.rotationYaw * 0.017453292F))).normalize();
                             double d6 = Math.abs(vec3d.dotProduct(vec3d1));
 
                             if (d6 < 0.800000011920929D) {
@@ -960,7 +970,13 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
 
     @Override
     public boolean processInitialInteract(EntityPlayer player, net.minecraft.util.EnumHand hand) {
-        return net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.minecart.MinecartInteractEvent(this, player, hand));
+        return MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.minecart.MinecartInteractEvent(this, player, hand));
+    }
+
+
+    @Override
+    public int lodLvl() {
+        return ElcaMobs.MINECART.lodLvl(elcaMinRange);
     }
 
     /* =================================== FORGE START ===========================================*/
@@ -969,7 +985,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
         int y = MathHelper.floor(this.posY);
         int z = MathHelper.floor(this.posZ);
 
-        if (BlockRailBase.isRailBlock(this.world, new BlockPos(x, y - 1, z))) y--;
+        if (BlockRailBase.isRailBlock(this.world.access(), x, y - 1, z)) y--;
         return new BlockPos(x, y, z);
     }
 
@@ -978,7 +994,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
     protected double getMaxSpeed() {
         if (!canUseRail()) return getMaximumSpeed();
         BlockPos pos = this.getCurrentRailPosition();
-        IBlockState state = this.world.getBlockState(pos);
+        IBlockState state = this.world.access().getBlockState(pos);
         if (!BlockRailBase.isRailBlock(state)) return getMaximumSpeed();
 
         float railMaxSpeed = ((BlockRailBase)state.getBlock()).getRailMaxSpeed(world, this, pos);

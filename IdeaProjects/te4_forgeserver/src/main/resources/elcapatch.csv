@@ -17,6 +17,7 @@
 "net.minecraft.block.BlockColoredFs"
 "net.minecraft.block.BlockCompressedPowered"
 "net.minecraft.block.BlockConcretePowder"
+"net.minecraft.block.BlockCrops"
 "net.minecraft.block.BlockDaylightDetector"
 "net.minecraft.block.BlockDirt$DirtType"
 "net.minecraft.block.BlockDirt"
@@ -34,6 +35,7 @@
 "net.minecraft.block.BlockFlowerPot$1"
 "net.minecraft.block.BlockFlowerPot$EnumFlowerType"
 "net.minecraft.block.BlockFlowerPot"
+"net.minecraft.block.BlockFrostedIce"
 "net.minecraft.block.BlockGlass"
 "net.minecraft.block.BlockGlazedTerracotta"
 "net.minecraft.block.BlockGlowstone"
@@ -74,6 +76,10 @@
 "net.minecraft.block.BlockQuartz$1"
 "net.minecraft.block.BlockQuartz$EnumType"
 "net.minecraft.block.BlockQuartz"
+"net.minecraft.block.BlockRailBase$1"
+"net.minecraft.block.BlockRailBase$EnumRailDirection"
+"net.minecraft.block.BlockRailBase$Rail"
+"net.minecraft.block.BlockRailBase"
 "net.minecraft.block.BlockRedSandstone$EnumType"
 "net.minecraft.block.BlockRedSandstone"
 "net.minecraft.block.BlockRedstoneDiode"
@@ -120,6 +126,8 @@
 "net.minecraft.block.BlockTrapDoor$1"
 "net.minecraft.block.BlockTrapDoor$DoorHalf"
 "net.minecraft.block.BlockTrapDoor"
+"net.minecraft.block.BlockTripWire$1"
+"net.minecraft.block.BlockTripWire"
 "net.minecraft.block.BlockWall$EnumType"
 "net.minecraft.block.BlockWall"
 "net.minecraft.block.BlockWorkbench$InterfaceCraftingTable"
@@ -244,6 +252,9 @@
 "net.minecraft.entity.player.EntityPlayer"
 "net.minecraft.entity.player.EntityPlayerMP"
 "net.minecraft.entity.player.InventoryPlayer"
+"net.minecraft.entity.projectile.EntityArrow$PickupStatus"
+"net.minecraft.entity.projectile.EntityArrow"
+"net.minecraft.entity.projectile.EntityThrowable"
 "net.minecraft.inventory.Container"
 "net.minecraft.inventory.EntityEquipmentSlot$Type"
 "net.minecraft.inventory.EntityEquipmentSlot"
@@ -347,6 +358,7 @@
 "net.minecraft.tileentity.TileEntityBeacon$BeamSegment"
 "net.minecraft.tileentity.TileEntityBeacon"
 "net.minecraft.tileentity.TileEntityFurnace"
+"net.minecraft.tileentity.TileEntityHopper"
 "net.minecraft.util.BitArray"
 "net.minecraft.util.BlockIDIndexes"
 "net.minecraft.util.ByClass"
@@ -558,6 +570,8 @@
 "net.minecraftforge.event.entity.living.LivingEvent$LivingUpdateEvent", (true)
 "net.minecraftforge.event.entity.living.LivingEvent", (true)
 "net.minecraftforge.event.entity.living.LivingHurtEvent", (true)
+"net.minecraftforge.event.entity.living.LivingPackSizeEvent$EventProxy", (true)
+"net.minecraftforge.event.entity.living.LivingPackSizeEvent", (true)
 "net.minecraftforge.event.entity.living.LivingSpawnEvent$AllowDespawn", (true)
 "net.minecraftforge.event.entity.living.LivingSpawnEvent$CheckSpawn", (true)
 "net.minecraftforge.event.entity.living.LivingSpawnEvent$SpecialSpawn", (true)
