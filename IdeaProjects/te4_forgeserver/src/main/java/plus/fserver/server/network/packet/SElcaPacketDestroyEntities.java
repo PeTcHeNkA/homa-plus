@@ -1,0 +1,68 @@
+package plus.fserver.server.network.packet;
+
+import net.minecraft.network.Packet;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.play.INetHandlerPlayClient;
+import net.minecraft.network.play.server.SPacketDestroyEntities;
+import plus.fserver.utls.collections.Int1LinkedList;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+
+
+public class SElcaPacketDestroyEntities implements Packet<INetHandlerPlayClient> {
+    private final Int1LinkedList.Node nodes;
+
+    public SElcaPacketDestroyEntities(){
+        this.nodes = new Int1LinkedList.Node(null,0);
+    }
+
+    public SElcaPacketDestroyEntities(Int1LinkedList.Node nodes) {
+        this.nodes = nodes;
+    }
+
+
+    @Override
+    public void readPacketData(PacketBuffer buf) throws IOException {
+        throw new UnsupportedEncodingException("THIS PACKET WRITE-ONLY! USE [SPacketDestroyEntities]");
+    }
+
+
+    @Override
+    public void writePacketData(PacketBuffer buf) throws IOException {
+        int len = 1;
+        Int1LinkedList.Node node = this.nodes, temp = node;
+
+        while (temp != null){
+            len += 1;
+            temp = temp.getParent();
+        }
+
+        buf.writeVarInt(len);
+
+        while (node != null){
+            buf.writeVarInt(node.getValue());
+            node = node.getParent();
+        }
+    }
+
+
+    @Override
+    public void processPacket(INetHandlerPlayClient client) {
+        int i = 1;
+        Int1LinkedList.Node node = this.nodes, temp = node;
+
+        while (temp != null){
+            i += 1;
+            temp = temp.getParent();
+        }
+
+        int[] ids = new int[i];
+        i = 0;
+
+        while (node != null){
+            ids[i] = node.getValue();
+            node = node.getParent();
+        }
+        client.handleDestroyEntities(new SPacketDestroyEntities(ids));
+    }
+}

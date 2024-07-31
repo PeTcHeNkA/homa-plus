@@ -1,13 +1,14 @@
 package net.minecraft.world.chunk;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.FastByteBuf;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.BlockIDIndexes;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import plus.fserver.utls.NetUtils;
+import plus.fserver.server.network.NetUtils;
 
 
 public class BlockStatePaletteLinear implements IBlockStatePalette {
@@ -70,14 +71,14 @@ public class BlockStatePaletteLinear implements IBlockStatePalette {
 
 
     @Override
-    public void write(ByteBuf buf) {
+    public void write(FastByteBuf buf) {
         final int size = this.arraySize;
         IBlockState[] states = this.states;
-        NetUtils.writeVarInt(buf, size);
+        buf.writeVarInt(size);
         IBlockState state;
         for (int i = 0; i < size; ++i) {
             state = states[i];
-            NetUtils.writeVarInt(buf, state==null?BlockIDIndexes.AIR_STATE_ID:state.getId());
+            buf.writeVarInt(state==null?BlockIDIndexes.AIR_STATE_ID:state.getId());
         }
     }
 

@@ -2,6 +2,7 @@ package net.minecraft.network.play.server;
 
 import com.google.common.collect.Lists;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.FastByteBuf;
 import io.netty.buffer.Unpooled;
 import java.io.IOException;
 import java.util.Iterator;
@@ -36,9 +37,9 @@ public class SPacketChunkData implements Packet<INetHandlerPlayClient> {
         boolean hasSkyLight = chunk.getWorld().provider.hasSkyLight();
 
         this.availableSections = extractChunkData(
-            Unpooled.wrappedBuffer(this.buffer = new byte[
+            new FastByteBuf(this.buffer = new byte[
                 calculateChunkSize(chunk, hasSkyLight, mask, fullChunk = mask == 65535)
-            ]).writerIndex(0),
+            ]),
             chunk, hasSkyLight, mask, fullChunk
         );
 
@@ -171,7 +172,7 @@ public class SPacketChunkData implements Packet<INetHandlerPlayClient> {
     }
 
 
-    private static int extractChunkData(ByteBuf buf, Chunk chunk, boolean hasSkyLight, int mask, boolean fullChunk) {
+    private static int extractChunkData(FastByteBuf buf, Chunk chunk, boolean hasSkyLight, int mask, boolean fullChunk) {
         int resultMask = 0;
         ExtendedBlockStorage[] arrays = chunk.getBlockStorageArray();
 

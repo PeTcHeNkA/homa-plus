@@ -94,8 +94,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.datafix.FixTypes;
-import net.minecraft.util.datafix.IDataFixer;
-import net.minecraft.util.datafix.IDataWalker;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -112,6 +110,7 @@ import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import plus.fserver.server.network.packet.SElcaPacketDestroyEntities;
 import plus.fserver.utls.collections.Int1LinkedList;
 
 import static plus.fserver.ElcaCV.SERVER_COMPILE;
@@ -312,13 +311,14 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
 
         Int1LinkedList.Node node = entityRemoveQueue.getListAndRem();
         if(node != null){
-            connection.netManager.exec(() -> {
-                Int1LinkedList.Node node0 = node;
-                while (node0 != null){
-                    connection.netManager.sendPacketSync(new SPacketDestroyEntities(node0.getValue()));
-                    node0 = node0.getParent();
-                }
-            });
+            connection.netManager.sendPacketE(new SElcaPacketDestroyEntities(node));
+//            connection.netManager.exec(() -> {
+//                Int1LinkedList.Node node0 = node;
+//                while (node0 != null){
+//                    connection.netManager.sendPacketSync(new SPacketDestroyEntities(node0.getValue()));
+//                    node0 = node0.getParent();
+//                }
+//            });
         }
 
         Entity entity = this.getSpectatingEntity();

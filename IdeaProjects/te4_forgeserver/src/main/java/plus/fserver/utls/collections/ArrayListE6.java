@@ -278,6 +278,7 @@ public class ArrayListE6<T> implements List<T> {
     public boolean addAll(@NotNull Collection<? extends T> c) {
         int newSize = size + c.size();
         if(newSize > data.length)data = Arrays.copyOf(data, newSize);
+        Object[] data = this.data;
         for (Object obj:c)data[size++] = obj;
         return !c.isEmpty();
     }

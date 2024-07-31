@@ -1158,7 +1158,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
             }
         }
 
-        this.getPlayerChunkMap().tick();
+        playerChunkMap.tick();
 
         if(ElcaConfig.VILLAGE_TICK_RATE!=-1){
             if(prevWorldTotalTime % ElcaConfig.VILLAGE_TICK_RATE==0) {

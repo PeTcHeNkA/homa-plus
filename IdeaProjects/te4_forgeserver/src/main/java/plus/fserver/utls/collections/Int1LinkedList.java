@@ -89,7 +89,8 @@ public final class Int1LinkedList {
     public static final class Node{
         private final int value;
         private Node parent;
-        Node(Node parent, int value) {
+
+        public Node(Node parent, int value) {
             this.parent = parent;
             this.value = value;
         }

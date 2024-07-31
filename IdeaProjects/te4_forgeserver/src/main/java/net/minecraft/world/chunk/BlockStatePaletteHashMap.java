@@ -1,6 +1,7 @@
 package net.minecraft.world.chunk;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.FastByteBuf;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.BlockIDIndexes;
@@ -8,7 +9,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.ElcaCV;
-import plus.fserver.utls.NetUtils;
+import plus.fserver.server.network.NetUtils;
 
 import java.util.Arrays;
 
@@ -85,12 +86,12 @@ public class BlockStatePaletteHashMap implements IBlockStatePalette {
 
 
     @Override
-    public void write(ByteBuf buf) {
+    public void write(FastByteBuf buf) {
         final int i;
-        NetUtils.writeVarInt(buf, i = size());
+        buf.writeVarInt(i = size());
         final IBlockState[] byId = this.byId;
         for (int cursor = 0; cursor < i; ++cursor)
-            NetUtils.writeVarInt(buf, byId[cursor].getId());
+            buf.writeVarInt(byId[cursor].getId());
     }
 
 

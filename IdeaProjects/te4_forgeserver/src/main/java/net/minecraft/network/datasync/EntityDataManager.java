@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import io.netty.handler.codec.DecoderException;
 import io.netty.handler.codec.EncoderException;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -12,6 +13,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.annotation.Nullable;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectCollection;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.Entity;
@@ -21,6 +23,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import plus.fserver.utls.collections.ArrayListE6;
 
 
 public class EntityDataManager {
@@ -176,8 +179,7 @@ public class EntityDataManager {
 
     public static void writeEntries(List <DataEntry<? >> entriesIn, PacketBuffer buf) throws IOException {
         if (entriesIn != null) {
-            int i = 0;
-            for (int j = entriesIn.size(); i < j; ++i) {
+            for (int i = 0, s = entriesIn.size(); i < s; ++i) {
                 EntityDataManager.DataEntry<?> dataentry = entriesIn.get(i);
                 writeEntry(buf, dataentry);
             }
@@ -187,8 +189,8 @@ public class EntityDataManager {
 
 
     @Nullable
-    public List < EntityDataManager.DataEntry<? >> getDirty() {
-        List < EntityDataManager.DataEntry<? >> list = null;
+    public List <EntityDataManager.DataEntry<?>> getDirty() {
+        ArrayListE6<EntityDataManager.DataEntry<?>> list = null;
 
         if (this.dirty) {
             this.lock.readLock().lock();
@@ -197,9 +199,9 @@ public class EntityDataManager {
                 if (dataentry.isDirty()) {
                     dataentry.setDirty(false);
                     if (list == null) {
-                        list = Lists.newArrayList();
+                        list = new ArrayListE6<>();
                     }
-                    list.add(dataentry.copy());
+                    list.addF(dataentry.copy());
                 }
             }
             this.lock.readLock().unlock();
@@ -220,16 +222,12 @@ public class EntityDataManager {
 
 
     @Nullable
-    public List <EntityDataManager.DataEntry<?>> getAll() {
-        List < EntityDataManager.DataEntry<? >> list = null;
+    public List<EntityDataManager.DataEntry<?>> getAll() {
         this.lock.readLock().lock();
 
-        for (EntityDataManager.DataEntry<?> dataentry : this.entries.values()) {
-            if (list == null) {
-                list = Lists.newArrayList();
-            }
-            list.add(dataentry.copy());
-        }
+        ArrayListE6<DataEntry<?>> list = new ArrayListE6<>();
+        list.addAll(this.entries.values());
+
         this.lock.readLock().unlock();
         return list;
     }

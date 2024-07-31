@@ -22,10 +22,10 @@ public class NativeCompressionEncoder extends MessageToByteEncoder<ByteBuf>{
         int uncompressed = msg.readableBytes();
         if (uncompressed < threshold) {
             // Under the threshold, there is nothing to do.
-            ProtocolUtils.writeVarInt(out, 0);
+            NetUtils.writeVarInt(out, 0);
             out.writeBytes(msg);
         } else {
-            ProtocolUtils.writeVarInt(out, uncompressed);
+            NetUtils.writeVarInt(out, uncompressed);
             ByteBuf compatibleIn = MoreByteBufUtils.ensureCompatible(ctx.alloc(), compressor, msg);
             try {
                 compressor.deflate(compatibleIn, out);

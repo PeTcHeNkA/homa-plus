@@ -8,7 +8,6 @@ import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.server.management.PlayerChunkMapEntry;
-import net.minecraft.util.WeightedRandom;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.SpawnPos;
 import net.minecraft.world.WorldEntitySpawner;
@@ -24,7 +23,6 @@ import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.collections.FlatMap;
 import plus.fserver.utls.math.FastRandom;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Random;
 
 

@@ -2,6 +2,7 @@ package net.minecraft.world.chunk;
 
 import javax.annotation.Nullable;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.FastByteBuf;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -11,7 +12,7 @@ import net.minecraft.util.BlockIDIndexes;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import plus.fserver.utls.NetUtils;
+import plus.fserver.server.network.NetUtils;
 import plus.fserver.utls.collections.IntBlockIndex;
 
 
@@ -123,10 +124,10 @@ public class BlockStateContainer implements IBlockStatePaletteResizer {
     }
 
 
-    public void write(ByteBuf buf) {
-        buf.writeByte(this.bits);
+    public void write(FastByteBuf buf) {
+        buf.writeByteV(this.bits);
         this.palette.write(buf);
-        NetUtils.writeLongArray(buf, this.storage.getBackingLongArray());
+        buf.writeLongArray(this.storage.getBackingLongArray());
     }
 
 

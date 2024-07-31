@@ -126,6 +126,7 @@ import net.minecraft.network.status.server.SPacketServerInfo;
 import org.apache.logging.log4j.LogManager;
 import plus.fserver.ElcaConfig;
 import plus.fserver.server.Reflector;
+import plus.fserver.server.network.packet.SElcaPacketDestroyEntities;
 
 
 public enum EnumConnectionState {
@@ -183,7 +184,10 @@ public enum EnumConnectionState {
         this.registerPacket(EnumPacketDirection.CLIENTBOUND, SPacketPlayerPosLook.class);
         this.registerPacket(EnumPacketDirection.CLIENTBOUND, SPacketUseBed.class);
         this.registerPacket(EnumPacketDirection.CLIENTBOUND, SPacketRecipeBook.class);
+
         this.registerPacket(EnumPacketDirection.CLIENTBOUND, SPacketDestroyEntities.class);
+        this.registerAlias(EnumPacketDirection.CLIENTBOUND, SPacketDestroyEntities.class, SElcaPacketDestroyEntities.class);
+
         this.registerPacket(EnumPacketDirection.CLIENTBOUND, SPacketRemoveEntityEffect.class);
         this.registerPacket(EnumPacketDirection.CLIENTBOUND, SPacketResourcePackSend.class);
         this.registerPacket(EnumPacketDirection.CLIENTBOUND, SPacketRespawn.class);
@@ -283,7 +287,7 @@ public enum EnumConnectionState {
     }
 
 
-    protected EnumConnectionState registerPacket(EnumPacketDirection direction, Class <? extends Packet<? >> packetClass) {
+    protected EnumConnectionState registerPacket(EnumPacketDirection direction, Class<? extends Packet<? >> packetClass) {
         Int2ObjectOpenHashMap<Supplier<Packet<?>>> conMap = constructMap[direction.id];
         IdentityHashMap<Class, Integer> clazzMap = clazzMaps[direction.id];
 
@@ -299,6 +303,14 @@ public enum EnumConnectionState {
             clazzMap.put(packetClass, id);
             return this;
         }
+    }
+
+
+    protected EnumConnectionState registerAlias(EnumPacketDirection direction, Class<? extends Packet<? >> parent, Class<? extends Packet<? >> alias){
+        IdentityHashMap<Class, Integer> map = clazzMaps[direction.id];
+        int id = map.get(parent);
+        map.put(alias, id);
+        return this;
     }
 
 
