@@ -127,6 +127,7 @@ import org.apache.logging.log4j.LogManager;
 import plus.fserver.ElcaConfig;
 import plus.fserver.server.Reflector;
 import plus.fserver.server.network.packet.SElcaPacketDestroyEntities;
+import plus.fserver.server.network.packet.SElcaPacketEntityEquipment;
 
 
 public enum EnumConnectionState {
@@ -200,7 +201,10 @@ public enum EnumConnectionState {
         this.registerPacket(EnumPacketDirection.CLIENTBOUND, SPacketEntityMetadata.class);
         this.registerPacket(EnumPacketDirection.CLIENTBOUND, SPacketEntityAttach.class);
         this.registerPacket(EnumPacketDirection.CLIENTBOUND, SPacketEntityVelocity.class);
+
         this.registerPacket(EnumPacketDirection.CLIENTBOUND, SPacketEntityEquipment.class);
+        this.registerAlias(EnumPacketDirection.CLIENTBOUND, SPacketEntityEquipment.class, SElcaPacketEntityEquipment.class);
+
         this.registerPacket(EnumPacketDirection.CLIENTBOUND, SPacketSetExperience.class);
         this.registerPacket(EnumPacketDirection.CLIENTBOUND, SPacketUpdateHealth.class);
         this.registerPacket(EnumPacketDirection.CLIENTBOUND, SPacketScoreboardObjective.class);

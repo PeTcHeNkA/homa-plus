@@ -64,6 +64,7 @@ import net.minecraftforge.fml.common.network.internal.FMLNetworkHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import plus.fserver.ElcaConfig;
+import plus.fserver.server.network.packet.SElcaPacketEntityEquipment;
 import plus.tson.utl.Te4HashSet;
 import javax.annotation.Nullable;
 import static plus.fserver.utls.math.MathUtls.F_256_T_360;
@@ -211,11 +212,28 @@ public class EntityTrackerEntry {
                     }
 
                     if (trackedEntity.isLiving()) {
+                        SElcaPacketEntityEquipment equp = null, next = null;
+
                         for (EntityEquipmentSlot slot : EntityEquipmentSlot.values()) {
                             ItemStack itemstack = ((EntityLivingBase)trackedEntity).getItemStackFromSlot(slot);
 
                             if (!itemstack.isEmpty()) {
-                                playerMP.connection.netManager.sendPacketE(new SPacketEntityEquipment(trackedEntity.getEntityId(), slot, itemstack));
+                                if(equp == null)equp = next = new SElcaPacketEntityEquipment(trackedEntity.getEntityId(), slot, itemstack);
+                                else next = next.with(trackedEntity.getEntityId(), slot, itemstack);
+                            }
+                        }
+                        if(equp != null){
+                            if(equp == next){
+                                playerMP.connection.netManager.sendPacketE(equp);
+                            } else {
+                                SElcaPacketEntityEquipment finalEqup = equp;
+                                playerMP.connection.netManager.exec(() -> {
+                                    SElcaPacketEntityEquipment temp = finalEqup;
+                                    while (temp != null){
+                                        playerMP.connection.netManager.sendPacketSync(temp);
+                                        temp = temp.next();
+                                    }
+                                });
                             }
                         }
 

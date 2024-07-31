@@ -57,9 +57,9 @@ public class WorldEntitySpawner {
     @Keep
     public static boolean canCreatureTypeSpawnAtLocation(EntityLiving.SpawnPlacementType type, World world, BlockPos pos) {
         if(world.isInWorldBorder(pos.getX(), pos.getZ())){
-            return false;
-        } else {
             return type.canSpawnAt(world, pos);
+        } else {
+            return false;
         }
     }
 
