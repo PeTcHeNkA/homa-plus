@@ -62,9 +62,17 @@ def makePathFile():
     for item in getDeepFiles(dir+"build/classes/java/main/net"):
         name = "net."+item.replace("/",".")[0:-6]
         if(name.startswith("net.minecraftforge")):
-            s += f"\"{name}\", (true)\n"
+            s += f"{name}, true\n"
+        elif(name.startswith("net.minecraft.pathfinding") or name.startswith("net.minecraft.scoreboard")):
+            s += f"{name}, false, false\n"
+        elif(name.startswith("net.minecraft.nbt") or name.startswith("net.minecraft.command")):
+            s += f"{name}, false, false\n"
+        elif(name.startswith("net.minecraft.world.gen.feature") or name.startswith("net.minecraft.world.storage")):
+            s += f"{name}, false, false\n"
+        elif(name.startswith("net.minecraft.util")):
+            s += f"{name}, false, false\n"
         else:
-            s += f"\"{name}\"\n"
+            s += f"{name}\n"
     createFile("src/main/resources/elcapatch.csv", s, )
     print("Completed.")
 

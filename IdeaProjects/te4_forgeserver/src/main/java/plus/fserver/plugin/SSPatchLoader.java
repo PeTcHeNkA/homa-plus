@@ -6,17 +6,13 @@ import net.minecraft.launchwrapper.LaunchClassLoader;
 import org.apache.logging.log4j.LogManager;
 import org.spongepowered.asm.launch.MixinBootstrap;
 import org.spongepowered.asm.mixin.Mixins;
-import plus.tson.TsonCSVParser;
-import plus.tson.TsonList;
-import plus.tson.TsonObj;
-import plus.tson.security.ClassManager;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.List;
 import static plus.fserver.ElcaCV.*;
 
 
-public class SSPatchLoader extends TweakEngine implements IClassTransformer, ITweaker{
+public class SSPatchLoader implements ITweaker{
     public static final String ELCA_RELEASE = "Elca Enterprise Edition";
     public static final String ELCA_VERSION;
 
@@ -49,42 +45,6 @@ public class SSPatchLoader extends TweakEngine implements IClassTransformer, ITw
         ELCA_VERSION = version;
     }
 
-    public SSPatchLoader(){
-        super("plus/fserver/plugin/SSPatchLoader.class");
-        addPatch();
-        addOverrides();
-    }
-
-
-    private void addPatch(){
-        byte[] table = getFastSrc("elcapatch.csv");
-        TsonList list = new TsonCSVParser(new ClassManager.Empty(), new String(table).toCharArray(), 2).getList();
-
-        for (TsonObj obj:list){
-            TsonList line = obj.getList();
-            String clazz = line.getStr(0);
-            boolean safe = false;
-            if(line.size()>1){
-                safe = line.getBool(1);
-            } else {
-//                if(clazz.startsWith("net.minecraftforge")){
-//                    safe = true;
-//                }
-            }
-            add(clazz, safe);
-        }
-    }
-
-
-    private void addOverrides(){
-        add("net.minecraft.server.MinecraftServer", true);
-        add("net.minecraft.server.MinecraftServer$1", true);
-        add("net.minecraft.server.MinecraftServer$2", true);
-        add("net.minecraft.server.dedicated.DedicatedServer", true);
-        add("net.minecraft.server.dedicated.DedicatedServer$1", true);
-        add("net.minecraft.server.dedicated.DedicatedServer$2", true);
-    }
-
 
     public static void printLogo(){
         String logo = "\n" +
@@ -112,22 +72,23 @@ public class SSPatchLoader extends TweakEngine implements IClassTransformer, ITw
         try {
             editTransformers(classLoader);
         } catch (NoSuchFieldException | IllegalAccessException e) {
-            classLoader.registerTransformer("plus.fserver.plugin.SSPatchLoader");
+            classLoader.registerTransformer("plus.fserver.plugin.SSPathTransformer");
         }
-        preLoadClasses();
     }
 
 
     private List<IClassTransformer> transformers(LaunchClassLoader classLoader) throws NoSuchFieldException, IllegalAccessException {
         Field field = LaunchClassLoader.class.getDeclaredField("transformers");
         field.setAccessible(true);
-        return  (List<IClassTransformer>) field.get(classLoader);
+        return (List<IClassTransformer>) field.get(classLoader);
     }
 
 
     private void editTransformers(LaunchClassLoader classLoader) throws NoSuchFieldException, IllegalAccessException {
         List<IClassTransformer> res = transformers(classLoader);
-        res.add(this);
+        SSPathTransformer transformer = new SSPathTransformer(false);
+        res.add(transformer);
+        transformer.init();
     }
 
 

@@ -3,6 +3,7 @@ package net.minecraft.world;
 import javax.annotation.Nullable;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityTrackerEntry;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.server.SPacketBlockBreakAnim;
@@ -87,16 +88,16 @@ public class ServerWorldEventHandler implements IWorldEventListener {
     }
 
 
-    @Override
+    @Override //player.trackerEntry.trackingPlayers
     public void sendBlockBreakProgress(int breakerId, BlockPos pos, int progress) {
-        for (EntityPlayerMP entityplayermp : this.server.getPlayerList().getPlayers()) {
-            if (entityplayermp != null && entityplayermp.world == this.world && entityplayermp.getEntityId() != breakerId) {
-                double d0 = (double)pos.getX() - entityplayermp.posX;
-                double d1 = (double)pos.getY() - entityplayermp.posY;
-                double d2 = (double)pos.getZ() - entityplayermp.posZ;
+        for (EntityPlayer player : world.playerEntities) {
+            if (player != null && player.world == this.world && player.getEntityId() != breakerId && player instanceof EntityPlayerMP) {
+                double d0 = (double)pos.getX() - player.posX;
+                double d1 = (double)pos.getY() - player.posY;
+                double d2 = (double)pos.getZ() - player.posZ;
 
                 if (d0 * d0 + d1 * d1 + d2 * d2 < 1024.0D) {
-                    entityplayermp.connection.netManager.sendPacketE(new SPacketBlockBreakAnim(breakerId, pos, progress));
+                    ((EntityPlayerMP) player).connection.netManager.sendPacketE(new SPacketBlockBreakAnim(breakerId, pos, progress));
                 }
             }
         }

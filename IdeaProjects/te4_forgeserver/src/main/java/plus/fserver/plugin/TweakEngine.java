@@ -4,8 +4,8 @@ import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraftforge.fml.relauncher.FMLLaunchHandler;
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.NotNull;
+import plus.tson.utl.Te4HashMap;
 import plus.tson.utl.Te4HashSet;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -15,11 +15,21 @@ import java.util.*;
 public class TweakEngine implements IClassTransformer, Set<String> {
     private static final String URL_TWEAK_SEARCH_POINT = "plus/fserver/plugin/TweakEngine.class";
     private final ClassLoader loader = TweakEngine.class.getClassLoader();
-    private final HashMap<String, Boolean> classes = new HashMap<>();
+    private final Te4HashMap<String, TweakInfo> classes = new Te4HashMap<>();
     private final Te4HashSet<String> preLoads = new Te4HashSet<>();
     private final String header;
     private final boolean debug = false;
     private final IClassTransformer sideTransformer;
+
+    private static class TweakInfo{
+        private boolean useSideTransformer;
+        private boolean useSafeMode;
+
+        public TweakInfo(boolean useSafeMode, boolean useSideTransformer){
+            this.useSafeMode = useSafeMode;
+            this.useSideTransformer = useSideTransformer;
+        }
+    }
 
     public TweakEngine(){
         this(URL_TWEAK_SEARCH_POINT);
@@ -90,11 +100,13 @@ public class TweakEngine implements IClassTransformer, Set<String> {
         return classes.keySet().iterator();
     }
 
+
     @NotNull
     @Override
     public Object[] toArray() {
         return classes.keySet().toArray();
     }
+
 
     @NotNull
     @Override
@@ -103,14 +115,15 @@ public class TweakEngine implements IClassTransformer, Set<String> {
     }
 
 
+    @Override
     public boolean add(String name){
-        return classes.put(name, false) == null;
+        return classes.put(name, new TweakInfo(false, true)) == null;
     }
 
 
     @Override
     public boolean remove(Object o) {
-        return classes.remove(o);
+        return classes.remove(o) != null;
     }
 
 
@@ -137,9 +150,7 @@ public class TweakEngine implements IClassTransformer, Set<String> {
 
     @Override
     public boolean removeAll(@NotNull Collection<?> c) {
-        for (Object s:c){
-            remove(s);
-        }
+        for (Object s:c) remove(s);
         return true;
     }
 
@@ -151,12 +162,18 @@ public class TweakEngine implements IClassTransformer, Set<String> {
 
 
     public void add(String name, boolean safe){
-        classes.put(name, safe);
+        classes.fput(name, new TweakInfo(safe, true));
     }
 
 
     public void add(String name, boolean safe, boolean preLoad){
         add(name, safe);
+        if(preLoad) preLoads.add(name);
+    }
+
+
+    public void add(String name, boolean safe, boolean preLoad, boolean useTransformers){
+        classes.fput(name, new TweakInfo(safe, useTransformers));
         if(preLoad) preLoads.add(name);
     }
 
@@ -167,10 +184,10 @@ public class TweakEngine implements IClassTransformer, Set<String> {
 
 
     public byte[] tweakBytesIfNeed(String name) {
-        Boolean mode = classes.get(name);
-        if (mode == null) return null;
-        byte[] result = mode ? getSafeTweaks(name) : getFastTweak(name);
-        if(sideTransformer==null)return result;
+        TweakInfo info = classes.get(name);
+        if (info == null) return null;
+        byte[] result = info.useSafeMode ? getSafeTweaks(name) : getFastTweak(name);
+        if(sideTransformer == null || !info.useSideTransformer)return result;
         return sideTransformer.transform(name, name, result);
     }
 

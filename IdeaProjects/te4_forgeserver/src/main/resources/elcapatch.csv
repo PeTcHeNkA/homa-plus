@@ -1,609 +1,609 @@
-"net.minecraft.advancements.AdvancementProgress$Serializer"
-"net.minecraft.advancements.AdvancementProgress"
-"net.minecraft.advancements.CriterionProgress"
-"net.minecraft.advancements.PlayerAdvancements$1"
-"net.minecraft.advancements.PlayerAdvancements"
-"net.minecraft.block.Block$1"
-"net.minecraft.block.Block$EnumOffsetType"
-"net.minecraft.block.Block"
-"net.minecraft.block.BlockBarrier"
-"net.minecraft.block.BlockBeacon"
-"net.minecraft.block.BlockBone"
-"net.minecraft.block.BlockBookshelf"
-"net.minecraft.block.BlockBreakableFs"
-"net.minecraft.block.BlockBush"
-"net.minecraft.block.BlockCarpet"
-"net.minecraft.block.BlockClay"
-"net.minecraft.block.BlockColoredFs"
-"net.minecraft.block.BlockCompressedPowered"
-"net.minecraft.block.BlockConcretePowder"
-"net.minecraft.block.BlockCrops"
-"net.minecraft.block.BlockDaylightDetector"
-"net.minecraft.block.BlockDirt$DirtType"
-"net.minecraft.block.BlockDirt"
-"net.minecraft.block.BlockDynamicLiquid"
-"net.minecraft.block.BlockEmptyDropsFs"
-"net.minecraft.block.BlockEndPortal"
-"net.minecraft.block.BlockEndPortalFrame"
-"net.minecraft.block.BlockFallingFs"
-"net.minecraft.block.BlockFarmland$1"
-"net.minecraft.block.BlockFarmland"
-"net.minecraft.block.BlockFence$1"
-"net.minecraft.block.BlockFence"
-"net.minecraft.block.BlockFenceGate"
-"net.minecraft.block.BlockFire"
-"net.minecraft.block.BlockFlowerPot$1"
-"net.minecraft.block.BlockFlowerPot$EnumFlowerType"
-"net.minecraft.block.BlockFlowerPot"
-"net.minecraft.block.BlockFrostedIce"
-"net.minecraft.block.BlockGlass"
-"net.minecraft.block.BlockGlazedTerracotta"
-"net.minecraft.block.BlockGlowstone"
-"net.minecraft.block.BlockGrass"
-"net.minecraft.block.BlockGrassPath$1"
-"net.minecraft.block.BlockGrassPath"
-"net.minecraft.block.BlockGravel"
-"net.minecraft.block.BlockHardenedClay"
-"net.minecraft.block.BlockHay"
-"net.minecraft.block.BlockHugeMushroom$1"
-"net.minecraft.block.BlockHugeMushroom$EnumType"
-"net.minecraft.block.BlockHugeMushroom"
-"net.minecraft.block.BlockIce"
-"net.minecraft.block.BlockLadder$1"
-"net.minecraft.block.BlockLadder"
-"net.minecraft.block.BlockLeaves"
-"net.minecraft.block.BlockLiquid"
-"net.minecraft.block.BlockLog$1"
-"net.minecraft.block.BlockLog$EnumAxis"
-"net.minecraft.block.BlockLog"
-"net.minecraft.block.BlockMagma"
-"net.minecraft.block.BlockMelon"
-"net.minecraft.block.BlockMushroom"
-"net.minecraft.block.BlockMycelium"
-"net.minecraft.block.BlockNetherBrick"
-"net.minecraft.block.BlockNetherrack"
-"net.minecraft.block.BlockObsidian"
-"net.minecraft.block.BlockOre"
-"net.minecraft.block.BlockPackedIce"
-"net.minecraft.block.BlockPane$1"
-"net.minecraft.block.BlockPane"
-"net.minecraft.block.BlockPistonBase$1"
-"net.minecraft.block.BlockPistonBase"
-"net.minecraft.block.BlockPlanks$EnumType"
-"net.minecraft.block.BlockPlanks"
-"net.minecraft.block.BlockPrismarine$EnumType"
-"net.minecraft.block.BlockPrismarine"
-"net.minecraft.block.BlockQuartz$1"
-"net.minecraft.block.BlockQuartz$EnumType"
-"net.minecraft.block.BlockQuartz"
-"net.minecraft.block.BlockRailBase$1"
-"net.minecraft.block.BlockRailBase$EnumRailDirection"
-"net.minecraft.block.BlockRailBase$Rail"
-"net.minecraft.block.BlockRailBase"
-"net.minecraft.block.BlockRedSandstone$EnumType"
-"net.minecraft.block.BlockRedSandstone"
-"net.minecraft.block.BlockRedstoneDiode"
-"net.minecraft.block.BlockRedstoneLight"
-"net.minecraft.block.BlockRedstoneOre"
-"net.minecraft.block.BlockRedstoneWire$1"
-"net.minecraft.block.BlockRedstoneWire$EnumAttachPosition"
-"net.minecraft.block.BlockRedstoneWire"
-"net.minecraft.block.BlockRotatedPillarFs"
-"net.minecraft.block.BlockSand$EnumType"
-"net.minecraft.block.BlockSand"
-"net.minecraft.block.BlockSandStone$EnumType"
-"net.minecraft.block.BlockSandStone"
-"net.minecraft.block.BlockSeaLantern"
-"net.minecraft.block.BlockSilverfish$1"
-"net.minecraft.block.BlockSilverfish$EnumType$1"
-"net.minecraft.block.BlockSilverfish$EnumType$2"
-"net.minecraft.block.BlockSilverfish$EnumType$3"
-"net.minecraft.block.BlockSilverfish$EnumType$4"
-"net.minecraft.block.BlockSilverfish$EnumType$5"
-"net.minecraft.block.BlockSilverfish$EnumType$6"
-"net.minecraft.block.BlockSilverfish$EnumType"
-"net.minecraft.block.BlockSilverfish"
-"net.minecraft.block.BlockSlab$EnumBlockHalf"
-"net.minecraft.block.BlockSlab"
-"net.minecraft.block.BlockSlime"
-"net.minecraft.block.BlockSnow"
-"net.minecraft.block.BlockSnowBlock"
-"net.minecraft.block.BlockSoulSand"
-"net.minecraft.block.BlockSponge$BlockPosIndex"
-"net.minecraft.block.BlockSponge"
-"net.minecraft.block.BlockStainedGlass"
-"net.minecraft.block.BlockStainedHardenedClay"
-"net.minecraft.block.BlockStairs$1"
-"net.minecraft.block.BlockStairs$EnumHalf"
-"net.minecraft.block.BlockStairs$EnumShape"
-"net.minecraft.block.BlockStairs"
-"net.minecraft.block.BlockStaticLiquid"
-"net.minecraft.block.BlockStone$EnumType"
-"net.minecraft.block.BlockStone"
-"net.minecraft.block.BlockStoneBrick$EnumType"
-"net.minecraft.block.BlockStoneBrick"
-"net.minecraft.block.BlockTNT"
-"net.minecraft.block.BlockTrapDoor$1"
-"net.minecraft.block.BlockTrapDoor$DoorHalf"
-"net.minecraft.block.BlockTrapDoor"
-"net.minecraft.block.BlockTripWire$1"
-"net.minecraft.block.BlockTripWire"
-"net.minecraft.block.BlockWall$EnumType"
-"net.minecraft.block.BlockWall"
-"net.minecraft.block.BlockWorkbench$InterfaceCraftingTable"
-"net.minecraft.block.BlockWorkbench"
-"net.minecraft.block.material.Material$1"
-"net.minecraft.block.material.Material"
-"net.minecraft.block.properties.PropertyBool"
-"net.minecraft.block.properties.PropertyEnum"
-"net.minecraft.block.properties.PropertyHelper"
-"net.minecraft.block.properties.PropertyInteger"
-"net.minecraft.block.state.BlockPistonStructureHelper"
-"net.minecraft.block.state.BlockStateBase$1"
-"net.minecraft.block.state.BlockStateBase"
-"net.minecraft.block.state.BlockStateContainer$1"
-"net.minecraft.block.state.BlockStateContainer$Builder"
-"net.minecraft.block.state.BlockStateContainer$StateImplementation"
-"net.minecraft.block.state.BlockStateContainer"
-"net.minecraft.block.state.IBlockProperties"
-"net.minecraft.block.state.IBlockState"
-"net.minecraft.client.multiplayer.WorldClient$1"
-"net.minecraft.client.multiplayer.WorldClient$2"
-"net.minecraft.client.multiplayer.WorldClient$3"
-"net.minecraft.client.multiplayer.WorldClient$4"
-"net.minecraft.client.multiplayer.WorldClient$5"
-"net.minecraft.client.multiplayer.WorldClient"
-"net.minecraft.command.CommandResultStats$1"
-"net.minecraft.command.CommandResultStats$Type"
-"net.minecraft.command.CommandResultStats"
-"net.minecraft.enchantment.EnchantmentFrostWalker"
-"net.minecraft.enchantment.EnchantmentHelper"
-"net.minecraft.entity.ai.attributes.AbstractAttributeMap"
-"net.minecraft.entity.ai.attributes.AttributeMap"
-"net.minecraft.entity.ai.attributes.ModifiableAttributeInstance"
-"net.minecraft.entity.ai.EntityAIAvoidEntity$1"
-"net.minecraft.entity.ai.EntityAIAvoidEntity$AvoidSelector"
-"net.minecraft.entity.ai.EntityAIAvoidEntity"
-"net.minecraft.entity.ai.EntityAIEatGrass"
-"net.minecraft.entity.ai.EntityAIMoveToBlock"
-"net.minecraft.entity.ai.EntityAINearestAttackableTarget$1"
-"net.minecraft.entity.ai.EntityAINearestAttackableTarget$Player2Double"
-"net.minecraft.entity.ai.EntityAINearestAttackableTarget$Sorter"
-"net.minecraft.entity.ai.EntityAINearestAttackableTarget"
-"net.minecraft.entity.ai.EntityAIPanic"
-"net.minecraft.entity.ai.EntityAITasks"
-"net.minecraft.entity.ai.EntitySenses"
-"net.minecraft.entity.Entity$1"
-"net.minecraft.entity.Entity$2"
-"net.minecraft.entity.Entity$3"
-"net.minecraft.entity.Entity$4"
-"net.minecraft.entity.Entity$5"
-"net.minecraft.entity.Entity$6"
-"net.minecraft.entity.Entity"
-"net.minecraft.entity.EntityLiving$1"
-"net.minecraft.entity.EntityLiving$SpawnPlacementType"
-"net.minecraft.entity.EntityLiving"
-"net.minecraft.entity.EntityLivingBase$1"
-"net.minecraft.entity.EntityLivingBase"
-"net.minecraft.entity.EntityTracker"
-"net.minecraft.entity.EntityTrackerEntry"
-"net.minecraft.entity.item.EntityBoat$1"
-"net.minecraft.entity.item.EntityBoat$Status"
-"net.minecraft.entity.item.EntityBoat$Type"
-"net.minecraft.entity.item.EntityBoat"
-"net.minecraft.entity.item.EntityFallingBlock"
-"net.minecraft.entity.item.EntityItem"
-"net.minecraft.entity.item.EntityMinecart$1"
-"net.minecraft.entity.item.EntityMinecart$Type"
-"net.minecraft.entity.item.EntityMinecart"
-"net.minecraft.entity.monster.AbstractSkeleton$1"
-"net.minecraft.entity.monster.AbstractSkeleton"
-"net.minecraft.entity.monster.EntityBlaze$AIFireballAttack"
-"net.minecraft.entity.monster.EntityBlaze"
-"net.minecraft.entity.monster.EntityCreeper"
-"net.minecraft.entity.monster.EntityEnderman$1"
-"net.minecraft.entity.monster.EntityEnderman$AIFindPlayer"
-"net.minecraft.entity.monster.EntityEnderman$AIPlaceBlock"
-"net.minecraft.entity.monster.EntityEnderman$AITakeBlock"
-"net.minecraft.entity.monster.EntityEnderman"
-"net.minecraft.entity.monster.EntityGuardian$AIGuardianAttack"
-"net.minecraft.entity.monster.EntityGuardian$GuardianMoveHelper"
-"net.minecraft.entity.monster.EntityGuardian$GuardianTargetSelector"
-"net.minecraft.entity.monster.EntityGuardian"
-"net.minecraft.entity.monster.EntityMob"
-"net.minecraft.entity.monster.EntitySpider$AISpiderAttack"
-"net.minecraft.entity.monster.EntitySpider$AISpiderTarget"
-"net.minecraft.entity.monster.EntitySpider$GroupData"
-"net.minecraft.entity.monster.EntitySpider"
-"net.minecraft.entity.monster.EntityWitch"
-"net.minecraft.entity.monster.EntityZombie$1"
-"net.minecraft.entity.monster.EntityZombie$GroupData"
-"net.minecraft.entity.monster.EntityZombie"
-"net.minecraft.entity.passive.EntityAmbientCreature"
-"net.minecraft.entity.passive.EntityAnimal"
-"net.minecraft.entity.passive.EntityBat"
-"net.minecraft.entity.passive.EntityRabbit$AIAvoidEntity"
-"net.minecraft.entity.passive.EntityRabbit$AIEvilAttack"
-"net.minecraft.entity.passive.EntityRabbit$AIPanic"
-"net.minecraft.entity.passive.EntityRabbit$AIRaidFarm"
-"net.minecraft.entity.passive.EntityRabbit$RabbitJumpHelper"
-"net.minecraft.entity.passive.EntityRabbit$RabbitMoveHelper"
-"net.minecraft.entity.passive.EntityRabbit$RabbitTypeData"
-"net.minecraft.entity.passive.EntityRabbit"
-"net.minecraft.entity.passive.EntitySheep$1"
-"net.minecraft.entity.passive.EntitySheep"
-"net.minecraft.entity.passive.EntitySquid$AIMoveRandom"
-"net.minecraft.entity.passive.EntitySquid"
-"net.minecraft.entity.passive.EntityVillager$1"
-"net.minecraft.entity.passive.EntityVillager$EmeraldForItems"
-"net.minecraft.entity.passive.EntityVillager$ItemAndEmeraldToItem"
-"net.minecraft.entity.passive.EntityVillager$ITradeList"
-"net.minecraft.entity.passive.EntityVillager$ListEnchantedBookForEmeralds"
-"net.minecraft.entity.passive.EntityVillager$ListEnchantedItemForEmeralds"
-"net.minecraft.entity.passive.EntityVillager$ListItemForEmeralds"
-"net.minecraft.entity.passive.EntityVillager$PriceInfo"
-"net.minecraft.entity.passive.EntityVillager$TreasureMapForEmeralds"
-"net.minecraft.entity.passive.EntityVillager"
-"net.minecraft.entity.passive.EntityWaterMob"
-"net.minecraft.entity.player.EntityPlayer$1"
-"net.minecraft.entity.player.EntityPlayer$EnumChatVisibility"
-"net.minecraft.entity.player.EntityPlayer$SleepEnemyPredicate"
-"net.minecraft.entity.player.EntityPlayer$SleepResult"
-"net.minecraft.entity.player.EntityPlayer"
-"net.minecraft.entity.player.EntityPlayerMP"
-"net.minecraft.entity.player.InventoryPlayer"
-"net.minecraft.entity.projectile.EntityArrow$PickupStatus"
-"net.minecraft.entity.projectile.EntityArrow"
-"net.minecraft.entity.projectile.EntityThrowable"
-"net.minecraft.inventory.Container"
-"net.minecraft.inventory.EntityEquipmentSlot$Type"
-"net.minecraft.inventory.EntityEquipmentSlot"
-"net.minecraft.inventory.InventoryCrafting"
-"net.minecraft.inventory.InventoryCraftResult"
-"net.minecraft.inventory.Slot"
-"net.minecraft.item.crafting.CraftingManager"
-"net.minecraft.item.Item$1"
-"net.minecraft.item.Item$10"
-"net.minecraft.item.Item$11"
-"net.minecraft.item.Item$12"
-"net.minecraft.item.Item$13"
-"net.minecraft.item.Item$14"
-"net.minecraft.item.Item$15"
-"net.minecraft.item.Item$16"
-"net.minecraft.item.Item$17"
-"net.minecraft.item.Item$18"
-"net.minecraft.item.Item$19"
-"net.minecraft.item.Item$2"
-"net.minecraft.item.Item$20"
-"net.minecraft.item.Item$21"
-"net.minecraft.item.Item$22"
-"net.minecraft.item.Item$3"
-"net.minecraft.item.Item$4"
-"net.minecraft.item.Item$5"
-"net.minecraft.item.Item$6"
-"net.minecraft.item.Item$7"
-"net.minecraft.item.Item$8"
-"net.minecraft.item.Item$9"
-"net.minecraft.item.Item$ToolMaterial"
-"net.minecraft.item.Item"
-"net.minecraft.item.ItemStack"
-"net.minecraft.item.ItemWrittenBook"
-"net.minecraft.nbt.NBTTagByte"
-"net.minecraft.nbt.NBTTagCompound"
-"net.minecraft.nbt.NBTTagDouble"
-"net.minecraft.nbt.NBTTagEnd"
-"net.minecraft.nbt.NBTTagFloat"
-"net.minecraft.nbt.NBTTagInt"
-"net.minecraft.nbt.NBTTagList"
-"net.minecraft.nbt.NBTTagLong"
-"net.minecraft.nbt.NBTTagShort"
-"net.minecraft.nbt.NBTTagString"
-"net.minecraft.network.datasync.EntityDataManager$DataEntry"
-"net.minecraft.network.datasync.EntityDataManager"
-"net.minecraft.network.EnumConnectionState$1"
-"net.minecraft.network.EnumConnectionState$2"
-"net.minecraft.network.EnumConnectionState$3"
-"net.minecraft.network.EnumConnectionState$4"
-"net.minecraft.network.EnumConnectionState"
-"net.minecraft.network.EnumPacketDirection"
-"net.minecraft.network.NetHandlerPlayServer$1"
-"net.minecraft.network.NetHandlerPlayServer$2"
-"net.minecraft.network.NetHandlerPlayServer"
-"net.minecraft.network.NetworkManager$1"
-"net.minecraft.network.NetworkManager$2"
-"net.minecraft.network.NetworkManager$3"
-"net.minecraft.network.NetworkManager$4"
-"net.minecraft.network.NetworkManager$5"
-"net.minecraft.network.NetworkManager$InboundHandlerTuplePacketListener"
-"net.minecraft.network.NetworkManager"
-"net.minecraft.network.NetworkSystem$1"
-"net.minecraft.network.NetworkSystem$2"
-"net.minecraft.network.NetworkSystem$3"
-"net.minecraft.network.NetworkSystem$4"
-"net.minecraft.network.NetworkSystem$5"
-"net.minecraft.network.NetworkSystem"
-"net.minecraft.network.play.client.CPacketClientSettings"
-"net.minecraft.network.play.client.CPacketCustomPayload"
-"net.minecraft.network.play.server.SPacketBlockChange"
-"net.minecraft.network.play.server.SPacketChunkData"
-"net.minecraft.network.rcon.RConThreadMain"
-"net.minecraft.pathfinding.FlyingNodeProcessor"
-"net.minecraft.pathfinding.NodeProcessor"
-"net.minecraft.pathfinding.PathFinder"
-"net.minecraft.pathfinding.PathHeap"
-"net.minecraft.pathfinding.PathNavigate"
-"net.minecraft.pathfinding.PathNavigateGround"
-"net.minecraft.pathfinding.PathNodeType$Set"
-"net.minecraft.pathfinding.PathNodeType"
-"net.minecraft.pathfinding.PathPoint"
-"net.minecraft.pathfinding.PathWorldListener"
-"net.minecraft.pathfinding.SwimNodeProcessor"
-"net.minecraft.pathfinding.WalkNodeProcessor"
-"net.minecraft.scoreboard.Scoreboard"
-"net.minecraft.scoreboard.ScoreboardSaveData"
-"net.minecraft.server.dedicated.DedicatedServer$1"
-"net.minecraft.server.dedicated.DedicatedServer"
-"net.minecraft.server.integrated.IntegratedServer"
-"net.minecraft.server.management.PlayerChunkMap"
-"net.minecraft.server.management.PlayerChunkMapEntry"
-"net.minecraft.server.management.PlayerList$1"
-"net.minecraft.server.management.PlayerList"
-"net.minecraft.server.MinecraftServer$1"
-"net.minecraft.server.MinecraftServer$2"
-"net.minecraft.server.MinecraftServer"
-"net.minecraft.server.network.NetHandlerLoginServer$ConnectEvent"
-"net.minecraft.server.network.NetHandlerLoginServer$LoginState"
-"net.minecraft.server.network.NetHandlerLoginServer"
-"net.minecraft.server.ServerEula"
-"net.minecraft.tileentity.TileEntityBeacon$BeamSegment"
-"net.minecraft.tileentity.TileEntityBeacon"
-"net.minecraft.tileentity.TileEntityFurnace"
-"net.minecraft.tileentity.TileEntityHopper"
-"net.minecraft.util.BitArray"
-"net.minecraft.util.BlockIDIndexes"
-"net.minecraft.util.ByClass"
-"net.minecraft.util.ChatAllowedCharacters"
-"net.minecraft.util.ClassInheritanceMultiMap$FastIter"
-"net.minecraft.util.ClassInheritanceMultiMap"
-"net.minecraft.util.CooldownTrackerServer"
-"net.minecraft.util.EntitySelectors$1"
-"net.minecraft.util.EntitySelectors$ArmoredMob"
-"net.minecraft.util.EntitySelectors"
-"net.minecraft.util.EnumFacing$1"
-"net.minecraft.util.EnumFacing$Axis"
-"net.minecraft.util.EnumFacing$AxisDirection"
-"net.minecraft.util.EnumFacing$Plane"
-"net.minecraft.util.EnumFacing"
-"net.minecraft.util.math.AxisAlignedBB"
-"net.minecraft.util.math.BlockPos$1"
-"net.minecraft.util.math.BlockPos$2"
-"net.minecraft.util.math.BlockPos$3"
-"net.minecraft.util.math.BlockPos$MutableBlockPos"
-"net.minecraft.util.math.BlockPos$PooledMutableBlockPos$1"
-"net.minecraft.util.math.BlockPos$PooledMutableBlockPos"
-"net.minecraft.util.math.BlockPos"
-"net.minecraft.util.math.Vec3i"
-"net.minecraft.village.VillageCollection"
-"net.minecraft.world.biome.Biome$1"
-"net.minecraft.world.biome.Biome$BiomeProperties"
-"net.minecraft.world.biome.Biome$FlowerEntry"
-"net.minecraft.world.biome.Biome$SpawnListEntry"
-"net.minecraft.world.biome.Biome$TempCategory"
-"net.minecraft.world.biome.Biome"
-"net.minecraft.world.biome.BiomeDecorator"
-"net.minecraft.world.biome.BiomeProvider"
-"net.minecraft.world.biome.BiomeProviderSingle"
-"net.minecraft.world.biome.BiomeSwamp"
-"net.minecraft.world.border.WorldBorder"
-"net.minecraft.world.chunk.BlockStateContainer"
-"net.minecraft.world.chunk.BlockStatePaletteHashMap"
-"net.minecraft.world.chunk.BlockStatePaletteLinear"
-"net.minecraft.world.chunk.BlockStatePaletteRegistry"
-"net.minecraft.world.chunk.Chunk$EnumCreateEntityType"
-"net.minecraft.world.chunk.Chunk"
-"net.minecraft.world.chunk.ChunkPrimer"
-"net.minecraft.world.chunk.IBlockStatePalette"
-"net.minecraft.world.chunk.storage.AnvilChunkLoader$1"
-"net.minecraft.world.chunk.storage.AnvilChunkLoader"
-"net.minecraft.world.chunk.storage.ChunkBuffer"
-"net.minecraft.world.chunk.storage.ExtendedBlockStorage"
-"net.minecraft.world.chunk.storage.IChunkLoader"
-"net.minecraft.world.DimensionType"
-"net.minecraft.world.Explosion"
-"net.minecraft.world.GameRules$Value"
-"net.minecraft.world.GameRules$ValueType"
-"net.minecraft.world.GameRules"
-"net.minecraft.world.gen.ChunkGeneratorHell$GenSession"
-"net.minecraft.world.gen.ChunkGeneratorHell"
-"net.minecraft.world.gen.ChunkGeneratorOverworld"
-"net.minecraft.world.gen.ChunkProviderServer"
-"net.minecraft.world.gen.feature.CWorldGenerator"
-"net.minecraft.world.gen.feature.StonePredicateV2"
-"net.minecraft.world.gen.feature.WorldGenAbstractTree"
-"net.minecraft.world.gen.feature.WorldGenBigMushroom"
-"net.minecraft.world.gen.feature.WorldGenBigTree$1"
-"net.minecraft.world.gen.feature.WorldGenBigTree$FoliageCoordinates"
-"net.minecraft.world.gen.feature.WorldGenBigTree$GenSession"
-"net.minecraft.world.gen.feature.WorldGenBigTree"
-"net.minecraft.world.gen.feature.WorldGenBirchTree"
-"net.minecraft.world.gen.feature.WorldGenBlockBlob"
-"net.minecraft.world.gen.feature.WorldGenCactus"
-"net.minecraft.world.gen.feature.WorldGenClay"
-"net.minecraft.world.gen.feature.WorldGenDeadBush"
-"net.minecraft.world.gen.feature.WorldGenDesertWells"
-"net.minecraft.world.gen.feature.WorldGenDungeons"
-"net.minecraft.world.gen.feature.WorldGenerator"
-"net.minecraft.world.gen.feature.WorldGenFire"
-"net.minecraft.world.gen.feature.WorldGenFlowers"
-"net.minecraft.world.gen.feature.WorldGenGlowStone1"
-"net.minecraft.world.gen.feature.WorldGenGlowStone2"
-"net.minecraft.world.gen.feature.WorldGenHugeTrees"
-"net.minecraft.world.gen.feature.WorldGenIcePath"
-"net.minecraft.world.gen.feature.WorldGenIceSpike"
-"net.minecraft.world.gen.feature.WorldGenLakes"
-"net.minecraft.world.gen.feature.WorldGenLiquids"
-"net.minecraft.world.gen.feature.WorldGenMegaJungle"
-"net.minecraft.world.gen.feature.WorldGenMegaPineTree"
-"net.minecraft.world.gen.feature.WorldGenMinable"
-"net.minecraft.world.gen.feature.WorldGenPumpkin"
-"net.minecraft.world.gen.feature.WorldGenSand"
-"net.minecraft.world.gen.feature.WorldGenSavannaTree"
-"net.minecraft.world.gen.feature.WorldGenShrub"
-"net.minecraft.world.gen.feature.WorldGenSwamp"
-"net.minecraft.world.gen.feature.WorldGenTaiga1"
-"net.minecraft.world.gen.feature.WorldGenTaiga2"
-"net.minecraft.world.gen.feature.WorldGenTallGrass"
-"net.minecraft.world.gen.feature.WorldGenTrees"
-"net.minecraft.world.gen.feature.WorldGenVines"
-"net.minecraft.world.gen.feature.WorldGenWaterlily"
-"net.minecraft.world.gen.IChunkGenerator"
-"net.minecraft.world.gen.NoiseGeneratorImproved"
-"net.minecraft.world.gen.NoiseGeneratorOctaves"
-"net.minecraft.world.gen.structure.MapGenMineshaft$Type"
-"net.minecraft.world.gen.structure.MapGenMineshaft"
-"net.minecraft.world.gen.structure.MapGenNetherBridge$Start"
-"net.minecraft.world.gen.structure.MapGenNetherBridge"
-"net.minecraft.world.gen.structure.MapGenScatteredFeature$Start"
-"net.minecraft.world.gen.structure.MapGenScatteredFeature"
-"net.minecraft.world.gen.structure.MapGenStructure"
-"net.minecraft.world.gen.structure.StructureBoundingBox$1"
-"net.minecraft.world.gen.structure.StructureBoundingBox"
-"net.minecraft.world.gen.structure.StructureComponent$1"
-"net.minecraft.world.gen.structure.StructureComponent$BlockSelector"
-"net.minecraft.world.gen.structure.StructureComponent"
-"net.minecraft.world.gen.structure.StructureMineshaftPieces$1"
-"net.minecraft.world.gen.structure.StructureMineshaftPieces$Corridor"
-"net.minecraft.world.gen.structure.StructureMineshaftPieces$Cross"
-"net.minecraft.world.gen.structure.StructureMineshaftPieces$Peice"
-"net.minecraft.world.gen.structure.StructureMineshaftPieces$Room"
-"net.minecraft.world.gen.structure.StructureMineshaftPieces$Stairs"
-"net.minecraft.world.gen.structure.StructureMineshaftPieces"
-"net.minecraft.world.gen.structure.StructureNetherBridgePieces$1"
-"net.minecraft.world.gen.structure.StructureNetherBridgePieces$Corridor"
-"net.minecraft.world.gen.structure.StructureNetherBridgePieces$Corridor2"
-"net.minecraft.world.gen.structure.StructureNetherBridgePieces$Corridor3"
-"net.minecraft.world.gen.structure.StructureNetherBridgePieces$Corridor4"
-"net.minecraft.world.gen.structure.StructureNetherBridgePieces$Corridor5"
-"net.minecraft.world.gen.structure.StructureNetherBridgePieces$Crossing"
-"net.minecraft.world.gen.structure.StructureNetherBridgePieces$Crossing2"
-"net.minecraft.world.gen.structure.StructureNetherBridgePieces$Crossing3"
-"net.minecraft.world.gen.structure.StructureNetherBridgePieces$End"
-"net.minecraft.world.gen.structure.StructureNetherBridgePieces$Entrance"
-"net.minecraft.world.gen.structure.StructureNetherBridgePieces$NetherStalkRoom"
-"net.minecraft.world.gen.structure.StructureNetherBridgePieces$Piece"
-"net.minecraft.world.gen.structure.StructureNetherBridgePieces$PieceWeight"
-"net.minecraft.world.gen.structure.StructureNetherBridgePieces$Stairs"
-"net.minecraft.world.gen.structure.StructureNetherBridgePieces$Start"
-"net.minecraft.world.gen.structure.StructureNetherBridgePieces$Straight"
-"net.minecraft.world.gen.structure.StructureNetherBridgePieces$Throne"
-"net.minecraft.world.gen.structure.StructureNetherBridgePieces"
-"net.minecraft.world.gen.structure.StructureVillagePieces$1"
-"net.minecraft.world.gen.structure.StructureVillagePieces$Church"
-"net.minecraft.world.gen.structure.StructureVillagePieces$Field1"
-"net.minecraft.world.gen.structure.StructureVillagePieces$Field2"
-"net.minecraft.world.gen.structure.StructureVillagePieces$Hall"
-"net.minecraft.world.gen.structure.StructureVillagePieces$House1"
-"net.minecraft.world.gen.structure.StructureVillagePieces$House2"
-"net.minecraft.world.gen.structure.StructureVillagePieces$House3"
-"net.minecraft.world.gen.structure.StructureVillagePieces$House4Garden"
-"net.minecraft.world.gen.structure.StructureVillagePieces$Path"
-"net.minecraft.world.gen.structure.StructureVillagePieces$PieceWeight"
-"net.minecraft.world.gen.structure.StructureVillagePieces$Road"
-"net.minecraft.world.gen.structure.StructureVillagePieces$Start"
-"net.minecraft.world.gen.structure.StructureVillagePieces$Torch"
-"net.minecraft.world.gen.structure.StructureVillagePieces$Village"
-"net.minecraft.world.gen.structure.StructureVillagePieces$Well"
-"net.minecraft.world.gen.structure.StructureVillagePieces$WoodHut"
-"net.minecraft.world.gen.structure.StructureVillagePieces"
-"net.minecraft.world.gen.structure.template.Template$1"
-"net.minecraft.world.gen.structure.template.Template$2"
-"net.minecraft.world.gen.structure.template.Template$3"
-"net.minecraft.world.gen.structure.template.Template$BasicPalette"
-"net.minecraft.world.gen.structure.template.Template$BlockInfo"
-"net.minecraft.world.gen.structure.template.Template$EntityInfo"
-"net.minecraft.world.gen.structure.template.Template"
-"net.minecraft.world.IBlockAccess"
-"net.minecraft.world.ServerWorldEventHandler"
-"net.minecraft.world.SpawnPos"
-"net.minecraft.world.storage.MapStorage$1"
-"net.minecraft.world.storage.MapStorage$SaveTask"
-"net.minecraft.world.storage.MapStorage"
-"net.minecraft.world.storage.WorldSavedData"
-"net.minecraft.world.World$1"
-"net.minecraft.world.World$2"
-"net.minecraft.world.World$3"
-"net.minecraft.world.World$4"
-"net.minecraft.world.World"
-"net.minecraft.world.WorldEntitySpawner"
-"net.minecraft.world.WorldProvider$WorldSleepResult"
-"net.minecraft.world.WorldProvider"
-"net.minecraft.world.WorldProviderHell$1"
-"net.minecraft.world.WorldProviderHell"
-"net.minecraft.world.WorldServer$1"
-"net.minecraft.world.WorldServer$ServerBlockEventList"
-"net.minecraft.world.WorldServer"
-"net.minecraftforge.common.chunkio.ChunkIOExecutor", (true)
-"net.minecraftforge.common.DimensionManager$1", (true)
-"net.minecraftforge.common.DimensionManager$Dimension", (true)
-"net.minecraftforge.common.DimensionManager", (true)
-"net.minecraftforge.common.ForgeChunkManager$ChunkEntry", (true)
-"net.minecraftforge.common.ForgeChunkManager$ForceChunkEvent", (true)
-"net.minecraftforge.common.ForgeChunkManager$LoadingCallback", (true)
-"net.minecraftforge.common.ForgeChunkManager$OrderedLoadingCallback", (true)
-"net.minecraftforge.common.ForgeChunkManager$PlayerOrderedLoadingCallback", (true)
-"net.minecraftforge.common.ForgeChunkManager$Ticket", (true)
-"net.minecraftforge.common.ForgeChunkManager$Type", (true)
-"net.minecraftforge.common.ForgeChunkManager$UnforceChunkEvent", (true)
-"net.minecraftforge.common.ForgeChunkManager", (true)
-"net.minecraftforge.common.ForgeHooks$1", (true)
-"net.minecraftforge.common.ForgeHooks$2", (true)
-"net.minecraftforge.common.ForgeHooks$LootTableContext", (true)
-"net.minecraftforge.common.ForgeHooks$SeedEntry", (true)
-"net.minecraftforge.common.ForgeHooks", (true)
-"net.minecraftforge.event.entity.EntityEvent$CanUpdate", (true)
-"net.minecraftforge.event.entity.EntityEvent$EnteringChunk", (true)
-"net.minecraftforge.event.entity.EntityEvent$EntityConstructing", (true)
-"net.minecraftforge.event.entity.EntityEvent", (true)
-"net.minecraftforge.event.entity.living.LivingAttackEvent", (true)
-"net.minecraftforge.event.entity.living.LivingDamageEvent", (true)
-"net.minecraftforge.event.entity.living.LivingEvent$LivingJumpEvent", (true)
-"net.minecraftforge.event.entity.living.LivingEvent$LivingUpdateEvent", (true)
-"net.minecraftforge.event.entity.living.LivingEvent", (true)
-"net.minecraftforge.event.entity.living.LivingHurtEvent", (true)
-"net.minecraftforge.event.entity.living.LivingPackSizeEvent$EventProxy", (true)
-"net.minecraftforge.event.entity.living.LivingPackSizeEvent", (true)
-"net.minecraftforge.event.entity.living.LivingSpawnEvent$AllowDespawn", (true)
-"net.minecraftforge.event.entity.living.LivingSpawnEvent$CheckSpawn", (true)
-"net.minecraftforge.event.entity.living.LivingSpawnEvent$SpecialSpawn", (true)
-"net.minecraftforge.event.entity.living.LivingSpawnEvent", (true)
-"net.minecraftforge.event.entity.player.PlayerEvent$BreakSpeed", (true)
-"net.minecraftforge.event.entity.player.PlayerEvent$Clone", (true)
-"net.minecraftforge.event.entity.player.PlayerEvent$HarvestCheck", (true)
-"net.minecraftforge.event.entity.player.PlayerEvent$LoadFromFile", (true)
-"net.minecraftforge.event.entity.player.PlayerEvent$NameFormat", (true)
-"net.minecraftforge.event.entity.player.PlayerEvent$SaveToFile", (true)
-"net.minecraftforge.event.entity.player.PlayerEvent$StartTracking", (true)
-"net.minecraftforge.event.entity.player.PlayerEvent$StopTracking", (true)
-"net.minecraftforge.event.entity.player.PlayerEvent$Visibility", (true)
-"net.minecraftforge.event.entity.player.PlayerEvent", (true)
-"net.minecraftforge.event.world.BlockEvent$BreakEvent", (true)
-"net.minecraftforge.event.world.BlockEvent$CreateFluidSourceEvent", (true)
-"net.minecraftforge.event.world.BlockEvent$CropGrowEvent$Post", (true)
-"net.minecraftforge.event.world.BlockEvent$CropGrowEvent$Pre", (true)
-"net.minecraftforge.event.world.BlockEvent$CropGrowEvent", (true)
-"net.minecraftforge.event.world.BlockEvent$EntityMultiPlaceEvent", (true)
-"net.minecraftforge.event.world.BlockEvent$EntityPlaceEvent", (true)
-"net.minecraftforge.event.world.BlockEvent$FarmlandTrampleEvent", (true)
-"net.minecraftforge.event.world.BlockEvent$FluidPlaceBlockEvent", (true)
-"net.minecraftforge.event.world.BlockEvent$HarvestDropsEvent", (true)
-"net.minecraftforge.event.world.BlockEvent$MultiPlaceEvent", (true)
-"net.minecraftforge.event.world.BlockEvent$NeighborNotifyEvent", (true)
-"net.minecraftforge.event.world.BlockEvent$PlaceEvent", (true)
-"net.minecraftforge.event.world.BlockEvent$PortalSpawnEvent", (true)
-"net.minecraftforge.event.world.BlockEvent", (true)
-"net.minecraftforge.event.world.ChunkWatchEvent$UnWatch", (true)
-"net.minecraftforge.event.world.ChunkWatchEvent$Watch", (true)
-"net.minecraftforge.event.world.ChunkWatchEvent", (true)
-"net.minecraftforge.event.world.GetCollisionBoxesEvent", (true)
-"net.minecraftforge.fml.common.eventhandler.EventBus", (true)
-"net.minecraftforge.fml.common.registry.EntityEntry", (true)
+net.minecraft.advancements.AdvancementProgress$Serializer
+net.minecraft.advancements.AdvancementProgress
+net.minecraft.advancements.CriterionProgress
+net.minecraft.advancements.PlayerAdvancements$1
+net.minecraft.advancements.PlayerAdvancements
+net.minecraft.block.Block$1
+net.minecraft.block.Block$EnumOffsetType
+net.minecraft.block.Block
+net.minecraft.block.BlockBarrier
+net.minecraft.block.BlockBeacon
+net.minecraft.block.BlockBone
+net.minecraft.block.BlockBookshelf
+net.minecraft.block.BlockBreakableFs
+net.minecraft.block.BlockBush
+net.minecraft.block.BlockCarpet
+net.minecraft.block.BlockClay
+net.minecraft.block.BlockColoredFs
+net.minecraft.block.BlockCompressedPowered
+net.minecraft.block.BlockConcretePowder
+net.minecraft.block.BlockCrops
+net.minecraft.block.BlockDaylightDetector
+net.minecraft.block.BlockDirt$DirtType
+net.minecraft.block.BlockDirt
+net.minecraft.block.BlockDynamicLiquid
+net.minecraft.block.BlockEmptyDropsFs
+net.minecraft.block.BlockEndPortal
+net.minecraft.block.BlockEndPortalFrame
+net.minecraft.block.BlockFallingFs
+net.minecraft.block.BlockFarmland$1
+net.minecraft.block.BlockFarmland
+net.minecraft.block.BlockFence$1
+net.minecraft.block.BlockFence
+net.minecraft.block.BlockFenceGate
+net.minecraft.block.BlockFire
+net.minecraft.block.BlockFlowerPot$1
+net.minecraft.block.BlockFlowerPot$EnumFlowerType
+net.minecraft.block.BlockFlowerPot
+net.minecraft.block.BlockFrostedIce
+net.minecraft.block.BlockGlass
+net.minecraft.block.BlockGlazedTerracotta
+net.minecraft.block.BlockGlowstone
+net.minecraft.block.BlockGrass
+net.minecraft.block.BlockGrassPath$1
+net.minecraft.block.BlockGrassPath
+net.minecraft.block.BlockGravel
+net.minecraft.block.BlockHardenedClay
+net.minecraft.block.BlockHay
+net.minecraft.block.BlockHugeMushroom$1
+net.minecraft.block.BlockHugeMushroom$EnumType
+net.minecraft.block.BlockHugeMushroom
+net.minecraft.block.BlockIce
+net.minecraft.block.BlockLadder$1
+net.minecraft.block.BlockLadder
+net.minecraft.block.BlockLeaves
+net.minecraft.block.BlockLiquid
+net.minecraft.block.BlockLog$1
+net.minecraft.block.BlockLog$EnumAxis
+net.minecraft.block.BlockLog
+net.minecraft.block.BlockMagma
+net.minecraft.block.BlockMelon
+net.minecraft.block.BlockMushroom
+net.minecraft.block.BlockMycelium
+net.minecraft.block.BlockNetherBrick
+net.minecraft.block.BlockNetherrack
+net.minecraft.block.BlockObsidian
+net.minecraft.block.BlockOre
+net.minecraft.block.BlockPackedIce
+net.minecraft.block.BlockPane$1
+net.minecraft.block.BlockPane
+net.minecraft.block.BlockPistonBase$1
+net.minecraft.block.BlockPistonBase
+net.minecraft.block.BlockPlanks$EnumType
+net.minecraft.block.BlockPlanks
+net.minecraft.block.BlockPrismarine$EnumType
+net.minecraft.block.BlockPrismarine
+net.minecraft.block.BlockQuartz$1
+net.minecraft.block.BlockQuartz$EnumType
+net.minecraft.block.BlockQuartz
+net.minecraft.block.BlockRailBase$1
+net.minecraft.block.BlockRailBase$EnumRailDirection
+net.minecraft.block.BlockRailBase$Rail
+net.minecraft.block.BlockRailBase
+net.minecraft.block.BlockRedSandstone$EnumType
+net.minecraft.block.BlockRedSandstone
+net.minecraft.block.BlockRedstoneDiode
+net.minecraft.block.BlockRedstoneLight
+net.minecraft.block.BlockRedstoneOre
+net.minecraft.block.BlockRedstoneWire$1
+net.minecraft.block.BlockRedstoneWire$EnumAttachPosition
+net.minecraft.block.BlockRedstoneWire
+net.minecraft.block.BlockRotatedPillarFs
+net.minecraft.block.BlockSand$EnumType
+net.minecraft.block.BlockSand
+net.minecraft.block.BlockSandStone$EnumType
+net.minecraft.block.BlockSandStone
+net.minecraft.block.BlockSeaLantern
+net.minecraft.block.BlockSilverfish$1
+net.minecraft.block.BlockSilverfish$EnumType$1
+net.minecraft.block.BlockSilverfish$EnumType$2
+net.minecraft.block.BlockSilverfish$EnumType$3
+net.minecraft.block.BlockSilverfish$EnumType$4
+net.minecraft.block.BlockSilverfish$EnumType$5
+net.minecraft.block.BlockSilverfish$EnumType$6
+net.minecraft.block.BlockSilverfish$EnumType
+net.minecraft.block.BlockSilverfish
+net.minecraft.block.BlockSlab$EnumBlockHalf
+net.minecraft.block.BlockSlab
+net.minecraft.block.BlockSlime
+net.minecraft.block.BlockSnow
+net.minecraft.block.BlockSnowBlock
+net.minecraft.block.BlockSoulSand
+net.minecraft.block.BlockSponge$BlockPosIndex
+net.minecraft.block.BlockSponge
+net.minecraft.block.BlockStainedGlass
+net.minecraft.block.BlockStainedHardenedClay
+net.minecraft.block.BlockStairs$1
+net.minecraft.block.BlockStairs$EnumHalf
+net.minecraft.block.BlockStairs$EnumShape
+net.minecraft.block.BlockStairs
+net.minecraft.block.BlockStaticLiquid
+net.minecraft.block.BlockStone$EnumType
+net.minecraft.block.BlockStone
+net.minecraft.block.BlockStoneBrick$EnumType
+net.minecraft.block.BlockStoneBrick
+net.minecraft.block.BlockTNT
+net.minecraft.block.BlockTrapDoor$1
+net.minecraft.block.BlockTrapDoor$DoorHalf
+net.minecraft.block.BlockTrapDoor
+net.minecraft.block.BlockTripWire$1
+net.minecraft.block.BlockTripWire
+net.minecraft.block.BlockWall$EnumType
+net.minecraft.block.BlockWall
+net.minecraft.block.BlockWorkbench$InterfaceCraftingTable
+net.minecraft.block.BlockWorkbench
+net.minecraft.block.material.Material$1
+net.minecraft.block.material.Material
+net.minecraft.block.properties.PropertyBool
+net.minecraft.block.properties.PropertyEnum
+net.minecraft.block.properties.PropertyHelper
+net.minecraft.block.properties.PropertyInteger
+net.minecraft.block.state.BlockPistonStructureHelper
+net.minecraft.block.state.BlockStateBase$1
+net.minecraft.block.state.BlockStateBase
+net.minecraft.block.state.BlockStateContainer$1
+net.minecraft.block.state.BlockStateContainer$Builder
+net.minecraft.block.state.BlockStateContainer$StateImplementation
+net.minecraft.block.state.BlockStateContainer
+net.minecraft.block.state.IBlockProperties
+net.minecraft.block.state.IBlockState
+net.minecraft.client.multiplayer.WorldClient$1
+net.minecraft.client.multiplayer.WorldClient$2
+net.minecraft.client.multiplayer.WorldClient$3
+net.minecraft.client.multiplayer.WorldClient$4
+net.minecraft.client.multiplayer.WorldClient$5
+net.minecraft.client.multiplayer.WorldClient
+net.minecraft.command.CommandResultStats$1, false, false
+net.minecraft.command.CommandResultStats$Type, false, false
+net.minecraft.command.CommandResultStats, false, false
+net.minecraft.enchantment.EnchantmentFrostWalker
+net.minecraft.enchantment.EnchantmentHelper
+net.minecraft.entity.ai.attributes.AbstractAttributeMap
+net.minecraft.entity.ai.attributes.AttributeMap
+net.minecraft.entity.ai.attributes.ModifiableAttributeInstance
+net.minecraft.entity.ai.EntityAIAvoidEntity$1
+net.minecraft.entity.ai.EntityAIAvoidEntity$AvoidSelector
+net.minecraft.entity.ai.EntityAIAvoidEntity
+net.minecraft.entity.ai.EntityAIEatGrass
+net.minecraft.entity.ai.EntityAIMoveToBlock
+net.minecraft.entity.ai.EntityAINearestAttackableTarget$1
+net.minecraft.entity.ai.EntityAINearestAttackableTarget$Player2Double
+net.minecraft.entity.ai.EntityAINearestAttackableTarget$Sorter
+net.minecraft.entity.ai.EntityAINearestAttackableTarget
+net.minecraft.entity.ai.EntityAIPanic
+net.minecraft.entity.ai.EntityAITasks
+net.minecraft.entity.ai.EntitySenses
+net.minecraft.entity.Entity$1
+net.minecraft.entity.Entity$2
+net.minecraft.entity.Entity$3
+net.minecraft.entity.Entity$4
+net.minecraft.entity.Entity$5
+net.minecraft.entity.Entity$6
+net.minecraft.entity.Entity
+net.minecraft.entity.EntityLiving$1
+net.minecraft.entity.EntityLiving$SpawnPlacementType
+net.minecraft.entity.EntityLiving
+net.minecraft.entity.EntityLivingBase$1
+net.minecraft.entity.EntityLivingBase
+net.minecraft.entity.EntityTracker
+net.minecraft.entity.EntityTrackerEntry
+net.minecraft.entity.item.EntityBoat$1
+net.minecraft.entity.item.EntityBoat$Status
+net.minecraft.entity.item.EntityBoat$Type
+net.minecraft.entity.item.EntityBoat
+net.minecraft.entity.item.EntityFallingBlock
+net.minecraft.entity.item.EntityItem
+net.minecraft.entity.item.EntityMinecart$1
+net.minecraft.entity.item.EntityMinecart$Type
+net.minecraft.entity.item.EntityMinecart
+net.minecraft.entity.monster.AbstractSkeleton$1
+net.minecraft.entity.monster.AbstractSkeleton
+net.minecraft.entity.monster.EntityBlaze$AIFireballAttack
+net.minecraft.entity.monster.EntityBlaze
+net.minecraft.entity.monster.EntityCreeper
+net.minecraft.entity.monster.EntityEnderman$1
+net.minecraft.entity.monster.EntityEnderman$AIFindPlayer
+net.minecraft.entity.monster.EntityEnderman$AIPlaceBlock
+net.minecraft.entity.monster.EntityEnderman$AITakeBlock
+net.minecraft.entity.monster.EntityEnderman
+net.minecraft.entity.monster.EntityGuardian$AIGuardianAttack
+net.minecraft.entity.monster.EntityGuardian$GuardianMoveHelper
+net.minecraft.entity.monster.EntityGuardian$GuardianTargetSelector
+net.minecraft.entity.monster.EntityGuardian
+net.minecraft.entity.monster.EntityMob
+net.minecraft.entity.monster.EntitySpider$AISpiderAttack
+net.minecraft.entity.monster.EntitySpider$AISpiderTarget
+net.minecraft.entity.monster.EntitySpider$GroupData
+net.minecraft.entity.monster.EntitySpider
+net.minecraft.entity.monster.EntityWitch
+net.minecraft.entity.monster.EntityZombie$1
+net.minecraft.entity.monster.EntityZombie$GroupData
+net.minecraft.entity.monster.EntityZombie
+net.minecraft.entity.passive.EntityAmbientCreature
+net.minecraft.entity.passive.EntityAnimal
+net.minecraft.entity.passive.EntityBat
+net.minecraft.entity.passive.EntityRabbit$AIAvoidEntity
+net.minecraft.entity.passive.EntityRabbit$AIEvilAttack
+net.minecraft.entity.passive.EntityRabbit$AIPanic
+net.minecraft.entity.passive.EntityRabbit$AIRaidFarm
+net.minecraft.entity.passive.EntityRabbit$RabbitJumpHelper
+net.minecraft.entity.passive.EntityRabbit$RabbitMoveHelper
+net.minecraft.entity.passive.EntityRabbit$RabbitTypeData
+net.minecraft.entity.passive.EntityRabbit
+net.minecraft.entity.passive.EntitySheep$1
+net.minecraft.entity.passive.EntitySheep
+net.minecraft.entity.passive.EntitySquid$AIMoveRandom
+net.minecraft.entity.passive.EntitySquid
+net.minecraft.entity.passive.EntityVillager$1
+net.minecraft.entity.passive.EntityVillager$EmeraldForItems
+net.minecraft.entity.passive.EntityVillager$ItemAndEmeraldToItem
+net.minecraft.entity.passive.EntityVillager$ITradeList
+net.minecraft.entity.passive.EntityVillager$ListEnchantedBookForEmeralds
+net.minecraft.entity.passive.EntityVillager$ListEnchantedItemForEmeralds
+net.minecraft.entity.passive.EntityVillager$ListItemForEmeralds
+net.minecraft.entity.passive.EntityVillager$PriceInfo
+net.minecraft.entity.passive.EntityVillager$TreasureMapForEmeralds
+net.minecraft.entity.passive.EntityVillager
+net.minecraft.entity.passive.EntityWaterMob
+net.minecraft.entity.player.EntityPlayer$1
+net.minecraft.entity.player.EntityPlayer$EnumChatVisibility
+net.minecraft.entity.player.EntityPlayer$SleepEnemyPredicate
+net.minecraft.entity.player.EntityPlayer$SleepResult
+net.minecraft.entity.player.EntityPlayer
+net.minecraft.entity.player.EntityPlayerMP
+net.minecraft.entity.player.InventoryPlayer
+net.minecraft.entity.projectile.EntityArrow$PickupStatus
+net.minecraft.entity.projectile.EntityArrow
+net.minecraft.entity.projectile.EntityThrowable
+net.minecraft.inventory.Container
+net.minecraft.inventory.EntityEquipmentSlot$Type
+net.minecraft.inventory.EntityEquipmentSlot
+net.minecraft.inventory.InventoryCrafting
+net.minecraft.inventory.InventoryCraftResult
+net.minecraft.inventory.Slot
+net.minecraft.item.crafting.CraftingManager
+net.minecraft.item.Item$1
+net.minecraft.item.Item$10
+net.minecraft.item.Item$11
+net.minecraft.item.Item$12
+net.minecraft.item.Item$13
+net.minecraft.item.Item$14
+net.minecraft.item.Item$15
+net.minecraft.item.Item$16
+net.minecraft.item.Item$17
+net.minecraft.item.Item$18
+net.minecraft.item.Item$19
+net.minecraft.item.Item$2
+net.minecraft.item.Item$20
+net.minecraft.item.Item$21
+net.minecraft.item.Item$22
+net.minecraft.item.Item$3
+net.minecraft.item.Item$4
+net.minecraft.item.Item$5
+net.minecraft.item.Item$6
+net.minecraft.item.Item$7
+net.minecraft.item.Item$8
+net.minecraft.item.Item$9
+net.minecraft.item.Item$ToolMaterial
+net.minecraft.item.Item
+net.minecraft.item.ItemStack
+net.minecraft.item.ItemWrittenBook
+net.minecraft.nbt.NBTTagByte, false, false
+net.minecraft.nbt.NBTTagCompound, false, false
+net.minecraft.nbt.NBTTagDouble, false, false
+net.minecraft.nbt.NBTTagEnd, false, false
+net.minecraft.nbt.NBTTagFloat, false, false
+net.minecraft.nbt.NBTTagInt, false, false
+net.minecraft.nbt.NBTTagList, false, false
+net.minecraft.nbt.NBTTagLong, false, false
+net.minecraft.nbt.NBTTagShort, false, false
+net.minecraft.nbt.NBTTagString, false, false
+net.minecraft.network.datasync.EntityDataManager$DataEntry
+net.minecraft.network.datasync.EntityDataManager
+net.minecraft.network.EnumConnectionState$1
+net.minecraft.network.EnumConnectionState$2
+net.minecraft.network.EnumConnectionState$3
+net.minecraft.network.EnumConnectionState$4
+net.minecraft.network.EnumConnectionState
+net.minecraft.network.EnumPacketDirection
+net.minecraft.network.NetHandlerPlayServer$1
+net.minecraft.network.NetHandlerPlayServer$2
+net.minecraft.network.NetHandlerPlayServer
+net.minecraft.network.NetworkManager$1
+net.minecraft.network.NetworkManager$2
+net.minecraft.network.NetworkManager$3
+net.minecraft.network.NetworkManager$4
+net.minecraft.network.NetworkManager$5
+net.minecraft.network.NetworkManager$InboundHandlerTuplePacketListener
+net.minecraft.network.NetworkManager
+net.minecraft.network.NetworkSystem$1
+net.minecraft.network.NetworkSystem$2
+net.minecraft.network.NetworkSystem$3
+net.minecraft.network.NetworkSystem$4
+net.minecraft.network.NetworkSystem$5
+net.minecraft.network.NetworkSystem
+net.minecraft.network.play.client.CPacketClientSettings
+net.minecraft.network.play.client.CPacketCustomPayload
+net.minecraft.network.play.server.SPacketBlockChange
+net.minecraft.network.play.server.SPacketChunkData
+net.minecraft.network.rcon.RConThreadMain
+net.minecraft.pathfinding.FlyingNodeProcessor, false, false
+net.minecraft.pathfinding.NodeProcessor, false, false
+net.minecraft.pathfinding.PathFinder, false, false
+net.minecraft.pathfinding.PathHeap, false, false
+net.minecraft.pathfinding.PathNavigate, false, false
+net.minecraft.pathfinding.PathNavigateGround, false, false
+net.minecraft.pathfinding.PathNodeType$Set, false, false
+net.minecraft.pathfinding.PathNodeType, false, false
+net.minecraft.pathfinding.PathPoint, false, false
+net.minecraft.pathfinding.PathWorldListener, false, false
+net.minecraft.pathfinding.SwimNodeProcessor, false, false
+net.minecraft.pathfinding.WalkNodeProcessor, false, false
+net.minecraft.scoreboard.Scoreboard, false, false
+net.minecraft.scoreboard.ScoreboardSaveData, false, false
+net.minecraft.server.dedicated.DedicatedServer$1
+net.minecraft.server.dedicated.DedicatedServer
+net.minecraft.server.integrated.IntegratedServer
+net.minecraft.server.management.PlayerChunkMap
+net.minecraft.server.management.PlayerChunkMapEntry
+net.minecraft.server.management.PlayerList$1
+net.minecraft.server.management.PlayerList
+net.minecraft.server.MinecraftServer$1
+net.minecraft.server.MinecraftServer$2
+net.minecraft.server.MinecraftServer
+net.minecraft.server.network.NetHandlerLoginServer$ConnectEvent
+net.minecraft.server.network.NetHandlerLoginServer$LoginState
+net.minecraft.server.network.NetHandlerLoginServer
+net.minecraft.server.ServerEula
+net.minecraft.tileentity.TileEntityBeacon$BeamSegment
+net.minecraft.tileentity.TileEntityBeacon
+net.minecraft.tileentity.TileEntityFurnace
+net.minecraft.tileentity.TileEntityHopper
+net.minecraft.util.BitArray, false, false
+net.minecraft.util.BlockIDIndexes, false, false
+net.minecraft.util.ByClass, false, false
+net.minecraft.util.ChatAllowedCharacters, false, false
+net.minecraft.util.ClassInheritanceMultiMap$FastIter, false, false
+net.minecraft.util.ClassInheritanceMultiMap, false, false
+net.minecraft.util.CooldownTrackerServer, false, false
+net.minecraft.util.EntitySelectors$1, false, false
+net.minecraft.util.EntitySelectors$ArmoredMob, false, false
+net.minecraft.util.EntitySelectors, false, false
+net.minecraft.util.EnumFacing$1, false, false
+net.minecraft.util.EnumFacing$Axis, false, false
+net.minecraft.util.EnumFacing$AxisDirection, false, false
+net.minecraft.util.EnumFacing$Plane, false, false
+net.minecraft.util.EnumFacing, false, false
+net.minecraft.util.math.AxisAlignedBB, false, false
+net.minecraft.util.math.BlockPos$1, false, false
+net.minecraft.util.math.BlockPos$2, false, false
+net.minecraft.util.math.BlockPos$3, false, false
+net.minecraft.util.math.BlockPos$MutableBlockPos, false, false
+net.minecraft.util.math.BlockPos$PooledMutableBlockPos$1, false, false
+net.minecraft.util.math.BlockPos$PooledMutableBlockPos, false, false
+net.minecraft.util.math.BlockPos, false, false
+net.minecraft.util.math.Vec3i, false, false
+net.minecraft.village.VillageCollection
+net.minecraft.world.biome.Biome$1
+net.minecraft.world.biome.Biome$BiomeProperties
+net.minecraft.world.biome.Biome$FlowerEntry
+net.minecraft.world.biome.Biome$SpawnListEntry
+net.minecraft.world.biome.Biome$TempCategory
+net.minecraft.world.biome.Biome
+net.minecraft.world.biome.BiomeDecorator
+net.minecraft.world.biome.BiomeProvider
+net.minecraft.world.biome.BiomeProviderSingle
+net.minecraft.world.biome.BiomeSwamp
+net.minecraft.world.border.WorldBorder
+net.minecraft.world.chunk.BlockStateContainer
+net.minecraft.world.chunk.BlockStatePaletteHashMap
+net.minecraft.world.chunk.BlockStatePaletteLinear
+net.minecraft.world.chunk.BlockStatePaletteRegistry
+net.minecraft.world.chunk.Chunk$EnumCreateEntityType
+net.minecraft.world.chunk.Chunk
+net.minecraft.world.chunk.ChunkPrimer
+net.minecraft.world.chunk.IBlockStatePalette
+net.minecraft.world.chunk.storage.AnvilChunkLoader$1
+net.minecraft.world.chunk.storage.AnvilChunkLoader
+net.minecraft.world.chunk.storage.ChunkBuffer
+net.minecraft.world.chunk.storage.ExtendedBlockStorage
+net.minecraft.world.chunk.storage.IChunkLoader
+net.minecraft.world.DimensionType
+net.minecraft.world.Explosion
+net.minecraft.world.GameRules$Value
+net.minecraft.world.GameRules$ValueType
+net.minecraft.world.GameRules
+net.minecraft.world.gen.ChunkGeneratorHell$GenSession
+net.minecraft.world.gen.ChunkGeneratorHell
+net.minecraft.world.gen.ChunkGeneratorOverworld
+net.minecraft.world.gen.ChunkProviderServer
+net.minecraft.world.gen.feature.CWorldGenerator, false, false
+net.minecraft.world.gen.feature.StonePredicateV2, false, false
+net.minecraft.world.gen.feature.WorldGenAbstractTree, false, false
+net.minecraft.world.gen.feature.WorldGenBigMushroom, false, false
+net.minecraft.world.gen.feature.WorldGenBigTree$1, false, false
+net.minecraft.world.gen.feature.WorldGenBigTree$FoliageCoordinates, false, false
+net.minecraft.world.gen.feature.WorldGenBigTree$GenSession, false, false
+net.minecraft.world.gen.feature.WorldGenBigTree, false, false
+net.minecraft.world.gen.feature.WorldGenBirchTree, false, false
+net.minecraft.world.gen.feature.WorldGenBlockBlob, false, false
+net.minecraft.world.gen.feature.WorldGenCactus, false, false
+net.minecraft.world.gen.feature.WorldGenClay, false, false
+net.minecraft.world.gen.feature.WorldGenDeadBush, false, false
+net.minecraft.world.gen.feature.WorldGenDesertWells, false, false
+net.minecraft.world.gen.feature.WorldGenDungeons, false, false
+net.minecraft.world.gen.feature.WorldGenerator, false, false
+net.minecraft.world.gen.feature.WorldGenFire, false, false
+net.minecraft.world.gen.feature.WorldGenFlowers, false, false
+net.minecraft.world.gen.feature.WorldGenGlowStone1, false, false
+net.minecraft.world.gen.feature.WorldGenGlowStone2, false, false
+net.minecraft.world.gen.feature.WorldGenHugeTrees, false, false
+net.minecraft.world.gen.feature.WorldGenIcePath, false, false
+net.minecraft.world.gen.feature.WorldGenIceSpike, false, false
+net.minecraft.world.gen.feature.WorldGenLakes, false, false
+net.minecraft.world.gen.feature.WorldGenLiquids, false, false
+net.minecraft.world.gen.feature.WorldGenMegaJungle, false, false
+net.minecraft.world.gen.feature.WorldGenMegaPineTree, false, false
+net.minecraft.world.gen.feature.WorldGenMinable, false, false
+net.minecraft.world.gen.feature.WorldGenPumpkin, false, false
+net.minecraft.world.gen.feature.WorldGenSand, false, false
+net.minecraft.world.gen.feature.WorldGenSavannaTree, false, false
+net.minecraft.world.gen.feature.WorldGenShrub, false, false
+net.minecraft.world.gen.feature.WorldGenSwamp, false, false
+net.minecraft.world.gen.feature.WorldGenTaiga1, false, false
+net.minecraft.world.gen.feature.WorldGenTaiga2, false, false
+net.minecraft.world.gen.feature.WorldGenTallGrass, false, false
+net.minecraft.world.gen.feature.WorldGenTrees, false, false
+net.minecraft.world.gen.feature.WorldGenVines, false, false
+net.minecraft.world.gen.feature.WorldGenWaterlily, false, false
+net.minecraft.world.gen.IChunkGenerator
+net.minecraft.world.gen.NoiseGeneratorImproved
+net.minecraft.world.gen.NoiseGeneratorOctaves
+net.minecraft.world.gen.structure.MapGenMineshaft$Type
+net.minecraft.world.gen.structure.MapGenMineshaft
+net.minecraft.world.gen.structure.MapGenNetherBridge$Start
+net.minecraft.world.gen.structure.MapGenNetherBridge
+net.minecraft.world.gen.structure.MapGenScatteredFeature$Start
+net.minecraft.world.gen.structure.MapGenScatteredFeature
+net.minecraft.world.gen.structure.MapGenStructure
+net.minecraft.world.gen.structure.StructureBoundingBox$1
+net.minecraft.world.gen.structure.StructureBoundingBox
+net.minecraft.world.gen.structure.StructureComponent$1
+net.minecraft.world.gen.structure.StructureComponent$BlockSelector
+net.minecraft.world.gen.structure.StructureComponent
+net.minecraft.world.gen.structure.StructureMineshaftPieces$1
+net.minecraft.world.gen.structure.StructureMineshaftPieces$Corridor
+net.minecraft.world.gen.structure.StructureMineshaftPieces$Cross
+net.minecraft.world.gen.structure.StructureMineshaftPieces$Peice
+net.minecraft.world.gen.structure.StructureMineshaftPieces$Room
+net.minecraft.world.gen.structure.StructureMineshaftPieces$Stairs
+net.minecraft.world.gen.structure.StructureMineshaftPieces
+net.minecraft.world.gen.structure.StructureNetherBridgePieces$1
+net.minecraft.world.gen.structure.StructureNetherBridgePieces$Corridor
+net.minecraft.world.gen.structure.StructureNetherBridgePieces$Corridor2
+net.minecraft.world.gen.structure.StructureNetherBridgePieces$Corridor3
+net.minecraft.world.gen.structure.StructureNetherBridgePieces$Corridor4
+net.minecraft.world.gen.structure.StructureNetherBridgePieces$Corridor5
+net.minecraft.world.gen.structure.StructureNetherBridgePieces$Crossing
+net.minecraft.world.gen.structure.StructureNetherBridgePieces$Crossing2
+net.minecraft.world.gen.structure.StructureNetherBridgePieces$Crossing3
+net.minecraft.world.gen.structure.StructureNetherBridgePieces$End
+net.minecraft.world.gen.structure.StructureNetherBridgePieces$Entrance
+net.minecraft.world.gen.structure.StructureNetherBridgePieces$NetherStalkRoom
+net.minecraft.world.gen.structure.StructureNetherBridgePieces$Piece
+net.minecraft.world.gen.structure.StructureNetherBridgePieces$PieceWeight
+net.minecraft.world.gen.structure.StructureNetherBridgePieces$Stairs
+net.minecraft.world.gen.structure.StructureNetherBridgePieces$Start
+net.minecraft.world.gen.structure.StructureNetherBridgePieces$Straight
+net.minecraft.world.gen.structure.StructureNetherBridgePieces$Throne
+net.minecraft.world.gen.structure.StructureNetherBridgePieces
+net.minecraft.world.gen.structure.StructureVillagePieces$1
+net.minecraft.world.gen.structure.StructureVillagePieces$Church
+net.minecraft.world.gen.structure.StructureVillagePieces$Field1
+net.minecraft.world.gen.structure.StructureVillagePieces$Field2
+net.minecraft.world.gen.structure.StructureVillagePieces$Hall
+net.minecraft.world.gen.structure.StructureVillagePieces$House1
+net.minecraft.world.gen.structure.StructureVillagePieces$House2
+net.minecraft.world.gen.structure.StructureVillagePieces$House3
+net.minecraft.world.gen.structure.StructureVillagePieces$House4Garden
+net.minecraft.world.gen.structure.StructureVillagePieces$Path
+net.minecraft.world.gen.structure.StructureVillagePieces$PieceWeight
+net.minecraft.world.gen.structure.StructureVillagePieces$Road
+net.minecraft.world.gen.structure.StructureVillagePieces$Start
+net.minecraft.world.gen.structure.StructureVillagePieces$Torch
+net.minecraft.world.gen.structure.StructureVillagePieces$Village
+net.minecraft.world.gen.structure.StructureVillagePieces$Well
+net.minecraft.world.gen.structure.StructureVillagePieces$WoodHut
+net.minecraft.world.gen.structure.StructureVillagePieces
+net.minecraft.world.gen.structure.template.Template$1
+net.minecraft.world.gen.structure.template.Template$2
+net.minecraft.world.gen.structure.template.Template$3
+net.minecraft.world.gen.structure.template.Template$BasicPalette
+net.minecraft.world.gen.structure.template.Template$BlockInfo
+net.minecraft.world.gen.structure.template.Template$EntityInfo
+net.minecraft.world.gen.structure.template.Template
+net.minecraft.world.IBlockAccess
+net.minecraft.world.ServerWorldEventHandler
+net.minecraft.world.SpawnPos
+net.minecraft.world.storage.MapStorage$1, false, false
+net.minecraft.world.storage.MapStorage$SaveTask, false, false
+net.minecraft.world.storage.MapStorage, false, false
+net.minecraft.world.storage.WorldSavedData, false, false
+net.minecraft.world.World$1
+net.minecraft.world.World$2
+net.minecraft.world.World$3
+net.minecraft.world.World$4
+net.minecraft.world.World
+net.minecraft.world.WorldEntitySpawner
+net.minecraft.world.WorldProvider$WorldSleepResult
+net.minecraft.world.WorldProvider
+net.minecraft.world.WorldProviderHell$1
+net.minecraft.world.WorldProviderHell
+net.minecraft.world.WorldServer$1
+net.minecraft.world.WorldServer$ServerBlockEventList
+net.minecraft.world.WorldServer
+net.minecraftforge.common.chunkio.ChunkIOExecutor, true
+net.minecraftforge.common.DimensionManager$1, true
+net.minecraftforge.common.DimensionManager$Dimension, true
+net.minecraftforge.common.DimensionManager, true
+net.minecraftforge.common.ForgeChunkManager$ChunkEntry, true
+net.minecraftforge.common.ForgeChunkManager$ForceChunkEvent, true
+net.minecraftforge.common.ForgeChunkManager$LoadingCallback, true
+net.minecraftforge.common.ForgeChunkManager$OrderedLoadingCallback, true
+net.minecraftforge.common.ForgeChunkManager$PlayerOrderedLoadingCallback, true
+net.minecraftforge.common.ForgeChunkManager$Ticket, true
+net.minecraftforge.common.ForgeChunkManager$Type, true
+net.minecraftforge.common.ForgeChunkManager$UnforceChunkEvent, true
+net.minecraftforge.common.ForgeChunkManager, true
+net.minecraftforge.common.ForgeHooks$1, true
+net.minecraftforge.common.ForgeHooks$2, true
+net.minecraftforge.common.ForgeHooks$LootTableContext, true
+net.minecraftforge.common.ForgeHooks$SeedEntry, true
+net.minecraftforge.common.ForgeHooks, true
+net.minecraftforge.event.entity.EntityEvent$CanUpdate, true
+net.minecraftforge.event.entity.EntityEvent$EnteringChunk, true
+net.minecraftforge.event.entity.EntityEvent$EntityConstructing, true
+net.minecraftforge.event.entity.EntityEvent, true
+net.minecraftforge.event.entity.living.LivingAttackEvent, true
+net.minecraftforge.event.entity.living.LivingDamageEvent, true
+net.minecraftforge.event.entity.living.LivingEvent$LivingJumpEvent, true
+net.minecraftforge.event.entity.living.LivingEvent$LivingUpdateEvent, true
+net.minecraftforge.event.entity.living.LivingEvent, true
+net.minecraftforge.event.entity.living.LivingHurtEvent, true
+net.minecraftforge.event.entity.living.LivingPackSizeEvent$EventProxy, true
+net.minecraftforge.event.entity.living.LivingPackSizeEvent, true
+net.minecraftforge.event.entity.living.LivingSpawnEvent$AllowDespawn, true
+net.minecraftforge.event.entity.living.LivingSpawnEvent$CheckSpawn, true
+net.minecraftforge.event.entity.living.LivingSpawnEvent$SpecialSpawn, true
+net.minecraftforge.event.entity.living.LivingSpawnEvent, true
+net.minecraftforge.event.entity.player.PlayerEvent$BreakSpeed, true
+net.minecraftforge.event.entity.player.PlayerEvent$Clone, true
+net.minecraftforge.event.entity.player.PlayerEvent$HarvestCheck, true
+net.minecraftforge.event.entity.player.PlayerEvent$LoadFromFile, true
+net.minecraftforge.event.entity.player.PlayerEvent$NameFormat, true
+net.minecraftforge.event.entity.player.PlayerEvent$SaveToFile, true
+net.minecraftforge.event.entity.player.PlayerEvent$StartTracking, true
+net.minecraftforge.event.entity.player.PlayerEvent$StopTracking, true
+net.minecraftforge.event.entity.player.PlayerEvent$Visibility, true
+net.minecraftforge.event.entity.player.PlayerEvent, true
+net.minecraftforge.event.world.BlockEvent$BreakEvent, true
+net.minecraftforge.event.world.BlockEvent$CreateFluidSourceEvent, true
+net.minecraftforge.event.world.BlockEvent$CropGrowEvent$Post, true
+net.minecraftforge.event.world.BlockEvent$CropGrowEvent$Pre, true
+net.minecraftforge.event.world.BlockEvent$CropGrowEvent, true
+net.minecraftforge.event.world.BlockEvent$EntityMultiPlaceEvent, true
+net.minecraftforge.event.world.BlockEvent$EntityPlaceEvent, true
+net.minecraftforge.event.world.BlockEvent$FarmlandTrampleEvent, true
+net.minecraftforge.event.world.BlockEvent$FluidPlaceBlockEvent, true
+net.minecraftforge.event.world.BlockEvent$HarvestDropsEvent, true
+net.minecraftforge.event.world.BlockEvent$MultiPlaceEvent, true
+net.minecraftforge.event.world.BlockEvent$NeighborNotifyEvent, true
+net.minecraftforge.event.world.BlockEvent$PlaceEvent, true
+net.minecraftforge.event.world.BlockEvent$PortalSpawnEvent, true
+net.minecraftforge.event.world.BlockEvent, true
+net.minecraftforge.event.world.ChunkWatchEvent$UnWatch, true
+net.minecraftforge.event.world.ChunkWatchEvent$Watch, true
+net.minecraftforge.event.world.ChunkWatchEvent, true
+net.minecraftforge.event.world.GetCollisionBoxesEvent, true
+net.minecraftforge.fml.common.eventhandler.EventBus, true
+net.minecraftforge.fml.common.registry.EntityEntry, true
