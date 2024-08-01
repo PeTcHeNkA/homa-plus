@@ -346,6 +346,7 @@ net.minecraft.server.dedicated.DedicatedServer
 net.minecraft.server.integrated.IntegratedServer
 net.minecraft.server.management.PlayerChunkMap
 net.minecraft.server.management.PlayerChunkMapEntry
+net.minecraft.server.management.PlayerInteractionManager
 net.minecraft.server.management.PlayerList$1
 net.minecraft.server.management.PlayerList
 net.minecraft.server.MinecraftServer$1

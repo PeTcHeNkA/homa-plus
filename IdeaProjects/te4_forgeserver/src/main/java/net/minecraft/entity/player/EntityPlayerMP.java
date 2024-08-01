@@ -15,10 +15,7 @@ import net.minecraft.block.BlockWall;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityList;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.IMerchant;
+import net.minecraft.entity.*;
 import net.minecraft.entity.passive.AbstractHorse;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.init.Items;
@@ -41,30 +38,7 @@ import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.client.CPacketClientSettings;
-import net.minecraft.network.play.server.SPacketAnimation;
-import net.minecraft.network.play.server.SPacketCamera;
-import net.minecraft.network.play.server.SPacketChangeGameState;
-import net.minecraft.network.play.server.SPacketChat;
-import net.minecraft.network.play.server.SPacketCloseWindow;
-import net.minecraft.network.play.server.SPacketCombatEvent;
-import net.minecraft.network.play.server.SPacketCustomPayload;
-import net.minecraft.network.play.server.SPacketDestroyEntities;
-import net.minecraft.network.play.server.SPacketEffect;
-import net.minecraft.network.play.server.SPacketEntityEffect;
-import net.minecraft.network.play.server.SPacketEntityStatus;
-import net.minecraft.network.play.server.SPacketOpenWindow;
-import net.minecraft.network.play.server.SPacketPlayerAbilities;
-import net.minecraft.network.play.server.SPacketRemoveEntityEffect;
-import net.minecraft.network.play.server.SPacketResourcePackSend;
-import net.minecraft.network.play.server.SPacketSetExperience;
-import net.minecraft.network.play.server.SPacketSetSlot;
-import net.minecraft.network.play.server.SPacketSignEditorOpen;
-import net.minecraft.network.play.server.SPacketSoundEffect;
-import net.minecraft.network.play.server.SPacketUpdateHealth;
-import net.minecraft.network.play.server.SPacketUpdateTileEntity;
-import net.minecraft.network.play.server.SPacketUseBed;
-import net.minecraft.network.play.server.SPacketWindowItems;
-import net.minecraft.network.play.server.SPacketWindowProperty;
+import net.minecraft.network.play.server.*;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.scoreboard.IScoreCriteria;
 import net.minecraft.scoreboard.Score;
@@ -1315,5 +1289,23 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
     @Nullable
     public Vec3d getEnteredNetherPosition() {
         return this.enteredNetherPosition;
+    }
+
+
+    public void sendBlockBreakProgressToTracking(BlockPos pos, int progress) {
+        if(trackerEntry == null)return;
+        SPacketBlockBreakAnim packet = null;
+        for (EntityPlayerMP player : trackerEntry.trackingPlayers) {
+            if (player != null && player != this) {
+                double d0 = (double)pos.getX() - player.posX;
+                double d1 = (double)pos.getY() - player.posY;
+                double d2 = (double)pos.getZ() - player.posZ;
+
+                if (d0 * d0 + d1 * d1 + d2 * d2 < 1024.0D) {
+                    if(packet == null)packet = new SPacketBlockBreakAnim(getEntityId(), pos, progress);
+                    player.connection.netManager.sendPacketE(packet);
+                }
+            }
+        }
     }
 }

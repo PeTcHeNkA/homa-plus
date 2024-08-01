@@ -88,16 +88,18 @@ public class ServerWorldEventHandler implements IWorldEventListener {
     }
 
 
-    @Override //player.trackerEntry.trackingPlayers
+    @Override //redirected to player.sendBlockBreakProgressToTracking()
     public void sendBlockBreakProgress(int breakerId, BlockPos pos, int progress) {
+        SPacketBlockBreakAnim packet = null;
         for (EntityPlayer player : world.playerEntities) {
-            if (player != null && player.world == this.world && player.getEntityId() != breakerId && player instanceof EntityPlayerMP) {
+            if (player != null && player.getEntityId() != breakerId && player instanceof EntityPlayerMP) {
                 double d0 = (double)pos.getX() - player.posX;
                 double d1 = (double)pos.getY() - player.posY;
                 double d2 = (double)pos.getZ() - player.posZ;
 
                 if (d0 * d0 + d1 * d1 + d2 * d2 < 1024.0D) {
-                    ((EntityPlayerMP) player).connection.netManager.sendPacketE(new SPacketBlockBreakAnim(breakerId, pos, progress));
+                    if(packet == null)packet = new SPacketBlockBreakAnim(breakerId, pos, progress);
+                    ((EntityPlayerMP) player).connection.netManager.sendPacketE(packet);
                 }
             }
         }
