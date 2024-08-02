@@ -11,6 +11,7 @@ import net.minecraft.init.*;
 import net.minecraftforge.fml.relauncher.*;
 import net.minecraft.util.*;
 import net.minecraft.block.state.*;
+import plus.fserver.api.IBlockEAccess;
 import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.collections.ArrayListE6;
 
@@ -25,12 +26,21 @@ public class BlockFire extends Block {
     private final Map<Block, Integer> encouragements;
     private final Map<Block, Integer> flammabilities;
 
-    public IBlockState getActualState(final IBlockState state, final IBlockAccess worldIn, final BlockPos pos) {
-        if (!worldIn.getBlockState(pos.down()).isSideSolid(worldIn, pos.down(), EnumFacing.UP) && !Blocks.FIRE.canCatchFire(worldIn, pos.down(), EnumFacing.UP)) {
-            return state.withProperty(BlockFire.NORTH, this.canCatchFire(worldIn, pos.north(), EnumFacing.SOUTH)).withProperty(BlockFire.EAST, this.canCatchFire(worldIn, pos.east(), EnumFacing.WEST)).withProperty(BlockFire.SOUTH, this.canCatchFire(worldIn, pos.south(), EnumFacing.NORTH)).withProperty(BlockFire.WEST, this.canCatchFire(worldIn, pos.west(), EnumFacing.EAST)).withProperty(BlockFire.UPPER, this.canCatchFire(worldIn, pos.up(), EnumFacing.DOWN));
+
+    @Override
+    public IBlockState getActualState(final IBlockState state, final IBlockAccess access, final BlockPos pos) {
+        BlockPos down = pos.down();
+        if (!access.getBlockState(down).isSideSolid(access, down, EnumFacing.UP) && !Blocks.FIRE.canCatchFire(access, down, EnumFacing.UP)) {
+            return state
+                    .withProperty(BlockFire.NORTH, this.canCatchFire(access, pos.north(), EnumFacing.SOUTH))
+                    .withProperty(BlockFire.EAST , this.canCatchFire(access, pos.east() , EnumFacing.WEST))
+                    .withProperty(BlockFire.SOUTH, this.canCatchFire(access, pos.south(), EnumFacing.NORTH))
+                    .withProperty(BlockFire.WEST , this.canCatchFire(access, pos.west() , EnumFacing.EAST))
+                    .withProperty(BlockFire.UPPER, this.canCatchFire(access, pos.up()   , EnumFacing.DOWN));
         }
         return this.getDefaultState();
     }
+
 
     protected BlockFire() {
         super(Material.FIRE);
@@ -140,7 +150,7 @@ public class BlockFire extends Block {
 
             BlockPos.MutableBlockPos temp = world.localTempPos.setPos(pos.getX(), pos.getY()-1, pos.getZ());
 
-            final Block block = selector.getBlockState(temp).getBlock();
+            final Block block = selector.getState(temp).getBlock();
             final boolean flag = block.isFireSource(world, temp, EnumFacing.UP);
 
             final int sAge = state.getValue(BlockFire.AGE);
@@ -154,18 +164,18 @@ public class BlockFire extends Block {
                 }
                 world.scheduleUpdate(pos, this, this.tickRate(world) + rand.nextInt(10));
                 if (!flag) {
-                    if (!this.canNeighborCatchFire(world, pos)) {
+                    if (!this.canNeighborCatchFire(selector, pos)) {
                         if (!selector.getBlockState(temp).isSideSolid(world, temp, EnumFacing.UP) || sAge > 3) {
                             selector.setBlockState(pos, BlockIDIndexes.AIR_STATE, 3);
                         }
                         return;
                     }
-                    if (!this.canCatchFire(world, temp, EnumFacing.UP) && sAge == 15 && rand.nextInt(4) == 0) {
+                    if (!this.canCatchFire(selector, temp, EnumFacing.UP) && sAge == 15 && rand.nextInt(4) == 0) {
                         selector.setBlockState(pos, BlockIDIndexes.AIR_STATE, 3);
                         return;
                     }
                 }
-                final boolean flag2 = world.isBlockinHighHumidity(pos);
+                final boolean flag2 = selector.getBiome(pos).isHighHumidity();
                 int ch = 0;
                 if (flag2) {
                     ch = -50;
@@ -294,9 +304,9 @@ public class BlockFire extends Block {
     }
 
 
-    private boolean canNeighborCatchFire(final World world, final BlockPos pos) {
+    private boolean canNeighborCatchFire(final IBlockEAccess access, final BlockPos pos) {
         for (final EnumFacing facing : EnumFacing.VALUES) {
-            if (this.canCatchFire(world, pos.offset(facing), facing.getOpposite())) {
+            if (this.canCatchFire(access, pos.offset(facing), facing.getOpposite())) {
                 return true;
             }
         }
@@ -306,18 +316,16 @@ public class BlockFire extends Block {
 
     @Deprecated
     private static int getNeighborEncouragement(final ChunkSelector selector, final World world, final BlockPos pos) {
-        if (!selector.isAirBlock(pos)) {
-            return 0;
-        }
+        if (!selector.isAirBlock(pos)) return 0;
         int i = 0;
+        final BlockPos.MutableBlockPos temp = world.localTempPos2;
         for (final EnumFacing facing : EnumFacing.VALUES) {
-            BlockPos.MutableBlockPos temp = world.localTempPos2.setPos(
+            temp.setPosB(
                     facing.getXOffset() + pos.getX(),
                     facing.getYOffset() + pos.getY(),
                     facing.getZOffset() + pos.getZ()
             );
-
-            i = Math.max(selector.getBlockState(temp).getBlock().getFireSpreadSpeed(selector, temp, facing.getOpposite()), i);
+            i = Math.max(selector.getState(temp).getBlock().getFireSpreadSpeed(selector, temp, facing.getOpposite()), i);
         }
         return i;
     }
@@ -330,21 +338,22 @@ public class BlockFire extends Block {
 
 
     @Deprecated
-    public boolean canCatchFire(final IBlockAccess worldIn, final BlockPos pos) {
-        return this.canCatchFire(worldIn, pos, EnumFacing.UP);
+    public boolean canCatchFire(final IBlockAccess access, final BlockPos pos) {
+        return this.canCatchFire(access, pos, EnumFacing.UP);
     }
 
 
     @Override
-    public boolean canPlaceBlockAt(final World worldIn, final BlockPos pos) {
-        return worldIn.getBlockState(pos.down()).isTopSolid() || this.canNeighborCatchFire(worldIn, pos);
+    public boolean canPlaceBlockAt(final World world, final BlockPos pos) {
+        return world.access().getBlockState(pos.getX(), pos.getY()-1, pos.getZ()).isTopSolid() || this.canNeighborCatchFire(world.access(), pos);
     }
 
 
     @Override
     public void neighborChanged(final IBlockState state, final World world, final BlockPos pos, final Block blockIn, final BlockPos fromPos) {
-        if (!world.getBlockState(pos.down()).isTopSolid() && !this.canNeighborCatchFire(world, pos)) {
-            world.setBlockToAir(pos);
+        final IBlockEAccess access = world.access();
+        if (!world.getBlockState(pos.getX(), pos.getY()-1, pos.getZ()).isTopSolid() && !this.canNeighborCatchFire(access, pos)) {
+            access.setBlockState(pos, BlockIDIndexes.AIR_STATE, 3);
         }
     }
 
@@ -352,8 +361,9 @@ public class BlockFire extends Block {
     @Override
     public void onBlockAdded(final World world, final BlockPos pos, final IBlockState state) {
         if (world.provider.getDimensionType().getId() > 0 || !Blocks.PORTAL.trySpawnPortal(world, pos)) {
-            if (!world.getBlockState(pos.down()).isTopSolid() && !this.canNeighborCatchFire(world, pos)) {
-                world.setBlockToAir(pos);
+            final IBlockEAccess access = world.access();
+            if (!access.getBlockState(pos.getX(), pos.getY()-1, pos.getZ()).isTopSolid() && !this.canNeighborCatchFire(access, pos)) {
+                access.setBlockState(pos, BlockIDIndexes.AIR_STATE, 3);
             }
             else {
                 world.scheduleUpdate(pos, this, this.tickRate(world) + world.rand.nextInt(10));
@@ -369,49 +379,49 @@ public class BlockFire extends Block {
 
 
     @SideOnly(Side.CLIENT)
-    public void randomDisplayTick(final IBlockState stateIn, final World worldIn, final BlockPos pos, final Random rand) {
+    public void randomDisplayTick(final IBlockState stateIn, final World world, final BlockPos pos, final Random rand) {
         if (rand.nextInt(24) == 0) {
-            worldIn.playSound(pos.getX() + 0.5f, pos.getY() + 0.5f, pos.getZ() + 0.5f, SoundEvents.BLOCK_FIRE_AMBIENT, SoundCategory.BLOCKS, 1.0f + rand.nextFloat(), rand.nextFloat() * 0.7f + 0.3f, false);
+            world.playSound(pos.getX() + 0.5f, pos.getY() + 0.5f, pos.getZ() + 0.5f, SoundEvents.BLOCK_FIRE_AMBIENT, SoundCategory.BLOCKS, 1.0f + rand.nextFloat(), rand.nextFloat() * 0.7f + 0.3f, false);
         }
-        if (!worldIn.getBlockState(pos.down()).isSideSolid(worldIn, pos.down(), EnumFacing.UP) && !Blocks.FIRE.canCatchFire(worldIn, pos.down(), EnumFacing.UP)) {
-            if (Blocks.FIRE.canCatchFire(worldIn, pos.west(), EnumFacing.EAST)) {
+        if (!world.getBlockState(pos.down()).isSideSolid(world, pos.down(), EnumFacing.UP) && !Blocks.FIRE.canCatchFire(world, pos.down(), EnumFacing.UP)) {
+            if (Blocks.FIRE.canCatchFire(world, pos.west(), EnumFacing.EAST)) {
                 for (int j = 0; j < 2; ++j) {
                     final double d3 = pos.getX() + rand.nextDouble() * 0.10000000149011612;
                     final double d4 = pos.getY() + rand.nextDouble();
                     final double d5 = pos.getZ() + rand.nextDouble();
-                    worldIn.spawnParticle(EnumParticleTypes.SMOKE_LARGE, d3, d4, d5, 0.0, 0.0, 0.0, new int[0]);
+                    world.spawnParticle(EnumParticleTypes.SMOKE_LARGE, d3, d4, d5, 0.0, 0.0, 0.0, new int[0]);
                 }
             }
-            if (Blocks.FIRE.canCatchFire(worldIn, pos.east(), EnumFacing.WEST)) {
+            if (Blocks.FIRE.canCatchFire(world, pos.east(), EnumFacing.WEST)) {
                 for (int k = 0; k < 2; ++k) {
                     final double d6 = pos.getX() + 1 - rand.nextDouble() * 0.10000000149011612;
                     final double d7 = pos.getY() + rand.nextDouble();
                     final double d8 = pos.getZ() + rand.nextDouble();
-                    worldIn.spawnParticle(EnumParticleTypes.SMOKE_LARGE, d6, d7, d8, 0.0, 0.0, 0.0, new int[0]);
+                    world.spawnParticle(EnumParticleTypes.SMOKE_LARGE, d6, d7, d8, 0.0, 0.0, 0.0, new int[0]);
                 }
             }
-            if (Blocks.FIRE.canCatchFire(worldIn, pos.north(), EnumFacing.SOUTH)) {
+            if (Blocks.FIRE.canCatchFire(world, pos.north(), EnumFacing.SOUTH)) {
                 for (int l = 0; l < 2; ++l) {
                     final double d9 = pos.getX() + rand.nextDouble();
                     final double d10 = pos.getY() + rand.nextDouble();
                     final double d11 = pos.getZ() + rand.nextDouble() * 0.10000000149011612;
-                    worldIn.spawnParticle(EnumParticleTypes.SMOKE_LARGE, d9, d10, d11, 0.0, 0.0, 0.0, new int[0]);
+                    world.spawnParticle(EnumParticleTypes.SMOKE_LARGE, d9, d10, d11, 0.0, 0.0, 0.0, new int[0]);
                 }
             }
-            if (Blocks.FIRE.canCatchFire(worldIn, pos.south(), EnumFacing.NORTH)) {
+            if (Blocks.FIRE.canCatchFire(world, pos.south(), EnumFacing.NORTH)) {
                 for (int i1 = 0; i1 < 2; ++i1) {
                     final double d12 = pos.getX() + rand.nextDouble();
                     final double d13 = pos.getY() + rand.nextDouble();
                     final double d14 = pos.getZ() + 1 - rand.nextDouble() * 0.10000000149011612;
-                    worldIn.spawnParticle(EnumParticleTypes.SMOKE_LARGE, d12, d13, d14, 0.0, 0.0, 0.0, new int[0]);
+                    world.spawnParticle(EnumParticleTypes.SMOKE_LARGE, d12, d13, d14, 0.0, 0.0, 0.0, new int[0]);
                 }
             }
-            if (Blocks.FIRE.canCatchFire(worldIn, pos.up(), EnumFacing.DOWN)) {
+            if (Blocks.FIRE.canCatchFire(world, pos.up(), EnumFacing.DOWN)) {
                 for (int j2 = 0; j2 < 2; ++j2) {
                     final double d15 = pos.getX() + rand.nextDouble();
                     final double d16 = pos.getY() + 1 - rand.nextDouble() * 0.10000000149011612;
                     final double d17 = pos.getZ() + rand.nextDouble();
-                    worldIn.spawnParticle(EnumParticleTypes.SMOKE_LARGE, d15, d16, d17, 0.0, 0.0, 0.0, new int[0]);
+                    world.spawnParticle(EnumParticleTypes.SMOKE_LARGE, d15, d16, d17, 0.0, 0.0, 0.0, new int[0]);
                 }
             }
         }
@@ -420,7 +430,7 @@ public class BlockFire extends Block {
                 final double d18 = pos.getX() + rand.nextDouble();
                 final double d19 = pos.getY() + rand.nextDouble() * 0.5 + 0.5;
                 final double d20 = pos.getZ() + rand.nextDouble();
-                worldIn.spawnParticle(EnumParticleTypes.SMOKE_LARGE, d18, d19, d20, 0.0, 0.0, 0.0, new int[0]);
+                world.spawnParticle(EnumParticleTypes.SMOKE_LARGE, d18, d19, d20, 0.0, 0.0, 0.0, new int[0]);
             }
         }
     }
@@ -450,8 +460,8 @@ public class BlockFire extends Block {
     }
 
 
-    public boolean canCatchFire(final IBlockAccess access, final BlockPos pos, final EnumFacing p_canCatchFire_3_) {
-        return access.getBlockState(pos).getBlock().isFlammable(access, pos, p_canCatchFire_3_);
+    public boolean canCatchFire(final IBlockAccess access, final BlockPos pos, final EnumFacing facing) {
+        return access.getBlockState(pos).getBlock().isFlammable(access, pos, facing);
     }
 
 

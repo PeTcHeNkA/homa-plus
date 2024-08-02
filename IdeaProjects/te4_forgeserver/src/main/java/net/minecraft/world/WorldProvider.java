@@ -437,8 +437,8 @@ public abstract class WorldProvider implements ElcaWorldProvider {
     }
 
 
-    public boolean isBlockHighHumidity(BlockPos p_isBlockHighHumidity_1_) {
-        return this.world.getBiome(p_isBlockHighHumidity_1_).isHighHumidity();
+    public boolean isBlockHighHumidity(BlockPos pos) {
+        return this.world.getBiome(pos).isHighHumidity();
     }
 
 
