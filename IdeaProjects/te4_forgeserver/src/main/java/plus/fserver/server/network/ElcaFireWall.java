@@ -8,6 +8,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetworkManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import plus.fserver.ElcaConfig;
 import plus.fserver.api.FireWall;
 import java.io.*;
 import java.net.InetAddress;
@@ -28,11 +29,13 @@ public abstract class ElcaFireWall<T extends Channel> extends ChannelInitializer
     private boolean dirty = false;
     private ScheduledFuture<?> future;
     private boolean logHistory = true;
+    private volatile long lastStamp = System.currentTimeMillis();
+    private int connections = 0;
 
     public ElcaFireWall(EventLoopGroup group){
         group.execute(() -> {
             readBanList();
-            future = group.scheduleWithFixedDelay(ElcaFireWall.this::saveBanList, 1, 1, TimeUnit.MINUTES);
+            future = group.scheduleWithFixedDelay(ElcaFireWall.this::recheckBanList, 1, 1, TimeUnit.MINUTES);
         });
     }
 
@@ -42,11 +45,21 @@ public abstract class ElcaFireWall<T extends Channel> extends ChannelInitializer
         InetSocketAddress address = (InetSocketAddress) channel.remoteAddress();
         Key key;
         Item item = map.get(key = new Key(address.getAddress().getAddress()));
-        if(item == null){
+        long cur = System.currentTimeMillis();
+        if(item == null || item.timeStamp < cur){
             if(breakUnknown) {
                 channel.close();
-                preInit(channel, key, null,  false);
+                preInit(channel, key, item,  false);
                 return;
+            }
+            if(++connections > ElcaConfig.MAX_CONNECTIONS_PER){
+                channel.close();
+                return;
+            } else {
+                if(cur > lastStamp){
+                    connections = 0;
+                    lastStamp = cur + ElcaConfig.MAX_CONNECTIONS_TIME;
+                }
             }
         } else {
             if(!item.allowConnect){
@@ -116,13 +129,16 @@ public abstract class ElcaFireWall<T extends Channel> extends ChannelInitializer
 
 
     public void writeTo(DataOutputStream out) {
+        long time = System.currentTimeMillis();
         map.forEach((key, item) -> {
             try {
+                if(item.timeStamp > time){
                 out.writeByte(key.bytes.length);
                 out.write(key.bytes);
 
                 out.writeLong(item.timeStamp);
                 out.writeBoolean(item.allowConnect);
+                }
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -191,6 +207,7 @@ public abstract class ElcaFireWall<T extends Channel> extends ChannelInitializer
                 }
             }
         }
+        saveBanList();
     }
 
 

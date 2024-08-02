@@ -53,6 +53,9 @@ public class ElcaConfig {
     public static int BALANCE_BLOCK_TICK         = 3;
     public static int BALANCE_BLOCK_CRITICAL     = 7;
 
+    public static int MAX_CONNECTIONS_PER        = 10;
+    public static int MAX_CONNECTIONS_TIME       = 1000;
+
     //public static boolean FAST_LIGHT                 = true;
     public static boolean SLOW_SWIM_AI               = true;
     public static boolean SLOW_TEMP_CHECK            = true;
@@ -132,5 +135,8 @@ public class ElcaConfig {
         OVERWORLD_ASYNC_POPULATION = calc(map, "overworld-async-population"  , OVERWORLD_ASYNC_POPULATION );
         SKIP_CHECK_NETWORK         = calc(map, "skip-check-network"          , SKIP_CHECK_NETWORK         );
         PRINT_CAUSE_SERVER_STOP    = calc(map, "print-case-stop"             , PRINT_CAUSE_SERVER_STOP    );
+
+        MAX_CONNECTIONS_PER        = calc(map, "max-connections-per"         , MAX_CONNECTIONS_PER        );
+        MAX_CONNECTIONS_TIME       = calc(map, "max-connections-time"        , MAX_CONNECTIONS_TIME       );
     }
 }
