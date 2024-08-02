@@ -55,7 +55,7 @@ public class ChunkLCache implements IBlockEAccess {
             if (xMin != null) {
                 xMin.x = chunk.x - 1;
                 xMin.z = chunk.z;
-                zMin.cleanAll();
+                xMin.cleanAll();
             }
             if (zAdd != null) {
                 zAdd.x = chunk.x;

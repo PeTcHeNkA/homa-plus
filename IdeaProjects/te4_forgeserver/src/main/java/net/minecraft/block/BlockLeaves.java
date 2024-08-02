@@ -8,10 +8,7 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.BlockRenderLayer;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.util.NonNullList;
+import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -72,11 +69,16 @@ public abstract class BlockLeaves extends BlockFs implements net.minecraftforge.
                     ChunkLCache access = cache.access;
                     access.init(world.localSelector.getChunk(pos.getX(), pos.getZ()));
                     Block block;
+                    IBlockState cur;
                     for (dx = -4; dx <= 4; ++dx) {
                         for (dz = -4; dz <= 4; ++dz) {
                             for (dy = -4; dy <= 4; ++dy) {
-                                IBlockState cur = access.getState(cache.setPos(num1 + dx, cY + dy, num2 + dz));
-
+                                int t = (dx * dy * dz);
+                                if(t <= 26 && t >= -26) {
+                                    cur = access.getState(cache.setPos(num1 + dx, cY + dy, num2 + dz));
+                                } else {
+                                    cur = BlockIDIndexes.AIR_STATE;
+                                }
                                 if (!(block = cur.getBlock()).canSustainLeaves(cur, world, cache)) {
                                     if (block.isLeaves(cur, world, cache))
                                          cache.set(dx, dy, dz, -2);
