@@ -19,7 +19,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.api.Keep;
 import plus.fserver.block.BlockFs;
-import plus.fserver.server.elca.ChunkSelector;
+import plus.fserver.server.elca.ChunkLCache;
 import plus.fserver.utls.collections.LeavesCache;
 
 
@@ -65,14 +65,12 @@ public abstract class BlockLeaves extends BlockFs implements net.minecraftforge.
     public void updateTick(World world, BlockPos pos, IBlockState state, Random rand) {
         if (!world.isRemote) {
             if (state.getValue(CHECK_DECAY) && state.getValue(DECAYABLE)) {
-                // Forge: prevent decaying leaves from updating neighbors and loading unloaded chunks
-                //if (!world.isAreaLoaded(pos, 1)) return;
-                // Forge: extend range from 5 to 6 to account for neighbor checks in world.markAndNotifyBlock -> world.updateObservingBlocksAt
                 if (world.isAreaLoaded(pos, 6)) {
                     int num1 = pos.getX(), cY = pos.getY(), num2 = pos.getZ(), dx, dy, dz;
 
                     LeavesCache cache = world.getLeavesCache();
-                    ChunkSelector access = world.localSelector;
+                    ChunkLCache access = cache.access;
+                    access.init(world.localSelector.getChunk(pos.getX(), pos.getZ()));
                     Block block;
                     for (dx = -4; dx <= 4; ++dx) {
                         for (dz = -4; dz <= 4; ++dz) {

@@ -72,6 +72,12 @@ public class LightingEngine implements ILightingEngine {
     }
 
 
+    @Override
+    public void scheduleLightUpdate(final EnumSkyBlock lightType, final int x, final int y, final int z) {
+        this.scheduleLightUpdate(lightType, encodeWorldCoord(x, y, z));
+    }
+
+
     private void scheduleLightUpdate(final EnumSkyBlock lightType, final long pos) {
         final PooledLongQueue queue = this.queuedLightUpdates[lightType.ordinal()];
         queue.add(pos);
@@ -335,7 +341,12 @@ public class LightingEngine implements ILightingEngine {
     }
 
 
-    private long encodeWorldCoord(final BlockPos pos) {
+    private static long encodeWorldCoord(final int x, final int y, final int z) {
+        return (long) y << 52 | x + 33554432L << 26 | z + 33554432L;
+    }
+
+
+    private static long encodeWorldCoord(final BlockPos pos) {
         return (long) pos.getY() << 52 | pos.getX() + 33554432L << 26 | pos.getZ() + 33554432L;
     }
 

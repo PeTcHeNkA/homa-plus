@@ -1,10 +1,17 @@
 package plus.fserver.utls.collections;
 
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+import plus.fserver.server.elca.ChunkLCache;
 
 
 public final class LeavesCache extends BlockPos.MutableBlockPos {
     private final byte[] updates = new byte[2186*2];
+    public final ChunkLCache access;
+
+    public LeavesCache(World world) {
+        this.access = new ChunkLCache(world, Integer.MIN_VALUE, Integer.MIN_VALUE);
+    }
 
     public int get(int dx, int dy, int dz) {
         return updates[((dx + 4) << 8) | ((dy + 4) << 4) | ((dz + 4))];

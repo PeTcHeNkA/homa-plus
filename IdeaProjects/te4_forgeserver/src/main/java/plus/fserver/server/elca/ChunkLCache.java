@@ -24,7 +24,7 @@ public class ChunkLCache implements IBlockEAccess {
     ChunkLCache zAdd;
     ChunkLCache zMin;
     Chunk chunk;
-    final int x, z;
+    int x, z;
     final World world;
 
     public ChunkLCache(Entity entity){
@@ -32,6 +32,53 @@ public class ChunkLCache implements IBlockEAccess {
         this.x = ((int)(entity.posX))>>4;
         this.z = ((int)(entity.posZ))>>4;
     }
+
+
+    public ChunkLCache(Chunk chunk){
+        this.world = chunk.getWorld();
+        this.chunk = chunk;
+        this.x = chunk.x;
+        this.z = chunk.z;
+    }
+
+
+    public void init(Chunk chunk){
+        this.chunk = chunk;
+        if (this.x != chunk.x && this.z != chunk.z) {
+            this.x = chunk.x;
+            this.z = chunk.z;
+            if (xAdd != null) {
+                xAdd.x = chunk.x + 1;
+                xAdd.z = chunk.z;
+                xAdd.cleanAll();
+            }
+            if (xMin != null) {
+                xMin.x = chunk.x - 1;
+                xMin.z = chunk.z;
+                zMin.cleanAll();
+            }
+            if (zAdd != null) {
+                zAdd.x = chunk.x;
+                zAdd.z = chunk.z + 1;
+                zAdd.cleanAll();
+            }
+            if (zMin != null) {
+                zMin.x = chunk.x;
+                zMin.z = chunk.z - 1;
+                zMin.cleanAll();
+            }
+        }
+    }
+
+
+    public void cleanAll(){
+        xAdd = null;
+        zAdd = null;
+        xMin = null;
+        zMin = null;
+        chunk = null;
+    }
+
 
     public ChunkLCache(World world, int x, int z) {
         this.x = x;
@@ -203,7 +250,6 @@ public class ChunkLCache implements IBlockEAccess {
     public boolean setBlockState(BlockPos pos, IBlockState newState, int flags) {
         if (pos.getY() > 255 || pos.getY() < 1) return false;
         Chunk chunk = getExecutor(pos.getX()>>4, pos.getZ()>>4).getChunk();
-        pos = pos.toImmutable();
 
         IBlockState oldState = chunk.getBlockStateUnchecked(pos.getX(), pos.getY(), pos.getZ());
         int oldLight = oldState.getLightValue(world, pos);

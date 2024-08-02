@@ -227,7 +227,7 @@ public class LightingHooks {
                 final ExtendedBlockStorage storage = storages[j];
                 if (storage != Chunk.NULL_BLOCK_STORAGE) {
                     final int yBase = j * 16;
-                    BlockStateContainer data = storage.getData();
+                    final BlockStateContainer data = storage.getData();
                     for (int y = 0; y < 16; ++y)
                         for (int z = 0; z < 16; ++z)
                             for (int x = 0; x < 16; ++x)

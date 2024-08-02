@@ -81,6 +81,7 @@ import plus.fserver.utls.collections.ChunkIterator;
 import plus.fserver.utls.math.MathUtls;
 import plus.fserver.world.CommonWorldEntitySpawner;
 import plus.fserver.world.NavigationCache;
+import plus.fserver.world.light.WorldChunkSlice;
 import plus.tson.utl.Te4HashSet;
 
 
@@ -1152,6 +1153,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
                 if(balanceBlock>0) updateBlocks(balanceBlock);
             }
         }
+        if((prevWorldTotalTime & 127) == 0) poledSlice = null;
 
         playerChunkMap.tick();
 

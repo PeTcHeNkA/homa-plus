@@ -34,6 +34,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.asm.mixin.Overwrite;
 import plus.asyutl.buf.FastBuffer;
 import plus.fserver.api.BiomeIndexes;
 import plus.fserver.api.Keep;
@@ -41,7 +42,9 @@ import plus.fserver.ElcaCV;
 import plus.fserver.utls.collections.ArrayListE6;
 import plus.fserver.utls.collections.ArrayRemSwapListE6;
 import plus.fserver.utls.math.MathUtls;
+import plus.fserver.world.light.LightingEngine;
 import plus.fserver.world.light.LightingHooks;
+import plus.fserver.world.light.WorldChunkSlice;
 import plus.fserver.world.light.api.IChunkLightingData;
 import plus.fserver.world.light.api.ILightingEngine;
 import plus.fserver.world.light.api.ILightingEngineProvider;
@@ -314,35 +317,132 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
     }
 
 
-    private void recheckGaps(boolean onlyOne) {
-        int x = (this.x << 4) + 8, z = (this.z << 4) + 8;
-        if (this.world.isAreaLoaded(x-16, 16, z-16, x+16, 16, z+16, true)) {
-            int mask;
-            for (x = 0; x < 16; ++x) {
-                for (z = 0; z < 16; ++z) {
-                    mask = 1<<z;
-                    if ((updateSkylights[x] & mask) == mask) {
-                        updateSkylights[x] &= ~mask;
-                        //this.updateSkylightColumns[x + z * 16] = false;
-                        int l = this.x * 16 + x;
-                        int i1 = this.z * 16 + z;
-                        int j1 = Integer.MAX_VALUE;
+    private void recheckGapsServer() {
+        WorldChunkSlice slice = world.poledSlice;
+        if(slice == null){
+            slice = world.poledSlice = new WorldChunkSlice();
+        }
+        slice.tryLoad3x3(world.chunkProviderServer, x, z);
+        if (slice.isLoaded3x3()) {
+            slice.tryLoad5x5No3x3(world.chunkProviderServer, x, z);
+            for (int x = 0; x < 16; ++x) {
+                for (int z = 0; z < 16; ++z) {
+                    this.recheckGapsForColumn(slice, x, z);
+                }
+            }
+            this.isGapLightingUpdated = false;
+        }
+    }
 
-                        for (EnumFacing enumfacing : HORIZONTAL) {
-                            j1 = Math.min(j1, this.world.getChunksLowestHorizon(l + enumfacing.getXOffset(), i1 + enumfacing.getZOffset()));
-                        }
-                        this.checkSkylightNeighborHeight(l, i1, j1);
 
-                        for (EnumFacing facing : HORIZONTAL) {
-                            this.checkSkylightNeighborHeight(l + facing.getXOffset(), i1 + facing.getZOffset(), getHeightValue(x, z));
-                        }
-                        if (onlyOne) return;
+    private void recheckGaps(final boolean onlyOne) {
+        if (this.world.isAreaLoaded(new BlockPos(this.x * 16 + 8, 0, this.z * 16 + 8), 16)) {
+            final WorldChunkSlice slice = world.slice(this.x, this.z);
+            for (int x = 0; x < 16; ++x) {
+                for (int z = 0; z < 16; ++z) {
+                    if (this.recheckGapsForColumn(slice, x, z) && onlyOne) {
+                        return;
                     }
                 }
             }
             this.isGapLightingUpdated = false;
         }
     }
+
+
+    private boolean recheckGapsForColumn(final WorldChunkSlice slice, final int x, final int z) {
+        final int mask = 1<<z;
+        if ((updateSkylights[x] & mask) == mask) {
+            updateSkylights[x] &= ~mask;
+            final int x2 = (this.x << 4) + x;
+            final int z2 = (this.z << 4) + z;
+            this.recheckGapsSkylightNeighborHeight(
+                    slice, x2, z2,
+                    getHeightValue(x, z),
+                    recheckGapsGetLowestHeight(slice, x2, z2)
+            );
+            return true;
+        }
+        return false;
+    }
+
+
+    private int recheckGapsGetLowestHeight(final WorldChunkSlice slice, final int x, final int z) {
+        int max = Integer.MAX_VALUE;
+        for (final EnumFacing facing : HORIZONTAL) {
+            final Chunk chunk = slice.getChunkFromWorldCoords(
+                    x + facing.getXOffset(),
+                    z + facing.getZOffset()
+            );
+            if (chunk != null) {
+                max = Math.min(max, chunk.getLowestHeight());
+            }
+        }
+        return max;
+    }
+
+
+    private void recheckGapsSkylightNeighborHeight(final WorldChunkSlice slice, final int x, final int z, final int height, final int max) {
+        this.checkSkylightNeighborHeight(slice, x, z, max);
+        this.checkSkylightNeighborHeight(slice, x+1, z, max);
+        this.checkSkylightNeighborHeight(slice, x-1, z, max);
+        this.checkSkylightNeighborHeight(slice, x, z+1, max);
+        this.checkSkylightNeighborHeight(slice, x, z-1, max);
+    }
+
+
+    private void checkSkylightNeighborHeight(final WorldChunkSlice slice, final int x, final int z, final int maxValue) {
+        final Chunk chunk;
+        if ((chunk = slice.getChunkFromWorldCoords(x, z)) == null) return;
+        final int i = chunk.getHeightValue(x & 0xF, z & 0xF);
+        if (i > maxValue)
+            this.updateSkylightNeighborHeight(slice, x, z, maxValue, i + 1);
+        else if (i < maxValue)
+            this.updateSkylightNeighborHeight(slice, x, z, i, maxValue + 1);
+    }
+
+
+    private void updateSkylightNeighborHeight(final WorldChunkSlice slice, final int x, final int z, final int startY, final int endY) {
+        if (endY > startY) {
+            if (!slice.isLoaded(x, z, 16)) return;
+            final LightingEngine eng = world.lightingEngine;
+            for (int i = startY; i < endY; ++i) {
+                eng.scheduleLightUpdate(EnumSkyBlock.SKY, x, i, z);
+            }
+            this.dirty = true;
+        }
+    }
+
+
+//    private void recheckGaps(boolean onlyOne) {
+//        int x = (this.x << 4) + 8, z = (this.z << 4) + 8;
+//        if (this.world.isAreaLoaded(x-16, 16, z-16, x+16, 16, z+16, true)) {
+//            int mask;
+//            for (x = 0; x < 16; ++x) {
+//                for (z = 0; z < 16; ++z) {
+//                    mask = 1<<z;
+//                    if ((updateSkylights[x] & mask) == mask) {
+//                        updateSkylights[x] &= ~mask;
+//                        //this.updateSkylightColumns[x + z * 16] = false;
+//                        int l = this.x * 16 + x;
+//                        int i1 = this.z * 16 + z;
+//                        int j1 = Integer.MAX_VALUE;
+//
+//                        for (EnumFacing enumfacing : HORIZONTAL) {
+//                            j1 = Math.min(j1, this.world.getChunksLowestHorizon(l + enumfacing.getXOffset(), i1 + enumfacing.getZOffset()));
+//                        }
+//                        this.checkSkylightNeighborHeight(l, i1, j1);
+//
+//                        for (EnumFacing facing : HORIZONTAL) {
+//                            this.checkSkylightNeighborHeight(l + facing.getXOffset(), i1 + facing.getZOffset(), getHeightValue(x, z));
+//                        }
+//                        if (onlyOne) return;
+//                    }
+//                }
+//            }
+//            this.isGapLightingUpdated = false;
+//        }
+//    }
 
 
     private void checkSkylightNeighborHeight(int x, int z, int maxValue) {
@@ -1001,8 +1101,11 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
     public void onTick(boolean skipRecheckGaps) {
         if (!skipRecheckGaps && this.isGapLightingUpdated && world.provider.hasSkyLight()) {
-            if(SERVER_COMPILE)recheckGaps(false);
-            else this.recheckGaps(world.isRemote);
+            if(SERVER_COMPILE)recheckGapsServer();
+            else {
+                if(world.isRemote)this.recheckGaps(true);
+                else recheckGapsServer();
+            }
         }
         this.ticked = true;
 
@@ -1209,7 +1312,8 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
 
     public void setSkylightUpdated() {
-        for (int i=0;i<updateSkylights.length;i++){
+        //updateSkylights.length = 16
+        for (int i = 0 ; i < 16; i++){
             updateSkylights[i] = ~0;
         }
         this.recheckGaps(false);

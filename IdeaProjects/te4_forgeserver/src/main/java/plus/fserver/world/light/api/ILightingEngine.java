@@ -8,6 +8,9 @@ public interface ILightingEngine {
     void scheduleLightUpdate(final EnumSkyBlock p0, final BlockPos p1);
 
 
+    void scheduleLightUpdate(final EnumSkyBlock p0, final int x, final int y, final int z);
+
+
     void processLightUpdates();
 
 

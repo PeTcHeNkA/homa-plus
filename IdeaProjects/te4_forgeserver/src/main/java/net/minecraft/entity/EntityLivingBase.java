@@ -160,7 +160,7 @@ public abstract class EntityLivingBase extends Entity {
     protected int ticksElytraFlying;
     private BlockPos prevBlockpos;
     private DamageSource lastDamageSource;
-    private long lastDamageStamp;
+    protected long lastDamageStamp;
 
     public EntityLivingBase(World worldIn) {
         super(worldIn);

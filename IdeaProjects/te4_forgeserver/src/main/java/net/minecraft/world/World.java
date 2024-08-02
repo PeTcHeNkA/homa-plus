@@ -5,7 +5,6 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import java.util.*;
-import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.AdvancementManager;
 import net.minecraft.advancements.FunctionManager;
@@ -77,6 +76,7 @@ import plus.fserver.utls.math.FastRandom;
 import plus.fserver.utls.math.Vec3dMut;
 import plus.fserver.world.RedstoneEngine;
 import plus.fserver.world.light.LightingEngine;
+import plus.fserver.world.light.WorldChunkSlice;
 import plus.fserver.world.light.api.ILightingEngineProvider;
 import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
@@ -159,7 +159,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     protected IBlockEAccess     effectiveAcces;
     //ONLY SERVER SIDE NOT NULL!
     public final ChunkSelector localSelector;
-    ChunkProviderServer chunkProviderServer;
+    public ChunkProviderServer chunkProviderServer;
     //END UNSAFE
 
     private final Object[] locals;
@@ -220,7 +220,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     public LeavesCache getLeavesCache(){
-        return leavesCache == null? leavesCache = new LeavesCache() : leavesCache;
+        return leavesCache == null? leavesCache = new LeavesCache(this) : leavesCache;
     }
 
 
@@ -406,9 +406,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
                 return false;
             } else {
                 if (newState.getLightOpacity(this, pos) != oldOpacity || newState.getLightValue(this, pos) != oldLight) {
-                    this.profiler.startSection("checkLight");
                     this.checkLight(pos);
-                    this.profiler.endSection();
                 }
                 // Don't notify clients or update physics while capturing blockstates
                 if (blockSnapshot == null)
@@ -483,8 +481,9 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             y1 = i;
         }
         if (this.provider.hasSkyLight()) {
-            for (int j = y1; j <= y2; ++j)
-                this.checkLightFor(EnumSkyBlock.SKY, new BlockPos(x, j, z));
+            final LightingEngine eng = lightingEngine;
+            for (int y = y1; y <= y2; ++y)
+                eng.scheduleLightUpdate(EnumSkyBlock.SKY, x, y, z);
         }
         this.markBlockRangeForRenderUpdate(x, y1, z, x, y2, z);
     }
@@ -2251,6 +2250,24 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
+    public void checkLightFor(EnumSkyBlock lightType, int x, int y, int z){
+        this.lightingEngine.scheduleLightUpdate(lightType, x, y, z);
+    }
+
+
+    public WorldChunkSlice slice(int x, int z){
+        return new WorldChunkSlice(chunkProviderServer, x, z);
+    }
+
+
+    public void reuse(WorldChunkSlice slice, int x, int z){
+        slice.tryLoad5x5Full(chunkProviderServer, x, z);
+    }
+
+
+    public WorldChunkSlice poledSlice = null;
+
+
     public boolean tickUpdates(boolean runAllPending) {
         return false;
     }
@@ -2861,8 +2878,8 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
     public void sendBlockBreakProgress(int breakerId, BlockPos pos, int progress) {
         for (int j2 = 0; j2 < this.eventListeners.size(); ++j2) {
-            IWorldEventListener iworldeventlistener = this.eventListeners.get(j2);
-            iworldeventlistener.sendBlockBreakProgress(breakerId, pos, progress);
+            IWorldEventListener listener = this.eventListeners.get(j2);
+            listener.sendBlockBreakProgress(breakerId, pos, progress);
         }
     }
 
@@ -3172,6 +3189,25 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
+    public final ArrayListE6<AxisAlignedBB> getCollisionBoxesRecachedLimitedC(@Nullable Entity entityIn, @NotNull AxisAlignedBB aabb, int lim) {
+        if(ElcaCV.MORE_MOBS_OPTIMIZER) {
+            final AABKey key;
+            ArrayListE6<AxisAlignedBB> res;
+            if ((res = bbCache.getC(key = bbCache.key(aabb))) != null){
+                res.fclear();
+                getCollisionBoxesNoCacheLimited(res, entityIn, aabb, lim);
+            } else {
+                getCollisionBoxesNoCacheLimited(res = bbCache.allocArr(), entityIn, aabb, lim);
+            }
+            return res;
+        } else {
+            final ArrayListE6<AxisAlignedBB> list;
+            getCollisionBoxesNoCacheLimited(list = new ArrayListE6<>(), entityIn, aabb, lim);
+            return list;
+        }
+    }
+
+
     /**
      * @author Te4hno
      */
@@ -3400,6 +3436,8 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         enteringChunk.setEntity(null);
         mobGriefingEvent.setEntity(null);
         entityCP.reset();
+        if(poledSlice != null) poledSlice.reset();
+        if(leavesCache != null)leavesCache.access.cleanAll();
     }
 
 

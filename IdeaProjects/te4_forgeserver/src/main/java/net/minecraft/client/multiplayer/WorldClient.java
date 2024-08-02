@@ -52,6 +52,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.ElcaCV;
 import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.collections.ArrayListE6;
+import plus.fserver.world.light.WorldChunkSlice;
+
 import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
@@ -716,16 +718,25 @@ public class WorldClient extends World {
     }
 
 
+    @Override
     public boolean isAreaLoaded(BlockPos center, int radius) {
         return this.isAreaLoaded(center, radius, true);
     }
 
 
+    @Override
     public boolean isAirBlock(BlockPos pos) {
         return this.getBlockState(pos).getBlock().isAir(this.getBlockState(pos), this, pos);
     }
 
 
+    @Override
+    public WorldChunkSlice slice(int x, int z){
+        return new WorldChunkSlice(this, x, z);
+    }
+
+
+    @Override
     public void updateObservingBlocksAt(BlockPos pos, Block blockType) {
         this.observedNeighborChanged(pos.west(),  blockType, pos);
         this.observedNeighborChanged(pos.east(),  blockType, pos);
