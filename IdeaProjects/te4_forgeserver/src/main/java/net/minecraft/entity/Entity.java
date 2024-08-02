@@ -654,9 +654,26 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
             prev.expandTo(x, y, z, axisalignedbb);
             axisalignedbb.minY -= 0.125;
 
-            final ArrayListE6<AxisAlignedBB> boxes0 = world.getCollisionBoxesLimitedC(this,
-                    axisalignedbb, ElcaConfig.MAX_ENTITY_COLLISIONS_MOVE
-            );
+            final ArrayListE6<AxisAlignedBB> boxes0;
+            //fix mobs getting stuck in blocks
+            if(isLiving()){
+                long time = world.getTotalWorldTime() - ((EntityLivingBase) this).lastDamageStamp;
+
+                if(time < 5){
+                    boxes0 = world.getCollisionBoxesRecachedLimitedC(this,
+                            axisalignedbb, ElcaConfig.MAX_ENTITY_COLLISIONS_MOVE
+                    );
+                } else {
+                    boxes0 = world.getCollisionBoxesLimitedC(this,
+                            axisalignedbb, ElcaConfig.MAX_ENTITY_COLLISIONS_MOVE
+                    );
+                }
+            } else {
+                boxes0 = world.getCollisionBoxesLimitedC(this,
+                        axisalignedbb, ElcaConfig.MAX_ENTITY_COLLISIONS_MOVE
+                );
+            }
+
             final int bSize = boxes0.sizeC();
             final Object[] rawBoxes = boxes0.raw();
 
