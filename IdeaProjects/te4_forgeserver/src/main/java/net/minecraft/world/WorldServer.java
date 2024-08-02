@@ -891,7 +891,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
 
             for (BlockEventData blockeventdata : this.blockEventQueue[i]) {
                 if (this.fireBlockEvent(blockeventdata)) {
-                    this.server.getPlayerList().sendToAllNearExcept(null, blockeventdata.getPosition().getX(), (double)blockeventdata.getPosition().getY(), (double)blockeventdata.getPosition().getZ(), 64.0D, this.provider.getDimension(), new SPacketBlockAction(blockeventdata.getPosition(), blockeventdata.getBlock(), blockeventdata.getEventID(), blockeventdata.getEventParameter()));
+                    this.server.getPlayerList().sendToAllNearExcept(null, blockeventdata.getPosition().getX(), (double)blockeventdata.getPosition().getY(), blockeventdata.getPosition().getZ(), 64.0D, this.provider.getDimension(), new SPacketBlockAction(blockeventdata.getPosition(), blockeventdata.getBlock(), blockeventdata.getEventID(), blockeventdata.getEventParameter()));
                 }
             }
             this.blockEventQueue[i].clear();

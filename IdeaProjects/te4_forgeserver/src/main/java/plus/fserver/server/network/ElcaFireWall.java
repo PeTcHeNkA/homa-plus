@@ -5,6 +5,7 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.EventLoopGroup;
 import io.netty.util.concurrent.ScheduledFuture;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.NetworkManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import plus.fserver.api.FireWall;
@@ -80,12 +81,25 @@ public abstract class ElcaFireWall<T extends Channel> extends ChannelInitializer
 
     public boolean softSet(EntityPlayerMP player, long time, boolean allow){
         if(player.connection != null){
-            Channel channel = player.connection.netManager.channel();
-            InetSocketAddress address = (InetSocketAddress) channel.remoteAddress();
-            softSet(new Key(address), time, allow);
-            return true;
+            return softSet(player.connection.netManager.channel(), time, allow);
         }
         return false;
+    }
+
+
+    public boolean softSet(Channel channel, long time, boolean allow){
+        InetSocketAddress address = (InetSocketAddress) channel.remoteAddress();
+        softSet(new Key(address), time, allow);
+        return true;
+    }
+
+
+    public boolean hasRule(Channel channel, Boolean allowConnect){
+        InetSocketAddress address = (InetSocketAddress) channel.remoteAddress();
+        Item item = map.get(new Key(address.getAddress().getAddress()));
+        if(item == null)return false;
+        if(allowConnect == null)return true;
+        return item.allowConnect == allowConnect.booleanValue();
     }
 
 
