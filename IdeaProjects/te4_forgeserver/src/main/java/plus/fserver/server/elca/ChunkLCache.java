@@ -168,6 +168,15 @@ public class ChunkLCache implements IBlockEAccess {
     }
 
 
+    public final Chunk getLoadedChunk(){
+        if(chunk == null) {
+            chunk = world.getChunkProvider().getLoadedChunk(x, z);
+            return chunk;
+        }
+        return chunk;
+    }
+
+
     @Nullable
     @Override
     public TileEntity getTileEntity(@NotNull BlockPos pos) {
@@ -184,7 +193,12 @@ public class ChunkLCache implements IBlockEAccess {
     @Override
     public IBlockState getBlockState(BlockPos pos) {
         if(pos.getY()>255 || pos.getY()<0)return BlockIDIndexes.AIR_STATE;
-        return getExecutor(pos.getX()>>4, pos.getZ()>>4).getChunk().getBlockState(pos.getX(), pos.getY(), pos.getZ());
+        return getExecutor(pos.getX()>>4, pos.getZ()>>4).getChunk().getBlockStateUnchecked(pos.getX(), pos.getY(), pos.getZ());
+    }
+
+
+    public IBlockState getBlockStateUnchecked(int x, int y, int z) {
+        return getExecutor(x>>4, z>>4).getChunk().getBlockStateUnchecked(x, y, z);
     }
 
 
@@ -229,7 +243,8 @@ public class ChunkLCache implements IBlockEAccess {
 
 
     public IBlockState getState(BlockPos pos){
-        return getExecutor(pos.getX()>>4, pos.getZ()>>4).getChunk().getBlockState(pos);
+        if(pos.getY()>255 || pos.getY()<0)return BlockIDIndexes.AIR_STATE;
+        return getExecutor(pos.getX()>>4, pos.getZ()>>4).getChunk().getBlockStateUnchecked(pos.getX(), pos.getY(), pos.getZ());
     }
 
 

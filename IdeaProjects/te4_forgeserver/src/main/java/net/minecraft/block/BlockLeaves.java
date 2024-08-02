@@ -17,7 +17,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.api.Keep;
 import plus.fserver.block.BlockFs;
 import plus.fserver.server.elca.ChunkLCache;
-import plus.fserver.utls.collections.LeavesCache;
+import plus.fserver.utls.collections.BlockPosQueue;
 
 
 public abstract class BlockLeaves extends BlockFs implements net.minecraftforge.common.IShearable {
@@ -59,82 +59,52 @@ public abstract class BlockLeaves extends BlockFs implements net.minecraftforge.
 
 
     @Override
-    public void updateTick(World world, BlockPos pos, IBlockState state, Random rand) {
+    public void updateTick(World world, BlockPos pos, IBlockState state, Random rand){
         if (!world.isRemote) {
             if (state.getValue(CHECK_DECAY) && state.getValue(DECAYABLE)) {
                 if (world.isAreaLoaded(pos, 6)) {
-                    int num1 = pos.getX(), cY = pos.getY(), num2 = pos.getZ(), dx, dy, dz;
-
-                    LeavesCache cache = world.getLeavesCache();
-                    ChunkLCache access = cache.access;
+                    ChunkLCache access = world.bigLocalCache;
                     access.init(world.localSelector.getChunk(pos.getX(), pos.getZ()));
-                    Block block;
-                    IBlockState cur;
-                    for (dx = -4; dx <= 4; ++dx) {
-                        for (dz = -4; dz <= 4; ++dz) {
-                            for (dy = -4; dy <= 4; ++dy) {
-                                int t = (dx * dy * dz);
-                                if(t <= 26 && t >= -26) {
-                                    cur = access.getState(cache.setPos(num1 + dx, cY + dy, num2 + dz));
-                                } else {
-                                    cur = BlockIDIndexes.AIR_STATE;
-                                }
-                                if (!(block = cur.getBlock()).canSustainLeaves(cur, world, cache)) {
-                                    if (block.isLeaves(cur, world, cache))
-                                         cache.set(dx, dy, dz, -2);
-                                    else cache.set(dx, dy, dz, -1);
-                                } else   cache.set(dx, dy, dz, 0);
-                            }
+
+                    BlockPosQueue queue = new BlockPosQueue(pos.getX(), pos.getY(), pos.getZ());
+
+                    if (tryFindBlock(access, queue, pos.getX(), pos.getY(), pos.getZ(), 5)){
+                        access.setBlockState(pos, state.withProperty(CHECK_DECAY, Boolean.FALSE), 4);
+
+                        BlockPosQueue update = queue.next();
+                        while (update != null){
+                            access.setBlockState(update, state.withProperty(CHECK_DECAY, Boolean.FALSE), 4);
+                            update = update.next();
                         }
                     }
-
-                    for (num2 = 1; num2 <= 4; ++num2) {
-                        for (dx = -4; dx <= 4; ++dx) {
-                            for (dy = -4; dy <= 4; ++dy) {
-                                for (dz = -4; dz <= 4; ++dz) {
-                                    if (cache.get(dx, dy, dz) == num2 - 1) {
-                                        if(dx != -4) {
-                                            num1 = LeavesCache.cursor(dx - 1, dy, dz);
-                                            if (cache.get(num1) == -2)
-                                                cache.set(num1, num2);
-                                        }
-                                        if(dx != 4) {
-                                            num1 = LeavesCache.cursor(dx + 1, dy, dz);
-                                            if (cache.get(num1) == -2)
-                                                cache.set(num1, num2);
-                                        }
-                                        if(dy != -4) {
-                                            num1 = LeavesCache.cursor(dx, dy - 1, dz);
-                                            if (cache.get(num1) == -2)
-                                                cache.set(num1, num2);
-                                        }
-                                        if(dy != 4) {
-                                            num1 = LeavesCache.cursor(dx, dy + 1, dz);
-                                            if (cache.get(num1) == -2)
-                                                cache.set(num1, num2);
-                                        }
-                                        if(dz != -4) {
-                                            num1 = LeavesCache.cursor(dx, dy, dz - 1);
-                                            if (cache.get(num1) == -2)
-                                                cache.set(num1, num2);
-                                        }
-                                        if(dz != 4) {
-                                            num1 = LeavesCache.cursor(dx, dy, dz + 1);
-                                            if (cache.get(num1) == -2)
-                                                cache.set(num1, num2);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    //int center = cache.get(0,0,0);
-
-                    if (cache.get(0,0,0) >= 0) access.setBlockState(pos, state.withProperty(CHECK_DECAY, Boolean.FALSE), 4);
                     else this.destroy(world, state, pos);
                 }
             }
         }
+    }
+
+
+    private static boolean tryFindBlock(ChunkLCache selector, BlockPosQueue cache, int x, int y, int z, int deep){
+        if(deep < 0)return false;
+        BlockPosQueue next = cache.next();
+        if(next != null && next.containsInDeep(x, y, z, Math.min(3, deep)))return false;
+        final IBlockState state = selector.getBlockStateUnchecked(x, y, z);
+        final Block block = state.getBlock();
+        if(block.canSustainLeaves(state, selector, cache.setPos(x, y, z)))return true;
+        if(block.isLeaves(state, selector, cache)){
+            cache.addToQueue(cache.getX(), cache.getY(), cache.getZ());
+            if(y > 1) {
+                if(tryFindBlock(selector, cache, x, y-1, z, deep-1))return true;
+            }
+            if(y < 254) {
+                if(tryFindBlock(selector, cache, x, y+1, z, deep-1))return true;
+            }
+            if(tryFindBlock(selector, cache, x-1, y, z, deep-1))return true;
+            if(tryFindBlock(selector, cache, x, y, z-1, deep-1))return true;
+            if(tryFindBlock(selector, cache, x+1, y, z, deep-1))return true;
+            if(tryFindBlock(selector, cache, x, y, z+1, deep-1))return true;
+        }
+        return false;
     }
 
 

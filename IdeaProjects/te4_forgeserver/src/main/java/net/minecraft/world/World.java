@@ -66,6 +66,7 @@ import plus.fserver.api.ElcaServerUtls;
 import plus.fserver.api.IBlockEAccess;
 import plus.fserver.ElcaCV;
 import plus.fserver.api.Keep;
+import plus.fserver.server.elca.ChunkLCache;
 import plus.fserver.utls.math.MathUtls;
 import plus.fserver.world.CollisionPredicate;
 import plus.fserver.server.elca.AABKey;
@@ -152,13 +153,13 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
     public long tryUpdateNavigationLimit = 20L;
     public final LightingEngine lightingEngine = new LightingEngine(this);
-    private LeavesCache leavesCache;
 
     final SyncListCache<AxisAlignedBB> bbCache;
     final SyncListCache<Entity> eeCache;
     protected IBlockEAccess     effectiveAcces;
     //ONLY SERVER SIDE NOT NULL!
     public final ChunkSelector localSelector;
+    public final ChunkLCache   bigLocalCache = new ChunkLCache(this, Integer.MIN_VALUE, Integer.MIN_VALUE);
     public ChunkProviderServer chunkProviderServer;
     //END UNSAFE
 
@@ -216,11 +217,6 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
     public final IBlockEAccess access(){
         return effectiveAcces;
-    }
-
-
-    public LeavesCache getLeavesCache(){
-        return leavesCache == null? leavesCache = new LeavesCache(this) : leavesCache;
     }
 
 
@@ -3437,7 +3433,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         mobGriefingEvent.setEntity(null);
         entityCP.reset();
         if(poledSlice != null) poledSlice.reset();
-        if(leavesCache != null)leavesCache.access.cleanAll();
+        bigLocalCache.cleanAll();
     }
 
 

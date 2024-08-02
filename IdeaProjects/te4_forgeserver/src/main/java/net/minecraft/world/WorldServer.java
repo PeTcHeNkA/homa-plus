@@ -653,6 +653,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
             try {
                 this.createSpawnPosition(settings);
                 if (this.worldInfo.getTerrainType() == WorldType.DEBUG_ALL_BLOCK_STATES) {
+                    isDebug = true;
                     this.setDebugWorldSettings();
                 }
                 super.initialize(settings);
@@ -670,7 +671,6 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
 
 
     private void setDebugWorldSettings() {
-        isDebug = true;
         this.worldInfo.setMapFeaturesEnabled(false);
         this.worldInfo.setAllowCommands(true);
         this.worldInfo.setRaining(false);

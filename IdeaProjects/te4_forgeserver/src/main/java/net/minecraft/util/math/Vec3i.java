@@ -41,6 +41,11 @@ public class Vec3i implements Comparable<Vec3i> {
     }
 
 
+    public boolean equals(int x, int y, int z){
+        return this.x == x && this.y == y && this.z == z;
+    }
+
+
     @Override
     public int hashCode() {
         return (this.getY() + this.getZ() * 31) * 31 + this.getX();

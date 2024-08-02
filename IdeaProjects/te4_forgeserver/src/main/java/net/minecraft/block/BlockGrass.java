@@ -17,6 +17,7 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.block.BlockFx;
+import plus.fserver.server.elca.ChunkLCache;
 import plus.fserver.server.elca.ChunkSelector;
 
 
@@ -95,22 +96,25 @@ public class BlockGrass extends BlockFx implements IGrowable {
         if (!world.isRemote) {
             if (world.isAreaLoaded(pos, 3)) {
                 ChunkSelector selector = world.localSelector;
-                int light = world.getLight(pos.getX(), pos.getY() + 1, pos.getZ(), true);
+                int num = world.getLight(pos.getX(), pos.getY() + 1, pos.getZ(), true);
 
                 BlockPos up = world.localTempPos.setPos(pos.getX(), pos.getY() + 1, pos.getZ());
 
-                if (light < 4 && selector.getState(up).getLightOpacity(world, up) > 2) {
+                if (num < 4 && selector.getState(up).getLightOpacity(world, up) > 2) {
                     selector.setBlockState(pos, Blocks.DIRT.getDefaultState(), 2);
-                } else if (light >= 9) {
+                } else if (num >= 9) {
+                    ChunkLCache cache = world.bigLocalCache;
+                    cache.init(selector.current());
                     BlockPos.MutableBlockPos blockPos = world.localTempPos2;
                     for (int i = 0; i < 4; ++i) {
+                        num = rand.nextInt();
                         blockPos.setPosB(
-                                pos.getX() + rand.nextInt(3) - 1,
-                                pos.getY() + rand.nextInt(5) - 3,
-                                pos.getZ() + rand.nextInt(3) - 1
+                                pos.getX() + (( num       & 3) % 3) - 1,
+                                pos.getY() + (((num >> 4) & 7) % 5) - 3,
+                                pos.getZ() + (((num >> 2) & 3) % 3) - 1
                         );
                         if (blockPos.getY() < 0 || blockPos.getY() > 255) return;
-                        Chunk chunk = selector.getLoadedE(blockPos.getX() >> 4, blockPos.getZ() >> 4);
+                        Chunk chunk = cache.getExecutor(blockPos.getX() >> 4, blockPos.getZ() >> 4).getLoadedChunk();
                         if (chunk == null) return;
 
                         final IBlockState state1 = chunk.getBlockState(blockPos.getX(), blockPos.getY() + 1, blockPos.getZ());
