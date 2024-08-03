@@ -222,19 +222,20 @@ public class EntityTrackerEntry {
                                 else next = next.with(trackedEntity.getEntityId(), slot, itemstack);
                             }
                         }
+                        //TODO UNCHECKED
                         if(equp != null){
-                            if(equp == next){
-                                playerMP.connection.netManager.sendPacketE(equp);
-                            } else {
-                                SElcaPacketEntityEquipment finalEqup = equp;
-                                playerMP.connection.netManager.exec(() -> {
-                                    SElcaPacketEntityEquipment temp = finalEqup;
-                                    while (temp != null){
-                                        playerMP.connection.netManager.sendPacketSync(temp);
-                                        temp = temp.next();
-                                    }
-                                });
-                            }
+                            //if(equp == next){
+                            playerMP.connection.netManager.sendPacketE(equp);
+//                            } else {
+//                                SElcaPacketEntityEquipment finalEqup = equp;
+//                                playerMP.connection.netManager.exec(() -> {
+//                                    SElcaPacketEntityEquipment temp = finalEqup;
+//                                    while (temp != null){
+//                                        playerMP.connection.netManager.sendPacketSync(temp);
+//                                        temp = temp.next();
+//                                    }
+//                                });
+//                            }
                         }
 
                         if (trackedEntity instanceof EntityPlayer) {

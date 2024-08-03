@@ -1,9 +1,11 @@
 package plus.fserver.server.network.packet;
 
+import io.netty.buffer.ByteBuf;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.network.play.server.SPacketDestroyEntities;
+import plus.fserver.server.network.NetUtils;
 import plus.fserver.utls.collections.Int1LinkedList;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -27,7 +29,7 @@ public class SElcaPacketDestroyEntities implements Packet<INetHandlerPlayClient>
     }
 
 
-    @Override
+    @Deprecated
     public void writePacketData(PacketBuffer buf) throws IOException {
         int len = 1;
         Int1LinkedList.Node node = this.nodes, temp = node;
@@ -41,6 +43,27 @@ public class SElcaPacketDestroyEntities implements Packet<INetHandlerPlayClient>
 
         while (node != null){
             buf.writeVarInt(node.getValue());
+            node = node.getParent();
+        }
+    }
+
+
+    @Override
+    public void writePacketData(int id, ByteBuf buf) throws IOException {
+        NetUtils.writeVarInt(buf, id);
+
+        int len = 1;
+        Int1LinkedList.Node node = this.nodes, temp = node;
+
+        while (temp != null){
+            len += 1;
+            temp = temp.getParent();
+        }
+
+        NetUtils.writeVarInt(buf, len);
+
+        while (node != null){
+            NetUtils.writeVarInt(buf, node.getValue());
             node = node.getParent();
         }
     }

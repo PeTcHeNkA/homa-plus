@@ -153,6 +153,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
     public long tryUpdateNavigationLimit = 20L;
     public final LightingEngine lightingEngine = new LightingEngine(this);
+    public final ActionResult<?> pooledAction = new ActionResult<>(null,null);
 
     final SyncListCache<AxisAlignedBB> bbCache;
     final SyncListCache<Entity> eeCache;

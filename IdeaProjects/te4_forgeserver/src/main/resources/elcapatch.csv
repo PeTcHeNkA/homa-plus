@@ -156,6 +156,7 @@ net.minecraft.client.multiplayer.WorldClient
 net.minecraft.command.CommandResultStats$1, false, false
 net.minecraft.command.CommandResultStats$Type, false, false
 net.minecraft.command.CommandResultStats, false, false
+net.minecraft.command.server.CommandBanPlayer, false, false
 net.minecraft.enchantment.EnchantmentFrostWalker
 net.minecraft.enchantment.EnchantmentHelper
 net.minecraft.entity.ai.attributes.AbstractAttributeMap
@@ -286,6 +287,9 @@ net.minecraft.item.Item$8
 net.minecraft.item.Item$9
 net.minecraft.item.Item$ToolMaterial
 net.minecraft.item.Item
+net.minecraft.item.ItemEgg
+net.minecraft.item.ItemFood
+net.minecraft.item.ItemSnowball
 net.minecraft.item.ItemStack
 net.minecraft.item.ItemWrittenBook
 net.minecraft.nbt.NBTTagByte, false, false
@@ -309,6 +313,7 @@ net.minecraft.network.EnumPacketDirection
 net.minecraft.network.NetHandlerPlayServer$1
 net.minecraft.network.NetHandlerPlayServer$2
 net.minecraft.network.NetHandlerPlayServer
+net.minecraft.network.NettyPacketEncoder
 net.minecraft.network.NetworkManager$1
 net.minecraft.network.NetworkManager$2
 net.minecraft.network.NetworkManager$3
@@ -322,10 +327,33 @@ net.minecraft.network.NetworkSystem$3
 net.minecraft.network.NetworkSystem$4
 net.minecraft.network.NetworkSystem$5
 net.minecraft.network.NetworkSystem
+net.minecraft.network.Packet
 net.minecraft.network.play.client.CPacketClientSettings
 net.minecraft.network.play.client.CPacketCustomPayload
+net.minecraft.network.play.server.SPacketAnimation
+net.minecraft.network.play.server.SPacketBlockAction
 net.minecraft.network.play.server.SPacketBlockChange
 net.minecraft.network.play.server.SPacketChunkData
+net.minecraft.network.play.server.SPacketCombatEvent$1
+net.minecraft.network.play.server.SPacketCombatEvent$Event
+net.minecraft.network.play.server.SPacketCombatEvent
+net.minecraft.network.play.server.SPacketConfirmTransaction
+net.minecraft.network.play.server.SPacketDisconnect
+net.minecraft.network.play.server.SPacketEntityEquipment
+net.minecraft.network.play.server.SPacketEntityHeadLook
+net.minecraft.network.play.server.SPacketEntityVelocity
+net.minecraft.network.play.server.SPacketHeldItemChange
+net.minecraft.network.play.server.SPacketKeepAlive
+net.minecraft.network.play.server.SPacketPlaceGhostRecipe
+net.minecraft.network.play.server.SPacketPlayerPosLook$EnumFlags
+net.minecraft.network.play.server.SPacketPlayerPosLook
+net.minecraft.network.play.server.SPacketSetSlot
+net.minecraft.network.play.server.SPacketSoundEffect
+net.minecraft.network.play.server.SPacketSpawnExperienceOrb
+net.minecraft.network.play.server.SPacketTimeUpdate
+net.minecraft.network.play.server.SPacketUnloadChunk
+net.minecraft.network.play.server.SPacketUpdateHealth
+net.minecraft.network.play.server.SPacketWindowProperty
 net.minecraft.network.rcon.RConThreadMain
 net.minecraft.pathfinding.FlyingNodeProcessor, false, false
 net.minecraft.pathfinding.NodeProcessor, false, false
@@ -352,6 +380,8 @@ net.minecraft.server.management.PlayerList
 net.minecraft.server.MinecraftServer$1
 net.minecraft.server.MinecraftServer$2
 net.minecraft.server.MinecraftServer
+net.minecraft.server.network.NetHandlerHandshakeTCP$1
+net.minecraft.server.network.NetHandlerHandshakeTCP
 net.minecraft.server.network.NetHandlerLoginServer$ConnectEvent
 net.minecraft.server.network.NetHandlerLoginServer$LoginState
 net.minecraft.server.network.NetHandlerLoginServer
@@ -360,6 +390,7 @@ net.minecraft.tileentity.TileEntityBeacon$BeamSegment
 net.minecraft.tileentity.TileEntityBeacon
 net.minecraft.tileentity.TileEntityFurnace
 net.minecraft.tileentity.TileEntityHopper
+net.minecraft.util.ActionResult, false, false
 net.minecraft.util.BitArray, false, false
 net.minecraft.util.BlockIDIndexes, false, false
 net.minecraft.util.ByClass, false, false

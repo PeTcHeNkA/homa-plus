@@ -88,7 +88,7 @@ public final class ChunkSelector implements IBlockEAccess {
     public Chunk getLoadedE(final int x, final int z){
         if(curX == x && curZ == z)return chunk;
         Chunk temp = provider.getLoadedChunk(x, z);
-        if(temp==null)return null;
+        if(temp == null)return null;
         this.curX = x; this.curZ = z;
         return chunk = temp;
     }
@@ -209,6 +209,26 @@ public final class ChunkSelector implements IBlockEAccess {
 
     public void setCurStateFast(int x, int y, int z, IBlockState newState){
         chunk.setBlockStateFastNoTile(x, y, z, newState);
+    }
+
+
+    public boolean isAreaLoaded3(int x, int z){
+        int tx, tz;
+        if(curX != x || curZ != z) {
+            Chunk chunk = provider.getLoadedChunk(curX = tx = x >> 4, curZ = tz = z >> 4);
+            if (chunk == null) return false;
+            this.chunk = chunk;
+        } else {
+            tx = curX;
+            tz = curZ;
+        }
+        if((x + 3)>>4 != tx || ((z + 3)>>4) != tz){
+            if(!provider.chunkExists((x + 3)>>4, (z + 3)>>4))return false;
+        }
+        if((x - 3)>>4 != tx || ((z - 3)>>4) != tz){
+            if(!provider.chunkExists((x - 3)>>4, (z - 3)>>4))return false;
+        }
+        return true;
     }
 
 

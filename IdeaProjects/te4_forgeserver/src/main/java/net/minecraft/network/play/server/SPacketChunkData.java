@@ -18,6 +18,7 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.fserver.server.network.NetUtils;
 
 
 public class SPacketChunkData implements Packet<INetHandlerPlayClient> {
@@ -89,7 +90,7 @@ public class SPacketChunkData implements Packet<INetHandlerPlayClient> {
     }
 
 
-    @Override
+    @Deprecated
     public void writePacketData(PacketBuffer buf) throws IOException {
         buf.writeInt(this.chunkX);
         buf.writeInt(this.chunkZ);
@@ -104,6 +105,27 @@ public class SPacketChunkData implements Packet<INetHandlerPlayClient> {
         while(iter.hasNext()) {
             NBTTagCompound tag = (NBTTagCompound)iter.next();
             buf.writeCompoundTag(tag);
+        }
+    }
+
+
+    @Override
+    public void writePacketData(int id, ByteBuf buf) throws IOException {
+        NetUtils.writeVarInt(buf, id);
+
+        buf.writeInt(this.chunkX);
+        buf.writeInt(this.chunkZ);
+        buf.writeBoolean(this.fullChunk);
+        NetUtils.writeVarInt(buf, this.availableSections);
+        NetUtils.writeVarInt(buf, this.buffer.length);
+        buf.writeBytes(this.buffer);
+        NetUtils.writeVarInt(buf, this.tileEntityTags.size());
+
+        Iterator iter = this.tileEntityTags.iterator();
+
+        while(iter.hasNext()) {
+            NBTTagCompound tag = (NBTTagCompound)iter.next();
+            NetUtils.writeCompoundTag(buf, tag);
         }
     }
 

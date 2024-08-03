@@ -110,9 +110,9 @@ public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >> {
 
 
     @Override
-    public void channelActive(ChannelHandlerContext p_channelActive_1_) throws Exception {
-        super.channelActive(p_channelActive_1_);
-        this.channel = p_channelActive_1_.channel();
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        super.channelActive(ctx);
+        this.channel = ctx.channel();
         this.socketAddress = this.channel.remoteAddress();
         try {
             this.setConnectionState(EnumConnectionState.HANDSHAKING);
@@ -151,7 +151,7 @@ public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >> {
 
 
     @Override
-    protected void channelRead0(ChannelHandlerContext p_channelRead0_1_, Packet<?> packet) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, Packet<?> packet) throws Exception {
         if (this.channel.isOpen()) {
             try {
                 ((Packet<INetHandler>)packet).processPacket(this.packetListener);
@@ -488,7 +488,7 @@ public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >> {
     }
 
 
-    private void dispatchPacketE(final Packet<?> inPacket, @org.jetbrains.annotations.Nullable final GenericFutureListener <? extends Future <? super Void >> [] futureListeners) {
+    private void dispatchPacketE(final Packet<?> inPacket, @Nullable final GenericFutureListener <? extends Future <? super Void >> [] futureListeners) {
         final EnumConnectionState state = EnumConnectionState.getFromPacket(inPacket);
         final EnumConnectionState state1 = channel.attr(PROTOCOL_ATTRIBUTE_KEY).get();
         if (state != state1) {

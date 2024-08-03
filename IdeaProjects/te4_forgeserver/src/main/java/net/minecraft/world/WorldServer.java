@@ -550,12 +550,12 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
 
     @Override
     public void updateEntityWithOptionalForce(Entity entity, boolean forceUpdate) {
-        if (checkCanUpdate) {
-            Chunk chunk = chunkProviderServer.getLoadedChunk(entity.chunkCoordX, entity.chunkCoordZ);
-
+        if (forceUpdate && checkCanUpdate) {
+            Chunk chunk = localSelector.getLoadedE(entity.chunkCoordX, entity.chunkCoordZ);
+            //Chunk chunk = chunkProviderServer.getLoadedChunk(entity.chunkCoordX, entity.chunkCoordZ);
             boolean canUpdate;
             if(chunk != null){
-                localSelector.setChunk(chunk);
+                //localSelector.setChunk(chunk);
                 canUpdate = chunk.isNotUnloadQueued();
             } else
                 canUpdate = canUpdateEvent.post(entity);
@@ -884,14 +884,16 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
     }
 
 
+    //TODO send this only for self players
     private void sendQueuedBlockEvents() {
         while (!this.blockEventQueue[this.blockEventCacheIndex].isEmpty()) {
             int i = this.blockEventCacheIndex;
             this.blockEventCacheIndex ^= 1;
 
-            for (BlockEventData blockeventdata : this.blockEventQueue[i]) {
-                if (this.fireBlockEvent(blockeventdata)) {
-                    this.server.getPlayerList().sendToAllNearExcept(null, blockeventdata.getPosition().getX(), (double)blockeventdata.getPosition().getY(), blockeventdata.getPosition().getZ(), 64.0D, this.provider.getDimension(), new SPacketBlockAction(blockeventdata.getPosition(), blockeventdata.getBlock(), blockeventdata.getEventID(), blockeventdata.getEventParameter()));
+            for (BlockEventData data : this.blockEventQueue[i]) {
+
+                if (this.fireBlockEvent(data)) {
+                    this.server.getPlayerList().sendToAllNearExcept(null, data.getPosition().getX(), data.getPosition().getY(), data.getPosition().getZ(), 64.0D, this.provider.getDimension(), new SPacketBlockAction(data.getPosition(), data.getBlock(), data.getEventID(), data.getEventParameter()));
                 }
             }
             this.blockEventQueue[i].clear();

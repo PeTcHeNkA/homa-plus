@@ -52,8 +52,13 @@ public final class AsyWorldTickerV2 implements ThreadFactory{
         //service = new AsyPoolTickerExecutor(ElcaConfig.ASY_THREAD_POOL_SIZE, this);
         EnumConnectionState.optimizeAccess();
 
-        netFuture = service.scheduleAtFixedRate(new NetworkTicker(), 0, ElcaConfig.NETWORK_TICK_RATE, TimeUnit.MILLISECONDS);
+        if(useSync) {
+            netFuture = service.scheduleAtFixedRate(new NetworkTicker(), 0, ElcaConfig.NETWORK_TICK_RATE, TimeUnit.MILLISECONDS);
+        } else {
+            netFuture = server.getNetworkSystem().makeUpdateTask().scheduleAtFixedRate(service, ElcaConfig.NETWORK_TICK_RATE, TimeUnit.MILLISECONDS);
+        }
     }
+
 
     class NetworkTicker implements Runnable{
         @Override
@@ -135,10 +140,10 @@ public final class AsyWorldTickerV2 implements ThreadFactory{
         }
         public void active(){
             future = service.scheduleAtFixedRate(
-                    () -> tickWorld(WorldInfo.this), 50, 50, TimeUnit.MILLISECONDS
+                    () -> tickWorld(WorldInfo.this), 25, 50, TimeUnit.MILLISECONDS
             );
             light = service.scheduleAtFixedRate(
-                    () -> updateLight(WorldInfo.this), 50, 50, TimeUnit.MILLISECONDS
+                    () -> updateLight(WorldInfo.this), 25, 50, TimeUnit.MILLISECONDS
             );
         }
 

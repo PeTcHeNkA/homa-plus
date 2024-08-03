@@ -42,6 +42,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import plus.fserver.api.Keep;
 import plus.fserver.server.network.ElcaFireWall;
+import plus.fserver.utls.collections.NetMenegerChunkedSyncList;
 
 
 @Keep
@@ -73,7 +74,9 @@ public class NetworkSystem {
     @Keep
     public volatile boolean isAlive;
     private final List<ChannelFuture> endpoints = Collections.synchronizedList(Lists.newArrayList());
-    private final List<NetworkManager> networkManagers = Collections.synchronizedList(Lists.newArrayList());
+    //private final List<NetworkManager> networkManagers = Collections.synchronizedList(Lists.newArrayList());
+    private NetMenegerChunkedSyncList networkManagers = new NetMenegerChunkedSyncList(4);
+
     public EventLoopGroup usedPool;
     private ElcaFireWall<Channel> fireWall;
 
@@ -172,10 +175,15 @@ public class NetworkSystem {
         synchronized (this.endpoints) {
             channelfuture = (new ServerBootstrap()).channel(LocalServerChannel.class).childHandler(new ChannelInitializer<Channel>() {
                 protected void initChannel(Channel chan) throws Exception {
-                    NetworkManager manager = new NetworkManager(EnumPacketDirection.SERVERBOUND);
-                    manager.setNetHandler(new NetHandlerHandshakeMemory(NetworkSystem.this.server, manager));
-                    NetworkSystem.this.networkManagers.add(manager);
-                    chan.pipeline().addLast("packet_handler", manager);
+                    try {
+                        NetworkManager manager = new NetworkManager(EnumPacketDirection.SERVERBOUND);
+                        manager.setNetHandler(new NetHandlerHandshakeMemory(NetworkSystem.this.server, manager));
+                        NetworkSystem.this.networkManagers.add(manager);
+                        chan.pipeline().addLast("packet_handler", manager);
+                    } catch (Exception e){
+                        e.printStackTrace();
+                        throw e;
+                    }
                 }
             }).group(usedPool = SERVER_NIO_EVENTLOOP.getValue()).localAddress(LocalAddress.ANY).bind().syncUninterruptibly();
             this.endpoints.add(channelfuture);
@@ -198,36 +206,47 @@ public class NetworkSystem {
 
 
     public void networkTick() {
-        synchronized (this.networkManagers) {
-            Iterator<NetworkManager> iterator = this.networkManagers.iterator();
+        networkManagers.forEach(this::updateManager);
+//        synchronized (this.networkManagers) {
+//            Iterator<NetworkManager> iterator = this.networkManagers.iterator();
+//
+//            while (iterator.hasNext()) {
+//                final NetworkManager manager = iterator.next();
+//                if(!updateManager(manager))iterator.remove();
+//            }
+//        }
+    }
 
-            while (iterator.hasNext()) {
-                final NetworkManager manager = iterator.next();
 
-                if (!manager.hasNoChannel()) {
-                    if (manager.isChannelOpen()) {
-                        try {
-                            manager.processReceivedPackets();
-                        } catch (Exception exception) {
-                            if (manager.isLocalChannel()) {
-                                CrashReport crashreport = CrashReport.makeCrashReport(exception, "Ticking memory connection");
-                                CrashReportCategory crashreportcategory = crashreport.makeCategory("Ticking connection");
-                                crashreportcategory.addDetail("Connection", manager::toString);
-                                throw new ReportedException(crashreport);
-                            }
+    public NetMenegerChunkedSyncList.AsyncUpdateTask makeUpdateTask(){
+        return networkManagers.makeTask(this::updateManager);
+    }
 
-                            LOGGER.warn("Failed to handle packet for {}", manager.getRemoteAddress(), exception);
-                            final TextComponentString textcomponentstring = new TextComponentString("Internal server error");
-                            manager.sendPacket(new SPacketDisconnect(textcomponentstring), future -> manager.closeChannel(textcomponentstring));
-                            manager.disableAutoRead();
-                        }
-                    } else {
-                        iterator.remove();
-                        manager.handleDisconnection();
+
+    private boolean updateManager(NetworkManager manager){
+        if (!manager.hasNoChannel()) {
+            if (manager.isChannelOpen()) {
+                try {
+                    manager.processReceivedPackets();
+                } catch (Exception exception) {
+                    if (manager.isLocalChannel()) {
+                        CrashReport crashreport = CrashReport.makeCrashReport(exception, "Ticking memory connection");
+                        CrashReportCategory crashreportcategory = crashreport.makeCategory("Ticking connection");
+                        crashreportcategory.addDetail("Connection", manager::toString);
+                        throw new ReportedException(crashreport);
                     }
+
+                    LOGGER.warn("Failed to handle packet for {}", manager.getRemoteAddress(), exception);
+                    final TextComponentString textcomponentstring = new TextComponentString("Internal server error");
+                    manager.sendPacket(new SPacketDisconnect(textcomponentstring), future -> manager.closeChannel(textcomponentstring));
+                    manager.disableAutoRead();
                 }
+            } else {
+                manager.handleDisconnection();
+                return false;
             }
         }
+        return true;
     }
 
 

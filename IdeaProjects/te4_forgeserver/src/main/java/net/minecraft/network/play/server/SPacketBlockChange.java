@@ -1,6 +1,8 @@
 package net.minecraft.network.play.server;
 
 import java.io.IOException;
+
+import io.netty.buffer.ByteBuf;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
@@ -11,6 +13,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.api.IBlockEAccess;
+import plus.fserver.server.network.NetUtils;
 
 
 public class SPacketBlockChange implements Packet<INetHandlerPlayClient> {
@@ -47,11 +50,19 @@ public class SPacketBlockChange implements Packet<INetHandlerPlayClient> {
     }
 
 
-    @Override
+    @Deprecated
     public void writePacketData(PacketBuffer buf) throws IOException {
         buf.writeBlockPos(this.blockPosition);
         buf.writeVarInt(blockState.getId());
-        //buf.writeVarInt(Block.BLOCK_STATE_IDS.get(this.blockState));
+    }
+
+
+    @Override
+    public void writePacketData(int id, ByteBuf buf) throws IOException {
+        NetUtils.writeVarInt(buf, id);
+
+        NetUtils.writeBlockPos(buf, this.blockPosition);
+        NetUtils.writeVarInt(buf, blockState.getId());
     }
 
 

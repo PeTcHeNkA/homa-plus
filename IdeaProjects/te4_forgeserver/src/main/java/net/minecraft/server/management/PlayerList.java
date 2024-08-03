@@ -348,6 +348,7 @@ public abstract class PlayerList {
 //    }
 
 
+    @Nullable
     public String allowUserToConnect(ElcaConnectEvent event, SocketAddress address, GameProfile profile) {
         if (this.bannedPlayers.isBanned(profile)) {
             UserListBansEntry userlistbansentry = this.bannedPlayers.getEntry(profile);

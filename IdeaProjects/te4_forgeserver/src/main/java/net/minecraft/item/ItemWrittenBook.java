@@ -76,16 +76,16 @@ public class ItemWrittenBook extends Item {
 
 
     @Override
-    public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
-        ItemStack itemstack = playerIn.getHeldItem(handIn);
+    public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer playerIn, EnumHand handIn) {
+        ItemStack stack = playerIn.getHeldItem(handIn);
 
-        if (!worldIn.isRemote) {
-            this.resolveContents(itemstack, playerIn);
+        if (!world.isRemote) {
+            this.resolveContents(stack, playerIn);
         }
 
-        playerIn.openBook(itemstack, handIn);
+        playerIn.openBook(stack, handIn);
         playerIn.addStat(Objects.requireNonNull(StatList.getObjectUseStats(this)));
-        return new ActionResult<>(EnumActionResult.SUCCESS, itemstack);
+        return world.pooledAction.init(EnumActionResult.SUCCESS, stack);
     }
 
 

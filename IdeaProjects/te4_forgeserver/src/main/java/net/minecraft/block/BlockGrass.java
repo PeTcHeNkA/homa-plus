@@ -33,8 +33,8 @@ public class BlockGrass extends BlockFx implements IGrowable {
 
 
     @Override
-    public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos) {
-        Block block = worldIn.getBlockState(pos.up()).getBlock();
+    public IBlockState getActualState(IBlockState state, IBlockAccess access, BlockPos pos) {
+        Block block = access.getBlockState(pos.up()).getBlock();
         return state.withProperty(SNOWY, block == Blocks.SNOW || block == Blocks.SNOW_LAYER);
     }
 
@@ -94,11 +94,11 @@ public class BlockGrass extends BlockFx implements IGrowable {
     @Override
     public void updateTick(final World world, final BlockPos pos, IBlockState state, final Random rand) {
         if (!world.isRemote) {
-            if (world.isAreaLoaded(pos, 3)) {
-                ChunkSelector selector = world.localSelector;
+            ChunkSelector selector = world.localSelector;
+            if (selector.isAreaLoaded3(pos.getX(), pos.getX())) {
                 int num = world.getLight(pos.getX(), pos.getY() + 1, pos.getZ(), true);
 
-                BlockPos up = world.localTempPos.setPos(pos.getX(), pos.getY() + 1, pos.getZ());
+                final BlockPos up = world.localTempPos.setPos(pos.getX(), pos.getY() + 1, pos.getZ());
 
                 if (num < 4 && selector.getState(up).getLightOpacity(world, up) > 2) {
                     selector.setBlockState(pos, Blocks.DIRT.getDefaultState(), 2);
