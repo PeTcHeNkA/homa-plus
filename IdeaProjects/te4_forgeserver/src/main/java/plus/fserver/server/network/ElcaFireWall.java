@@ -5,7 +5,6 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.EventLoopGroup;
 import io.netty.util.concurrent.ScheduledFuture;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.NetworkManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import plus.fserver.ElcaConfig;
@@ -24,7 +23,7 @@ import static plus.fserver.ElcaConfig.DEFAULT_SOFT_TIME;
 
 public abstract class ElcaFireWall<T extends Channel> extends ChannelInitializer<T> implements FireWall {
     private static final Logger LOGGER = LogManager.getLogger("FIREWALL");
-    private final ConcurrentHashMap<Key,Item> map = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Key, UserData> map = new ConcurrentHashMap<>();
     private boolean breakUnknown = false;
     private boolean dirty = false;
     private ScheduledFuture<?> future;
@@ -44,9 +43,9 @@ public abstract class ElcaFireWall<T extends Channel> extends ChannelInitializer
     public void initChannel(T channel) throws Exception {
         InetSocketAddress address = (InetSocketAddress) channel.remoteAddress();
         Key key;
-        Item item = map.get(key = new Key(address.getAddress().getAddress()));
+        UserData item = map.get(key = new Key(address.getAddress().getAddress()));
         long cur = System.currentTimeMillis();
-        if(item == null || item.timeStamp < cur){
+        if(item == null || item.timeStamp < cur || item.unknown){
             if(breakUnknown) {
                 channel.close();
                 preInit(channel, key, item,  false);
@@ -63,6 +62,7 @@ public abstract class ElcaFireWall<T extends Channel> extends ChannelInitializer
             }
         } else {
             if(!item.allowConnect){
+                item.warn += 1;
                 channel.close();
                 preInit(channel, key, item,  false);
                 return;
@@ -76,7 +76,7 @@ public abstract class ElcaFireWall<T extends Channel> extends ChannelInitializer
     protected abstract void postInit(Channel channel) throws Exception;
 
 
-    private void preInit(Channel channel, Key key, Item item, boolean allowConnect){
+    private void preInit(Channel channel, Key key, UserData item, boolean allowConnect){
         if(logHistory){
             if(allowConnect){
                 LOGGER.info("ALLOW [{}]", channel.remoteAddress());
@@ -109,10 +109,39 @@ public abstract class ElcaFireWall<T extends Channel> extends ChannelInitializer
 
     public boolean hasRule(Channel channel, Boolean allowConnect){
         InetSocketAddress address = (InetSocketAddress) channel.remoteAddress();
-        Item item = map.get(new Key(address.getAddress().getAddress()));
+        UserData item = map.get(new Key(address.getAddress().getAddress()));
         if(item == null)return false;
         if(allowConnect == null)return true;
         return item.allowConnect == allowConnect.booleanValue();
+    }
+
+
+    public boolean softWarn(Channel channel, int amount){
+        InetSocketAddress address = (InetSocketAddress) channel.remoteAddress();
+        Key key;
+        UserData item = map.get(key = new Key(address.getAddress().getAddress()));
+
+        if(item == null){
+            item = new UserData();
+            map.put(key, item);
+        }
+
+        if(item.unknown){
+            if(amount > 0) {
+                if ((item.warn += amount) > ElcaConfig.MAX_CONNECTION_WARN) {
+                    item.allowConnect = false;
+                    long max = Math.max(item.timeStamp, System.currentTimeMillis());
+                    max += item.warn;
+                    item.warn = 0;
+                    item.timeStamp = max;
+                    return true;
+                }
+            } else {
+                item.warn += amount;
+                if(item.warn < 0)item.warn = 0;
+            }
+        }
+        return breakUnknown && item.unknown;
     }
 
 
@@ -132,12 +161,12 @@ public abstract class ElcaFireWall<T extends Channel> extends ChannelInitializer
         long time = System.currentTimeMillis();
         map.forEach((key, item) -> {
             try {
-                if(item.timeStamp > time){
-                out.writeByte(key.bytes.length);
-                out.write(key.bytes);
+                if(item.timeStamp > time && !item.unknown){
+                    out.writeByte(key.bytes.length);
+                    out.write(key.bytes);
 
-                out.writeLong(item.timeStamp);
-                out.writeBoolean(item.allowConnect);
+                    out.writeLong(item.timeStamp);
+                    out.writeBoolean(item.allowConnect);
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -155,7 +184,7 @@ public abstract class ElcaFireWall<T extends Channel> extends ChannelInitializer
                 Key key = new Key(bytes);
                 long timeStamp = in.readLong();
                 boolean allowConnect = in.readBoolean();
-                Item item = new Item();
+                UserData item = new UserData();
                 item.timeStamp = timeStamp;
                 item.allowConnect = allowConnect;
                 map.put(key, item);
@@ -198,10 +227,18 @@ public abstract class ElcaFireWall<T extends Channel> extends ChannelInitializer
     private void recheckBanList(){
         synchronized (map) {
             long curTime = System.currentTimeMillis();
-            Iterator<Map.Entry<Key, Item>> itr = map.entrySet().iterator();
+            Iterator<Map.Entry<Key, UserData>> itr = map.entrySet().iterator();
             while (itr.hasNext()) {
-                Map.Entry<Key, Item> entry = itr.next();
-                if (entry.getValue().timeStamp < curTime) {
+                Map.Entry<Key, UserData> entry = itr.next();
+                UserData data = entry.getValue();
+
+                if(data.warn > 5000){
+                    data.warn -= 5000;
+                } else {
+                    data.warn = 0;
+                }
+
+                if (data.timeStamp < curTime) {
                     itr.remove();
                     dirty = true;
                 }
@@ -245,12 +282,13 @@ public abstract class ElcaFireWall<T extends Channel> extends ChannelInitializer
 
 
     private void softSet(Key key, long time, boolean allow){
-        Item item = map.get(key);
+        UserData item = map.get(key);
         if(item == null){
-            item = new Item();
+            item = new UserData();
         }
         item.timeStamp = System.currentTimeMillis() + time;
         item.allowConnect = allow;
+        item.unknown      = false;
         dirty = true;
     }
 
@@ -309,8 +347,27 @@ public abstract class ElcaFireWall<T extends Channel> extends ChannelInitializer
     }
 
 
-    private static final class Item{
+    private static final class UserData {
         private long timeStamp;
         private boolean allowConnect = true;
+        private boolean unknown      = true;
+        private int warn = 0;
+
+        public long timeStamp(){
+            return timeStamp;
+        }
+
+        public boolean allowConnect(){
+            return allowConnect;
+        }
+
+        public void set(boolean allowConnect, long time){
+            this.allowConnect = allowConnect;
+            this.timeStamp = time;
+        }
+
+        public void set(boolean allowConnect){
+            this.allowConnect = allowConnect;
+        }
     }
 }

@@ -1,8 +1,12 @@
 package plus.fserver.api;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.epoll.Epoll;
+import io.netty.util.AttributeKey;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.LazyLoadBase;
 import net.minecraft.util.text.TextComponentString;
@@ -10,10 +14,12 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.storage.ISaveHandler;
+import net.minecraftforge.fml.common.network.handshake.NetworkDispatcher;
 import plus.fserver.ElcaCV2;
 import plus.fserver.utls.collections.ArrayListE6;
 import plus.fserver.utls.collections.EntityChunkIter;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Function;
 import static net.minecraft.network.NetworkSystem.SERVER_EPOLL_EVENTLOOP;
@@ -60,6 +66,19 @@ public final class ElcaServerUtls {
             throw new UnsupportedOperationException("Use only on Elca Server!");
         }
         return access.getWorld();
+    }
+
+
+    public static Map<String,String> modList(EntityPlayerMP player){
+        try {
+            final NetworkDispatcher dispatcher = (NetworkDispatcher) player.connection.netManager.channel()
+                    .attr((AttributeKey) NetworkDispatcher.FML_DISPATCHER).get();
+            if (dispatcher == null) return ImmutableMap.of();
+            return dispatcher.getModList();
+        } catch (Exception e){
+            e.printStackTrace();
+            return ImmutableMap.of();
+        }
     }
 
 

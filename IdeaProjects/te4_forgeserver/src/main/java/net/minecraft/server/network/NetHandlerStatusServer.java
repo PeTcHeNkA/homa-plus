@@ -1,5 +1,6 @@
 package net.minecraft.server.network;
 
+import io.netty.channel.Channel;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.status.INetHandlerStatusServer;
 import net.minecraft.network.status.client.CPacketPing;
@@ -9,6 +10,7 @@ import net.minecraft.network.status.server.SPacketServerInfo;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
+import plus.fserver.server.network.ElcaFireWall;
 
 
 public class NetHandlerStatusServer implements INetHandlerStatusServer {
@@ -40,7 +42,10 @@ public class NetHandlerStatusServer implements INetHandlerStatusServer {
 
     @Override
     public void processPing(CPacketPing ping) {
-        this.networkManager.sendPacket(new SPacketPong(ping.getClientTime()));
+        ElcaFireWall<Channel> firewall = server.getNetworkSystem().fireWall();
+        if(firewall == null || !firewall.softWarn(networkManager.channel(), 500)){
+            this.networkManager.sendPacket(new SPacketPong(ping.getClientTime()));
+        }
         this.networkManager.closeChannel(EXIT_MESSAGE);
     }
 }

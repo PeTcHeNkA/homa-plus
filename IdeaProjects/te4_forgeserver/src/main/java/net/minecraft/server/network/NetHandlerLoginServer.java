@@ -2,6 +2,7 @@ package net.minecraft.server.network;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.exceptions.AuthenticationUnavailableException;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
 import java.math.BigInteger;
 import java.net.InetAddress;
@@ -35,6 +36,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import plus.fserver.ElcaConfig;
 import plus.fserver.event.ElcaConnectEvent;
+import plus.fserver.server.network.ElcaFireWall;
 import plus.fserver.utls.math.FastRandom;
 
 
@@ -117,6 +119,10 @@ public class NetHandlerLoginServer implements INetHandlerLoginServer, ITickable 
             event.setData(connectionTimer);
             if(event.isCanceled())return;
             if(!event.canJoin()) {
+                ElcaFireWall<Channel> firewall = server.getNetworkSystem().fireWall();
+                if(firewall != null){
+                    firewall.softWarn(networkManager.channel(), 500);
+                }
                 this.disconnect(new TextComponentTranslation(event.getMessage()));
             } else {
                 Object data = event.getData();

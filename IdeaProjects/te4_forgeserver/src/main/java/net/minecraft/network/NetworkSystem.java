@@ -40,6 +40,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 import plus.fserver.api.Keep;
 import plus.fserver.server.network.ElcaFireWall;
 import plus.fserver.utls.collections.NetMenegerChunkedSyncList;
@@ -163,6 +164,7 @@ public class NetworkSystem {
     }
 
 
+    @Nullable
     public ElcaFireWall<Channel> fireWall() {
         return fireWall;
     }

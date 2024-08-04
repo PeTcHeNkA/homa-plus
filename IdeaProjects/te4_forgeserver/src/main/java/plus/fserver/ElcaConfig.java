@@ -53,8 +53,9 @@ public class ElcaConfig {
     public static int BALANCE_BLOCK_TICK         = 3;
     public static int BALANCE_BLOCK_CRITICAL     = 7;
 
-    public static int MAX_CONNECTIONS_PER        = 10;
+    public static int MAX_CONNECTIONS_PER        = 15;
     public static int MAX_CONNECTIONS_TIME       = 1000;
+    public static int MAX_CONNECTION_WARN       = 10;
 
     //public static boolean FAST_LIGHT                 = true;
     public static boolean SLOW_SWIM_AI               = true;

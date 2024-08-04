@@ -24,6 +24,11 @@ public class NetHandlerHandshakeTCP implements INetHandlerHandshakeServer {
     @Override
     public void processHandshake(final C00Handshake handshake) {
         if (!FMLCommonHandler.instance().handleServerHandshake(handshake, this.networkManager)) {
+            try {
+                server.getNetworkSystem().fireWall().softWarn(networkManager.channel(), 500);
+            } catch (Exception e){
+                e.printStackTrace();
+            }
             return;
         }
         switch (handshake.getRequestedState()) {
