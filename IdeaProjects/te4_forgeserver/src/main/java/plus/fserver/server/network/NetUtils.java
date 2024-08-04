@@ -120,8 +120,13 @@ public class NetUtils {
     }
 
 
-    public <T extends Enum<T>> T readEnumValue(ByteBuf buf, final Class<T> enumClass) {
-        return enumClass.getEnumConstants()[this.readVarInt(buf)];
+    public static <T extends Enum<T>> T readEnumValue(ByteBuf buf, final Class<T> enumClass) {
+        return enumClass.getEnumConstants()[NetUtils.readVarInt(buf)];
+    }
+
+
+    public static <T extends Enum<T>> T readEnumValueFast(ByteBuf buf, final T[] values) {
+        return values[NetUtils.readVarInt(buf)];
     }
 
 

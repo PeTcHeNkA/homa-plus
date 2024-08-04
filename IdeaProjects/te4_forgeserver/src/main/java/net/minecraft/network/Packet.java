@@ -19,4 +19,9 @@ public interface Packet<T extends INetHandler> {
         NetUtils.writeVarInt(buf, id);
         writePacketData(new PacketBuffer(buf));
     }
+
+
+    default void readPacketData(ByteBuf buf) throws IOException {
+        readPacketData(new PacketBuffer(buf));
+    }
 }

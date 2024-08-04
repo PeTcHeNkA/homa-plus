@@ -1,6 +1,8 @@
 package net.minecraft.network.play.client;
 
 import java.io.IOException;
+
+import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
@@ -8,6 +10,7 @@ import net.minecraft.network.play.INetHandlerPlayServer;
 import net.minecraft.util.EnumHandSide;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.fserver.server.network.NetUtils;
 
 
 public class CPacketClientSettings implements Packet<INetHandlerPlayServer> {
@@ -32,6 +35,7 @@ public class CPacketClientSettings implements Packet<INetHandlerPlayServer> {
     }
 
 
+    @Deprecated
     public void readPacketData(PacketBuffer buf) throws IOException {
         this.lang = buf.readString(16);
         this.view = buf.readByte();
@@ -42,6 +46,18 @@ public class CPacketClientSettings implements Packet<INetHandlerPlayServer> {
     }
 
 
+    @Override
+    public void readPacketData(ByteBuf buf) throws IOException {
+        this.lang = NetUtils.readString(buf, 16);
+        this.view = buf.readByte();
+        this.chatVisibility = NetUtils.readEnumValue(buf, EntityPlayer.EnumChatVisibility.class);
+        this.enableColors = buf.readBoolean();
+        this.modelPartFlags = buf.readUnsignedByte();
+        this.mainHand = NetUtils.readEnumValue(buf, EnumHandSide.class);
+    }
+
+
+    @Override
     public void writePacketData(PacketBuffer buf) throws IOException {
         buf.writeString(this.lang);
         buf.writeByte(this.view);
@@ -52,6 +68,7 @@ public class CPacketClientSettings implements Packet<INetHandlerPlayServer> {
     }
 
 
+    @Override
     public void processPacket(INetHandlerPlayServer handler) {
         handler.processClientSettings(this);
     }

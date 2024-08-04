@@ -1,10 +1,12 @@
 package net.minecraft.network.play.client;
 
+import io.netty.buffer.ByteBuf;
 import net.minecraft.network.play.*;
 import net.minecraftforge.fml.relauncher.*;
 import java.io.*;
 import net.minecraft.network.*;
 import plus.fserver.api.Keep;
+import plus.fserver.server.network.NetUtils;
 
 
 @Keep
@@ -25,8 +27,21 @@ public class CPacketCustomPayload implements Packet<INetHandlerPlayServer> {
     }
 
 
+    @Deprecated
     public void readPacketData(final PacketBuffer buf) throws IOException {
         this.channel = buf.readString(20);
+        final int i = buf.readableBytes();
+        if (i >= 0 && i <= 32767) {
+            this.data = new PacketBuffer(buf.readBytes(i));
+            return;
+        }
+        throw new IOException("Payload may not be larger than 32767 bytes");
+    }
+
+
+    @Override
+    public void readPacketData(ByteBuf buf) throws IOException {
+        this.channel = NetUtils.readString(buf, 20);
         final int i = buf.readableBytes();
         if (i >= 0 && i <= 32767) {
             this.data = new PacketBuffer(buf.readBytes(i));
