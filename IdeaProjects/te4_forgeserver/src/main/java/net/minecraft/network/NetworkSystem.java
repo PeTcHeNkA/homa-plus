@@ -75,7 +75,7 @@ public class NetworkSystem {
     public volatile boolean isAlive;
     private final List<ChannelFuture> endpoints = Collections.synchronizedList(Lists.newArrayList());
     //private final List<NetworkManager> networkManagers = Collections.synchronizedList(Lists.newArrayList());
-    private NetMenegerChunkedSyncList networkManagers = new NetMenegerChunkedSyncList(4);
+    private final NetMenegerChunkedSyncList networkManagers = new NetMenegerChunkedSyncList(4, 4);
 
     public EventLoopGroup usedPool;
     private ElcaFireWall<Channel> fireWall;

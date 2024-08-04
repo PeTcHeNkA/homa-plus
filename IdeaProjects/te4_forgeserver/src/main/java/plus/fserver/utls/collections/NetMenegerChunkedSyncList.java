@@ -2,7 +2,6 @@ package plus.fserver.utls.collections;
 
 import net.minecraft.network.NetworkManager;
 import org.jetbrains.annotations.NotNull;
-
 import java.util.concurrent.*;
 
 
@@ -10,10 +9,10 @@ public class NetMenegerChunkedSyncList {
     private final Chunk[] chunks;
     private int size = 0;
 
-    public NetMenegerChunkedSyncList(int countChunks){
+    public NetMenegerChunkedSyncList(int countChunks, int initChunkSize){
         this.chunks = new Chunk[countChunks];
         for (int i = 0; i < chunks.length; i++){
-            chunks[i] = new Chunk();
+            chunks[i] = new Chunk(initChunkSize);
         }
     }
 
@@ -24,8 +23,12 @@ public class NetMenegerChunkedSyncList {
 
 
     private class Chunk{
-        private NetworkManager[] managers = new NetworkManager[4];
+        private NetworkManager[] managers;
         int size = 0;
+
+        private Chunk(int initSize){
+            managers = new NetworkManager[initSize];
+        }
 
         synchronized void add(NetworkManager manager){
             if(managers.length == size){
@@ -81,11 +84,16 @@ public class NetMenegerChunkedSyncList {
     public synchronized void add(NetworkManager manager){
         addAndGet();
         final Chunk[] chunks = this.chunks;
-        int min = 0;
+        int min = Integer.MAX_VALUE;
+        int index = 0;
         for (int i = 0; i < chunks.length; i++){
-            min = Math.min(min, chunks[i].size);
+            int cur = chunks[i].size;
+            if(cur < min){
+                min = cur;
+                index = i;
+            }
         }
-        chunks[min].add(manager);
+        chunks[index].add(manager);
     }
 
 
