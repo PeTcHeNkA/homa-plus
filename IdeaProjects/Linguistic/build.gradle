@@ -1,0 +1,35 @@
+plugins {
+    id 'java'
+}
+
+group = 'plus.tmsg'
+version = '1.0-SNAPSHOT'
+
+compileJava.options.encoding = 'UTF-8'
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+
+    implementation 'it.unimi.dsi:fastutil:8.5.12'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'C:/Users/Te4hnoPlus/IdeaProjects/TsonConfigurations/core/src/main/java'
+            srcDir 'C:/Users/Te4hnoPlus/IdeaProjects/TsonConfigurations/extensions/src/main/java'
+        }
+    }
+}
