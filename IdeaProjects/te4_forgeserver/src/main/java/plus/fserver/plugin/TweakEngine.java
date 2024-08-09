@@ -42,11 +42,8 @@ public class TweakEngine implements IClassTransformer, Set<String> {
         } else {
             IClassTransformer transformer = null;
             try {
-                Class<IClassTransformer> clazz = (Class<IClassTransformer>) Class.forName(
-                        "net.minecraftforge.fml.common.asm.transformers.SideTransformer"
-                );
-                transformer = clazz.newInstance();
-            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+                transformer = new PathTransformer();
+            } catch (Throwable e) {
                 throw new RuntimeException(e);
             }
             sideTransformer = transformer;

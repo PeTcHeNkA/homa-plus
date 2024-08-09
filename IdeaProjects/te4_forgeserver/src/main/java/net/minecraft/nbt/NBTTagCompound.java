@@ -79,6 +79,12 @@ public class NBTTagCompound extends NBTBase {
     }
 
 
+    public void setTagU(String key, NBTBase value) {
+        if (value == null)return;
+        this.tagMap.fput(key, value);
+    }
+
+
     public void setByte(String key, byte value) {
         this.tagMap.fput(key, new NBTTagByte(value));
     }
@@ -296,6 +302,19 @@ public class NBTTagCompound extends NBTBase {
     }
 
 
+    @Nullable
+    public NBTTagCompound getCompoundTagOrNull(String key) {
+        try {
+            NBTBase nbtbase = this.tagMap.get(key);
+            if(nbtbase == null)return null;
+            if (nbtbase.getId() == 10) return (NBTTagCompound)nbtbase;
+        } catch (ClassCastException classcastexception) {
+            throw new ReportedException(this.createCrashReport(key, 10, classcastexception));
+        }
+        return null;
+    }
+
+
     public NBTTagCompound getCompoundTag(String key) {
         try {
             NBTBase nbtbase = this.tagMap.get(key);
@@ -306,6 +325,26 @@ public class NBTTagCompound extends NBTBase {
             throw new ReportedException(this.createCrashReport(key, 10, classcastexception));
         }
         return new NBTTagCompound();
+    }
+
+
+    public NBTTagList getListOrNull(String key, int type){
+        try {
+            NBTBase nbtbase = this.tagMap.get(key);
+            if(nbtbase==null)return null;
+            if (nbtbase.getId() == 9) {
+                NBTTagList nbttaglist = (NBTTagList)this.tagMap.get(key);
+
+                if (!nbttaglist.isEmpty() && nbttaglist.getTagType() != type) {
+                    return null;
+                }
+                return nbttaglist;
+            }
+        } catch (ClassCastException classcastexception) {
+            throw new ReportedException(this.createCrashReport(key, 9, classcastexception));
+        }
+
+        return null;
     }
 
 

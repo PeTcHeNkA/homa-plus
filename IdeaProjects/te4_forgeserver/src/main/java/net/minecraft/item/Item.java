@@ -426,6 +426,13 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
         return false;
     }
 
+
+    public void copyForPacket(ItemStack src, ItemStack copy){
+        NBTTagCompound srcTag = src.getTagCompound();
+        if (srcTag != null) copy.setTagCompound(srcTag.copy());
+    }
+
+
     public boolean getIsRepairable(ItemStack toRepair, ItemStack repair) {
         return false;
     }
@@ -444,6 +451,7 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
         return this.getItemAttributeModifiers(slot);
     }
 
+
     /**
      * Called when a player drops the item into the world,
      * returning false from this will prevent the item from
@@ -453,10 +461,10 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
      * @param player The player that dropped the item
      * @param item The item stack, before the item is removed.
      */
-    public boolean onDroppedByPlayer(ItemStack item, EntityPlayer player)
-    {
+    public boolean onDroppedByPlayer(ItemStack item, EntityPlayer player) {
         return true;
     }
+
 
     /**
      * Allow the item one last chance to modify its name used for the
@@ -466,45 +474,44 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
      * @param item the ItemStack for the item.
      * @param displayName the name that will be displayed unless it is changed in this method.
      */
-    public String getHighlightTip( ItemStack item, String displayName )
-    {
+    public String getHighlightTip( ItemStack item, String displayName ) {
         return displayName;
     }
 
 
-    public EnumActionResult onItemUseFirst(EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, EnumHand hand)
-    {
+    public EnumActionResult onItemUseFirst(EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, EnumHand hand) {
         return EnumActionResult.PASS;
     }
+
 
     protected boolean canRepair = true;
     /**
      * Called by CraftingManager to determine if an item is reparable.
      * @return True if reparable
      */
-    public boolean isRepairable()
-    {
+    public boolean isRepairable() {
         return canRepair && isDamageable();
     }
+
 
     /**
      * Call to disable repair recipes.
      * @return The current Item instance
      */
-    public Item setNoRepair()
-    {
+    public Item setNoRepair() {
         canRepair = false;
         return this;
     }
+
 
     /**
      * Determines the amount of durability the mending enchantment
      * will repair, on average, per point of experience.
      */
-    public float getXpRepairRatio(ItemStack stack)
-    {
+    public float getXpRepairRatio(ItemStack stack) {
         return 2f;
     }
+
 
     /**
      * Override this method to change the NBT data being sent to the client.
@@ -521,10 +528,10 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
      * @return The NBT tag
      */
     @Nullable
-    public NBTTagCompound getNBTShareTag(ItemStack stack)
-    {
+    public NBTTagCompound getNBTShareTag(ItemStack stack) {
         return stack.getTagCompound();
     }
+
 
     /**
      * Override this method to decide what to do with the NBT data received from getNBTShareTag().
@@ -532,10 +539,10 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
      * @param stack The stack that received NBT
      * @param nbt Received NBT, can be null
      */
-    public void readNBTShareTag(ItemStack stack, @Nullable NBTTagCompound nbt)
-    {
+    public void readNBTShareTag(ItemStack stack, @Nullable NBTTagCompound nbt) {
         stack.setTagCompound(nbt);
     }
+
 
     /**
      * Called before a block is broken.  Return true to prevent default block harvesting.
@@ -547,10 +554,10 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
      * @param player The Player that is wielding the item
      * @return True to prevent harvesting, false to continue as normal
      */
-    public boolean onBlockStartBreak(ItemStack itemstack, BlockPos pos, EntityPlayer player)
-    {
+    public boolean onBlockStartBreak(ItemStack itemstack, BlockPos pos, EntityPlayer player) {
         return false;
     }
+
 
     /**
      * Called each tick while using an item.
@@ -558,9 +565,8 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
      * @param player The Player using the item
      * @param count The amount of time in tick the item has been used for continuously
      */
-    public void onUsingTick(ItemStack stack, EntityLivingBase player, int count)
-    {
-    }
+    public void onUsingTick(ItemStack stack, EntityLivingBase player, int count) {}
+
 
     /**
      * Called when the player Left Clicks (attacks) an entity.
@@ -572,10 +578,10 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
      * @param entity The entity being attacked
      * @return True to cancel the rest of the interaction.
      */
-    public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity)
-    {
+    public boolean onLeftClickEntity(ItemStack stack, EntityPlayer player, Entity entity) {
         return false;
     }
+
 
     /**
      * ItemStack sensitive version of getContainerItem.
@@ -584,24 +590,23 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
      * @param itemStack The current ItemStack
      * @return The resulting ItemStack
      */
-    public ItemStack getContainerItem(ItemStack itemStack)
-    {
-        if (!hasContainerItem(itemStack))
-        {
+    public ItemStack getContainerItem(ItemStack itemStack) {
+        if (!hasContainerItem(itemStack)) {
             return ItemStack.EMPTY;
         }
         return new ItemStack(getContainerItem());
     }
+
 
     /**
      * ItemStack sensitive version of hasContainerItem
      * @param stack The current item stack
      * @return True if this item has a 'container'
      */
-    public boolean hasContainerItem(ItemStack stack)
-    {
+    public boolean hasContainerItem(ItemStack stack) {
         return hasContainerItem();
     }
+
 
     /**
      * Retrieves the normal 'lifespan' of this item when it is dropped on the ground as a EntityItem.
@@ -611,10 +616,10 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
      * @param world The world the entity is in
      * @return The normal lifespan in ticks.
      */
-    public int getEntityLifespan(ItemStack itemStack, World world)
-    {
+    public int getEntityLifespan(ItemStack itemStack, World world) {
         return 6000;
     }
+
 
     /**
      * Determines if this Item has a special entity for when they are in the world.
@@ -624,10 +629,10 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
      * @param stack The current item stack
      * @return True of the item has a custom entity, If true, Item#createCustomEntity will be called
      */
-    public boolean hasCustomEntity(ItemStack stack)
-    {
+    public boolean hasCustomEntity(ItemStack stack) {
         return false;
     }
+
 
     /**
      * This function should return a new entity to replace the dropped item.
@@ -640,10 +645,10 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
      * @return A new Entity object to spawn or null
      */
     @Nullable
-    public Entity createEntity(World world, Entity location, ItemStack itemstack)
-    {
+    public Entity createEntity(World world, Entity location, ItemStack itemstack) {
         return null;
     }
+
 
     /**
      * Called by the default implemetation of EntityItem's onUpdate method, allowing for cleaner
@@ -652,10 +657,10 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
      * @param entityItem The entity Item
      * @return Return true to skip any further update code.
      */
-    public boolean onEntityItemUpdate(net.minecraft.entity.item.EntityItem entityItem)
-    {
+    public boolean onEntityItemUpdate(net.minecraft.entity.item.EntityItem entityItem) {
         return false;
     }
+
 
     /**
      * Gets a list of tabs that items belonging to this class can display on,
@@ -664,10 +669,10 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
      *
      * @return A list of all tabs that this item could possibly be one.
      */
-    public CreativeTabs[] getCreativeTabs()
-    {
+    public CreativeTabs[] getCreativeTabs() {
         return new CreativeTabs[]{ getCreativeTab() };
     }
+
 
     /**
      * Determines the base experience for a player when they remove this item from a furnace slot.
@@ -677,10 +682,10 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
      * @param item The item stack the player is picking up.
      * @return The amount to award for each item.
      */
-    public float getSmeltingExperience(ItemStack item)
-    {
+    public float getSmeltingExperience(ItemStack item) {
         return -1; //-1 will default to the old lookups.
     }
+
 
     /**
      *
@@ -691,15 +696,16 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
      * @param player The Player that is wielding the item
      * @return
      */
-    public boolean doesSneakBypassUse(ItemStack stack, net.minecraft.world.IBlockAccess world, BlockPos pos, EntityPlayer player)
-    {
+    public boolean doesSneakBypassUse(ItemStack stack, net.minecraft.world.IBlockAccess world, BlockPos pos, EntityPlayer player) {
         return false;
     }
+
 
     /**
      * Called to tick armor in the armor slot. Override to do something
      */
     public void onArmorTick(World world, EntityPlayer player, ItemStack itemStack){}
+
 
     /**
      * Determines if the specific ItemStack can be placed in the specified armor slot, for the entity.
@@ -711,10 +717,10 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
      * @param entity The entity trying to equip the armor
      * @return True if the given ItemStack can be inserted in the slot
      */
-    public boolean isValidArmor(ItemStack stack, EntityEquipmentSlot armorType, Entity entity)
-    {
+    public boolean isValidArmor(ItemStack stack, EntityEquipmentSlot armorType, Entity entity) {
         return net.minecraft.entity.EntityLiving.getSlotForItemStack(stack) == armorType;
     }
+
 
     /**
      * Override this to set a non-default armor slot for an ItemStack, but
@@ -726,10 +732,10 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
      * vanilla logic as per {@code EntityLiving.getSlotForItemStack(stack)} decide
      */
     @Nullable
-    public EntityEquipmentSlot getEquipmentSlot(ItemStack stack)
-    {
+    public EntityEquipmentSlot getEquipmentSlot(ItemStack stack) {
         return null;
     }
+
 
     /**
      * Allow or forbid the specific book/item combination as an anvil enchant
@@ -738,10 +744,10 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
      * @param book The book
      * @return if the enchantment is allowed
      */
-    public boolean isBookEnchantable(ItemStack stack, ItemStack book)
-    {
+    public boolean isBookEnchantable(ItemStack stack, ItemStack book) {
         return true;
     }
+
 
     /**
      * Called by RenderBiped and RenderPlayer to determine the armor texture that
@@ -757,10 +763,10 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
      * @return Path of texture to bind, or null to use default
      */
     @Nullable
-    public String getArmorTexture(ItemStack stack, Entity entity, EntityEquipmentSlot slot, String type)
-    {
+    public String getArmorTexture(ItemStack stack, Entity entity, EntityEquipmentSlot slot, String type) {
         return null;
     }
+
 
     /**
      * Returns the font renderer used to render tooltips and overlays for this item.
@@ -771,10 +777,10 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
      */
     @SideOnly(Side.CLIENT)
     @Nullable
-    public net.minecraft.client.gui.FontRenderer getFontRenderer(ItemStack stack)
-    {
+    public net.minecraft.client.gui.FontRenderer getFontRenderer(ItemStack stack) {
         return null;
     }
+
 
     /**
      * Override this method to have an item handle its own armor rendering.
@@ -787,10 +793,10 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
      */
     @SideOnly(Side.CLIENT)
     @Nullable
-    public net.minecraft.client.model.ModelBiped getArmorModel(EntityLivingBase entityLiving, ItemStack itemStack, EntityEquipmentSlot armorSlot, net.minecraft.client.model.ModelBiped _default)
-    {
+    public net.minecraft.client.model.ModelBiped getArmorModel(EntityLivingBase entityLiving, ItemStack itemStack, EntityEquipmentSlot armorSlot, net.minecraft.client.model.ModelBiped _default) {
         return null;
     }
+
 
     /**
      * Called when a entity tries to play the 'swing' animation.
@@ -799,10 +805,10 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
      * @param stack The Item stack
      * @return True to cancel any further processing by EntityLiving
      */
-    public boolean onEntitySwing(EntityLivingBase entityLiving, ItemStack stack)
-    {
+    public boolean onEntitySwing(EntityLivingBase entityLiving, ItemStack stack) {
         return false;
     }
+
 
     /**
      * Called when the client starts rendering the HUD, for whatever item the player currently has as a helmet.
@@ -816,26 +822,27 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
     @SideOnly(Side.CLIENT)
     public void renderHelmetOverlay(ItemStack stack, EntityPlayer player, net.minecraft.client.gui.ScaledResolution resolution, float partialTicks){}
 
+
     /**
      * Return the itemDamage represented by this ItemStack. Defaults to the itemDamage field on ItemStack, but can be overridden here for other sources such as NBT.
      *
      * @param stack The itemstack that is damaged
      * @return the damage value
      */
-    public int getDamage(ItemStack stack)
-    {
+    public int getDamage(ItemStack stack) {
         return stack.itemDamage;
     }
+
 
     /**
      * This used to be 'display damage' but its really just 'aux' data in the ItemStack, usually shares the same variable as damage.
      * @param stack
      * @return
      */
-    public int getMetadata(ItemStack stack)
-    {
+    public int getMetadata(ItemStack stack) {
         return stack.itemDamage;
     }
+
 
     /**
      * Determines if the durability bar should be rendered for this item.
@@ -845,10 +852,10 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
      * @param stack The current Item Stack
      * @return True if it should render the 'durability' bar.
      */
-    public boolean showDurabilityBar(ItemStack stack)
-    {
+    public boolean showDurabilityBar(ItemStack stack) {
         return stack.isItemDamaged();
     }
+
 
     /**
      * Queries the percentage of the 'Durability' bar that should be drawn.
@@ -856,10 +863,10 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
      * @param stack The current ItemStack
      * @return 0.0 for 100% (no damage / full bar), 1.0 for 0% (fully damaged / empty bar)
      */
-    public double getDurabilityForDisplay(ItemStack stack)
-    {
+    public double getDurabilityForDisplay(ItemStack stack) {
         return (double)stack.getItemDamage() / (double)stack.getMaxDamage();
     }
+
 
     /**
      * Returns the packed int RGB value used to render the durability bar in the GUI.
@@ -868,10 +875,11 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
      * @param stack Stack to get durability from
      * @return A packed RGB value for the durability colour (0x00RRGGBB)
      */
-    public int getRGBDurabilityForDisplay(ItemStack stack)
-    {
+    public int getRGBDurabilityForDisplay(ItemStack stack) {
         return MathHelper.hsvToRGB(Math.max(0.0F, (float) (1.0F - getDurabilityForDisplay(stack))) / 3.0F, 1.0F, 1.0F);
     }
+
+
     /**
      * Return the maxDamage for this ItemStack. Defaults to the maxDamage field in this item,
      * but can be overridden here for other sources such as NBT.
@@ -879,41 +887,39 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
      * @param stack The itemstack that is damaged
      * @return the damage value
      */
-    public int getMaxDamage(ItemStack stack)
-    {
+    public int getMaxDamage(ItemStack stack) {
         return getMaxDamage();
     }
+
 
     /**
      * Return if this itemstack is damaged. Note only called if {@link #isDamageable()} is true.
      * @param stack the stack
      * @return if the stack is damaged
      */
-    public boolean isDamaged(ItemStack stack)
-    {
+    public boolean isDamaged(ItemStack stack) {
         return stack.itemDamage > 0;
     }
+
 
     /**
      * Set the damage for this itemstack. Note, this method is responsible for zero checking.
      * @param stack the stack
      * @param damage the new damage value
      */
-    public void setDamage(ItemStack stack, int damage)
-    {
+    public void setDamage(ItemStack stack, int damage) {
         stack.itemDamage = damage;
 
-        if (stack.itemDamage < 0)
-        {
+        if (stack.itemDamage < 0) {
             stack.itemDamage = 0;
         }
     }
 
 
-    public boolean canDestroyBlockInCreative(World world, BlockPos pos, ItemStack stack, EntityPlayer player)
-    {
+    public boolean canDestroyBlockInCreative(World world, BlockPos pos, ItemStack stack, EntityPlayer player) {
         return !(this instanceof ItemSword);
     }
+
 
     /**
      * ItemStack sensitive version of {@link #canHarvestBlock(IBlockState)}
@@ -921,10 +927,10 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
      * @param stack The itemstack used to harvest the block
      * @return true if can harvest the block
      */
-    public boolean canHarvestBlock(IBlockState state, ItemStack stack)
-    {
+    public boolean canHarvestBlock(IBlockState state, ItemStack stack) {
         return canHarvestBlock(state);
     }
+
 
     /**
      * Gets the maximum number of items that this stack should be able to hold.
@@ -933,12 +939,12 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
      * @param stack The ItemStack
      * @return The maximum number this item can be stacked to
      */
-    public int getItemStackLimit(ItemStack stack)
-    {
+    public int getItemStackLimit(ItemStack stack) {
         return this.getItemStackLimit();
     }
 
-    private java.util.Map<String, Integer> toolClasses = new java.util.HashMap<String, Integer>();
+
+    private java.util.Map<String, Integer> toolClasses = new java.util.HashMap<>();
     /**
      * Sets or removes the harvest level for the specified tool class.
      *
@@ -950,18 +956,18 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
      *     Diamond: 3
      *     Gold:    0
      */
-    public void setHarvestLevel(String toolClass, int level)
-    {
+    public void setHarvestLevel(String toolClass, int level) {
         if (level < 0)
             toolClasses.remove(toolClass);
         else
             toolClasses.put(toolClass, level);
     }
 
-    public java.util.Set<String> getToolClasses(ItemStack stack)
-    {
+
+    public java.util.Set<String> getToolClasses(ItemStack stack) {
         return toolClasses.keySet();
     }
+
 
     /**
      * Queries the harvest level of this item stack for the specified tool class,
@@ -973,11 +979,11 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
      * @param blockState The block to harvest
      * @return Harvest level, or -1 if not the specified tool type.
      */
-    public int getHarvestLevel(ItemStack stack, String toolClass, @Nullable EntityPlayer player, @Nullable IBlockState blockState)
-    {
+    public int getHarvestLevel(ItemStack stack, String toolClass, @Nullable EntityPlayer player, @Nullable IBlockState blockState) {
         Integer ret = toolClasses.get(toolClass);
         return ret == null ? -1 : ret;
     }
+
 
     /**
      * ItemStack sensitive version of getItemEnchantability
@@ -985,10 +991,10 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
      * @param stack The ItemStack
      * @return the item echantability value
      */
-    public int getItemEnchantability(ItemStack stack)
-    {
+    public int getItemEnchantability(ItemStack stack) {
         return getItemEnchantability();
     }
+
 
     /**
      * Checks whether an item can be enchanted with a certain enchantment. This applies specifically to enchanting an item in the enchanting table and is called when retrieving the list of possible enchantments for an item.
@@ -998,20 +1004,20 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
      * @param enchantment the enchantment to be applied
      * @return true if the enchantment can be applied to this item
      */
-    public boolean canApplyAtEnchantingTable(ItemStack stack, net.minecraft.enchantment.Enchantment enchantment)
-    {
+    public boolean canApplyAtEnchantingTable(ItemStack stack, net.minecraft.enchantment.Enchantment enchantment) {
         return enchantment.type.canEnchantItem(stack.getItem());
     }
+
 
     /**
      * Whether this Item can be used as a payment to activate the vanilla beacon.
      * @param stack the ItemStack
      * @return true if this Item can be used
      */
-    public boolean isBeaconPayment(ItemStack stack)
-    {
+    public boolean isBeaconPayment(ItemStack stack) {
         return this == Items.EMERALD || this == Items.DIAMOND || this == Items.GOLD_INGOT || this == Items.IRON_INGOT;
     }
+
 
     /**
      * Determine if the player switching between these two item stacks
@@ -1022,10 +1028,10 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
      *                    slots that hold the exact same item.
      * @return True to play the item change animation
      */
-    public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged)
-    {
+    public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
         return !oldStack.equals(newStack); //!ItemStack.areItemStacksEqual(oldStack, newStack);
     }
+
 
     /**
      * Called when the player is mining a block and the item in his hand changes.
@@ -1034,8 +1040,7 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
      * @param newStack The new stack
      * @return True to reset block break progress
      */
-    public boolean shouldCauseBlockBreakReset(ItemStack oldStack, ItemStack newStack)
-    {
+    public boolean shouldCauseBlockBreakReset(ItemStack oldStack, ItemStack newStack) {
         return !(newStack.getItem() == oldStack.getItem() && ItemStack.areItemStackTagsEqual(newStack, oldStack) && (newStack.isItemStackDamageable() || newStack.getMetadata() == oldStack.getMetadata()));
     }
 
@@ -1047,10 +1052,10 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
      * @param newStack the stack currently in the active hand
      * @return true to set the new stack to active and continue using it
      */
-    public boolean canContinueUsing(ItemStack oldStack, ItemStack newStack)
-    {
+    public boolean canContinueUsing(ItemStack oldStack, ItemStack newStack) {
         return oldStack.equals(newStack);
     }
+
 
     /**
      * Called to get the Mod ID of the mod that *created* the ItemStack,
@@ -1067,10 +1072,10 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
      *         null when there is no specially associated mod and {@link #getRegistryName()} would return null.
      */
     @Nullable
-    public String getCreatorModId(ItemStack itemStack)
-    {
+    public String getCreatorModId(ItemStack itemStack) {
         return net.minecraftforge.common.ForgeHooks.getDefaultCreatorModId(itemStack);
     }
+
 
     /**
      * Called from ItemStack.setItem, will hold extra data for the life of this ItemStack.
@@ -1086,16 +1091,14 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
      * @return A holder instance associated with this ItemStack where you can hold capabilities for the life of this item.
      */
     @Nullable
-    public net.minecraftforge.common.capabilities.ICapabilityProvider initCapabilities(ItemStack stack, @Nullable NBTTagCompound nbt)
-    {
+    public net.minecraftforge.common.capabilities.ICapabilityProvider initCapabilities(ItemStack stack, @Nullable NBTTagCompound nbt) {
         return null;
     }
 
-    public com.google.common.collect.ImmutableMap<String, net.minecraftforge.common.animation.ITimeValue> getAnimationParameters(final ItemStack stack, final World world, final EntityLivingBase entity)
-    {
+
+    public com.google.common.collect.ImmutableMap<String, net.minecraftforge.common.animation.ITimeValue> getAnimationParameters(final ItemStack stack, final World world, final EntityLivingBase entity) {
         com.google.common.collect.ImmutableMap.Builder<String, net.minecraftforge.common.animation.ITimeValue> builder = com.google.common.collect.ImmutableMap.builder();
-        for(ResourceLocation location : properties.getKeys())
-        {
+        for(ResourceLocation location : properties.getKeys()) {
             final IItemPropertyGetter parameter = properties.getObject(location);
             builder.put(location.toString(), new net.minecraftforge.common.animation.ITimeValue()
             {
@@ -1108,6 +1111,7 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
         return builder.build();
     }
 
+
     /**
      * Can this Item disable a shield
      * @param stack The ItemStack
@@ -1116,10 +1120,10 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
      * @param attacker The EntityLivingBase holding the ItemStack
      * @retrun True if this ItemStack can disable the shield in question.
      */
-    public boolean canDisableShield(ItemStack stack, ItemStack shield, EntityLivingBase entity, EntityLivingBase attacker)
-    {
+    public boolean canDisableShield(ItemStack stack, ItemStack shield, EntityLivingBase entity, EntityLivingBase attacker) {
         return this instanceof ItemAxe;
     }
+
 
     /**
      * Is this Item a shield
@@ -1127,10 +1131,10 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
      * @param entity The Entity holding the ItemStack
      * @return True if the ItemStack is considered a shield
      */
-    public boolean isShield(ItemStack stack, @Nullable EntityLivingBase entity)
-    {
+    public boolean isShield(ItemStack stack, @Nullable EntityLivingBase entity) {
         return stack.getItem() == Items.SHIELD;
     }
+
 
     /**
      * @return the fuel burn time for this itemStack in a furnace.
@@ -1142,19 +1146,19 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
         return -1;
     }
 
+
     /**
      * Returns an enum constant of type {@code HorseArmorType}.
      * The returned enum constant will be used to determine the armor value and texture of this item when equipped.
      * @param stack the armor stack
      * @return an enum constant of type {@code HorseArmorType}. Return HorseArmorType.NONE if this is not horse armor
      */
-    public net.minecraft.entity.passive.HorseArmorType getHorseArmorType(ItemStack stack)
-    {
+    public net.minecraft.entity.passive.HorseArmorType getHorseArmorType(ItemStack stack) {
         return net.minecraft.entity.passive.HorseArmorType.getByItem(stack.getItem());
     }
 
-    public String getHorseArmorTexture(net.minecraft.entity.EntityLiving wearer, ItemStack stack)
-    {
+
+    public String getHorseArmorTexture(net.minecraft.entity.EntityLiving wearer, ItemStack stack) {
         return getHorseArmorType(stack).getTextureName();
     }
 
@@ -1706,26 +1710,26 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
         registerItem(2267, "record_wait", (new ItemRecord("wait", SoundEvents.RECORD_WAIT)).setTranslationKey("record"));
     }
 
-    private static void registerItemBlock(Block blockIn)
-    {
+
+    private static void registerItemBlock(Block blockIn) {
         registerItemBlock(blockIn, new ItemBlock(blockIn));
     }
 
-    protected static void registerItemBlock(Block blockIn, Item itemIn)
-    {
+
+    protected static void registerItemBlock(Block blockIn, Item itemIn) {
         registerItem(Block.getIdFromBlock(blockIn), Block.REGISTRY.getNameForObject(blockIn), itemIn);
         BLOCK_TO_ITEM.put(blockIn, itemIn);
     }
 
-    private static void registerItem(int id, String textualID, Item itemIn)
-    {
+
+    private static void registerItem(int id, String textualID, Item itemIn) {
         registerItem(id, new ResourceLocation(textualID), itemIn);
     }
 
-    private static void registerItem(int id, ResourceLocation textualID, Item itemIn)
-    {
+    private static void registerItem(int id, ResourceLocation textualID, Item itemIn) {
         REGISTRY.register(id, textualID, itemIn);
     }
+
 
     @SideOnly(Side.CLIENT)
     public ItemStack getDefaultInstance()
@@ -1784,40 +1788,30 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
         }
 
         @Deprecated // Use getRepairItemStack below
-        public Item getRepairItem()
-        {
-            if (this == WOOD)
-            {
+        public Item getRepairItem() {
+            if (this == WOOD) {
                 return Item.getItemFromBlock(Blocks.PLANKS);
-            }
-            else if (this == STONE)
-            {
+            } else if (this == STONE) {
                 return Item.getItemFromBlock(Blocks.COBBLESTONE);
-            }
-            else if (this == GOLD)
-            {
+            } else if (this == GOLD) {
                 return Items.GOLD_INGOT;
-            }
-            else if (this == IRON)
-            {
+            } else if (this == IRON) {
                 return Items.IRON_INGOT;
-            }
-            else
-            {
+            } else {
                 return this == DIAMOND ? Items.DIAMOND : null;
             }
         }
 
-        public ToolMaterial setRepairItem(ItemStack stack)
-        {
+
+        public ToolMaterial setRepairItem(ItemStack stack) {
             if (!this.repairMaterial.isEmpty()) throw new RuntimeException("Repair material has already been set");
             if (this == WOOD || this == STONE || this == GOLD || this == IRON || this == DIAMOND) throw new RuntimeException("Can not change vanilla tool repair materials");
             this.repairMaterial = stack;
             return this;
         }
 
-        public ItemStack getRepairItemStack()
-        {
+
+        public ItemStack getRepairItemStack() {
             if (!repairMaterial.isEmpty()) return repairMaterial;
             Item ret = this.getRepairItem();
             if (ret != null) repairMaterial = new ItemStack(ret, 1, net.minecraftforge.oredict.OreDictionary.WILDCARD_VALUE);

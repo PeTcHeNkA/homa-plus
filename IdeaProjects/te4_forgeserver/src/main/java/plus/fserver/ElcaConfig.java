@@ -2,13 +2,17 @@ package plus.fserver;
 
 import plus.tson.TsonFile;
 import plus.tson.TsonMap;
-
+import plus.tson.TsonObj;
+import plus.tson.utl.Te4HashMap;
 import java.io.File;
+import java.util.Map;
 import static plus.tson.ext.TsonNumUtils.*;
 import static plus.tson.ext.TsonBoolUtils.*;
 
 
 public class ElcaConfig {
+    private static final Te4HashMap<String,Boolean> VARS = new Te4HashMap<>();
+
     public static File NATIVES;
     public static final String SERVER_ID            = "ElcaServer";
     public static final String DEFAULT_REJECT_MSG   = "Connection rejected";
@@ -89,8 +93,28 @@ public class ElcaConfig {
     }
 
 
+    private static void readVars(TsonMap map){
+        if(map == null)return;
+        Te4HashMap<String,Boolean> vars = VARS;
+        for (Map.Entry<String, TsonObj> entry : map.entrySet()) {
+            String key = entry.getKey();
+            TsonObj val = entry.getValue();
+            if (val.isBool()) {
+                vars.fput(key, val.getBool());
+            }
+        }
+    }
+
+
+    public static boolean getVar(String key, boolean def){
+        return VARS.getOrDefault(key, def);
+    }
+
+
     public static void init(TsonMap map){
         NATIVES                    = dir(map.getOrDefaultStr("elca-natives", "elca_natives"));
+
+        map.ifContainsMap("vars", ElcaConfig::readVars);
 
         TIME_PACKET_RATE           = calc(map, "time-packet-rate"            , TIME_PACKET_RATE           );
         CHUNK_TICK_RADIUS_1        = calc(map, "chunk-tick-radius-m"         , CHUNK_TICK_RADIUS_1        );

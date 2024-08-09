@@ -8,7 +8,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.biome.Biome;
 import plus.tson.TsonMap;
 import plus.tson.TsonObj;
-import plus.tson.exception.NoSearchException;
 import plus.tson.security.ClassManager;
 
 
@@ -53,7 +52,7 @@ public class McTsonUtils {
                 result = forName0(clazz);
                 if(result != null)return result;
 
-                throw new NoSearchException(clazz);
+                throw new IllegalArgumentException(clazz);
             }
             private Class<?> forName0(String name){
                 try {

@@ -99,7 +99,8 @@ public final class ItemStack implements ICapabilitySerializable<NBTTagCompound> 
 
 
     public ItemStack(final NBTTagCompound compound) {
-        this.capNBT = (compound.hasKey("ForgeCaps") ? compound.getCompoundTag("ForgeCaps") : null);
+        this.capNBT = compound.getCompoundTagOrNull("ForgeCaps");
+
         this.item = (compound.hasKey("id", 8) ? Item.getByNameOrId(compound.getString("id")) : Items.AIR);
         this.stackSize = compound.getByte("Count");
         this.itemDamage = Math.max(0, compound.getShort("Damage"));
@@ -312,6 +313,16 @@ public final class ItemStack implements ICapabilitySerializable<NBTTagCompound> 
     }
 
 
+    public ItemStack copyForPacket(){
+        Item item = this.item;
+        ItemStack copy = new ItemStack(item, this.stackSize, this.itemDamage, (this.capabilities != null) ? this.capabilities.serializeNBT() : null);
+        if(item == null)return copy;
+        copy.setAnimationsToGo(this.getAnimationsToGo());
+        item.copyForPacket(this, copy);
+        return copy;
+    }
+
+
     public static boolean areItemStackTagsEqual(final ItemStack stackA, final ItemStack stackB) {
         return (stackA.isEmpty() && stackB.isEmpty()) || (!stackA.isEmpty() && !stackB.isEmpty() && (stackA.stackTagCompound != null || stackB.stackTagCompound == null) && (stackA.stackTagCompound == null || stackA.stackTagCompound.equals(stackB.stackTagCompound)) && stackA.areCapsCompatible(stackB));
     }
@@ -415,7 +426,8 @@ public final class ItemStack implements ICapabilitySerializable<NBTTagCompound> 
 
     @Nullable
     public NBTTagCompound getSubCompound(final String key) {
-        return (this.stackTagCompound != null && this.stackTagCompound.hasKey(key, 10)) ? this.stackTagCompound.getCompoundTag(key) : null;
+        if(this.stackTagCompound == null)return null;
+        return this.stackTagCompound.getCompoundTagOrNull(key);
     }
 
 

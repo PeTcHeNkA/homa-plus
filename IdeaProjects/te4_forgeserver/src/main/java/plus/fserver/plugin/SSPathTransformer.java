@@ -72,5 +72,7 @@ public class SSPathTransformer extends TweakEngine implements IClassTransformer{
         add("net.minecraft.server.dedicated.DedicatedServer", true);
         add("net.minecraft.server.dedicated.DedicatedServer$1", true);
         add("net.minecraft.server.dedicated.DedicatedServer$2", true);
+
+        add("net.minecraft.item.ItemShulkerBox", false, false, true);
     }
 }

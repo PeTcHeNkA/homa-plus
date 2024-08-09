@@ -24,7 +24,7 @@ public class SPacketSetSlot implements Packet<INetHandlerPlayClient> {
         this.item = ItemStack.EMPTY;
         this.windowId = id;
         this.slot = slot;
-        this.item = stack.copy();
+        this.item = stack.copyForPacket();
     }
 
 
