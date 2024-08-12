@@ -272,7 +272,7 @@ public enum EnumConnectionState {
 
     private static final Supplier<Packet<?>> EMPTY = () -> null;
     private static final EnumConnectionState[] STATES_BY_ID = new EnumConnectionState[4];
-    private static final Map < Class <? extends Packet<? >> , EnumConnectionState > STATES_BY_CLASS = Maps.newHashMap();
+    private static final IdentityHashMap<Class<? extends Packet<?>> , EnumConnectionState > STATES_BY_CLASS = new IdentityHashMap<>();
     private final int id;
 
     private final Int2ObjectOpenHashMap<Supplier<Packet<?>>>[] constructMap = new Int2ObjectOpenHashMap[]{makeConMap(), makeConMap()};

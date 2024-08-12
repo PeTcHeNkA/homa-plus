@@ -255,10 +255,15 @@ public abstract class StructureComponent {
 
 
     protected IBlockState getBlockStateFromPos(ChunkSelector selector, int x, int y, int z, StructureBoundingBox box) {
-        BlockPos pos;
-        return !box.isVecInside(pos = new BlockPos(
-                this.getXWithOffset(x, z), this.getYWithOffset(y), this.getZWithOffset(x, z))
-        ) ? BlockIDIndexes.AIR_STATE : selector.getState(pos);
+        int yOff = this.getYWithOffset(y);
+        if(yOff > 255 || yOff < 0)return BlockIDIndexes.AIR_STATE;
+        int xOff = this.getXWithOffset(x, z);
+        int zOff = this.getZWithOffset(x, z);
+
+        if(box.isVecInside(xOff, yOff, zOff)){
+            return selector.getStateUnchecked(xOff, yOff, zOff);
+        }
+        return BlockIDIndexes.AIR_STATE;
     }
 
 
@@ -488,17 +493,19 @@ public abstract class StructureComponent {
 
 
     protected void replaceAirAndLiquidDownwards(ChunkSelector selector, IBlockState state, int x, int y, int z, StructureBoundingBox boundingboxIn) {
-        int i = this.getXWithOffset(x, z);
-        int j = this.getYWithOffset(y);
-        int k = this.getZWithOffset(x, z);
+        int yOff = this.getYWithOffset(y);
+        if(yOff <= 1)return;
 
-        if (boundingboxIn.isVecInside(new BlockPos(i, j, k))) {
-            BlockPos pos;
-            while (j > 1 && (selector.isAirBlock(pos = new BlockPos(i, j, k)) ||
+        int xOff = this.getXWithOffset(x, z);
+        int zOff = this.getZWithOffset(x, z);
+
+        if (boundingboxIn.isVecInside(xOff, yOff, zOff)) {
+            final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+            while (yOff > 1 && (selector.isAirBlock(pos.setPos(xOff, yOff, zOff)) ||
                     selector.getCurState(pos).getMaterial().isLiquid())) {
 
                 selector.setBlockState(pos, state);
-                --j;
+                --yOff;
             }
         }
     }

@@ -489,35 +489,35 @@ public class StructureMineshaftPieces {
 
 
         @Override
-        public boolean addComponentParts(World worldIn, Random randomIn, StructureBoundingBox structureBoundingBoxIn) {
+        public boolean addComponentParts(World worldIn, Random randomIn, StructureBoundingBox box) {
             ChunkSelector selector = new ChunkSelector(worldIn);
-            if (this.isLiquidInStructureBoundingBox(selector, structureBoundingBoxIn)) {
+            if (this.isLiquidInStructureBoundingBox(selector, box)) {
                 return false;
             } else {
                 IBlockState iblockstate = this.getPlanksBlock();
 
                 if (this.isMultipleFloors) {
-                    this.fillWithBlocks(selector, structureBoundingBoxIn, this.boundingBox.minX + 1, this.boundingBox.minY, this.boundingBox.minZ, this.boundingBox.maxX - 1, this.boundingBox.minY + 3 - 1, this.boundingBox.maxZ, BlockIDIndexes.AIR_STATE, false);
-                    this.fillWithBlocks(selector, structureBoundingBoxIn, this.boundingBox.minX, this.boundingBox.minY, this.boundingBox.minZ + 1, this.boundingBox.maxX, this.boundingBox.minY + 3 - 1, this.boundingBox.maxZ - 1, BlockIDIndexes.AIR_STATE, false);
-                    this.fillWithBlocks(selector, structureBoundingBoxIn, this.boundingBox.minX + 1, this.boundingBox.maxY - 2, this.boundingBox.minZ, this.boundingBox.maxX - 1, this.boundingBox.maxY, this.boundingBox.maxZ, BlockIDIndexes.AIR_STATE, false);
-                    this.fillWithBlocks(selector, structureBoundingBoxIn, this.boundingBox.minX, this.boundingBox.maxY - 2, this.boundingBox.minZ + 1, this.boundingBox.maxX, this.boundingBox.maxY, this.boundingBox.maxZ - 1, BlockIDIndexes.AIR_STATE, false);
-                    this.fillWithBlocks(selector, structureBoundingBoxIn, this.boundingBox.minX + 1, this.boundingBox.minY + 3, this.boundingBox.minZ + 1, this.boundingBox.maxX - 1, this.boundingBox.minY + 3, this.boundingBox.maxZ - 1, BlockIDIndexes.AIR_STATE, false);
+                    this.fillWithBlocks(selector, box, this.boundingBox.minX + 1, this.boundingBox.minY, this.boundingBox.minZ, this.boundingBox.maxX - 1, this.boundingBox.minY + 3 - 1, this.boundingBox.maxZ, BlockIDIndexes.AIR_STATE, false);
+                    this.fillWithBlocks(selector, box, this.boundingBox.minX, this.boundingBox.minY, this.boundingBox.minZ + 1, this.boundingBox.maxX, this.boundingBox.minY + 3 - 1, this.boundingBox.maxZ - 1, BlockIDIndexes.AIR_STATE, false);
+                    this.fillWithBlocks(selector, box, this.boundingBox.minX + 1, this.boundingBox.maxY - 2, this.boundingBox.minZ, this.boundingBox.maxX - 1, this.boundingBox.maxY, this.boundingBox.maxZ, BlockIDIndexes.AIR_STATE, false);
+                    this.fillWithBlocks(selector, box, this.boundingBox.minX, this.boundingBox.maxY - 2, this.boundingBox.minZ + 1, this.boundingBox.maxX, this.boundingBox.maxY, this.boundingBox.maxZ - 1, BlockIDIndexes.AIR_STATE, false);
+                    this.fillWithBlocks(selector, box, this.boundingBox.minX + 1, this.boundingBox.minY + 3, this.boundingBox.minZ + 1, this.boundingBox.maxX - 1, this.boundingBox.minY + 3, this.boundingBox.maxZ - 1, BlockIDIndexes.AIR_STATE, false);
                 } else {
-                    this.fillWithBlocks(selector, structureBoundingBoxIn, this.boundingBox.minX + 1, this.boundingBox.minY, this.boundingBox.minZ, this.boundingBox.maxX - 1, this.boundingBox.maxY, this.boundingBox.maxZ, BlockIDIndexes.AIR_STATE, false);
-                    this.fillWithBlocks(selector, structureBoundingBoxIn, this.boundingBox.minX, this.boundingBox.minY, this.boundingBox.minZ + 1, this.boundingBox.maxX, this.boundingBox.maxY, this.boundingBox.maxZ - 1, BlockIDIndexes.AIR_STATE, false);
+                    this.fillWithBlocks(selector, box, this.boundingBox.minX + 1, this.boundingBox.minY, this.boundingBox.minZ, this.boundingBox.maxX - 1, this.boundingBox.maxY, this.boundingBox.maxZ, BlockIDIndexes.AIR_STATE, false);
+                    this.fillWithBlocks(selector, box, this.boundingBox.minX, this.boundingBox.minY, this.boundingBox.minZ + 1, this.boundingBox.maxX, this.boundingBox.maxY, this.boundingBox.maxZ - 1, BlockIDIndexes.AIR_STATE, false);
                 }
 
-                this.placeSupportPillar(selector, structureBoundingBoxIn, this.boundingBox.minX + 1, this.boundingBox.minY, this.boundingBox.minZ + 1, this.boundingBox.maxY);
-                this.placeSupportPillar(selector, structureBoundingBoxIn, this.boundingBox.minX + 1, this.boundingBox.minY, this.boundingBox.maxZ - 1, this.boundingBox.maxY);
-                this.placeSupportPillar(selector, structureBoundingBoxIn, this.boundingBox.maxX - 1, this.boundingBox.minY, this.boundingBox.minZ + 1, this.boundingBox.maxY);
-                this.placeSupportPillar(selector, structureBoundingBoxIn, this.boundingBox.maxX - 1, this.boundingBox.minY, this.boundingBox.maxZ - 1, this.boundingBox.maxY);
+                this.placeSupportPillar(selector, box, this.boundingBox.minX + 1, this.boundingBox.minY, this.boundingBox.minZ + 1, this.boundingBox.maxY);
+                this.placeSupportPillar(selector, box, this.boundingBox.minX + 1, this.boundingBox.minY, this.boundingBox.maxZ - 1, this.boundingBox.maxY);
+                this.placeSupportPillar(selector, box, this.boundingBox.maxX - 1, this.boundingBox.minY, this.boundingBox.minZ + 1, this.boundingBox.maxY);
+                this.placeSupportPillar(selector, box, this.boundingBox.maxX - 1, this.boundingBox.minY, this.boundingBox.maxZ - 1, this.boundingBox.maxY);
 
                 for (int i = this.boundingBox.minX; i <= this.boundingBox.maxX; ++i) {
                     for (int j = this.boundingBox.minZ; j <= this.boundingBox.maxZ; ++j) {
                         if (this.getBlockStateFromPos(selector, i, this.boundingBox.minY - 1, j,
-                                structureBoundingBoxIn).getMaterial() == Material.AIR &&
-                                this.getSkyBrightness(selector, i, this.boundingBox.minY - 1, j, structureBoundingBoxIn) < 8) {
-                            this.setBlockState(selector, iblockstate, i, this.boundingBox.minY - 1, j, structureBoundingBoxIn);
+                                box).getMaterial() == Material.AIR &&
+                                this.getSkyBrightness(selector, i, this.boundingBox.minY - 1, j, box) < 8) {
+                            this.setBlockState(selector, iblockstate, i, this.boundingBox.minY - 1, j, box);
                         }
                     }
                 }
@@ -534,9 +534,7 @@ public class StructureMineshaftPieces {
 
 
         private void placeSupportPillar(World world, StructureBoundingBox box, int x, int y, int z, int y2) {
-            if (this.getBlockStateFromPos(world, x, y2 + 1, z, box).getMaterial() != Material.AIR) {
-                this.fillWithBlocks(world, box, x, y, z, x, y2, z, this.getPlanksBlock(), BlockIDIndexes.AIR_STATE, false);
-            }
+            placeSupportPillar(new ChunkSelector(world), box, x, y, z, y2);
         }
     }
 

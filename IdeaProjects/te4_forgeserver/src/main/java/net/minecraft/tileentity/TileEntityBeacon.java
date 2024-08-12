@@ -270,9 +270,9 @@ public class TileEntityBeacon extends TileEntityLockable implements ITickable, I
     @Override
     public NBTTagCompound writeToNBT(final NBTTagCompound compound) {
         super.writeToNBT(compound);
-        compound.setInteger("Primary", Potion.getIdFromPotion(this.primaryEffect));
-        compound.setInteger("Secondary", Potion.getIdFromPotion(this.secondaryEffect));
-        compound.setInteger("Levels", this.levels);
+        compound.setIntegerU("Primary", Potion.getIdFromPotion(this.primaryEffect));
+        compound.setIntegerU("Secondary", Potion.getIdFromPotion(this.secondaryEffect));
+        compound.setIntegerU("Levels", this.levels);
         return compound;
     }
 

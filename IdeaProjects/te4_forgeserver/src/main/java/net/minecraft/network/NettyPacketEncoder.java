@@ -20,11 +20,11 @@ public class NettyPacketEncoder extends MessageToByteEncoder<Packet<?>> {
 
     @Override
     protected void encode(final ChannelHandlerContext ctx, final Packet<?> packet, final ByteBuf buf) throws IOException, Exception {
-        final EnumConnectionState enumconnectionstate = (EnumConnectionState)ctx.channel().attr((AttributeKey)NetworkManager.PROTOCOL_ATTRIBUTE_KEY).get();
-        if (enumconnectionstate == null) {
-            throw new RuntimeException("ConnectionProtocol unknown: " + packet.toString());
+        final EnumConnectionState state = (EnumConnectionState)ctx.channel().attr((AttributeKey)NetworkManager.PROTOCOL_ATTRIBUTE_KEY).get();
+        if (state == null) {
+            throw new RuntimeException("ConnectionProtocol unknown: " + packet);
         }
-        final Integer integer = enumconnectionstate.getPacketId(this.direction, (Packet)packet);
+        final Integer integer = state.getPacketId(this.direction, packet);
         if (NettyPacketEncoder.LOGGER.isDebugEnabled()) {
             NettyPacketEncoder.LOGGER.debug(NettyPacketEncoder.RECEIVED_PACKET_MARKER, "OUT: [{}:{}] {}", ctx.channel().attr((AttributeKey)NetworkManager.PROTOCOL_ATTRIBUTE_KEY).get(), (Object)integer, (Object)packet.getClass().getName());
         }

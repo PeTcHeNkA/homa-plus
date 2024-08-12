@@ -491,7 +491,7 @@ public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >> {
     }
 
 
-    private void dispatchPacketE(final Packet<?> inPacket, @Nullable final GenericFutureListener <? extends Future <? super Void >> [] futureListeners) {
+    private void dispatchPacketE(final Packet<?> inPacket, @Nullable final GenericFutureListener <? extends Future <? super Void >> [] listeners) {
         final EnumConnectionState state = EnumConnectionState.getFromPacket(inPacket);
         final EnumConnectionState state1 = channel.attr(PROTOCOL_ATTRIBUTE_KEY).get();
         if (state != state1) {
@@ -499,8 +499,8 @@ public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >> {
             channel.config().setAutoRead(false);
         }
         ChannelFuture future = channel.writeAndFlush(inPacket);
-        if (futureListeners != null)
-            future.addListeners(futureListeners);
+        if (listeners != null)
+            future.addListeners(listeners);
 
         future.addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
     }
