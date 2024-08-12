@@ -31,7 +31,7 @@ public class WorldGenMinable extends CWorldGenerator {
 
 
     @Override
-    public boolean generate(World worldIn, ChunkSelector selector, Random rand, BlockPos position) {
+    public boolean generate(World world, ChunkSelector selector, Random rand, BlockPos position) {
         float fl1 = rand.nextFloat() * (float)Math.PI,
               d4 = MathHelper.sin(fl1), d5 = MathHelper.cos(fl1),
               d10 = this.numberOfBlocks >> 3;
@@ -82,7 +82,7 @@ public class WorldGenMinable extends CWorldGenerator {
                                 if (fl1 + d14 * d14 < 1) {
 
                                     IBlockState state = selector.getStateUnchecked(xPos, yPos, zPos);
-                                    if (state.getBlock().isReplaceableOreGen(state, worldIn, mut.setPos(xPos, yPos, zPos), predicate)) {
+                                    if (state.getBlock().isReplaceableOreGen(state, world, mut.setPos(xPos, yPos, zPos), predicate)) {
                                         selector.setCurStateFast(xPos, yPos, zPos, this.oreBlock);
                                     }
                                 }

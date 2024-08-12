@@ -27,9 +27,14 @@ public class WorldGenSwamp extends WorldGenAbstractTree {
 
 
     @Override
-    public boolean generate(World worldIn, Random rand, BlockPos position0) {
+    public boolean generate(World worldIn, Random rand, BlockPos position) {
+        return generate(worldIn, new ChunkSelector(worldIn), rand, position);
+    }
+
+
+    @Override
+    public boolean generate(World worldIn, ChunkSelector selector, Random rand, BlockPos position0) {
         int i;
-        ChunkSelector selector = new ChunkSelector(worldIn);
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos(position0);
         pos.setY(pos.getY()-1);
         selector.getChunk(pos);

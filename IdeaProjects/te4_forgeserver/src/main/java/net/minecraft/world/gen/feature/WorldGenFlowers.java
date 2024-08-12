@@ -11,7 +11,7 @@ import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.math.FastRandom;
 
 
-public class WorldGenFlowers extends WorldGenerator {
+public class WorldGenFlowers extends CWorldGenerator {
     private BlockFlower flower;
     private IBlockState state;
 
@@ -29,16 +29,15 @@ public class WorldGenFlowers extends WorldGenerator {
 
 
     @Override
-    public boolean generate(World world, Random random, BlockPos position) {
-        ChunkSelector selector = new ChunkSelector(world);
-        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+    public boolean generate(World world, ChunkSelector selector, Random rand, BlockPos pos) {
+        BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
         for(int num = 0; num < 64; ++num) {
-            FastRandom.INST.setRandom8x8x4(pos, position);
+            FastRandom.setRandom8x8x4(rand, mut, pos);
 
-            if (pos.getY() > 0 && pos.getY() < 255 && selector.isAirBlock(pos)) {
-                pos.setY(pos.getY()-1);
-                if(BlockBush.canGrowFlower(flower, selector.getCurState(pos)))
-                    selector.setCurStateFast(pos.getX(), pos.getY()+1, pos.getZ(), state);
+            if (mut.getY() > 0 && mut.getY() < 255 && selector.isAirBlock(mut)) {
+                mut.setY(mut.getY()-1);
+                if(BlockBush.canGrowFlower(flower, selector.getCurState(mut)))
+                    selector.setCurStateFast(mut.getX(), mut.getY()+1, mut.getZ(), state);
             }
         }
         return true;

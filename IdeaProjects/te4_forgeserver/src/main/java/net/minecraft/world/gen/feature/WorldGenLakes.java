@@ -14,7 +14,7 @@ import plus.fserver.api.Keep;
 import plus.fserver.server.elca.ChunkSelector;
 
 
-public class WorldGenLakes extends WorldGenerator {
+public class WorldGenLakes extends CWorldGenerator {
     private final IBlockState state;
 
     public WorldGenLakes(Block blockIn) {
@@ -23,8 +23,7 @@ public class WorldGenLakes extends WorldGenerator {
 
 
     @Keep
-    public boolean generate(World worldIn, Random rand, BlockPos position) {
-        ChunkSelector selector = new ChunkSelector(worldIn);
+    public boolean generate(World worldIn, ChunkSelector selector, Random rand, BlockPos position) {
         BlockPos.MutableBlockPos mutPos = new BlockPos.MutableBlockPos(
                 position.getX() -8, position.getY(), position.getZ()-8
         );

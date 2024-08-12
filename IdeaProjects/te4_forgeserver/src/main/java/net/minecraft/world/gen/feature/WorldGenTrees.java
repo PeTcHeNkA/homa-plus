@@ -11,6 +11,7 @@ import net.minecraft.util.BlockIDIndexes;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 import plus.fserver.api.Keep;
 import plus.fserver.server.elca.ChunkSelector;
 
@@ -41,11 +42,18 @@ public class WorldGenTrees extends WorldGenAbstractTree {
 
     @Override
     public boolean generate(World worldIn, Random rand, BlockPos position) {
+        return generate(worldIn, null, rand, position);
+    }
+
+
+    @Override
+    public boolean generate(World worldIn, @Nullable ChunkSelector selector, Random rand, BlockPos position) {
         int factor = rand.nextInt(3) + this.minTreeHeight;
 
         if (position.getY() >= 1 && position.getY() + factor + 1 <= worldIn.getHeight()) {
             boolean flag = true;
-            ChunkSelector selector = new ChunkSelector(worldIn);
+
+            if(selector == null)selector = new ChunkSelector(worldIn);
             BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos();
 
             for (int j = position.getY(); j <= position.getY() + 1 + factor; ++j) {

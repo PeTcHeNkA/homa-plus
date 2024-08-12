@@ -28,29 +28,34 @@ public class WorldGenMegaPineTree extends WorldGenHugeTrees {
 
 
     @Override
-    public boolean generate(World worldIn, Random rand, BlockPos position) {
-        ChunkSelector selector = new ChunkSelector(worldIn);
+    public boolean generate(World world, Random rand, BlockPos pos) {
+        return generate(world, new ChunkSelector(world), rand, pos);
+    }
+
+
+    @Override
+    public boolean generate(World world, ChunkSelector selector, Random rand, BlockPos pos) {
         int i = this.getHeight(rand);
-        if (!this.ensureGrowable(selector, worldIn, position, i)) {
+        if (!this.ensureGrowable(selector, world, pos, i)) {
             return false;
         } else {
-            this.createCrown(selector, position.getX(), position.getZ(), position.getY() + i, 0, rand);
+            this.createCrown(selector, pos.getX(), pos.getZ(), pos.getY() + i, 0, rand);
 
             for (int j = 0; j < i; ++j) {
-                if (isAirLeaves(selector, worldIn, position.up(j))) {
-                    this.setBlockAndNotifyAdequately(selector, position.up(j), this.woodMetadata);
+                if (isAirLeaves(selector, world, pos.up(j))) {
+                    this.setBlockAndNotifyAdequately(selector, pos.up(j), this.woodMetadata);
                 }
                 if (j < i - 1) {
-                    if (isAirLeaves(selector, worldIn, position.add(1, j, 0))) {
-                        this.setBlockAndNotifyAdequately(selector, position.add(1, j, 0), this.woodMetadata);
+                    if (isAirLeaves(selector, world, pos.add(1, j, 0))) {
+                        this.setBlockAndNotifyAdequately(selector, pos.add(1, j, 0), this.woodMetadata);
                     }
 
-                    if (isAirLeaves(selector, worldIn, position.add(1, j, 1))) {
-                        this.setBlockAndNotifyAdequately(selector, position.add(1, j, 1), this.woodMetadata);
+                    if (isAirLeaves(selector, world, pos.add(1, j, 1))) {
+                        this.setBlockAndNotifyAdequately(selector, pos.add(1, j, 1), this.woodMetadata);
                     }
 
-                    if (isAirLeaves(selector, worldIn, position.add(0, j, 1))) {
-                        this.setBlockAndNotifyAdequately(selector, position.add(0, j, 1), this.woodMetadata);
+                    if (isAirLeaves(selector, world, pos.add(0, j, 1))) {
+                        this.setBlockAndNotifyAdequately(selector, pos.add(0, j, 1), this.woodMetadata);
                     }
                 }
             }

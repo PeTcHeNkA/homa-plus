@@ -23,7 +23,7 @@ public class WorldGenClay extends CWorldGenerator {
 
 
     @Override
-    public boolean generate(World worldIn, ChunkSelector selector, Random rand, BlockPos position) {
+    public boolean generate(World world, ChunkSelector selector, Random rand, BlockPos position) {
         if (selector.getBlockState(position).getMaterial() != Material.WATER) {
             return false;
         } else {

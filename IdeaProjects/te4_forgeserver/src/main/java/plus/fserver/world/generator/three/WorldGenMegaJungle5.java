@@ -17,8 +17,7 @@ public class WorldGenMegaJungle5 extends WorldGenMegaJungle4 {
 
 
     @Override
-    public boolean generate(@NotNull World worldIn, @NotNull Random rand, @NotNull BlockPos position) {
-        ChunkSelector selector = new ChunkSelector(worldIn);
+    public boolean generate(@NotNull World worldIn, ChunkSelector selector, @NotNull Random rand, @NotNull BlockPos position) {
         int i = this.getHeight(rand);
         if (!this.ensureGrowable(selector, worldIn, position, i)) {
             return false;

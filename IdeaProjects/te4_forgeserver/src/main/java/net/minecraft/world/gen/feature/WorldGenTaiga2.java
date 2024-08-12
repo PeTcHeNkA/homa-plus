@@ -9,6 +9,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 import plus.fserver.api.Keep;
 import plus.fserver.server.elca.ChunkSelector;
 
@@ -25,6 +26,12 @@ public class WorldGenTaiga2 extends WorldGenAbstractTree {
 
     @Override
     public boolean generate(World worldIn, Random rand, BlockPos position) {
+        return generate(worldIn, null, rand, position);
+    }
+
+
+    @Override
+    public boolean generate(World worldIn, @Nullable ChunkSelector selector, Random rand, BlockPos position) {
         int num = rand.nextInt();
         int i = num & 3 + 6;
         int j = 1 + (num >> 2 & 1);
@@ -34,7 +41,7 @@ public class WorldGenTaiga2 extends WorldGenAbstractTree {
         if (position.getY() >= 1 && position.getY() + i + 1 <= worldIn.getHeight()) {
             boolean flag = true;
             BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos();
-            ChunkSelector selector = new ChunkSelector(worldIn);
+            if(selector == null)selector = new ChunkSelector(worldIn);
 
             for (int i1 = position.getY(); i1 <= position.getY() + 1 + i && flag; ++i1) {
                 if (i1 - position.getY() < j) {

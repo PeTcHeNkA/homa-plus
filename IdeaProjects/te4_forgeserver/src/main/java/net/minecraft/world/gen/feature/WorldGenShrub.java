@@ -25,8 +25,12 @@ public class WorldGenShrub extends WorldGenTrees {
 
     @Override
     public boolean generate(World worldIn, Random rand, BlockPos position) {
-        ChunkSelector selector = new ChunkSelector(worldIn);
+        return generate(worldIn, new ChunkSelector(worldIn), rand, position);
+    }
 
+
+    @Override
+    public boolean generate(World worldIn, ChunkSelector selector, Random rand, BlockPos position) {
         for (IBlockState iblockstate = selector.getState(position);
              (iblockstate.getBlock().isAir(iblockstate, worldIn, position)
                      || iblockstate.getBlock().isLeaves(iblockstate, worldIn, position))

@@ -1,7 +1,6 @@
 package net.minecraft.world.gen.feature;
 
 import java.util.Random;
-
 import net.minecraft.block.BlockBush;
 import net.minecraft.block.BlockTallGrass;
 import net.minecraft.block.state.IBlockState;
@@ -13,7 +12,7 @@ import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.math.FastRandom;
 
 
-public class WorldGenTallGrass extends WorldGenerator {
+public class WorldGenTallGrass extends CWorldGenerator {
     private final IBlockState tallGrassState;
 
     @Keep
@@ -24,23 +23,22 @@ public class WorldGenTallGrass extends WorldGenerator {
 
 
     @Override
-    public boolean generate(World worldIn, Random rand, BlockPos position) {
-        ChunkSelector selector = new ChunkSelector(worldIn);
-        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos(position);
-        for (IBlockState iblockstate = selector.getState(pos);
-             (iblockstate.getBlock().isAir(iblockstate, worldIn, pos)
-                        || iblockstate.getBlock().isLeaves(iblockstate, worldIn, pos))
-                        && pos.getY() > 0; iblockstate = selector.getCurState(pos)) {
-            pos.setY(pos.getY()-1);
+    public boolean generate(World worldIn, ChunkSelector selector, Random rand, BlockPos pos) {
+        BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos(pos);
+        for (IBlockState iblockstate = selector.getState(mut);
+             (iblockstate.getBlock().isAir(iblockstate, worldIn, mut)
+                        || iblockstate.getBlock().isLeaves(iblockstate, worldIn, mut))
+                        && mut.getY() > 0; iblockstate = selector.getCurState(mut)) {
+            mut.setY(mut.getY()-1);
         }
-        position = new BlockPos(pos.getX(), pos.getY()+1, pos.getZ());
+        pos = new BlockPos(mut.getX(), mut.getY()+1, mut.getZ());
 
         for (int i = 0; i < 128; ++i) {
-            FastRandom.INST.setRandom8x8x4(pos, position);
-            if (pos.getY() > 0 && pos.getY() < 255 && selector.isAirBlock(pos)) {
-                pos.setY(pos.getY()-1);
-                if(BlockBush.canGrowFlower(Blocks.TALLGRASS, selector.getCurState(pos))){
-                    selector.setCurStateFast(pos.getX(), pos.getY()+1, pos.getZ(), tallGrassState);
+            FastRandom.INST.setRandom8x8x4(mut, pos);
+            if (mut.getY() > 0 && mut.getY() < 255 && selector.isAirBlock(mut)) {
+                mut.setY(mut.getY()-1);
+                if(BlockBush.canGrowFlower(Blocks.TALLGRASS, selector.getCurState(mut))){
+                    selector.setCurStateFast(mut.getX(), mut.getY()+1, mut.getZ(), tallGrassState);
                 }
             }
         }

@@ -63,7 +63,12 @@ public class FastRandom extends Random {
 
 
     public void setRandom8x8x4(BlockPos.MutableBlockPos pos, BlockPos parent){
-        int num = nextInt();
+        setRandom8x8x4(this, pos, parent);
+    }
+
+
+    public static void setRandom8x8x4(Random rand, BlockPos.MutableBlockPos pos, BlockPos parent){
+        int num = rand.nextInt();
         pos.setPos(
                 parent.getX() + (num & 7) - ((num >> 4) & 7),
                 parent.getY() + ((num >> 8) & 3) - ((num >> 10) & 3),

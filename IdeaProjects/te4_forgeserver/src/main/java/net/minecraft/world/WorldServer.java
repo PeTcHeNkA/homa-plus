@@ -697,13 +697,13 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
 
 
     protected void createBonusChest() {
-        WorldGeneratorBonusChest worldgeneratorbonuschest = new WorldGeneratorBonusChest();
+        WorldGeneratorBonusChest chestGen = new WorldGeneratorBonusChest();
         for (int i = 0; i < 10; ++i) {
             int j = this.worldInfo.getSpawnX() + this.rand.nextInt(6) - this.rand.nextInt(6);
             int k = this.worldInfo.getSpawnZ() + this.rand.nextInt(6) - this.rand.nextInt(6);
             BlockPos blockpos = this.getTopSolidOrLiquidBlock(new BlockPos(j, 0, k)).up();
 
-            if (worldgeneratorbonuschest.generate(this, this.rand, blockpos)) {
+            if (chestGen.generate(this, this.rand, blockpos)) {
                 break;
             }
         }

@@ -331,19 +331,23 @@ public class BiomeDecorator {
                 --minY;
             }
         }
+        if(max == 0)return;
+        ChunkSelector selector = new ChunkSelector(world);
 
         for(j = 0; j < max; ++j) {
             BlockPos blockpos = this.chunkPos.add(rand.nextInt(16), rand.nextInt(maxY - minY) + minY, rand.nextInt(16));
-            gen.generate(world, rand, blockpos);
+            gen.generate(world, selector, rand, blockpos);
         }
     }
 
 
     @Deprecated
     protected void genStandardOre2(World world, Random rand, int max, WorldGenerator gen, int yf1, int yf2) {
+        if(max == 0)return;
+        ChunkSelector selector = new ChunkSelector(world);
         for(int i = 0; i < max; ++i) {
             BlockPos blockpos = this.chunkPos.add(rand.nextInt(16), rand.nextInt(yf2) + rand.nextInt(yf2) + yf1 - yf2, rand.nextInt(16));
-            gen.generate(world, rand, blockpos);
+            gen.generate(world, selector, rand, blockpos);
         }
     }
 

@@ -28,7 +28,7 @@ public class WorldGenStalactite extends CWorldGenerator {
 
 
     @Override
-    public boolean generate(World worldIn, ChunkSelector selector, Random rand, BlockPos start) {
+    public boolean generate(World world, ChunkSelector selector, Random rand, BlockPos start) {
         if(start.getY() < 1 || start.getY() > 255)return false;
         BlockPos.MutableBlockPos shifted = new BlockPos.MutableBlockPos();
         for(int num = 0; num < 24; ++num) {

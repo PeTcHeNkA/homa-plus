@@ -23,17 +23,17 @@ public class WorldGenLiquids extends CWorldGenerator {
 
 
     @Override
-    public boolean generate(World worldIn, ChunkSelector selector, Random rand, BlockPos pos) {
-        Chunk chunk = worldIn.getChunk(pos.getX()>>4, pos.getZ()>>4);
+    public boolean generate(World world, ChunkSelector selector, Random rand, BlockPos pos) {
+        Chunk chunk = world.getChunk(pos.getX()>>4, pos.getZ()>>4);
         if (chunk.getBlockState(pos.getX(), pos.getY()+1, pos.getZ()).getBlock() != Blocks.STONE) {
             return false;
         }
-        else if (worldIn.getBlockState(pos.getX(), pos.getY()-1, pos.getZ()).getBlock() != Blocks.STONE) {
+        else if (world.getBlockState(pos.getX(), pos.getY()-1, pos.getZ()).getBlock() != Blocks.STONE) {
             return false;
         } else {
             IBlockState iblockstate = chunk.getBlockState(pos);
 
-            if (!iblockstate.getBlock().isAir(iblockstate, worldIn, pos)
+            if (!iblockstate.getBlock().isAir(iblockstate, world, pos)
                     && iblockstate.getBlock() != Blocks.STONE) {
                 return false;
             } else {
@@ -72,7 +72,7 @@ public class WorldGenLiquids extends CWorldGenerator {
                     selector.setStateFast(pos.getX(), pos.getY(), pos.getZ(), state);
                     selector.current().relight(pos);
                     //worldIn.scheduleBlockUpdate(pos, state.getBlock(), 0, 0);/
-                    ((WorldServer)worldIn).addSyncTask(() -> worldIn.immediateBlockTick(pos, state, rand));
+                    ((WorldServer) world).addSyncTask(() -> world.immediateBlockTick(pos, state, rand));
                 }
                 return true;
             }

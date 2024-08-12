@@ -17,7 +17,7 @@ public class WorldGenFire extends WorldGenerator {
         ChunkSelector selector = new ChunkSelector(worldIn);
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
         for (int i = 0; i < 64; ++i) {
-            FastRandom.INST.setRandom8x8x4(pos, position);
+            FastRandom.setRandom8x8x4(rand, pos, position);
             if (pos.getY()>0 && pos.getY() < 255 && worldIn.isAirBlock(pos)) {
                 pos.setY(pos.getY()-1);
                 if(selector.getState(pos).getBlock() == Blocks.NETHERRACK){

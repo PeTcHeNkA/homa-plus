@@ -12,17 +12,22 @@ import plus.fserver.api.Keep;
 import plus.fserver.server.elca.ChunkSelector;
 
 
-public class WorldGenVines extends WorldGenerator {
+public class WorldGenVines extends CWorldGenerator {
     @Keep
     public WorldGenVines() {}
 
 
-    public boolean generate(World world, Random random, BlockPos pos) {
-        for(ChunkSelector selector = new ChunkSelector(world);pos.getY() < 128; pos = pos.up()) {
+    @Override
+    public boolean generate(World world, ChunkSelector selector, Random random, BlockPos pos) {
+        for(;pos.getY() < 128; pos = pos.up()) {
             if (selector.isAirBlock(pos)) {
                 for (EnumFacing facing : Chunk.HORIZONTAL) {
                     if (Blocks.VINE.canPlaceBlockOnSide(world, pos, facing)) {
-                        IBlockState state = Blocks.VINE.getDefaultState().withProperty(BlockVine.NORTH, facing == EnumFacing.NORTH).withProperty(BlockVine.EAST, facing == EnumFacing.EAST).withProperty(BlockVine.SOUTH, facing == EnumFacing.SOUTH).withProperty(BlockVine.WEST, facing == EnumFacing.WEST);
+                        IBlockState state = Blocks.VINE.getDefaultState()
+                                .withProperty(BlockVine.NORTH, facing == EnumFacing.NORTH)
+                                .withProperty(BlockVine.EAST, facing == EnumFacing.EAST)
+                                .withProperty(BlockVine.SOUTH, facing == EnumFacing.SOUTH)
+                                .withProperty(BlockVine.WEST, facing == EnumFacing.WEST);
                         selector.setCurState(pos, state);
                         break;
                     }

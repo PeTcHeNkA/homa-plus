@@ -10,7 +10,7 @@ import plus.fserver.api.Keep;
 import plus.fserver.server.elca.ChunkSelector;
 
 
-public class WorldGenIcePath extends WorldGenerator {
+public class WorldGenIcePath extends CWorldGenerator {
     private final IBlockState state;
     private final int basePathWidth;
 
@@ -22,8 +22,7 @@ public class WorldGenIcePath extends WorldGenerator {
 
 
     @Override
-    public boolean generate(World world, Random rand, BlockPos pos) {
-        ChunkSelector selector = new ChunkSelector(world);
+    public boolean generate(World world, ChunkSelector selector, Random rand, BlockPos pos) {
         BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos(pos);
         while(selector.isAirBlock(mut) && mut.getY() > 2) {
             mut.setY(mut.getY()-1);

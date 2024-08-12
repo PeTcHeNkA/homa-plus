@@ -15,13 +15,13 @@ public class WorldGenCactus extends WorldGenerator {
 
 
     @Override
-    public boolean generate(World worldIn, Random random, BlockPos pos) {
+    public boolean generate(World worldIn, Random rand, BlockPos pos) {
         ChunkSelector selector = new ChunkSelector(worldIn);
         BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
         for(int cursor = 0; cursor < 10; ++cursor) {
-            FastRandom.INST.setRandom8x8x4(mut, pos);
+            FastRandom.setRandom8x8x4(rand, mut, pos);
             if (mut.getY()<255 && mut.getY()>0 && selector.isAirBlock(mut)) {
-                int height = 1 + random.nextInt(random.nextInt(3) + 1);
+                int height = 1 + rand.nextInt(rand.nextInt(3) + 1);
                 int startY = mut.getY();
 
                 for(int yPos = 0; yPos < height; ++yPos) {

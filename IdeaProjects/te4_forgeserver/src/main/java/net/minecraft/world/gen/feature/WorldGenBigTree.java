@@ -240,36 +240,42 @@ public class WorldGenBigTree extends WorldGenAbstractTree {
 
 
     @Override
-    public boolean generate(World worldIn, Random rand, BlockPos position) {
-        GenSession session = new GenSession(worldIn);
+    public boolean generate(World world, Random rand, BlockPos pos) {
+        return generate(world, new ChunkSelector(world), rand, pos);
+    }
+
+
+    @Override
+    public boolean generate(World world, ChunkSelector selector, Random rand, BlockPos pos) {
+        GenSession session = new GenSession(selector);
         if (session.heightLimit == 0) {
-            session.heightLimit = 5 + worldIn.rand.nextInt(this.heightLimitLimit);
+            session.heightLimit = 5 + world.rand.nextInt(this.heightLimitLimit);
         }
-        if (!this.validTreeLocation(session, position)) {
+        if (!this.validTreeLocation(session, pos)) {
             return false;
         } else {
             final ArrayList<FoliageCoordinates> cords = new ArrayList<>();
-            this.generateLeafNodeList(session, cords, position);
+            this.generateLeafNodeList(session, cords, pos);
             BlockPos blockpos;
 
             for (WorldGenBigTree.FoliageCoordinates cord : cords) {
                 this.generateLeafNode(session, cord);
             }
 
-            blockpos = position.up(session.height);
-            this.limb(session.selector, position, blockpos);
+            blockpos = pos.up(session.height);
+            this.limb(session.selector, pos, blockpos);
 
             if (this.trunkSize == 2) {
-                this.limb(session.selector, position.east(), blockpos.east());
-                this.limb(session.selector, position.add(1,0,1), blockpos.add(1,0,1));
-                this.limb(session.selector, position.south(), blockpos.south());
+                this.limb(session.selector, pos.east(), blockpos.east());
+                this.limb(session.selector, pos.add(1,0,1), blockpos.add(1,0,1));
+                this.limb(session.selector, pos.south(), blockpos.south());
             }
 
             for (WorldGenBigTree.FoliageCoordinates cord : cords) {
-                blockpos = new BlockPos(position.getX(), cord.branchBase, position.getZ());
+                blockpos = new BlockPos(pos.getX(), cord.branchBase, pos.getZ());
                 if (!blockpos.equals(cord) && this.leafNodeNeedsBase(
                         session.heightLimit,
-                        cord.branchBase - position.getY())) {
+                        cord.branchBase - pos.getY())) {
                     this.limb(session.selector, blockpos, cord);
                 }
             }
@@ -287,6 +293,10 @@ public class WorldGenBigTree extends WorldGenAbstractTree {
 
         private GenSession(World world) {
             this.selector = new ChunkSelector(world);
+        }
+
+        private GenSession(ChunkSelector selector){
+            this.selector = selector;
         }
     }
 

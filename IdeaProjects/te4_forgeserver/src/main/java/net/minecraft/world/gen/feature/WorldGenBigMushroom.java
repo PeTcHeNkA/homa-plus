@@ -7,6 +7,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 import plus.fserver.api.Keep;
 import plus.fserver.server.elca.ChunkSelector;
 
@@ -28,6 +29,12 @@ public class WorldGenBigMushroom extends WorldGenerator {
 
     @Override
     public boolean generate(World worldIn, Random rand, BlockPos position) {
+        return generate(worldIn, null, rand, position);
+    }
+
+
+    @Override
+    public boolean generate(World world, @Nullable ChunkSelector selector, Random rand, BlockPos position) {
         Block block = this.mushroomType;
 
         if (block == null) {
@@ -43,7 +50,7 @@ public class WorldGenBigMushroom extends WorldGenerator {
         boolean flag = true;
 
         if (position.getY() >= 1 && position.getY() + i + 1 < 256) {
-            ChunkSelector selector = new ChunkSelector(worldIn);
+            if(selector == null) selector = new ChunkSelector(world);
             for (int j = position.getY(); j <= position.getY() + 1 + i; ++j) {
                 int k = 3;
 
@@ -58,7 +65,7 @@ public class WorldGenBigMushroom extends WorldGenerator {
                         if (j >= 0 && j < 256) {
                             IBlockState state = selector.getState(blockPos.setPos(l, j, i1));
 
-                            if (!state.getBlock().isAir(state, worldIn, blockPos) && !state.getBlock().isLeaves(state, worldIn, blockPos)) {
+                            if (!state.getBlock().isAir(state, world, blockPos) && !state.getBlock().isLeaves(state, world, blockPos)) {
                                 flag = false;
                             }
                         } else {
@@ -162,7 +169,7 @@ public class WorldGenBigMushroom extends WorldGenerator {
                                     BlockPos blockpos = new BlockPos(l1, l2, i2);
                                     IBlockState state = selector.getState(blockpos);
 
-                                    if (state.getBlock().canBeReplacedByLeaves(state, worldIn, blockpos)) {
+                                    if (state.getBlock().canBeReplacedByLeaves(state, world, blockpos)) {
                                         this.setBlockAndNotifyAdequately(selector, blockpos, block.getDefaultState().withProperty(BlockHugeMushroom.VARIANT, type));
                                     }
                                 }
@@ -173,7 +180,7 @@ public class WorldGenBigMushroom extends WorldGenerator {
                     for (int i3 = 0; i3 < i; ++i3) {
                         IBlockState iblockstate = selector.getState(temp = position.up(i3));
 
-                        if (iblockstate.getBlock().canBeReplacedByLeaves(iblockstate, worldIn, temp)) {
+                        if (iblockstate.getBlock().canBeReplacedByLeaves(iblockstate, world, temp)) {
                             this.setBlockAndNotifyAdequately(selector, temp, block.getDefaultState().withProperty(BlockHugeMushroom.VARIANT, BlockHugeMushroom.EnumType.STEM));
                         }
                     }

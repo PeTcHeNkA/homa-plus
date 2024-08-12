@@ -28,28 +28,23 @@ public class WorldGenGlowStone2 extends WorldGenerator {
             chunk.setBlockState(position, GLOW_STONE_DEF_STATE);
             //IBlockState state;
             BlockPos pos0;
-            BlockPos.MutableBlockPos blockpos = new BlockPos.MutableBlockPos();
+            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
 
             for (int i = 0; i < 1500; ++i) {
-                FastRandom.INST.setRandom8x8x4(blockpos, position);
-//                blockpos = position.add(
-//                        rand.nextInt(8) - rand.nextInt(8),
-//                        rand.nextInt(3) - rand.nextInt(3),
-//                        rand.nextInt(8) - rand.nextInt(8)
-//                );
-                //state = selector.getState(blockpos);
-                if (blockpos.getY()>0 && blockpos.getY() < 255 && selector.isAirBlock(blockpos)) {
+                FastRandom.setRandom8x8x4(rand, mut, position);
+
+                if (mut.getY()>0 && mut.getY() < 255 && selector.isAirBlock(mut)) {
                     int j = 0;
 
                     for (EnumFacing enumfacing : EnumFacing.VALUES) {
-                        pos0 = blockpos.offset(enumfacing);
+                        pos0 = mut.offset(enumfacing);
                         if (selector.getState(pos0).getBlock() == Blocks.GLOWSTONE) {
                             ++j;
                         }
                         if (j > 1) break;
                     }
                     if (j == 1) {
-                        selector.setBlockState(blockpos, GLOW_STONE_DEF_STATE);
+                        selector.setBlockState(mut, GLOW_STONE_DEF_STATE);
                     }
                 }
             }

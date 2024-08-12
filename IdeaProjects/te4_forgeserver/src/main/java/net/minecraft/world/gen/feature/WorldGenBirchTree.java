@@ -8,6 +8,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 import plus.fserver.api.Keep;
 import plus.fserver.server.elca.ChunkSelector;
 
@@ -24,7 +25,14 @@ public class WorldGenBirchTree extends WorldGenAbstractTree {
     }
 
 
-    public boolean generate(World worldIn, Random rand, BlockPos position) {
+    @Override
+    public boolean generate(World world, Random rand, BlockPos pos) {
+        return generate(world, null, rand, pos);
+    }
+
+
+    @Override
+    public boolean generate(World world, @Nullable ChunkSelector selector, Random rand, BlockPos position) {
         int i = rand.nextInt(3) + 5;
 
         if (this.useExtraRandomHeight) {
@@ -34,8 +42,9 @@ public class WorldGenBirchTree extends WorldGenAbstractTree {
         boolean flag = true;
 
         if (position.getY() >= 1 && position.getY() + i + 1 <= 256) {
-            BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos();
-            ChunkSelector selector = new ChunkSelector(worldIn);
+            if(selector == null)selector = new ChunkSelector(world);
+            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+
             for (int j = position.getY(); j <= position.getY() + 1 + i; ++j) {
                 int k = 1;
 
@@ -49,8 +58,8 @@ public class WorldGenBirchTree extends WorldGenAbstractTree {
 
                 for (int l = position.getX() - k; l <= position.getX() + k && flag; ++l) {
                     for (int i1 = position.getZ() - k; i1 <= position.getZ() + k && flag; ++i1) {
-                        if (j >= 0 && j < worldIn.getHeight()) {
-                            if (!this.isReplaceable(selector, worldIn, blockPos.setPos(l, j, i1))) {
+                        if (j >= 0 && j < world.getHeight()) {
+                            if (!this.isReplaceable(selector, world, mut.setPos(l, j, i1))) {
                                 flag = false;
                             }
                         } else {
@@ -64,10 +73,10 @@ public class WorldGenBirchTree extends WorldGenAbstractTree {
             } else {
                 BlockPos down = position.down();
                 IBlockState state = selector.getState(down);
-                boolean isSoil = state.getBlock().canSustainPlant(state, worldIn, down, net.minecraft.util.EnumFacing.UP, (net.minecraft.block.BlockSapling)Blocks.SAPLING);
+                boolean isSoil = state.getBlock().canSustainPlant(state, world, down, net.minecraft.util.EnumFacing.UP, (net.minecraft.block.BlockSapling)Blocks.SAPLING);
 
-                if (isSoil && position.getY() < worldIn.getHeight() - i - 1) {
-                    state.getBlock().onPlantGrow(state, worldIn, down, position);
+                if (isSoil && position.getY() < world.getHeight() - i - 1) {
+                    state.getBlock().onPlantGrow(state, world, down, position);
 
                     for (int i2 = position.getY() - 3 + i; i2 <= position.getY() + i; ++i2) {
                         int k2 = i2 - (position.getY() + i);
@@ -83,7 +92,7 @@ public class WorldGenBirchTree extends WorldGenAbstractTree {
                                     BlockPos blockpos = new BlockPos(i3, i2, k1);
                                     IBlockState state2 = selector.getState(blockpos);
 
-                                    if (state2.getBlock().isAir(state2, worldIn, blockpos) || state2.getBlock().isAir(state2, worldIn, blockpos)) {
+                                    if (state2.getBlock().isAir(state2, world, blockpos) || state2.getBlock().isAir(state2, world, blockpos)) {
                                         this.setBlockAndNotifyAdequately(selector, blockpos, LEAF);
                                     }
                                 }
@@ -91,12 +100,11 @@ public class WorldGenBirchTree extends WorldGenAbstractTree {
                         }
                     }
 
-
                     for (int j2 = 0; j2 < i; ++j2) {
                         BlockPos upN = position.up(j2);
                         IBlockState state2 = selector.getState(upN);
 
-                        if (state2.getBlock().isAir(state2, worldIn, upN) || state2.getBlock().isLeaves(state2, worldIn, upN)) {
+                        if (state2.getBlock().isAir(state2, world, upN) || state2.getBlock().isLeaves(state2, world, upN)) {
                             this.setBlockAndNotifyAdequately(selector, position.up(j2), LOG);
                         }
                     }

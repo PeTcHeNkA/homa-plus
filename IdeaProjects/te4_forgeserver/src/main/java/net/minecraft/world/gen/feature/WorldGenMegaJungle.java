@@ -20,8 +20,13 @@ public class WorldGenMegaJungle extends WorldGenHugeTrees {
 
 
     @Override
-    public boolean generate(World worldIn, Random rand, BlockPos position) {
-        ChunkSelector selector = new ChunkSelector(worldIn);
+    public boolean generate(World world, Random rand, BlockPos pos) {
+        return generate(world, new ChunkSelector(world), rand, pos);
+    }
+
+
+    @Override
+    public boolean generate(World worldIn, ChunkSelector selector, Random rand, BlockPos position) {
         int i = this.getHeight(rand);
         if (!this.ensureGrowable(selector, worldIn, position, i)) {
             return false;
