@@ -73,6 +73,7 @@ import plus.fserver.api.Keep;
 import plus.fserver.api.MeanTicker;
 import plus.fserver.api.ElcaWorldServer;
 import plus.fserver.ElcaCV;
+import plus.fserver.api.VarOnly;
 import plus.fserver.server.chunk.io.TChunkTask;
 import plus.fserver.server.chunk.io.TQueuedChunk;
 import plus.fserver.server.elca.ChunkSelector;
@@ -447,6 +448,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
     private boolean spawnAnimals = true, spawnNpc = true;
     @Override
     public void tickLoadedEntities(){
+        updateColledeController();
         if(spawnAnimals != canSpawnAnimals() || spawnNpc != canSpawnNPCs()){
             recheckEntities();
         }
@@ -475,6 +477,28 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
                 }
             }
         }
+    }
+
+
+    @VarOnly(var = "skip-collide-overload")
+    private boolean skipColliede = false;
+    @VarOnly(var = "skip-collide-overload")
+    private int timer = 0;
+    @VarOnly(var = "skip-collide-overload")
+    protected void updateColledeController() {
+        if(meanTickTime() > ElcaConfig.MEAN_OVERLOAD){
+            skipColliede = true;
+            //LOGGER.warn("WORLD {} OVERLOADED! SKIP 25% COLLIDES ({})", provider.getDimension(), timer);
+        } else {
+            skipColliede = false;
+        }
+    }
+
+
+    @VarOnly(var = "skip-collide-overload")
+    public boolean skipCollide() {
+        if(skipColliede)return (timer++ & 1) == 0;
+        return false;
     }
 
 
@@ -1177,36 +1201,41 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
 
         this.sendQueuedBlockEvents();
         //mean tick time
-        if(++meanTTSkip == 20){
-            meanTTSkip = 0;
-            meanTTSum += average(FMLCommonHandler.instance().getMinecraftServerInstance().tickTimeArray) * 1.0E-6;
-            if (++meanTTCount >= 30) {
-                meanTTTime = meanTTSum / meanTTCount;
-                meanTTCount = 0;
-                meanTTSum = 1.0;
-            }
-            tryUpdateNavigationLimit = MathHelper.clamp((int)(meanTTTime*0.5),
-                    ElcaConfig.STD_UPDATE_NAVIGATION_RATE, ElcaConfig.MAX_UPDATE_NAVIGATION_RATE
-            );
-        }
+//        if(++meanTTSkip == 20){
+//            meanTTSkip = 0;
+//            meanTTSum = average(server.worldTickTimes.get(provider.getDimension())) * 1.0E-6D;
+//            //meanTTSum += average(FMLCommonHandler.instance().getMinecraftServerInstance().tickTimeArray) * 1.0E-6;
+//            if (++meanTTCount >= 30) {
+//                meanTTTime = meanTTSum / meanTTCount;
+//                meanTTCount = 0;
+//                meanTTSum = 1.0;
+//            }
+//            tryUpdateNavigationLimit = MathHelper.clamp((int)(meanTTTime*0.5),
+//                    ElcaConfig.STD_UPDATE_NAVIGATION_RATE, ElcaConfig.MAX_UPDATE_NAVIGATION_RATE
+//            );
+//        }
     }
 
 
-    private double meanTTSum = 1.0, meanTTTime = 0.0;
-    private int meanTTSkip = 0, meanTTCount = 0;
+    private double meanTTTime = 0.0;
+//    private int meanTTSkip = 0, meanTTCount = 0;
     //todo add multicore balance
     @Override
     public double meanTickTime() {
         return meanTTTime;
     }
 
-
-    private static long average(final long[] values) {
-        if (values == null || values.length == 0) return 0L;
-        long sum = 0L;
-        for (final long v : values) sum += v;
-        return sum / values.length;
+    public void setMeanTT(double time){
+        this.meanTTTime = time;
     }
+
+
+//    private static long average(final long[] values) {
+//        if (values == null || values.length == 0) return 0L;
+//        long sum = 0L;
+//        for (final long v : values) sum += v;
+//        return sum / values.length;
+//    }
 
 
     @Override

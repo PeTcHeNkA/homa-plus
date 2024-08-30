@@ -149,7 +149,7 @@ public class BlockRedstoneWire extends BlockFs {
     @Override
     public boolean canPlaceBlockAt(final World worldIn, BlockPos pos) {
         IBlockEAccess access = worldIn.access();
-        final IBlockState downState = access.getBlockState(pos.getX(), pos.getY(), pos.getZ());
+        final IBlockState downState = access.getBlockState(pos.getX(), pos.getY()-1, pos.getZ());
         return downState.isTopSolid() || downState.getBlockFaceShape(worldIn, pos, EnumFacing.UP) == BlockFaceShape.SOLID ||
                 access.getBlockState(pos).getBlock() == Blocks.GLOWSTONE;
     }

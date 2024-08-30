@@ -5,6 +5,7 @@ import java.util.UUID;
 import java.util.function.BiPredicate;
 import javax.annotation.Nullable;
 import it.unimi.dsi.fastutil.ints.Int2FloatOpenHashMap;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.ai.EntityAITasks;
@@ -56,6 +57,7 @@ import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.api.Keep;
+import plus.fserver.api.VarOnly;
 import plus.fserver.server.SStrings;
 import plus.fserver.utls.EntityLodFunc;
 import plus.fserver.utls.collections.FixedItemList;
@@ -295,6 +297,29 @@ public abstract class EntityLiving extends EntityLivingBase {
                 if (!item.isDead && !item.getItem().isEmpty() && !item.cannotPickup())
                     this.updateEquipmentIfNeeded(item);
         }
+    }
+
+
+    @Override
+    @VarOnly(var = "fast-water-check")
+    public boolean handleWaterMovement() {
+        if (this.getRidingEntity() instanceof EntityBoat) this.inWater = false;
+        else if(((lodLvl() + 1) & ticksExisted) == 0){
+            AxisAlignedBB box;
+            getEntityBoundingBox().growTo(-0.001D, -0.4010000059604645D, -0.001D, box = world.commonWorldEntityAABB);
+            if (world.handleMaterialAcceleration(box, Material.WATER, this)) {
+                if (!this.inWater && !this.firstUpdate) this.doWaterSplashEffect();
+
+                this.fallDistance = 0.0F;
+                this.inWater = true;
+                this.extinguish();
+                return true;
+            } else return this.inWater = false;
+        } else if(this.inWater){
+            this.extinguish();
+            return true;
+        }
+        return false;
     }
 
 

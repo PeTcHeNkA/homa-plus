@@ -158,18 +158,18 @@ public class EntityAINearestAttackableTarget<T extends EntityLivingBase> extends
     }
 
 
-    private double round(double d){
-        return ((long)d);
+    private static double round(double d){
+        return ((long)d) & 0xFFFFFFFFFFFFFFFEL;
     }
-    protected AxisAlignedBB getTargetableArea(double targetDistance) {
+    protected AxisAlignedBB getTargetableArea(double distance) {
         AxisAlignedBB aabb = this.taskOwner.getEntityBoundingBox();
         return new AxisAlignedBB(
-                round(aabb.minX - targetDistance),
-                round(aabb.maxY - 4),
-                round(aabb.minZ - targetDistance),
-                round(aabb.maxX + targetDistance),
-                round(aabb.maxY + 4),
-                round(aabb.maxZ + targetDistance)
+                round(aabb.minX - distance),
+                round(aabb.minY - 5),
+                round(aabb.minZ - distance),
+                round(aabb.maxX + distance),
+                round(aabb.maxY + 5),
+                round(aabb.maxZ + distance)
         );
     }
 

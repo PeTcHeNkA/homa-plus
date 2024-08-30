@@ -702,7 +702,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
                 flag = true;
             }
 
-            if(flag) this.getEntityBoundingBox().offsetMut(x, y, z);
+            if(flag) axisalignedbb.offsetMut(x, y, z);
 
 
             flag = this.onGround || dy1 != y && dy1 < 0.0D;
@@ -771,7 +771,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
                 temp = 0;
 
                 for (num1 = bSize; temp < num1; ++temp)
-                    y = ((AxisAlignedBB)rawBoxes[temp]).calculateYOffset(this.getEntityBoundingBox(), y);
+                    y = ((AxisAlignedBB)rawBoxes[temp]).calculateYOffset(axisalignedbb, y);
 
                 if (dx2 * dx2 + dz2 * dz2 >= x * x + z * z) {
                     x = dx2;

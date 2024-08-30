@@ -3172,9 +3172,10 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
     public final ArrayListE6<AxisAlignedBB> getCollisionBoxesLimitedC(@Nullable Entity entityIn, @NotNull AxisAlignedBB aabb, int lim) {
         if(ElcaCV.MORE_MOBS_OPTIMIZER) {
+            final SyncListCache<AxisAlignedBB> bbCache;
             final AABKey key;
             ArrayListE6<AxisAlignedBB> res;
-            if ((res = bbCache.getC(key = bbCache.key(aabb))) != null) return res;
+            if ((res = (bbCache = this.bbCache).getC(key = bbCache.key(aabb))) != null) return res;
             getCollisionBoxesNoCacheLimited(res = bbCache.allocArr(), entityIn, aabb, lim);
             bbCache.add(key, res);
             return res;
@@ -3335,6 +3336,47 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         list.fclear();
         getCollisionBoxesNoCacheLimited(list, entityIn, aabb, 1);
         return list.isEmptyC();
+    }
+
+
+    @NotNull
+    public List<Entity> getEntitiesInAABBexcludingLimitedEC(@Nullable Entity entityIn, @NotNull AxisAlignedBB aabb,
+                                                          @Nullable Predicate<? super Entity > predicate, int lim){
+        if(ElcaCV.MORE_MOBS_OPTIMIZER) {
+            AABKey key = eeCache.key(aabb);
+            final ArrayListE6<Entity> entities = eeCache.getC(key);
+            if (entities != null) {
+                int size;
+                if (predicate != null && (size = entities.sizeC()) != 0) {
+                    for (int i = 0; i < size; ++i) {
+                        if (!predicate.apply(entities.getC(i))) {
+                            ArrayListE6<Entity> res = eeCache.allocArr();
+
+                            getEntitiesInAABBexcludingNoCacheLimited(res, entityIn, aabb, predicate, lim);
+
+                            eeCache.add(key, res);
+                            return res;
+                        }
+                    }
+                }
+                return entities;
+            } else {
+                final ArrayListE6<Entity> res;
+                if(skipCollide()){
+                    res = eeCache.allocArr();
+                    eeCache.add(key, res);
+                    return res;
+                }
+                getEntitiesInAABBexcludingNoCacheLimited(res = eeCache.allocArr(), entityIn, aabb, predicate, lim);
+
+                eeCache.add(key, res);
+                return res;
+            }
+        } else {
+            ArrayListE6<Entity> res = new ArrayListE6<>();
+            getEntitiesInAABBexcludingNoCacheLimited(res, entityIn, aabb, predicate, lim);
+            return res;
+        }
     }
 
 
@@ -4011,5 +4053,13 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             for (int zPos = l2; zPos <= i3; ++zPos)
                 if ((chunk = localSelector.getLoadedE(xPos, zPos)) != null)
                     chunk.getEntitiesWithinAABBForEntity(entityIn, boundingBox, list, predicate);
+    }
+
+
+    protected void updateColledeController(){}
+
+
+    public boolean skipCollide(){
+        return false;
     }
 }

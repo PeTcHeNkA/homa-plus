@@ -507,6 +507,12 @@ public class EntityFishHook extends Entity {
     }
 
 
+    @Override
+    public int lodLvl() {
+        return 0;
+    }
+
+    
     static {
         DATA_HOOKED_ENTITY = EntityDataManager.createKey(EntityFishHook.class, DataSerializers.VARINT);
     }

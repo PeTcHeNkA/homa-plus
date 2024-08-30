@@ -11,6 +11,8 @@ import static plus.tson.ext.TsonBoolUtils.*;
 
 
 public class ElcaConfig {
+    //fast-water-check
+    //fix-shulcer-nbt-view
     private static final Te4HashMap<String,Boolean> VARS = new Te4HashMap<>();
 
     public static File NATIVES;
@@ -18,7 +20,7 @@ public class ElcaConfig {
     public static final String DEFAULT_REJECT_MSG   = "Connection rejected";
     public static final String REJECT_SERVER_FULL   = "The server is full!";
     public static final String REJECT_NON_WHITELIST = "You are not white-listed on this server!";
-    public static final int MEAN_OVERLOAD           = 50 * 12;
+    public static final int MEAN_OVERLOAD           = 50;
     public static final long DEFAULT_SOFT_TIME = 1000*60*60;
 
     public static int END_PORTAL_TRANSFER_DIM    = 1;
@@ -26,8 +28,8 @@ public class ElcaConfig {
     public static int TIME_PACKET_RATE           = 20 * 3;
     public static int CHUNK_TICK_RADIUS_1        = 4 * 16;
     public static int CHUNK_TICK_RADIUS_2        = 5 * 16;
-    public static int MEAN_BALANCE_MOB           = 35 * 12;
-    public static int MEAN_BALANCE_BLOCK         = 35 * 12;
+    public static int MEAN_BALANCE_MOB           = 35;
+    public static int MEAN_BALANCE_BLOCK         = 35;
     public static int GOAL_TICK_RATE             = 4;
     public static int RECHECK_CHUNKS_SPAWNER_RATE= 7;
     public static int RECHECK_SPAWNER_RATE       = 80;
@@ -122,8 +124,8 @@ public class ElcaConfig {
         BALANCE_BLOCK_TICK         = calc(map, "balance-block-tick"          , BALANCE_BLOCK_TICK         );
         BALANCE_BLOCK_CRITICAL     = calc(map, "balance-block-critical"      , BALANCE_BLOCK_CRITICAL     );
 
-        MEAN_BALANCE_BLOCK         = calc(map, "mean-balance-block"          ,     35                 )*12;
-        MEAN_BALANCE_MOB           = calc(map, "mean-balance-mob"            ,     35                 )*12;
+        MEAN_BALANCE_BLOCK         = calc(map, "mean-balance-block"          ,     35                 );
+        MEAN_BALANCE_MOB           = calc(map, "mean-balance-mob"            ,     35                 );
 
         GOAL_TICK_RATE             = calc(map, "goal-tick-rate"              , GOAL_TICK_RATE             );
         RECHECK_SPAWNER_RATE       = calc(map, "recheck-spawner-rate"        , RECHECK_SPAWNER_RATE       );

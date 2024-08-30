@@ -1745,19 +1745,21 @@ public abstract class EntityLivingBase extends Entity {
 
     //todo maybe async
     protected void collideWithNearbyEntities() {
-        List<Entity> list;
+        final World world = this.world;
+        //if((world = this.world).skipCollide())return;
+        final List<Entity> list;
         if((ticksExisted & 7) != 7){
-            if(!(list = this.world.getEntitiesInAABBexcludingLimited(
+            if(!(list = world.getEntitiesInAABBexcludingLimitedEC(
                     this, this.getEntityBoundingBox(),
                     world.entityCP.forEntity(this),
                     ElcaConfig.MAX_ENTITY_COLLISIONS
             )).isEmpty()) for (int cur = 0; cur < list.size(); ++cur) collideWithEntity(list.get(cur));
         } else {
-            if(!(list = this.world.getEntitiesInAABBexcluding(
+            if(!(list = world.getEntitiesInAABBexcluding(
                     this, this.getEntityBoundingBox(),
                     world.entityCP.forEntity(this)
             )).isEmpty()){
-                int limit = this.world.getGameRules().maxEntityCramming.getInt();
+                int limit = world.getGameRules().maxEntityCramming.getInt();
                 if (limit > 0 && list.size() > limit - 1 && this.rand.nextBoolean()) {
                     int j = 0;
                     for (int k = 0; k < list.size(); ++k) {

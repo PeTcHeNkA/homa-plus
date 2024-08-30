@@ -263,7 +263,7 @@ public final class AsyWorldTickerV2 implements ThreadFactory{
 
             EntityTracker tracer = worldserver.getEntityTracker();
             if(!tracer.isAsync()) {
-                if(worldserver.meanTickTime() > ElcaConfig.MEAN_OVERLOAD){
+                if(false && worldserver.meanTickTime() > ElcaConfig.MEAN_OVERLOAD){
                     AsyEntityTracker asy = tracer.toAsync();
                     worldserver.setTracker(asy);
 
@@ -282,7 +282,13 @@ public final class AsyWorldTickerV2 implements ThreadFactory{
                 }
             }
 
-            server.worldTickTimes.get(inf.id)[inf.tickCounter % 100] = System.nanoTime() - curNanoTime;
+            long spend = System.nanoTime() - curNanoTime;
+            long[] times = server.worldTickTimes.get(inf.id);
+
+            times[inf.tickCounter % 100] = spend;
+
+            worldserver.setMeanTT(mean(times, inf.tickCounter));
+
         } catch (Exception | StackOverflowError exception){
             onError(worldserver, exception);
         } catch (OutOfMemoryError error){
@@ -296,6 +302,25 @@ public final class AsyWorldTickerV2 implements ThreadFactory{
         } catch (Throwable throwable){
             stopAnError(throwable, worldserver);
         }
+    }
+
+
+    private static double mean(long[] values, int cur) {
+        long sum = 0L;
+        int min = cur - 3;
+        int max = cur + 3;
+
+        if(min < 0 || max >= 100){
+            while (min != max){
+                sum += values[min++ % 100];
+            }
+        } else {
+            while (min != max){
+                sum += values[min++];
+            }
+        }
+
+        return ((double) sum / 7) * 1.0E-6D;
     }
 
 

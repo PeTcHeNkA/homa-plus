@@ -337,7 +337,7 @@ public class ElcaCommands extends ServerCommand {
             }
 
             curChunks = world.getChunkProvider().getLoadedChunkCount();
-            double worldTickTime = mean(server.worldTickTimes.get(dimId)) * 1.0E-6D;
+            double worldTickTime = mean(server.worldTickTimes.get(dimId));
             double worldTPS = Math.min(1000.0/worldTickTime, 20);
             reply(sender, primary+"[%s]: tt: %s, tps %s, chunk: %s, mob: %s (%s, N:%s, M: %s, L: %s)",
                     getDimensionPrefix(dimId),
@@ -379,11 +379,11 @@ public class ElcaCommands extends ServerCommand {
                         TIME_FORMATTER.format(worldTPS)
                 );
             }
-            double meanTickTime = mean(server.tickTimeArray) * 1.0E-6D;
+            double meanTickTime = mean(server.tickTimeArray);
             double meanTPS = Math.min(1000.0/meanTickTime, 20);
             sender.sendMessage(TextComponentHelper.createComponentTranslation(sender, "commands.forge.tps.summary","Overall", TIME_FORMATTER.format(meanTickTime), TIME_FORMATTER.format(meanTPS)));
         } else {
-            double worldTickTime = mean(server.worldTickTimes.get(dim)) * 1.0E-6D;
+            double worldTickTime = mean(server.worldTickTimes.get(dim));
             double worldTPS = Math.min(1000.0/worldTickTime, 20);
             sender.sendMessage(TextComponentHelper.createComponentTranslation(sender, "commands.forge.tps.summary", getDimensionPrefix(dim), TIME_FORMATTER.format(worldTickTime), TIME_FORMATTER.format(worldTPS)));
         }
@@ -400,11 +400,11 @@ public class ElcaCommands extends ServerCommand {
     }
 
 
-    private static long mean(long[] values) {
+    private static double mean(long[] values) {
         long sum = 0L;
         for (long v : values) {
             sum += v;
         }
-        return sum / values.length;
+        return ((double) sum / values.length) * 1.0E-6D;
     }
 }

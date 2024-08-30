@@ -1,7 +1,6 @@
 package plus.fserver.world;
 
 import java.util.*;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRedstoneWire;
 import net.minecraft.block.state.BlockFaceShape;
@@ -14,11 +13,10 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import plus.fserver.api.IBlockEAccess;
-import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.math.BlockPosDelta;
 import plus.tson.utl.Te4HashMap;
-
 import java.util.concurrent.ThreadLocalRandom;
+
 
 public class RedstoneEngine {
     private static final boolean old_current_change = false;
@@ -292,9 +290,9 @@ public class RedstoneEngine {
     }
 
 
-    private void identifyNode(final World worldIn, IBlockEAccess access, final UpdateNode upd1) {
+    private void identifyNode(final World world, final UpdateNode upd1) {
         final BlockPos pos = upd1.self;
-        final IBlockState oldState = worldIn.localSelector.getState(pos);
+        final IBlockState oldState = world.localSelector.getState(pos);
         upd1.currentState = oldState;
 
         final Block block = oldState.getBlock();
@@ -302,9 +300,9 @@ public class RedstoneEngine {
             upd1.type = UpdateNode.Type.OTHER;
             return;
         }
-        if (!canPlaceBlockAt(worldIn, access, pos)) {
-            wire.dropBlockAsItem(worldIn, pos, oldState, 0);
-            worldIn.access().setBlockState(pos, BlockIDIndexes.AIR_STATE, 3);
+        if (!canPlaceBlockAt(world, world.localSelector, pos)) {
+            wire.dropBlockAsItem(world, pos, oldState, 0);
+            world.localSelector.setBlockState(pos, BlockIDIndexes.AIR_STATE, 3);
             upd1.type = UpdateNode.Type.OTHER;
             return;
         }
@@ -313,7 +311,7 @@ public class RedstoneEngine {
 
 
     private static boolean canPlaceBlockAt(final World worldIn, final IBlockEAccess access, final BlockPos pos) {
-        final IBlockState downState = access.getBlockState(pos.getX(), pos.getY(), pos.getZ());
+        final IBlockState downState = access.getBlockState(pos.getX(), pos.getY()-1, pos.getZ());
         return downState.isTopSolid() || downState.getBlockFaceShape(worldIn, pos, EnumFacing.UP) == BlockFaceShape.SOLID ||
                 access.getBlockState(pos).getBlock() == Blocks.GLOWSTONE;
     }
@@ -379,7 +377,7 @@ public class RedstoneEngine {
     }
 
 
-    private void findNeighbors(final World worldIn, IBlockEAccess access, final UpdateNode upd1) {
+    private void findNeighbors(final World worldIn, final UpdateNode upd1) {
         final BlockPos pos = upd1.self;
         final BlockPos.MutableBlockPos[] neighbors = worldIn.redstoneCache.neighbors;
         final UpdateNode[] nodes =  worldIn.redstoneCache.tempNodes;
@@ -396,7 +394,7 @@ public class RedstoneEngine {
                 upd2.self = (pos2 = new BlockPos(pos2));
                 upd2.parent = pos;
                 nodeCache.fput(pos2, upd2);
-                identifyNode(worldIn, access, upd2);
+                identifyNode(worldIn, upd2);
             }
             if (update_redstone[i] || upd2.type != UpdateNode.Type.REDSTONE)
                 nodes[i] = upd2;
@@ -446,7 +444,7 @@ public class RedstoneEngine {
 
     private void propagateChanges(final World world, final UpdateNode upd1, final int layer) {
         if (upd1.nodes == null) {
-            findNeighbors(world, world.access(), upd1);
+            findNeighbors(world, upd1);
         }
 
         final BlockPos pos = upd1.self;
@@ -506,7 +504,6 @@ public class RedstoneEngine {
 
 
     private IBlockState scheduleReentrantNeighborChanged(final World worldIn, final BlockPos pos, final IBlockState newState, final BlockPos source) {
-        IBlockEAccess access = worldIn.access();
         final Te4HashMap<BlockPos, UpdateNode> cache = worldIn.redstoneCache.nodeCache;
         if (source != null) {
             UpdateNode src = cache.get(source);
@@ -515,7 +512,7 @@ public class RedstoneEngine {
                 src.self = source;
                 src.parent = source;
                 src.visited = true;
-                identifyNode(worldIn, access, src);
+                identifyNode(worldIn, src);
                 cache.put(source, src);
             }
         }
@@ -526,7 +523,7 @@ public class RedstoneEngine {
             upd.self = pos;
             upd.parent = pos;
             upd.visited = true;
-            identifyNode(worldIn, access, upd);
+            identifyNode(worldIn, upd);
             cache.put(pos, upd);
         }
         upd.currentState = newState;
@@ -537,7 +534,7 @@ public class RedstoneEngine {
                 if (upd2 == null) continue;
                 upd2.type = UpdateNode.Type.UNKNOWN;
                 upd2.currentState = null;
-                identifyNode(worldIn, access, upd2);
+                identifyNode(worldIn, upd2);
             }
         }
 
@@ -562,7 +559,7 @@ public class RedstoneEngine {
             src.parent = source;
             src.visited = true;
             worldIn.redstoneCache.nodeCache.put(source, src);
-            identifyNode(worldIn, worldIn.access(), src);
+            identifyNode(worldIn, src);
         }
 
         final UpdateNode upd = new UpdateNode();
@@ -593,7 +590,7 @@ public class RedstoneEngine {
 
         if (k<15) {
             if (upd.nodes == null) {
-                findNeighbors(worldIn, worldIn.access(), upd);
+                findNeighbors(worldIn, upd);
             }
 
             UpdateNode center_up = upd.nodes[1];
