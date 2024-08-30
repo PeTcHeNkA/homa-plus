@@ -1,5 +1,6 @@
 package net.minecraft.block;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import javax.annotation.Nullable;
@@ -687,39 +688,33 @@ public class Block extends net.minecraftforge.registries.IForgeRegistryEntry.Imp
         return false;
     }
 
-    public void onEntityCollision(World worldIn, BlockPos pos, IBlockState state, Entity entityIn)
-    {
-    }
+
+    public void onEntityCollision(World worldIn, BlockPos pos, IBlockState state, Entity entityIn) {}
+
 
     @Deprecated
-    public int getStrongPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
-    {
+    public int getStrongPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side) {
         return 0;
     }
 
-    public void harvestBlock(World worldIn, EntityPlayer player, BlockPos pos, IBlockState state, @Nullable TileEntity te, ItemStack stack)
-    {
+
+    public void harvestBlock(World worldIn, EntityPlayer player, BlockPos pos, IBlockState state, @Nullable TileEntity te, ItemStack stack) {
         player.addStat(StatList.getBlockStats(this));
         player.addExhaustion(0.005F);
 
-        if (this.canSilkHarvest(worldIn, pos, state, player) && EnchantmentHelper.getEnchantmentLevel(Enchantments.SILK_TOUCH, stack) > 0)
-        {
-            java.util.List<ItemStack> items = new java.util.ArrayList<ItemStack>();
+        if (this.canSilkHarvest(worldIn, pos, state, player) && EnchantmentHelper.getEnchantmentLevel(Enchantments.SILK_TOUCH, stack) > 0) {
+            ArrayList<ItemStack> items = new ArrayList<>();
             ItemStack itemstack = this.getSilkTouchDrop(state);
 
-            if (!itemstack.isEmpty())
-            {
+            if (!itemstack.isEmpty()) {
                 items.add(itemstack);
             }
 
             net.minecraftforge.event.ForgeEventFactory.fireBlockHarvesting(items, worldIn, pos, state, 0, 1.0f, true, player);
-            for (ItemStack item : items)
-            {
+            for (ItemStack item : items) {
                 spawnAsEntity(worldIn, pos, item);
             }
-        }
-        else
-        {
+        } else {
             harvesters.set(player);
             int i = EnchantmentHelper.getEnchantmentLevel(Enchantments.FORTUNE, stack);
             this.dropBlockAsItem(worldIn, pos, state, i);

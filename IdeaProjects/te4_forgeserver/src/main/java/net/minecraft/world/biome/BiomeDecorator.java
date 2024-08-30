@@ -99,7 +99,7 @@ public class BiomeDecorator {
     protected void genDecorations(final Biome biome, final World world, final Random rand, final BlockPos chunkPos) {
         ChunkPos fPos = new ChunkPos(chunkPos);
 
-        MinecraftForge.EVENT_BUS.post(new DecorateBiomeEvent.Pre(world, rand, fPos));
+        MinecraftForge.EVENT_BUS.postF(new DecorateBiomeEvent.Pre(world, rand, fPos));
 
         ChunkSelector selector = new ChunkSelector(world);
         WorldGenerator gen = new WorldGenDeadBush();
@@ -301,7 +301,7 @@ public class BiomeDecorator {
                 gen.generate(world, selector, rand, cRel.delta(rX, rY, rZ));
             }
         }
-        MinecraftForge.EVENT_BUS.post(new DecorateBiomeEvent.Post(world, rand, fPos));
+        MinecraftForge.EVENT_BUS.postF(new DecorateBiomeEvent.Post(world, rand, fPos));
     }
 
 
@@ -353,7 +353,7 @@ public class BiomeDecorator {
 
 
     protected final void generateOres(final ChunkSelector selector, final World worldIn, final Random random, final BlockPos chunkPos) {
-        MinecraftForge.ORE_GEN_BUS.post(new OreGenEvent.Pre(worldIn, random, chunkPos));
+        MinecraftForge.ORE_GEN_BUS.postF(new OreGenEvent.Pre(worldIn, random, chunkPos));
 
         ChunkGenSettingsPlus settings = ((ElcaWorldInfo) worldIn.getWorldInfo()).getChunkGenSettings();
 
@@ -369,7 +369,7 @@ public class BiomeDecorator {
         genOre1(selector, worldIn, chunkPos, random, settings.settings.diamondCount, settings.diamondGen,  settings.settings.diamondMinHeight, settings.settings.diamondMaxHeight );
         genOre2(selector, worldIn, chunkPos, random, settings.settings.lapisCount,   settings.lapisGen,    settings.settings.lapisCenterHeight,settings.settings.lapisSpread      );
 
-        MinecraftForge.ORE_GEN_BUS.post(new OreGenEvent.Post(worldIn, random, chunkPos));
+        MinecraftForge.ORE_GEN_BUS.postF(new OreGenEvent.Post(worldIn, random, chunkPos));
     }
 
 

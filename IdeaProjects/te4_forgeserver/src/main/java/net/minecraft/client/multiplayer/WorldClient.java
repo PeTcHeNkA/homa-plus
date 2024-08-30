@@ -548,8 +548,8 @@ public class WorldClient extends World {
 
 
     @Override
-    protected boolean getCollisionBoxesFalse(@Nullable Entity entityIn, AxisAlignedBB aabb, ArrayListE6<AxisAlignedBB> outList) {
-        return getCollisionBoxes(entityIn, aabb, false, outList);
+    protected void getCollisionBoxesFalse(@Nullable Entity entityIn, AxisAlignedBB aabb, ArrayListE6<AxisAlignedBB> outList) {
+        getCollisionBoxes(entityIn, aabb, false, outList);
     }
 
 

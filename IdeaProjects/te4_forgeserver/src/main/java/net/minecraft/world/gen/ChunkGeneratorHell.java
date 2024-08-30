@@ -139,7 +139,7 @@ public class ChunkGeneratorHell implements IChunkGenerator {
 
 
     protected void editGenSettings(NetherGenInitEvent event){
-        MinecraftForge.EVENT_BUS.post(event);
+        MinecraftForge.EVENT_BUS.postF(event);
     }
 
 
@@ -370,7 +370,7 @@ public class ChunkGeneratorHell implements IChunkGenerator {
         }
 
         ChunkGeneratorEvent.InitNoiseField event = new ChunkGeneratorEvent.InitNoiseField(this, heights, xOff, yOff, zOff, xSize, ySize, zSize);
-        MinecraftForge.EVENT_BUS.post(event);
+        MinecraftForge.EVENT_BUS.postF(event);
         if (event.getResult() == Event.Result.DENY) return event.getNoisefield();
 
         session.noiseData4 = this.scaleNoise.generateNoiseOctaves(session.noiseData4, xOff, yOff, zOff, xSize, 1, zSize, 1.0D, 0.0D, 1.0D);

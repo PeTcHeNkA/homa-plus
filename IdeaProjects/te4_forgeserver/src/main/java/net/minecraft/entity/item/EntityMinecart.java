@@ -380,7 +380,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
                 }
             }
             this.handleWaterMovement();
-            MinecraftForge.EVENT_BUS.post(new MinecartUpdateEvent(this, this.getCurrentRailPosition()));
+            MinecraftForge.EVENT_BUS.postF(new MinecartUpdateEvent(this, this.getCurrentRailPosition()));
         }
     }
 
@@ -773,7 +773,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
 
     @Override
     public void applyEntityCollision(Entity entityIn) {
-        MinecraftForge.EVENT_BUS.post(new MinecartCollisionEvent(this, entityIn));
+        MinecraftForge.EVENT_BUS.postF(new MinecartCollisionEvent(this, entityIn));
         if (getCollisionHandler() != null) {
             getCollisionHandler().onEntityCollision(this, entityIn);
             return;

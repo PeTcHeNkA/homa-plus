@@ -427,21 +427,21 @@ public abstract class Biome extends IForgeRegistryEntry.Impl<Biome> {
 
     public int getWaterColorMultiplier() {
         BiomeEvent.GetWaterColor event = new BiomeEvent.GetWaterColor(this, this.waterColor);
-        MinecraftForge.EVENT_BUS.post(event);
+        MinecraftForge.EVENT_BUS.postF(event);
         return event.getNewColor();
     }
 
 
     public int getModdedBiomeGrassColor(int original) {
         BiomeEvent.GetGrassColor event = new BiomeEvent.GetGrassColor(this, original);
-        MinecraftForge.EVENT_BUS.post(event);
+        MinecraftForge.EVENT_BUS.postF(event);
         return event.getNewColor();
     }
 
 
     public int getModdedBiomeFoliageColor(int original) {
         BiomeEvent.GetFoliageColor event = new BiomeEvent.GetFoliageColor(this, original);
-        MinecraftForge.EVENT_BUS.post(event);
+        MinecraftForge.EVENT_BUS.postF(event);
         return event.getNewColor();
     }
 

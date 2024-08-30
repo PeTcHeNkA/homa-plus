@@ -245,7 +245,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         this.entityInit();
         manager.trim();
 
-        MinecraftForge.EVENT_BUS.post(
+        MinecraftForge.EVENT_BUS.postF(
                 new EntityEvent.EntityConstructing(this)
         );
         capabilities = ForgeEventFactory.gatherCapabilities(this);
@@ -1050,7 +1050,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
     public boolean handleWaterMovement() {
         if (this.getRidingEntity() instanceof EntityBoat) this.inWater = false;
-        else {
+        else if((lodLvl() & ticksExisted) == 0){
             AxisAlignedBB box;
             getEntityBoundingBox().growTo(-0.001D, -0.4010000059604645D, -0.001D, box = world.commonWorldEntityAABB);
             if (world.handleMaterialAcceleration(box, Material.WATER, this)) {
@@ -1059,9 +1059,13 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
                 this.fallDistance = 0.0F;
                 this.inWater = true;
                 this.extinguish();
-            } else this.inWater = false;
+                return true;
+            } else return this.inWater = false;
+        } else if(this.inWater){
+            this.extinguish();
+            return true;
         }
-        return this.inWater;
+        return false;
     }
 
 

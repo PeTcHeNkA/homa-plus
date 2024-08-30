@@ -31,6 +31,7 @@ public class ElcaMobs {
     public static final EntityLodFunc BOAT     ;
     public static final EntityLodFunc RABBIT   ;
     public static final EntityLodFunc MINECART ;
+    public static final EntityLodFunc ARMOR_ST ;
 
 
     static {
@@ -63,6 +64,7 @@ public class ElcaMobs {
         BOAT      = new EntityLodFunc(config.get("bat"),      12, 22);
         MINECART  = new EntityLodFunc(config.get("minecart"), 24, 28);
         RABBIT    = new EntityLodFunc(config.get("rabbit"),   16, 32);
+        ARMOR_ST  = new EntityLodFunc(config.get("armor_st"), 16, 24);
 
 
         SPIDER_RIDER_PAWN_CHANCE   = getR(config, "spider.rider_spawn",   80  );

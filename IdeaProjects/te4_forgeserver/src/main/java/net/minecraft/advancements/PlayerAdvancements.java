@@ -188,7 +188,7 @@ public class PlayerAdvancements {
                 advancement.getRewards().apply(this.player);
 
                 AdvancementEvent event = new AdvancementEvent(player, advancement);
-                MinecraftForge.EVENT_BUS.post(event);
+                MinecraftForge.EVENT_BUS.postF(event);
 
                 if(event.getResult() != Event.Result.DENY) {
                     if (advancement.getDisplay() != null && advancement.getDisplay().shouldAnnounceToChat() && this.player.world.getGameRules().getBoolean("announceAdvancements")) {

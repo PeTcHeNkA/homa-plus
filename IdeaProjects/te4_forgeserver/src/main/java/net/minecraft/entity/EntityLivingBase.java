@@ -492,7 +492,7 @@ public abstract class EntityLivingBase extends Entity {
         } else {
             Collection<PotionEffect> collection = this.activePotionsMap.values();
             net.minecraftforge.event.entity.living.PotionColorCalculationEvent event = new net.minecraftforge.event.entity.living.PotionColorCalculationEvent(this, PotionUtils.getPotionColorFromEffectList(collection), areAllPotionsAmbient(collection), collection);
-            net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(event);
+            net.minecraftforge.common.MinecraftForge.EVENT_BUS.postF(event);
             this.dataManager.set(HIDE_PARTICLES, event.areParticlesHidden());
             this.dataManager.set(POTION_EFFECTS, event.getColor());
             this.setInvisible(this.isPotionActive(MobEffects.INVISIBILITY));
@@ -551,7 +551,7 @@ public abstract class EntityLivingBase extends Entity {
     public void addPotionEffect(PotionEffect potioneffectIn) {
         if (this.isPotionApplicable(potioneffectIn)) {
             PotionEffect potioneffect = this.activePotionsMap.get(potioneffectIn.getPotion());
-            net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.living.PotionEvent.PotionAddedEvent(this, potioneffect, potioneffectIn));
+            net.minecraftforge.common.MinecraftForge.EVENT_BUS.postF(new net.minecraftforge.event.entity.living.PotionEvent.PotionAddedEvent(this, potioneffect, potioneffectIn));
             if (potioneffect == null) {
                 this.activePotionsMap.put(potioneffectIn.getPotion(), potioneffectIn);
                 this.onNewPotionEffect(potioneffectIn);
@@ -565,7 +565,7 @@ public abstract class EntityLivingBase extends Entity {
 
     public boolean isPotionApplicable(PotionEffect effect) {
         net.minecraftforge.event.entity.living.PotionEvent.PotionApplicableEvent event = new net.minecraftforge.event.entity.living.PotionEvent.PotionApplicableEvent(this, effect);
-        net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(event);
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.postF(event);
         if (event.getResult() != net.minecraftforge.fml.common.eventhandler.Event.Result.DEFAULT) return event.getResult() == net.minecraftforge.fml.common.eventhandler.Event.Result.ALLOW;
         if (this.getCreatureAttribute() == EnumCreatureAttribute.UNDEAD) {
             Potion potion = effect.getPotion();
@@ -1611,7 +1611,7 @@ public abstract class EntityLivingBase extends Entity {
         if (!ItemStack.areItemStacksEqual(other, stack)) {
             if (!ItemStack.areItemStacksEqualUsingNBTShareTag(other, stack))
                 ((WorldServer)this.world).getEntityTracker().sendToTracking(this, new SPacketEntityEquipment(this.getEntityId(), slot, other));
-            MinecraftForge.EVENT_BUS.post(new LivingEquipmentChangeEvent(this, slot, stack, other));
+            MinecraftForge.EVENT_BUS.postF(new LivingEquipmentChangeEvent(this, slot, stack, other));
 
             if (!stack.isEmpty())
                 this.getAttributeMap().removeAttributeModifiers(stack.getAttributeModifiers(slot));

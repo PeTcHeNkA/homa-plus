@@ -260,13 +260,15 @@ public class EntityItem extends Entity {
 
     @Override
     public boolean handleWaterMovement() {
-        if (this.world.handleMaterialAcceleration(this.getEntityBoundingBox(), Material.WATER, this)) {
-            if (!this.inWater && !this.firstUpdate) {
-                this.doWaterSplashEffect();
+        if((lodLvl() & ticksExisted) == 0) {
+            if (this.world.handleMaterialAcceleration(this.getEntityBoundingBox(), Material.WATER, this)) {
+                if (!this.inWater && !this.firstUpdate) {
+                    this.doWaterSplashEffect();
+                }
+                this.inWater = true;
+            } else {
+                this.inWater = false;
             }
-            this.inWater = true;
-        } else {
-            this.inWater = false;
         }
         return this.inWater;
     }

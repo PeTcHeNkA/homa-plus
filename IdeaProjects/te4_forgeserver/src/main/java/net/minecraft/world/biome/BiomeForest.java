@@ -42,7 +42,8 @@ public class BiomeForest extends Biome {
                     if (type == BlockFlower.EnumFlowerType.BLUE_ORCHID) {
                         type = BlockFlower.EnumFlowerType.POPPY;
                     }
-                    this.addFlower(Blocks.RED_FLOWER.getDefaultState().withProperty(Blocks.RED_FLOWER.getTypeProperty(), (Comparable)type), 10);
+                    this.addFlower(Blocks.RED_FLOWER.getDefaultState()
+                            .withProperty(Blocks.RED_FLOWER.getTypeProperty(), type), 10);
                 }
             }
         }

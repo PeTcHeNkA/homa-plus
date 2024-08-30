@@ -378,7 +378,7 @@ public abstract class PlayerList {
                 event.reject(msg);
             }
         }
-        MinecraftForge.EVENT_BUS.post(event);
+        MinecraftForge.EVENT_BUS.postF(event);
         return event.getMessage();
     }
 

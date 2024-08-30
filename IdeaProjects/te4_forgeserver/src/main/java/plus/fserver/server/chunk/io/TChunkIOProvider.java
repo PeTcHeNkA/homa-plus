@@ -36,14 +36,13 @@ public class TChunkIOProvider extends TChunkTask {
             if (chunk != null) {
                 this.loader.loadEntities(this.chunkInfo.world, this.nbt.getCompoundTag(SStrings.CL_LEVEL), this.chunk);
 
-                MinecraftForge.EVENT_BUS.post(new ChunkDataEvent.Load(this.chunk, this.nbt));
+                MinecraftForge.EVENT_BUS.postF(new ChunkDataEvent.Load(this.chunk, this.nbt));
 
                 this.chunk.setLastSaveTime(provider.world.getTotalWorldTime());
                 this.provider.chunkGenerator.recreateStructures(this.chunk, this.chunkInfo.x, this.chunkInfo.z);
 
                 worldServer().getChunkProvider().onComplete(this);
             }
-
             this.runCallbacks();
         } catch (Throwable throwable){
             throwable.printStackTrace();

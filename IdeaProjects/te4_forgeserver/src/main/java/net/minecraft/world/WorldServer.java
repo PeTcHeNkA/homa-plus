@@ -81,14 +81,13 @@ import plus.fserver.utls.collections.ChunkIterator;
 import plus.fserver.utls.math.MathUtls;
 import plus.fserver.world.CommonWorldEntitySpawner;
 import plus.fserver.world.NavigationCache;
-import plus.fserver.world.light.WorldChunkSlice;
 import plus.tson.utl.Te4HashSet;
 
 
 public class WorldServer extends World implements IThreadListener, ElcaWorldServer, MeanTicker {
     private static final Logger LOGGER = LogManager.getLogger();
     private final MinecraftServer server;
-    private final EntityTracker entityTracker;
+    private EntityTracker entityTracker;
     private final PlayerChunkMap playerChunkMap;
     private final Set<NextTickListEntry> pendingTickListEntriesHashSet = new Te4HashSet<>();
     private final TreeSet<NextTickListEntry> pendingTickListEntriesTreeSet = new TreeSet<>(
@@ -122,7 +121,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
             throw new RuntimeException("DEBUG NO SERVER IS ENABLED!");
         }
         this.server = server;
-        this.entityTracker = new EntityTracker(this);
+        this.entityTracker = new EntityTracker(this).init();
         this.playerChunkMap = new PlayerChunkMap(this);
 
         perWorldStorage = new MapStorage(new WorldSpecificSaveHandler(this, saveHandlerIn));
@@ -963,6 +962,11 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
     }
 
 
+    public void setTracker(EntityTracker entityTracker){
+        this.entityTracker = entityTracker;
+    }
+
+
     public PlayerChunkMap getPlayerChunkMap() {
         return this.playerChunkMap;
     }
@@ -1339,7 +1343,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
                 progressCallback.displayLoadingString("Saving chunks");
             }
             chunkproviderserver.saveChunks(all);
-            MinecraftForge.EVENT_BUS.post(new WorldEvent.Save(this));
+            MinecraftForge.EVENT_BUS.postF(new WorldEvent.Save(this));
         }
     }
 

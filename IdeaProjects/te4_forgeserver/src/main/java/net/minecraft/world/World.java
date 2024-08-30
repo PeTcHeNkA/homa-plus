@@ -2389,11 +2389,11 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
-    public boolean mayPlace(Block blockIn, BlockPos pos, boolean skipCollisionCheck, EnumFacing sidePlacedOn, @Nullable Entity placer) {
-        IBlockState iblockstate1 = this.getBlockState(pos);
-        AxisAlignedBB aabb = skipCollisionCheck ? null : blockIn.getDefaultState().getCollisionBoundingBox(this, pos);
+    public boolean mayPlace(Block block, BlockPos pos, boolean skipCollisionCheck, EnumFacing side, @Nullable Entity placer) {
+        IBlockState iblockstate1 = this.access().getBlockState(pos);
+        AxisAlignedBB aabb = skipCollisionCheck ? null : block.getDefaultState().getCollisionBoundingBox(this, pos);
 
-        if (!((placer instanceof EntityPlayer) || !onBlockPlace(placer, new BlockSnapshot(this, pos, blockIn.getDefaultState()), sidePlacedOn).isCanceled())) return false;
+        if (!((placer instanceof EntityPlayer) || !onBlockPlace(placer, new BlockSnapshot(this, pos, block.getDefaultState()), side).isCanceled())) return false;
         if (aabb != Block.NULL_AABB && !this.checkNoEntityCollision(
                 new AxisAlignedBB(
                         aabb.minX+pos.getX()+0.0626,
@@ -2408,10 +2408,10 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         {
             return false;
         }
-        else if (iblockstate1.getMaterial() == Material.CIRCUITS && blockIn == Blocks.ANVIL) {
+        else if (iblockstate1.getMaterial() == Material.CIRCUITS && block == Blocks.ANVIL) {
             return true;
         } else {
-            return iblockstate1.getBlock().isReplaceable(this, pos) && blockIn.canPlaceBlockOnSide(this, pos, sidePlacedOn);
+            return iblockstate1.getBlock().isReplaceable(this, pos) && block.canPlaceBlockOnSide(this, pos, side);
         }
     }
 
@@ -3301,7 +3301,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             addIfNeed(list1, list, entityIn, aabb);
         }
         if(ElcaCV.ENABLE_COLLISION_EVENTS)
-            MinecraftForge.EVENT_BUS.post(collisionEvent.init(entityIn, aabb, list));
+            MinecraftForge.EVENT_BUS.postF(collisionEvent.init(entityIn, aabb, list));
     }
 
 
@@ -3316,7 +3316,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             );
         }
         if(ElcaCV.ENABLE_COLLISION_EVENTS)
-            MinecraftForge.EVENT_BUS.post(collisionEvent.init(entityIn, aabb, list));
+            MinecraftForge.EVENT_BUS.postF(collisionEvent.init(entityIn, aabb, list));
         //return list;
     }
 
@@ -3879,7 +3879,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     @Keep
-    protected boolean getCollisionBoxesFalse(@Nullable Entity entityIn, AxisAlignedBB aabb, ArrayListE6<AxisAlignedBB> outList) {
+    protected void getCollisionBoxesFalse(@Nullable Entity entityIn, AxisAlignedBB aabb, ArrayListE6<AxisAlignedBB> outList) {
         int minX = MathHelper.floor(aabb.minX) - 1;
         int maxX = MathHelper.ceil(aabb.maxX) + 1;
         int minY = MathHelper.floor(aabb.minY) - 1;
@@ -3914,17 +3914,15 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
                         }
             }
         }
-        return !outList.isEmptyC();
     }
 
 
     @Keep
     protected boolean getCollisionBoxesTrue(@Nullable Entity entityIn, AxisAlignedBB aabb, ArrayListE6<AxisAlignedBB> outList) {
-        if (true){
-            if(ElcaCV.ENABLE_COLLISION_EVENTS)
-                MinecraftForge.EVENT_BUS.post(collisionEvent.init(entityIn, aabb, outList));
-            if(!outList.isEmptyC())return true;
-        }
+        if(ElcaCV.ENABLE_COLLISION_EVENTS)
+            MinecraftForge.EVENT_BUS.post(collisionEvent.init(entityIn, aabb, outList));
+        if(!outList.isEmptyC())return true;
+
         int minX = MathHelper.floor(aabb.minX) - 1;
         int maxX = MathHelper.ceil(aabb.maxX) + 1;
         int minY = MathHelper.floor(aabb.minY) - 1;
@@ -3958,11 +3956,11 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
                                     .addCollisionBoxToListF(selector, tempPooledLocalPos.setPos(xPos, yPos, zPos), aabb, outList);
 
-                            if (true)
-                                if(ElcaCV.ENABLE_COLLISION_EVENTS){
-                                    MinecraftForge.EVENT_BUS.post(collisionEvent.init(entityIn, aabb, outList));
-                                    if(!outList.isEmptyC())return true;
-                                }else return true;
+
+                            if(ElcaCV.ENABLE_COLLISION_EVENTS){
+                                MinecraftForge.EVENT_BUS.postF(collisionEvent.init(entityIn, aabb, outList));
+                                if(!outList.isEmptyC())return true;
+                            }else return true;
                         }
             }
         return !outList.isEmptyC();

@@ -2,6 +2,7 @@ package plus.fserver.server;
 
 import com.github.luben.zstd.util.Native;
 import net.minecraft.crash.CrashReport;
+import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.crafting.CraftingManager;
@@ -134,6 +135,8 @@ public final class AsyWorldTickerV2 implements ThreadFactory{
         //private long lastTicked;
         private ScheduledFuture<?> future;
         private ScheduledFuture<?> light;
+        private ScheduledFuture<?> tracker;
+
         private WorldInfo(int id) {
             this.id = id;
             if(!useSync) active();
@@ -162,6 +165,13 @@ public final class AsyWorldTickerV2 implements ThreadFactory{
                 light.cancel(true);
             } catch (Exception e){
                 e.printStackTrace();
+            }
+            if(tracker != null){
+                try {
+                    tracker.cancel(true);
+                } catch (Exception e){
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -250,7 +260,27 @@ public final class AsyWorldTickerV2 implements ThreadFactory{
             worldserver.tick();
             worldserver.updateEntities();
             FMLCommonHandler.instance().onPostWorldTick(worldserver);
-            worldserver.getEntityTracker().tick();
+
+            EntityTracker tracer = worldserver.getEntityTracker();
+            if(!tracer.isAsync()) {
+                if(worldserver.meanTickTime() > ElcaConfig.MEAN_OVERLOAD){
+                    AsyEntityTracker asy = tracer.toAsync();
+                    worldserver.setTracker(asy);
+
+                    inf.tracker = service.scheduleAtFixedRate(() -> {
+                        if(asy.world().meanTickTime() > ElcaConfig.MEAN_OVERLOAD){
+                            asy.tick();
+                        } else {
+                            asy.world().setTracker(asy.toSync());
+                            worldserver.addSyncTask(asy::runTasks);
+                            inf.tracker.cancel(false);
+                            inf.tracker = null;
+                        }
+                    }, 0, 50, TimeUnit.MILLISECONDS);
+                } else {
+                    tracer.tick();
+                }
+            }
 
             server.worldTickTimes.get(inf.id)[inf.tickCounter % 100] = System.nanoTime() - curNanoTime;
         } catch (Exception | StackOverflowError exception){
@@ -318,7 +348,7 @@ public final class AsyWorldTickerV2 implements ThreadFactory{
         } catch (Exception e) {
             onError(world, e);
         }
-        MinecraftForge.EVENT_BUS.post(new WorldEvent.Unload(world));
+        MinecraftForge.EVENT_BUS.postF(new WorldEvent.Unload(world));
         DimensionManager.setWorld(id, null, this.server);
     }
 }

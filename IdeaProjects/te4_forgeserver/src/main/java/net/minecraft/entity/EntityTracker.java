@@ -20,6 +20,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import plus.fserver.server.AsyEntityTracker;
 import plus.fserver.utls.collections.ArrayListE6;
 import plus.fserver.utls.collections.ArrayRemSwapListE15;
 import plus.fserver.utls.collections.EntityChunkIter;
@@ -29,12 +30,39 @@ import plus.fserver.world.EntityTrackerFactory;
 public class EntityTracker {
     private static final EntityTrackerFactory trackingTable = new EntityTrackerFactory();
     private static final Logger LOGGER = LogManager.getLogger();
-    private final WorldServer world;
-    private int maxTrackingDistanceThreshold;
+    protected final WorldServer world;
+    public int maxTrackingDistanceThreshold;
 
-    public EntityTracker(WorldServer theWorldIn) {
-        this.world = theWorldIn;
-        this.maxTrackingDistanceThreshold = theWorldIn.getMinecraftServer().getPlayerList().getEntityViewDistance();
+    public EntityTracker(WorldServer world) {
+        this.world = world;
+    }
+
+
+    public final EntityTracker init(){
+        this.maxTrackingDistanceThreshold = world.getMinecraftServer().getPlayerList().getEntityViewDistance();
+        return this;
+    }
+
+
+    public WorldServer world(){
+        return world;
+    }
+
+
+    public boolean isAsync(){
+        return false;
+    }
+
+
+    public AsyEntityTracker toAsync(){
+        AsyEntityTracker asy = new AsyEntityTracker(world);
+        asy.maxTrackingDistanceThreshold = maxTrackingDistanceThreshold;
+        return asy;
+    }
+
+
+    public EntityTracker toSync(){
+        return this;
     }
 
 
@@ -63,11 +91,7 @@ public class EntityTracker {
                 throw new IllegalStateException("Entity is already tracked!");
             }
             EntityTrackerEntry entry = new EntityTrackerEntry(entityIn, trackingRange, this.maxTrackingDistanceThreshold, updateFrequency, sendVelocityUpdates);
-
-            //this.entries.add(entry);
-            entityIn.trackerEntry = entry;
-
-            entry.updatePlayerEntities(this.world.playerEntities);
+            onTrack(entityIn.trackerEntry = entry);
         } catch (Throwable throwable) {
             CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Adding entity to track");
             CrashReportCategory crashreportcategory = crashreport.makeCategory("Entity To Track");
@@ -90,15 +114,20 @@ public class EntityTracker {
     }
 
 
+    public void onTrack(EntityTrackerEntry entry){
+        entry.updatePlayerEntities(this.world.playerEntities);
+    }
+
+
     public void untrack(Entity entityIn) {
         EntityTrackerEntry entry;
         if (entityIn instanceof EntityPlayerMP) {
-            EntityPlayerMP entityplayermp = (EntityPlayerMP)entityIn;
+            EntityPlayerMP player = (EntityPlayerMP)entityIn;
 
             for (ArrayRemSwapListE15<Entity> list: world.realEntityList.getRaw()) {
                 for (int cursor = 0, s = list.sizeC(); cursor < s; ++cursor) {
                     if((entry = list.getC(cursor).trackerEntry) != null)
-                        entry.removeFromTrackedPlayers(entityplayermp);
+                        entry.removeFromTrackedPlayers(player);
                     else
                         System.out.println("WARN: TRYING TO REMOVE ENTITY WITH NULL TRACKER");
                 }
@@ -113,10 +142,13 @@ public class EntityTracker {
 
 
     private final ArrayList<EntityPlayerMP> toUpdate = new ArrayList<>();
+    protected boolean fastUpdate = false;
+
     public void tick() {
         List<EntityPlayer> players = this.world.playerEntities;
         EntityTrackerEntry entry;
-        if((world.getTotalWorldTime()&1)==0){
+        if(fastUpdate){
+            fastUpdate = false;
             for (ArrayRemSwapListE15<Entity> list: world.realEntityList.getRaw()) {
                 for (int cursor = 0, s = list.sizeC(); cursor < s; ++cursor) {
                     if((entry = list.getC(cursor).trackerEntry) != null)
@@ -124,6 +156,7 @@ public class EntityTracker {
                 }
             }
         } else {
+            fastUpdate = true;
             ArrayList<EntityPlayerMP> toUpdate = this.toUpdate;
 
             for (ArrayRemSwapListE15<Entity> list: world.realEntityList.getRaw())
@@ -227,7 +260,7 @@ public class EntityTracker {
     }
 
 
-    public void sendLeashedEntitiesInChunk(EntityPlayerMP player, Chunk chunkIn) {
+    public void sendLeashedEntitiesInChunk(EntityPlayerMP player, Chunk chunk) {
         ArrayListE6<Entity> leashed  = new ArrayListE6<>();
         ArrayListE6<Entity> passengers = new ArrayListE6<>();
 
@@ -236,7 +269,7 @@ public class EntityTracker {
                 Entity entity = list.getC(cursor);
                 EntityTrackerEntry entry = entity.trackerEntry;
                 if (entry != null) {
-                    if (entity != player && entity.chunkCoordX == chunkIn.x && entity.chunkCoordZ == chunkIn.z) {
+                    if (entity != player && entity.chunkCoordX == chunk.x && entity.chunkCoordZ == chunk.z) {
                         entry.updatePlayerEntity(player);
 
                         if (entity instanceof EntityLiving && ((EntityLiving) entity).getLeashHolder() != null)

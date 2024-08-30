@@ -722,7 +722,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
             this.openContainer = guiOwner.createContainer(this.inventory, this);
             this.openContainer.windowId = this.currentWindowId;
             this.openContainer.addListener(this);
-            MinecraftForge.EVENT_BUS.post(new PlayerContainerEvent.Open(this, this.openContainer));
+            MinecraftForge.EVENT_BUS.postF(new PlayerContainerEvent.Open(this, this.openContainer));
         }
     }
 
@@ -755,7 +755,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
             }
             this.openContainer.windowId = this.currentWindowId;
             this.openContainer.addListener(this);
-            MinecraftForge.EVENT_BUS.post(new PlayerContainerEvent.Open(this, this.openContainer));
+            MinecraftForge.EVENT_BUS.postF(new PlayerContainerEvent.Open(this, this.openContainer));
         }
     }
 
@@ -766,7 +766,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
         this.openContainer = new ContainerMerchant(this.inventory, villager, this.world);
         this.openContainer.windowId = this.currentWindowId;
         this.openContainer.addListener(this);
-        net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.player.PlayerContainerEvent.Open(this, this.openContainer));
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.postF(new net.minecraftforge.event.entity.player.PlayerContainerEvent.Open(this, this.openContainer));
         IInventory iinventory = ((ContainerMerchant)this.openContainer).getMerchantInventory();
         ITextComponent itextcomponent = villager.getDisplayName();
         this.connection.netManager.sendPacketE(new SPacketOpenWindow(this.currentWindowId, "minecraft:villager", itextcomponent, iinventory.getSizeInventory()));
@@ -867,7 +867,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
 
     public void closeContainer() {
         this.openContainer.onContainerClosed(this);
-        MinecraftForge.EVENT_BUS.post(new PlayerContainerEvent.Close(this, this.openContainer));
+        MinecraftForge.EVENT_BUS.postF(new PlayerContainerEvent.Close(this, this.openContainer));
         this.openContainer = this.inventoryContainer;
     }
 

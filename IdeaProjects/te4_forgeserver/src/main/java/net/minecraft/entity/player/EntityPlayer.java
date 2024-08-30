@@ -1850,7 +1850,7 @@ public abstract class EntityPlayer extends EntityLivingBase {
             return false;
         } else {
             BlockPos blockpos = pos.offset(facing.getOpposite());
-            Block block = this.world.getBlockState(blockpos).getBlock();
+            Block block = this.world.access().getBlockState(blockpos).getBlock();
             return stack.canPlaceOn(block) || stack.canEditBlocks();
         }
     }

@@ -783,7 +783,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
             part = this.entityLists.length - 1;
         }
 
-        MinecraftForge.EVENT_BUS.post(world.enteringChunk.initEntering(entityIn, this.x, this.z, entityIn.chunkCoordX, entityIn.chunkCoordZ));
+        MinecraftForge.EVENT_BUS.postF(world.enteringChunk.initEntering(entityIn, this.x, this.z, entityIn.chunkCoordX, entityIn.chunkCoordZ));
         entityIn.addedToChunk = true;
         entityIn.chunkCoordX = this.x;
         entityIn.chunkCoordY = part;
@@ -889,7 +889,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
         for (ClassInheritanceMultiMap<Entity> entities : this.entityLists) {
             this.world.loadEntities(com.google.common.collect.ImmutableList.copyOf(entities));
         }
-        net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.world.ChunkEvent.Load(this));
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.postF(new net.minecraftforge.event.world.ChunkEvent.Load(this));
     }
 
 
@@ -902,7 +902,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
         for (ClassInheritanceMultiMap<Entity> entities : this.entityLists) {
             this.world.unloadEntities(entities);
         }
-        net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.world.ChunkEvent.Unload(this));
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.postF(new net.minecraftforge.event.world.ChunkEvent.Unload(this));
     }
 
 
@@ -950,37 +950,37 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
     public final void getEntitiesWithinAABBForEntityLimitedC(@Nullable Entity entityIn, AxisAlignedBB aabb, ArrayListE6<Entity> listToFill, @Nullable Predicate <? super Entity > filter, int max) {
         int minY = MathUtls.clamp16c(aabb.minY - World.MAX_ENTITY_RADIUS),
-                maxY = MathUtls.clamp16c(aabb.maxY + World.MAX_ENTITY_RADIUS);
+            maxY = MathUtls.clamp16c(aabb.maxY + World.MAX_ENTITY_RADIUS);
 
         Entity[] parts;
         Entity entity;
 
         if(filter == null) {
             for (ArrayRemSwapListE6<Entity> raw; minY <= maxY; ++minY)
-                if (!(raw = this.entityLists[minY].rawValues()).isEmptyC())
-                    for (int i = 0; i < raw.sizeC();i++)
-                        if ((entity = raw.getC(i)) != entityIn && entity.getEntityBoundingBox().intersects(aabb)) {
-                            listToFill.addF(entity);
-                            if ((parts = entity.getParts()) != null)
-                                for (Entity entity1 : parts)
-                                    if (entity1 != entityIn && entity1.getEntityBoundingBox().intersects(aabb))
-                                        listToFill.addF(entity1);
-                            if (--max < 0) return;
-                        }
+                //if ((cursor = (raw = this.entityLists[minY].rawValues()).sizeC()-1) != 0)
+                for (int cursor = (raw = this.entityLists[minY].rawValues()).sizeC()-1; cursor != -1; cursor--)
+                    if ((entity = raw.getC(cursor)) != entityIn && entity.getEntityBoundingBox().intersects(aabb)) {
+                        listToFill.addF(entity);
+                        if ((parts = entity.getParts()) != null)
+                            for (Entity entity1 : parts)
+                                if (entity1 != entityIn && entity1.getEntityBoundingBox().intersects(aabb))
+                                    listToFill.addF(entity1);
+                        if (--max < 0) return;
+                    }
         } else {
             for (ArrayRemSwapListE6<Entity> raw; minY <= maxY; ++minY)
-                if (!(raw = this.entityLists[minY].rawValues()).isEmptyC())
-                    for (int i = 0; i < raw.sizeC();i++)
-                        if ((entity = raw.getC(i)) != entityIn && entity.getEntityBoundingBox().intersects(aabb)) {
-                            if (filter.apply(entity)) listToFill.addF(entity);
+                //if ((cursor = (raw = this.entityLists[minY].rawValues()).sizeC()) != 0)
+                for (int cursor = (raw = this.entityLists[minY].rawValues()).sizeC()-1; cursor != -1; cursor--)
+                    if ((entity = raw.getC(cursor)) != entityIn && entity.getEntityBoundingBox().intersects(aabb)) {
+                        if (filter.apply(entity)) listToFill.addF(entity);
 
-                            if ((parts = entity.getParts()) != null)
-                                for (Entity entity1 : parts)
-                                    if (entity1 != entityIn && entity1.getEntityBoundingBox().intersects(aabb)
-                                            && (filter.apply(entity1)))
-                                        listToFill.addF(entity1);
-                            if (--max < 0) return;
-                        }
+                        if ((parts = entity.getParts()) != null)
+                            for (Entity entity1 : parts)
+                                if (entity1 != entityIn && entity1.getEntityBoundingBox().intersects(aabb)
+                                        && (filter.apply(entity1)))
+                                    listToFill.addF(entity1);
+                        if (--max < 0) return;
+                    }
         }
     }
 

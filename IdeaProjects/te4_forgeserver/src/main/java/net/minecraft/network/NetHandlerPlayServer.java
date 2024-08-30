@@ -349,9 +349,7 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
     }
 
 
-    /**
-     * @author Te4hno
-     */
+    @Override
     public void processPlayer(@NotNull CPacketPlayer packetIn) {
         if (isMovePlayerPacketInvalid(packetIn)) {
             this.disconnect(new TextComponentTranslation("multiplayer.disconnect.invalid_player_movement"));
@@ -386,8 +384,8 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
                 double d4 = packetIn.getX(player.posX);
                 double d5 = packetIn.getY(player.posY);
                 double d6 = packetIn.getZ(player.posZ);
-                float f = packetIn.getYaw(player.rotationYaw);
-                float f1 = packetIn.getPitch(player.rotationPitch);
+                float yaw = packetIn.getYaw(player.rotationYaw);
+                float pitch = packetIn.getPitch(player.rotationPitch);
                 double d7 = d4 - this.firstGoodX;
                 double d8 = d5 - this.firstGoodY;
                 double d9 = d6 - this.firstGoodZ;
@@ -447,14 +445,14 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
                         LOGGER.warn("{} moved wrongly!", player.getName());
                     }
 
-                    player.setPositionAndRotation(d4, d5, d6, f, f1);
+                    player.setPositionAndRotation(d4, d5, d6, yaw, pitch);
                     player.addMovementStat(player.posX - d0, player.posY - d1, player.posZ - d2);
 
                     if (!player.noClip && !player.isPlayerSleeping()) {
                         boolean flag1 = worldserver.getCollisionBoxes(player, player.getEntityBoundingBox().shrink(0.0625D)).isEmpty();
 
                         if (flag2 && (flag || !flag1)) {
-                            this.setPlayerLocation(d0, d1, d2, f, f1);
+                            this.setPlayerLocation(d0, d1, d2, yaw, pitch);
                             return;
                         }
                     }
@@ -463,7 +461,7 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
                     this.floating &= !this.server.isFlightAllowed() && !player.capabilities.allowFlying;
                     this.floating &= !player.isPotionActive(MobEffects.LEVITATION) && !player.isElytraFlying()
                             && !worldserver.checkBlockCollision(
-                            player.getEntityBoundingBox().grow(0.0625D).expand(0.0D, -0.55D, 0.0D)
+                            player.getEntityBoundingBox().grow(0.0625D, -0.4875D, 0.0625D)
                     );
                     player.onGround = packetIn.isOnGround();
                     player.getServerWorld().getPlayerChunkMap().updateMovingPlayer(player);
@@ -477,14 +475,7 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
     }
 
 
-//    private void updateMoving(){
-//        this.player.getServerWorld().getPlayerChunkMap().updateMovingPlayer(this.player);
-//    }
-
-
-    /**
-     * @author Te4hno
-     */
+    @Override
     public void processPlayerDigging(@NotNull CPacketPlayerDigging packetIn) {
         WorldServer worldserver = this.server.getWorld(player.dimension);
         player.markPlayerActive();
@@ -548,9 +539,7 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
     }
 
 
-    /**
-     * @author Te4hno
-     */
+    @Override
     public void processVehicleMove(@NotNull CPacketVehicleMove packetIn) {
         if (isMoveVehiclePacketInvalid(packetIn)) {
             this.disconnect(new TextComponentTranslation("multiplayer.disconnect.invalid_vehicle_movement"));
@@ -625,9 +614,7 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
     }
 
 
-    /**
-     * @author Te4hno
-     */
+    @Override
     public void processConfirmTeleport(CPacketConfirmTeleport packetIn) {
         if (packetIn.getTeleportId() == this.teleportId) {
             Runnable task = new Runnable() {
