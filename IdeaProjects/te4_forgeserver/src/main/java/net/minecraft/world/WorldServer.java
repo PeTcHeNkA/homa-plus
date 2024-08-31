@@ -73,7 +73,7 @@ import plus.fserver.api.Keep;
 import plus.fserver.api.MeanTicker;
 import plus.fserver.api.ElcaWorldServer;
 import plus.fserver.ElcaCV;
-import plus.fserver.api.VarOnly;
+import plus.fserver.server.EntityCollider;
 import plus.fserver.server.chunk.io.TChunkTask;
 import plus.fserver.server.chunk.io.TQueuedChunk;
 import plus.fserver.server.elca.ChunkSelector;
@@ -410,6 +410,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
     }
 
 
+    private final EntityCollider collider = new EntityCollider(this);
     @Override
     public void updateEntities() {
         if (this.playerEntities.isEmpty()) {
@@ -421,6 +422,13 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         }
         this.provider.onWorldUpdateEntities();
         super.updateEntities();
+
+        EntityCollider collider = this.collider;
+        collider.begin(getGameRules().maxEntityCramming.getInt());
+        for (Chunk chunk:this.playerChunkMap.getChunkIterator(ElcaConfig.CHUNK_TICK_RADIUS_1)){
+            collider.collideAll(chunk);
+        }
+        collider.complete();
     }
 
 
@@ -448,7 +456,6 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
     private boolean spawnAnimals = true, spawnNpc = true;
     @Override
     public void tickLoadedEntities(){
-        updateColledeController();
         if(spawnAnimals != canSpawnAnimals() || spawnNpc != canSpawnNPCs()){
             recheckEntities();
         }
@@ -477,28 +484,6 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
                 }
             }
         }
-    }
-
-
-    @VarOnly(var = "skip-collide-overload")
-    private boolean skipColliede = false;
-    @VarOnly(var = "skip-collide-overload")
-    private int timer = 0;
-    @VarOnly(var = "skip-collide-overload")
-    protected void updateColledeController() {
-        if(meanTickTime() > ElcaConfig.MEAN_OVERLOAD){
-            skipColliede = true;
-            //LOGGER.warn("WORLD {} OVERLOADED! SKIP 25% COLLIDES ({})", provider.getDimension(), timer);
-        } else {
-            skipColliede = false;
-        }
-    }
-
-
-    @VarOnly(var = "skip-collide-overload")
-    public boolean skipCollide() {
-        if(skipColliede)return (timer++ & 1) == 0;
-        return false;
     }
 
 

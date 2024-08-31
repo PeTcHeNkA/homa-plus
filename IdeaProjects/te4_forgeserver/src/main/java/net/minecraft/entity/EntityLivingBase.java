@@ -1743,13 +1743,17 @@ public abstract class EntityLivingBase extends Entity {
     protected void updateEntityActionState() {}
 
 
-    //todo maybe async
+    public boolean useSelfCollisions(){
+        return false;
+    }
+
+
+    //todo unused, see EntityCollider
     protected void collideWithNearbyEntities() {
         final World world = this.world;
-        //if((world = this.world).skipCollide())return;
         final List<Entity> list;
         if((ticksExisted & 7) != 7){
-            if(!(list = world.getEntitiesInAABBexcludingLimitedEC(
+            if(!(list = world.getEntitiesInAABBexcludingLimited(
                     this, this.getEntityBoundingBox(),
                     world.entityCP.forEntity(this),
                     ElcaConfig.MAX_ENTITY_COLLISIONS

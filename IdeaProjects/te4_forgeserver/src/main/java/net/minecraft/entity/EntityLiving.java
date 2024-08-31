@@ -52,7 +52,6 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.*;
 import net.minecraft.world.storage.loot.LootContext;
 import net.minecraft.world.storage.loot.LootTable;
-import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -287,7 +286,7 @@ public abstract class EntityLiving extends EntityLivingBase {
         int lodLvl;
         if((ticksExisted & (lodLvl = lodLvl())) == 0){
             onLivingUpdateTick();
-            if(lodLvl < EntityLodFunc.LOW2_MASK) this.collideWithNearbyEntities();
+            if(lodLvl < EntityLodFunc.LOW2_MASK && useSelfCollisions()) this.collideWithNearbyEntities();
         }
 
         if (lodLvl == 0 && (!this.world.isRemote || SERVER_COMPILE) && this.canPickUpLoot() && !this.dead && world.getMobGrifering(this)) {

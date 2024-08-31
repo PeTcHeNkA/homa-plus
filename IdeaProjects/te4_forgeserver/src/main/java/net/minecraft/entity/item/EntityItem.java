@@ -194,6 +194,12 @@ public class EntityItem extends Entity {
     }
 
 
+    @Override
+    public boolean useSelfCollisions() {
+        return false;
+    }
+
+
     private void searchForOtherItemsNearby() {
         if((age>>2 & 3) != 3)return;
         final ItemStack stack = this.getItem();

@@ -297,6 +297,14 @@ public class EntityArmorStand extends EntityLivingBase {
 
 
     @Override
+    public void collideWith(Entity entity){
+        if (this.getDistanceSq(entity) <= 0.2) {
+            entity.applyEntityCollision(this);
+        }
+    }
+
+
+    @Override
     protected void collideWithNearbyEntities() {
         if(lodLvl() != 0)return;
         final List<Entity> list = this.world.getEntitiesInAABBexcludingLimited(this, this.getEntityBoundingBox(), EntityArmorStand.IS_RIDEABLE_MINECART, 3);

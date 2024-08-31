@@ -625,12 +625,14 @@ public class Block extends net.minecraftforge.registries.IForgeRegistryEntry.Imp
 
 
     @Nullable
-    protected RayTraceResult rayTrace(BlockPos pos, Vec3d start, Vec3d end, AxisAlignedBB boundingBox) {
-        Vec3d vec3d = start.subtract(pos.getX(), pos.getY(), pos.getZ());
-        Vec3d vec3d1 = end.subtract(pos.getX(), pos.getY(), pos.getZ());
-        RayTraceResult raytraceresult = boundingBox.calculateIntercept(vec3d, vec3d1);
-        return raytraceresult == null ? null : new RayTraceResult(raytraceresult.hitVec.add(pos.getX(), pos.getY(), pos.getZ()), raytraceresult.sideHit, pos);
+    protected RayTraceResult rayTrace(BlockPos pos, Vec3d start, Vec3d end, AxisAlignedBB aabb) {
+        return aabb.calculateInterceptRT(
+                start.subtract(pos.getX(), pos.getY(), pos.getZ()),
+                end  .subtract(pos.getX(), pos.getY(), pos.getZ()),
+                pos
+        );
     }
+
 
     public void onExplosionDestroy(World worldIn, BlockPos pos, Explosion explosionIn) {}
 

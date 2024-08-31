@@ -3340,47 +3340,6 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     @NotNull
-    public List<Entity> getEntitiesInAABBexcludingLimitedEC(@Nullable Entity entityIn, @NotNull AxisAlignedBB aabb,
-                                                          @Nullable Predicate<? super Entity > predicate, int lim){
-        if(ElcaCV.MORE_MOBS_OPTIMIZER) {
-            AABKey key = eeCache.key(aabb);
-            final ArrayListE6<Entity> entities = eeCache.getC(key);
-            if (entities != null) {
-                int size;
-                if (predicate != null && (size = entities.sizeC()) != 0) {
-                    for (int i = 0; i < size; ++i) {
-                        if (!predicate.apply(entities.getC(i))) {
-                            ArrayListE6<Entity> res = eeCache.allocArr();
-
-                            getEntitiesInAABBexcludingNoCacheLimited(res, entityIn, aabb, predicate, lim);
-
-                            eeCache.add(key, res);
-                            return res;
-                        }
-                    }
-                }
-                return entities;
-            } else {
-                final ArrayListE6<Entity> res;
-                if(skipCollide()){
-                    res = eeCache.allocArr();
-                    eeCache.add(key, res);
-                    return res;
-                }
-                getEntitiesInAABBexcludingNoCacheLimited(res = eeCache.allocArr(), entityIn, aabb, predicate, lim);
-
-                eeCache.add(key, res);
-                return res;
-            }
-        } else {
-            ArrayListE6<Entity> res = new ArrayListE6<>();
-            getEntitiesInAABBexcludingNoCacheLimited(res, entityIn, aabb, predicate, lim);
-            return res;
-        }
-    }
-
-
-    @NotNull
     public List<Entity> getEntitiesInAABBexcludingLimited(@Nullable Entity entityIn, @NotNull AxisAlignedBB aabb,
                                                           @Nullable Predicate<? super Entity > predicate, int lim){
         if(ElcaCV.MORE_MOBS_OPTIMIZER) {
@@ -3462,6 +3421,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public  final Random              commonWorldEntityRandom = new FastRandom();
     public  final AxisAlignedBB         commonWorldEntityAABB = new AxisAlignedBB(0,0,0,0,0,0);
     public  final CollisionPredicate                 entityCP = new CollisionPredicate();
+
     public  final Vec3dMut                 commonEntityVec3d1 = new Vec3dMut(0,0,0);
     public  final Vec3dMut                 commonEntityVec3d2 = new Vec3dMut(0,0,0);
 
@@ -4041,7 +4001,6 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
-
     public void getEntitiesInAABBexcludingNoCache(List<Entity> list, @Nullable Entity entityIn, AxisAlignedBB boundingBox, @Nullable Predicate <? super Entity > predicate) {
         int k2 = MathHelper.floor(boundingBox.maxX + MAX_ENTITY_RADIUS)>>4;
         int l2 = MathHelper.floor(boundingBox.minZ - MAX_ENTITY_RADIUS)>>4;
@@ -4053,13 +4012,5 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             for (int zPos = l2; zPos <= i3; ++zPos)
                 if ((chunk = localSelector.getLoadedE(xPos, zPos)) != null)
                     chunk.getEntitiesWithinAABBForEntity(entityIn, boundingBox, list, predicate);
-    }
-
-
-    protected void updateColledeController(){}
-
-
-    public boolean skipCollide(){
-        return false;
     }
 }

@@ -1,5 +1,6 @@
 package plus.fserver.world;
 
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.util.math.ChunkPos;
 import plus.tson.utl.Te4HashMap;
@@ -8,7 +9,8 @@ import static net.minecraft.pathfinding.PathNodeType.TYPES;
 
 
 public class PntMatrix {
-    private final Te4HashMap<Long, Chunked> data = new Te4HashMap<>();
+    private final Long2ObjectOpenHashMap<Chunked> data = new Long2ObjectOpenHashMap<>();
+    //private final Te4HashMap<Long, Chunked> data = new Te4HashMap<>();
     private Chunked last = new Chunked(null, Integer.MIN_VALUE, Integer.MIN_VALUE);
 
     static class Group{

@@ -135,7 +135,7 @@ public class ArrayListE6<T> implements List<T> {
                 (T1[])java.lang.reflect.Array
                         .newInstance(a.getClass().getComponentType(), size);
 
-        for (int i=0;i<size;i++){
+        for (int i = 0, s = size; i < s; i++){
             r[i] = (T1) data[i];
         }
         return r;

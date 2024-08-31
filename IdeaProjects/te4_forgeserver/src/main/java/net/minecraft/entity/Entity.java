@@ -503,6 +503,16 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
     }
 
 
+    public boolean useSelfCollisions(){
+        return true;
+    }
+
+
+    public void collideWith(Entity entity){
+        entity.applyEntityCollision(this);
+    }
+
+
     protected void decrementTimeUntilPortal() {
         if (this.timeUntilPortal > 0) {
             --this.timeUntilPortal;
@@ -1368,7 +1378,11 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         Vec3d vec3d = this.getPositionEyes(partialTicks);
         Vec3d vec3d1 = this.getLook(partialTicks);
         Vec3d vec3d2 = vec3d.add(vec3d1.x * blockReachDistance, vec3d1.y * blockReachDistance, vec3d1.z * blockReachDistance);
-        return this.world.rayTraceBlocks(vec3d, vec3d2, false, false, true);
+        return this.world.rayTraceBlocks(
+                vec3d,
+                vec3d2,
+                false, false, true
+        );
     }
 
 

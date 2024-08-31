@@ -457,6 +457,48 @@ public final class AxisAlignedBB {
     }
 
 
+    @Nullable
+    public RayTraceResult calculateInterceptRT(Vec3d vecA, Vec3d vecB, BlockPos pos) {
+        Vec3d vec3d = this.collideWithXPlane(this.minX, vecA, vecB);
+        EnumFacing facing = EnumFacing.WEST;
+        Vec3d vec3d1 = this.collideWithXPlane(this.maxX, vecA, vecB);
+
+        if (vec3d1 != null && this.isClosest(vecA, vec3d, vec3d1)) {
+            vec3d = vec3d1;
+            facing = EnumFacing.EAST;
+        }
+
+        vec3d1 = this.collideWithYPlane(this.minY, vecA, vecB);
+
+        if (vec3d1 != null && this.isClosest(vecA, vec3d, vec3d1)) {
+            vec3d = vec3d1;
+            facing = EnumFacing.DOWN;
+        }
+
+        vec3d1 = this.collideWithYPlane(this.maxY, vecA, vecB);
+
+        if (vec3d1 != null && this.isClosest(vecA, vec3d, vec3d1)) {
+            vec3d = vec3d1;
+            facing = EnumFacing.UP;
+        }
+
+        vec3d1 = this.collideWithZPlane(this.minZ, vecA, vecB);
+
+        if (vec3d1 != null && this.isClosest(vecA, vec3d, vec3d1)) {
+            vec3d = vec3d1;
+            facing = EnumFacing.NORTH;
+        }
+        vec3d1 = this.collideWithZPlane(this.maxZ, vecA, vecB);
+
+        if (vec3d1 != null && this.isClosest(vecA, vec3d, vec3d1)) {
+            vec3d = vec3d1;
+            facing = EnumFacing.SOUTH;
+        }
+        if(vec3d == null)return null;
+        return new RayTraceResult(vec3d.add(pos.getX(), pos.getY(), pos.getY()), facing, pos);
+    }
+
+
     @VisibleForTesting
     boolean isClosest(Vec3d p_186661_1_, @Nullable Vec3d p_186661_2_, Vec3d p_186661_3_) {
         return p_186661_2_ == null || p_186661_1_.squareDistanceTo(p_186661_3_) < p_186661_1_.squareDistanceTo(p_186661_2_);
