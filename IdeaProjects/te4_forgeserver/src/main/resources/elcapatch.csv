@@ -12,6 +12,9 @@ net.minecraft.block.BlockBone
 net.minecraft.block.BlockBookshelf
 net.minecraft.block.BlockBreakableFs
 net.minecraft.block.BlockBush
+net.minecraft.block.BlockButton$1
+net.minecraft.block.BlockButton
+net.minecraft.block.BlockCake
 net.minecraft.block.BlockCarpet
 net.minecraft.block.BlockClay
 net.minecraft.block.BlockColoredFs
@@ -19,12 +22,15 @@ net.minecraft.block.BlockCompressedPowered
 net.minecraft.block.BlockConcretePowder
 net.minecraft.block.BlockCrops
 net.minecraft.block.BlockDaylightDetector
+net.minecraft.block.BlockDirectionalFx
 net.minecraft.block.BlockDirt$DirtType
 net.minecraft.block.BlockDirt
 net.minecraft.block.BlockDynamicLiquid
 net.minecraft.block.BlockEmptyDropsFs
 net.minecraft.block.BlockEndPortal
 net.minecraft.block.BlockEndPortalFrame
+net.minecraft.block.BlockEndRod$1
+net.minecraft.block.BlockEndRod
 net.minecraft.block.BlockFallingFs
 net.minecraft.block.BlockFarmland$1
 net.minecraft.block.BlockFarmland
@@ -62,6 +68,8 @@ net.minecraft.block.BlockMushroom
 net.minecraft.block.BlockMycelium
 net.minecraft.block.BlockNetherBrick
 net.minecraft.block.BlockNetherrack
+net.minecraft.block.BlockNetherWart
+net.minecraft.block.BlockObserver
 net.minecraft.block.BlockObsidian
 net.minecraft.block.BlockOre
 net.minecraft.block.BlockPackedIce
@@ -73,6 +81,7 @@ net.minecraft.block.BlockPlanks$EnumType
 net.minecraft.block.BlockPlanks
 net.minecraft.block.BlockPrismarine$EnumType
 net.minecraft.block.BlockPrismarine
+net.minecraft.block.BlockPumpkin
 net.minecraft.block.BlockQuartz$1
 net.minecraft.block.BlockQuartz$EnumType
 net.minecraft.block.BlockQuartz
@@ -88,11 +97,14 @@ net.minecraft.block.BlockRedstoneOre
 net.minecraft.block.BlockRedstoneWire$1
 net.minecraft.block.BlockRedstoneWire$EnumAttachPosition
 net.minecraft.block.BlockRedstoneWire
+net.minecraft.block.BlockReed
 net.minecraft.block.BlockRotatedPillarFs
 net.minecraft.block.BlockSand$EnumType
 net.minecraft.block.BlockSand
 net.minecraft.block.BlockSandStone$EnumType
 net.minecraft.block.BlockSandStone
+net.minecraft.block.BlockSapling$1
+net.minecraft.block.BlockSapling
 net.minecraft.block.BlockSeaLantern
 net.minecraft.block.BlockSilverfish$1
 net.minecraft.block.BlockSilverfish$EnumType$1
@@ -123,6 +135,8 @@ net.minecraft.block.BlockStone
 net.minecraft.block.BlockStoneBrick$EnumType
 net.minecraft.block.BlockStoneBrick
 net.minecraft.block.BlockTNT
+net.minecraft.block.BlockTorch$1
+net.minecraft.block.BlockTorch
 net.minecraft.block.BlockTrapDoor$1
 net.minecraft.block.BlockTrapDoor$DoorHalf
 net.minecraft.block.BlockTrapDoor
@@ -188,6 +202,8 @@ net.minecraft.entity.EntityLivingBase$1
 net.minecraft.entity.EntityLivingBase
 net.minecraft.entity.EntityTracker
 net.minecraft.entity.EntityTrackerEntry
+net.minecraft.entity.item.EntityArmorStand$1
+net.minecraft.entity.item.EntityArmorStand
 net.minecraft.entity.item.EntityBoat$1
 net.minecraft.entity.item.EntityBoat$Status
 net.minecraft.entity.item.EntityBoat$Type
@@ -255,6 +271,8 @@ net.minecraft.entity.player.EntityPlayerMP
 net.minecraft.entity.player.InventoryPlayer
 net.minecraft.entity.projectile.EntityArrow$PickupStatus
 net.minecraft.entity.projectile.EntityArrow
+net.minecraft.entity.projectile.EntityFishHook$State
+net.minecraft.entity.projectile.EntityFishHook
 net.minecraft.entity.projectile.EntityThrowable
 net.minecraft.inventory.Container
 net.minecraft.inventory.EntityEquipmentSlot$Type
@@ -287,9 +305,19 @@ net.minecraft.item.Item$8
 net.minecraft.item.Item$9
 net.minecraft.item.Item$ToolMaterial
 net.minecraft.item.Item
+net.minecraft.item.ItemBlock
 net.minecraft.item.ItemEgg
 net.minecraft.item.ItemFood
+net.minecraft.item.ItemHoe$1
+net.minecraft.item.ItemHoe
+net.minecraft.item.ItemRedstone
+net.minecraft.item.ItemSeedFood
+net.minecraft.item.ItemSeeds
+net.minecraft.item.ItemShears
+net.minecraft.item.ItemShulkerBox
+net.minecraft.item.ItemSlab
 net.minecraft.item.ItemSnowball
+net.minecraft.item.ItemSpade
 net.minecraft.item.ItemStack
 net.minecraft.item.ItemWrittenBook
 net.minecraft.nbt.NBTTagByte, false, false
@@ -310,9 +338,14 @@ net.minecraft.network.EnumConnectionState$3
 net.minecraft.network.EnumConnectionState$4
 net.minecraft.network.EnumConnectionState
 net.minecraft.network.EnumPacketDirection
+net.minecraft.network.handshake.client.C00Handshake
+net.minecraft.network.login.client.CPacketLoginStart
+net.minecraft.network.login.server.SPacketDisconnect
+net.minecraft.network.login.server.SPacketEnableCompression
 net.minecraft.network.NetHandlerPlayServer$1
 net.minecraft.network.NetHandlerPlayServer$2
 net.minecraft.network.NetHandlerPlayServer
+net.minecraft.network.NettyPacketDecoder
 net.minecraft.network.NettyPacketEncoder
 net.minecraft.network.NetworkManager$1
 net.minecraft.network.NetworkManager$2
@@ -328,8 +361,23 @@ net.minecraft.network.NetworkSystem$4
 net.minecraft.network.NetworkSystem$5
 net.minecraft.network.NetworkSystem
 net.minecraft.network.Packet
+net.minecraft.network.play.client.CPacketAnimation
+net.minecraft.network.play.client.CPacketChatMessage
 net.minecraft.network.play.client.CPacketClientSettings
+net.minecraft.network.play.client.CPacketCloseWindow
+net.minecraft.network.play.client.CPacketConfirmTransaction
 net.minecraft.network.play.client.CPacketCustomPayload
+net.minecraft.network.play.client.CPacketHeldItemChange
+net.minecraft.network.play.client.CPacketInput
+net.minecraft.network.play.client.CPacketKeepAlive
+net.minecraft.network.play.client.CPacketPlaceRecipe
+net.minecraft.network.play.client.CPacketPlayerDigging$Action
+net.minecraft.network.play.client.CPacketPlayerDigging
+net.minecraft.network.play.client.CPacketPlayerTryUseItem
+net.minecraft.network.play.client.CPacketPlayerTryUseItemOnBlock
+net.minecraft.network.play.client.CPacketUseEntity$Action
+net.minecraft.network.play.client.CPacketUseEntity
+net.minecraft.network.play.client.CPacketVehicleMove
 net.minecraft.network.play.server.SPacketAnimation
 net.minecraft.network.play.server.SPacketBlockAction
 net.minecraft.network.play.server.SPacketBlockChange
@@ -355,6 +403,9 @@ net.minecraft.network.play.server.SPacketUnloadChunk
 net.minecraft.network.play.server.SPacketUpdateHealth
 net.minecraft.network.play.server.SPacketWindowProperty
 net.minecraft.network.rcon.RConThreadMain
+net.minecraft.network.status.client.CPacketPing
+net.minecraft.network.status.client.CPacketServerQuery
+net.minecraft.network.status.server.SPacketPong
 net.minecraft.pathfinding.FlyingNodeProcessor, false, false
 net.minecraft.pathfinding.NodeProcessor, false, false
 net.minecraft.pathfinding.PathFinder, false, false
@@ -385,11 +436,15 @@ net.minecraft.server.network.NetHandlerHandshakeTCP
 net.minecraft.server.network.NetHandlerLoginServer$ConnectEvent
 net.minecraft.server.network.NetHandlerLoginServer$LoginState
 net.minecraft.server.network.NetHandlerLoginServer
+net.minecraft.server.network.NetHandlerStatusServer
 net.minecraft.server.ServerEula
 net.minecraft.tileentity.TileEntityBeacon$BeamSegment
 net.minecraft.tileentity.TileEntityBeacon
+net.minecraft.tileentity.TileEntityBed
+net.minecraft.tileentity.TileEntityComparator
 net.minecraft.tileentity.TileEntityFurnace
 net.minecraft.tileentity.TileEntityHopper
+net.minecraft.tileentity.TileEntityNote
 net.minecraft.util.ActionResult, false, false
 net.minecraft.util.BitArray, false, false
 net.minecraft.util.BlockIDIndexes, false, false
@@ -406,6 +461,7 @@ net.minecraft.util.EnumFacing$Axis, false, false
 net.minecraft.util.EnumFacing$AxisDirection, false, false
 net.minecraft.util.EnumFacing$Plane, false, false
 net.minecraft.util.EnumFacing, false, false
+net.minecraft.util.EnumHand, false, false
 net.minecraft.util.math.AxisAlignedBB, false, false
 net.minecraft.util.math.BlockPos$1, false, false
 net.minecraft.util.math.BlockPos$2, false, false
@@ -423,9 +479,17 @@ net.minecraft.world.biome.Biome$SpawnListEntry
 net.minecraft.world.biome.Biome$TempCategory
 net.minecraft.world.biome.Biome
 net.minecraft.world.biome.BiomeDecorator
+net.minecraft.world.biome.BiomeForest$Type
+net.minecraft.world.biome.BiomeForest
+net.minecraft.world.biome.BiomeHills$1
+net.minecraft.world.biome.BiomeHills$EmeraldGenerator
+net.minecraft.world.biome.BiomeHills$Type
+net.minecraft.world.biome.BiomeHills
+net.minecraft.world.biome.BiomeJungle
 net.minecraft.world.biome.BiomeProvider
 net.minecraft.world.biome.BiomeProviderSingle
 net.minecraft.world.biome.BiomeSwamp
+net.minecraft.world.biome.BiomeVoidDecorator
 net.minecraft.world.border.WorldBorder
 net.minecraft.world.chunk.BlockStateContainer
 net.minecraft.world.chunk.BlockStatePaletteHashMap
@@ -463,6 +527,7 @@ net.minecraft.world.gen.feature.WorldGenCactus, false, false
 net.minecraft.world.gen.feature.WorldGenClay, false, false
 net.minecraft.world.gen.feature.WorldGenDeadBush, false, false
 net.minecraft.world.gen.feature.WorldGenDesertWells, false, false
+net.minecraft.world.gen.feature.WorldGenDoublePlant, false, false
 net.minecraft.world.gen.feature.WorldGenDungeons, false, false
 net.minecraft.world.gen.feature.WorldGenerator, false, false
 net.minecraft.world.gen.feature.WorldGenFire, false, false
@@ -529,6 +594,30 @@ net.minecraft.world.gen.structure.StructureNetherBridgePieces$Start
 net.minecraft.world.gen.structure.StructureNetherBridgePieces$Straight
 net.minecraft.world.gen.structure.StructureNetherBridgePieces$Throne
 net.minecraft.world.gen.structure.StructureNetherBridgePieces
+net.minecraft.world.gen.structure.StructureOceanMonumentPieces$1
+net.minecraft.world.gen.structure.StructureOceanMonumentPieces$DoubleXRoom
+net.minecraft.world.gen.structure.StructureOceanMonumentPieces$DoubleXYRoom
+net.minecraft.world.gen.structure.StructureOceanMonumentPieces$DoubleYRoom
+net.minecraft.world.gen.structure.StructureOceanMonumentPieces$DoubleYZRoom
+net.minecraft.world.gen.structure.StructureOceanMonumentPieces$DoubleZRoom
+net.minecraft.world.gen.structure.StructureOceanMonumentPieces$EntryRoom
+net.minecraft.world.gen.structure.StructureOceanMonumentPieces$FitSimpleRoomHelper
+net.minecraft.world.gen.structure.StructureOceanMonumentPieces$FitSimpleRoomTopHelper
+net.minecraft.world.gen.structure.StructureOceanMonumentPieces$MonumentBuilding
+net.minecraft.world.gen.structure.StructureOceanMonumentPieces$MonumentCoreRoom
+net.minecraft.world.gen.structure.StructureOceanMonumentPieces$MonumentRoomFitHelper
+net.minecraft.world.gen.structure.StructureOceanMonumentPieces$Penthouse
+net.minecraft.world.gen.structure.StructureOceanMonumentPieces$Piece
+net.minecraft.world.gen.structure.StructureOceanMonumentPieces$RoomDefinition
+net.minecraft.world.gen.structure.StructureOceanMonumentPieces$SimpleRoom
+net.minecraft.world.gen.structure.StructureOceanMonumentPieces$SimpleTopRoom
+net.minecraft.world.gen.structure.StructureOceanMonumentPieces$WingRoom
+net.minecraft.world.gen.structure.StructureOceanMonumentPieces$XDoubleRoomFitHelper
+net.minecraft.world.gen.structure.StructureOceanMonumentPieces$XYDoubleRoomFitHelper
+net.minecraft.world.gen.structure.StructureOceanMonumentPieces$YDoubleRoomFitHelper
+net.minecraft.world.gen.structure.StructureOceanMonumentPieces$YZDoubleRoomFitHelper
+net.minecraft.world.gen.structure.StructureOceanMonumentPieces$ZDoubleRoomFitHelper
+net.minecraft.world.gen.structure.StructureOceanMonumentPieces
 net.minecraft.world.gen.structure.StructureVillagePieces$1
 net.minecraft.world.gen.structure.StructureVillagePieces$Church
 net.minecraft.world.gen.structure.StructureVillagePieces$Field1

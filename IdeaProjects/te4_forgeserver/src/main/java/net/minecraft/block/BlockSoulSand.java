@@ -11,10 +11,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import plus.fserver.api.Keep;
-import plus.fserver.block.BlockFs;
+import plus.fserver.block.BlockFx;
 
 
-public class BlockSoulSand extends BlockFs {
+public class BlockSoulSand extends BlockFx {
     @Keep
     protected static final AxisAlignedBB SOUL_SAND_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.875D, 1.0D);
 

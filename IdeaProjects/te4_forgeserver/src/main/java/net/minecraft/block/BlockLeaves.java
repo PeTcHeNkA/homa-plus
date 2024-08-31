@@ -15,12 +15,12 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.api.Keep;
-import plus.fserver.block.BlockFs;
+import plus.fserver.block.BlockFx;
 import plus.fserver.server.elca.ChunkLCache;
 import plus.fserver.utls.collections.BlockPosQueue;
 
 
-public abstract class BlockLeaves extends BlockFs implements net.minecraftforge.common.IShearable {
+public abstract class BlockLeaves extends BlockFx implements net.minecraftforge.common.IShearable {
     @Keep
     public static final PropertyBool DECAYABLE = PropertyBool.create("decayable");
     @Keep
