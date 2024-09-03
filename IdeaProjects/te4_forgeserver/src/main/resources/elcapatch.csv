@@ -227,6 +227,7 @@ net.minecraft.entity.monster.EntityGuardian$AIGuardianAttack
 net.minecraft.entity.monster.EntityGuardian$GuardianMoveHelper
 net.minecraft.entity.monster.EntityGuardian$GuardianTargetSelector
 net.minecraft.entity.monster.EntityGuardian
+net.minecraft.entity.monster.EntityIronGolem
 net.minecraft.entity.monster.EntityMob
 net.minecraft.entity.monster.EntitySpider$AISpiderAttack
 net.minecraft.entity.monster.EntitySpider$AISpiderTarget
@@ -654,6 +655,7 @@ net.minecraft.world.World$1
 net.minecraft.world.World$2
 net.minecraft.world.World$3
 net.minecraft.world.World$4
+net.minecraft.world.World$5
 net.minecraft.world.World
 net.minecraft.world.WorldEntitySpawner
 net.minecraft.world.WorldProvider$WorldSleepResult

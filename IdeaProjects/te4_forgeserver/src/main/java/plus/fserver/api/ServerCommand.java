@@ -40,12 +40,12 @@ public abstract class ServerCommand implements ICommand {
     }
 
 
-    protected void reply(ICommandSender sender, String msg){
+    protected static void reply(ICommandSender sender, String msg){
         sender.sendMessage(new TextComponentAuto(msg.replace("&", "§")));
     }
 
 
-    protected void reply(ICommandSender sender, String format, Object... args){
+    protected static void reply(ICommandSender sender, String format, Object... args){
         sender.sendMessage(new TextComponentAuto((String.format(format, args)).replace("&", "§")));
     }
 

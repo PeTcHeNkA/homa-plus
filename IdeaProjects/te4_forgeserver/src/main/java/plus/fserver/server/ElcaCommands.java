@@ -10,6 +10,8 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetworkSystem;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.PlayerChunkMapEntry;
+import net.minecraft.util.ClassInheritanceMultiMap;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -25,13 +27,18 @@ import net.minecraftforge.fml.common.registry.EntityEntry;
 import net.minecraftforge.fml.common.registry.EntityRegistry;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.server.command.TextComponentHelper;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import plus.fserver.ElcaConfig;
 import plus.fserver.api.ServerCommand;
 import plus.fserver.plugin.SSPatchLoader;
 import plus.fserver.utls.EntityLodFunc;
+import plus.fserver.utls.collections.ArrayListE6;
+import plus.fserver.utls.collections.ArrayListEV;
 import plus.tson.TsonFile;
 import plus.tson.utl.ByteStrBuilder;
+import plus.tson.utl.Te4HashSet;
+
 import java.io.File;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -48,7 +55,7 @@ public class ElcaCommands extends ServerCommand {
     private static final String normal   = "&a";
 
     private final List<String> completions = ImmutableList.copyOf(
-        new String[]{"version", "info", "tps", "mobs", "spawn"}
+        new String[]{"version", "info", "tps", "mobs", "spawn", "hotpoints"}
     );
     private final DecimalFormat TIME_FORMATTER = new DecimalFormat("########0.00");
     private static final ElcaCommands cmds = new ElcaCommands();
@@ -97,6 +104,175 @@ public class ElcaCommands extends ServerCommand {
         }
         if(arg0.equalsIgnoreCase("spawn")){
             spawn(sender, args);
+        }
+        if(arg0.equalsIgnoreCase("hotpoints")){
+            hotPoints(server, sender, args);
+        }
+    }
+
+
+    private void hotPoints(MinecraftServer server, ICommandSender sender, String[] args){
+        Te4HashSet<EntityPlayerMP> playerSet = new Te4HashSet<>();
+        class Part implements Comparable<Part>{
+            final Chunk chunk;
+            final byte shift;
+            final short count;
+
+            Part(Chunk chunk, byte shift, int count){
+                this.chunk = chunk;
+                this.shift = shift;
+                this.count = (short) count;
+            }
+            @Override
+            public int compareTo(@NotNull Part o) {
+                return Short.compare(o.count, count);
+            }
+            public List<EntityPlayerMP> findCauses(){
+                WorldServer world = (WorldServer) chunk.getWorld();
+                PlayerChunkMapEntry entry = world.getPlayerChunkMap().getEntry(chunk.x, chunk.z);
+                if(entry == null)return Collections.emptyList();
+                return entry.getWatchingPlayers();
+            }
+            public void display(){
+                int x = chunk.x * 16 + 8;
+                int y = shift * 16 + 8;
+                int z = chunk.z * 16 + 8;
+
+                List<EntityPlayerMP> causes = findCauses();
+
+                MobInfoList mobs = new MobInfoList();
+
+                for (Entity entity:chunk.getEntityLists()[shift].rawValues()){
+                    mobs.add(entity);
+                }
+
+                String inf = "  &ePos: x:"+x+", y:"+y+", z: "+z+ ", count:"+count;
+
+                if(!causes.isEmpty()){
+                    for (EntityPlayerMP player:causes){
+                        if(!playerSet.add(player)){
+                            inf += ", "+player.getName();
+                        } else {
+                            BlockPos pos = player.getPosition();
+                            inf += ", "+player.getName()
+                                    + "["+pos.getX()+", "+pos.getY()+", "+pos.getZ()+"]";
+                        }
+                    }
+                }
+                reply(sender, inf);
+                mobs.display(sender, "    ");
+            }
+        }
+        World defWorld = sender.getEntityWorld();
+
+        class WorldInfo implements Comparable<WorldInfo>{
+            final ArrayListEV<Part> parts = new ArrayListEV<>(32);
+            int sumParts = 0;
+            final WorldServer world;
+            boolean sorted = false;
+
+            WorldInfo(WorldServer world) {
+                this.world = world;
+            }
+
+            public void compute(){
+                Chunk[] arr = world.getChunkProvider().getLoadedChunks().toArray(new Chunk[0]);
+                for (Chunk chunk:arr){
+                    add(chunk);
+                }
+            }
+
+            public void add(Chunk chunk){
+                sorted = false;
+                byte index = 0;
+                for (ClassInheritanceMultiMap<Entity> part:chunk.getEntityLists()){
+                    int count = part.rawValues().sizeC();
+                    if(count > 3){
+                        parts.addF(new Part(chunk, index, count));
+                    }
+                    ++index;
+                }
+            }
+
+            private void sortIfNeed(){
+                if(!sorted){
+                    parts.sort(Part::compareTo);
+                    sumParts = 0;
+                    for (Part part:parts){
+                        sumParts += part.count;
+                    }
+                    sorted = true;
+                }
+            }
+
+            @Override
+            public int compareTo(@NotNull WorldInfo o) {
+                sortIfNeed();
+                o.sortIfNeed();
+                if(o.world == defWorld)return 1;
+                return Integer.compare(o.sumParts, sumParts);
+            }
+
+            public boolean display(int lim){
+                if(parts.isEmptyC())return false;
+                sortIfNeed();
+                boolean flag = true;
+                for (Part part:parts){
+                    if(lim-- == 0)break;
+                    if(flag){
+                        sendWorldInfo(world, sender);
+                        flag = false;
+                    }
+                    part.display();
+                }
+                return !flag;
+            }
+        }
+
+        boolean onlyOne = true;
+        int limit = 10;
+        if(args.length > 1){
+            if(args[1].equals("all")){
+                onlyOne = false;
+                if(args.length > 2){
+                    limit = Integer.parseInt(args[2]);
+                }
+            }
+            else if(args[1].equals("one")){
+                if(args.length > 2){
+                    limit = Integer.parseInt(args[2]);
+                }
+            }
+        }
+
+        if(onlyOne){
+            WorldInfo inf = new WorldInfo((WorldServer) defWorld);
+            inf.compute();
+            if(!inf.display(limit)){
+                reply(sender, normal + "World ["+defWorld.provider.getDimension()+"] has`nt slow entity sectors");
+            }
+        } else {
+
+            ArrayListE6<WorldInfo> infs = new ArrayListE6<>();
+
+            for (Integer dimId : DimensionManager.getIDs()) {
+                WorldServer world = DimensionManager.getWorld(dimId);
+                WorldInfo inf = new WorldInfo(world);
+                infs.addF(inf);
+
+                inf.compute();
+            }
+
+            infs.sort(WorldInfo::compareTo);
+            boolean flag = false;
+
+            for (WorldInfo inf : infs) {
+                if(inf.display(limit))flag = true;
+            }
+
+            if (!flag) {
+                reply(sender, normal + "Server has`nt slow entity sectors");
+            }
         }
     }
 
@@ -298,7 +474,8 @@ public class ElcaCommands extends ServerCommand {
 
     @Override
     public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
-        return completions;
+        if(args.length < 2) return completions;
+        return Collections.emptyList();
     }
 
 
@@ -318,7 +495,7 @@ public class ElcaCommands extends ServerCommand {
         }
     }
 
-    private static class MobInfo{
+    private static class MobInfo implements Comparable<MobInfo>{
         final String name;
         int count;
         int lod0, lod1, lod2, lod3;
@@ -336,8 +513,6 @@ public class ElcaCommands extends ServerCommand {
             if(lodLvl==EntityLodFunc.LOW2_MASK) lod2++;
             if(lodLvl==EntityLodFunc.LOW3_MASK) lod3++;
         }
-
-
         private String getName(int nameLen){
             StringBuilder buffer = new StringBuilder(nameLen);
             buffer.append(name);
@@ -347,48 +522,88 @@ public class ElcaCommands extends ServerCommand {
             }
             return buffer.toString();
         }
+        public void send(ICommandSender sender, int maxName, String prefix){
+            reply(sender, primary+"%s&8|&a%s %s &e(%s, N:%s, M: %s, L: %s)", prefix,
+                    getName(maxName+1), count, lod0, lod1, lod2, lod3
+            );
+        }
+        @Override
+        public int compareTo(@NotNull MobInfo o) {
+            return Integer.compare(o.count, count);
+        }
+    }
+
+    private static class MobInfoList extends IdentityHashMap<Class<?>, MobInfo>{
+        private boolean dirty = true;
+        private List<MobInfo> result;
+        private int numLength, nameLength;
+        public void add(Entity entity){
+            if(entity == null || entity.isDead)return;
+            dirty = true;
+            Class<? extends Entity> clazz = entity.getClass();
+            MobInfo info = get(clazz);
+            if(info==null){
+                put(clazz, info = new MobInfo(clazz));
+            }
+            info.add(entity.lodLvl());
+        }
+
+        private void updateResult(){
+            if(!dirty)return;
+            result = new ArrayList<>(values());
+            int maxName = 0;
+            for (MobInfo info:result){
+                int curLen = info.name.length();
+                if(curLen > maxName)maxName = curLen;
+            }
+            result.sort(MobInfo::compareTo);
+            nameLength = maxName;
+            numLength = String.valueOf(result.size()).length();
+        }
+
+        public List<MobInfo> result(){
+            updateResult();
+            return result;
+        }
+
+        public int numLength(){
+            updateResult();
+            return numLength;
+        }
+
+        protected int nameLength(){
+            updateResult();
+            return nameLength;
+        }
+
+        public void display(ICommandSender sender, String prefix){
+            List<MobInfo> result = result();
+
+            int nameLength = nameLength();
+            int numLength = numLength();
+            int num = 0;
+
+            for (MobInfo info:result){
+                info.send(sender, nameLength+1, prefix+formatNum(++num, numLength));
+            }
+        }
     }
 
 
     public void mobs(MinecraftServer server, ICommandSender sender, int dim){
         WorldServer worldServer = DimensionManager.getWorld(dim);
         List<Entity> list = new ArrayList<>(worldServer.loadedEntityList);
-        IdentityHashMap<Class<?>, MobInfo> mobs = new IdentityHashMap<>();
+        MobInfoList mobs = new MobInfoList();
 
         for (Entity entity:list){
-            if(entity == null)continue;
-            Class<?> clazz = entity.getClass();
-            MobInfo info = mobs.get(clazz);
-            if(info==null){
-                mobs.put(clazz, info = new MobInfo((Class<? extends Entity>) clazz));
-            }
-            info.add(entity.lodLvl());
+            mobs.add(entity);
         }
 
-        List<MobInfo> result = new ArrayList<>(mobs.values());
-        result.sort((o1, o2) -> {
-            int n1 = o1.count;
-            int n2 = o2.count;
-            return Integer.compare(n2, n1);
-        });
-
-        int maxName = 0;
-        for (MobInfo info:result){
-            int curLen = info.name.length();
-            if(curLen > maxName)maxName = curLen;
-        }
-        int numL = String.valueOf(result.size()).length();
-        int num = 0;
-
-        for (MobInfo info:result){
-            reply(sender, primary+"%s&8|&a%s %s &e(%s, N:%s, M: %s, L: %s)", formatNum(++num, numL),
-                    info.getName(maxName+1), info.count, info.lod0, info.lod1, info.lod2, info.lod3
-            );
-        }
+        mobs.display(sender, "");
     }
 
 
-    private String formatNum(int num, int max){
+    private static String formatNum(int num, int max){
         String str = String.valueOf(num);
         while (str.length() < max)str = str + ' ';
         return str;
@@ -397,32 +612,38 @@ public class ElcaCommands extends ServerCommand {
 
     public void info(MinecraftServer server, ICommandSender sender){
         reply(sender, warning+"Loaded worlds: "+primary+server.worlds.length);
-        int curMobs = 0;
-        int lod0 = 0, lod1 = 0, lod2 = 0, lod3 = 0;
-        int curChunks = 0;
+
         for (Integer dimId : DimensionManager.getIDs()) {
-            WorldServer world = DimensionManager.getWorld(dimId);
-            curMobs = world.loadedEntityList.size();
-
-            for (Entity entity:world.loadedEntityList){
-                if(entity == null)continue;
-                int lodLvl = entity.lodLvl();
-                if(lodLvl == EntityLodFunc.NEAR_MASK) lod0++;
-                if(lodLvl == EntityLodFunc.LOW1_MASK) lod1++;
-                if(lodLvl == EntityLodFunc.LOW2_MASK) lod2++;
-                if(lodLvl == EntityLodFunc.LOW3_MASK) lod3++;
-            }
-
-            curChunks = world.getChunkProvider().getLoadedChunkCount();
-            double worldTickTime = mean(server.worldTickTimes.get(dimId));
-            double worldTPS = Math.min(1000.0/worldTickTime, 20);
-            reply(sender, primary+"[%s]: tt: %s, tps %s, chunk: %s, mob: %s (%s, N:%s, M: %s, L: %s)",
-                    getDimensionPrefix(dimId),
-                    formatTickTime(worldTickTime),
-                    formatTps(worldTPS),
-                    curChunks, curMobs, lod0, lod1, lod2, lod3
-            );
+            sendWorldInfo(DimensionManager.getWorld(dimId), sender);
         }
+    }
+
+
+    private void sendWorldInfo(WorldServer world, ICommandSender sender){
+        int curMobs, curChunks;
+        int lod0 = 0, lod1 = 0, lod2 = 0, lod3 = 0;
+        curMobs = world.loadedEntityList.size();
+
+        for (Entity entity:world.loadedEntityList){
+            if(entity == null)continue;
+            int lodLvl = entity.lodLvl();
+            if(lodLvl == EntityLodFunc.NEAR_MASK) lod0++;
+            if(lodLvl == EntityLodFunc.LOW1_MASK) lod1++;
+            if(lodLvl == EntityLodFunc.LOW2_MASK) lod2++;
+            if(lodLvl == EntityLodFunc.LOW3_MASK) lod3++;
+        }
+
+        int dimId = world.provider.getDimension();
+
+        curChunks = world.getChunkProvider().getLoadedChunkCount();
+        double worldTickTime = mean(world.getMinecraftServer().worldTickTimes.get(dimId));
+        double worldTPS = Math.min(1000.0/worldTickTime, 20);
+        reply(sender, primary+"[%s]: tt: %s, tps %s, chunk: %s, mob: %s (%s, N:%s, M: %s, L: %s)",
+                getDimensionPrefix(dimId),
+                formatTickTime(worldTickTime),
+                formatTps(worldTPS),
+                curChunks, curMobs, lod0, lod1, lod2, lod3
+        );
     }
 
 
