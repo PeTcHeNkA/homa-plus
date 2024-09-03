@@ -76,12 +76,6 @@ public abstract class AbstractSkeleton extends EntityMob implements IRangedAttac
 
 
     @Override
-    public boolean allowSprint(){
-        return false;
-    }
-
-
-    @Override
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
         this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.25D);

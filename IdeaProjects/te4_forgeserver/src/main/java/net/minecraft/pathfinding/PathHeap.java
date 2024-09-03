@@ -6,6 +6,12 @@ public class PathHeap {
     private int count;
 
     public PathPoint addPoint(PathPoint point) {
+        addPointV(point);
+        return point;
+    }
+
+
+    public final void addPointV(PathPoint point) {
         if (point.index >= 0) {
             throw new IllegalStateException("OW KNOWS!");
         } else {
@@ -17,8 +23,7 @@ public class PathHeap {
             }
 
             pathPoints[point.index = this.count] = point;
-            sortBack(this.pathPoints, this.count++);
-            return point;
+            sortBack(pathPoints, this.count++);
         }
     }
 
@@ -54,7 +59,7 @@ public class PathHeap {
     }
 
 
-    private static void sortBack(PathPoint[] pathPoints, int index) {
+    private static void sortBack(final PathPoint[] pathPoints, int index) {
         PathPoint pathpoint = pathPoints[index], current;
         int i;
         for (float f = pathpoint.distanceToTarget; index > 0; index = i) {
@@ -67,7 +72,7 @@ public class PathHeap {
     }
 
 
-    private static void sortForward(PathPoint[] pathPoints, int index, int count) {
+    private static void sortForward(final PathPoint[] pathPoints, int index, int count) {
         PathPoint point1 = pathPoints[index], point2, point3;
         int num1, num2;
         float f = point1.distanceToTarget, f1, f2;

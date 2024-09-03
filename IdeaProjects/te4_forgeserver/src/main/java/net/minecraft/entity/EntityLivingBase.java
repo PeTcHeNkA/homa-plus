@@ -189,8 +189,8 @@ public abstract class EntityLivingBase extends Entity {
 
 
     @Override
-    public boolean allowSprint(){
-        return true;
+    public boolean useSelfCollisions(){
+        return false;
     }
 
 
@@ -280,7 +280,8 @@ public abstract class EntityLivingBase extends Entity {
                 }
             }
             if (!this.world.isRemote || SERVER_COMPILE) {
-                BlockPos temp = world.localTempPos2.setPos(this);
+                BlockPos.MutableBlockPos temp = world.localTempPos2;
+                temp.setPosB(this);
 
                 if (this.prevBlockpos == null || !this.prevBlockpos.equals(temp))
                     this.frostWalk(this.prevBlockpos = new BlockPos(temp.getX(), temp.getY(), temp.getZ()));
@@ -1666,8 +1667,7 @@ public abstract class EntityLivingBase extends Entity {
 
     public void onLivingUpdate(){
         this.onLivingUpdateTick();
-        //todo maybe async?
-        this.collideWithNearbyEntities();
+        if(useSelfCollisions())this.collideWithNearbyEntities();
     }
 
 
@@ -1748,11 +1748,6 @@ public abstract class EntityLivingBase extends Entity {
 
 
     protected void updateEntityActionState() {}
-
-
-    public boolean useSelfCollisions(){
-        return false;
-    }
 
 
     //todo unused, see EntityCollider

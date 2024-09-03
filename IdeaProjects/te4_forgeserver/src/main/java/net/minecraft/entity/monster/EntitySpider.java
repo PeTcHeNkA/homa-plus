@@ -84,12 +84,6 @@ public class EntitySpider extends EntityMob {
 
 
     @Override
-    public boolean allowSprint(){
-        return false;
-    }
-
-
-    @Override
     public void onUpdate() {
         super.onUpdate();
 

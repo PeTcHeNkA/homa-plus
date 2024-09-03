@@ -187,8 +187,8 @@ public abstract class PathNavigate {
 
             if (!this.noPath()) {
                 Vec3d vec3d2 = this.currentPath.getPosition(this.entity);
-                BlockPos blockpos = (new BlockPos(vec3d2)).down();
-                AxisAlignedBB box = this.world.getBlockState(blockpos).getBoundingBox(this.world, blockpos);
+                BlockPos blockpos = world.localTempPos3.setPos(vec3d2.x, vec3d2.y-1, vec3d2.z);
+                AxisAlignedBB box = this.world.access().getBlockState(blockpos).getBoundingBox(this.world, blockpos);
                 vec3d2 = vec3d2.add(0.0D, 1.1D - box.maxY, 0.0D);
                 this.entity.getMoveHelper().setMoveTo(vec3d2.x, vec3d2.y, vec3d2.z, this.speed);
             }

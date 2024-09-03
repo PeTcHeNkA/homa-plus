@@ -1,9 +1,11 @@
 package plus.fserver.utls.collections;
 
+import net.minecraft.pathfinding.PathPoint;
 
-public class EPooledIntVHashMap<V> {
+
+public class PointHashMap {
     private static final float growFactor = 0.75F;
-    private EPooledIntVHashMap.Entry<V>[] slots = new EPooledIntVHashMap.Entry[16];
+    private PointHashMap.Entry[] slots = new PointHashMap.Entry[16];
 
     private int count, threshold = 12;
 
@@ -20,13 +22,13 @@ public class EPooledIntVHashMap<V> {
     }
 
 
-    public V lookup(int hashEntry) {
-        for (EPooledIntVHashMap.Entry<V> entry = this.slots[getSlotIndex(hashEntry)]; entry != null; entry = entry.nextEntry) {
+    public PathPoint lookup(int hashEntry) {
+        for (PointHashMap.Entry entry = this.slots[getSlotIndex(hashEntry)]; entry != null; entry = entry.nextEntry) {
             if (entry.hashEntry == hashEntry) {
                 return entry.valueEntry;
             }
         }
-        return (V)null;
+        return null;
     }
 
 
@@ -35,8 +37,8 @@ public class EPooledIntVHashMap<V> {
     }
 
 
-    final EPooledIntVHashMap.Entry<V> lookupEntry(int hashEntry) {
-        for (EPooledIntVHashMap.Entry<V> entry = this.slots[getSlotIndex(hashEntry)]; entry != null; entry = entry.nextEntry) {
+    final PointHashMap.Entry lookupEntry(int hashEntry) {
+        for (PointHashMap.Entry entry = this.slots[getSlotIndex(hashEntry)]; entry != null; entry = entry.nextEntry) {
             if (entry.hashEntry == hashEntry) {
                 return entry;
             }
@@ -45,9 +47,9 @@ public class EPooledIntVHashMap<V> {
     }
 
 
-    public void addKey(int hashEntry, V valueEntry) {
+    public void addKey(int hashEntry, PathPoint valueEntry) {
         int index = getSlotIndex(hashEntry);
-        for (EPooledIntVHashMap.Entry<V> entry = this.slots[index]; entry != null; entry = entry.nextEntry) {
+        for (PointHashMap.Entry entry = this.slots[index]; entry != null; entry = entry.nextEntry) {
             if (entry.hashEntry == hashEntry) {
                 entry.valueEntry = valueEntry;
                 return;
@@ -57,36 +59,36 @@ public class EPooledIntVHashMap<V> {
     }
 
 
-    private void grow(int p_76047_1_) {
-        EPooledIntVHashMap.Entry<V>[] entry = this.slots;
+    private void grow(int newSize) {
+        PointHashMap.Entry[] entry = this.slots;
         int i = entry.length;
 
         if (i == 1073741824) {
             this.threshold = Integer.MAX_VALUE;
         } else {
-            EPooledIntVHashMap.Entry<V>[] entry1 = new EPooledIntVHashMap.Entry[p_76047_1_];
+            PointHashMap.Entry[] entry1 = new PointHashMap.Entry[newSize];
             this.copyTo(entry1);
             this.slots = entry1;
-            this.threshold = (int)((float)p_76047_1_ * this.growFactor);
+            this.threshold = (int)((float)newSize * this.growFactor);
         }
     }
 
 
-    private void copyTo(EPooledIntVHashMap.Entry<V>[] p_76048_1_) {
-        EPooledIntVHashMap.Entry<V>[] entry = this.slots;
-        int i = p_76048_1_.length;
+    private void copyTo(PointHashMap.Entry[] src) {
+        PointHashMap.Entry[] entry = this.slots;
+        int i = src.length;
 
         for (int j = 0; j < entry.length; ++j) {
-            EPooledIntVHashMap.Entry<V> entry1 = entry[j];
+            PointHashMap.Entry entry1 = entry[j];
 
             if (entry1 != null) {
                 entry[j] = null;
 
                 while (true) {
-                    EPooledIntVHashMap.Entry<V> entry2 = entry1.nextEntry;
+                    PointHashMap.Entry entry2 = entry1.nextEntry;
                     int k = getSlotIndex(entry1.slotHash, i);
-                    entry1.nextEntry = p_76048_1_[k];
-                    p_76048_1_[k] = entry1;
+                    entry1.nextEntry = src[k];
+                    src[k] = entry1;
                     entry1 = entry2;
 
                     if (entry2 == null) {
@@ -98,17 +100,17 @@ public class EPooledIntVHashMap<V> {
     }
 
 
-    public V removeObject(int o) {
-        EPooledIntVHashMap.Entry<V> entry = this.removeEntry(o);
-        return (V)(entry == null ? null : entry.valueEntry);
+    public PathPoint removeObject(int o) {
+        PointHashMap.Entry entry = this.removeEntry(o);
+        return (entry == null ? null : entry.valueEntry);
     }
 
 
-    final EPooledIntVHashMap.Entry<V> removeEntry(int hash) {
+    final PointHashMap.Entry removeEntry(int hash) {
         int j = getSlotIndex(hash);
-        EPooledIntVHashMap.Entry<V> entry = this.slots[j];
-        EPooledIntVHashMap.Entry<V> entry1;
-        EPooledIntVHashMap.Entry<V> entry2;
+        PointHashMap.Entry entry = this.slots[j];
+        PointHashMap.Entry entry1;
+        PointHashMap.Entry entry2;
 
         for (entry1 = entry; entry1 != null; entry1 = entry2) {
             entry2 = entry1.nextEntry;
@@ -130,21 +132,42 @@ public class EPooledIntVHashMap<V> {
 
 
     public void clearMap() {
-        EPooledIntVHashMap.Entry<V>[] entry = this.slots;
-        for (int i = 0; i < entry.length; ++i) {
-            EPooledIntVHashMap.Entry<V> entry1 = entry[i];
+        final PointHashMap.Entry[] entry = this.slots;
+        PointHashMap.Entry[] unused = this.unused;
+        int eCount = this.eCount, ul = unused.length;
+        for (int i = 0, s = entry.length; i < s; ++i) {
+            PointHashMap.Entry entry1 = entry[i];
             while (entry1 != null) {
-                freeEntry(entry1);
+                if(ul == ++eCount){
+                    PointHashMap.Entry[] newNodes = new PointHashMap.Entry[ul==0?slots.length:ul<<1];
+                    System.arraycopy(unused, 0, newNodes, 1, ul);
+                    ul = newNodes.length;
+                    newNodes[0] = entry1;
+                    unused = this.unused = newNodes;
+                } else {
+                    unused[eCount] = entry1;
+                }
                 entry1 = entry1.nextEntry;
             }
             entry[i] = null;
         }
+        this.eCount = eCount;
         this.count = 0;
     }
 
 
-    private void insert(int h, int h2, V val, int index) {
-        EPooledIntVHashMap.Entry<V> entry = this.slots[index];
+    private void freeEntry(PointHashMap.Entry entry) {
+        if(unused.length == ++eCount){
+            PointHashMap.Entry[] newNodes = new PointHashMap.Entry[unused.length==0?slots.length:unused.length<<1];
+            System.arraycopy(unused, 0, newNodes, 1, unused.length);
+            newNodes[0] = entry;
+            unused = newNodes;
+        } else unused[eCount] = entry;
+    }
+
+
+    private void insert(int h, int h2, PathPoint val, int index) {
+        PointHashMap.Entry entry = this.slots[index];
         this.slots[index] = newEntry(h, h2, val, entry);
 
         if (this.count++ >= this.threshold) {
@@ -153,42 +176,32 @@ public class EPooledIntVHashMap<V> {
     }
 
     private static final Entry[] EMPTY = new Entry[0];
-    private EPooledIntVHashMap.Entry<V>[] unused = EMPTY;
+    private PointHashMap.Entry[] unused = EMPTY;
     private int eCount = -1;
 
-    public V tryGetValueOnInsert() {
+    public PathPoint tryGetValueOnInsert() {
         return eCount == -1 ? null : this.unused[eCount].valueEntry;
     }
 
-    private Entry<V> newEntry(int hash, int eHash, V value, EPooledIntVHashMap.Entry<V> next) {
-        if(eCount == -1)return new EPooledIntVHashMap.Entry<V>(hash, eHash, value, next);
+    private Entry newEntry(int hash, int eHash, PathPoint value, PointHashMap.Entry next) {
+        if(eCount == -1)return new PointHashMap.Entry(hash, eHash, value, next);
         return unused[eCount--].initF(hash, eHash, value, next);
     }
 
 
-    private void freeEntry(EPooledIntVHashMap.Entry<V> entry) {
-        if(unused.length == ++eCount){
-            EPooledIntVHashMap.Entry[] newNodes = new EPooledIntVHashMap.Entry[unused.length==0?slots.length:unused.length<<1];
-            System.arraycopy(unused, 0, newNodes, 1, unused.length);
-            newNodes[0] = entry;
-            unused = newNodes;
-        } else unused[eCount] = entry;
-    }
-
-
-    static class Entry<V> {
+    static class Entry {
         int hashEntry, slotHash;
-        V valueEntry;
-        EPooledIntVHashMap.Entry<V> nextEntry;
+        PathPoint valueEntry;
+        PointHashMap.Entry nextEntry;
 
-        Entry(int hash, int eHash, V value, EPooledIntVHashMap.Entry<V> next) {
+        Entry(int hash, int eHash, PathPoint value, PointHashMap.Entry next) {
             this.valueEntry = value;
             this.nextEntry = next;
             this.hashEntry = eHash;
             this.slotHash = hash;
         }
 
-        Entry<V> initF(int hash, int eHash, V value, EPooledIntVHashMap.Entry<V> next){
+        Entry initF(int hash, int eHash, PathPoint value, PointHashMap.Entry next){
             this.valueEntry = value;
             this.nextEntry = next;
             this.hashEntry = eHash;
@@ -201,21 +214,21 @@ public class EPooledIntVHashMap<V> {
         }
 
 
-        public final V getValue() {
+        public final PathPoint getValue() {
             return this.valueEntry;
         }
 
 
         public final boolean equals(Object obj) {
-            if (!(obj instanceof EPooledIntVHashMap.Entry)) {
+            if (!(obj instanceof PointHashMap.Entry)) {
                 return false;
             } else {
-                EPooledIntVHashMap.Entry<V> entry = (EPooledIntVHashMap.Entry)obj;
+                PointHashMap.Entry entry = (PointHashMap.Entry)obj;
 
                 if (this.hashEntry == entry.hashEntry) {
-                    Object object = this.getValue();
-                    Object object1 = entry.getValue();
-                    if (object == object1 || object != null && object.equals(object1)) {
+                    PathPoint point1 = this.getValue();
+                    PathPoint point2 = entry.getValue();
+                    if (point1 == point2 || point1 != null && point1.equals(point2)) {
                         return true;
                     }
                 }

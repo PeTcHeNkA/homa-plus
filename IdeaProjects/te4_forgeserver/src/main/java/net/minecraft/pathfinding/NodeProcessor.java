@@ -1,18 +1,17 @@
 package net.minecraft.pathfinding;
 
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.util.IntHashMap;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.IBlockAccess;
-import plus.fserver.utls.collections.EPooledIntVHashMap;
+import plus.fserver.utls.collections.PointHashMap;
 
 
 public abstract class NodeProcessor {
     protected final BlockPos.MutableBlockPos pooledPos = new BlockPos.MutableBlockPos();
     protected IBlockAccess blockaccess;
     protected EntityLiving entity;
-    protected final EPooledIntVHashMap<PathPoint> pointMap = new EPooledIntVHashMap<>();
+    protected final PointHashMap pointMap = new PointHashMap();
     protected int entitySizeX;
     protected int entitySizeY;
     protected int entitySizeZ;

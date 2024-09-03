@@ -51,7 +51,7 @@ public class FlyingNodeProcessor extends WalkNodeProcessor {
             i = MathHelper.floor(this.entity.getEntityBoundingBox().minY + 0.5D);
         }
 
-        pooledPos.setPos(this.entity);
+        pooledPos.setPosB(this.entity);
         PntMatrix.Chunked chunked = matrix.getChunked(pooledPos.getX(), pooledPos.getZ());
 
         PathNodeType type0 = chunked.getCur(pooledPos.getX(), i, pooledPos.getZ());

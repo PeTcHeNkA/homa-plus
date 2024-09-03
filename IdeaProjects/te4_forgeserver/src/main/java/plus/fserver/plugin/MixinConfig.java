@@ -4,11 +4,12 @@ import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import plus.fserver.ElcaConfig;
+
 import java.util.List;
 import java.util.Set;
 
 
-public class SSLightLoader implements IMixinConfigPlugin {
+public class MixinConfig implements IMixinConfigPlugin {
     @Override
     public void onLoad(String mixinPackage) {
 
@@ -22,6 +23,9 @@ public class SSLightLoader implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
+        if(mixinClassName.equals("plus.fserver.mixins.server.FastEntityEq")){
+            return ElcaConfig.FAST_ENTITY_EQUALS;
+        }
         //if(mixinClassName.contains("plus.fserver.mixins.light"))return ElcaConfig.FAST_LIGHT;
         return true;
     }

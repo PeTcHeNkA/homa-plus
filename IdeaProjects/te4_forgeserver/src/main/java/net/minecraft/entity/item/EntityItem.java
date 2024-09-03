@@ -103,6 +103,7 @@ public class EntityItem extends Entity {
     }
 
 
+    private byte updateTimer = -1;
     @Override
     public void onUpdate() {
         ItemStack item = this.getItem();
@@ -113,8 +114,10 @@ public class EntityItem extends Entity {
             if (this.pickupDelay > 0 && this.pickupDelay != 32767) {
                 --this.pickupDelay;
             }
+            if (this.age != -32768) ++this.age;
             int lodLvl;
             if(((lodLvl = lodLvl()) & ticksExisted) != 0)return;
+            ++updateTimer;
             onUpdateE();
 
             this.prevPosX = this.posX;
@@ -124,7 +127,7 @@ public class EntityItem extends Entity {
             double d1 = this.motionY;
             double d2 = this.motionZ;
 
-            if (lodLvl == 0 && !this.hasNoGravity() || (age & 1) == 1) {
+            if ((lodLvl & updateTimer) == 0 && !this.hasNoGravity()) {
                 this.motionY -= 0.03999999910593033D;
             }
 
@@ -136,7 +139,7 @@ public class EntityItem extends Entity {
 
             this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
 
-            if(lodLvl == 0 || (((lodLvl << 1) & age) == 0)) {
+            if(lodLvl == 0 || (((lodLvl << 1) & updateTimer) == 0)) {
                 AxisAlignedBB res;
                 getEntityBoundingBox().growTo(-0.01D, -0.01D, -0.01D, res = world.commonWorldEntityAABB);
 
@@ -147,7 +150,9 @@ public class EntityItem extends Entity {
             }
 
             if (((int)this.prevPosX != (int)this.posX || (int)this.prevPosY != (int)this.posY || (int)this.prevPosZ != (int)this.posZ) || this.ticksExisted % 25 == 0) {
-                BlockPos blockpos = world.localTempPos3.setPos(this);
+                BlockPos.MutableBlockPos blockpos = world.localTempPos3;
+                blockpos.setPosB(this);
+
                 if (this.world.access().getBlockState(blockpos).getMaterial() == Material.LAVA) {
                     this.motionY = 0.20000000298023224D;
                     Random rand = this.rand;
@@ -156,7 +161,7 @@ public class EntityItem extends Entity {
                     this.playSound(SoundEvents.ENTITY_GENERIC_BURN, 0.4F, 2.0F + this.rand.nextFloat() * 0.4F);
                 }
 
-                if (!this.world.isRemote && ((age>>(2+lodLvl) & 3) == 3)) {
+                if (!this.world.isRemote && ((updateTimer>>(2+lodLvl) & 3) == 3)) {
                     this.searchForOtherItemsNearby();
                 }
             }
@@ -179,10 +184,6 @@ public class EntityItem extends Entity {
                 this.motionY *= -0.5D;
             }
 
-            if (this.age != -32768) {
-                ++this.age;
-            }
-
             //this.handleWaterMovement();
 
             if (!this.world.isRemote) {
@@ -203,12 +204,6 @@ public class EntityItem extends Entity {
             }
             //if (item.isEmpty()) this.setDead();
         }
-    }
-
-
-    @Override
-    public boolean useSelfCollisions() {
-        return false;
     }
 
 
@@ -546,9 +541,19 @@ public class EntityItem extends Entity {
                     z = boxes.getC(temp).calculateZOffset(curBox, z);
 
             }
+
             if(boxes != null) {
+                double prevX = posX;
+                double prevY = posY;
+                double prevZ = posZ;
                 curBox.offsetMut(x, y, z);
                 this.resetPositionToBB();
+                if(posX == prevX) motionX = 0;
+                else updateTimer = -1;
+                if(posY == prevY) motionY = 0;
+                else updateTimer = -1;
+                if(posZ == prevZ) motionZ = 0;
+                else updateTimer = -1;
             }
 
             this.collided = (collidedVertically = oldY != y) || (collidedHorizontally = oldX != x || oldZ != z);

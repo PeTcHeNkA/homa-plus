@@ -290,12 +290,17 @@ public abstract class EntityLiving extends EntityLivingBase {
         }
 
         if (lodLvl == 0 && (!this.world.isRemote || SERVER_COMPILE) && this.canPickUpLoot() && !this.dead && world.getMobGrifering(this)) {
-            AxisAlignedBB box;
-            getEntityBoundingBox().growTo(1d,0d,1d, box = world.commonWorldEntityAABB);
-            for (EntityItem item : this.world.getEntitiesWithinAABB(EntityItem.class, box))
-                if (!item.isDead && !item.getItem().isEmpty() && !item.cannotPickup())
-                    this.updateEquipmentIfNeeded(item);
+            tryPickupLoot();
         }
+    }
+
+
+    protected final void tryPickupLoot(){
+        AxisAlignedBB box;
+        getEntityBoundingBox().growTo(1d,0d,1d, box = world.commonWorldEntityAABB);
+        for (EntityItem item : this.world.getEntitiesWithinAABB(EntityItem.class, box))
+            if (!item.isDead && !item.getItem().isEmpty() && !item.cannotPickup())
+                this.updateEquipmentIfNeeded(item);
     }
 
 

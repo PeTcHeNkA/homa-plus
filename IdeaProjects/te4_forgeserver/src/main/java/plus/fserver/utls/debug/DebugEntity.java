@@ -74,14 +74,10 @@ public class DebugEntity extends Entity {
         return String.format(name+"[x: %s, y: %s, z: %s] ", posX, posY, posZ)+getEntityBoundingBox();
     }
 
+
     @Override
     protected void entityInit() {}
 
-
-    @Override
-    public boolean equals(Object p_equals_1_) {
-        return super.equals(p_equals_1_);
-    }
 
     @Override
     protected void readEntityFromNBT(NBTTagCompound nbt) {}

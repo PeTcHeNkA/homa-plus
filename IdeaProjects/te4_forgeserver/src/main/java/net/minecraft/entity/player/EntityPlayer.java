@@ -177,6 +177,7 @@ public abstract class EntityPlayer extends EntityLivingBase {
     }
 
 
+    @Override
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
         AbstractAttributeMap map = getAttributeMap();
@@ -185,6 +186,12 @@ public abstract class EntityPlayer extends EntityLivingBase {
         map.registerAttribute(SharedMonsterAttributes.ATTACK_SPEED);
         map.registerAttribute(SharedMonsterAttributes.LUCK);
         map.registerAttribute(REACH_DISTANCE);
+    }
+
+
+    @Override
+    public boolean allowSprint() {
+        return true;
     }
 
 

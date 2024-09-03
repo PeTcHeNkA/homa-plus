@@ -54,14 +54,14 @@ public class WalkNodeProcessor extends NodeProcessor {
 
             for (Block block = this.blockaccess.getBlockState(pooledPos).getBlock(); block == Blocks.FLOWING_WATER || block == Blocks.WATER; block = this.blockaccess.getBlockState(pooledPos).getBlock()) {
                 ++yFactor;
-                pooledPos.setPos(MathHelper.floor(this.entity.posX), yFactor, MathHelper.floor(this.entity.posZ));
+                pooledPos.setPosB(MathHelper.floor(this.entity.posX), yFactor, MathHelper.floor(this.entity.posZ));
             }
         } else if (this.entity.onGround) {
             yFactor = MathHelper.floor(this.entity.getEntityBoundingBox().minY + 0.5D);
         } else {
             IBlockState state;
 
-            for (pooledPos.setPos(this.entity);
+            for (pooledPos.setPosB(this.entity);
                  ((state = this.blockaccess.getBlockState(pooledPos)).getMaterial() ==
                          Material.AIR || state.getBlock()
                                  .isPassable(this.blockaccess, pooledPos))
@@ -126,7 +126,7 @@ public class WalkNodeProcessor extends NodeProcessor {
         PntMatrix.Chunked chunked = matrix.getChunked(cur.x, cur.z);
         PathNodeType type = chunked.getCur(cur.x, cur.y + 1, cur.z);
 
-        if(type==null) {
+        if(type == null) {
             type = this.getPathNodeType(this.entity, cur.x, cur.y + 1, cur.z);
             chunked.setCur(cur.x, cur.y + 1, cur.z, type);
         }

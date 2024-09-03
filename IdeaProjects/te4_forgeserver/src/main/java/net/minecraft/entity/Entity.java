@@ -312,15 +312,17 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
     }
 
 
-    public boolean equals(Object p_equals_1_) {
-        if (p_equals_1_ instanceof Entity) {
-            return ((Entity)p_equals_1_).entityId == this.entityId;
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Entity) {
+            return ((Entity)obj).entityId == this.entityId;
         } else {
             return false;
         }
     }
 
 
+    @Override
     public int hashCode() {
         return this.entityId;
     }
@@ -1094,13 +1096,13 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         for (int i = 0; (float)i < 1.0F + this.width * 20.0F; ++i) {
             float f3 = (this.rand.nextFloat() * 2.0F - 1.0F) * this.width;
             float f4 = (this.rand.nextFloat() * 2.0F - 1.0F) * this.width;
-            this.world.spawnParticle(EnumParticleTypes.WATER_BUBBLE, this.posX + (double)f3, (double)(f2 + 1.0F), this.posZ + (double)f4, this.motionX, this.motionY - (double)(this.rand.nextFloat() * 0.2F), this.motionZ);
+            this.world.spawnParticle(EnumParticleTypes.WATER_BUBBLE, this.posX + (double)f3, f2 + 1.0F, this.posZ + (double)f4, this.motionX, this.motionY - (double)(this.rand.nextFloat() * 0.2F), this.motionZ);
         }
 
         for (int j = 0; (float)j < 1.0F + this.width * 20.0F; ++j) {
             float f5 = (this.rand.nextFloat() * 2.0F - 1.0F) * this.width;
             float f6 = (this.rand.nextFloat() * 2.0F - 1.0F) * this.width;
-            this.world.spawnParticle(EnumParticleTypes.WATER_SPLASH, this.posX + (double)f5, (double)(f2 + 1.0F), this.posZ + (double)f6, this.motionX, this.motionY, this.motionZ);
+            this.world.spawnParticle(EnumParticleTypes.WATER_SPLASH, this.posX + (double)f5, f2 + 1.0F, this.posZ + (double)f6, this.motionX, this.motionY, this.motionZ);
         }
     }
 
@@ -1947,7 +1949,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
 
     public boolean isRiding() {
-        return this.getRidingEntity() != null;
+        return ridingEntity != null;
     }
 
 

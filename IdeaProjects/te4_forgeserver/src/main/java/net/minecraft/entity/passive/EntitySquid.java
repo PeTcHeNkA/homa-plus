@@ -16,6 +16,9 @@ import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.fserver.utls.EntityLodFunc;
+
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public class EntitySquid extends EntityWaterMob {
@@ -103,8 +106,18 @@ public class EntitySquid extends EntityWaterMob {
 
 
     @Override
-    public void onLivingUpdateTick() {
-        super.onLivingUpdateTick();
+    public void onLivingUpdate() {
+        int lodLvl;
+        if((ticksExisted & (lodLvl = lodLvl())) == 0){
+            onLivingUpdateTick();
+            updaeSquid();
+            if(lodLvl < EntityLodFunc.LOW2_MASK && useSelfCollisions()) this.collideWithNearbyEntities();
+        }
+    }
+
+
+    private void updaeSquid(){
+        super.onLivingUpdate();
         this.prevSquidPitch = this.squidPitch;
         this.prevSquidYaw = this.squidYaw;
         this.prevSquidRotation = this.squidRotation;

@@ -107,20 +107,26 @@ public class PathPoint {
     }
 
 
-    public float distanceManhattan(PathPoint p_186281_1_) {
-        float f = (float)Math.abs(p_186281_1_.x - this.x);
-        float f1 = (float)Math.abs(p_186281_1_.y - this.y);
-        float f2 = (float)Math.abs(p_186281_1_.z - this.z);
+    public float distanceManhattan(PathPoint point) {
+        float f  = (float)Math.abs(point.x - this.x);
+        float f1 = (float)Math.abs(point.y - this.y);
+        float f2 = (float)Math.abs(point.z - this.z);
         return f + f1 + f2;
     }
 
 
+    @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof PathPoint)) return false;
         else {
             PathPoint pathpoint = (PathPoint)obj;
             return this.hash == pathpoint.hash && this.x == pathpoint.x && this.y == pathpoint.y && this.z == pathpoint.z;
         }
+    }
+
+
+    public boolean equals(PathPoint pathpoint) {
+        return this.hash == pathpoint.hash && this.x == pathpoint.x && this.y == pathpoint.y && this.z == pathpoint.z;
     }
 
 

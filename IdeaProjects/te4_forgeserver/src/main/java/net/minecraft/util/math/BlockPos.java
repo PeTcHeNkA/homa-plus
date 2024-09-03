@@ -352,6 +352,17 @@ public class BlockPos extends Vec3i {
         }
 
 
+        public void setPosB(Entity entityIn) {
+            double xIn = entityIn.posX, yIn = entityIn.posY, zIn = entityIn.posZ;
+            int xi = (int) xIn, yi = (int) yIn, zi = (int) zIn;
+            editRoot(
+                    xIn < (double) xi?xi-1:xi,
+                    yIn < (double) yi?yi-1:yi,
+                    zIn < (double) zi?zi-1:zi
+            );
+        }
+
+
         public BlockPos.MutableBlockPos setPos(Vec3i vec) {
             return this.setPos(vec.getX(), vec.getY(), vec.getZ());
         }

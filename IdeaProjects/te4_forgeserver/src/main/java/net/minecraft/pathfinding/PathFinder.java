@@ -51,7 +51,7 @@ public class PathFinder {
         from.distanceToTarget = from.distanceToNext;
         PathHeap path;
         (path = this.path).clearPath();
-        path.addPoint(from);
+        path.addPointV(from);
 
         PathPoint pathpoint = from, cur;
         int limit = 0;
@@ -85,7 +85,7 @@ public class PathFinder {
                         path.changeDistance(point, point.totalPathDistance + point.distanceToNext);
                     else {
                         point.distanceToTarget = point.totalPathDistance + point.distanceToNext;
-                        path.addPoint(point);
+                        path.addPointV(point);
                     }
                 }
             }

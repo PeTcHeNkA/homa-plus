@@ -279,7 +279,7 @@ public class ElcaCommands extends ServerCommand {
 
     private void spawn(ICommandSender sender, String[] args) throws NumberInvalidException {
         if(args.length < 8){
-            //   /elca spawn zombie ~ ~ ~ ~50 ~ ~50 0.5
+            //   /elca spawn zombie ~ ~ ~ ~50 ~ ~50 0.7
             //   /elca spawn villager_golem ~ ~ ~ ~50 ~ ~50 1.5
             reply(sender, "&e/spawn [ID] [X] [Y] [Z] [X2] [Y2] [Z2] [STEP]");
             return;
