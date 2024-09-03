@@ -29,9 +29,9 @@ public class BlockRedstoneLight extends BlockFx {
     public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state) {
         if (!worldIn.isRemote || SERVER_COMPILE) {
             if (this.isOn && !worldIn.isBlockPowered(pos)) {
-                worldIn.setBlockState(pos, Blocks.REDSTONE_LAMP.getDefaultState(), 2);
+                worldIn.access().setBlockState(pos, Blocks.REDSTONE_LAMP.getDefaultState(), 2);
             } else if (!this.isOn && worldIn.isBlockPowered(pos)) {
-                worldIn.setBlockState(pos, Blocks.LIT_REDSTONE_LAMP.getDefaultState(), 2);
+                worldIn.access().setBlockState(pos, Blocks.LIT_REDSTONE_LAMP.getDefaultState(), 2);
             }
         }
     }

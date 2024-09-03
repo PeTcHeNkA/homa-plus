@@ -126,9 +126,9 @@ public class PntMatrix {
 
         public PathNodeType getCur(int x, int y, int z){
             Group group = groups[y >> 4];
-            if(group==null)return null;
+            if(group == null)return null;
             Branch branch = group.branch(x&=15, y&15, z&=15);
-            if(branch==null)return null;
+            if(branch == null)return null;
             return branch.get(x, y&7, z);
         }
 

@@ -108,6 +108,12 @@ public class EntityZombie extends EntityMob {
     }
 
 
+    @Override
+    public boolean allowSprint(){
+        return false;
+    }
+
+
     public void setArmsRaised(boolean armsRaised) {
         this.getDataManager().set(ARMS_RAISED, armsRaised);
     }

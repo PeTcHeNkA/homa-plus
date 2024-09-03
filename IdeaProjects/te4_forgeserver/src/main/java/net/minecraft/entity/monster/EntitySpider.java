@@ -8,14 +8,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.ai.EntityAIAttackMelee;
-import net.minecraft.entity.ai.EntityAIHurtByTarget;
-import net.minecraft.entity.ai.EntityAILeapAtTarget;
-import net.minecraft.entity.ai.EntityAILookIdle;
-import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
-import net.minecraft.entity.ai.EntityAISwimming;
-import net.minecraft.entity.ai.EntityAIWanderAvoidWater;
-import net.minecraft.entity.ai.EntityAIWatchClosest;
+import net.minecraft.entity.ai.*;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.MobEffects;
 import net.minecraft.init.SoundEvents;
@@ -36,7 +29,6 @@ import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
 import plus.fserver.ElcaMobs;
-
 import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
@@ -54,16 +46,21 @@ public class EntitySpider extends EntityMob {
     }
 
 
+    @Override
     protected void initEntityAI() {
-        this.tasks.addTask(1, new EntityAISwimming(this));
-        this.tasks.addTask(3, new EntityAILeapAtTarget(this, 0.4F));
-        this.tasks.addTask(4, new EntitySpider.AISpiderAttack(this));
-        this.tasks.addTask(5, new EntityAIWanderAvoidWater(this, 0.8D));
-        this.tasks.addTask(6, new EntityAIWatchClosest(this, EntityPlayer.class, 8.0F));
-        this.tasks.addTask(6, new EntityAILookIdle(this));
-        this.targetTasks.addTask(1, new EntityAIHurtByTarget(this, false));
-        this.targetTasks.addTask(2, new EntitySpider.AISpiderTarget(this, EntityPlayer.class));
-        this.targetTasks.addTask(3, new EntitySpider.AISpiderTarget(this, EntityIronGolem.class));
+        EntityAITasks tasks = this.tasks;
+        tasks.addTask(1, new EntityAISwimming(this));
+        tasks.addTask(3, new EntityAILeapAtTarget(this, 0.4F));
+        tasks.addTask(4, new EntitySpider.AISpiderAttack(this));
+        tasks.addTask(5, new EntityAIWanderAvoidWater(this, 0.8D));
+        tasks.addTask(6, new EntityAIWatchClosest(this, EntityPlayer.class, 8.0F));
+        tasks.addTask(6, new EntityAILookIdle(this));
+
+        tasks = this.targetTasks;
+
+        tasks.addTask(1, new EntityAIHurtByTarget(this, false));
+        tasks.addTask(2, new EntitySpider.AISpiderTarget(this, EntityPlayer.class));
+        tasks.addTask(3, new EntitySpider.AISpiderTarget(this, EntityIronGolem.class));
     }
 
 
@@ -83,6 +80,12 @@ public class EntitySpider extends EntityMob {
     protected void entityInit() {
         this.dataManager.register(CLIMBING, (byte) 0);
         super.entityInit();
+    }
+
+
+    @Override
+    public boolean allowSprint(){
+        return false;
     }
 
 

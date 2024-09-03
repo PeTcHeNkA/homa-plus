@@ -187,9 +187,11 @@ public class EntityAINearestAttackableTarget<T extends EntityLivingBase> extends
             this.entity = entityIn;
         }
 
+        @Override
         public int compare(Entity entity, Entity other) {
-            double d0 = this.entity.getDistanceSq(entity);
-            double d1 = this.entity.getDistanceSq(other);
+            Entity cur;
+            double d0 = (cur = this.entity).getDistanceSq(entity);
+            double d1 = cur.getDistanceSq(other);
             if (d0 < d1) {
                 return -1;
             } else {

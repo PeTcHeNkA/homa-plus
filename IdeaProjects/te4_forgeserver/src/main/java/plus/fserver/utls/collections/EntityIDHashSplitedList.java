@@ -255,7 +255,9 @@ public class EntityIDHashSplitedList implements List<Entity> {
         ArrayRemSwapListE15<Entity>[] lists = this.lists;
         for (int cursor = 0; cursor < SIZE; cursor++)size += lists[cursor].size;
 
-        T[] arr = (T[]) new Object[size];
+        T[] arr = a.length >= size ? a :
+                (T[])java.lang.reflect.Array
+                        .newInstance(a.getClass().getComponentType(), size);
 
         int i = 0;
         for (int cursor = 0; cursor < SIZE; cursor++){

@@ -422,7 +422,10 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         }
         this.provider.onWorldUpdateEntities();
         super.updateEntities();
+    }
 
+
+    private void collideAll(){
         EntityCollider collider = this.collider;
         collider.begin(getGameRules().maxEntityCramming.getInt());
         for (Chunk chunk:this.playerChunkMap.getChunkIterator(ElcaConfig.CHUNK_TICK_RADIUS_1)){
@@ -1145,7 +1148,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         }
         if(balanceBlock == 0) {
             this.updateBlocks();
-        } else {
+        } else l1:{
             if(prevWorldTotalTime % balanceBlock == 0) {
                 if(meanTickTime() > ElcaConfig.MEAN_OVERLOAD){
                     if(blockUpdateDebt < 200) {
@@ -1165,8 +1168,12 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
                         blockUpdateDebt -= 1;
                     }
                 }
-                if(balanceBlock>0) updateBlocks(balanceBlock);
+                if(balanceBlock>0) {
+                    updateBlocks(balanceBlock);
+                    break l1;
+                }
             }
+            collideAll();
         }
         if((prevWorldTotalTime & 127) == 0) poledSlice = null;
 
@@ -1401,8 +1408,12 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
             final int snowChance  = 16 / factor;
             final Random rand = this.rand;
 
+            EntityCollider collider = this.collider;
+            collider.begin(getGameRules().maxEntityCramming.getInt());
+
             for (ChunkIterator iter = this.playerChunkMap.getChunkIterator(radius); iter.hasNext();){
                 selector.setChunk(chunk = iter.next());
+                collider.collideAll(chunk);
 
                 int startCX = chunk.x << 4;
                 int startCZ = chunk.z << 4;
@@ -1478,6 +1489,8 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
                 }
             }
             this.updateLCG = updateLCG;
+
+            collider.complete();
         }
     }
 

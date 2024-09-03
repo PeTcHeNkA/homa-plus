@@ -34,9 +34,11 @@ public class PathFinder {
     private Path findPath(IBlockAccess worldIn, EntityLiving entitylivingIn, double x, double y, double z, float maxDistance) {
         this.path.clearPath();
         this.nodeProcessor.init(worldIn, entitylivingIn);
-        PathPoint pathpoint = this.nodeProcessor.getStart();
-        PathPoint pathpoint1 = this.nodeProcessor.getPathPointToCoords(x, y, z);
-        Path path = this.findPath(pathpoint, pathpoint1, maxDistance);
+        Path path = this.findPath(
+                nodeProcessor.getStart(),
+                nodeProcessor.getPathPointToCoords(x, y, z),
+                maxDistance
+        );
         this.nodeProcessor.postProcess();
         return path;
     }
@@ -47,16 +49,17 @@ public class PathFinder {
         from.totalPathDistance = 0.0F;
         from.distanceToNext = from.distanceManhattan(to);
         from.distanceToTarget = from.distanceToNext;
-        this.path.clearPath();
+        PathHeap path;
+        (path = this.path).clearPath();
+        path.addPoint(from);
 
-        this.path.addPoint(from);
         PathPoint pathpoint = from, cur;
         int limit = 0;
 
         PathPoint[] options = this.pathOptions;
 
-        while (++limit < 200 && !this.path.isPathEmpty()) {
-            if ((cur = this.path.dequeue()).equals(to)) {
+        while (++limit < 200 && !path.isPathEmpty()) {
+            if ((cur = path.dequeue()).equals(to)) {
                 pathpoint = to;
                 break;
             }
@@ -79,10 +82,10 @@ public class PathFinder {
                     point.distanceToNext = point.distanceManhattan(to) + point.costMalus;
 
                     if (point.isAssigned())
-                        this.path.changeDistance(point, point.totalPathDistance + point.distanceToNext);
+                        path.changeDistance(point, point.totalPathDistance + point.distanceToNext);
                     else {
                         point.distanceToTarget = point.totalPathDistance + point.distanceToNext;
-                        this.path.addPoint(point);
+                        path.addPoint(point);
                     }
                 }
             }

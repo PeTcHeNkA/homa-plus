@@ -121,7 +121,7 @@ public class RedstoneEngine {
         private final Te4HashMap<BlockPos, UpdateNode>
                 nodeCache = new Te4HashMap<>();
 
-        public  boolean redstoneCanProvidePower = true;
+        public boolean redstoneCanProvidePower = true;
         private int currentWalkLayer = 0;
         private final BlockPos.MutableBlockPos[] neighbors   = new BlockPos.MutableBlockPos[24];
         private final UpdateNode[] tempNodes = new UpdateNode[24];

@@ -60,6 +60,7 @@ import net.minecraftforge.event.world.GetCollisionBoxesEvent;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.NotNull;
 import plus.fserver.ElcaConfig;
 import plus.fserver.api.ElcaServerUtls;
@@ -204,6 +205,146 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
         locals = ElcaServerUtls.createLocals(this);
     }
+
+    private int nextEntityID = 0;
+    private int maxEntityId  = 0x7FFFFFF0;
+
+    public int nextEntityId(){
+        l1: if(nextEntityID == maxEntityId){
+            int maxId = 0;
+            int minId = Integer.MAX_VALUE;
+
+            EntityIDHashSplitedList realEntityList = this.realEntityList;
+            ArrayListE10<Entity> toRecreateId = new ArrayListE10<>();
+            for (ArrayRemSwapListE15<Entity> list:realEntityList.getRaw()) {
+                for (int cursor = 0; cursor < list.sizeC(); ++cursor) {
+                    Entity entity = list.get(cursor);
+                    int id = entity.getEntityId();
+                    if(id > maxId){
+                        maxId = id;
+                    }
+                    if(id < minId){
+                        minId = id;
+                    }
+                    if(entity.trackerEntry == null || entity.trackerEntry.trackingPlayers.isEmpty()){
+                        toRecreateId.addF(entity);
+                        list.remove(cursor);
+                        --cursor;
+                    }
+                }
+            }
+
+            Entity[] arr = realEntityList.toArray(new Entity[0]);
+            Arrays.sort(arr, new Comparator<Entity>() {
+                @Override
+                public int compare(Entity o1, Entity o2) {
+                    return Integer.compare(o1.getEntityId(), o2.getEntityId());
+                }
+            });
+
+            int maxRangeIndex = -1, recreateIndex = -1;
+            int maxRange = -1, recEffRange = -2, recMin = toRecreateId.sizeC()+1;
+
+            for (int i = 1; i < arr.length; i++){
+                int range = arr[i].getEntityId() - arr[i-1].getEntityId();
+                if(range > maxRange){
+                    maxRange = range;
+                    maxRangeIndex = i-1;
+                    continue;
+                }
+//                if(recEffRange != recMin){
+//                    if(range >= recMin){
+//                        if(recEffRange == -2){
+//                            recEffRange = range;
+//                            recreateIndex = i-1;
+//                        } else {
+//                            if(range < recEffRange){
+//                                recEffRange = range;
+//                                recreateIndex = i-1;
+//                            }
+//                        }
+//                    }
+//                }
+            }
+
+            int recStartId, nextId;
+
+            if(maxRangeIndex == -1){
+                LogManager.getLogger().error("Cant found free ranges for entity ID. Please restart server");
+                realEntityList.addAll(toRecreateId);
+                break l1;
+            } else {
+                int maxBound = arr[maxRangeIndex+1].getEntityId();
+                int minBound = arr[maxRangeIndex  ].getEntityId()+1;
+
+                nextId = maxId;
+
+                if(maxBound - minBound < 0x7FFFFFF0 - nextId){
+                    nextId += 1;
+                    maxId = 0x7FFFFFF0;
+                } else {
+                    if(minId > maxBound - minBound){
+                        nextId = 0;
+                        maxId = minId;
+                    } else {
+                        nextId = minBound;
+                        maxId = maxBound;
+                    }
+                }
+            }
+
+            if(recreateIndex == -1){
+                if((maxId - nextId) > recMin){
+                    recStartId = nextId;
+                    nextId += recMin;
+                } else {
+                    LogManager.getLogger().error("Cant found free ranges for entity ID. Please restart server");
+                    realEntityList.addAll(toRecreateId);
+                    break l1;
+                }
+            } else {
+                recStartId = arr[recreateIndex].getEntityId()+1;
+            }
+
+            int id = recStartId;
+            for (Entity entity:toRecreateId){
+                entity.world = null;
+                entity.setEntityId(id++);
+                realEntityList.addF(entity);
+                entity.world = this;
+            }
+
+            nextEntityID = nextId;
+            maxEntityId  = maxId;
+        }
+        return nextEntityID++;
+    }
+//    private static class IdRecreator{
+//        private final Entity[] all;
+//        private int lockIndex, nextIndex, curId, curMax;
+//
+//        private IdRecreator(Entity[] all, int lock) {
+//            this.all = all;
+//            this.lockIndex = lock;
+//        }
+//        private int nextId(){
+//            if(curId == curMax){
+//                if(++nextIndex == lockIndex){
+//                    curId = all[nextIndex].getEntityId()+1;
+//                    ++nextIndex;
+//                }
+//
+//                if(nextIndex >= all.length){
+//                    //todo
+//                } else {
+//                    curId = all[nextIndex].getEntityId()+1;
+//                    curMax = all[nextIndex].getEntityId();
+//                }
+//
+//            }
+//            return curId++;
+//        }
+//    }
 
 
     public Object getLocal(int id){

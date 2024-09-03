@@ -1,14 +1,21 @@
 package plus.fserver.server;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.command.NumberInvalidException;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetworkSystem;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.DimensionType;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.ChunkProviderServer;
@@ -16,6 +23,7 @@ import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.ForgeVersion;
 import net.minecraftforge.fml.common.registry.EntityEntry;
 import net.minecraftforge.fml.common.registry.EntityRegistry;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.server.command.TextComponentHelper;
 import org.jetbrains.annotations.Nullable;
 import plus.fserver.ElcaConfig;
@@ -40,7 +48,7 @@ public class ElcaCommands extends ServerCommand {
     private static final String normal   = "&a";
 
     private final List<String> completions = ImmutableList.copyOf(
-        new String[]{"version", "info", "tps", "mobs"}
+        new String[]{"version", "info", "tps", "mobs", "spawn"}
     );
     private final DecimalFormat TIME_FORMATTER = new DecimalFormat("########0.00");
     private static final ElcaCommands cmds = new ElcaCommands();
@@ -87,6 +95,75 @@ public class ElcaCommands extends ServerCommand {
         if(arg0.equalsIgnoreCase("soft")){
             soft(server, sender, args);
         }
+        if(arg0.equalsIgnoreCase("spawn")){
+            spawn(sender, args);
+        }
+    }
+
+
+    private void spawn(ICommandSender sender, String[] args) throws NumberInvalidException {
+        if(args.length < 8){
+            //   /elca spawn zombie ~ ~ ~ ~50 ~ ~50 0.5
+            //   /elca spawn villager_golem ~ ~ ~ ~50 ~ ~50 1.5
+            reply(sender, "&e/spawn [ID] [X] [Y] [Z] [X2] [Y2] [Z2] [STEP]");
+            return;
+        }
+
+        ResourceLocation loc = new ResourceLocation(args[1]);
+        EntityEntry entry = ForgeRegistries.ENTITIES.getValue(loc);
+
+        if(entry == null){
+            reply(sender, "&dEntity ID ["+args[1]+"] is invalid");
+            return;
+        }
+        Vec3d from = posOf(sender, args, 2);
+        Vec3d to   = posOf(sender, args, 5);
+        double step = args.length > 8? CommandBase.parseDouble(args[8]):1;
+
+        double xMin = Math.min(from.x, to.x);
+        double xMax = Math.max(from.x, to.x);
+        double yMin = Math.min(from.y, to.y);
+        double yMax = Math.max(from.y, to.y);
+        double zMin = Math.min(from.z, to.z);
+        double zMax = Math.max(from.z, to.z);
+
+        World world = sender.getEntityWorld();
+        DifficultyInstance diff = world.getDifficultyForLocation(new BlockPos(xMin, yMin, zMin));
+
+        boolean init = EntityLiving.class.isAssignableFrom(entry.getEntityClass());
+
+        int count = 0;
+
+        if(yMin >= yMax){
+            yMax += step*0.5;
+        }
+
+        for(double x = xMin; x <= xMax; x += step){
+            for (double z = zMin; z <= zMax; z += step) {
+                for (double y = yMin; y <= yMax; y += step) {
+                    Entity entity = entry.newInstance(world);
+                    entity.setLocationAndAngles(x, y, z, entity.rotationYaw, entity.rotationPitch);
+                    if(world.spawnEntity(entity)){
+                        if(init) {
+                            ((EntityLiving) entity).onInitialSpawn(diff, null);
+                        }
+                        ++count;
+                    }
+                }
+            }
+        }
+        reply(sender,  normal+"Successful spawned " + count + " entities");
+    }
+
+
+    private Vec3d posOf(ICommandSender sender, String[] args, int index) throws NumberInvalidException {
+        Vec3d vec = sender.getPositionVector();
+
+        double x = CommandBase.parseDouble(vec.x, args[index+0],  true);
+        double y = CommandBase.parseDouble(vec.y, args[index+1], false);
+        double z = CommandBase.parseDouble(vec.z, args[index+2], true);
+
+        return new Vec3d(x, y, z);
     }
 
 

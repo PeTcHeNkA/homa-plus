@@ -198,6 +198,7 @@ public abstract class BlockRedstoneDiode extends BlockHorizontal {
 
     @Override
     public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
+        if(worldIn.isRemote)return;
         if (this.shouldBePowered(worldIn, pos, state))
             worldIn.scheduleUpdate(pos, this, 1);
     }

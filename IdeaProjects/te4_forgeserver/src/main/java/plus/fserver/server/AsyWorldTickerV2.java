@@ -309,8 +309,8 @@ public final class AsyWorldTickerV2 implements ThreadFactory{
         long sum = 0L;
         int min = cur - 3;
         int max = cur + 3;
-
-        if(min < 0 || max >= 100){
+        if(min < 0)min = 0;
+        if(max >= 100){
             while (min != max){
                 sum += values[min++ % 100];
             }

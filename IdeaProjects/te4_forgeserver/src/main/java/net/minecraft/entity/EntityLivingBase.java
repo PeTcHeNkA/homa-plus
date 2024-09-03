@@ -176,6 +176,7 @@ public abstract class EntityLivingBase extends Entity {
     }
 
 
+    @Override
     protected void entityInit() {
         EntityDataManager manager = this.dataManager;
 
@@ -184,6 +185,12 @@ public abstract class EntityLivingBase extends Entity {
         manager.register(HIDE_PARTICLES, Boolean.FALSE);
         manager.register(ARROW_COUNT_IN_ENTITY, 0);
         manager.register(HEALTH, 1.0F);
+    }
+
+
+    @Override
+    public boolean allowSprint(){
+        return true;
     }
 
 
@@ -230,7 +237,7 @@ public abstract class EntityLivingBase extends Entity {
             if (this.isEntityInsideOpaqueBlock()) {
                 //TODO try fix position
                 this.attackEntityFrom(DamageSource.IN_WALL, 1.0F);
-                motionY += 0.125d;
+                motionY += 0.127d;
             } else if (flag && !this.world.isInWorldBorder(this.getEntityBoundingBox())) {
                 double d0 = this.world.getWorldBorder().getClosestDistance(this) + this.world.getWorldBorder().getDamageBuffer();
 
@@ -1456,7 +1463,7 @@ public abstract class EntityLivingBase extends Entity {
 
                             if (this.motionY < -0.15D) this.motionY = -0.15D;
 
-                            if (this.isSneaking() && isPlayer() && this.motionY < 0.0D) this.motionY = 0.0D;
+                            if (isPlayer() && this.isSneaking() && this.motionY < 0.0D) this.motionY = 0.0D;
                         }
 
                         this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);

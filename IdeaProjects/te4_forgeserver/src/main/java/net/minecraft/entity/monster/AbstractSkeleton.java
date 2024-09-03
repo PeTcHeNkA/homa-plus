@@ -58,6 +58,7 @@ public abstract class AbstractSkeleton extends EntityMob implements IRangedAttac
     }
 
 
+    @Override
     protected void initEntityAI() {
         EntityAITasks tasks = this.tasks;
         tasks.addTask(1, new EntityAISwimming(this));
@@ -71,6 +72,12 @@ public abstract class AbstractSkeleton extends EntityMob implements IRangedAttac
         this.targetTasks.addTask(1, new EntityAIHurtByTarget(this, false));
         this.targetTasks.addTask(2, new EntityAINearestAttackableTarget<>(this, EntityPlayer.class, true));
         this.targetTasks.addTask(3, new EntityAINearestAttackableTarget<>(this, EntityIronGolem.class, true));
+    }
+
+
+    @Override
+    public boolean allowSprint(){
+        return false;
     }
 
 

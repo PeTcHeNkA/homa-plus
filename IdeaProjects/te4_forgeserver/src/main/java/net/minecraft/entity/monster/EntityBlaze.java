@@ -5,6 +5,7 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.*;
+import net.minecraft.entity.ai.attributes.AbstractAttributeMap;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntitySmallFireball;
@@ -63,11 +64,18 @@ public class EntityBlaze extends EntityMob {
 
 
     @Override
+    public boolean allowSprint(){
+        return false;
+    }
+
+
+    @Override
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
-        this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(6.0D);
-        this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.23000000417232513D);
-        this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(48.0D);
+        AbstractAttributeMap map = getAttributeMap();
+        map.getAttributeInstance(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(6.0D);
+        map.getAttributeInstance(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.23000000417232513D);
+        map.getAttributeInstance(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(48.0D);
     }
 
 

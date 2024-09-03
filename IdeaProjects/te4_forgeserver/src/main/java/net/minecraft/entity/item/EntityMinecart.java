@@ -808,7 +808,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
                             double d4 = entityIn.posX - this.posX;
                             double d5 = entityIn.posZ - this.posZ;
                             Vec3d vec3d = (new Vec3d(d4, 0.0D, d5)).normalize();
-                            Vec3d vec3d1 = (new Vec3d(MathHelper.cos(this.rotationYaw * 0.017453292F), 0.0D, (double)MathHelper.sin(this.rotationYaw * 0.017453292F))).normalize();
+                            Vec3d vec3d1 = (new Vec3d(MathHelper.cos(this.rotationYaw * 0.017453292F), 0.0D, MathHelper.sin(this.rotationYaw * 0.017453292F))).normalize();
                             double d6 = Math.abs(vec3d.dotProduct(vec3d1));
 
                             if (d6 < 0.800000011920929D) {

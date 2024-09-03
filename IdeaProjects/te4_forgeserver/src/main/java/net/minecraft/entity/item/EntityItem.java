@@ -42,6 +42,7 @@ import plus.fserver.ElcaConfig;
 import plus.fserver.ElcaMobs;
 import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.collections.ArrayListE6;
+import java.util.Random;
 
 
 public class EntityItem extends Entity {
@@ -135,16 +136,27 @@ public class EntityItem extends Entity {
 
             this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
 
+            if(lodLvl == 0 || (((lodLvl << 1) & age) == 0)) {
+                AxisAlignedBB res;
+                getEntityBoundingBox().growTo(-0.01D, -0.01D, -0.01D, res = world.commonWorldEntityAABB);
+
+                if (this.world.isFlammableWithin(res)) {
+                    this.dealFireDamage(1);
+                    if (!this.isWet()) this.setFire(8);
+                }
+            }
+
             if (((int)this.prevPosX != (int)this.posX || (int)this.prevPosY != (int)this.posY || (int)this.prevPosZ != (int)this.posZ) || this.ticksExisted % 25 == 0) {
                 BlockPos blockpos = world.localTempPos3.setPos(this);
                 if (this.world.access().getBlockState(blockpos).getMaterial() == Material.LAVA) {
                     this.motionY = 0.20000000298023224D;
-                    this.motionX = (this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F;
-                    this.motionZ = (this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F;
+                    Random rand = this.rand;
+                    this.motionX = (rand.nextFloat() - rand.nextFloat()) * 0.2F;
+                    this.motionZ = (rand.nextFloat() - rand.nextFloat()) * 0.2F;
                     this.playSound(SoundEvents.ENTITY_GENERIC_BURN, 0.4F, 2.0F + this.rand.nextFloat() * 0.4F);
                 }
 
-                if (!this.world.isRemote) {
+                if (!this.world.isRemote && ((age>>(2+lodLvl) & 3) == 3)) {
                     this.searchForOtherItemsNearby();
                 }
             }
@@ -201,12 +213,12 @@ public class EntityItem extends Entity {
 
 
     private void searchForOtherItemsNearby() {
-        if((age>>2 & 3) != 3)return;
         final ItemStack stack = this.getItem();
         if(stack.getCount() >= stack.getMaxStackSize())return;
+        AxisAlignedBB aabb;
+        this.getEntityBoundingBox().growTo(0.73D, 0.0D, 0.73D, aabb = world.commonWorldEntityAABB);
 
-        for (EntityItem entityitem : this.world.getEntitiesWithinAABB(EntityItem.class,
-                this.getEntityBoundingBox().grow(0.73D, 0.0D, 0.73D))) {
+        for (EntityItem entityitem : this.world.getEntitiesWithinAABB(EntityItem.class, aabb)) {
             this.combineItems(entityitem);
         }
     }
@@ -583,14 +595,6 @@ public class EntityItem extends Entity {
                 CrashReportCategory crashreportcategory = crashreport.makeCategory("Entity being checked for collision");
                 this.addEntityCrashInfo(crashreportcategory);
                 world.getMinecraftServer().ticker().onError((WorldServer) world, new ReportedException(crashreport));
-            }
-
-            AxisAlignedBB res;
-            curBox.growTo(-0.01D, -0.01D, -0.01D, res = world.commonWorldEntityAABB);
-
-            if (this.world.isFlammableWithin(res)) {
-                this.dealFireDamage(1);
-                if (!this.isWet()) this.setFire(8);
             }
         }
     }

@@ -65,6 +65,12 @@ public class EntityCreeper extends EntityMob {
 
 
     @Override
+    public boolean allowSprint(){
+        return false;
+    }
+
+
+    @Override
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
         this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.25D);

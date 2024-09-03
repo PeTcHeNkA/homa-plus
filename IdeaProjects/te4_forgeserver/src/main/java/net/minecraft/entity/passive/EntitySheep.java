@@ -12,6 +12,7 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.*;
+import net.minecraft.entity.ai.attributes.AbstractAttributeMap;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -100,8 +101,9 @@ public class EntitySheep extends EntityAnimal implements IShearable {
     @Override
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
-        this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(8.0);
-        this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.23000000417232513);
+        AbstractAttributeMap map = getAttributeMap();
+        map.getAttributeInstance(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(8.0);
+        map.getAttributeInstance(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.23000000417232513);
     }
 
 

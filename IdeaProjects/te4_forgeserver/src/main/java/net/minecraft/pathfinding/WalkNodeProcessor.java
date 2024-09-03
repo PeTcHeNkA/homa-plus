@@ -135,7 +135,7 @@ public class WalkNodeProcessor extends NodeProcessor {
             stepH = MathHelper.floor(Math.max(1.0F, this.entity.stepHeight));
 
 
-        pooledPos.setPos(cur.x, cur.y-1, cur.z);
+        pooledPos.setPosB(cur.x, cur.y-1, cur.z);
 
         double curY = (double)cur.y - (1.0D - this.blockaccess.getBlockState(pooledPos).getBoundingBox(this.blockaccess, pooledPos).maxY);
         PathPoint pathpoint =  this.getSafePoint(chunked, cur.x, cur.y, cur.z + 1, stepH, curY, EnumFacing.SOUTH);
@@ -218,7 +218,7 @@ public class WalkNodeProcessor extends NodeProcessor {
             chunked = chunked.get(x, z);
 
             type = chunked.getCur(x, y, z);
-            if(type==null) {
+            if(type == null) {
                 type = this.getPathNodeType(this.entity, x, y, z);
                 chunked.setCur(x, y, z, type);
             }

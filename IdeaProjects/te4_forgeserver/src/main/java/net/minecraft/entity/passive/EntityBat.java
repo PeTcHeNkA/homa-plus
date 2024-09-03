@@ -35,6 +35,12 @@ public class EntityBat extends EntityAmbientCreature {
 
 
     @Override
+    public boolean allowSprint(){
+        return false;
+    }
+
+
+    @Override
     protected void entityInit() {
         this.dataManager.register(HANGING, (byte) 0);
         super.entityInit();

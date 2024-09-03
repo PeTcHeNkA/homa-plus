@@ -203,7 +203,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
 
     public Entity(World worldIn) {
-        this.entityId = nextEntityID++;
+
         this.riddenByEntities = new ArrayList<>();
         //use zero AABB is safe
         this.boundingBox = ZERO_AABB;
@@ -215,9 +215,11 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         //todo use local or thread - bad idea
         //this.rand = ThreadLocalRandom.current();
         if (worldIn != null) {
+            this.entityId = worldIn.nextEntityId();
             this.dimension = worldIn.provider.getDimension();
             this.rand = worldIn.commonWorldEntityRandom;
         } else {
+            this.entityId = nextEntityID++;
             this.rand = new Random();
         }
 
@@ -1104,7 +1106,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
 
     public void spawnRunningParticles() {
-        if (this.isSprinting() && !this.isInWater()) this.createRunningParticles();
+        if(allowSprint()) if (this.isSprinting() && !this.isInWater()) this.createRunningParticles();
     }
 
 
@@ -1114,12 +1116,11 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
                 MathHelper.floor(this.posY - 0.20000000298023224D),
                 MathHelper.floor(this.posZ)
         );
-        IBlockState state = this.world.getBlockState(blockpos);
+        IBlockState state = this.world.access().getBlockState(blockpos);
 
         if(!state.getBlock().addRunningEffects(state, world, blockpos, this))
             if (state.getRenderType() != EnumBlockRenderType.INVISIBLE)
                 this.world.spawnParticle(EnumParticleTypes.BLOCK_CRACK, this.posX + ((double)this.rand.nextFloat() - 0.5D) * (double)this.width, this.getEntityBoundingBox().minY + 0.1D, this.posZ + ((double)this.rand.nextFloat() - 0.5D) * (double)this.width, -this.motionX * 4.0D, 1.5D, -this.motionZ * 4.0D, Block.getStateId(state));
-
     }
 
 
@@ -1968,6 +1969,11 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
     public boolean isSprinting() {
         return this.getFlag(3);
+    }
+
+
+    public boolean allowSprint(){
+        return false;
     }
 
 

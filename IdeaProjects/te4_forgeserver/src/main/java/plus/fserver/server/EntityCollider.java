@@ -54,10 +54,10 @@ public class EntityCollider {
             if((size = (list = part.rawValues()).sizeC()) < 2)continue;
             if(size > 12){
                 Entity[] entities = export(list, size);
+                temp = EMPTY;
                 if(size > limit){
                     task.add((cp, limit1, temp) -> collideAllB(cp, entities, size, limit1, temp));
                 } else {
-                    temp = EMPTY;
                     task.add((cp, limit12, temp) -> collideAll(cp, entities, size));
                 }
             } else {
@@ -153,7 +153,7 @@ public class EntityCollider {
                 if(check.getEntityBoundingBox().intersects(aabb)){
                     temp.addF(entity);
                     if(e1.apply(check))
-                        entity.applyEntityCollision(check);
+                        check.collideWith(entity);
                 } else if((parts = entity.getParts()) != null){
                     for (Entity entity1:parts){
                         if(e1.apply(check))
