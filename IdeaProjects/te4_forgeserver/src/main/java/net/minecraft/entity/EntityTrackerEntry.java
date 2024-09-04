@@ -606,14 +606,7 @@ public class EntityTrackerEntry {
 
     public void sendPacketToTrackedPlayers(Packet<?> packetIn){
         if(trackingPlayers.isEmpty())return;
-        Te4HashSet<EntityPlayerMP>.KeyIterator iter = (Te4HashSet<EntityPlayerMP>.KeyIterator)
-                this.trackingPlayers.iterator();
-
-        EntityPlayerMP mp = iter.nextIfCan();
-        while (mp != null){
-            mp.connection.netManager.addToQueueE(packetIn);
-            mp = iter.nextIfCan();
-        }
+        ((Te4HashSet<EntityPlayerMP>)trackingPlayers).forEachIfCan(playerMP -> playerMP.addPacketToQueue(packetIn));
     }
 
 

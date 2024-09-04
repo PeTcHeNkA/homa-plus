@@ -2097,6 +2097,10 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         this.dataManager.setU(AIR, air);
     }
 
+    public void setAir(Integer air) {
+        this.dataManager.setU(AIR, air);
+    }
+
 
     public void onStruckByLightning(EntityLightningBolt lightningBolt) {
         this.attackEntityFrom(DamageSource.LIGHTNING_BOLT, 5.0F);

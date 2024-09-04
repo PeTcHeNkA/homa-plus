@@ -76,6 +76,7 @@ import plus.fserver.ElcaConfig;
 import plus.fserver.api.IBlockEAccess;
 import plus.fserver.server.SStrings;
 import plus.fserver.utls.collections.FixedItemList;
+import plus.fserver.utls.math.MathUtls;
 import plus.fserver.utls.math.Vec3dMut;
 import static plus.fserver.ElcaCV.SERVER_COMPILE;
 import static plus.fserver.utls.math.MathUtls.F_180_PI;
@@ -254,13 +255,13 @@ public abstract class EntityLivingBase extends Entity {
             }
 
             if (!this.isInsideOfMaterial(Material.WATER)) {
-                this.setAir(300);
+                this.setAir(MathUtls.INT_300);
             } else {
                 if (!this.canBreatheUnderwater() && !this.isPotionActive(MobEffects.WATER_BREATHING) && !(flag && ((EntityPlayer)this).capabilities.disableDamage)) {
                     int air = decreaseAirSupply(this.getAir());
 
                     if (air == -20) {
-                        this.setAir(0);
+                        this.setAir(MathUtls.INT_0);
                         Random rand = this.rand;
                         for (int i = 0; i < 8; ++i) {
                             this.world.spawnParticle(EnumParticleTypes.WATER_BUBBLE,
@@ -342,14 +343,15 @@ public abstract class EntityLivingBase extends Entity {
                     this.world.spawnEntity(new EntityXPOrb(this.world, this.posX, this.posY, this.posZ, j));
                 }
             }
-
             this.setDead();
-
-            for (int k = 0; k < 20; ++k) {
-                double d2 = this.rand.nextGaussian() * 0.02D;
-                double d0 = this.rand.nextGaussian() * 0.02D;
-                double d1 = this.rand.nextGaussian() * 0.02D;
-                this.world.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, this.posX + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, this.posY + (double)(this.rand.nextFloat() * this.height), this.posZ + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, d2, d0, d1);
+            if(world.isRemote) {
+                Random rand = this.rand;
+                for (int k = 0; k < 20; ++k) {
+                    double d2 = rand.nextGaussian() * 0.02D;
+                    double d0 = rand.nextGaussian() * 0.02D;
+                    double d1 = rand.nextGaussian() * 0.02D;
+                    this.world.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, this.posX + (double) (this.rand.nextFloat() * this.width * 2.0F) - (double) this.width, this.posY + (double) (this.rand.nextFloat() * this.height), this.posZ + (double) (this.rand.nextFloat() * this.width * 2.0F) - (double) this.width, d2, d0, d1);
+                }
             }
         }
     }

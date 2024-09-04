@@ -1260,6 +1260,11 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
     }
 
 
+    public void addPacketToQueue(Packet<?> packet){
+        connection.netManager.addToQueueE(packet);
+    }
+
+
     public boolean isInvulnerableDimensionChange() {
         return this.invulnerableDimensionChange;
     }
