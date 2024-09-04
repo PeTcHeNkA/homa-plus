@@ -155,7 +155,7 @@ public class EntityItem extends Entity {
                 }
             }
 
-            if (((int)this.prevPosX != (int)this.posX || (int)this.prevPosY != (int)this.posY || (int)this.prevPosZ != (int)this.posZ) || this.ticksExisted % 25 == 0) {
+            if (((int)this.prevPosX != (int)this.posX || (int)this.prevPosY != (int)this.posY || (int)this.prevPosZ != (int)this.posZ) || updateTimer % 25 == 0) {
                 BlockPos.MutableBlockPos blockpos = world.localTempPos3;
                 blockpos.setPosB(this);
 
@@ -166,8 +166,7 @@ public class EntityItem extends Entity {
                     this.motionZ = (rand.nextFloat() - rand.nextFloat()) * 0.2F;
                     this.playSound(SoundEvents.ENTITY_GENERIC_BURN, 0.4F, 2.0F + this.rand.nextFloat() * 0.4F);
                 }
-
-                if (!this.world.isRemote && ((updateTimer>>(2+lodLvl) & 3) == 3)) {
+                if(lodLvl == 0 || (updateTimer % 50) == 0) {
                     this.searchForOtherItemsNearby();
                 }
             }
