@@ -22,7 +22,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeHooks;
 import org.jetbrains.annotations.NotNull;
-import plus.fserver.world.TargetSelector;
+import plus.fserver.entity.ai.TargetSelector;
 
 
 public class EntityAINearestAttackableTarget<T extends EntityLivingBase> extends EntityAITarget {
@@ -102,13 +102,15 @@ public class EntityAINearestAttackableTarget<T extends EntityLivingBase> extends
     }
 
 
-    private static final class Player2Double implements Comparable<Player2Double>{
-        private final EntityPlayer player;
-        private final double factor;
-        private Player2Double(EntityPlayer player, double factor) {
+    public static final class Player2Double implements Comparable<Player2Double>{
+        public final EntityPlayer player;
+        public final double factor;
+
+        public Player2Double(EntityPlayer player, double factor) {
             this.player = player;
             this.factor = factor;
         }
+
         @Override
         public int compareTo(@NotNull Player2Double o) {
             return Double.compare(factor, o.factor);

@@ -18,6 +18,7 @@ import net.minecraft.util.text.translation.*;
 import net.minecraft.world.*;
 import net.minecraft.entity.*;
 import net.minecraft.network.datasync.*;
+import plus.fserver.entity.ai.EntityAIWatchClosestPlayer;
 
 
 public class EntityOcelot extends EntityTameable {
@@ -44,7 +45,7 @@ public class EntityOcelot extends EntityTameable {
         tasks.addTask(8 , new EntityAIOcelotAttack(this));
         tasks.addTask(9 , new EntityAIMate(this, 0.8));
         tasks.addTask(10, new EntityAIWanderAvoidWater(this, 0.8, 1.0000001E-5f));
-        tasks.addTask(11, new EntityAIWatchClosest(this, EntityPlayer.class, 10.0f));
+        tasks.addTask(11, new EntityAIWatchClosestPlayer(this, 10.0f));
 
         this.targetTasks.addTask(1, new EntityAITargetNonTamed<>(this, EntityChicken.class, false, (Predicate)null));
     }

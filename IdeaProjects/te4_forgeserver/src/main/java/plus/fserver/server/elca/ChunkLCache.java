@@ -206,7 +206,7 @@ public class ChunkLCache implements IBlockEAccess {
     public boolean isAirBlock(BlockPos pos) {
         if(pos.getY()>255 || pos.getY()<0)return true;
         IBlockState state = getExecutor(pos.getX()>>4, pos.getZ()>>4).getChunk().getBlockState(pos);
-        return state.getBlock().isAir(state, world, pos);
+        return state.getBlock().isAir(state, this, pos);
     }
 
 

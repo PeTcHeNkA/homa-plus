@@ -83,7 +83,7 @@ public class PntMatrix {
         }
 
 
-        private Chunked executor(int rx, int rz){
+        Chunked executor(int rx, int rz){
             if(rx == x){
                 if(rz == z)return this;
                 int delta = rz-z;
@@ -178,7 +178,7 @@ public class PntMatrix {
     }
 
 
-    private Chunked getChunked0(int x, int z){
+    Chunked getChunked0(int x, int z){
         long key = ChunkPos.asLong(x, z);
         //todo use primitive long in collection
         Chunked res = data.get(key);

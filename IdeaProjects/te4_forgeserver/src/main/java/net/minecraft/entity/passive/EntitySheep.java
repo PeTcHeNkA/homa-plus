@@ -38,6 +38,7 @@ import net.minecraft.world.storage.loot.LootTableList;
 import net.minecraftforge.common.IShearable;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.fserver.entity.ai.EntityAIWatchClosestPlayer;
 import plus.fserver.utls.FastDyeBlend;
 
 
@@ -77,7 +78,7 @@ public class EntitySheep extends EntityAnimal implements IShearable {
         tasks.addTask(4, new EntityAIFollowParent(this, 1.1));
         tasks.addTask(5, entityAIEatGrass = new EntityAIEatGrass(this));
         tasks.addTask(6, new EntityAIWanderAvoidWater(this, 1.0));
-        tasks.addTask(7, new EntityAIWatchClosest(this, EntityPlayer.class, 6.0F));
+        tasks.addTask(7, new EntityAIWatchClosestPlayer(this, 6.0F));
         tasks.addTask(8, new EntityAILookIdle(this));
     }
 

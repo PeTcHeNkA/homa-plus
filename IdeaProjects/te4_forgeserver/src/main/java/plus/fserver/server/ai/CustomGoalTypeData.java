@@ -8,12 +8,12 @@ import java.util.function.*;
 
 
 public class CustomGoalTypeData {
-    private final HashMap<Class<? extends EntityAIBase>, CustomGoalTypeParameter> GOAL_TYPES;
+    private final IdentityHashMap<Class<? extends EntityAIBase>, CustomGoalTypeParameter> GOAL_TYPES = new IdentityHashMap<>();
     
     public CustomGoalTypeData() {
-        (this.GOAL_TYPES = new HashMap<>()).put(EntityAISwimming.class, new CustomGoalTypeParameter(g -> g, 5, 1, ElcaConfig.SLOW_SWIM_AI));
-        this.GOAL_TYPES.put(EntityAITempt.class, new CustomGoalTypeParameter(g -> g, 4, 10, ElcaConfig.SLOW_TEMP_CHECK));
-        this.GOAL_TYPES.put(EntityAIWander.class, new CustomGoalTypeParameter(g -> g, 4, 1, ElcaConfig.SLOW_WANDER));
+        this.GOAL_TYPES.put(EntityAISwimming.class, new CustomGoalTypeParameter(g -> g, 5, 1 , ElcaConfig.SLOW_SWIM_AI   ));
+        this.GOAL_TYPES.put(EntityAITempt.class   , new CustomGoalTypeParameter(g -> g, 4, 10, ElcaConfig.SLOW_TEMP_CHECK));
+        this.GOAL_TYPES.put(EntityAIWander.class  , new CustomGoalTypeParameter(g -> g, 4, 1 , ElcaConfig.SLOW_WANDER    ));
     }
 
 

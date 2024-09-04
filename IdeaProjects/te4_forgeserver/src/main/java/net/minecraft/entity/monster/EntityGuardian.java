@@ -32,6 +32,7 @@ import net.minecraft.world.storage.loot.LootTableList;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.ElcaMobs;
+import plus.fserver.entity.ai.EntityAIWatchClosestPlayer;
 
 
 public class EntityGuardian extends EntityMob {
@@ -65,7 +66,7 @@ public class EntityGuardian extends EntityMob {
         tasks.addTask(4, new EntityGuardian.AIGuardianAttack(this));
         tasks.addTask(5, entityaimovetowardsrestriction);
         tasks.addTask(7, this.wander);
-        tasks.addTask(8, new EntityAIWatchClosest(this, EntityPlayer.class, 8.0F));
+        tasks.addTask(8, new EntityAIWatchClosestPlayer(this, 8.0F));
         tasks.addTask(8, new EntityAIWatchClosest(this, EntityGuardian.class, 12.0F, 0.01F));
         tasks.addTask(9, new EntityAILookIdle(this));
         this.wander.setMutexBits(3);

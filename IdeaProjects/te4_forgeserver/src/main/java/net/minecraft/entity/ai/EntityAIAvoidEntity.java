@@ -29,7 +29,7 @@ public class EntityAIAvoidEntity<T extends Entity> extends EntityAIBase {
 
 
     public EntityAIAvoidEntity(EntityCreature creature, Class<T> avoid, Predicate<? super T> avoidSelector, float distance, double farSpeed, double nearSpeed) {
-        predicate = new AvoidSelector(avoidSelector);
+        predicate = new AvoidSelector<>(creature, avoidSelector);
 
         this.entity = creature;
         this.classToAvoid = avoid;;
@@ -41,10 +41,12 @@ public class EntityAIAvoidEntity<T extends Entity> extends EntityAIBase {
     }
 
 
-    private class AvoidSelector implements Predicate<T>{
+    private static class AvoidSelector<T extends Entity> implements Predicate<T>{
+        private final EntityCreature entity;
         private final Predicate<? super T> parent;
 
-        private AvoidSelector(Predicate<? super T> parent) {
+        private AvoidSelector(EntityCreature entity, Predicate<? super T> parent) {
+            this.entity = entity;
             this.parent = parent;
         }
 
@@ -53,8 +55,8 @@ public class EntityAIAvoidEntity<T extends Entity> extends EntityAIBase {
             if(!(entity instanceof EntityPlayer) || !((EntityPlayer)entity).isSpectator()
                     && !((EntityPlayer)entity).isCreative()){
 
-                if(entity.isEntityAlive() && EntityAIAvoidEntity.this.entity.getEntitySenses().canSee(entity)
-                        && !EntityAIAvoidEntity.this.entity.isOnSameTeam(entity)){
+                if(entity.isEntityAlive() && this.entity.getEntitySenses().canSee(entity)
+                        && !this.entity.isOnSameTeam(entity)){
                     return parent.apply(entity);
                 }
             }

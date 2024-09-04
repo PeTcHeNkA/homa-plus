@@ -26,6 +26,9 @@ import net.minecraft.world.storage.loot.LootTableList;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.ElcaMobs;
+import plus.fserver.entity.ai.EntityAIHurtByTargetSlim;
+import plus.fserver.entity.ai.EntityAINearestAttackableTargetPlayer;
+import plus.fserver.entity.ai.EntityAIWatchClosestPlayer;
 
 
 public class EntityBlaze extends EntityMob {
@@ -55,11 +58,11 @@ public class EntityBlaze extends EntityMob {
         tasks.addTask(4, new EntityBlaze.AIFireballAttack(this));
         tasks.addTask(5, new EntityAIMoveTowardsRestriction(this, 1.0D));
         tasks.addTask(7, new EntityAIWanderAvoidWater(this, 1.0D, 0.0F));
-        tasks.addTask(8, new EntityAIWatchClosest(this, EntityPlayer.class, 8.0F));
+        tasks.addTask(8, new EntityAIWatchClosestPlayer(this, 8.0F));
         tasks.addTask(8, new EntityAILookIdle(this));
 
-        this.targetTasks.addTask(1, new EntityAIHurtByTarget(this, true, new Class[0]));
-        this.targetTasks.addTask(2, new EntityAINearestAttackableTarget(this, EntityPlayer.class, true));
+        this.targetTasks.addTask(1, EntityAIHurtByTargetSlim.create(this, true));
+        this.targetTasks.addTask(2, new EntityAINearestAttackableTargetPlayer(this, true));
     }
 
 

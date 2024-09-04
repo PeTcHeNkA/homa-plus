@@ -19,6 +19,8 @@ import net.minecraftforge.fml.relauncher.*;
 import net.minecraft.util.*;
 import net.minecraft.world.storage.loot.*;
 import net.minecraft.network.datasync.*;
+import plus.fserver.entity.ai.EntityAIHurtByTargetSlim;
+import plus.fserver.entity.ai.EntityAIWatchClosestPlayer;
 
 
 public class EntityIronGolem extends EntityGolem {
@@ -45,12 +47,12 @@ public class EntityIronGolem extends EntityGolem {
         tasks.addTask(4, new EntityAIMoveTowardsRestriction(this, 1.0));
         tasks.addTask(5, new EntityAILookAtVillager(this));
         tasks.addTask(6, new EntityAIWanderAvoidWater(this, 0.6));
-        tasks.addTask(7, new EntityAIWatchClosest(this, EntityPlayer.class, 6.0f));
+        tasks.addTask(7, new EntityAIWatchClosestPlayer(this, 6.0f));
         tasks.addTask(8, new EntityAILookIdle(this));
 
         tasks = this.targetTasks;
         tasks.addTask(1, new EntityAIDefendVillage(this));
-        tasks.addTask(2, new EntityAIHurtByTarget(this, false));
+        tasks.addTask(2, EntityAIHurtByTargetSlim.create(this, false));
         tasks.addTask(3, new EntityAINearestAttackableTarget<>(this, EntityLiving.class, 10, false, true, GOLEM_TARGET_PREDICATE));
     }
 

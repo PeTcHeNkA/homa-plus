@@ -127,8 +127,14 @@ public class EntityItem extends Entity {
             double d1 = this.motionY;
             double d2 = this.motionZ;
 
-            if ((lodLvl & updateTimer) == 0 && !this.hasNoGravity()) {
-                this.motionY -= 0.03999999910593033D;
+            if(lodLvl == 0){
+                if((updateTimer & 1) == 0 && !this.hasNoGravity()){
+                    this.motionY -= 0.03999999910593033D;
+                }
+            } else {
+                if (((lodLvl<<1) & updateTimer) == 0 && !this.hasNoGravity()) {
+                    this.motionY -= 0.03999999910593033D;
+                }
             }
 
             if (!this.world.isRemote && lodLvl == 0) {

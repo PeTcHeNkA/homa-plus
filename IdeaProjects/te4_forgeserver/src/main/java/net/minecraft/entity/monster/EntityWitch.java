@@ -36,6 +36,10 @@ import net.minecraft.world.storage.loot.LootTableList;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.ElcaMobs;
+import plus.fserver.entity.ai.EntityAIHurtByTargetSlim;
+import plus.fserver.entity.ai.EntityAINearestAttackableTargetPlayer;
+import plus.fserver.entity.ai.EntityAIWatchClosestPlayer;
+
 import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
@@ -62,11 +66,11 @@ public class EntityWitch extends EntityMob implements IRangedAttackMob {
         tasks.addTask(1, new EntityAISwimming(this));
         tasks.addTask(2, new EntityAIAttackRanged(this, 1.0D, 60, 10.0F));
         tasks.addTask(2, new EntityAIWanderAvoidWater(this, 1.0D));
-        tasks.addTask(3, new EntityAIWatchClosest(this, EntityPlayer.class, 8.0F));
+        tasks.addTask(3, new EntityAIWatchClosestPlayer(this, 8.0F));
         tasks.addTask(3, new EntityAILookIdle(this));
 
-        this.targetTasks.addTask(1, new EntityAIHurtByTarget(this, false, new Class[0]));
-        this.targetTasks.addTask(2, new EntityAINearestAttackableTarget(this, EntityPlayer.class, true));
+        this.targetTasks.addTask(1, EntityAIHurtByTargetSlim.create(this, false));
+        this.targetTasks.addTask(2, new EntityAINearestAttackableTargetPlayer(this, true));
     }
 
 

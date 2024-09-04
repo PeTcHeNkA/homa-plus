@@ -180,12 +180,15 @@ net.minecraft.entity.ai.EntityAIAvoidEntity$1
 net.minecraft.entity.ai.EntityAIAvoidEntity$AvoidSelector
 net.minecraft.entity.ai.EntityAIAvoidEntity
 net.minecraft.entity.ai.EntityAIEatGrass
+net.minecraft.entity.ai.EntityAIFollowParent
+net.minecraft.entity.ai.EntityAILookAtTradePlayer
+net.minecraft.entity.ai.EntityAILookIdle
 net.minecraft.entity.ai.EntityAIMoveToBlock
-net.minecraft.entity.ai.EntityAINearestAttackableTarget$1
 net.minecraft.entity.ai.EntityAINearestAttackableTarget$Player2Double
 net.minecraft.entity.ai.EntityAINearestAttackableTarget$Sorter
 net.minecraft.entity.ai.EntityAINearestAttackableTarget
 net.minecraft.entity.ai.EntityAIPanic
+net.minecraft.entity.ai.EntityAITarget
 net.minecraft.entity.ai.EntityAITasks
 net.minecraft.entity.ai.EntitySenses
 net.minecraft.entity.Entity$1
@@ -195,6 +198,7 @@ net.minecraft.entity.Entity$4
 net.minecraft.entity.Entity$5
 net.minecraft.entity.Entity$6
 net.minecraft.entity.Entity
+net.minecraft.entity.EntityCreature
 net.minecraft.entity.EntityLiving$1
 net.minecraft.entity.EntityLiving$SpawnPlacementType
 net.minecraft.entity.EntityLiving
@@ -240,6 +244,7 @@ net.minecraft.entity.monster.EntityZombie
 net.minecraft.entity.passive.EntityAmbientCreature
 net.minecraft.entity.passive.EntityAnimal
 net.minecraft.entity.passive.EntityBat
+net.minecraft.entity.passive.EntityOcelot
 net.minecraft.entity.passive.EntityRabbit$AIAvoidEntity
 net.minecraft.entity.passive.EntityRabbit$AIEvilAttack
 net.minecraft.entity.passive.EntityRabbit$AIPanic

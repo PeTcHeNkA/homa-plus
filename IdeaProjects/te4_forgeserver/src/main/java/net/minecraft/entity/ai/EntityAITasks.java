@@ -1,7 +1,6 @@
 package net.minecraft.entity.ai;
 
 import java.util.*;
-import javax.annotation.Nullable;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.world.World;
 import org.apache.logging.log4j.LogManager;
@@ -16,9 +15,9 @@ import plus.tson.utl.Te4HashSet;
 
 public class EntityAITasks extends ArrayListEV<CustomPriotizedSlowedGoal>{
     private static final Logger LOGGER = LogManager.getLogger();
-    public static final CustomGoalTypeData            goalData = new CustomGoalTypeData();
-    private final Set<CustomPriotizedSlowedGoal>         toAdd = new Te4HashSet<>(8),
-                                                      toRemove = new Te4HashSet<>(8);
+    public static final CustomGoalTypeData       goalData = new CustomGoalTypeData();
+    private final Set<CustomPriotizedSlowedGoal>    toAdd = new Te4HashSet<>(8),
+                                                 toRemove = new Te4HashSet<>(8);
 
     private int runningFlags = 0, runningNoOverRuleFlags = 0;
     private int avgTickCount, pauseTicks, pauseTickDelay, counter;

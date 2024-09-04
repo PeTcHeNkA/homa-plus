@@ -40,6 +40,8 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.ElcaMobs;
 import plus.fserver.api.IBlockEAccess;
+import plus.fserver.entity.ai.EntityAINearestAttackableTargetPlayer;
+import plus.fserver.entity.ai.EntityAIWatchClosestPlayer;
 
 import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
@@ -69,7 +71,7 @@ public class EntityZombie extends EntityMob {
         tasks.addTask(2, new EntityAIZombieAttack(this, 1.0D, false));
         tasks.addTask(5, new EntityAIMoveTowardsRestriction(this, 1.0D));
         tasks.addTask(7, new EntityAIWanderAvoidWater(this, 1.0D));
-        tasks.addTask(8, new EntityAIWatchClosest(this, EntityPlayer.class, 8.0F));
+        tasks.addTask(8, new EntityAIWatchClosestPlayer(this, 8.0F));
         tasks.addTask(8, new EntityAILookIdle(this));
         this.applyEntityAI();
     }
@@ -79,7 +81,7 @@ public class EntityZombie extends EntityMob {
         this.tasks.addTask(6, new EntityAIMoveThroughVillage(this, 1.0D, false));
         EntityAITasks targetTasks = this.targetTasks;
         targetTasks.addTask(1, new EntityAIHurtByTarget(this, true, EntityPigZombie.class));
-        targetTasks.addTask(2, new EntityAINearestAttackableTarget<>(this, EntityPlayer.class, true));
+        targetTasks.addTask(2, new EntityAINearestAttackableTargetPlayer(this, true));
         targetTasks.addTask(3, new EntityAINearestAttackableTarget<>(this, EntityVillager.class, false));
         targetTasks.addTask(3, new EntityAINearestAttackableTarget<>(this, EntityIronGolem.class, true));
     }

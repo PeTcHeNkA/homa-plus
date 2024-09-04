@@ -42,6 +42,9 @@ import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
 import net.minecraftforge.event.ForgeEventFactory;
 import plus.fserver.ElcaMobs;
+import plus.fserver.entity.ai.EntityAIHurtByTargetSlim;
+import plus.fserver.entity.ai.EntityAINearestAttackableTargetPlayer;
+import plus.fserver.entity.ai.EntityAIWatchClosestPlayer;
 
 
 public class EntityEnderman extends EntityMob {
@@ -68,13 +71,13 @@ public class EntityEnderman extends EntityMob {
         tasks.addTask(0, new EntityAISwimming(this));
         tasks.addTask(2, new EntityAIAttackMelee(this, 1.0D, false));
         tasks.addTask(7, new EntityAIWanderAvoidWater(this, 1.0D, 0.0F));
-        tasks.addTask(8, new EntityAIWatchClosest(this, EntityPlayer.class, 8.0F));
+        tasks.addTask(8, new EntityAIWatchClosestPlayer(this, 8.0F));
         tasks.addTask(8, new EntityAILookIdle(this));
         tasks.addTask(10, new EntityEnderman.AIPlaceBlock(this));
         tasks.addTask(11, new EntityEnderman.AITakeBlock(this));
 
         this.targetTasks.addTask(1, new EntityEnderman.AIFindPlayer(this));
-        this.targetTasks.addTask(2, new EntityAIHurtByTarget(this, false, new Class[0]));
+        this.targetTasks.addTask(2, EntityAIHurtByTargetSlim.create(this, false));
         this.targetTasks.addTask(3, new EntityAINearestAttackableTarget(this, EntityEndermite.class, 10, true, false,
                 new Predicate<EntityEndermite>() {
             public boolean apply(@Nullable EntityEndermite endermite)
@@ -369,14 +372,14 @@ public class EntityEnderman extends EntityMob {
     }
 
 
-    static class AIFindPlayer extends EntityAINearestAttackableTarget<EntityPlayer> implements Predicate<EntityPlayer> {
+    static class AIFindPlayer extends EntityAINearestAttackableTargetPlayer implements Predicate<EntityPlayer> {
         private final EntityEnderman enderman;
         private EntityPlayer player;
         private int aggroTime;
         private int teleportTime;
 
         public AIFindPlayer(EntityEnderman enderman) {
-            super(enderman, EntityPlayer.class, false);
+            super(enderman, false);
             this.enderman = enderman;
         }
 

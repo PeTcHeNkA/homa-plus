@@ -37,6 +37,9 @@ import net.minecraft.world.storage.loot.LootTableList;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.ElcaMobs;
+import plus.fserver.entity.ai.EntityAIHurtByTargetSlim;
+import plus.fserver.entity.ai.EntityAINearestAttackableTargetPlayer;
+import plus.fserver.entity.ai.EntityAIWatchClosestPlayer;
 
 import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
@@ -72,7 +75,7 @@ public class EntityRabbit extends EntityAnimal {
         tasks.addTask(4 , new AIAvoidEntity(this, EntityMob.class, 4.0F, 2.2, 2.2));
         tasks.addTask(5 , new AIRaidFarm(this));
         tasks.addTask(6 , new EntityAIWanderAvoidWater(this, 0.6));
-        tasks.addTask(11, new EntityAIWatchClosest(this, EntityPlayer.class, 10.0F));
+        tasks.addTask(11, new EntityAIWatchClosestPlayer(this, 10.0F));
     }
 
 
@@ -354,8 +357,8 @@ public class EntityRabbit extends EntityAnimal {
         if (type == 99) {
             this.getEntityAttribute(SharedMonsterAttributes.ARMOR).setBaseValue(8.0);
             this.tasks.addTask(4, new AIEvilAttack(this));
-            this.targetTasks.addTask(1, new EntityAIHurtByTarget(this, false, new Class[0]));
-            this.targetTasks.addTask(2, new EntityAINearestAttackableTarget(this, EntityPlayer.class, true));
+            this.targetTasks.addTask(1, EntityAIHurtByTargetSlim.create(this, false));
+            this.targetTasks.addTask(2, new EntityAINearestAttackableTargetPlayer(this, true));
             this.targetTasks.addTask(2, new EntityAINearestAttackableTarget(this, EntityWolf.class, true));
             if (!this.hasCustomName()) {
                 this.setCustomNameTag(I18n.translateToLocal("entity.KillerBunny.name"));

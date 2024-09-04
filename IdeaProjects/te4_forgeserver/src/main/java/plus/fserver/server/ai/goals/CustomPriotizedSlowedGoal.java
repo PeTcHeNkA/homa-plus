@@ -23,7 +23,7 @@ public class CustomPriotizedSlowedGoal implements Comparable<CustomPriotizedSlow
             this.priority = (byte) priority;
         }
         this.goal = goal;
-        this.tickRate = (short) Math.max(1, tickRate);
+        this.tickRate          = (short) Math.max(1, tickRate);
         this.shouldExecuteRate = (short) Math.max(1, shouldExecuteRate);
     }
     

@@ -29,6 +29,9 @@ import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootTableList;
 import plus.fserver.ElcaMobs;
+import plus.fserver.entity.ai.EntityAIHurtByTargetSlim;
+import plus.fserver.entity.ai.EntityAIWatchClosestPlayer;
+
 import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
@@ -53,12 +56,12 @@ public class EntitySpider extends EntityMob {
         tasks.addTask(3, new EntityAILeapAtTarget(this, 0.4F));
         tasks.addTask(4, new EntitySpider.AISpiderAttack(this));
         tasks.addTask(5, new EntityAIWanderAvoidWater(this, 0.8D));
-        tasks.addTask(6, new EntityAIWatchClosest(this, EntityPlayer.class, 8.0F));
+        tasks.addTask(6, new EntityAIWatchClosestPlayer(this, 8.0F));
         tasks.addTask(6, new EntityAILookIdle(this));
 
         tasks = this.targetTasks;
 
-        tasks.addTask(1, new EntityAIHurtByTarget(this, false));
+        tasks.addTask(1, EntityAIHurtByTargetSlim.create(this, false));
         tasks.addTask(2, new EntitySpider.AISpiderTarget(this, EntityPlayer.class));
         tasks.addTask(3, new EntitySpider.AISpiderTarget(this, EntityIronGolem.class));
     }
