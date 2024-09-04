@@ -317,11 +317,11 @@ public class WalkNodeProcessor extends NodeProcessor {
 
     @Override
     public PathNodeType getPathNodeType(final IBlockAccess access, int x, int y, int z, EntityLiving entity, int xSize, int ySize, int zSize, boolean canBreakDoorsIn, boolean canEnterDoorsIn) {
-        PathNodeType.Set enumset = new PathNodeType.Set();
+        PathNodeType.Set enumset = matrix.localSet();
         //EnumSet<PathNodeType> enumset = EnumSet.noneOf(PathNodeType.class);
         PathNodeType pathnodetype = PathNodeType.BLOCKED;
         this.currentEntity = entity;
-        pathnodetype = this.getPathNodeType(access, x, y, z, xSize, ySize, zSize, canBreakDoorsIn, canEnterDoorsIn, enumset, pathnodetype, new BlockPos(entity));
+        pathnodetype = this.getPathNodeType(access, x, y, z, xSize, ySize, zSize, canBreakDoorsIn, canEnterDoorsIn, enumset, pathnodetype, access.getWorld().localTempPos3.setPos(entity));
         this.currentEntity = null;
 
         if (enumset.contains(PathNodeType.FENCE)) {

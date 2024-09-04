@@ -59,6 +59,15 @@ public enum PathNodeType {
             items |= 1<<type.id;
         }
 
+
+        public void clear(){
+            items = 0;
+            cursor = 0;
+            size = 0;
+            current = 0;
+        }
+
+
         public boolean contains(PathNodeType type){
             return ((items >> type.id) & 1) == 1;
         }

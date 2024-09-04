@@ -11,20 +11,19 @@ public class PntMatrix {
     private final Long2ObjectOpenHashMap<Chunked> data = new Long2ObjectOpenHashMap<>();
     //private final Te4HashMap<Long, Chunked> data = new Te4HashMap<>();
     private Chunked last = new Chunked(null, Integer.MIN_VALUE, Integer.MIN_VALUE);
+    private final PathNodeType.Set localSet = new PathNodeType.Set();
 
-    static class Group{
-        private final Branch[] branches = new Branch[16];
-        //             0-16,  0-16,  0-16
-        Branch branch(int x, int y, int z){
-            if(x<8) x = z <8?0:1;
-            else    x = z <8?2:3;
-            Branch result = branches[x = (x<<2 | y >> 2)];
-            return result == null?branches[x] = new Branch():result;
-        }
-        void clean(){
-            for (Branch br0:branches)
-                if(br0 != null)br0.clean();
-        }
+    static Branch branch(Branch[] branches, int x, int y, int z){
+        if(x<8) x = z <8?0:1;
+        else    x = z <8?2:3;
+        Branch result = branches[x = (x<<2 | y >> 2)];
+        return result == null?branches[x] = new Branch():result;
+    }
+
+
+    static void cleanBranches(Branch[] branches){
+        for (Branch br0:branches)
+            if(br0 != null)br0.clean();
     }
 
 
@@ -58,7 +57,10 @@ public class PntMatrix {
 
 
     public static class Chunked{
-        private final Group[] groups = new Group[16];
+        private final Branch[][] groups = new Branch[][]{
+                null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null
+        };
         private final PntMatrix matrix;
         Chunked xAdd;
         Chunked zAdd;
@@ -74,7 +76,7 @@ public class PntMatrix {
 
 
         public void clean(){
-            for (Group group:groups) if(group != null)group.clean();
+            for (Branch[] group:groups) if(group != null)cleanBranches(group);
         }
 
 
@@ -102,58 +104,49 @@ public class PntMatrix {
                             (xAdd == null?xAdd = matrix.getChunked0(x+1, z):xAdd).executor(rx, rz):
                             (xMin == null?xMin = matrix.getChunked0(x-1, z):xMin).executor(rx, rz);
             }
-//            if(rx == x){
-//                if(rz == z)return this;
-//                return rz > z ?
-//                        (zAdd == null?zAdd = matrix.getChunked0(x, z+1):zAdd).executor(rx, rz):
-//                        (zMin == null?zMin = matrix.getChunked0(x, z-1):zMin).executor(rx, rz);
-//            }
-//            return rx > x ?
-//                        (xAdd == null?xAdd = matrix.getChunked0(x+1, z):xAdd).executor(rx, rz):
-//                        (xMin == null?xMin = matrix.getChunked0(x-1, z):xMin).executor(rx, rz);
         }
 
 
         public PathNodeType getType(int x, int y, int z){
-            Group group = executor(x>>4, z>>4).groups[y >> 4];
-            if(group==null)return null;
-            Branch branch = group.branch(x&=15, y&15, z&=15);
-            if(branch==null)return null;
+            Branch[] group = executor(x>>4, z>>4).groups[y >> 4];
+            if(group == null)return null;
+            Branch branch = branch(group, x&=15, y&15, z&=15);
+            if(branch == null)return null;
             return branch.get(x, y&7, z);
         }
 
 
         public PathNodeType getCur(int x, int y, int z){
-            Group group = groups[y >> 4];
+            Branch[] group = groups[y >> 4];
             if(group == null)return null;
-            Branch branch = group.branch(x&=15, y&15, z&=15);
+            Branch branch = branch(group, x&=15, y&15, z&=15);
             if(branch == null)return null;
             return branch.get(x, y&7, z);
         }
 
 
         public void setCur(int x, int y, int z, PathNodeType type){
-            Group group = groups[y >> 4];
-            if(group==null)group = groups[y >> 4] = new Group();
-            Branch branch = group.branch(x&=15, y&15, z&=15);
+            Branch[] group = groups[y >> 4];
+            if(group==null)group = groups[y >> 4] = new Branch[16];
+            Branch branch = branch(group, x&=15, y&15, z&=15);
             branch.set(x, y&7, z, type);
         }
 
 
         public void setType(int x, int y, int z, PathNodeType type){
             Chunked chunked = executor(x>>4, z>>4);
-            Group group = chunked.groups[y >> 4];
-            if(group==null)group = chunked.groups[y >> 4] = new Group();
-            Branch branch = group.branch(x&=15, y&15, z&=15);
+            Branch[] group = chunked.groups[y >> 4];
+            if(group==null)group = chunked.groups[y >> 4] = new Branch[16];
+            Branch branch = branch(group, x&=15, y&15, z&=15);
             branch.set(x, y&7, z, type);
         }
 
 
         public void rem(int x, int y, int z){
             Chunked chunked = executor(x>>4, z>>4);
-            Group group = chunked.groups[y >> 4];
-            if(group==null)group = chunked.groups[y >> 4] = new Group();
-            Branch branch = group.branch(x&=15, y&15, z&=15);
+            Branch[] group = chunked.groups[y >> 4];
+            if(group==null)group = chunked.groups[y >> 4] = new Branch[16];
+            Branch branch = branch(group, x&=15, y&15, z&=15);
             branch.rem(x, y&7, z);
         }
     }
@@ -184,5 +177,12 @@ public class PntMatrix {
         Chunked res = data.get(key);
         if(res == null)data.put(key, res = new Chunked(this, x, z));
         return res;
+    }
+
+
+    public PathNodeType.Set localSet(){
+        PathNodeType.Set set = localSet;
+        set.clear();
+        return set;
     }
 }

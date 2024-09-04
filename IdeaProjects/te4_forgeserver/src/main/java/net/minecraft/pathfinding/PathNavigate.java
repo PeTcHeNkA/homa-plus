@@ -190,8 +190,12 @@ public abstract class PathNavigate {
                 BlockPos blockpos = world.localTempPos3.setPos(vec3d2.x, vec3d2.y-1, vec3d2.z);
                 IBlockEAccess access = world.access();
                 AxisAlignedBB box = access.getBlockState(blockpos).getBoundingBox(access, blockpos);
-                vec3d2 = vec3d2.add(0.0D, 1.1D - box.maxY, 0.0D);
-                this.entity.getMoveHelper().setMoveTo(vec3d2.x, vec3d2.y, vec3d2.z, this.speed);
+                this.entity.getMoveHelper().setMoveTo(
+                        vec3d2.x,
+                        vec3d2.y + 1.1D - box.maxY,
+                        vec3d2.z,
+                        this.speed
+                );
             }
         }
     }
@@ -211,11 +215,10 @@ public abstract class PathNavigate {
             }
         }
 
-
         this.maxDistanceToWaypoint = this.entity.width > 0.75F ? this.entity.width / 2.0F : 0.75F - this.entity.width / 2.0F;
-        Vec3d vec3d1 = this.currentPath.getCurrentPos();
+        PathPoint point = this.currentPath.getCurrentPoint();
 
-        if (MathHelper.abs((float)(this.entity.posX - (vec3d1.x + 0.5D))) < this.maxDistanceToWaypoint && MathHelper.abs((float)(this.entity.posZ - (vec3d1.z + 0.5D))) < this.maxDistanceToWaypoint && Math.abs(this.entity.posY - vec3d1.y) < 1.0D) {
+        if (MathHelper.abs((float)(this.entity.posX - (point.x + 0.5D))) < this.maxDistanceToWaypoint && MathHelper.abs((float)(this.entity.posZ - (point.z + 0.5D))) < this.maxDistanceToWaypoint && Math.abs(this.entity.posY - point.y) < 1.0D) {
             this.currentPath.setCurrentPathIndex(this.currentPath.getCurrentPathIndex() + 1);
         }
 
@@ -243,12 +246,13 @@ public abstract class PathNavigate {
 
 
         if (this.currentPath != null && !this.currentPath.isFinished()) {
-            Vec3d vec3d = this.currentPath.getCurrentPos();
+            PathPoint point = this.currentPath.getCurrentPoint();
+            Vec3d vec = this.timeoutCachedNode;
 
-            if (vec3d.equals(this.timeoutCachedNode)) {
+            if (vec.x == point.x && vec.y == point.y && vec.z == point.z) {
                 this.timeoutTimer += System.currentTimeMillis() - this.lastTimeoutCheck;
             } else {
-                this.timeoutCachedNode = vec3d;
+                this.timeoutCachedNode = new Vec3d(point.x, point.y, point.z);
                 double d0 = positionVec3.distanceTo(this.timeoutCachedNode);
                 this.timeoutLimit = this.entity.getAIMoveSpeed() > 0.0F ? d0 / (double)this.entity.getAIMoveSpeed() * 1000.0D : 0.0D;
             }

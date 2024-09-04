@@ -239,7 +239,7 @@ public class FlyingNodeProcessor extends WalkNodeProcessor {
 
     @Override
     public PathNodeType getPathNodeType(IBlockAccess blockaccessIn, int x, int y, int z, EntityLiving entitylivingIn, int xSize, int ySize, int zSize, boolean canBreakDoorsIn, boolean canEnterDoorsIn) {
-        PathNodeType.Set enumset = new PathNodeType.Set();
+        PathNodeType.Set enumset = matrix.localSet();
         //EnumSet<PathNodeType> enumset = EnumSet.noneOf(PathNodeType.class);
 
         PathNodeType pathnodetype = PathNodeType.BLOCKED;
