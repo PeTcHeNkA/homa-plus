@@ -1715,6 +1715,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
     //todo check
     public boolean isEntityInsideOpaqueBlock() {
         if (!this.noClip) {
+            if(!world.isRemote || SERVER_COMPILE)return serverIsEntityInsideOpaqueBlock();
             final IBlockEAccess access = world.access();
             final float w08 = this.width * 0.8f, yeeH = this.getEyeHeight();
 
@@ -1726,6 +1727,43 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
                 if (px != x || py != y || pz != z)
                     if (access.getBlockState(px = x, py = y, pz = z).causesSuffocation()) return true;
             }
+        }
+        return false;
+    }
+
+
+    protected final boolean serverIsEntityInsideOpaqueBlock(){
+        final ChunkSelector access = world.localSelector;
+        final float w08 = this.width * 0.8f, yeeH = (float)posY + this.getEyeHeight();
+
+        int yf = MathHelper.floor(yeeH - 0.05f);
+        if(yf > 255 || yf < 0)return false;
+        int xf = MathHelper.floor(this.posX - w08         );
+        int zf = MathHelper.floor(this.posZ - w08         );
+
+        if(access.getStateUnchecked(xf, yf, zf).causesSuffocation())return true;
+
+        int xe = MathHelper.floor(this.posX + w08         );
+
+        if(xe != xf){
+            if(access.getStateUnchecked(xe, yf, zf).causesSuffocation())return true;
+        }
+
+        int ze = MathHelper.floor(this.posZ - w08         );
+
+        if(ze != zf){
+            if(access.getStateUnchecked(xe, yf, ze).causesSuffocation())return true;
+        }
+
+        int ye = MathHelper.floor(yeeH + 0.05f);
+        if(ye == yf || ye > 255 || ye < 0)return false;
+
+        if(access.getStateUnchecked(xf, ye, zf).causesSuffocation())return true;
+        if(xe != xf){
+            if(access.getStateUnchecked(xe, ye, zf).causesSuffocation())return true;
+        }
+        if(ze != zf){
+            if(access.getStateUnchecked(xe, ye, ze).causesSuffocation())return true;
         }
         return false;
     }
