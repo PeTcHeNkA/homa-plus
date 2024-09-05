@@ -96,6 +96,12 @@ public class EntityBat extends EntityAmbientCreature {
 
 
     @Override
+    public boolean ignoreCollisions(){
+        return true;
+    }
+
+
+    @Override
     protected void collideWithNearbyEntities() {}
 
 

@@ -24,7 +24,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.api.Keep;
-import plus.fserver.utls.collections.ArrayListE6;
+import plus.fserver.utls.collections.AABBList;
 import static plus.fserver.block.BlockFs.addCollisionBoxToListFx;
 
 
@@ -93,7 +93,7 @@ public class BlockPane extends Block {
 
 
     @Override
-    public void addCollisionBoxToListF(IBlockState state, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> list) {
+    public void addCollisionBoxToListF(IBlockState state, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, AABBList list) {
         state = this.getActualState(state, access, pos);
 
         addCollisionBoxToListFx(pos, entityBox, list, AABB_BY_INDEX[0]);

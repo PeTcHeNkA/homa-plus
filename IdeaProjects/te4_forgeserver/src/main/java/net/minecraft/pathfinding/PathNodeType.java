@@ -82,7 +82,7 @@ public enum PathNodeType {
 
         @Override
         public boolean hasNext() {
-            return current<size;
+            return current < size;
         }
 
 

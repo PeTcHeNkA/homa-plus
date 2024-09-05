@@ -7,26 +7,19 @@ import net.minecraft.world.chunk.BlockStateContainer;
 import net.minecraft.world.chunk.NibbleArray;
 
 
-public class ExtendedBlockStorage {
+public class ExtendedBlockStorage extends BlockStateContainer{
     private final int yBase;
     private int blockRefCount;
     private int tickRefCount;
-    private final BlockStateContainer data;
     private NibbleArray blockLight;
     private NibbleArray skyLight;
 
     public ExtendedBlockStorage(int y, boolean storeSkylight) {
         this.yBase = y;
-        this.data = new BlockStateContainer();
         this.blockLight = new NibbleArray();
         if (storeSkylight) {
             this.skyLight = new NibbleArray();
         }
-    }
-
-
-    public IBlockState get(int x, int y, int z) {
-        return this.data.get(x, y, z);
     }
 
 
@@ -37,7 +30,7 @@ public class ExtendedBlockStorage {
             if (block1.getTickRandomly()) ++this.tickRefCount;
         }
 
-        if ((block1 = this.data.update(x, y, z, state).getBlock()) != Blocks.AIR) {
+        if ((block1 = super.update(x, y, z, state).getBlock()) != Blocks.AIR) {
             --this.blockRefCount;
             if (block1.getTickRandomly()) --this.tickRefCount;
         }
@@ -97,7 +90,7 @@ public class ExtendedBlockStorage {
 
 
     public BlockStateContainer getData() {
-        return this.data;
+        return this;
     }
 
 

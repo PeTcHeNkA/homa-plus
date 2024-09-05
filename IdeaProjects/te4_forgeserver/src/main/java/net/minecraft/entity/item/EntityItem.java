@@ -41,6 +41,7 @@ import org.apache.logging.log4j.Logger;
 import plus.fserver.ElcaConfig;
 import plus.fserver.ElcaMobs;
 import plus.fserver.server.elca.ChunkSelector;
+import plus.fserver.utls.collections.AABBList;
 import plus.fserver.utls.collections.ArrayListE6;
 import java.util.Random;
 
@@ -100,6 +101,12 @@ public class EntityItem extends Entity {
     @Override
     protected void entityInit() {
         item = this.getDataManager().registerV(ITEM, ItemStack.EMPTY);
+    }
+
+
+    @Override
+    public boolean ignoreCollisions(){
+        return true;
     }
 
 
@@ -493,7 +500,7 @@ public class EntityItem extends Entity {
     }
 
 
-    private ArrayListE6<AxisAlignedBB> defBoxes(double x, double y, double z){
+    private AABBList defBoxes(double x, double y, double z){
         AxisAlignedBB box = world.commonWorldEntityAABB;
         getEntityBoundingBox().expandTo(x, y, z, box);
         return this.world.getCollisionBoxesLimitedC(null, box, ElcaConfig.MAX_ENTITY_COLLISIONS_MOVE);
@@ -520,7 +527,7 @@ public class EntityItem extends Entity {
             double oldY = y;
             double oldZ = z;
 
-            ArrayListE6<AxisAlignedBB> boxes = null;
+            AABBList boxes = null;
             AxisAlignedBB curBox = this.getEntityBoundingBox();
             int temp, curX, curY, curZ;
             if (y != 0.0D) {

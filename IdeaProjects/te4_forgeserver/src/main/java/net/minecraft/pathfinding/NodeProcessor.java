@@ -4,12 +4,13 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.IBlockAccess;
+import plus.fserver.api.IBlockEAccess;
 import plus.fserver.utls.collections.PointHashMap;
 
 
 public abstract class NodeProcessor {
     protected final BlockPos.MutableBlockPos pooledPos = new BlockPos.MutableBlockPos();
-    protected IBlockAccess blockaccess;
+    protected IBlockEAccess blockaccess;
     protected EntityLiving entity;
     protected final PointHashMap pointMap = new PointHashMap();
     protected int entitySizeX;
@@ -20,7 +21,7 @@ public abstract class NodeProcessor {
     protected boolean canSwim;
 
     public void init(IBlockAccess sourceIn, EntityLiving mob) {
-        this.blockaccess = sourceIn;
+        this.blockaccess = (IBlockEAccess) sourceIn;
         this.entity = mob;
         this.pointMap.clearMap();
         this.entitySizeX = MathHelper.floor(mob.width + 1.0F);
@@ -59,10 +60,10 @@ public abstract class NodeProcessor {
     public abstract int findPathOptions(PathPoint[] pathOptions, PathPoint currentPoint, PathPoint targetPoint, float maxDistance);
 
 
-    public abstract PathNodeType getPathNodeType(IBlockAccess blockaccessIn, int x, int y, int z, EntityLiving entitylivingIn, int xSize, int ySize, int zSize, boolean canBreakDoorsIn, boolean canEnterDoorsIn);
+    public abstract PathNodeType getPathNodeType(IBlockEAccess blockaccessIn, int x, int y, int z, EntityLiving entitylivingIn, int xSize, int ySize, int zSize, boolean canBreakDoorsIn, boolean canEnterDoorsIn);
 
 
-    public abstract PathNodeType getPathNodeType(IBlockAccess blockaccessIn, int x, int y, int z);
+    public abstract PathNodeType getPathNodeType(IBlockEAccess blockaccessIn, int x, int y, int z);
 
 
     public void setCanEnterDoors(boolean canEnterDoorsIn) {

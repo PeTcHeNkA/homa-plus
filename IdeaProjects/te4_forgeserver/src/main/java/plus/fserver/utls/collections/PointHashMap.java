@@ -10,13 +10,17 @@ public class PointHashMap {
     private int count, threshold = 12;
 
 
-    private int getSlotIndex(int integer) {
-        integer = integer ^ integer >>> 20 ^ integer >>> 12;
-        return (integer ^ integer >>> 7 ^ integer >>> 4) & this.slots.length -1;
+    private int getSlotIndex(int hash) {
+//        int h = hash * -1640531527;
+//        return (h ^ h >>> 16) & this.slots.length -1;
+        hash = hash ^ hash >>> 20 ^ hash >>> 12;
+        return (hash ^ hash >>> 7 ^ hash >>> 4) & this.slots.length -1;
     }
 
 
-    private int getSlotIndex(int hash, int size) {
+    private static int getSlotIndex(int hash, int size) {
+//        int h = hash * -1640531527;
+//        return (h ^ h >>> 16) & size -1;
         hash = hash ^ hash >>> 20 ^ hash >>> 12;
         return (hash ^ hash >>> 7 ^ hash >>> 4) & size -1;
     }

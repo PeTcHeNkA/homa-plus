@@ -1,6 +1,5 @@
 package net.minecraft.world.chunk;
 
-import io.netty.buffer.ByteBuf;
 import io.netty.buffer.FastByteBuf;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.network.PacketBuffer;

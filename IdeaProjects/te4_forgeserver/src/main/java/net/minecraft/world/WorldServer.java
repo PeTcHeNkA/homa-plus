@@ -62,7 +62,6 @@ import net.minecraftforge.common.WorldSpecificSaveHandler;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.world.WorldEvent;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
@@ -487,6 +486,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
                 }
             }
         }
+        collideTask.complete();
     }
 
 
@@ -1540,5 +1540,24 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         chunkProviderServer.chunkGenerator.cleanupCache();
         provider.getBiomeProvider().cleanupCache();
         clearEvents();
+    }
+
+    public EMoveHelper.ComboCollideTask collideTask = new EMoveHelper.ComboCollideTask(this);
+
+    private EMoveHelper.MoveTask[] allTasks = new EMoveHelper.MoveTask[128];
+    private int realSize = 0;
+    
+    public EMoveHelper.MoveTask allocMoveTask(){
+        if(realSize == 0)return new EMoveHelper.MoveTask();
+        else return allTasks[--realSize];
+    }
+    
+    public void freeMoveTask(EMoveHelper.MoveTask task){
+        if(allTasks.length == realSize){
+            EMoveHelper.MoveTask[] newTasks = new EMoveHelper.MoveTask[allTasks.length+128];
+            System.arraycopy(allTasks, 0, newTasks, 0, allTasks.length);
+            allTasks = newTasks;
+        }
+        allTasks[realSize++] = task;
     }
 }

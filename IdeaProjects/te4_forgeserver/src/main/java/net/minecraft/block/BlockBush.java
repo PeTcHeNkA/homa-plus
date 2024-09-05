@@ -19,7 +19,7 @@ import net.minecraftforge.common.EnumPlantType;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.api.IBlockEAccess;
-import plus.fserver.utls.collections.ArrayListE6;
+import plus.fserver.utls.collections.AABBList;
 
 
 public class BlockBush extends Block implements net.minecraftforge.common.IPlantable {
@@ -107,7 +107,7 @@ public class BlockBush extends Block implements net.minecraftforge.common.IPlant
 
 
     @Override
-    public void addCollisionBoxToListF(IBlockState state, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> collidingBoxes) {}
+    public void addCollisionBoxToListF(IBlockState state, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, AABBList collidingBoxes) {}
 
 
     @Override

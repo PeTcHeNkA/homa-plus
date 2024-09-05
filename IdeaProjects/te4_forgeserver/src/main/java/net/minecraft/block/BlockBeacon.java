@@ -25,8 +25,7 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.block.BlockFs;
-import plus.fserver.server.elca.ChunkSelector;
-import plus.fserver.utls.collections.ArrayListE6;
+import plus.fserver.utls.collections.AABBList;
 
 
 public class BlockBeacon extends BlockContainer {
@@ -58,7 +57,7 @@ public class BlockBeacon extends BlockContainer {
     }
 
     @Override
-    public void addCollisionBoxToListF(IBlockState state, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> list) {
+    public void addCollisionBoxToListF(IBlockState state, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, AABBList list) {
         BlockFs.addCollisionBoxToListFs(pos, entityBox, list, state.getCollisionBoundingBox(access, pos));
     }
 

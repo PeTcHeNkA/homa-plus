@@ -19,10 +19,10 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import plus.fserver.utls.collections.ArrayListE6;
+import plus.fserver.utls.collections.AABBList;
 
-public interface IBlockProperties
-{
+
+public interface IBlockProperties {
     Material getMaterial();
 
     boolean isFullBlock();
@@ -96,7 +96,7 @@ public interface IBlockProperties
 
     void addCollisionBoxToList(World worldIn, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes, @Nullable Entity entityIn, boolean actual);
     
-    void addCollisionBoxToListF(IBlockAccess worldIn, BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> collidingBoxes);
+    void addCollisionBoxToListF(IBlockAccess worldIn, BlockPos pos, AxisAlignedBB entityBox, AABBList collidingBoxes);
 
 
     AxisAlignedBB getBoundingBox(IBlockAccess blockAccess, BlockPos pos);

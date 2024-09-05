@@ -31,9 +31,9 @@ public class PathFinder {
 
 
     @Nullable
-    private Path findPath(IBlockAccess worldIn, EntityLiving entitylivingIn, double x, double y, double z, float maxDistance) {
+    private Path findPath(IBlockAccess access, EntityLiving entitylivingIn, double x, double y, double z, float maxDistance) {
         this.path.clearPath();
-        this.nodeProcessor.init(worldIn, entitylivingIn);
+        this.nodeProcessor.init(access, entitylivingIn);
         Path path = this.findPath(
                 nodeProcessor.getStart(),
                 nodeProcessor.getPathPointToCoords(x, y, z),

@@ -25,7 +25,7 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import plus.fserver.utls.collections.ArrayListE6;
+import plus.fserver.utls.collections.AABBList;
 import static plus.fserver.block.BlockFs.addCollisionBoxToListFx;
 
 
@@ -80,7 +80,7 @@ public class BlockFence extends Block {
 
 
     @Override
-    public void addCollisionBoxToListF(IBlockState state, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> collidingBoxes) {
+    public void addCollisionBoxToListF(IBlockState state, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, AABBList collidingBoxes) {
         state = getActualState(state, access, pos);
 
         addCollisionBoxToListFx(pos, entityBox, collidingBoxes, PILLAR_AABB);

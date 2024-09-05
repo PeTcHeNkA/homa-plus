@@ -10,6 +10,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.WorldServer;
+import plus.fserver.api.IBlockEAccess;
 import plus.fserver.world.NavigationCache;
 import plus.fserver.world.PntMatrix;
 import plus.tson.utl.Te4HashSet;
@@ -238,48 +239,55 @@ public class FlyingNodeProcessor extends WalkNodeProcessor {
 
 
     @Override
-    public PathNodeType getPathNodeType(IBlockAccess blockaccessIn, int x, int y, int z, EntityLiving entitylivingIn, int xSize, int ySize, int zSize, boolean canBreakDoorsIn, boolean canEnterDoorsIn) {
-        PathNodeType.Set enumset = matrix.localSet();
+    public PathNodeType getPathNodeType(IBlockEAccess blockaccessIn, int x, int y, int z, EntityLiving entity, int xSize, int ySize, int zSize, boolean canBreakDoorsIn, boolean canEnterDoorsIn) {
+        PathNodeType.Set enumset;
+        if(matrix != null){
+            enumset = matrix.localSet();
+        } else {
+            enumset = new PathNodeType.Set();
+        }
         //EnumSet<PathNodeType> enumset = EnumSet.noneOf(PathNodeType.class);
 
         PathNodeType pathnodetype = PathNodeType.BLOCKED;
-        BlockPos blockpos = new BlockPos(entitylivingIn);
-        this.currentEntity = entitylivingIn;
+        BlockPos blockpos = new BlockPos(entity);
+        this.currentEntity = entity;
         pathnodetype = this.getPathNodeType(blockaccessIn, x, y, z, xSize, ySize, zSize, canBreakDoorsIn, canEnterDoorsIn, enumset, pathnodetype, blockpos);
         this.currentEntity = null;
 
         if (enumset.contains(PathNodeType.FENCE)) {
             return PathNodeType.FENCE;
         } else {
-            PathNodeType pathnodetype1 = PathNodeType.BLOCKED;
-
-            for (PathNodeType pathnodetype2 : enumset) {
-                if (entitylivingIn.getPathPriority(pathnodetype2) < 0.0F) {
-                    return pathnodetype2;
+            PathNodeType nodeType = PathNodeType.BLOCKED;
+            float nodePriority = -1;
+            for (PathNodeType type : enumset) {
+                float priority = entity.getPathPriority(type);
+                if (priority < 0.0F) {
+                    return type;
                 }
 
-                if (entitylivingIn.getPathPriority(pathnodetype2) >= entitylivingIn.getPathPriority(pathnodetype1)) {
-                    pathnodetype1 = pathnodetype2;
+                if (priority >= nodePriority) {
+                    nodeType = type;
+                    nodePriority = priority;
                 }
             }
 
-            if (pathnodetype == PathNodeType.OPEN && entitylivingIn.getPathPriority(pathnodetype1) == 0.0F) {
+            if (pathnodetype == PathNodeType.OPEN && nodePriority == 0.0F) {
                 return PathNodeType.OPEN;
             }
             else {
-                return pathnodetype1;
+                return nodeType;
             }
         }
     }
 
 
     @Override
-    public PathNodeType getPathNodeType(IBlockAccess access, int x, int y, int z) {
-        IBlockState state = access.getBlockState(pooledPos.setPos(x, y, z));
+    public PathNodeType getPathNodeType(IBlockEAccess access, int x, int y, int z) {
+        IBlockState state = access.getBlockState(x, y, z);
         PathNodeType pathnodetype = this.getPathNodeTypeRaw(access, state);
 
         if (pathnodetype == PathNodeType.OPEN && y >= 1) {
-            state = access.getBlockState(pooledPos.setPos(x, y - 1, z));
+            state = access.getBlockState(x, y - 1, z);
             PathNodeType type = this.getPathNodeTypeRaw(access, state);
 
             if (type != PathNodeType.DAMAGE_FIRE && state.getBlock() != Blocks.MAGMA && type != PathNodeType.LAVA) {
@@ -294,8 +302,7 @@ public class FlyingNodeProcessor extends WalkNodeProcessor {
                 pathnodetype = PathNodeType.DAMAGE_FIRE;
             }
         }
-        pathnodetype = this.checkNeighborBlocks(access, x, y, z, pathnodetype);
-        return pathnodetype;
+        return checkNeighborBlocks(access, x, y, z, pathnodetype);
     }
 
 

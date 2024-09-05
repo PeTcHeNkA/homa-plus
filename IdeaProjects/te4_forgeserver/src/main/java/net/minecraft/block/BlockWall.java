@@ -22,7 +22,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.api.Keep;
-import plus.fserver.utls.collections.ArrayListE6;
+import plus.fserver.utls.collections.AABBList;
 import static plus.fserver.block.BlockFs.addCollisionBoxToListFs;
 
 
@@ -71,7 +71,7 @@ public class BlockWall extends Block {
 
 
     @Override
-    public void addCollisionBoxToListF(IBlockState state, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> collidingBoxes) {
+    public void addCollisionBoxToListF(IBlockState state, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, AABBList collidingBoxes) {
         addCollisionBoxToListFs(pos, entityBox, collidingBoxes, CLIP_AABB_BY_INDEX[getAABBIndex(getActualState(state, access, pos))]);
     }
 

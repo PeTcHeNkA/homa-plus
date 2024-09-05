@@ -53,6 +53,12 @@ public abstract class EntityThrowable extends Entity implements IProjectile {
     protected void entityInit() {}
 
 
+    @Override
+    public boolean ignoreCollisions(){
+        return true;
+    }
+
+
     @SideOnly(Side.CLIENT)
     public boolean isInRangeToRenderDist(final double distance) {
         double d0 = this.getEntityBoundingBox().getAverageEdgeLength() * 4.0;

@@ -12,6 +12,7 @@ import net.minecraft.block.properties.*;
 import net.minecraft.util.*;
 import plus.fserver.api.IBlockEAccess;
 import plus.fserver.server.elca.ChunkSelector;
+import plus.fserver.utls.collections.AABBList;
 import plus.fserver.utls.collections.ArrayListE6;
 import java.util.*;
 
@@ -50,7 +51,7 @@ public abstract class BlockRailBase extends Block {
 
 
     @Override
-    public void addCollisionBoxToListF(IBlockState state, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> collidingBoxes) {}
+    public void addCollisionBoxToListF(IBlockState state, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, AABBList collidingBoxes) {}
 
 
     @Override

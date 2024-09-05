@@ -13,7 +13,7 @@ import net.minecraft.util.*;
 import net.minecraft.block.state.*;
 import plus.fserver.api.IBlockEAccess;
 import plus.fserver.server.elca.ChunkSelector;
-import plus.fserver.utls.collections.ArrayListE6;
+import plus.fserver.utls.collections.AABBList;
 
 
 public class BlockFire extends Block {
@@ -110,7 +110,7 @@ public class BlockFire extends Block {
 
 
     @Override
-    public void addCollisionBoxToListF(IBlockState state, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> collidingBoxes) {}
+    public void addCollisionBoxToListF(IBlockState state, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, AABBList collidingBoxes) {}
 
 
     @Override

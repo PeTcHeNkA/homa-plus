@@ -14,7 +14,7 @@ import net.minecraft.entity.*;
 import net.minecraft.block.state.*;
 import net.minecraft.block.state.pattern.*;
 import plus.fserver.ElcaCV2;
-import plus.fserver.utls.collections.ArrayListE6;
+import plus.fserver.utls.collections.AABBList;
 
 
 public class BlockPumpkin extends BlockHorizontal {
@@ -33,15 +33,11 @@ public class BlockPumpkin extends BlockHorizontal {
 
 
     @Override
-    public void addCollisionBoxToListF(IBlockState state, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> list) {
+    public void addCollisionBoxToListF(IBlockState state, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, AABBList list) {
         if(ElcaCV2.LIBBUILD) {
             throw new RuntimeException("THIS CLASS ONLY FOR COMPILE. NOT LOAD THIS");
         }//Up to 40+ times faster
-        AxisAlignedBB src;
-        AxisAlignedBB blockBox = getCollisionBoundingBox(state, access, pos);
-        if((src = list.getSafe(list.sizeC())) != null) blockBox.offsetTo(pos, src);
-        else src = blockBox.offset(pos);
-        if (entityBox.intersects(src)) list.addF(src);
+        list.addIfIntersects(entityBox, getCollisionBoundingBox(state, access, pos), pos);
     }
 
 

@@ -12,7 +12,7 @@ import net.minecraft.util.math.*;
 import java.util.*;
 import net.minecraft.util.*;
 import net.minecraft.block.state.*;
-import plus.fserver.utls.collections.ArrayListE6;
+import plus.fserver.utls.collections.AABBList;
 
 
 public abstract class BlockButton extends BlockDirectional {
@@ -47,7 +47,7 @@ public abstract class BlockButton extends BlockDirectional {
 
 
     @Override
-    public void addCollisionBoxToListF(IBlockState state, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> collidingBoxes) {}
+    public void addCollisionBoxToListF(IBlockState state, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, AABBList collidingBoxes) {}
 
 
     @Override

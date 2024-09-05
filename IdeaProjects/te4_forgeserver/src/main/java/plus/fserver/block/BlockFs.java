@@ -8,7 +8,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import plus.fserver.ElcaCV2;
-import plus.fserver.utls.collections.ArrayListE6;
+import plus.fserver.utls.collections.AABBList;
 import javax.annotation.Nullable;
 
 
@@ -23,34 +23,27 @@ public class BlockFs extends Block {
 
 
     @Override
-    public void addCollisionBoxToListF(IBlockState state, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> list) {
+    public void addCollisionBoxToListF(IBlockState state, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, AABBList list) {
         addCollisionBoxToListFs(pos, entityBox, list, state.getCollisionBoundingBox(access, pos));
     }
 
 
-    public static void addCollisionBoxToListFs(BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> list, @Nullable AxisAlignedBB blockBox) {
+    public static void addCollisionBoxToListFs(BlockPos pos, AxisAlignedBB entityBox, AABBList list, @Nullable AxisAlignedBB blockBox) {
         if(ElcaCV2.LIBBUILD) {
             throw new RuntimeException("THIS CLASS ONLY FOR COMPILE. NOT LOAD THIS");
         }
         if (blockBox != NULL_AABB) {
             //Up to 30+ times faster
-            AxisAlignedBB src = list.getSafe(list.sizeC());
-            if(src != null) blockBox.offsetTo(pos, src);
-            else src = blockBox.offset(pos);
-
-            if (entityBox.intersects(src)) list.addF(src);
+            list.addIfIntersects(entityBox, blockBox, pos);
         }
     }
 
 
-    public static void addCollisionBoxToListFx(BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> list, @Nullable AxisAlignedBB blockBox) {
+    public static void addCollisionBoxToListFx(BlockPos pos, AxisAlignedBB entityBox, AABBList list, @Nullable AxisAlignedBB blockBox) {
         if (ElcaCV2.LIBBUILD) {
             throw new RuntimeException("THIS CLASS ONLY FOR COMPILE. NOT LOAD THIS");
         }
-        AxisAlignedBB src = list.getSafe(list.sizeC());
-        if (src != null) blockBox.offsetTo(pos, src);
-        else src = blockBox.offset(pos);
-        if (entityBox.intersects(src)) list.addF(src);
+        list.addIfIntersects(entityBox, blockBox, pos);
     }
 
 

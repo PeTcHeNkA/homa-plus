@@ -156,8 +156,8 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public final LightingEngine lightingEngine = new LightingEngine(this);
     public final ActionResult<?> pooledAction = new ActionResult<>(null,null);
 
-    final SyncListCache<AxisAlignedBB> bbCache;
-    final SyncListCache<Entity> eeCache;
+    final SyncListCache.AABB bbCache;
+    final SyncListCache.ListE6<Entity> eeCache;
     protected IBlockEAccess     effectiveAcces;
     //ONLY SERVER SIDE NOT NULL!
     public final ChunkSelector localSelector;
@@ -194,8 +194,8 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         perWorldStorage = new MapStorage((ISaveHandler)null);
 
         if(ElcaCV.MORE_MOBS_OPTIMIZER) {
-            eeCache = new SyncListCache<>(10, 60);
-            bbCache = new SyncListCache<>(10, 180);
+            eeCache = new SyncListCache.ListE6<>(10, 60);
+            bbCache = new SyncListCache.AABB(10, 180);
         } else {
             eeCache = null;
             bbCache = null;
@@ -1182,6 +1182,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
+    //todo use pooled event
     public void playSound(@Nullable EntityPlayer player, double x, double y, double z, SoundEvent soundIn, SoundCategory category, float volume, float pitch) {
         PlaySoundAtEntityEvent event = ForgeEventFactory.onPlaySoundAtEntity(player, soundIn, category, volume, pitch);
         if (event.isCanceled() || event.getSound() == null) return;
@@ -3265,7 +3266,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     /**
      * @author Te4hno
      */
-    private final HoleListE6 hole = new HoleListE6();
+    private final AABBList.Hole hole = new AABBList.Hole();
     public boolean collidesWithAnyBlock(AxisAlignedBB bbox) {
         return !getCollisionBoxesTrue(null, bbox, hole.free());
     }
@@ -3278,14 +3279,14 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         if(ElcaCV.MORE_MOBS_OPTIMIZER) {
             AABKey key = bbCache.key(aabb);
 
-            ArrayListE6<AxisAlignedBB> res = this.bbCache.getC(key);
+            AABBList res = this.bbCache.getC(key);
             if (res != null) return res;
             res = bbCache.allocArr();
             getCollisionBoxes0(res, entityIn, aabb);
             this.bbCache.add(key, res);
             return res;
         } else {
-            ArrayListE6<AxisAlignedBB> res = new ArrayListE6<>();
+            AABBList res = new AABBList();
             getCollisionBoxes0(res, entityIn, aabb);
             return res;
         }
@@ -3298,40 +3299,40 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public List<AxisAlignedBB> getCollisionBoxesLimited(@Nullable Entity entityIn, @NotNull AxisAlignedBB aabb, int lim) {
         if(ElcaCV.MORE_MOBS_OPTIMIZER) {
             final AABKey key;
-            ArrayListE6<AxisAlignedBB> res;
+            AABBList res;
             if ((res = bbCache.getC(key = bbCache.key(aabb))) != null) return res;
             getCollisionBoxesNoCacheLimited(res = bbCache.allocArr(), entityIn, aabb, lim);
             bbCache.add(key, res);
             return res;
         } else {
-            final ArrayListE6<AxisAlignedBB> list;
-            getCollisionBoxesNoCacheLimited(list = new ArrayListE6<>(), entityIn, aabb, lim);
+            final AABBList list;
+            getCollisionBoxesNoCacheLimited(list = new AABBList(), entityIn, aabb, lim);
             return list;
         }
     }
 
 
-    public final ArrayListE6<AxisAlignedBB> getCollisionBoxesLimitedC(@Nullable Entity entityIn, @NotNull AxisAlignedBB aabb, int lim) {
+    public final AABBList getCollisionBoxesLimitedC(@Nullable Entity entityIn, @NotNull AxisAlignedBB aabb, int lim) {
         if(ElcaCV.MORE_MOBS_OPTIMIZER) {
-            final SyncListCache<AxisAlignedBB> bbCache;
+            final SyncListCache.AABB bbCache;
             final AABKey key;
-            ArrayListE6<AxisAlignedBB> res;
+            AABBList res;
             if ((res = (bbCache = this.bbCache).getC(key = bbCache.key(aabb))) != null) return res;
             getCollisionBoxesNoCacheLimited(res = bbCache.allocArr(), entityIn, aabb, lim);
             bbCache.add(key, res);
             return res;
         } else {
-            final ArrayListE6<AxisAlignedBB> list;
-            getCollisionBoxesNoCacheLimited(list = new ArrayListE6<>(), entityIn, aabb, lim);
+            final AABBList list;
+            getCollisionBoxesNoCacheLimited(list = new AABBList(), entityIn, aabb, lim);
             return list;
         }
     }
 
 
-    public final ArrayListE6<AxisAlignedBB> getCollisionBoxesRecachedLimitedC(@Nullable Entity entityIn, @NotNull AxisAlignedBB aabb, int lim) {
+    public final AABBList getCollisionBoxesRecachedLimitedC(@Nullable Entity entityIn, @NotNull AxisAlignedBB aabb, int lim) {
         if(ElcaCV.MORE_MOBS_OPTIMIZER) {
             final AABKey key;
-            ArrayListE6<AxisAlignedBB> res;
+            AABBList res;
             if ((res = bbCache.getC(key = bbCache.key(aabb))) != null){
                 res.fclear();
                 getCollisionBoxesNoCacheLimited(res, entityIn, aabb, lim);
@@ -3340,8 +3341,8 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             }
             return res;
         } else {
-            final ArrayListE6<AxisAlignedBB> list;
-            getCollisionBoxesNoCacheLimited(list = new ArrayListE6<>(), entityIn, aabb, lim);
+            final AABBList list;
+            getCollisionBoxesNoCacheLimited(list = new AABBList(), entityIn, aabb, lim);
             return list;
         }
     }
@@ -3434,7 +3435,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
     private final AxisAlignedBB localTempAABB = new AxisAlignedBB(0,0,0,0,0,0);
 
-    private void getCollisionBoxes0(ArrayListE6<AxisAlignedBB> list, @Nullable Entity entityIn, AxisAlignedBB aabb) {
+    private void getCollisionBoxes0(AABBList list, @Nullable Entity entityIn, AxisAlignedBB aabb) {
         this.getCollisionBoxesFalse(entityIn, aabb, list);
         if (entityIn != null) {
             AxisAlignedBB temp;
@@ -3447,7 +3448,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
-    public final void getCollisionBoxesNoCacheLimited(ArrayListE6<AxisAlignedBB> list, @Nullable Entity entityIn, AxisAlignedBB aabb, int lim) {
+    public final void getCollisionBoxesNoCacheLimited(AABBList list, @Nullable Entity entityIn, AxisAlignedBB aabb, int lim) {
         this.getCollisionBoxesFalse(entityIn, aabb, list);
         if (entityIn != null && list.sizeC() < lim) {
             final AxisAlignedBB temp;
@@ -3463,17 +3464,17 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
-    public final ArrayListE6<AxisAlignedBB> allocAABBList(){
+    public final AABBList allocAABBList(){
         return bbCache.allocArr();
     }
 
 
-    public final void freeAABBList(ArrayListE6<AxisAlignedBB> list){
+    public final void freeAABBList(AABBList list){
         bbCache.freeArr(list);
     }
 
 
-    public final boolean noCollisionsBoxesNoCacheIn(ArrayListE6<AxisAlignedBB> list, @Nullable Entity entityIn, AxisAlignedBB aabb){
+    public final boolean noCollisionsBoxesNoCacheIn(AABBList list, @Nullable Entity entityIn, AxisAlignedBB aabb){
         list.fclear();
         getCollisionBoxesNoCacheLimited(list, entityIn, aabb, 1);
         return list.isEmptyC();
@@ -4022,7 +4023,45 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     @Keep
-    protected void getCollisionBoxesFalse(@Nullable Entity entityIn, AxisAlignedBB aabb, ArrayListE6<AxisAlignedBB> outList) {
+    public void getCollisionBoxesFalse(@Nullable Entity entityIn, AxisAlignedBB aabb, AABBList outList) {
+        int minX = MathHelper.floor(aabb.minX) - 1;
+        int maxX = MathHelper.ceil(aabb.maxX) + 1;
+        int minY = MathHelper.floor(aabb.minY) - 1;
+        if (minY < 0)minY = 0;
+        int maxY = MathHelper.ceil(aabb.maxY) + 1;
+        if (maxY > 255)maxY = 255;
+        int minZ = MathHelper.floor(aabb.minZ) - 1;
+        int maxZ = MathHelper.ceil(aabb.maxZ) + 1;
+
+        boolean flag  = entityIn != null && entityIn.isOutsideBorder(),
+                flag1 = entityIn != null && isInsideWorldBorder(entityIn);
+        ChunkSelector selector = localSelector;
+        Chunk chunk;
+
+        for (int xPos = minX; xPos < maxX; ++xPos) {
+            final boolean flag2 = xPos == minX || xPos == maxX - 1;
+            for (int zPos = minZ; zPos < maxZ; ++zPos) {
+                final boolean flag3 = zPos == minZ || zPos == maxZ - 1;
+
+                if ((!flag2 || !flag3) && (chunk = selector.getLoadedE(xPos >> 4, zPos >> 4)) != null)
+                    for (int yPos = minY; yPos < maxY; ++yPos)
+                        if (!flag2 && !flag3 || yPos != maxY - 1) {
+                            if (entityIn != null && flag == flag1) entityIn.setOutsideBorder(!flag1);
+
+                            if (flag1 && !isInWorldBorder(xPos, zPos)) {
+                                BlockIDIndexes.STONE_STATE
+                                        .addCollisionBoxToListF(selector, tempPooledLocalPos.setPos(xPos, yPos, zPos), aabb, outList);
+                            } else {
+                                chunk.getBlockStateUnchecked(xPos, yPos, zPos)
+                                        .addCollisionBoxToListF(selector, tempPooledLocalPos.setPos(xPos, yPos, zPos), aabb, outList);
+                            }
+                        }
+            }
+        }
+    }
+
+
+    public void getAndApplyCollision(@Nullable Entity entityIn, AxisAlignedBB aabb, AABBList outList) {
         int minX = MathHelper.floor(aabb.minX) - 1;
         int maxX = MathHelper.ceil(aabb.maxX) + 1;
         int minY = MathHelper.floor(aabb.minY) - 1;
@@ -4061,7 +4100,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     @Keep
-    protected boolean getCollisionBoxesTrue(@Nullable Entity entityIn, AxisAlignedBB aabb, ArrayListE6<AxisAlignedBB> outList) {
+    protected boolean getCollisionBoxesTrue(@Nullable Entity entityIn, AxisAlignedBB aabb, AABBList outList) {
         if(ElcaCV.ENABLE_COLLISION_EVENTS)
             MinecraftForge.EVENT_BUS.post(collisionEvent.init(entityIn, aabb, outList));
         if(!outList.isEmptyC())return true;

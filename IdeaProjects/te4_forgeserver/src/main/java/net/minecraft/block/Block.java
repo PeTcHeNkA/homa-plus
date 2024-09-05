@@ -52,7 +52,7 @@ import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.block.BlockFx;
-import plus.fserver.utls.collections.ArrayListE6;
+import plus.fserver.utls.collections.AABBList;
 
 import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
@@ -467,7 +467,7 @@ public class Block extends net.minecraftforge.registries.IForgeRegistryEntry.Imp
 
 
     @Deprecated
-    public void addCollisionBoxToListF(IBlockState state, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> collidingBoxes) {
+    public void addCollisionBoxToListF(IBlockState state, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, AABBList collidingBoxes) {
         addCollisionBoxToList(state, access.getWorld(), pos, entityBox, collidingBoxes, null, false);
     }
 

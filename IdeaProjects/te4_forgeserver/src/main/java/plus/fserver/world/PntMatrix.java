@@ -1,17 +1,18 @@
 package plus.fserver.world;
 
-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.pathfinding.PathNodeType;
-import net.minecraft.util.math.ChunkPos;
+import plus.fserver.utls.collections.FlatMap;
 import java.util.Arrays;
 import static net.minecraft.pathfinding.PathNodeType.TYPES;
 
 
-public class PntMatrix {
-    private final Long2ObjectOpenHashMap<Chunked> data = new Long2ObjectOpenHashMap<>();
-    //private final Te4HashMap<Long, Chunked> data = new Te4HashMap<>();
+public class PntMatrix extends FlatMap<PntMatrix.Chunked> {
     private Chunked last = new Chunked(null, Integer.MIN_VALUE, Integer.MIN_VALUE);
     private final PathNodeType.Set localSet = new PathNodeType.Set();
+
+    public PntMatrix(){
+        super(128);
+    }
 
     static Branch branch(Branch[] branches, int x, int y, int z){
         if(x<8) x = z <8?0:1;
@@ -153,9 +154,7 @@ public class PntMatrix {
 
 
     public void clean(){
-        for (Chunked chunked:data.values()){
-            chunked.clean();
-        }
+        forEach(Chunked::clean);
     }
 
 
@@ -172,10 +171,8 @@ public class PntMatrix {
 
 
     Chunked getChunked0(int x, int z){
-        long key = ChunkPos.asLong(x, z);
-        //todo use primitive long in collection
-        Chunked res = data.get(key);
-        if(res == null)data.put(key, res = new Chunked(this, x, z));
+        Chunked res = super.get(x, z);
+        if(res == null)super.put(x, z, res = new Chunked(this, x, z));
         return res;
     }
 

@@ -32,7 +32,8 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.api.Keep;
-import plus.fserver.utls.collections.ArrayListE6;
+import plus.fserver.block.BlockFs;
+import plus.fserver.utls.collections.AABBList;
 
 
 public class BlockFlowerPot extends BlockContainer {
@@ -50,12 +51,8 @@ public class BlockFlowerPot extends BlockContainer {
 
 
     @Override
-    public void addCollisionBoxToListF(IBlockState state, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> list) {
-        AxisAlignedBB src;
-        AxisAlignedBB blockBox = getCollisionBoundingBox(state, access, pos);
-        if((src = list.getSafe(list.sizeC())) != null) blockBox.offsetTo(pos, src);
-        else src = blockBox.offset(pos);
-        if (entityBox.intersects(src)) list.addF(src);
+    public void addCollisionBoxToListF(IBlockState state, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, AABBList list) {
+        BlockFs.addCollisionBoxToListFx(pos, entityBox, list, getCollisionBoundingBox(state, access, pos));
     }
 
 

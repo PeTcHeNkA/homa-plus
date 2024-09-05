@@ -6,6 +6,7 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.IBlockAccess;
+import plus.fserver.api.IBlockEAccess;
 
 
 public class SwimNodeProcessor extends NodeProcessor {
@@ -37,13 +38,13 @@ public class SwimNodeProcessor extends NodeProcessor {
 
 
     @Override
-    public PathNodeType getPathNodeType(IBlockAccess access, int x, int y, int z, EntityLiving entity, int xSize, int ySize, int zSize, boolean canBreakDoorsIn, boolean canEnterDoorsIn) {
+    public PathNodeType getPathNodeType(IBlockEAccess access, int x, int y, int z, EntityLiving entity, int xSize, int ySize, int zSize, boolean canBreakDoorsIn, boolean canEnterDoorsIn) {
         return PathNodeType.WATER;
     }
 
 
     @Override
-    public PathNodeType getPathNodeType(IBlockAccess access, int x, int y, int z) {
+    public PathNodeType getPathNodeType(IBlockEAccess access, int x, int y, int z) {
         return PathNodeType.WATER;
     }
 

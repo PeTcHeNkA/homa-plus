@@ -51,6 +51,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.ElcaCV;
 import plus.fserver.server.elca.ChunkSelector;
+import plus.fserver.utls.collections.AABBList;
 import plus.fserver.utls.collections.ArrayListE6;
 import plus.fserver.world.light.WorldChunkSlice;
 
@@ -542,18 +543,18 @@ public class WorldClient extends World {
 
 
     @Override
-    protected boolean getCollisionBoxesTrue(@Nullable Entity entityIn, AxisAlignedBB aabb, ArrayListE6<AxisAlignedBB> outList) {
+    protected boolean getCollisionBoxesTrue(@Nullable Entity entityIn, AxisAlignedBB aabb, AABBList outList) {
         return getCollisionBoxes(entityIn, aabb, true, outList);
     }
 
 
     @Override
-    protected void getCollisionBoxesFalse(@Nullable Entity entityIn, AxisAlignedBB aabb, ArrayListE6<AxisAlignedBB> outList) {
+    public void getCollisionBoxesFalse(@Nullable Entity entityIn, AxisAlignedBB aabb, AABBList outList) {
         getCollisionBoxes(entityIn, aabb, false, outList);
     }
 
 
-    protected boolean getCollisionBoxes(@Nullable Entity entityIn, AxisAlignedBB aabb, boolean fastCheck, ArrayListE6<AxisAlignedBB> outList) {
+    protected boolean getCollisionBoxes(@Nullable Entity entityIn, AxisAlignedBB aabb, boolean fastCheck, AABBList outList) {
         if (fastCheck){
             if(ElcaCV.ENABLE_COLLISION_EVENTS){
                 MinecraftForge.EVENT_BUS.post(collisionEvent.init(entityIn, aabb, outList));

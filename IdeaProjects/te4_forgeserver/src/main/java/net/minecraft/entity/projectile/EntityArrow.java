@@ -67,6 +67,12 @@ public abstract class EntityArrow extends Entity implements IProjectile {
     }
 
 
+    @Override
+    public boolean ignoreCollisions(){
+        return true;
+    }
+
+
     @SideOnly(Side.CLIENT)
     public boolean isInRangeToRenderDist(final double distance) {
         double d0 = this.getEntityBoundingBox().getAverageEdgeLength() * 10.0;

@@ -90,6 +90,7 @@ import plus.fserver.api.IBlockEAccess;
 import plus.fserver.ElcaCV;
 import plus.fserver.server.SStrings;
 import plus.fserver.server.elca.ChunkSelector;
+import plus.fserver.utls.collections.AABBList;
 import plus.fserver.utls.collections.ArrayListE6;
 import plus.tson.utl.Te4HashSet;
 import static plus.fserver.ElcaCV.SERVER_COMPILE;
@@ -137,8 +138,8 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
     public float distanceWalkedModified;
     public float distanceWalkedOnStepModified;
     public float fallDistance;
-    private int nextStepDistance;
-    private float nextFlap;
+    int nextStepDistance;
+    float nextFlap;
     public double lastTickPosX;
     public double lastTickPosY;
     public double lastTickPosZ;
@@ -147,7 +148,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
     public float entityCollisionReduction;
     protected Random rand;
     public int ticksExisted;
-    private short fire; //todo check mini error
+    short fire; //todo check mini error
     protected boolean inWater;
     public int hurtResistantTime;
     protected boolean firstUpdate;
@@ -186,8 +187,8 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
     protected boolean glowing;
     private final Set<String> tags;
     private boolean isPositionDirty;
-    private final float[] pistonDeltas; //todo check mini error
-    private long pistonDeltasGameTime;
+    final float[] pistonDeltas; //todo check mini error
+    long pistonDeltasGameTime;
 
     public EntityTrackerEntry trackerEntry;
     public double elcaMinRange;
@@ -512,6 +513,11 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
     }
 
 
+    public boolean ignoreCollisions(){
+        return false;
+    }
+
+
     public void collideWith(Entity entity){
         entity.applyEntityCollision(this);
     }
@@ -571,6 +577,10 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
     //todo hot point
     public void move(MoverType type, double x, double y, double z) {
+        if(!world.isRemote){
+            EMoveHelper.move(this, type, x, y, z);
+            return;
+        }
         if (this.noClip) {
             getEntityBoundingBox().offsetMut(x, y, z);
             this.resetPositionToBB();
@@ -636,7 +646,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
                     && this.onGround && this.isSneaking() && this instanceof EntityPlayer) {
 
                 fl1 = -this.stepHeight;
-                ArrayListE6<AxisAlignedBB> list = world.allocAABBList();
+                AABBList list = world.allocAABBList();
 
                 for (; x != 0.0D && z != 0.0D && world.noCollisionsBoxesNoCacheIn(list, this, prev.offsetToF(x, fl1, z, axisalignedbb)); dz1 = z) {
                     if      (x < 0.05D && x >= -0.05D) x =  0.0D;
@@ -668,7 +678,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
             prev.expandTo(x, y, z, axisalignedbb);
             axisalignedbb.minY -= 0.125;
 
-            final ArrayListE6<AxisAlignedBB> boxes0;
+            final AABBList boxes0;
             //fix mobs getting stuck in blocks
             if(isLiving()){
                 long time = world.getTotalWorldTime() - ((EntityLivingBase) this).lastDamageStamp;
@@ -689,20 +699,20 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
             }
 
             final int bSize = boxes0.sizeC();
-            final Object[] rawBoxes = boxes0.raw();
+            final AxisAlignedBB[] rawBoxes = boxes0.raw();
 
             axisalignedbb = this.getEntityBoundingBox();
             boolean flag;
             if (flag = y != 0.0D) {
                 temp = 0;
                 for (num1 = bSize; temp < num1; ++temp)
-                    y = ((AxisAlignedBB)rawBoxes[temp]).calculateYOffset(axisalignedbb, y);
+                    y = rawBoxes[temp].calculateYOffset(axisalignedbb, y);
 
             }
             if (x != 0.0D) {
                 temp = 0;
                 for (num1 = bSize; temp < num1; ++temp)
-                    x = ((AxisAlignedBB)rawBoxes[temp]).calculateXOffset(axisalignedbb, x);
+                    x = rawBoxes[temp].calculateXOffset(axisalignedbb, x);
 
                 flag = true;
             }
@@ -711,7 +721,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
                 temp = 0;
 
                 for (num1 = bSize; temp < num1; ++temp)
-                    z = ((AxisAlignedBB)rawBoxes[temp]).calculateZOffset(axisalignedbb, z);
+                    z = rawBoxes[temp].calculateZOffset(axisalignedbb, z);
 
                 flag = true;
             }
@@ -1043,7 +1053,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
                 pZ = MathHelper.floor(posZ);
             Chunk chunk = world.getChunk(pX>>4, pZ>>4);
 
-            if(!chunk.canSeeSky(pX, pY, pZ) || chunk.getPrecipitationHeight(pX, pZ).getY() > pY) return false;
+            if(!chunk.canSeeSky(pX, pY, pZ) || chunk.getPrecipitationHeightY(pX, pZ) > pY) return false;
 
             if(ElcaCV.ENTITY_FAST_WET)return true;
             return !chunk.getBiome(pX, pZ, world.getBiomeProvider()).getEnableSnow();
@@ -3010,4 +3020,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
     public int lodLvl(){
         return ElcaMobs.GLOBAL.lodLvl(elcaMinRange);
     }
+
+
+    public EMoveHelper.MoveTask moveTask;
 }

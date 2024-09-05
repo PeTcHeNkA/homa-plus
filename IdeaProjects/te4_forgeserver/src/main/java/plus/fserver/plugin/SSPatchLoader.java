@@ -17,7 +17,7 @@ public class SSPatchLoader implements ITweaker{
     public static final String ELCA_VERSION;
 
     static {
-        String version = "2.5.1.03";
+        String version = "2.5.2.07";
         boolean isDev = true;
 
         int num  = 0;

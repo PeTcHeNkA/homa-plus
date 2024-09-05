@@ -1,6 +1,8 @@
 package plus.fserver.utls.collections;
 
 
+import java.util.function.Consumer;
+
 public class FlatMap<T> {
     private Node[] nodes;
     private int mask;
@@ -146,6 +148,18 @@ public class FlatMap<T> {
             }
         }
         count = 0;
+    }
+
+
+    public void forEach(Consumer<T> consumer){
+        Node[] nodes = this.nodes;
+        for (int i = 0, s = nodes.length; i < s; i++) {
+            Node node = nodes[i];
+            while (node != null) {
+                consumer.accept((T) node.chunk);
+                node = node.next;
+            }
+        }
     }
 
 

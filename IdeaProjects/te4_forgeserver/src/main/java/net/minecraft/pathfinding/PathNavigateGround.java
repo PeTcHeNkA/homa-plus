@@ -144,7 +144,7 @@ public class PathNavigateGround extends PathNavigate {
             d1 = d1 * d2;
 
             //todo maybe non-threadsafe
-            IBlockAccess access = world.access();
+            IBlockEAccess access = world.access();
             PntMatrix matrix = ((WalkNodeProcessor)nodeProcessor).matrix;
             //todo maybe this equal "if false"
             if(matrix == null){
@@ -194,7 +194,7 @@ public class PathNavigateGround extends PathNavigate {
     }
 
 
-    private boolean isSafeToStandAt(IBlockAccess access, PntMatrix.Chunked chunked, int x, int y, int z, int sizeX, int sizeY, int sizeZ, Vec3d vec31, double param, double param2) {
+    private boolean isSafeToStandAt(IBlockEAccess access, PntMatrix.Chunked chunked, int x, int y, int z, int sizeX, int sizeY, int sizeZ, Vec3d vec31, double param, double param2) {
         int dX = x - sizeX / 2;
         int dZ = z - sizeZ / 2;
 

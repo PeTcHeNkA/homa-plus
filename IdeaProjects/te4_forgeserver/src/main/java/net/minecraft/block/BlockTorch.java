@@ -11,7 +11,7 @@ import java.util.*;
 import net.minecraftforge.fml.relauncher.*;
 import net.minecraft.util.*;
 import net.minecraft.block.state.*;
-import plus.fserver.utls.collections.ArrayListE6;
+import plus.fserver.utls.collections.AABBList;
 
 
 public class BlockTorch extends Block {
@@ -59,7 +59,7 @@ public class BlockTorch extends Block {
 
 
     @Override
-    public void addCollisionBoxToListF(IBlockState state, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> collidingBoxes) {}
+    public void addCollisionBoxToListF(IBlockState state, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, AABBList collidingBoxes) {}
 
 
     @Override

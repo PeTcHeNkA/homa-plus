@@ -30,6 +30,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.api.Keep;
+import plus.fserver.utls.collections.AABBList;
 import plus.fserver.utls.collections.ArrayListE6;
 import plus.fserver.utls.collections.ArrayListEV;
 import static plus.fserver.block.BlockFs.addCollisionBoxToListFx;
@@ -107,7 +108,7 @@ public class BlockStairs extends Block {
 
 
     @Override
-    public void addCollisionBoxToListF(IBlockState bstate, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> collidingBoxes) {
+    public void addCollisionBoxToListF(IBlockState bstate, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, AABBList collidingBoxes) {
         bstate = this.getActualState(bstate, access, pos);
 
         addCollisionBoxToListFx(pos, entityBox, collidingBoxes, bstate.getValue(HALF) == BlockStairs.EnumHalf.TOP ? AABB_SLAB_TOP : AABB_SLAB_BOTTOM);

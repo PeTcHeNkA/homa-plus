@@ -5,7 +5,8 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
-import plus.fserver.utls.collections.ArrayListE6;
+import plus.fserver.block.BlockFs;
+import plus.fserver.utls.collections.AABBList;
 
 
 public class BlockFallingFs extends BlockFalling {
@@ -17,11 +18,7 @@ public class BlockFallingFs extends BlockFalling {
 
 
     @Override
-    public void addCollisionBoxToListF(IBlockState state, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, ArrayListE6<AxisAlignedBB> list) {
-        AxisAlignedBB src;
-        AxisAlignedBB blockBox = getCollisionBoundingBox(state, access, pos);
-        if((src = list.getSafe(list.sizeC())) != null) blockBox.offsetTo(pos, src);
-        else src = blockBox.offset(pos);
-        if (entityBox.intersects(src)) list.addF(src);
+    public void addCollisionBoxToListF(IBlockState state, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, AABBList list) {
+        BlockFs.addCollisionBoxToListFs(pos, entityBox, list, getCollisionBoundingBox(state, access, pos));
     }
 }
