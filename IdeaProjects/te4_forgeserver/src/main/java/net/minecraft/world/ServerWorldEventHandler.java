@@ -54,7 +54,7 @@ public class ServerWorldEventHandler implements IWorldEventListener {
 
     @Override
     public void playSoundToAllNearExcept(@Nullable EntityPlayer player, SoundEvent soundIn, SoundCategory category, double x, double y, double z, float volume, float pitch) {
-        this.server.getPlayerList().sendToAllNearExcept(player, x, y, z, volume > 1.0F ? (double)(16.0F * volume) : 16.0D, this.world.provider.getDimension(), new SPacketSoundEffect(soundIn, category, x, y, z, volume, pitch));
+        world.sendToAllNearExcept(player, x, y, z, volume > 1.0F ? (double)(16.0F * volume) : 16.0D, new SPacketSoundEffect(soundIn, category, x, y, z, volume, pitch));
     }
 
 
@@ -78,7 +78,7 @@ public class ServerWorldEventHandler implements IWorldEventListener {
 
     @Override
     public void playEvent(EntityPlayer player, int type, BlockPos blockPosIn, int data) {
-        this.server.getPlayerList().sendToAllNearExcept(player, blockPosIn.getX(), blockPosIn.getY(), blockPosIn.getZ(), 64.0D, this.world.provider.getDimension(), new SPacketEffect(type, blockPosIn, data, false));
+        world.sendToAllNearExcept(player, blockPosIn.getX(), blockPosIn.getY(), blockPosIn.getZ(), 64.0D, new SPacketEffect(type, blockPosIn, data, false));
     }
 
 

@@ -26,6 +26,7 @@ import net.minecraft.entity.passive.EntityWaterMob;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
+import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.*;
 import net.minecraft.profiler.Profiler;
@@ -838,10 +839,63 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
     @Override
     public boolean addWeatherEffect(Entity entityIn) {
         if (super.addWeatherEffect(entityIn)) {
-            this.server.getPlayerList().sendToAllNearExcept((EntityPlayer)null, entityIn.posX, entityIn.posY, entityIn.posZ, 512.0D, this.provider.getDimension(), new SPacketSpawnGlobalEntity(entityIn));
+            sendToAllNearExcept(null, entityIn.posX, entityIn.posY, entityIn.posZ, 512.0D, new SPacketSpawnGlobalEntity(entityIn));
             return true;
         } else {
             return false;
+        }
+    }
+
+
+    public void sendPacketToAllPlayers(Packet<?> packetIn) {
+        List<EntityPlayer> players = playerEntities;
+        if(players.isEmpty())return;
+
+        EntityPlayerMP first = (EntityPlayerMP) players.get(0);
+        first.connection.netManager.exec(() -> {
+            first.connection.netManager.sendPacketSync(packetIn);
+            for (int i = 1; i < players.size(); ++i) {
+                ((EntityPlayerMP) players.get(i)).connection.netManager.sendPacketSync(packetIn);
+            }
+        });
+    }
+
+
+    public void sendToAllNearExcept(@Nullable EntityPlayer except, double x, double y, double z, double radius, Packet<?> packetIn) {
+        final double radius1 = radius*radius;
+        double d0, d1, d2;
+        List<EntityPlayer> players = playerEntities;
+        for (int i = 0; i < players.size(); ++i) {
+            EntityPlayer player = players.get(i);
+            if (player != except) {
+                d0 = x - player.posX;
+                d1 = y - player.posY;
+                d2 = z - player.posZ;
+
+                if (d0 * d0 + d1 * d1 + d2 * d2 < radius1){
+                    EntityPlayerMP mp = (EntityPlayerMP) player;
+
+                    final NetworkManager first = mp.connection.netManager;
+                    final int finalI = i;
+                    first.exec(() -> {
+                        first.sendPacketSync(packetIn);
+                        double d01, d11, d21;
+                        for (int i1 = finalI; i1 < players.size(); ++i1) {
+                            EntityPlayer player1 = players.get(i1);
+                            if (player1 != except) {
+                                d01 = x - player1.posX;
+                                d11 = y - player1.posY;
+                                d21 = z - player1.posZ;
+
+                                if (d01 * d01 + d11 * d11 + d21 * d21 < radius1){
+                                    ((EntityPlayerMP)player1).connection.netManager.sendPacketSync(packetIn);
+                                }
+                            }
+                        }
+                    });
+                    break;
+                }
+            }
         }
     }
 
@@ -902,9 +956,8 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
             this.blockEventCacheIndex ^= 1;
 
             for (BlockEventData data : this.blockEventQueue[i]) {
-
                 if (this.fireBlockEvent(data)) {
-                    this.server.getPlayerList().sendToAllNearExcept(null, data.getPosition().getX(), data.getPosition().getY(), data.getPosition().getZ(), 64.0D, this.provider.getDimension(), new SPacketBlockAction(data.getPosition(), data.getBlock(), data.getEventID(), data.getEventParameter()));
+                    sendToAllNearExcept(null, data.getPosition().getX(), data.getPosition().getY(), data.getPosition().getZ(), 64.0D, new SPacketBlockAction(data.getPosition(), data.getBlock(), data.getEventID(), data.getEventParameter()));
                 }
             }
             this.blockEventQueue[i].clear();
@@ -929,11 +982,11 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         super.updateWeather();
 
         if (this.prevRainingStrength != this.rainingStrength) {
-            this.server.getPlayerList().sendPacketToAllPlayersInDimensionE(new SPacketChangeGameState(7, this.rainingStrength), this.provider.getDimension());
+            sendPacketToAllPlayers(new SPacketChangeGameState(7, this.rainingStrength));
         }
 
         if (this.prevThunderingStrength != this.thunderingStrength) {
-            this.server.getPlayerList().sendPacketToAllPlayersInDimensionE(new SPacketChangeGameState(8, this.thunderingStrength), this.provider.getDimension());
+            sendPacketToAllPlayers(new SPacketChangeGameState(8, this.thunderingStrength));
         }
 
         /* The function in use here has been replaced in order to only send the weather info to players in the correct dimension,
@@ -942,21 +995,19 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
          */
         if (flag != this.isRaining()) {
             if (flag) {
-                this.server.getPlayerList().sendPacketToAllPlayersInDimensionE(
-                        new SPacketChangeGameState(2, 0.0F), this.provider.getDimension()
+                sendPacketToAllPlayers(
+                        new SPacketChangeGameState(2, 0.0F)
                 );
             } else {
-                this.server.getPlayerList().sendPacketToAllPlayersInDimensionE(
-                        new SPacketChangeGameState(1, 0.0F), this.provider.getDimension()
+                sendPacketToAllPlayers(
+                        new SPacketChangeGameState(1, 0.0F)
                 );
             }
-            this.server.getPlayerList().sendPacketToAllPlayersInDimensionE(
-                    new SPacketChangeGameState(7, this.rainingStrength),
-                    this.provider.getDimension()
+            sendPacketToAllPlayers(
+                    new SPacketChangeGameState(7, this.rainingStrength)
             );
-            this.server.getPlayerList().sendPacketToAllPlayersInDimensionE(
-                    new SPacketChangeGameState(8, this.thunderingStrength),
-                    this.provider.getDimension()
+            sendPacketToAllPlayers(
+                    new SPacketChangeGameState(8, this.thunderingStrength)
             );
         }
     }

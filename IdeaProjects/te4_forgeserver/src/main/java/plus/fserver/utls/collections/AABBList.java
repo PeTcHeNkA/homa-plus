@@ -4,7 +4,6 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
 import plus.fserver.ElcaCV2;
-
 import java.util.*;
 import java.util.function.Consumer;
 

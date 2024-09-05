@@ -148,7 +148,7 @@ public abstract class MinecraftServer implements ICommandSender, Runnable, IThre
     private final PlayerProfileCache profileCache;
     private long nanoTimeSinceStatusRefresh;
     public final Queue < FutureTask<? >> futureTaskQueue = Queues.newArrayDeque();
-    private Thread serverThread;
+    public Thread serverThread;
     protected long currentTime = getCurrentTimeMillis();
     @SideOnly(Side.CLIENT)
     private boolean worldIconSet;

@@ -1184,7 +1184,9 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
     //todo use pooled event
     public void playSound(@Nullable EntityPlayer player, double x, double y, double z, SoundEvent soundIn, SoundCategory category, float volume, float pitch) {
-        PlaySoundAtEntityEvent event = ForgeEventFactory.onPlaySoundAtEntity(player, soundIn, category, volume, pitch);
+        PlaySoundAtEntityEvent event;
+        (event = playSoundEvent).initPlaySound(player, soundIn, category, volume, pitch);
+        MinecraftForge.EVENT_BUS.postF(event);
         if (event.isCanceled() || event.getSound() == null) return;
         soundIn = event.getSound();
         category = event.getCategory();
@@ -3555,6 +3557,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     private final LivingSpawnEvent.AllowDespawn allowDespawn  = new LivingSpawnEvent.AllowDespawn();
     private final BlockEvent.CropGrowEvent.Pre  cropGrowPre   = new BlockEvent.CropGrowEvent.Pre();
     private final BlockEvent.CropGrowEvent.Post croptGrowPost = new BlockEvent.CropGrowEvent.Post();
+    private final PlaySoundAtEntityEvent       playSoundEvent = new PlaySoundAtEntityEvent(null,null,null,0,0);
 
     public  final EntityEvent.EnteringChunk     enteringChunk = new EntityEvent.EnteringChunk(null,0,0,0,0);
     public  final ChunkWatchEvent             chunkWatchEvent = new ChunkWatchEvent.Watch().forBus(MinecraftForge.EVENT_BUS);

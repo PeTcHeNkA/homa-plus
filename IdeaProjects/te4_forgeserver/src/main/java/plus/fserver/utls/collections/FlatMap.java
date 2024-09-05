@@ -156,7 +156,8 @@ public class FlatMap<T> {
         for (int i = 0, s = nodes.length; i < s; i++) {
             Node node = nodes[i];
             while (node != null) {
-                consumer.accept((T) node.chunk);
+                Object chunk = node.chunk;
+                if(chunk != null)consumer.accept((T) chunk);
                 node = node.next;
             }
         }
