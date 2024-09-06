@@ -86,21 +86,22 @@ public class PathNavigateGround extends PathNavigate {
 
 
     private int getPathablePosY() {
-        if (this.entity.isInWater() && this.getCanSwim()) {
+        Entity entity = this.entity;
+        if (entity.isInWater() && this.getCanSwim()) {
             IBlockEAccess access = world.access();
-            int i = (int)this.entity.getEntityBoundingBox().minY, px, pz, j = 0;
+            int i = (int)entity.getEntityBoundingBox().minY, px, pz, j = 0;
 
-            Block block = access.getBlockState(px = MathHelper.floor(this.entity.posX), i, pz = MathHelper.floor(this.entity.posZ)).getBlock();
+            Block block = access.getBlockState(px = MathHelper.floor(entity.posX), i, pz = MathHelper.floor(entity.posZ)).getBlock();
 
 
             while (block == Blocks.FLOWING_WATER || block == Blocks.WATER) {
                 ++i;
                 block = access.getBlockState(px, i, pz).getBlock();
                 ++j;
-                if (j > 16) return (int)this.entity.getEntityBoundingBox().minY;
+                if (j > 16) return (int)entity.getEntityBoundingBox().minY;
             }
             return i;
-        } else return (int)(this.entity.getEntityBoundingBox().minY + 0.5D);
+        } else return (int)(entity.getEntityBoundingBox().minY + 0.5D);
     }
 
 
@@ -210,7 +211,7 @@ public class PathNavigateGround extends PathNavigate {
                     if (d0 * param + d1 * param2 >= 0.0D) {
                         chunked = chunked.get(curX, curZ);
                         type = chunked.getCur(curX, y - 1, curZ);
-                        if(type==null) {
+                        if(type == null) {
                             type = this.nodeProcessor.getPathNodeType(access, curX, y - 1, curZ, this.entity, sizeX, sizeY, sizeZ, true, true);
                             chunked.setCur(curX, y - 1, curZ, type);
                         }
@@ -219,7 +220,7 @@ public class PathNavigateGround extends PathNavigate {
                         if (type == PathNodeType.OPEN) return false;
 
                         type = chunked.getCur(curX, y, curZ);
-                        if(type==null) {
+                        if(type == null) {
                             type = this.nodeProcessor.getPathNodeType(access, curX, y, curZ, this.entity, sizeX, sizeY, sizeZ, true, true);
                             chunked.setCur(curX, y, curZ, type);
                         }
@@ -245,8 +246,8 @@ public class PathNavigateGround extends PathNavigate {
         for (;x<fx;++x)
             for (;z<fz;++z)
                 for (;y<fy;++y){
-                    pos.setPos(x, y, z);
-                    if ((pos.getX() + 0.5D - vec.x) * p1 + (pos.getZ() + 0.5D - vec.z) * p2 >= 0.0D
+                    pos.setPosB(x, y, z);
+                    if ((x + 0.5D - vec.x) * p1 + (z + 0.5D - vec.z) * p2 >= 0.0D
                         && access.getBlockState(pos).getBlock().isPassable(access, pos)
                     ) return false;
                 }

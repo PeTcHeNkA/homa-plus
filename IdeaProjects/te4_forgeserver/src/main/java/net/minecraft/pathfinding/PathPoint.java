@@ -107,11 +107,26 @@ public class PathPoint {
     }
 
 
+    public int distanceToSquaredInt(PathPoint pathpointIn) {
+        int f  = (pathpointIn.x - this.x);
+        int f1 = (pathpointIn.y - this.y);
+        int f2 = (pathpointIn.z - this.z);
+        return f * f + f1 * f1 + f2 * f2;
+    }
+
+
     public float distanceManhattan(PathPoint point) {
         float f  = (float)Math.abs(point.x - this.x);
         float f1 = (float)Math.abs(point.y - this.y);
         float f2 = (float)Math.abs(point.z - this.z);
         return f + f1 + f2;
+    }
+
+
+    public int distanceManhattanInt(PathPoint point) {
+        return    Math.abs(point.x - this.x)
+                + Math.abs(point.y - this.y)
+                + Math.abs(point.z - this.z);
     }
 
 

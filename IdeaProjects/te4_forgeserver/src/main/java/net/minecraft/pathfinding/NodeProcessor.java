@@ -8,11 +8,11 @@ import plus.fserver.api.IBlockEAccess;
 import plus.fserver.utls.collections.PointHashMap;
 
 
-public abstract class NodeProcessor {
+public abstract class NodeProcessor extends PointHashMap{
     protected final BlockPos.MutableBlockPos pooledPos = new BlockPos.MutableBlockPos();
     protected IBlockEAccess blockaccess;
     protected EntityLiving entity;
-    protected final PointHashMap pointMap = new PointHashMap();
+    //protected final PointHashMap pointMap = new PointHashMap();
     protected int entitySizeX;
     protected int entitySizeY;
     protected int entitySizeZ;
@@ -23,7 +23,7 @@ public abstract class NodeProcessor {
     public void init(IBlockAccess sourceIn, EntityLiving mob) {
         this.blockaccess = (IBlockEAccess) sourceIn;
         this.entity = mob;
-        this.pointMap.clearMap();
+        super.clearMap();
         this.entitySizeX = MathHelper.floor(mob.width + 1.0F);
         this.entitySizeY = MathHelper.floor(mob.height + 1.0F);
         this.entitySizeZ = MathHelper.floor(mob.width + 1.0F);
@@ -37,17 +37,19 @@ public abstract class NodeProcessor {
 
 
     protected PathPoint openPoint(int x, int y, int z) {
-        int hash = PathPoint.makeHash(x, y, z);
-        PathPoint pathpoint = this.pointMap.lookup(hash);
-        if (pathpoint == null) {
-            pathpoint = pointMap.tryGetValueOnInsert();
+        int hash;
+        PathPoint point;
+        if ((point = super.lookup(
+                hash = PathPoint.makeHash(x, y, z)
+        )) == null) {
+            if((point = super.tryGetValueOnInsert()) == null)
+                point = new PathPoint(x, y, z, hash);
+            else
+                point.init(x, y, z, hash);
 
-            if(pathpoint == null) pathpoint = new PathPoint(x, y, z, hash);
-            else                  pathpoint.init(x, y, z, hash);
-
-            this.pointMap.addKey(hash, pathpoint);
+            super.addKey(hash, point);
         }
-        return pathpoint;
+        return point;
     }
 
 

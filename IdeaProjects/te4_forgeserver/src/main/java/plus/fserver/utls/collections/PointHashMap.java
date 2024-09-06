@@ -26,11 +26,9 @@ public class PointHashMap {
     }
 
 
-    public PathPoint lookup(int hashEntry) {
-        for (PointHashMap.Entry entry = this.slots[getSlotIndex(hashEntry)]; entry != null; entry = entry.nextEntry) {
-            if (entry.hashEntry == hashEntry) {
-                return entry.valueEntry;
-            }
+    public PathPoint lookup(int hash) {
+        for (PointHashMap.Entry entry = this.slots[getSlotIndex(hash)]; entry != null; entry = entry.nextEntry) {
+            if (entry.hashEntry == hash) return entry.valueEntry;
         }
         return null;
     }

@@ -3565,6 +3565,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public  final EntityEvent.CanUpdate       canUpdateEvent  = new EntityEvent.CanUpdate(null).forBus(MinecraftForge.EVENT_BUS);
     public  final Random              commonWorldEntityRandom = new FastRandom();
     public  final AxisAlignedBB         commonWorldEntityAABB = new AxisAlignedBB(0,0,0,0,0,0);
+    public  final AxisAlignedBB        commonWorldEntityAABB2 = new AxisAlignedBB(0,0,0,0,0,0);
     public  final CollisionPredicate                 entityCP = new CollisionPredicate();
 
     public  final Vec3dMut                 commonEntityVec3d1 = new Vec3dMut(0,0,0);
@@ -3951,20 +3952,22 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public boolean isFlammableWithin(AxisAlignedBB bb) {
         int yPos, maxY;
         if((yPos = MathHelper.floor(bb.minY)) < 0 || (maxY = MathHelper.ceil(bb.maxY)) > 255)return false;
-
         int xPos, maxX, zPos, maxZ;
 
         if (this.isAreaLoaded0((xPos = MathHelper.floor(bb.minX)), (zPos = MathHelper.floor(bb.minZ)), (maxX = MathHelper.ceil(bb.maxX)),
-                (maxZ = MathHelper.ceil(bb.maxZ))))
+                (maxZ = MathHelper.ceil(bb.maxZ)))) {
+            final ChunkSelector access = localSelector;
+            final BlockPos.MutableBlockPos mut = tempPooledLocalPos;
             for (Block block; xPos < maxX; ++xPos)
                 for (; zPos < maxZ; ++zPos)
                     for (; yPos < maxY; ++yPos) {
-                        block = localSelector.getStateUnchecked(xPos, yPos, zPos).getBlock();
+                        block = access.getStateUnchecked(xPos, yPos, zPos).getBlock();
                         if (block == Blocks.FIRE || block == Blocks.FLOWING_LAVA || block == Blocks.LAVA)
                             return true;
-                        else if (block.isBurning(this, tempPooledLocalPos.setPos(xPos, yPos, zPos)))
+                        else if (block.isBurning(this, mut.setPos(xPos, yPos, zPos)))
                             return true;
                     }
+        }
         return false;
     }
 
@@ -4036,10 +4039,10 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         int minZ = MathHelper.floor(aabb.minZ) - 1;
         int maxZ = MathHelper.ceil(aabb.maxZ) + 1;
 
-        boolean flag  = entityIn != null && entityIn.isOutsideBorder(),
-                flag1 = entityIn != null && isInsideWorldBorder(entityIn);
+        boolean flag1 = entityIn == null || isInsideWorldBorder(entityIn);
         ChunkSelector selector = localSelector;
         Chunk chunk;
+        BlockPos.MutableBlockPos mut = tempPooledLocalPos;
 
         for (int xPos = minX; xPos < maxX; ++xPos) {
             final boolean flag2 = xPos == minX || xPos == maxX - 1;
@@ -4049,14 +4052,18 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
                 if ((!flag2 || !flag3) && (chunk = selector.getLoadedE(xPos >> 4, zPos >> 4)) != null)
                     for (int yPos = minY; yPos < maxY; ++yPos)
                         if (!flag2 && !flag3 || yPos != maxY - 1) {
-                            if (entityIn != null && flag == flag1) entityIn.setOutsideBorder(!flag1);
 
-                            if (flag1 && !isInWorldBorder(xPos, zPos)) {
-                                BlockIDIndexes.STONE_STATE
-                                        .addCollisionBoxToListF(selector, tempPooledLocalPos.setPos(xPos, yPos, zPos), aabb, outList);
-                            } else {
+                            if (flag1) {
                                 chunk.getBlockStateUnchecked(xPos, yPos, zPos)
-                                        .addCollisionBoxToListF(selector, tempPooledLocalPos.setPos(xPos, yPos, zPos), aabb, outList);
+                                        .addCollisionBoxToListF(selector, mut.setPos(xPos, yPos, zPos), aabb, outList);
+                            } else {
+                                if(isInWorldBorder(xPos, zPos)){
+                                    chunk.getBlockStateUnchecked(xPos, yPos, zPos)
+                                            .addCollisionBoxToListF(selector, mut.setPos(xPos, yPos, zPos), aabb, outList);
+                                } else {
+                                    BlockIDIndexes.STONE_STATE
+                                            .addCollisionBoxToListF(selector, mut.setPos(xPos, yPos, zPos), aabb, outList);
+                                }
                             }
                         }
             }

@@ -22,15 +22,12 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.gen.ChunkProviderServer;
 import plus.fserver.ElcaConfig;
 import plus.fserver.utls.collections.AABBList;
-import plus.fserver.utls.collections.ArrayListE6;
 import plus.fserver.utls.collections.ArrayRemSwapListE6;
 import plus.tson.utl.Te4HashSet;
 import java.util.Arrays;
 
 
 public class EMoveHelper {
-
-
     public static void move(Entity entity, MoverType type, double x, double y, double z) {
         if (entity.noClip) {
             entity.getEntityBoundingBox().offsetMut(x, y, z);
@@ -40,32 +37,33 @@ public class EMoveHelper {
             float fl1;
             final WorldServer world = (WorldServer) entity.world;
             if (type == MoverType.PISTON) {
+                float[] pistonDeltas = entity.pistonDeltas;
                 long i;
                 if ((i = world.getTotalWorldTime()) != entity.pistonDeltasGameTime) {
-                    Arrays.fill(entity.pistonDeltas, 0.0f);
+                    Arrays.fill(pistonDeltas, 0.0f);
                     entity.pistonDeltasGameTime = i;
                 }
 
                 if (x != 0.0D) {
-                    fl1 = MathHelper.clamp((float)x + entity.pistonDeltas[temp = EnumFacing.Axis.X.ordinal()], -0.51f, 0.51f);
-                    x = fl1 - entity.pistonDeltas[temp];
-                    entity.pistonDeltas[temp] = fl1;
+                    fl1 = MathHelper.clamp((float)x + pistonDeltas[temp = EnumFacing.Axis.X.ordinal()], -0.51f, 0.51f);
+                    x = fl1 - pistonDeltas[temp];
+                    pistonDeltas[temp] = fl1;
 
                     if (Math.abs(x) <= 9.999999747378752E-6D) return;
 
                 } else if (y != 0.0D) {
-                    fl1 = MathHelper.clamp((float)y + entity.pistonDeltas[temp = EnumFacing.Axis.Y.ordinal()], -0.51f, 0.51f);
-                    y = fl1 - entity.pistonDeltas[temp];
-                    entity.pistonDeltas[temp] = fl1;
+                    fl1 = MathHelper.clamp((float)y + pistonDeltas[temp = EnumFacing.Axis.Y.ordinal()], -0.51f, 0.51f);
+                    y = fl1 - pistonDeltas[temp];
+                    pistonDeltas[temp] = fl1;
 
                     if (Math.abs(y) <= 9.999999747378752E-6D) return;
 
                 } else {
                     if (z == 0.0D) return;
 
-                    fl1 = MathHelper.clamp((float)z + entity.pistonDeltas[temp = EnumFacing.Axis.Z.ordinal()], -0.51f, 0.51f);
-                    z = fl1 - entity.pistonDeltas[temp];
-                    entity.pistonDeltas[temp] = fl1;
+                    fl1 = MathHelper.clamp((float)z + pistonDeltas[temp = EnumFacing.Axis.Z.ordinal()], -0.51f, 0.51f);
+                    z = fl1 - pistonDeltas[temp];
+                    pistonDeltas[temp] = fl1;
 
                     if (Math.abs(z) <= 9.999999747378752E-6D) return;
                 }
@@ -160,11 +158,13 @@ public class EMoveHelper {
 
 
         public void complete(){
-            entity.world.getCollisionBoxesFalse(entity, moveBox, this);
+            Entity entity = this.entity;
             entity.moveTask = null;
-            completeMove(entity, this, x, y, z);
-            ((WorldServer)entity.world).freeMoveTask(this);
             this.entity = null;
+            WorldServer world;
+            (world =((WorldServer)entity.world)).getCollisionBoxesFalse(entity, moveBox, this);
+            completeMove(entity, this, x, y, z);
+            world.freeMoveTask(this);
         }
     }
 
@@ -223,26 +223,27 @@ public class EMoveHelper {
                 MoveTask curTask;
                 if ((curTask = (cur = arr[i]).moveTask) == null) continue;
 
-                int curSize = curTask.sizeC();
-
-                l1: if(!cur.ignoreCollisions() && curSize < ElcaConfig.MAX_ENTITY_COLLISIONS_MOVE) {
-                    AxisAlignedBB aaBBMove = curTask.moveBox;
+                int lim;
+                l1: if(!cur.ignoreCollisions() && (lim = curTask.sizeC()) < ElcaConfig.MAX_ENTITY_COLLISIONS_MOVE) {
+                    AxisAlignedBB aabb;
+                    double x1 = (aabb = curTask.moveBox).minX, y1 = aabb.minY, z1 = aabb.minZ,
+                           x2 =  aabb.maxX                   , y2 = aabb.maxY, z2 = aabb.maxZ;
                     for (int j = i + 1; j < size; j++) {
                         Entity check;
                         if(!(check = arr[j]).ignoreCollisions()) {
                             MoveTask checkTask;
                             if ((checkTask = check.moveTask) == null) {
                                 AxisAlignedBB checkBox = check.getEntityBoundingBox();
-                                if (checkBox.intersects(aaBBMove)) {
+                                if (checkBox.intersectsXZY(x1, y1, z1, x2, y2, z2)) {
                                     curTask.addBox(checkBox);
-                                    if (++curSize >= ElcaConfig.MAX_ENTITY_COLLISIONS_MOVE) break l1;
+                                    if (++lim >= ElcaConfig.MAX_ENTITY_COLLISIONS_MOVE) break l1;
                                 }
                             } else {
-                                AxisAlignedBB checkBox = checkTask.moveBox;
-                                if (checkBox.intersects(aaBBMove)) {
+                                AxisAlignedBB checkBox;
+                                if ((checkBox = checkTask.moveBox).intersectsXZY(x1, y1, z1, x2, y2, z2)) {
                                     curTask.addBox(checkBox);
                                     checkTask.addBox(checkBox);
-                                    if (++curSize >= ElcaConfig.MAX_ENTITY_COLLISIONS_MOVE) break l1;
+                                    if (++lim >= ElcaConfig.MAX_ENTITY_COLLISIONS_MOVE) break l1;
                                 }
                             }
                         }
@@ -293,8 +294,14 @@ public class EMoveHelper {
             flag = true;
         }
 
-        if(flag) axisalignedbb.offsetMut(x, y, z);
-
+        AxisAlignedBB prev = world.commonWorldEntityAABB;
+        prev.initSafe(
+                axisalignedbb.minX, axisalignedbb.minY, axisalignedbb.minZ,
+                axisalignedbb.maxX, axisalignedbb.maxY, axisalignedbb.maxZ
+        );
+        if(flag) {
+            axisalignedbb.offsetMut(x, y, z);
+        }
 
         flag = entity.onGround || dy1 != y && dy1 < 0.0D;
 
@@ -303,12 +310,12 @@ public class EMoveHelper {
             dx2 = x;
             dy2 = y;
             dz2 = z;
-            AxisAlignedBB prev = entity.getEntityBoundingBox();
-            entity.setEntityBoundingBox(axisalignedbb);
+
+            //entity.setEntityBoundingBox(axisalignedbb);
             y = entity.stepHeight;
 
             final AxisAlignedBB aab2 = entity.getEntityBoundingBox();
-            aab2.expandTo(dx1, 0.0D, dz1, axisalignedbb = world.commonWorldEntityAABB);
+            aab2.expandTo(dx1, 0.0D, dz1, axisalignedbb = world.commonWorldEntityAABB2);
             double d8 = y;
             temp = 0;
 
@@ -368,10 +375,13 @@ public class EMoveHelper {
                 x = dx2;
                 y = dy2;
                 z = dz2;
-                entity.setEntityBoundingBox(prev);
+
+                entity.getEntityBoundingBox().initSafe(
+                        prev.minX, prev.minY, prev.minZ,
+                        prev.maxX, prev.maxY, prev.maxZ
+                );
             } else {
-                (axisalignedbb = entity.getEntityBoundingBox()).offsetMut(0.0D, y, 0.0D);
-                entity.setEntityBoundingBox(axisalignedbb);
+                entity.getEntityBoundingBox().offsetMut(0.0D, y, 0.0D);
             }
         }
         entity.resetPositionToBB();
@@ -380,12 +390,12 @@ public class EMoveHelper {
         entity.collided = (entity.collidedHorizontally = dx1 != x || dz1 != z) || entity.collidedVertically;
 
         BlockPos.MutableBlockPos pos;
-        IBlockState state = world.access().getBlockState(
+        IBlockState state = world.localSelector.getState(
                 pos = world.localTempPos.setPos(entity.posX, entity.posY - 0.20000000298023224D, entity.posZ)
         );
 
         if (state.getMaterial() == Material.AIR) {
-            IBlockState state1 = world.access().getBlockState(pos.getX(), pos.getY()-1, pos.getZ());
+            IBlockState state1 = world.localSelector.getBlockState(pos.getX(), pos.getY()-1, pos.getZ());
             Block block1 = state1.getBlock();
 
             if (block1 instanceof BlockFence || block1 instanceof BlockWall || block1 instanceof BlockFenceGate) {
@@ -436,8 +446,7 @@ public class EMoveHelper {
             CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Checking entity block collision");
             CrashReportCategory cat = crashreport.makeCategory("Entity being checked for collision");
             entity.addEntityCrashInfo(cat);
-            if(!world.isRemote)world.getMinecraftServer().ticker().onError((WorldServer) world, new ReportedException(crashreport));
-            else throw new ReportedException(crashreport);
+            world.getMinecraftServer().ticker().onError((WorldServer) world, new ReportedException(crashreport));
         }
 
         flag = entity.isWet();

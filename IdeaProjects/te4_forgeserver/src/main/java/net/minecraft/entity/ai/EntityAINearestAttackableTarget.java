@@ -176,6 +176,7 @@ public class EntityAINearestAttackableTarget<T extends EntityLivingBase> extends
     }
 
 
+    @Override
     public void startExecuting() {
         this.taskOwner.setAttackTarget(this.targetEntity);
         super.startExecuting();

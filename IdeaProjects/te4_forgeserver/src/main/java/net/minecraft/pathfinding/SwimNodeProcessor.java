@@ -26,10 +26,11 @@ public class SwimNodeProcessor extends NodeProcessor {
     public int findPathOptions(PathPoint[] pathOptions, PathPoint currentPoint, PathPoint targetPoint, float maxDistance) {
         int i = 0;
         PathPoint point;
+        float maxDistanceSq = maxDistance * maxDistance;
         for (EnumFacing enumfacing : EnumFacing.VALUES)
             if ((point = this.getWaterNode(
                     currentPoint.x + enumfacing.getXOffset(), currentPoint.y + enumfacing.getYOffset(), currentPoint.z + enumfacing.getZOffset()
-            )) != null && !point.visited && point.distanceTo(targetPoint) < maxDistance) {
+            )) != null && !point.visited && point.distanceToSquared(targetPoint) < maxDistanceSq) {
 
                 pathOptions[i++] = point;
             }

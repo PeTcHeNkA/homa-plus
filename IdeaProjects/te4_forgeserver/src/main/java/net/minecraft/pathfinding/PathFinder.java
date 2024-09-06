@@ -33,13 +33,14 @@ public class PathFinder {
     @Nullable
     private Path findPath(IBlockAccess access, EntityLiving entitylivingIn, double x, double y, double z, float maxDistance) {
         this.path.clearPath();
-        this.nodeProcessor.init(access, entitylivingIn);
+        NodeProcessor proc;
+        (proc = nodeProcessor).init(access, entitylivingIn);
         Path path = this.findPath(
-                nodeProcessor.getStart(),
-                nodeProcessor.getPathPointToCoords(x, y, z),
+                proc.getStart(),
+                proc.getPathPointToCoords(x, y, z),
                 maxDistance
         );
-        this.nodeProcessor.postProcess();
+        proc.postProcess();
         return path;
     }
 
@@ -56,7 +57,8 @@ public class PathFinder {
         PathPoint pathpoint = from, cur;
         int limit = 0;
 
-        PathPoint[] options = this.pathOptions;
+        final PathPoint[] options = this.pathOptions;
+        final NodeProcessor proc = this.nodeProcessor;
 
         while (++limit < 200 && !path.isPathEmpty()) {
             if ((cur = path.dequeue()).equals(to)) {
@@ -64,12 +66,12 @@ public class PathFinder {
                 break;
             }
 
-            if (cur.distanceManhattan(to) < pathpoint.distanceManhattan(to))
+            if (cur.distanceManhattanInt(to) < pathpoint.distanceManhattanInt(to))
                 pathpoint = cur;
 
             cur.visited = true;
 
-            for (int k = 0, count = this.nodeProcessor.findPathOptions(options, cur, to, maxDistance); k < count; ++k) {
+            for (int k = 0, count = proc.findPathOptions(options, cur, to, maxDistance); k < count; ++k) {
                 PathPoint point = options[k];
                 float f = cur.distanceManhattan(point);
                 point.distanceFromOrigin = cur.distanceFromOrigin + f;

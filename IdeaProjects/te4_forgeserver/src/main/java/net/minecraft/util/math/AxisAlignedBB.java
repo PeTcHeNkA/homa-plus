@@ -383,6 +383,11 @@ public final class AxisAlignedBB {
     }
 
 
+    public boolean intersectsXZY(double x1, double y1, double z1, double x2, double y2, double z2) {
+        return this.minX < x2 && this.maxX > x1 && this.minZ < z2 && this.maxZ > z1 && this.minY < y2 && this.maxY > y1;
+    }
+
+
     @SideOnly(Side.CLIENT)
     public boolean intersects(Vec3d min, Vec3d max) {
         return this.intersects(Math.min(min.x, max.x), Math.min(min.y, max.y), Math.min(min.z, max.z), Math.max(min.x, max.x), Math.max(min.y, max.y), Math.max(min.z, max.z));
