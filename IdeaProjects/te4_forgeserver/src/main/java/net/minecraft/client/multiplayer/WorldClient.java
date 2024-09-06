@@ -53,6 +53,7 @@ import plus.fserver.ElcaCV;
 import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.collections.AABBList;
 import plus.fserver.utls.collections.ArrayListE6;
+import plus.fserver.utls.collections.EntityList;
 import plus.fserver.world.light.WorldChunkSlice;
 
 import static plus.fserver.ElcaCV.SERVER_COMPILE;
@@ -472,6 +473,7 @@ public class WorldClient extends World {
 
 
     //to merge ========================================================================================================================
+    @Override
     protected <T extends Entity> void getEntitiesWithinAABB0(List<T> list, Class <? extends T > clazz, AxisAlignedBB aabb, @Nullable Predicate<? super T > filter) {
         int j2 = MathHelper.floor((aabb.minX - MAX_ENTITY_RADIUS) / 16.0D);
         int k2 = MathHelper.ceil((aabb.maxX + MAX_ENTITY_RADIUS) / 16.0D);
@@ -617,7 +619,8 @@ public class WorldClient extends World {
     }
 
 
-    protected void getEntitiesInAABBexcludingNoCacheLimited(ArrayListE6<Entity> list, @Nullable Entity entityIn, AxisAlignedBB boundingBox,
+    @Override
+    protected void getEntitiesInAABBexcludingNoCacheLimited(EntityList<Entity> list, @Nullable Entity entityIn, AxisAlignedBB boundingBox,
                                                             @Nullable Predicate <? super Entity > predicate, int lim) {
         int k2 = MathHelper.floor((boundingBox.maxX + MAX_ENTITY_RADIUS) / 16.0D);
         int l2 = MathHelper.floor((boundingBox.minZ - MAX_ENTITY_RADIUS) / 16.0D);
@@ -633,7 +636,8 @@ public class WorldClient extends World {
     }
 
 
-    public void getEntitiesInAABBexcludingNoCache(List<Entity> list, @Nullable Entity entityIn, AxisAlignedBB boundingBox, @Nullable Predicate <? super Entity > predicate) {
+    @Override
+    public void getEntitiesInAABBexcludingNoCache(EntityList<Entity> list, @Nullable Entity entityIn, AxisAlignedBB boundingBox, @Nullable Predicate <? super Entity > predicate) {
         int k2 = MathHelper.floor((boundingBox.maxX + MAX_ENTITY_RADIUS) / 16.0D);
         int l2 = MathHelper.floor((boundingBox.minZ - MAX_ENTITY_RADIUS) / 16.0D);
         int i3 = MathHelper.floor((boundingBox.maxZ + MAX_ENTITY_RADIUS) / 16.0D);

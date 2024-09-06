@@ -9,6 +9,7 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import plus.fserver.utls.collections.ArrayListE6;
 import plus.fserver.utls.collections.ArrayRemSwapListE6;
+import plus.fserver.utls.collections.EntityList;
 import plus.fserver.world.CollisionPredicate;
 
 
@@ -47,7 +48,7 @@ public class EntityCollider {
 
 
     public void collideAll(ClassInheritanceMultiMap<Entity>[] entityLists){
-        ArrayRemSwapListE6<Entity> list;
+        EntityList<Entity> list;
 
         for (ClassInheritanceMultiMap<Entity> part:entityLists){
             int size;
@@ -67,22 +68,20 @@ public class EntityCollider {
     }
 
 
-    private Entity[] export(ArrayRemSwapListE6<Entity> src, int size){
-        Object[] raw = src.raw();
+    private Entity[] export(EntityList<Entity> src, int size){
+        Entity[] raw = src.raw();
         Entity[] result = temp;
         if(result.length < size){
             result = temp = new Entity[size];
         }
-        for (int i = 0; i < size; i++){
-            result[i] = (Entity) raw[i];
-        }
+        if (size >= 0) System.arraycopy(raw, 0, result, 0, size);
         return result;
     }
 
 
     private static class AsyncCollideTask extends ArrayListE6<CollideTask> implements Runnable{
         private final CollisionPredicate cp = new CollisionPredicate();
-        private final ArrayListE6<Entity> temp = new ArrayListE6<>();
+        private final EntityList<Entity> temp = new EntityList<>();
         private int limit;
 
         private void init(int limit) {
@@ -91,7 +90,7 @@ public class EntityCollider {
 
         @Override
         public void run() {
-            final ArrayListE6<Entity> temp = this.temp;
+            final EntityList<Entity> temp = this.temp;
             final CollisionPredicate cp = this.cp;
             final int limit = this.limit, size = this.size;
             final Object[] data = this.data;
@@ -102,7 +101,7 @@ public class EntityCollider {
 
 
     private interface CollideTask{
-        void collide(CollisionPredicate cp, int limit, ArrayListE6<Entity> temp);
+        void collide(CollisionPredicate cp, int limit, EntityList<Entity> temp);
     }
 
 
@@ -134,7 +133,7 @@ public class EntityCollider {
     }
 
 
-    private static void collideAllB(CollisionPredicate cp, Entity[] entities, int size, int limit, ArrayListE6<Entity> temp){
+    private static void collideAllB(CollisionPredicate cp, Entity[] entities, int size, int limit, EntityList<Entity> temp){
         Predicate<Entity> e1;
         Entity[] parts;
         temp.fclear();
@@ -163,9 +162,9 @@ public class EntityCollider {
             }
             int s;
             if((s = temp.sizeC()) > limit){
-                Object[] raw = temp.raw();
+                Entity[] raw = temp.raw();
                 for (int j = 0; j < s; j++){
-                    ((Entity)raw[j]).attackEntityFrom(DamageSource.CRAMMING, 1);
+                    raw[j].attackEntityFrom(DamageSource.CRAMMING, 1);
                 }
             }
             temp.fclear();

@@ -47,7 +47,6 @@ import net.minecraft.world.storage.WorldSavedData;
 import net.minecraft.world.storage.loot.LootTableManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.BlockSnapshot;
-import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.EntityMobGriefingEvent;
@@ -157,7 +156,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public final ActionResult<?> pooledAction = new ActionResult<>(null,null);
 
     final SyncListCache.AABB bbCache;
-    final SyncListCache.ListE6<Entity> eeCache;
+    final SyncListCache.EList eeCache;
     protected IBlockEAccess     effectiveAcces;
     //ONLY SERVER SIDE NOT NULL!
     public final ChunkSelector localSelector;
@@ -194,7 +193,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         perWorldStorage = new MapStorage((ISaveHandler)null);
 
         if(ElcaCV.MORE_MOBS_OPTIMIZER) {
-            eeCache = new SyncListCache.ListE6<>(10, 60);
+            eeCache = new SyncListCache.EList(10, 60);
             bbCache = new SyncListCache.AABB(10, 180);
         } else {
             eeCache = null;
@@ -216,9 +215,9 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
             EntityIDHashSplitedList realEntityList = this.realEntityList;
             ArrayListE10<Entity> toRecreateId = new ArrayListE10<>();
-            for (ArrayRemSwapListE15<Entity> list:realEntityList.getRaw()) {
+            for (EntityRemSwapList.E15<Entity> list:realEntityList.getRaw()) {
                 for (int cursor = 0; cursor < list.sizeC(); ++cursor) {
-                    Entity entity = list.get(cursor);
+                    Entity entity = list.getC(cursor);
                     int id = entity.getEntityId();
                     if(id > maxId){
                         maxId = id;
@@ -228,7 +227,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
                     }
                     if(entity.trackerEntry == null || entity.trackerEntry.trackingPlayers.isEmpty()){
                         toRecreateId.addF(entity);
-                        list.remove(cursor);
+                        list.removeSwap(cursor);
                         --cursor;
                     }
                 }
@@ -1605,9 +1604,9 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     public void tickLoadedEntities(){
-        for (ArrayRemSwapListE15<Entity> list:realEntityList.getRaw()) {
+        for (EntityRemSwapList.E15<Entity> list:realEntityList.getRaw()) {
             for (int cursor = 0; cursor < list.sizeC(); ++cursor) {
-                Entity entity = list.get(cursor);
+                Entity entity = list.getC(cursor);
                 Entity ridding = entity.getRidingEntity();
 
                 if (ridding != null) {
@@ -1626,7 +1625,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
                     if (entity.addedToChunk && this.isChunkLoaded(l1, i2, true)) {
                         this.getChunk(l1, i2).removeEntity(entity);
                     }
-                    list.remove(cursor--);
+                    list.removeSwap(cursor--);
                     this.onEntityRemoved(entity);
                 }
             }
@@ -2435,7 +2434,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     @Keep
     public <T extends Entity> List<T> getEntities(Class <? extends T > entityType, Predicate <? super T > filter) {
         List<T> result = Lists.<T>newArrayList();
-        for (ArrayRemSwapListE15<Entity> list:realEntityList.getRaw()) {
+        for (EntityRemSwapList.E15<Entity> list:realEntityList.getRaw()) {
             for (int cursor = 0, s = list.sizeC(); cursor < s; ++cursor) {
                 Entity entity = list.getC(cursor);
                 if (entityType.isAssignableFrom(entity.getClass()) && filter.apply((T) entity))
@@ -2506,9 +2505,9 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
     public int countEntities(Class<?> entityType) {
         int count = 0;
-        for (ArrayRemSwapListE15<Entity> list:realEntityList.getRaw()) {
+        for (EntityRemSwapList.E15<Entity> list:realEntityList.getRaw()) {
             for (int cursor = 0; cursor < list.sizeC(); ++cursor) {
-                Entity entity = list.get(cursor);
+                Entity entity = list.getC(cursor);
                 if ((!(entity instanceof EntityLiving) || !((EntityLiving) entity).isNoDespawnRequired()) && entityType.isAssignableFrom(entity.getClass())) {
                     ++count;
                 }
@@ -3184,7 +3183,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
      */
     public int countEntities(EnumCreatureType type, boolean forSpawnCount) {
         int count = 0;
-        for (ArrayRemSwapListE15<Entity> list: realEntityList.getRaw()) {
+        for (EntityRemSwapList.E15<Entity> list: realEntityList.getRaw()) {
             for (int cursor = 0, s = list.sizeC(); cursor < s; ++cursor) {
                 if(list.getC(cursor).isCreatureType(type, forSpawnCount))
                     ++count;
@@ -3359,12 +3358,12 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         if(ElcaCV.MORE_MOBS_OPTIMIZER) {
             AABKey key = eeCache.key(aabb);
 
-            final ArrayListE6<Entity> entities = this.eeCache.getC(key);
+            final EntityList<Entity> entities = this.eeCache.getC(key);
             if (entities != null) {
                 if (predicate != null && !entities.isEmptyC()) {
                     for (final Entity entity : entities) {
                         if (!predicate.apply(entity)) {
-                            ArrayListE6<Entity> res = eeCache.allocArr();
+                            EntityList<Entity> res = eeCache.allocArr();
                             getEntitiesInAABBexcludingNoCache(res, entityIn, aabb, predicate);
                             this.eeCache.add(key, res);
                             return res;
@@ -3373,13 +3372,13 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
                 }
                 return entities;
             } else {
-                ArrayListE6<Entity> res = eeCache.allocArr();
+                EntityList<Entity> res = eeCache.allocArr();
                 getEntitiesInAABBexcludingNoCache(res, entityIn, aabb, predicate);
                 this.eeCache.add(key, res);
                 return res;
             }
         } else {
-            ArrayListE6<Entity> res = new ArrayListE6<>();
+            EntityList<Entity> res = new EntityList<>();
             getEntitiesInAABBexcludingNoCache(res, entityIn, aabb, predicate);
             return res;
         }
@@ -3395,27 +3394,27 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         if(ElcaCV.MORE_MOBS_OPTIMIZER) {
             AABKey key = eeCache.key(aabb);
             //AABKey key = new AABKey(aabb);
-            final ArrayListE6<Entity> entities = this.eeCache.getC(key);
+            final EntityList<Entity> entities = this.eeCache.getC(key);
             if (entities != null) {
                 if (entities.isEmptyC()) return (List<T>) entities;
                 for (final Entity entity : entities) {
                     if (!clazz.isInstance(entity) || filter != null && !filter.apply((T) entity)) {
-                        ArrayListE6<T> res = (ArrayListE6<T>) eeCache.allocArr();
+                        EntityList<T> res = eeCache.allocArr();
 
                         getEntitiesWithinAABB0(res, clazz, aabb, filter);
-                        eeCache.add(key, (ArrayListE6<Entity>) res);
+                        eeCache.add(key, (EntityList<Entity>)res);
                         return res;
                     }
                 }
                 return (List<T>) entities;
             } else {
-                ArrayListE6<T> res = (ArrayListE6<T>) eeCache.allocArr();
+                EntityList<T> res = eeCache.allocArr();
                 getEntitiesWithinAABB0(res, clazz, aabb, filter);
-                eeCache.add(key, (ArrayListE6<Entity>) res);
+                eeCache.add(key, (EntityList<Entity>) res);
                 return res;
             }
         } else {
-            ArrayListE6<T> res = new ArrayListE6<>();
+            EntityList<T> res = new EntityList<>();
             getEntitiesWithinAABB0(res, clazz, aabb, filter);
             return res;
         }
@@ -3424,7 +3423,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
     public <T extends Entity> List<T> getEntitiesWithinAABBNoCache(@NotNull Class <? extends T > clazz, @NotNull AxisAlignedBB aabb,
                                                             @Nullable Predicate<? super T > filter){
-        ArrayListE6<T> res = new ArrayListE6<>();
+        EntityList<T> res = new EntityList<>();
         getEntitiesWithinAABB0(res, clazz, aabb, filter);
         return res;
     }
@@ -3484,17 +3483,17 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     @NotNull
-    public List<Entity> getEntitiesInAABBexcludingLimited(@Nullable Entity entityIn, @NotNull AxisAlignedBB aabb,
+    public EntityList<Entity> getEntitiesInAABBexcludingLimited(@Nullable Entity entityIn, @NotNull AxisAlignedBB aabb,
                                                           @Nullable Predicate<? super Entity > predicate, int lim){
         if(ElcaCV.MORE_MOBS_OPTIMIZER) {
             AABKey key = eeCache.key(aabb);
-            final ArrayListE6<Entity> entities = eeCache.getC(key);
+            final EntityList<Entity> entities = eeCache.getC(key);
             if (entities != null) {
                 int size;
                 if (predicate != null && (size = entities.sizeC()) != 0) {
                     for (int i = 0; i < size; ++i) {
                         if (!predicate.apply(entities.getC(i))) {
-                            ArrayListE6<Entity> res = eeCache.allocArr();
+                            EntityList<Entity> res = eeCache.allocArr();
 
                             getEntitiesInAABBexcludingNoCacheLimited(res, entityIn, aabb, predicate, lim);
 
@@ -3505,14 +3504,14 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
                 }
                 return entities;
             } else {
-                final ArrayListE6<Entity> res;
+                final EntityList<Entity> res;
                 getEntitiesInAABBexcludingNoCacheLimited(res = eeCache.allocArr(), entityIn, aabb, predicate, lim);
 
                 eeCache.add(key, res);
                 return res;
             }
         } else {
-            ArrayListE6<Entity> res = new ArrayListE6<>();
+            EntityList<Entity> res = new EntityList<>();
             getEntitiesInAABBexcludingNoCacheLimited(res, entityIn, aabb, predicate, lim);
             return res;
         }
@@ -4176,7 +4175,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     //collisions, no cache
-    protected void getEntitiesInAABBexcludingNoCacheLimited(ArrayListE6<Entity> list, @Nullable Entity entityIn, AxisAlignedBB boundingBox, @Nullable Predicate <? super Entity > predicate, int lim) {
+    protected void getEntitiesInAABBexcludingNoCacheLimited(EntityList<Entity> list, @Nullable Entity entityIn, AxisAlignedBB boundingBox, @Nullable Predicate <? super Entity > predicate, int lim) {
         if(lim==0)return;
         int k2 = MathHelper.floor(boundingBox.maxX + MAX_ENTITY_RADIUS)>>4,
                 l2 = MathHelper.floor(boundingBox.minZ - MAX_ENTITY_RADIUS)>>4,
@@ -4191,7 +4190,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
-    public void getEntitiesInAABBexcludingNoCache(List<Entity> list, @Nullable Entity entityIn, AxisAlignedBB boundingBox, @Nullable Predicate <? super Entity > predicate) {
+    public void getEntitiesInAABBexcludingNoCache(EntityList<Entity> list, @Nullable Entity entityIn, AxisAlignedBB boundingBox, @Nullable Predicate <? super Entity > predicate) {
         int k2 = MathHelper.floor(boundingBox.maxX + MAX_ENTITY_RADIUS)>>4;
         int l2 = MathHelper.floor(boundingBox.minZ - MAX_ENTITY_RADIUS)>>4;
         int i3 = MathHelper.floor(boundingBox.maxZ + MAX_ENTITY_RADIUS)>>4;

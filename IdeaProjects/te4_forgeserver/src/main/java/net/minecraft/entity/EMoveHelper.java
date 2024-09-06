@@ -22,7 +22,7 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.gen.ChunkProviderServer;
 import plus.fserver.ElcaConfig;
 import plus.fserver.utls.collections.AABBList;
-import plus.fserver.utls.collections.ArrayRemSwapListE6;
+import plus.fserver.utls.collections.EntityList;
 import plus.tson.utl.Te4HashSet;
 import java.util.Arrays;
 
@@ -198,22 +198,20 @@ public class EMoveHelper {
         }
 
 
-        private Entity[] export(ArrayRemSwapListE6<Entity> src, int size){
-            Object[] raw = src.raw();
+        private Entity[] export(EntityList<Entity> src, int size){
+            Entity[] raw = src.raw();
             Entity[] result = temp;
             if(result.length < size){
                 result = temp = new Entity[size+2];
             }
-            for (int i = 0; i < size; i++){
-                result[i] = (Entity) raw[i];
-            }
+            if (size >= 0) System.arraycopy(raw, 0, result, 0, size);
             return result;
         }
 
 
         public void completeMoveTasks(ClassInheritanceMultiMap<Entity> part) {
             int size;
-            ArrayRemSwapListE6<Entity> list;
+            EntityList<Entity> list;
             if ((size = (list = part.rawValues()).sizeC()) < 2) return;
 
             Entity[] arr = export(list, size);

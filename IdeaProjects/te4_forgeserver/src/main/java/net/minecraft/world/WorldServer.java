@@ -79,6 +79,7 @@ import plus.fserver.server.chunk.io.TQueuedChunk;
 import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.collections.ArrayRemSwapListE15;
 import plus.fserver.utls.collections.ChunkIterator;
+import plus.fserver.utls.collections.EntityRemSwapList;
 import plus.fserver.utls.math.MathUtls;
 import plus.fserver.world.CommonWorldEntitySpawner;
 import plus.fserver.world.NavigationCache;
@@ -463,7 +464,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
             recheckEntities();
         }
         ChunkProviderServer cps = chunkProviderServer;
-        for (ArrayRemSwapListE15<Entity> list:realEntityList.getRaw()) {
+        for (EntityRemSwapList.E15<Entity> list:realEntityList.getRaw()) {
             for (int cursor = 0; cursor < list.sizeC(); ++cursor) {
                 Entity entity = list.getC(cursor);
                 Entity ridding = entity.getRidingEntity();
@@ -494,7 +495,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
     private void recheckEntities(){
         boolean spawnAnimals = this.spawnAnimals = canSpawnAnimals();
         boolean spawnNpc     = this.spawnNpc = canSpawnNPCs();
-        for (ArrayRemSwapListE15<Entity> list:realEntityList.getRaw()) {
+        for (EntityRemSwapList.E15<Entity> list:realEntityList.getRaw()) {
             for (int cursor = 0; cursor < list.sizeC(); ++cursor) {
                 Entity entity = list.getC(cursor);
                 if(!spawnAnimals){

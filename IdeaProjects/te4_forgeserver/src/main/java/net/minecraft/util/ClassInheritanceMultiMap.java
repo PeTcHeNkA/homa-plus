@@ -2,6 +2,7 @@ package net.minecraft.util;
 
 import com.google.common.collect.Iterators;
 import io.netty.util.collection.IntObjectHashMap;
+import net.minecraft.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import plus.fserver.utls.collections.*;
 import java.util.*;
@@ -9,13 +10,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 
-public class ClassInheritanceMultiMap<T> extends AbstractSet<T> {
+public class ClassInheritanceMultiMap<T extends Entity> extends AbstractSet<T> {
     private static final EmptySelfIter EMPTY_BY_CLASS = new EmptySelfIter();
     private static final Set<Class<?>> ALL_KNOWN = Collections.newSetFromMap(new ConcurrentHashMap<>());
-    private final IntObjectHashMap<ArrayRemSwapListE6<T>> map = new IntObjectHashMap<>(4);
+    private final IntObjectHashMap<EntityRemSwapList<T>> map = new IntObjectHashMap<>(4);
     private final Set<Class<?>> knownKeys = new IdentityTe4HashSet<>(4);
     private final Class<T> baseClass;
-    private final ArrayRemSwapListE6<T> values = new ArrayRemSwapListE6<>();
+    private final EntityRemSwapList.E15<T> values = new EntityRemSwapList.E15<>();
 
     public ClassInheritanceMultiMap(Class<T> baseClassIn) {
         this.baseClass = baseClassIn;
@@ -63,12 +64,12 @@ public class ClassInheritanceMultiMap<T> extends AbstractSet<T> {
 
     @Override
     public boolean add(final T obj) {
-        ArrayListE6<T> list; int key;
+        EntityRemSwapList<T> list; int key;
         final Class<?> clazz = obj.getClass();
         for (Class<?> oclass : this.knownKeys) {
             if (oclass.isAssignableFrom(clazz)) {
                 if ((list = map.get(key = oclass.hashCode())) == null) {
-                    map.put(key, new ArrayRemSwapListE1V<>(obj));
+                    map.put(key, new EntityRemSwapList.E1V<>(obj));
                 } else {
                     list.addF(obj);
                 }
@@ -79,9 +80,9 @@ public class ClassInheritanceMultiMap<T> extends AbstractSet<T> {
 
 
     private void addForClassHash(final T value, final int key) {
-        final ArrayListE6<T> list;
+        final EntityRemSwapList<T> list;
         if ((list = map.get(key)) == null) {
-            map.put(key, new ArrayRemSwapListE1V<>(value));
+            map.put(key, new EntityRemSwapList.E1V<>(value));
         } else {
             list.addF(value);
         }
@@ -95,7 +96,7 @@ public class ClassInheritanceMultiMap<T> extends AbstractSet<T> {
 
         for (Class<?> oclass : this.knownKeys) {
             if (oclass.isAssignableFrom(clazz)) {
-                ArrayRemSwapListE6<T> list;
+                EntityRemSwapList<T> list;
 
                 if ((list = map.get(oclass.hashCode())) != null && list.remove(obj))
                     flag = true;
@@ -128,7 +129,7 @@ public class ClassInheritanceMultiMap<T> extends AbstractSet<T> {
     }
 
 
-    public ArrayRemSwapListE6<T> rawValues(){
+    public EntityRemSwapList.E15<T> rawValues(){
         return values;
     }
 
@@ -140,38 +141,20 @@ public class ClassInheritanceMultiMap<T> extends AbstractSet<T> {
 
 
     public <S> Iterable<S> getByClass(final Class<S> clazz) {
-        ArrayRemSwapListE6<T> list = map.get(initializeClassLookup(clazz).hashCode());
+        EntityRemSwapList<T> list = map.get(initializeClassLookup(clazz).hashCode());
         if(list == null || list.isEmpty())return (Iterable<S>) EMPTY_BY_CLASS;
         return new ByClass<>(clazz, list);
-    }
-
-
-    public class FastIter{
-        private int cursor = 0;
-
-        public boolean hasNext(){
-            return cursor < values.sizeC();
-        }
-
-        public T readAndNext(){
-            return values.get(cursor++);
-        }
-    }
-
-
-    public FastIter fastIter(){
-        return new FastIter();
     }
 }
 
 
-final class ByClass<S,T> implements Iterable<S>, Iterator<S> {
+final class ByClass<S,T extends Entity> implements Iterable<S>, Iterator<S> {
     private final Class<S> clazz;
     private T next;
     private int cursor = 0;
-    private final ArrayRemSwapListE6<T> src;
+    private final EntityRemSwapList<T> src;
 
-    ByClass(Class<S> clazz, ArrayRemSwapListE6<T> src) {
+    ByClass(Class<S> clazz, EntityRemSwapList<T> src) {
         this.clazz = clazz;
         this.src = src;
     }
@@ -179,7 +162,7 @@ final class ByClass<S,T> implements Iterable<S>, Iterator<S> {
 
     private void calcNext(){
         while (cursor<src.sizeC()){
-            T temp = src.getC(cursor);
+            T temp = src.get(cursor);
             ++cursor;
             if(clazz.isInstance(temp)){
                 next = temp;

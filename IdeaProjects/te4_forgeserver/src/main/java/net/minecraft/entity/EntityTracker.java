@@ -24,6 +24,7 @@ import plus.fserver.server.AsyEntityTracker;
 import plus.fserver.utls.collections.ArrayListE6;
 import plus.fserver.utls.collections.ArrayRemSwapListE15;
 import plus.fserver.utls.collections.EntityChunkIter;
+import plus.fserver.utls.collections.EntityRemSwapList;
 import plus.fserver.world.EntityTrackerFactory;
 
 
@@ -124,7 +125,7 @@ public class EntityTracker {
         if (entityIn instanceof EntityPlayerMP) {
             EntityPlayerMP player = (EntityPlayerMP)entityIn;
 
-            for (ArrayRemSwapListE15<Entity> list: world.realEntityList.getRaw()) {
+            for (EntityRemSwapList.E15<Entity> list: world.realEntityList.getRaw()) {
                 for (int cursor = 0, s = list.sizeC(); cursor < s; ++cursor) {
                     if((entry = list.getC(cursor).trackerEntry) != null)
                         entry.removeFromTrackedPlayers(player);
@@ -149,7 +150,7 @@ public class EntityTracker {
         EntityTrackerEntry entry;
         if(fastUpdate){
             fastUpdate = false;
-            for (ArrayRemSwapListE15<Entity> list: world.realEntityList.getRaw()) {
+            for (EntityRemSwapList.E15<Entity> list: world.realEntityList.getRaw()) {
                 for (int cursor = 0, s = list.sizeC(); cursor < s; ++cursor) {
                     if((entry = list.getC(cursor).trackerEntry) != null)
                         entry.updatePlayerList(players);
@@ -159,7 +160,7 @@ public class EntityTracker {
             fastUpdate = true;
             ArrayList<EntityPlayerMP> toUpdate = this.toUpdate;
 
-            for (ArrayRemSwapListE15<Entity> list: world.realEntityList.getRaw())
+            for (EntityRemSwapList.E15<Entity> list: world.realEntityList.getRaw())
                 for (int cursor = 0, s = list.sizeC(); cursor < s; ++cursor) {
                     Entity entity = list.getC(cursor);
                     if ((entry = entity.trackerEntry) != null) {
@@ -180,7 +181,7 @@ public class EntityTracker {
 
     public void updateVisibility(EntityPlayerMP player) {
         EntityTrackerEntry entry;
-        for (ArrayRemSwapListE15<Entity> list: world.realEntityList.getRaw()) {
+        for (EntityRemSwapList.E15<Entity> list: world.realEntityList.getRaw()) {
             for (int cursor = 0, s = list.sizeC(); cursor < s; ++cursor) {
                 Entity entity = list.getC(cursor);
                 if ((entry = entity.trackerEntry) != null) {
@@ -214,7 +215,7 @@ public class EntityTracker {
 
     public void removePlayerFromTrackers(EntityPlayerMP player) {
         EntityTrackerEntry entry;
-        for (ArrayRemSwapListE15<Entity> list: world.realEntityList.getRaw()) {
+        for (EntityRemSwapList.E15<Entity> list: world.realEntityList.getRaw()) {
             for (int cursor = 0, s = list.sizeC(); cursor < s; ++cursor) {
                 if ((entry = list.getC(cursor).trackerEntry) != null) entry.removeTrackedPlayerSymmetric(player);
             }
@@ -264,7 +265,7 @@ public class EntityTracker {
         ArrayListE6<Entity> leashed  = new ArrayListE6<>();
         ArrayListE6<Entity> passengers = new ArrayListE6<>();
 
-        for (ArrayRemSwapListE15<Entity> list: world.realEntityList.getRaw()) {
+        for (EntityRemSwapList.E15<Entity> list: world.realEntityList.getRaw()) {
             for (int cursor = 0, s = list.sizeC(); cursor < s; ++cursor) {
                 Entity entity = list.getC(cursor);
                 EntityTrackerEntry entry = entity.trackerEntry;
@@ -296,7 +297,7 @@ public class EntityTracker {
     public void setViewDistance(int distance) {
         this.maxTrackingDistanceThreshold = ((distance - 1) << 4);
         EntityTrackerEntry entry;
-        for (ArrayRemSwapListE15<Entity> list: world.realEntityList.getRaw()) {
+        for (EntityRemSwapList.E15<Entity> list: world.realEntityList.getRaw()) {
             for (int cursor = 0, s = list.sizeC(); cursor < s; ++cursor) {
                 if ((entry = list.getC(cursor).trackerEntry) != null)
                     entry.setMaxRange(this.maxTrackingDistanceThreshold);
@@ -322,7 +323,7 @@ public class EntityTracker {
 
     private void updatePlayer1(EntityPlayerMP player) {
         EntityTrackerEntry entry;
-        for (ArrayRemSwapListE15<Entity> list: world.realEntityList.getRaw()) {
+        for (EntityRemSwapList.E15<Entity> list: world.realEntityList.getRaw()) {
             for (int cursor = 0, s = list.sizeC(); cursor < s; ++cursor) {
                 if ((entry = list.getC(cursor).trackerEntry) != null)
                     if (entry.getTrackedEntity() != player)

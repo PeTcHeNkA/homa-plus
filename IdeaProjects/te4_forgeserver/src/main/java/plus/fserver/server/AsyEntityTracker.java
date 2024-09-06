@@ -9,8 +9,8 @@ import plus.fserver.utls.collections.ArrayListE10;
 
 
 public class AsyEntityTracker extends EntityTracker {
-    private ArrayListE10<Runnable> tasks = new ArrayListE10<>();
-    private ArrayListE10<Runnable> swap  = new ArrayListE10<>();
+//    private ArrayListE10<Runnable> tasks = new ArrayListE10<>();
+//    private ArrayListE10<Runnable> swap  = new ArrayListE10<>();
 
     public AsyEntityTracker(WorldServer world) {
         super(world);
@@ -37,37 +37,42 @@ public class AsyEntityTracker extends EntityTracker {
     }
 
 
-    public void runTasks(){
-        ArrayListE10<Runnable> swap = this.swap;
-        this.swap = tasks;
-        this.tasks = swap;
-
-        this.swap.forEach(Runnable::run);
-        this.swap.clear();
-    }
+//    public void runTasks(){
+//        ArrayListE10<Runnable> tasks;
+//        synchronized (this) {
+//            tasks = this.tasks;
+//            this.tasks = this.swap;
+//            this.swap = tasks;
+//        }
+//        tasks.forEach(Runnable::run);
+//        tasks.clear();
+//    }
 
 
     @Override
-    public void tick() {
-        runTasks();
+    public synchronized void tick() {
+        //runTasks();
         super.tick();
     }
 
 
     @Override
-    public void onTrack(EntityTrackerEntry entry) {
-        tasks.addF((Runnable) () -> entry.updatePlayerEntities(world.playerEntities));
+    public synchronized void onTrack(EntityTrackerEntry entry) {
+        super.onTrack(entry);
+        //tasks.addF((Runnable) () -> entry.updatePlayerEntities(world.playerEntities));
     }
 
 
     @Override
-    public void untrack(Entity entityIn) {
-        tasks.addF((Runnable) () -> AsyEntityTracker.super.untrack(entityIn));
+    public synchronized void untrack(Entity entityIn) {
+        super.untrack(entityIn);
+        //tasks.addF((Runnable) () -> AsyEntityTracker.super.untrack(entityIn));
     }
 
 
     @Override
-    public void updateVisibility(EntityPlayerMP player) {
-        tasks.addF((Runnable) () -> AsyEntityTracker.super.updateVisibility(player));
+    public synchronized void updateVisibility(EntityPlayerMP player) {
+        super.updateVisibility(player);
+        //tasks.addF((Runnable) () -> AsyEntityTracker.super.updateVisibility(player));
     }
 }

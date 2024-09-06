@@ -38,6 +38,7 @@ import plus.fserver.ElcaMobs;
 import plus.fserver.api.Keep;
 import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.collections.ArrayListE6;
+import plus.fserver.utls.collections.EntityList;
 
 
 public abstract class EntityMinecart extends Entity implements IWorldNameable {
@@ -359,7 +360,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
             }
 
             if (canBeRidden() && this.motionX * this.motionX + this.motionZ * this.motionZ > 0.01D) {
-                ArrayListE6<Entity> list = (ArrayListE6<Entity>)this.world.getEntitiesInAABBexcludingLimited(this, box, world.entityCP.forEntity(this), num);
+                EntityList<Entity> list = this.world.getEntitiesInAABBexcludingLimited(this, box, world.entityCP.forEntity(this), num);
 
                 if (!list.isEmptyC()) {
                     for (int j1 = 0; j1 < list.sizeC(); ++j1) {

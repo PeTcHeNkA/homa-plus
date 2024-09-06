@@ -41,6 +41,7 @@ import plus.fserver.api.Keep;
 import plus.fserver.ElcaCV;
 import plus.fserver.utls.collections.ArrayListE6;
 import plus.fserver.utls.collections.ArrayRemSwapListE6;
+import plus.fserver.utls.collections.EntityList;
 import plus.fserver.utls.math.MathUtls;
 import plus.fserver.world.light.LightingEngine;
 import plus.fserver.world.light.LightingHooks;
@@ -919,7 +920,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
         Entity entity;
 
         if(filter == null) {
-            for (ArrayRemSwapListE6<Entity> raw; minY <= maxY; ++minY)
+            for (EntityList<Entity> raw; minY <= maxY; ++minY)
                 if (!(raw = this.entityLists[minY].rawValues()).isEmptyC())
                     for (int i = 0; i < raw.sizeC();i++)
                         if ((entity = raw.getC(i)) != entityIn && entity.getEntityBoundingBox().intersects(aabb)) {
@@ -931,7 +932,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
                             if (--max < 0) return;
                         }
         } else {
-            for (ArrayRemSwapListE6<Entity> raw; minY <= maxY; ++minY)
+            for (EntityList<Entity> raw; minY <= maxY; ++minY)
                 if (!(raw = this.entityLists[minY].rawValues()).isEmptyC())
                     for (int i = 0; i < raw.sizeC();i++)
                         if ((entity = raw.getC(i)) != entityIn && entity.getEntityBoundingBox().intersects(aabb)) {
@@ -948,7 +949,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
     }
 
 
-    public final void getEntitiesWithinAABBForEntityLimitedC(@Nullable Entity entityIn, AxisAlignedBB aabb, ArrayListE6<Entity> listToFill, @Nullable Predicate <? super Entity > filter, int max) {
+    public final void getEntitiesWithinAABBForEntityLimitedC(@Nullable Entity entityIn, AxisAlignedBB aabb, EntityList<Entity> listToFill, @Nullable Predicate <? super Entity > filter, int max) {
         int minY = MathUtls.clamp16c(aabb.minY - World.MAX_ENTITY_RADIUS),
             maxY = MathUtls.clamp16c(aabb.maxY + World.MAX_ENTITY_RADIUS);
 
@@ -956,7 +957,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
         Entity entity;
 
         if(filter == null) {
-            for (ArrayRemSwapListE6<Entity> raw; minY <= maxY; ++minY)
+            for (EntityList<Entity> raw; minY <= maxY; ++minY)
                 //if ((cursor = (raw = this.entityLists[minY].rawValues()).sizeC()-1) != 0)
                 for (int cursor = (raw = this.entityLists[minY].rawValues()).sizeC()-1; cursor != -1; cursor--)
                     if ((entity = raw.getC(cursor)) != entityIn && entity.getEntityBoundingBox().intersects(aabb)) {
@@ -968,7 +969,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
                         if (--max < 0) return;
                     }
         } else {
-            for (ArrayRemSwapListE6<Entity> raw; minY <= maxY; ++minY)
+            for (EntityList<Entity> raw; minY <= maxY; ++minY)
                 //if ((cursor = (raw = this.entityLists[minY].rawValues()).sizeC()) != 0)
                 for (int cursor = (raw = this.entityLists[minY].rawValues()).sizeC()-1; cursor != -1; cursor--)
                     if ((entity = raw.getC(cursor)) != entityIn && entity.getEntityBoundingBox().intersects(aabb)) {
@@ -992,7 +993,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
         Entity entity;
 
         if(filter == null)
-            for (ArrayRemSwapListE6<Entity> raw; minY <= maxY; ++minY){
+            for (EntityList<Entity> raw; minY <= maxY; ++minY){
                 if (!(raw = this.entityLists[minY].rawValues()).isEmptyC())
                     for (int i = 0; i < raw.sizeC();i++)
                         if ((entity = raw.getC(i)).getEntityBoundingBox().intersects(aabb) && entity != entityIn) {
@@ -1004,7 +1005,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
                         }
             }
         else
-            for (ArrayRemSwapListE6<Entity> raw; minY <= maxY; ++minY){
+            for (EntityList<Entity> raw; minY <= maxY; ++minY){
                 if (!(raw = this.entityLists[minY].rawValues()).isEmptyC())
                     for (int i = 0; i < raw.sizeC();i++)
                         if ((entity = raw.getC(i)).getEntityBoundingBox().intersects(aabb) && entity != entityIn) {

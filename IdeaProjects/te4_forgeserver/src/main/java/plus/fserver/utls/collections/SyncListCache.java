@@ -1,5 +1,6 @@
 package plus.fserver.utls.collections;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.util.math.AxisAlignedBB;
 import plus.fserver.server.elca.AABKey;
 
@@ -15,28 +16,28 @@ public class SyncListCache<V> extends SyncTe4Cache<AABKey, V>{
     }
 
 
-    public static class ListE6<V> extends SyncListCache<ArrayListE6<V>>{
-        public ListE6(int clearTime, int clearTime2) {
+    public static class EList extends SyncListCache<EntityList<Entity>>{
+        public EList(int clearTime, int clearTime2) {
             super(clearTime, clearTime2);
         }
 
-        public ArrayListE6<V> allocArr(){
-            ArrayListE6<V> list = tryAllocVal();
+        public EntityList allocArr(){
+            EntityList list = tryAllocVal();
             if(list != null){
                 list.fclear();
                 return list;
             }
-            return new ArrayListE6<>();
+            return new EntityList();
         }
 
 
         @Override
         protected void cleanRed1(){
             for (int i=0;i<vals.length;i++){
-                ArrayListE6 list = (ArrayListE6) vals[i];
+                EntityList list = (EntityList) vals[i];
                 if(list == null) return;
                 if(list.data.length > 16){
-                    list.data = ArrayListE6.EMPTY_ARR;
+                    list.data = EntityList.EMPTY_ARR;
                     list.size = 0;
                 }
                 else list.clearAll();

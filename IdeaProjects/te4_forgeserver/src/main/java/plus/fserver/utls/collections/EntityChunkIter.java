@@ -9,7 +9,7 @@ import java.util.function.Consumer;
 
 public class EntityChunkIter implements Iterable<Entity>, Iterator<Entity> {
     private final ClassInheritanceMultiMap<Entity>[] lists;
-    private ArrayListE6<Entity> list;
+    private EntityList<Entity> list;
     private int cursor1 = 0, cursor2 = 0;
     private Entity next;
 
@@ -20,13 +20,13 @@ public class EntityChunkIter implements Iterable<Entity>, Iterator<Entity> {
 
     private void calcNext(){
         if(cursor2 < list.sizeC()){
-            next = list.get(cursor2++);
+            next = list.getC(cursor2++);
             return;
         }
         while (cursor1 < 16) {
-            ArrayRemSwapListE6<Entity> res = lists[cursor1++].rawValues();
+            EntityList<Entity> res = lists[cursor1++].rawValues();
             if(!res.isEmptyC()){
-                next = res.get(0);
+                next = res.getC(0);
                 cursor2 = 1;
                 list = res;
                 return;
@@ -46,7 +46,7 @@ public class EntityChunkIter implements Iterable<Entity>, Iterator<Entity> {
     public void forEach(Consumer<? super Entity> action) {
         ClassInheritanceMultiMap<Entity>[] lists = this.lists;
         for (int i = 1; i < lists.length; ++i) {
-            ArrayRemSwapListE6<Entity> vals = lists[i].rawValues();
+            EntityList<Entity> vals = lists[i].rawValues();
             if(!vals.isEmptyC()) vals.forEach(action);
         }
     }

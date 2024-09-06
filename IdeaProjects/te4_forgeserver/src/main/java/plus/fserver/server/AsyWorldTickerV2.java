@@ -246,7 +246,7 @@ public final class AsyWorldTickerV2 implements ThreadFactory{
                     return;
                 }
             }
-            if(inf.save++>saveAllEvery){
+            if(inf.save++ > saveAllEvery){
                 try {
                     //todo test async net.minecraft.world.storage.MapStorage.saveData
                     worldserver.saveAllChunks(true,null);
@@ -264,6 +264,7 @@ public final class AsyWorldTickerV2 implements ThreadFactory{
             EntityTracker tracer = worldserver.getEntityTracker();
             if(!tracer.isAsync()) {
                 if(false && worldserver.meanTickTime() > ElcaConfig.MEAN_OVERLOAD){
+                    tracer.tick();
                     AsyEntityTracker asy = tracer.toAsync();
                     worldserver.setTracker(asy);
 
@@ -272,11 +273,11 @@ public final class AsyWorldTickerV2 implements ThreadFactory{
                             asy.tick();
                         } else {
                             asy.world().setTracker(asy.toSync());
-                            worldserver.addSyncTask(asy::runTasks);
+                            //worldserver.addSyncTask(asy::runTasks);
                             inf.tracker.cancel(false);
                             inf.tracker = null;
                         }
-                    }, 0, 50, TimeUnit.MILLISECONDS);
+                    }, 50, 50, TimeUnit.MILLISECONDS);
                 } else {
                     tracer.tick();
                 }

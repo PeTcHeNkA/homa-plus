@@ -9,11 +9,11 @@ import java.util.function.Consumer;
 public class EntityIDHashSplitedList implements List<Entity> {
     private static final int SIZE = 32;
     private static final int MASK = 31;
-    private final ArrayRemSwapListE15<Entity>[] lists;
+    private final EntityRemSwapList.E15<Entity>[] lists;
 
     public EntityIDHashSplitedList(){
-        ArrayRemSwapListE15<Entity>[] lists = this.lists = new ArrayRemSwapListE15[SIZE];
-        for (int i = 0; i < SIZE; i++) lists[i] = new ArrayRemSwapListE15<>();
+        EntityRemSwapList.E15<Entity>[] lists = this.lists = new EntityRemSwapList.E15[SIZE];
+        for (int i = 0; i < SIZE; i++) lists[i] = new EntityRemSwapList.E15<Entity>();
     }
 
 
@@ -71,7 +71,7 @@ public class EntityIDHashSplitedList implements List<Entity> {
 
     @Override
     public void clear() {
-        ArrayRemSwapListE15<Entity>[] lists = this.lists;
+        EntityRemSwapList.E15<Entity>[] lists = this.lists;
         for (int i = 0; i < SIZE;i++) lists[i].clear();
     }
 
@@ -79,9 +79,9 @@ public class EntityIDHashSplitedList implements List<Entity> {
     @Override
     @Deprecated
     public Entity get(int index) {
-        ArrayRemSwapListE15<Entity>[] lists = this.lists;
+        EntityRemSwapList.E15<Entity>[] lists = this.lists;
         for (int i = 0; i < SIZE;i++) {
-            ArrayRemSwapListE15<Entity> list = lists[i];
+            EntityRemSwapList.E15<Entity> list = lists[i];
             if (list.size >= index) index -= list.size;
             else return list.get(index);
         }
@@ -92,9 +92,9 @@ public class EntityIDHashSplitedList implements List<Entity> {
     @Override
     @Deprecated
     public Entity set(int index, Entity element) {
-        ArrayRemSwapListE15<Entity>[] lists = this.lists;
+        EntityRemSwapList.E15<Entity>[] lists = this.lists;
         for (int i = 0; i < SIZE;i++) {
-            ArrayRemSwapListE15<Entity> list = lists[i];
+            EntityRemSwapList.E15<Entity> list = lists[i];
             if (list.size >= index) index -= list.size;
             else return list.set(index, element);
         }
@@ -111,9 +111,9 @@ public class EntityIDHashSplitedList implements List<Entity> {
 
     @Override
     public Entity remove(int index) {
-        ArrayRemSwapListE15<Entity>[] lists = this.lists;
+        EntityRemSwapList.E15<Entity>[] lists = this.lists;
         for (int i = 0; i < SIZE;i++) {
-            ArrayRemSwapListE15<Entity> list = lists[i];
+            EntityRemSwapList.E15<Entity> list = lists[i];
             if (list.size >= index) index -= list.size;
             else return list.remove(index);
         }
@@ -123,10 +123,10 @@ public class EntityIDHashSplitedList implements List<Entity> {
 
     @Override
     public int indexOf(Object o) {
-        ArrayRemSwapListE15<Entity>[] lists = this.lists;
+        EntityRemSwapList.E15<Entity>[] lists = this.lists;
         int pre = 0;
         for (int i = 0; i < SIZE; i++) {
-            ArrayRemSwapListE15<Entity> list = lists[i];
+            EntityRemSwapList.E15<Entity> list = lists[i];
             int res = list.indexOf(o);
             if(res != -1)return pre + res;
             pre += list.size;
@@ -172,12 +172,12 @@ public class EntityIDHashSplitedList implements List<Entity> {
     }
 
 
-    public ArrayRemSwapListE15<Entity> getRaw(int index){
+    public EntityRemSwapList.E15<Entity> getRaw(int index){
         return lists[index];
     }
 
 
-    public ArrayRemSwapListE15<Entity>[] getRaw(){
+    public EntityRemSwapList.E15<Entity>[] getRaw(){
         return lists;
     }
 
@@ -190,7 +190,7 @@ public class EntityIDHashSplitedList implements List<Entity> {
     @Override
     public int size() {
         int size = 0;
-        ArrayRemSwapListE15<Entity>[] lists = this.lists;
+        EntityRemSwapList.E15<Entity>[] lists = this.lists;
         for (int i = 0; i < SIZE; i++)size += lists[i].size;
         return size;
     }
@@ -222,7 +222,7 @@ public class EntityIDHashSplitedList implements List<Entity> {
 
     @Override
     public void forEach(Consumer<? super Entity> action) {
-        for (ArrayRemSwapListE15<Entity> list:lists){
+        for (EntityRemSwapList.E15<Entity> list:lists){
             Object[] data = list.data;
             for (int i = 0, s = list.size; i < s; i++)
                 action.accept((Entity)data[i]);
@@ -232,16 +232,16 @@ public class EntityIDHashSplitedList implements List<Entity> {
 
     @NotNull
     @Override
-    public Object[] toArray() {
+    public Entity[] toArray() {
         int size = 0;
-        ArrayRemSwapListE15<Entity>[] lists = this.lists;
+        EntityRemSwapList.E15<Entity>[] lists = this.lists;
         for (int cursor = 0; cursor < SIZE; cursor++)size += lists[cursor].size;
-        Object[] arr = new Object[size];
+        Entity[] arr = new Entity[size];
 
         int i = 0;
         for (int cursor = 0; cursor < SIZE; cursor++){
-            ArrayRemSwapListE15<Entity> list = lists[cursor];
-            Object[] lData = list.data;
+            EntityRemSwapList.E15<Entity> list = lists[cursor];
+            Entity[] lData = list.data;
             for (int e = 0, s = list.size; e < s; e++) arr[i++] = lData[e];
         }
         return arr;
@@ -252,7 +252,7 @@ public class EntityIDHashSplitedList implements List<Entity> {
     @Override
     public <T> T[] toArray(@NotNull T[] a) {
         int size = 0;
-        ArrayRemSwapListE15<Entity>[] lists = this.lists;
+        EntityRemSwapList.E15<Entity>[] lists = this.lists;
         for (int cursor = 0; cursor < SIZE; cursor++)size += lists[cursor].size;
 
         T[] arr = a.length >= size ? a :
@@ -261,8 +261,8 @@ public class EntityIDHashSplitedList implements List<Entity> {
 
         int i = 0;
         for (int cursor = 0; cursor < SIZE; cursor++){
-            ArrayRemSwapListE15<Entity> list = lists[cursor];
-            Object[] lData = list.data;
+            EntityRemSwapList.E15<Entity> list = lists[cursor];
+            Entity[] lData = list.data;
             for (int e = 0, s = list.size; e < s; e++) arr[i++] = (T) lData[e];
         }
         return arr;
@@ -270,25 +270,25 @@ public class EntityIDHashSplitedList implements List<Entity> {
 
 
     private static final class Itr implements Iterator<Entity>, Iterable<Entity> {
-        private final ArrayRemSwapListE15<Entity>[] lists;
-        private ArrayListE6<Entity> list;
+        private final EntityRemSwapList.E15<Entity>[] lists;
+        private EntityRemSwapList.E15<Entity> list;
         private int cursor1 = 1, cursor2 = 0;
         private Entity next;
 
-        public Itr(ArrayRemSwapListE15<Entity>[] lists) {
+        public Itr(EntityRemSwapList.E15<Entity>[] lists) {
             list = (this.lists = lists)[0];
             calcNext();
         }
 
         private void calcNext(){
             if(cursor2 < list.size){
-                next = list.get(cursor2++);
+                next = list.getC(cursor2++);
                 return;
             }
             while (cursor1 < SIZE) {
-                ArrayRemSwapListE6<Entity> res = lists[cursor1++];
+                EntityRemSwapList.E15<Entity> res = lists[cursor1++];
                 if(!res.isEmptyC()){
-                    next = res.get(0);
+                    next = res.getC(0);
                     cursor2 = 1;
                     list = res;
                     return;
@@ -306,7 +306,7 @@ public class EntityIDHashSplitedList implements List<Entity> {
 
         @Override
         public void forEach(Consumer<? super Entity> action) {
-            ArrayRemSwapListE15<Entity>[] lists = this.lists;
+            EntityRemSwapList.E15<Entity>[] lists = this.lists;
             for (int i = 0; i < SIZE; ++i) lists[i].forEach(action);
         }
 
