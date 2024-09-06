@@ -203,13 +203,17 @@ public class EntityFishHook extends Entity {
             if (iblockstate.getMaterial() != Material.WATER) {
                 this.motionY -= 0.03;
             }
-            this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
-            this.updateRotation();
-            this.motionX *= 0.92;
-            this.motionY *= 0.92;
-            this.motionZ *= 0.92;
-            this.mutPosition(this.posX, this.posY, this.posZ);
+            this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ, this::completeMove);
         }
+    }
+
+
+    private void completeMove(){
+        this.updateRotation();
+        this.motionX *= 0.92;
+        this.motionY *= 0.92;
+        this.motionZ *= 0.92;
+        this.mutPosition(this.posX, this.posY, this.posZ);
     }
 
 

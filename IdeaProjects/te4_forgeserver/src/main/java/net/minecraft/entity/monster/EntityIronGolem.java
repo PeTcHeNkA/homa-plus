@@ -19,6 +19,7 @@ import net.minecraftforge.fml.relauncher.*;
 import net.minecraft.util.*;
 import net.minecraft.world.storage.loot.*;
 import net.minecraft.network.datasync.*;
+import plus.fserver.ElcaMobs;
 import plus.fserver.entity.ai.EntityAIHurtByTargetSlim;
 import plus.fserver.entity.ai.EntityAIWatchClosestPlayer;
 
@@ -257,6 +258,12 @@ public class EntityIronGolem extends EntityGolem {
         else {
             this.dataManager.set(EntityIronGolem.PLAYER_CREATED, (byte)(b0 & 0xFFFFFFFE));
         }
+    }
+
+
+    @Override
+    public int lodLvl() {
+        return ElcaMobs.IRON_GOLEM.lodLvl(elcaMinRange);
     }
 
 

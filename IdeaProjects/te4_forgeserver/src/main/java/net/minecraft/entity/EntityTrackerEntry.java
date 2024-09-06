@@ -43,7 +43,6 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.network.play.server.SPacketEntity;
 import net.minecraft.network.play.server.SPacketEntityEffect;
-import net.minecraft.network.play.server.SPacketEntityEquipment;
 import net.minecraft.network.play.server.SPacketEntityHeadLook;
 import net.minecraft.network.play.server.SPacketEntityMetadata;
 import net.minecraft.network.play.server.SPacketEntityProperties;

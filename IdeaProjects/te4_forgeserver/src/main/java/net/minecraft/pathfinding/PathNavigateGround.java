@@ -129,16 +129,62 @@ public class PathNavigateGround extends PathNavigate {
 
 
     @Override
-    protected boolean isDirectPathBetweenPoints(Vec3d posVec31, Vec3d posVec32, int sizeX, int sizeY, int sizeZ) {
-        double d0 = posVec32.x - posVec31.x;
-        double d1 = posVec32.z - posVec31.z;
+    protected void pathFollow() {
+        Entity entity = this.entity;
+        double vX = entity.posX;
+        double vY = this.getPathablePosY();
+        double vZ = entity.posZ;
+
+        Path currentPath = this.currentPath;
+        int i = currentPath.getCurrentPathLength();
+
+        for (int j = currentPath.getCurrentPathIndex(); j < currentPath.getCurrentPathLength(); ++j) {
+            if ((double)currentPath.getPathPointFromIndex(j).y != Math.floor(vY)) {
+                i = j;
+                break;
+            }
+        }
+
+        this.maxDistanceToWaypoint = entity.width > 0.75F ? entity.width / 2.0F : 0.75F - entity.width / 2.0F;
+        PathPoint point = currentPath.getCurrentPoint();
+
+        if (MathHelper.abs((float)(vX - (point.x + 0.5D))) < this.maxDistanceToWaypoint && MathHelper.abs((float)(vZ - (point.z + 0.5D))) < this.maxDistanceToWaypoint && Math.abs(this.entity.posY - point.y) < 1.0D) {
+            this.currentPath.setCurrentPathIndex(this.currentPath.getCurrentPathIndex() + 1);
+        }
+
+        int k = MathHelper.ceil(entity.width);
+        int l = MathHelper.ceil(entity.height);
+
+        for (int index = i - 1; index >= currentPath.getCurrentPathIndex(); --index) {
+            PathPoint point0 = currentPath.getPathPointFromIndex(index);
+            double v2x = (double)point0.x + (double)((int)(entity.width + 1.0F)) * 0.5;
+            double v2z = (double)point0.z + (double)((int)(entity.width + 1.0F)) * 0.5;
+
+            if (this.isDirectPathBetweenPoints(vX, vY, vZ, v2x, v2z, k, l, k)) {
+                currentPath.setCurrentPathIndex(index);
+                break;
+            }
+        }
+        this.checkForStuck(vX, vY, vZ);
+    }
+
+
+    @Override
+    protected boolean isDirectPathBetweenPoints(Vec3d vec, Vec3d posVec32, int sizeX, int sizeY, int sizeZ) {
+        return isDirectPathBetweenPoints(vec.x, vec.y, vec.z, posVec32.x, posVec32.z, sizeX, sizeY, sizeZ);
+    }
+
+
+    private boolean isDirectPathBetweenPoints(double vx, double vy, double vz, double v2x, double v2z, int sizeX, int sizeY, int sizeZ) {
+        double d0 = v2x - vx;
+        double d1 = v2z - vz;
         double d2 = d0 * d0 + d1 * d1;
 
         if (d2 < 1.0E-8D) {
             return false;
         } else {
-            int fX = MathHelper.floor(posVec31.x);
-            int fZ = MathHelper.floor(posVec31.z);
+            int fX = MathHelper.floor(vx);
+            int fZ = MathHelper.floor(vz);
 
             d2 = 1.0D / Math.sqrt(d2);
             d0 = d0 * d2;
@@ -153,13 +199,13 @@ public class PathNavigateGround extends PathNavigate {
             }
             PntMatrix.Chunked chunked = matrix.getChunked(fX, fZ);
 
-            if (!this.isSafeToStandAt(access, chunked, fX, (int)posVec31.y, fZ, sizeX + 2, sizeY, sizeZ - 2, posVec31, d0, d1)) {
+            if (!this.isSafeToStandAt(access, chunked, fX, (int)vy, fZ, sizeX + 2, sizeY, sizeZ - 2, vx, vz, d0, d1)) {
                 return false;
             } else {
-                double d6 = (double)fX - posVec31.x,
-                       d7 = (double)fZ - posVec31.z,
-                       d4 = 1.0D / Math.abs(d0),
-                       d5 = 1.0D / Math.abs(d1);
+                double d6 = (double)fX - vx,
+                        d7 = (double)fZ - vz,
+                        d4 = 1.0D / Math.abs(d0),
+                        d5 = 1.0D / Math.abs(d1);
 
                 if (d0 >= 0) ++d6;
                 if (d1 >= 0) ++d7;
@@ -168,10 +214,10 @@ public class PathNavigateGround extends PathNavigate {
                 d7 = d7 / d1;
 
                 int k = d0 < 0.0D ? -1 : 1,
-                    l = d1 < 0.0D ? -1 : 1;
+                        l = d1 < 0.0D ? -1 : 1;
 
-                int i1 = MathHelper.floor(posVec32.x);
-                int j1 = MathHelper.floor(posVec32.z);
+                int i1 = MathHelper.floor(v2x);
+                int j1 = MathHelper.floor(v2z);
                 int k1 = i1 - fX;
                 int l1 = j1 - fZ;
 
@@ -185,7 +231,7 @@ public class PathNavigateGround extends PathNavigate {
                         fZ += l;
                         l1 = j1 - fZ;
                     }
-                    if (!this.isSafeToStandAt(access, chunked, fX, (int)posVec31.y, fZ, sizeX, sizeY, sizeZ, posVec31, d0, d1)) {
+                    if (!this.isSafeToStandAt(access, chunked, fX, (int)vy, fZ, sizeX, sizeY, sizeZ, vx, vz, d0, d1)) {
                         return false;
                     }
                 }
@@ -195,18 +241,18 @@ public class PathNavigateGround extends PathNavigate {
     }
 
 
-    private boolean isSafeToStandAt(IBlockEAccess access, PntMatrix.Chunked chunked, int x, int y, int z, int sizeX, int sizeY, int sizeZ, Vec3d vec31, double param, double param2) {
+    private boolean isSafeToStandAt(IBlockEAccess access, PntMatrix.Chunked chunked, int x, int y, int z, int sizeX, int sizeY, int sizeZ, double vecX, double vecZ, double param, double param2) {
         int dX = x - sizeX / 2;
         int dZ = z - sizeZ / 2;
 
-        if (!this.isPositionClear(access, dX, y, dZ, sizeX, sizeY, sizeZ, vec31, param, param2)) {
+        if (!this.isPositionClear(access, dX, y, dZ, sizeX, sizeY, sizeZ, vecX, vecZ, param, param2)) {
             return false;
         } else {
             PathNodeType type;
             for (int curX = dX; curX < dX + sizeX; ++curX) {
                 for (int curZ = dZ; curZ < dZ + sizeZ; ++curZ) {
-                    double d0 = (double)curX + 0.5D - vec31.x;
-                    double d1 = (double)curZ + 0.5D - vec31.z;
+                    double d0 = (double)curX + 0.5D - vecX;
+                    double d1 = (double)curZ + 0.5D - vecZ;
 
                     if (d0 * param + d1 * param2 >= 0.0D) {
                         chunked = chunked.get(curX, curZ);
@@ -239,7 +285,7 @@ public class PathNavigateGround extends PathNavigate {
     }
 
 
-    private boolean isPositionClear(IBlockAccess access, int x, int y, int z, int sizeX, int sizeY, int sizeZ, Vec3d vec, double p1, double p2) {
+    private boolean isPositionClear(IBlockAccess access, int x, int y, int z, int sizeX, int sizeY, int sizeZ, double vecX, double vecZ, double p1, double p2) {
         int fx = x + sizeX -1, fy = y + sizeY - 1, fz = z + sizeZ - 1;
         //todo move to pool
         BlockPos.MutableBlockPos pos = access.getWorld().localTempPos2;
@@ -247,7 +293,7 @@ public class PathNavigateGround extends PathNavigate {
             for (;z<fz;++z)
                 for (;y<fy;++y){
                     pos.setPosB(x, y, z);
-                    if ((x + 0.5D - vec.x) * p1 + (z + 0.5D - vec.z) * p2 >= 0.0D
+                    if ((x + 0.5D - vecX) * p1 + (z + 0.5D - vecZ) * p2 >= 0.0D
                         && access.getBlockState(pos).getBlock().isPassable(access, pos)
                     ) return false;
                 }

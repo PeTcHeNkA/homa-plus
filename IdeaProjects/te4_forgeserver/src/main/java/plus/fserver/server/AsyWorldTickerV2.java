@@ -261,11 +261,11 @@ public final class AsyWorldTickerV2 implements ThreadFactory{
             worldserver.updateEntities();
             FMLCommonHandler.instance().onPostWorldTick(worldserver);
 
-            EntityTracker tracer = worldserver.getEntityTracker();
-            if(!tracer.isAsync()) {
+            EntityTracker tracker = worldserver.getEntityTracker();
+            if(!tracker.isAsync()) {
                 if(false && worldserver.meanTickTime() > ElcaConfig.MEAN_OVERLOAD){
-                    tracer.tick();
-                    AsyEntityTracker asy = tracer.toAsync();
+                    tracker.tick();
+                    AsyEntityTracker asy = tracker.toAsync();
                     worldserver.setTracker(asy);
 
                     inf.tracker = service.scheduleAtFixedRate(() -> {
@@ -279,7 +279,7 @@ public final class AsyWorldTickerV2 implements ThreadFactory{
                         }
                     }, 50, 50, TimeUnit.MILLISECONDS);
                 } else {
-                    tracer.tick();
+                    tracker.tick();
                 }
             }
 

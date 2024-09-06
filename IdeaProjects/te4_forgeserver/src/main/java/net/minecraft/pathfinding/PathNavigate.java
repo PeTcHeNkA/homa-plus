@@ -186,14 +186,16 @@ public abstract class PathNavigate {
             this.debugPathFinding();
 
             if (!this.noPath()) {
-                Vec3d vec3d2 = this.currentPath.getPosition(this.entity);
-                BlockPos blockpos = world.localTempPos3.setPos(vec3d2.x, vec3d2.y-1, vec3d2.z);
+                PathPoint point = currentPath.getCurrentPoint();
+                double vecX = (double)point.x + (double)((int)(entity.width + 1.0F)) * 0.5;
+                double vecZ = (double)point.z + (double)((int)(entity.width + 1.0F)) * 0.5;
+                BlockPos blockpos = world.localTempPos3.setPos(vecX, point.y-1, vecZ);
                 IBlockEAccess access = world.access();
                 AxisAlignedBB box = access.getBlockState(blockpos).getBoundingBox(access, blockpos);
                 this.entity.getMoveHelper().setMoveTo(
-                        vec3d2.x,
-                        vec3d2.y + 1.1D - box.maxY,
-                        vec3d2.z,
+                        vecX,
+                        point.y + 1.1D - box.maxY,
+                        vecZ,
                         this.speed
                 );
             }
@@ -235,7 +237,7 @@ public abstract class PathNavigate {
     }
 
 
-    protected void checkForStuck(Vec3d positionVec3) {
+    protected final void checkForStuck(Vec3d positionVec3) {
         if (this.totalTicks - this.ticksAtLastPos > 100) {
             if (positionVec3.squareDistanceTo(this.lastPosCheck) < 2.25D) {
                 this.clearPath();
@@ -254,6 +256,38 @@ public abstract class PathNavigate {
             } else {
                 this.timeoutCachedNode = new Vec3d(point.x, point.y, point.z);
                 double d0 = positionVec3.distanceTo(this.timeoutCachedNode);
+                this.timeoutLimit = this.entity.getAIMoveSpeed() > 0.0F ? d0 / (double)this.entity.getAIMoveSpeed() * 1000.0D : 0.0D;
+            }
+
+            if (this.timeoutLimit > 0.0D && (double)this.timeoutTimer > this.timeoutLimit * 3.0D) {
+                this.timeoutCachedNode = Vec3d.ZERO;
+                this.timeoutTimer = 0L;
+                this.timeoutLimit = 0.0D;
+                this.clearPath();
+            }
+            this.lastTimeoutCheck = System.currentTimeMillis();
+        }
+    }
+
+
+    protected final void checkForStuck(double vX, double vY, double vZ) {
+        if (this.totalTicks - this.ticksAtLastPos > 100) {
+            if (this.lastPosCheck.squareDistanceTo(vX, vY, vZ) < 2.25D) {
+                this.clearPath();
+            }
+            this.ticksAtLastPos = this.totalTicks;
+            this.lastPosCheck = new Vec3d(vX, vY, vZ);
+        }
+
+        if (this.currentPath != null && !this.currentPath.isFinished()) {
+            PathPoint point = this.currentPath.getCurrentPoint();
+            Vec3d vec = this.timeoutCachedNode;
+
+            if (vec.x == point.x && vec.y == point.y && vec.z == point.z) {
+                this.timeoutTimer += System.currentTimeMillis() - this.lastTimeoutCheck;
+            } else {
+                this.timeoutCachedNode = new Vec3d(point.x, point.y, point.z);
+                double d0 = Math.sqrt(this.timeoutCachedNode.squareDistanceTo(vX, vY, vZ));
                 this.timeoutLimit = this.entity.getAIMoveSpeed() > 0.0F ? d0 / (double)this.entity.getAIMoveSpeed() * 1000.0D : 0.0D;
             }
 

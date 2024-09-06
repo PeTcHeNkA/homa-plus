@@ -90,6 +90,7 @@ public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO {
             }
 
             nbttagcompound = this.fixer.process(FixTypes.CHUNK, CompressedStreamTools.read(datainputstream));
+
             datainputstream.close(); // Forge: close stream after use
         }
         return this.checkedReadChunkFromNBT__Async(worldIn, x, z, nbttagcompound);

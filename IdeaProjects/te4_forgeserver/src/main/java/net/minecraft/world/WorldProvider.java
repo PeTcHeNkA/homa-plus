@@ -292,7 +292,7 @@ public abstract class WorldProvider implements ElcaWorldProvider {
         BlockPos ret = this.world.getSpawnPoint();
         boolean isAdventure = this.world.getWorldInfo().getGameType() == GameType.ADVENTURE;
         int spawnFuzz = this.world instanceof WorldServer ? this.terrainType.getSpawnFuzz((WorldServer)this.world, this.world.getMinecraftServer()) : 1;
-        int border = MathHelper.floor(this.world.getWorldBorder().getClosestDistance((double)ret.getX(), (double)ret.getZ()));
+        int border = MathHelper.floor(this.world.getWorldBorder().getClosestDistance(ret.getX(), ret.getZ()));
         if (border < spawnFuzz) {
             spawnFuzz = border;
         }
@@ -303,7 +303,9 @@ public abstract class WorldProvider implements ElcaWorldProvider {
             }
 
             int spawnFuzzHalf = spawnFuzz / 2;
-            ret = this.world.getTopSolidOrLiquidBlock(ret.add(spawnFuzzHalf - this.world.rand.nextInt(spawnFuzz), 0, spawnFuzzHalf - this.world.rand.nextInt(spawnFuzz)));
+            ret = this.world.getTopSolidOrLiquidBlock(
+                    ret.add(spawnFuzzHalf - this.world.rand.nextInt(spawnFuzz), 0, spawnFuzzHalf - this.world.rand.nextInt(spawnFuzz))
+            );
         }
         return ret;
     }

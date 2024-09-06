@@ -109,8 +109,11 @@ public abstract class EntityLivingBase extends Entity {
     public float prevSwingProgress;
     public float swingProgress;
     protected int ticksSinceLastSwing;
+    @SideOnly(Side.CLIENT)
     public float prevLimbSwingAmount;
+    @SideOnly(Side.CLIENT)
     public float limbSwingAmount;
+    @SideOnly(Side.CLIENT)
     public float limbSwing;
     public int maxHurtResistantTime = 20;
     public float prevCameraPitch;
@@ -192,6 +195,12 @@ public abstract class EntityLivingBase extends Entity {
     @Override
     public boolean useSelfCollisions(){
         return false;
+    }
+
+
+    @Override
+    public boolean enableMoveAccelerator() {
+        return true;
     }
 
 
@@ -673,7 +682,9 @@ public abstract class EntityLivingBase extends Entity {
                     flag = true;
                 }
 
-                this.limbSwingAmount = 1.5F;
+                if(!SERVER_COMPILE){
+                    onClientAttack();
+                }
                 boolean flag1 = true;
 
                 if ((float)this.hurtResistantTime > (float)this.maxHurtResistantTime / 2.0F) {
@@ -758,6 +769,12 @@ public abstract class EntityLivingBase extends Entity {
                 return flag2;
             }
         }
+    }
+
+
+    @SideOnly(Side.CLIENT)
+    protected void onClientAttack() {
+        this.limbSwingAmount = 1.5F;
     }
 
 
@@ -1421,21 +1438,20 @@ public abstract class EntityLivingBase extends Entity {
                         this.move(MoverType.SELF,
                                 this.motionX *= 0.9900000095367432D,
                                 this.motionY *= 0.9800000190734863D,
-                                this.motionZ *= 0.9900000095367432D
-                        );
+                                this.motionZ *= 0.9900000095367432D, () -> {
 
-                        if (this.collidedHorizontally && (!this.world.isRemote || SERVER_COMPILE)) {
-                            temp = motXZ - Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
-                            float f5 = (float)(temp * 10.0D - 3.0D);
+                            if (this.collidedHorizontally && (!this.world.isRemote || SERVER_COMPILE)) {
+                                double temp1 = motXZ - Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
+                                float f5 = (float) (temp1 * 10.0D - 3.0D);
 
-                            if (f5 > 0.0F) {
-                                this.playSound(this.getFallSound((int)f5), 1.0F, 1.0F);
-                                this.attackEntityFrom(DamageSource.FLY_INTO_WALL, f5);
+                                if (f5 > 0.0F) {
+                                    this.playSound(this.getFallSound((int) f5), 1.0F, 1.0F);
+                                    this.attackEntityFrom(DamageSource.FLY_INTO_WALL, f5);
+                                }
                             }
-                        }
-
-                        if (this.onGround && (!this.world.isRemote || SERVER_COMPILE)) this.setFlag(7, false);
-
+                            if (this.onGround && (!this.world.isRemote || SERVER_COMPILE))
+                                this.setFlag(7, false);
+                        });
                     } else {
                         float fl0 = 0.91F;
                         BlockPos.MutableBlockPos blockPos = world.localTempPos;
@@ -1452,12 +1468,6 @@ public abstract class EntityLivingBase extends Entity {
                         else fl1 = this.jumpMovementFactor;
 
                         this.moveRelative(strafe, vertical, forward, fl1);
-                        fl0 = 0.91F;
-
-                        if (this.onGround) {
-                            IBlockState underState = access.getBlockState(blockPos.setPos(this.posX, this.getEntityBoundingBox().minY - 1.0D, this.posZ));
-                            fl0 = underState.getBlock().getSlipperiness(underState, access, blockPos, this) * 0.91F;
-                        }
 
                         if (this.isOnLadder()) {
                             this.motionX = MathHelper.clamp(this.motionX, -0.15000000596046448D, 0.15000000596046448D);
@@ -1469,38 +1479,22 @@ public abstract class EntityLivingBase extends Entity {
                             if (isPlayer() && this.isSneaking() && this.motionY < 0.0D) this.motionY = 0.0D;
                         }
 
-                        this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
-
-                        if (this.collidedHorizontally && this.isOnLadder()) this.motionY = 0.2D;
-
-                        if (this.isPotionActive(MobEffects.LEVITATION))
-                            this.motionY += (0.05D * (double)(this.getActivePotionEffect(MobEffects.LEVITATION).getAmplifier() + 1) - this.motionY) * 0.2D;
-                        else {
-                            blockPos.setPos(this.posX, 0.0D, this.posZ);
-
-                            if ((!this.world.isRemote || SERVER_COMPILE) || this.world.isBlockLoaded(blockPos) && this.world.getChunk(blockPos).isLoaded()) {
-                                if (!this.hasNoGravity())
-                                    this.motionY -= 0.08D;
-                            }
-                            else if (this.posY > 0.0D) this.motionY = -0.1D;
-                            else this.motionY = 0.0D;
-                        }
-                        this.motionY *= 0.9800000190734863D;
-                        this.motionX *= fl0;
-                        this.motionZ *= fl0;
+                        this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ, EMoveHelper.COMMON_FUTURE);
                     }
                 } else {
                     double d4 = this.posY;
                     this.moveRelative(strafe, vertical, forward, 0.02F);
-                    this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
-                    this.motionX *= 0.5D;
-                    this.motionY *= 0.5D;
-                    this.motionZ *= 0.5D;
 
-                    if (!this.hasNoGravity()) this.motionY -= 0.02D;
+                    this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ, () -> {
+                        this.motionX *= 0.5D;
+                        this.motionY *= 0.5D;
+                        this.motionZ *= 0.5D;
 
-                    if (this.collidedHorizontally && this.isOffsetPositionInLiquid(this.motionX, this.motionY + 0.6000000238418579D - this.posY + d4, this.motionZ))
-                        this.motionY = 0.30000001192092896D;
+                        if (!this.hasNoGravity()) this.motionY -= 0.02D;
+
+                        if (this.collidedHorizontally && this.isOffsetPositionInLiquid(this.motionX, this.motionY + 0.6000000238418579D - this.posY + d4, this.motionZ))
+                            this.motionY = 0.30000001192092896D;
+                    });
                 }
             } else {
                 double d0 = this.posY;
@@ -1511,25 +1505,63 @@ public abstract class EntityLivingBase extends Entity {
                 if (f3 > 3.0F) f3 = 3.0F;
                 if (!this.onGround) f3 *= 0.5F;
 
-
                 if (f3 > 0.0F) {
                     f1 += (0.54600006F - f1) * f3 / 3.0F;
                     f2 += (this.getAIMoveSpeed() - f2) * f3 / 3.0F;
                 }
 
                 this.moveRelative(strafe, vertical, forward, f2);
-                this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
-                this.motionX *= f1;
-                this.motionY *= 0.800000011920929D;
-                this.motionZ *= f1;
 
-                if (!this.hasNoGravity()) this.motionY -= 0.02D;
+                float finalF = f1;
+                this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ, () -> {
+                    this.motionX *= finalF;
+                    this.motionY *= 0.800000011920929D;
+                    this.motionZ *= finalF;
 
-                if (this.collidedHorizontally && this.isOffsetPositionInLiquid(this.motionX, this.motionY + 0.6000000238418579D - this.posY + d0, this.motionZ))
-                    this.motionY = 0.30000001192092896D;
+                    if (!this.hasNoGravity()) this.motionY -= 0.02D;
+
+                    if (this.collidedHorizontally && this.isOffsetPositionInLiquid(this.motionX, this.motionY + 0.6000000238418579D - this.posY + d0, this.motionZ))
+                        this.motionY = 0.30000001192092896D;
+                });
             }
         }
+        if(!SERVER_COMPILE) if(world.isRemote)updateLimbSwing();
+    }
 
+
+    @Override
+    public void completeCommon(){
+        BlockPos.MutableBlockPos mut = world.localTempPos;
+        IBlockEAccess curAccess = world.access();
+        float slipperiness;
+        if (this.onGround) {
+            IBlockState underState = curAccess.getBlockState(mut.setPos(this.posX, this.getEntityBoundingBox().minY - 1.0D, this.posZ));
+            slipperiness = underState.getBlock().getSlipperiness(underState, curAccess, mut, this) * 0.91F;
+        } else {
+            slipperiness = 0.91F;
+        }
+
+        if (this.collidedHorizontally && this.isOnLadder()) this.motionY = 0.2D;
+
+        if (this.isPotionActive(MobEffects.LEVITATION))
+            this.motionY += (0.05D * (double) (this.getActivePotionEffect(MobEffects.LEVITATION).getAmplifier() + 1) - this.motionY) * 0.2D;
+        else {
+            mut.setPos(this.posX, 0.0D, this.posZ);
+
+            if ((!this.world.isRemote || SERVER_COMPILE) || this.world.isBlockLoaded(mut) && this.world.getChunk(mut).isLoaded()) {
+                if (!this.hasNoGravity())
+                    this.motionY -= 0.08D;
+            } else if (this.posY > 0.0D) this.motionY = -0.1D;
+            else this.motionY = 0.0D;
+        }
+        this.motionY *= 0.9800000190734863D;
+        this.motionX *= slipperiness;
+        this.motionZ *= slipperiness;
+    }
+
+
+    @SideOnly(Side.CLIENT)
+    protected void updateLimbSwing(){
         this.prevLimbSwingAmount = this.limbSwingAmount;
         double d5 = this.posX - this.prevPosX;
         double d7 = this.posZ - this.prevPosZ;

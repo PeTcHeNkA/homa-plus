@@ -38,6 +38,8 @@ import net.minecraft.world.storage.loot.LootTableList;
 import net.minecraftforge.common.IShearable;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.fserver.ElcaConfig;
+import plus.fserver.ElcaMobs;
 import plus.fserver.entity.ai.EntityAIWatchClosestPlayer;
 import plus.fserver.utls.FastDyeBlend;
 
@@ -336,6 +338,12 @@ public class EntitySheep extends EntityAnimal implements IShearable {
     @Override
     public float getEyeHeight() {
         return 0.95F * this.height;
+    }
+
+
+    @Override
+    public int lodLvl() {
+        return ElcaMobs.SHEEP.lodLvl(elcaMinRange);
     }
 
 

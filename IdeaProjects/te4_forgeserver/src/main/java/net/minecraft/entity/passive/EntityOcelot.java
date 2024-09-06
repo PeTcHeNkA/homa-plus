@@ -18,6 +18,7 @@ import net.minecraft.util.text.translation.*;
 import net.minecraft.world.*;
 import net.minecraft.entity.*;
 import net.minecraft.network.datasync.*;
+import plus.fserver.ElcaMobs;
 import plus.fserver.entity.ai.EntityAIWatchClosestPlayer;
 
 
@@ -308,6 +309,12 @@ public class EntityOcelot extends EntityTameable {
             }
         }
         return livingdata;
+    }
+
+
+    @Override
+    public int lodLvl() {
+        return ElcaMobs.OCELOT.lodLvl(elcaMinRange);
     }
 
 

@@ -115,9 +115,9 @@ public abstract class EntityXPOrbPatch extends Entity {
             f = underState.getBlock().getSlipperiness(underState, this.world, underPos, this) * 0.98F;
         }
 
-        this.motionX *= (double)f;
+        this.motionX *= f;
         this.motionY *= 0.9800000190734863D;
-        this.motionZ *= (double)f;
+        this.motionZ *= f;
 
         if (this.onGround) {
             this.motionY *= -0.8999999761581421D;

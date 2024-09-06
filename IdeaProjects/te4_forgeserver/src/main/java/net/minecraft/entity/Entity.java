@@ -575,16 +575,40 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
     }
 
 
-    //todo hot point
-    public void move(MoverType type, double x, double y, double z) {
-        if(!world.isRemote){
-            EMoveHelper.move(this, type, x, y, z);
-            return;
-        }
+    public void move(MoverType type, double x, double y, double z, Runnable future) {
         if (this.noClip) {
             getEntityBoundingBox().offsetMut(x, y, z);
             this.resetPositionToBB();
         } else {
+            if(world.isRemote){
+                move(type, x, y, z);
+                future.run();
+            } else {
+                EMoveHelper.move(this, type, x, y, z, future);
+            }
+        }
+    }
+
+
+    protected void updateLimbSwing(){}
+    protected void onClientAttack(){}
+
+
+    public boolean enableMoveAccelerator(){
+        return false;
+    }
+
+
+    //todo hot point
+    public void move(MoverType type, double x, double y, double z) {
+        if (this.noClip) {
+            getEntityBoundingBox().offsetMut(x, y, z);
+            this.resetPositionToBB();
+        } else {
+            if(!world.isRemote && enableMoveAccelerator()){
+                EMoveHelper.move(this, type, x, y, z, null);
+                return;
+            }
             int temp, num1;
             float fl1;
             final World world = this.world;
@@ -892,6 +916,223 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
             }
         }
     }
+
+
+    public void completeMove(AABBList boxes, double x, double y, double z){
+        World world = this.world;
+        final int bSize = boxes.sizeC();
+        final AxisAlignedBB[] rawBoxes = boxes.raw();
+
+        double dx0 = this.posX;
+        double dy0 = this.posY;
+        double dz0 = this.posZ;
+
+        double dx1 = x;
+        double dy1 = y;
+        double dz1 = z;
+
+        AxisAlignedBB axisalignedbb = this.getEntityBoundingBox();
+        boolean flag;
+        int temp, num1;
+        if (flag = y != 0.0D) {
+            temp = 0;
+            for (num1 = bSize; temp < num1; ++temp)
+                y = rawBoxes[temp].calculateYOffset(axisalignedbb, y);
+
+        }
+        if (x != 0.0D) {
+            temp = 0;
+            for (num1 = bSize; temp < num1; ++temp)
+                x = rawBoxes[temp].calculateXOffset(axisalignedbb, x);
+
+            flag = true;
+        }
+
+        if (z != 0.0D) {
+            temp = 0;
+
+            for (num1 = bSize; temp < num1; ++temp)
+                z = rawBoxes[temp].calculateZOffset(axisalignedbb, z);
+
+            flag = true;
+        }
+
+        AxisAlignedBB prev = world.commonWorldEntityAABB;
+        prev.initSafe(
+                axisalignedbb.minX, axisalignedbb.minY, axisalignedbb.minZ,
+                axisalignedbb.maxX, axisalignedbb.maxY, axisalignedbb.maxZ
+        );
+        if(flag) {
+            axisalignedbb.offsetMut(x, y, z);
+        }
+
+        flag = this.onGround || dy1 != y && dy1 < 0.0D;
+
+        double dx2, dy2, dz2;
+        if (this.stepHeight > 0.0F && flag && (dx1 != x || dz1 != z)) {
+            dx2 = x;
+            dy2 = y;
+            dz2 = z;
+
+            //entity.setEntityBoundingBox(axisalignedbb);
+            y = this.stepHeight;
+
+            final AxisAlignedBB aab2 = this.getEntityBoundingBox();
+            aab2.expandTo(dx1, 0.0D, dz1, axisalignedbb = world.commonWorldEntityAABB2);
+            double d8 = y;
+            temp = 0;
+
+            for (num1 = bSize; temp < num1; ++temp)
+                d8 = rawBoxes[temp].calculateYOffset(axisalignedbb, d8);
+
+            aab2.offsetMut(0.0D, d8, 0.0D);
+            double d18 = dx1;
+            temp = 0;
+
+            for (num1 = bSize; temp < num1; ++temp)
+                d18 = rawBoxes[temp].calculateXOffset(aab2, d18);
+
+            aab2.offsetMut(d18, 0.0D, 0.0D);
+
+            double d19 = dz1;
+            temp = 0;
+
+            for (num1 = bSize; temp < num1; ++temp)
+                d19 = rawBoxes[temp].calculateZOffset(aab2, d19);
+
+            aab2.offsetMut(0.0D, 0.0D, d19);
+
+            double d20 = y;
+            temp = 0;
+
+            axisalignedbb = this.getEntityBoundingBox();
+            for (num1 = bSize; temp < num1; ++temp)
+                d20 = rawBoxes[temp].calculateYOffset(axisalignedbb, d20);
+
+            double d21 = dx1;
+            temp = 0;
+
+            for (num1 = bSize; temp < num1; ++temp)
+                d21 = rawBoxes[temp].calculateXOffset(axisalignedbb, d21);
+
+            double d22 = dz1;
+            temp = 0;
+
+            for (num1 = bSize; temp < num1; ++temp)
+                d22 = rawBoxes[temp].calculateZOffset(axisalignedbb, d22);
+
+            if (d18 * d18 + d19 * d19 > d21 * d21 + d22 * d22) {
+                x = d18;
+                z = d19;
+                y = -d8;
+                this.setEntityBoundingBox(aab2);
+            } else
+                axisalignedbb.offsetMut(x = d21, y = -d20, z = d22);
+
+            temp = 0;
+
+            for (num1 = bSize; temp < num1; ++temp)
+                y = rawBoxes[temp].calculateYOffset(axisalignedbb, y);
+
+            if (dx2 * dx2 + dz2 * dz2 >= x * x + z * z) {
+                x = dx2;
+                y = dy2;
+                z = dz2;
+
+                this.getEntityBoundingBox().initSafe(
+                        prev.minX, prev.minY, prev.minZ,
+                        prev.maxX, prev.maxY, prev.maxZ
+                );
+            } else {
+                this.getEntityBoundingBox().offsetMut(0.0D, y, 0.0D);
+            }
+        }
+        this.resetPositionToBB();
+
+        this.onGround = (this.collidedVertically = dy1 != y) && dy1 < 0.0D;
+        this.collided = (this.collidedHorizontally = dx1 != x || dz1 != z) || this.collidedVertically;
+
+        BlockPos.MutableBlockPos pos;
+        IBlockState state = world.localSelector.getState(
+                pos = world.localTempPos.setPos(this.posX, this.posY - 0.20000000298023224D, this.posZ)
+        );
+
+        if (state.getMaterial() == Material.AIR) {
+            IBlockState state1 = world.localSelector.getBlockState(pos.getX(), pos.getY()-1, pos.getZ());
+            Block block1 = state1.getBlock();
+
+            if (block1 instanceof BlockFence || block1 instanceof BlockWall || block1 instanceof BlockFenceGate) {
+                state = state1;
+                pos.setY(pos.getY()-1);
+            }
+        }
+
+        this.updateFallState(y, this.onGround, state, pos);
+
+        if (dx1 != x) this.motionX = 0.0D;
+        if (dz1 != z) this.motionZ = 0.0D;
+
+        Block block = state.getBlock();
+
+        if (this.collidedVertically) block.onLanded(world, this);
+
+        if (this.canTriggerWalking() && (!this.onGround || !this.isSneaking() || !(this instanceof EntityPlayer)) && !this.isRiding()) {
+            dx2 = this.posX - dx0;
+            dy2 = block == Blocks.LADDER ? this.posY - dy0 : 0;
+            dz2 = this.posZ - dz0;
+
+            if (this.onGround) block.onEntityWalk(world, pos, this);
+
+
+            this.distanceWalkedModified = (float)((double)this.distanceWalkedModified + (double)MathHelper.sqrt(dx2 * dx2 + dz2 * dz2) * 0.6D);
+            this.distanceWalkedOnStepModified = (float)((double)this.distanceWalkedOnStepModified + (double)MathHelper.sqrt(dx2 * dx2 + dy2 * dy2 + dz2 * dz2) * 0.6D);
+
+            if (this.distanceWalkedOnStepModified > (float)this.nextStepDistance && state.getMaterial() != Material.AIR) {
+                this.nextStepDistance = (int)this.distanceWalkedOnStepModified + 1;
+
+                if (this.isInWater()) {
+                    Entity entity1 = this.isBeingRidden() && this.getControllingPassenger() != null ? this.getControllingPassenger() : this;
+                    float fl1 = entity1 == this ? 0.35F : 0.4F;
+                    float f1 = MathHelper.sqrt(entity1.motionX * entity1.motionX * 0.20000000298023224D + entity1.motionY * entity1.motionY + entity1.motionZ * entity1.motionZ * 0.20000000298023224D) * fl1;
+
+                    if (f1 > 1.0F) f1 = 1.0F;
+
+                    this.playSound(entity1.getSwimSound(), f1, 1.0F + (this.rand.nextFloat() - this.rand.nextFloat()) * 0.4F);
+                } else this.playStepSound(pos, block);
+
+            } else if (this.distanceWalkedOnStepModified > this.nextFlap && this.makeFlySound() && state.getMaterial() == Material.AIR)
+                this.nextFlap = this.playFlySound(this.distanceWalkedOnStepModified);
+        }
+        try {
+            this.doBlockCollisions();
+        } catch (Throwable throwable) {
+            CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Checking entity block collision");
+            CrashReportCategory cat = crashreport.makeCategory("Entity being checked for collision");
+            this.addEntityCrashInfo(cat);
+            world.getMinecraftServer().ticker().onError((WorldServer) world, new ReportedException(crashreport));
+        }
+
+        flag = this.isWet();
+
+        this.getEntityBoundingBox().growTo(-0.001D,-0.001D,-0.001D, axisalignedbb = world.commonWorldEntityAABB);
+
+        if (world.isFlammableWithin(axisalignedbb)) {
+            this.dealFireDamage(1);
+            if (!flag) {
+                ++this.fire;
+
+                if (this.fire == 0) this.setFire(8);
+            }
+        } else if (this.fire <= 0) this.fire = (short) -this.getFireImmuneTicks();
+
+        if (flag && this.isBurning()) {
+            this.playSound(SoundEvents.ENTITY_GENERIC_EXTINGUISH_FIRE, 0.7F, 1.6F + (this.rand.nextFloat() - this.rand.nextFloat()) * 0.4F);
+            this.fire = (short) -this.getFireImmuneTicks();
+        }
+    }
+
+
+    public void completeCommon(){};
 
 
     public void resetPositionToBB() {

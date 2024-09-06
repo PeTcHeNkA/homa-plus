@@ -361,6 +361,27 @@ public abstract class EntityArrow extends Entity implements IProjectile {
     }
 
 
+    @Override
+    public void move(MoverType type, double x, double y, double z, Runnable future) {
+        if (this.noClip) {
+            getEntityBoundingBox().offsetMut(x, y, z);
+            this.resetPositionToBB();
+        } else {
+            if(world.isRemote){
+                move(type, x, y, z);
+                future.run();
+            } else {
+                EMoveHelper.move(this, type, x, y, z, future);
+                if (this.inGround) {
+                    this.xTile = MathHelper.floor(this.posX);
+                    this.yTile = MathHelper.floor(this.posY);
+                    this.zTile = MathHelper.floor(this.posZ);
+                }
+            }
+        }
+    }
+
+
     protected void arrowHit(final EntityLivingBase living) {}
 
 

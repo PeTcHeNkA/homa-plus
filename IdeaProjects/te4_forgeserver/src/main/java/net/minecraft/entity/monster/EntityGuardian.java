@@ -368,17 +368,18 @@ public class EntityGuardian extends EntityMob {
     public void travel(float strafe, float vertical, float forward) {
         if (this.isServerWorld() && this.isInWater()) {
             this.moveRelative(strafe, vertical, forward, 0.1F);
-            this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
-            this.motionX *= 0.8999999761581421D;
-            this.motionY *= 0.8999999761581421D;
-            this.motionZ *= 0.8999999761581421D;
-
-            if (!this.isMoving() && this.getAttackTarget() == null) {
-                this.motionY -= 0.005D;
-            }
+            this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ, this::completeMove);
         } else {
             super.travel(strafe, vertical, forward);
         }
+    }
+
+
+    private void completeMove(){
+        this.motionX *= 0.8999999761581421D;
+        this.motionY *= 0.8999999761581421D;
+        this.motionZ *= 0.8999999761581421D;
+        if (!this.isMoving() && this.getAttackTarget() == null) this.motionY -= 0.005D;
     }
 
 

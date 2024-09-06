@@ -130,91 +130,101 @@ public class EntityFallingBlock extends Entity {
                 this.motionY -= 0.03999999910593033D;
             }
 
-            this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
+            this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ, this::completeMove);
+        }
+    }
 
-            if (!this.world.isRemote || SERVER_COMPILE) {
-                int lodLvl = lodLvl();
-                if(lodLvl != 0 && (ticksExisted & lodLvl) != 0)return;
 
-                BlockPos temp1 = world.localTempPos.setPos(this);
-                boolean flag = this.fallTile.getBlock() == Blocks.CONCRETE_POWDER;
-                boolean flag1 = flag && this.world.access().getBlockState(temp1).getMaterial() == Material.WATER;
+    @Override
+    public boolean enableMoveAccelerator() {
+        return true;
+    }
 
-                if (flag && (this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ) > 1.0D) {
-                    RayTraceResult rtxResult = this.world.rayTraceBlocks(new Vec3d(this.prevPosX, this.prevPosY, this.prevPosZ), new Vec3d(this.posX, this.posY, this.posZ), true);
 
-                    if (rtxResult != null && this.world.getBlockState(rtxResult.getBlockPos()).getMaterial() == Material.WATER) {
-                        temp1 = rtxResult.getBlockPos();
-                        flag1 = true;
-                    }
-                }
+    private void completeMove(){
+        final Block cur = this.fallTile.getBlock();
+        if (!this.world.isRemote || SERVER_COMPILE) {
+            int lodLvl = lodLvl();
+            if(lodLvl != 0 && (ticksExisted & lodLvl) != 0)return;
 
-                if (!this.onGround && !flag1) {
-                    if (this.fallTime > 100 && !this.world.isRemote && (temp1.getY() < 1 || temp1.getY() > 256) || this.fallTime > 600) {
-                        if (this.shouldDropItem && this.world.getGameRules().doEntityDrops.getBoolean()) {
-                            this.entityDropItem(new ItemStack(cur, 1, cur.damageDropped(this.fallTile)), 0.0F);
-                        }
+            BlockPos temp1 = world.localTempPos.setPos(this);
+            boolean flag = this.fallTile.getBlock() == Blocks.CONCRETE_POWDER;
+            boolean flag1 = flag && this.world.access().getBlockState(temp1).getMaterial() == Material.WATER;
 
-                        this.setDead();
-                    }
-                } else {
-                    BlockPos.MutableBlockPos temp2 = world.localTempPos2.setPos(this.posX, this.posY - 0.009999999776482582D, this.posZ);
+            if (flag && (this.motionX * this.motionX + this.motionY * this.motionY + this.motionZ * this.motionZ) > 1.0D) {
+                RayTraceResult rtxResult = this.world.rayTraceBlocks(new Vec3d(this.prevPosX, this.prevPosY, this.prevPosZ), new Vec3d(this.posX, this.posY, this.posZ), true);
 
-                    if (this.world.localSelector.isAirBlock(temp2)) //Forge: Don't indent below.
-                        if (!flag1 && BlockFalling.canFallThrough(this.world.localSelector.getState(temp2))) {
-                            this.onGround = false;
-                            return;
-                        }
-
-                    this.motionX *= 0.699999988079071D;
-                    this.motionZ *= 0.699999988079071D;
-                    this.motionY *= -0.5D;
-
-                    IBlockState state;
-
-                    if ((state = world.access().getBlockState(temp1)).getBlock() != Blocks.PISTON_EXTENSION) {
-                        this.setDead();
-
-                        if (!this.dontSetBlock) {
-                            if (this.world.mayPlace(cur, temp1, true, EnumFacing.UP, this) && (flag1 ||
-                                    !BlockFalling.canFallThrough(this.world.localSelector.getState(temp1.getX(), temp1.getY()-1, temp1.getZ())))
-                                    && this.world.localSelector.setBlockState(temp1, this.fallTile, 3)) {
-                                if (cur instanceof BlockFalling) {
-                                    ((BlockFalling)cur).onEndFalling(this.world, temp1, this.fallTile, state);
-                                }
-
-                                if (this.tileEntityData != null && cur.hasTileEntity(this.fallTile)) {
-                                    TileEntity tileentity = this.world.getTileEntity(temp1);
-
-                                    if (tileentity != null) {
-                                        NBTTagCompound nbttagcompound = tileentity.writeToNBT(new NBTTagCompound());
-
-                                        for (String s : this.tileEntityData.getKeySet()) {
-                                            NBTBase nbtbase = this.tileEntityData.getTag(s);
-
-                                            if (!"x".equals(s) && !"y".equals(s) && !"z".equals(s)) {
-                                                nbttagcompound.setTag(s, nbtbase.copy());
-                                            }
-                                        }
-                                        tileentity.readFromNBT(nbttagcompound);
-                                        tileentity.markDirty();
-                                    }
-                                }
-                            }
-                            else if (this.shouldDropItem && this.world.getGameRules().getBoolean("doEntityDrops")) {
-                                this.entityDropItem(new ItemStack(cur, 1, cur.damageDropped(this.fallTile)), 0.0F);
-                            }
-                        } else if (cur instanceof BlockFalling) {
-                            ((BlockFalling)cur).onBroken(this.world, temp1);
-                        }
-                    }
+                if (rtxResult != null && this.world.getBlockState(rtxResult.getBlockPos()).getMaterial() == Material.WATER) {
+                    temp1 = rtxResult.getBlockPos();
+                    flag1 = true;
                 }
             }
 
-            this.motionX *= 0.9800000190734863D;
-            this.motionY *= 0.9800000190734863D;
-            this.motionZ *= 0.9800000190734863D;
+            if (!this.onGround && !flag1) {
+                if (this.fallTime > 100 && !this.world.isRemote && (temp1.getY() < 1 || temp1.getY() > 256) || this.fallTime > 600) {
+                    if (this.shouldDropItem && this.world.getGameRules().doEntityDrops.getBoolean()) {
+                        this.entityDropItem(new ItemStack(cur, 1, cur.damageDropped(this.fallTile)), 0.0F);
+                    }
+
+                    this.setDead();
+                }
+            } else {
+                BlockPos.MutableBlockPos temp2 = world.localTempPos2.setPos(this.posX, this.posY - 0.009999999776482582D, this.posZ);
+
+                if (this.world.localSelector.isAirBlock(temp2)) //Forge: Don't indent below.
+                    if (!flag1 && BlockFalling.canFallThrough(this.world.localSelector.getState(temp2))) {
+                        this.onGround = false;
+                        return;
+                    }
+
+                this.motionX *= 0.699999988079071D;
+                this.motionZ *= 0.699999988079071D;
+                this.motionY *= -0.5D;
+
+                IBlockState state;
+
+                if ((state = world.access().getBlockState(temp1)).getBlock() != Blocks.PISTON_EXTENSION) {
+                    this.setDead();
+
+                    if (!this.dontSetBlock) {
+                        if (this.world.mayPlace(cur, temp1, true, EnumFacing.UP, this) && (flag1 ||
+                                !BlockFalling.canFallThrough(this.world.localSelector.getState(temp1.getX(), temp1.getY()-1, temp1.getZ())))
+                                && this.world.localSelector.setBlockState(temp1, this.fallTile, 3)) {
+                            if (cur instanceof BlockFalling) {
+                                ((BlockFalling)cur).onEndFalling(this.world, temp1, this.fallTile, state);
+                            }
+
+                            if (this.tileEntityData != null && cur.hasTileEntity(this.fallTile)) {
+                                TileEntity tileentity = this.world.getTileEntity(temp1);
+
+                                if (tileentity != null) {
+                                    NBTTagCompound nbttagcompound = tileentity.writeToNBT(new NBTTagCompound());
+
+                                    for (String s : this.tileEntityData.getKeySet()) {
+                                        NBTBase nbtbase = this.tileEntityData.getTag(s);
+
+                                        if (!"x".equals(s) && !"y".equals(s) && !"z".equals(s)) {
+                                            nbttagcompound.setTag(s, nbtbase.copy());
+                                        }
+                                    }
+                                    tileentity.readFromNBT(nbttagcompound);
+                                    tileentity.markDirty();
+                                }
+                            }
+                        }
+                        else if (this.shouldDropItem && this.world.getGameRules().getBoolean("doEntityDrops")) {
+                            this.entityDropItem(new ItemStack(cur, 1, cur.damageDropped(this.fallTile)), 0.0F);
+                        }
+                    } else if (cur instanceof BlockFalling) {
+                        ((BlockFalling)cur).onBroken(this.world, temp1);
+                    }
+                }
+            }
         }
+
+        this.motionX *= 0.9800000190734863D;
+        this.motionY *= 0.9800000190734863D;
+        this.motionZ *= 0.9800000190734863D;
     }
 
 
