@@ -5,15 +5,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.velocitypowered.natives.compression.VelocityCompressor;
 import com.velocitypowered.natives.util.Natives;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelException;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.*;
 import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollSocketChannel;
@@ -25,13 +17,13 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.TimeoutException;
+import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import java.net.InetAddress;
 import java.net.SocketAddress;
 import java.util.Queue;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.annotation.Nullable;
 import javax.crypto.SecretKey;
 import net.minecraft.util.CryptManager;
@@ -55,8 +47,6 @@ import plus.fserver.server.network.NativeCompressionEncoder;
 
 
 public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >> {
-    @Keep
-    private static final GenericFutureListener[] emptyFuture = new GenericFutureListener[0];
     private static final Logger LOGGER = LogManager.getLogger();
     @Keep
     public static final Marker NETWORK_MARKER = MarkerManager.getMarker("NETWORK");
@@ -65,40 +55,32 @@ public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >> {
     @Keep
     public static final AttributeKey<EnumConnectionState> PROTOCOL_ATTRIBUTE_KEY = AttributeKey.<EnumConnectionState>valueOf("protocol");
     @Keep
-    public static final LazyLoadBase<NioEventLoopGroup> CLIENT_NIO_EVENTLOOP = new LazyLoadBase<NioEventLoopGroup>()
-    {
-        protected NioEventLoopGroup load()
-        {
+    public static final LazyLoadBase<NioEventLoopGroup> CLIENT_NIO_EVENTLOOP = new LazyLoadBase<NioEventLoopGroup>() {
+        protected NioEventLoopGroup load() {
             return new NioEventLoopGroup(0, (new ThreadFactoryBuilder()).setNameFormat("Netty Client IO #%d").setDaemon(true).build());
         }
     };
     @Keep
-    public static final LazyLoadBase<EpollEventLoopGroup> CLIENT_EPOLL_EVENTLOOP = new LazyLoadBase<EpollEventLoopGroup>()
-    {
-        protected EpollEventLoopGroup load()
-        {
+    public static final LazyLoadBase<EpollEventLoopGroup> CLIENT_EPOLL_EVENTLOOP = new LazyLoadBase<EpollEventLoopGroup>() {
+        protected EpollEventLoopGroup load() {
             return new EpollEventLoopGroup(0, (new ThreadFactoryBuilder()).setNameFormat("Netty Epoll Client IO #%d").setDaemon(true).build());
         }
     };
     @Keep
-    public static final LazyLoadBase<LocalEventLoopGroup> CLIENT_LOCAL_EVENTLOOP = new LazyLoadBase<LocalEventLoopGroup>()
-    {
-        protected LocalEventLoopGroup load()
-        {
+    public static final LazyLoadBase<LocalEventLoopGroup> CLIENT_LOCAL_EVENTLOOP = new LazyLoadBase<LocalEventLoopGroup>() {
+        protected LocalEventLoopGroup load() {
             return new LocalEventLoopGroup(0, (new ThreadFactoryBuilder()).setNameFormat("Netty Local Client IO #%d").setDaemon(true).build());
         }
     };
 
     private final EnumPacketDirection direction;
-    private final Queue<NetworkManager.InboundHandlerTuplePacketListener> outboundPacketsQueue = Queues.newConcurrentLinkedQueue();
-    //todo removed. is safe?
-    //private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+    private final Queue<NetworkManager.InboundHandlerTuplePacketListenerBase> outboundPacketsQueue = Queues.newConcurrentLinkedQueue();
     private Channel channel;
     private SocketAddress socketAddress;
     private INetHandler packetListener;
     private ITextComponent terminationReason;
-    private boolean isEncrypted;
-    private boolean disconnected;
+    private boolean isEncrypted, disconnected;
+    private Attribute<EnumConnectionState> connectionState;
 
     public NetworkManager(EnumPacketDirection packetDirection) {
         this.direction = packetDirection;
@@ -115,6 +97,8 @@ public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >> {
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
         this.channel = ctx.channel();
+        connectionState = channel.attr(PROTOCOL_ATTRIBUTE_KEY);
+
         this.socketAddress = this.channel.remoteAddress();
         try {
             this.setConnectionState(EnumConnectionState.HANDSHAKING);
@@ -126,7 +110,7 @@ public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >> {
 
     @Keep
     public void setConnectionState(EnumConnectionState newState) {
-        this.channel.attr(PROTOCOL_ATTRIBUTE_KEY).set(newState);
+        connectionState.set(newState);
         this.channel.config().setAutoRead(true);
     }
 
@@ -157,9 +141,7 @@ public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >> {
         if (this.channel.isOpen()) {
             try {
                 ((Packet<INetHandler>)packet).processPacket(this.packetListener);
-            } catch (ThreadQuickExitException ignored) {
-                ;
-            }
+            } catch (ThreadQuickExitException ignored) {}
         }
     }
 
@@ -178,12 +160,7 @@ public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >> {
             this.flushOutboundQueue();
             this.dispatchPacket(packetIn, null);
         } else {
-            //this.readWriteLock.writeLock().lock();
-            try {
-                this.outboundPacketsQueue.add(new NetworkManager.InboundHandlerTuplePacketListener(packetIn, emptyFuture));
-            } finally {
-                //this.readWriteLock.writeLock().unlock();
-            }
+            this.outboundPacketsQueue.add(new NetworkManager.InboundHandlerTuplePacketListenerBase(packetIn));
         }
     }
 
@@ -193,53 +170,58 @@ public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >> {
         if (this.isChannelOpen()) {
             this.flushOutboundQueue();
             this.dispatchPacket(packetIn, ArrayUtils.add(listeners, 0, listener));
-        }
-        else {
-            //this.readWriteLock.writeLock().lock();
-            try {
-                this.outboundPacketsQueue.add(new NetworkManager.InboundHandlerTuplePacketListener(packetIn, ArrayUtils.add(listeners, 0, listener)));
-            }
-            finally {
-                //this.readWriteLock.writeLock().unlock();
-            }
+        } else {
+            this.outboundPacketsQueue.add(new NetworkManager.InboundHandlerTuplePacketListener(packetIn, ArrayUtils.add(listeners, 0, listener)));
         }
     }
 
 
-    private void dispatchPacket(final Packet<?> inPacket, @Nullable final GenericFutureListener <? extends Future <? super Void >> [] futureListeners) {
-        final EnumConnectionState state = EnumConnectionState.getFromPacket(inPacket);
-        boolean flag = channel.attr(PROTOCOL_ATTRIBUTE_KEY).get() != state
-                && !( inPacket instanceof FMLProxyPacket);
-        if (flag) this.channel.config().setAutoRead(false);
+    //todo use pooled promise?
+    private void dispatchPacket(final Packet<?> inPacket, @Nullable final GenericFutureListener <? extends Future <? super Void >> [] future) {
+        final Channel channel;
+        recheckState(inPacket);
 
-        if (this.channel.eventLoop().inEventLoop()) {
-            if (flag) this.setConnectionState(state);
-            ChannelFuture channelfuture = this.channel.writeAndFlush(inPacket);
-
-            if (futureListeners != null) {
-                channelfuture.addListeners(futureListeners);
+        if ((channel = this.channel).eventLoop().inEventLoop()) {
+            if (future != null) {
+                channel.writeAndFlush(inPacket)
+                        .addListeners(future)
+                        .addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+            } else {
+                channel.writeAndFlush(inPacket)
+                        .addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
             }
-            channelfuture.addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
         } else {
-            this.channel.eventLoop().execute(() -> {
-                if (flag) NetworkManager.this.setConnectionState(state);
-                ChannelFuture channelfuture1 = NetworkManager.this.channel.writeAndFlush(inPacket);
-
-                if (futureListeners != null) {
-                    channelfuture1.addListeners(futureListeners);
-                }
-                channelfuture1.addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
-            });
+            if (future != null) {
+                channel.eventLoop().execute(() -> channel.writeAndFlush(inPacket)
+                        .addListeners(future)
+                        .addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE));
+            } else {
+                channel.eventLoop().execute(() -> channel.writeAndFlush(inPacket)
+                        .addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE)
+                );
+            }
         }
     }
 
 
     @Keep
     public void flushOutboundQueue() {
-        NetworkManager.InboundHandlerTuplePacketListener listener = this.outboundPacketsQueue.poll();
+        final Queue<InboundHandlerTuplePacketListenerBase> queue;
+        NetworkManager.InboundHandlerTuplePacketListenerBase listener = (queue = this.outboundPacketsQueue).poll();
         while (listener != null){
-            this.dispatchPacket(listener.packet, listener.futureListeners);
-            listener = this.outboundPacketsQueue.poll();
+            this.dispatchPacket(listener.packet, listener.future());
+            listener = queue.poll();
+        }
+    }
+
+
+    private void flushOutboundQueueE() {
+        final Queue<InboundHandlerTuplePacketListenerBase> queue;
+        NetworkManager.InboundHandlerTuplePacketListenerBase listener = (queue = this.outboundPacketsQueue).poll();
+        Channel channel = this.channel;
+        while (listener != null){
+            dispatchPacketE(channel, listener.packet, listener.future());
+            listener = queue.poll();
         }
     }
 
@@ -426,13 +408,30 @@ public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >> {
 
 
     @Keep
-    public static class InboundHandlerTuplePacketListener {
-        private final Packet<?> packet;
+    public static class InboundHandlerTuplePacketListener extends InboundHandlerTuplePacketListenerBase{
         private final GenericFutureListener <? extends Future <? super Void >> [] futureListeners;
-
+        @SafeVarargs
         public InboundHandlerTuplePacketListener(Packet<?> inPacket, GenericFutureListener <? extends Future <? super Void >> ... inFutureListeners) {
-            this.packet = inPacket;
+            super(inPacket);
             this.futureListeners = inFutureListeners;
+        }
+
+        public GenericFutureListener<? extends Future<? super Void>>[] future() {
+            return futureListeners;
+        }
+    }
+
+
+    @Keep
+    public static class InboundHandlerTuplePacketListenerBase {
+        private final Packet<?> packet;
+
+        public InboundHandlerTuplePacketListenerBase(Packet<?> inPacket) {
+            this.packet = inPacket;
+        }
+
+        public GenericFutureListener <? extends Future <? super Void >> [] future(){
+            return null;
         }
     }
 
@@ -443,27 +442,17 @@ public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >> {
 
 
     public void addToQueue(Packet<?> packetIn){
-        //this.readWriteLock.writeLock().lock();
-        try {
-            this.outboundPacketsQueue.add(new NetworkManager.InboundHandlerTuplePacketListener(packetIn, emptyFuture));
-        } finally {
-            //this.readWriteLock.writeLock().unlock();
-        }
+        this.outboundPacketsQueue.add(new NetworkManager.InboundHandlerTuplePacketListenerBase(packetIn));
     }
 
 
-
     public void sendPacketSync(Packet<?> packetIn){
-        if (this.isChannelOpen()) {
-            flushOutboundQueue();
-            dispatchPacketE(packetIn, null);
+        Channel channel = this.channel;
+        if (channel != null && channel.isOpen()) {
+            flushOutboundQueueE();
+            dispatchPacketE(channel, packetIn, null);
         } else {
-            //this.readWriteLock.writeLock().lock();
-            try {
-                this.outboundPacketsQueue.add(new NetworkManager.InboundHandlerTuplePacketListener(packetIn, emptyFuture));
-            } finally {
-                //this.readWriteLock.writeLock().unlock();
-            }
+            this.outboundPacketsQueue.add(new NetworkManager.InboundHandlerTuplePacketListenerBase(packetIn));
         }
     }
 
@@ -472,36 +461,39 @@ public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >> {
     public void sendPacketE(Packet<?> packetIn) {
         if (this.isChannelOpen()) {
             channel.eventLoop().execute(() -> {
-                flushOutboundQueue();
-                dispatchPacketE(packetIn, null);
+                flushOutboundQueueE();
+                dispatchPacketE(channel, packetIn, null);
             });
         } else {
-            //this.readWriteLock.writeLock().lock();
-            try {
-        this.outboundPacketsQueue.add(new NetworkManager.InboundHandlerTuplePacketListener(packetIn, emptyFuture));
-            } finally {
-                //this.readWriteLock.writeLock().unlock();
-            }
+            this.outboundPacketsQueue.add(new NetworkManager.InboundHandlerTuplePacketListenerBase(packetIn));
         }
     }
 
 
     public void addToQueueE(Packet<?> packetIn){
-        this.outboundPacketsQueue.add(new NetworkManager.InboundHandlerTuplePacketListener(packetIn, emptyFuture));
+        this.outboundPacketsQueue.add(new NetworkManager.InboundHandlerTuplePacketListenerBase(packetIn));
     }
 
 
-    private void dispatchPacketE(final Packet<?> inPacket, @Nullable final GenericFutureListener <? extends Future <? super Void >> [] listeners) {
-        final EnumConnectionState state = EnumConnectionState.getFromPacket(inPacket);
-        final EnumConnectionState state1 = channel.attr(PROTOCOL_ATTRIBUTE_KEY).get();
-        if (state != state1) {
-            setConnectionState(state);
-            channel.config().setAutoRead(false);
+    private void dispatchPacketE(Channel channel, final Packet<?> inPacket, @Nullable final GenericFutureListener <? extends Future <? super Void >> [] listeners) {
+        recheckState(inPacket);
+        if (listeners != null){
+            channel.writeAndFlush(inPacket)
+                    .addListeners(listeners)
+                    .addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+        } else {
+            channel.writeAndFlush(inPacket)
+                    .addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
         }
-        ChannelFuture future = channel.writeAndFlush(inPacket);
-        if (listeners != null)
-            future.addListeners(listeners);
+    }
 
-        future.addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+
+    private void recheckState(final Packet<?> inPacket){
+        final EnumConnectionState state = inPacket.getConnectionState();
+        Attribute<EnumConnectionState> conn;
+        if((conn = this.connectionState).get() != state && !(inPacket instanceof FMLProxyPacket)){
+            conn.set(state);
+            channel.config().setAutoRead(true);
+        }
     }
 }

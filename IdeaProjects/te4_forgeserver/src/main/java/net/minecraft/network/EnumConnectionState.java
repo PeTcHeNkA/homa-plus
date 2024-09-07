@@ -221,6 +221,8 @@ public enum EnumConnectionState {
         this.registerPacket(EnumPacketDirection.CLIENTBOUND, SPacketAdvancementInfo.class);
         this.registerPacket(EnumPacketDirection.CLIENTBOUND, SPacketEntityProperties.class);
         this.registerPacket(EnumPacketDirection.CLIENTBOUND, SPacketEntityEffect.class);
+
+
         this.registerPacket(EnumPacketDirection.SERVERBOUND, CPacketConfirmTeleport.class);
         this.registerPacket(EnumPacketDirection.SERVERBOUND, CPacketTabComplete.class);
         this.registerPacket(EnumPacketDirection.SERVERBOUND, CPacketChatMessage.class);
@@ -323,9 +325,20 @@ public enum EnumConnectionState {
     }
 
 
+    public Integer getPacketIdF(int enumId, Packet<?> packetIn) {
+        return this.clazzMaps[enumId].get(packetIn.getClass());
+    }
+
+
     @Nullable
     public Packet<?> getPacket(EnumPacketDirection direction, int packetId) throws InstantiationException, IllegalAccessException {
         return constructMap[direction.id].get(packetId).get();
+    }
+
+
+    @Nullable
+    public Packet<?> getPacketF(int enumId, int packetId) {
+        return constructMap[enumId].get(packetId).get();
     }
 
 

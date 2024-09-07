@@ -7,16 +7,18 @@ import java.util.*;
 import io.netty.util.*;
 import java.io.*;
 import org.apache.logging.log4j.*;
+import plus.fserver.ElcaCV;
 import plus.fserver.server.network.NetUtils;
 
 
+@ChannelHandler.Sharable
 public class NettyPacketDecoder extends ByteToMessageDecoder {
     private static final Logger LOGGER;
     private static final Marker RECEIVED_PACKET_MARKER;
-    private final EnumPacketDirection direction;
+    private final int direction;
 
     public NettyPacketDecoder(final EnumPacketDirection direction) {
-        this.direction = direction;
+        this.direction = direction.id;
     }
 
 
@@ -26,7 +28,7 @@ public class NettyPacketDecoder extends ByteToMessageDecoder {
 
         //final PacketBuffer pBuffer = new PacketBuffer(buf);
         final int id = NetUtils.readVarInt(buf);
-        final Packet<?> packet = ((EnumConnectionState)ctx.channel().attr((AttributeKey)NetworkManager.PROTOCOL_ATTRIBUTE_KEY).get()).getPacket(this.direction, id);
+        final Packet<?> packet = ((EnumConnectionState)ctx.channel().attr((AttributeKey)NetworkManager.PROTOCOL_ATTRIBUTE_KEY).get()).getPacketF(this.direction, id);
         if (packet == null) {
             throw new IOException("Bad packet id " + id);
         }
@@ -35,10 +37,19 @@ public class NettyPacketDecoder extends ByteToMessageDecoder {
             throw new IOException("Packet " + ((EnumConnectionState)ctx.channel().attr((AttributeKey)NetworkManager.PROTOCOL_ATTRIBUTE_KEY).get()).getId() + "/" + id + " (" + packet.getClass().getSimpleName() + ") was larger than I expected, found " + buf.readableBytes() + " bytes extra whilst reading packet " + id);
         }
         msg.add(packet);
-        if (NettyPacketDecoder.LOGGER.isDebugEnabled()) {
-            NettyPacketDecoder.LOGGER.debug(NettyPacketDecoder.RECEIVED_PACKET_MARKER, " IN: [{}:{}] {}", ctx.channel().attr((AttributeKey)NetworkManager.PROTOCOL_ATTRIBUTE_KEY).get(), (Object)id, (Object)packet.getClass().getName());
+        if(ElcaCV.ENABLE_PACKET_DEBUG) {
+            if (NettyPacketDecoder.LOGGER.isDebugEnabled()) {
+                NettyPacketDecoder.LOGGER.debug(NettyPacketDecoder.RECEIVED_PACKET_MARKER, " IN: [{}:{}] {}", ctx.channel().attr((AttributeKey) NetworkManager.PROTOCOL_ATTRIBUTE_KEY).get(), id, packet.getClass().getName());
+            }
         }
     }
+
+
+    @Override
+    public boolean isSharable() {
+        return true;
+    }
+
 
     static {
         LOGGER = LogManager.getLogger();

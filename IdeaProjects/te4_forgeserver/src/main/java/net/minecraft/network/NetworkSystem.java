@@ -3,12 +3,7 @@ package net.minecraft.network;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelException;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollServerSocketChannel;
@@ -41,6 +36,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import plus.fserver.ElcaConfig;
 import plus.fserver.api.Keep;
 import plus.fserver.server.network.ElcaFireWall;
 import plus.fserver.utls.collections.NetMenegerChunkedSyncList;
@@ -105,23 +101,29 @@ public class NetworkSystem {
 
             this.endpoints.add((new ServerBootstrap()).channel(oclass).childHandler(
                     fireWall = new ElcaFireWall<Channel>(lazyloadbase.getValue()) {
+
+                final NettyPacketDecoder decoder = new NettyPacketDecoder(EnumPacketDirection.SERVERBOUND);
+                final NettyPacketEncoder encoder = new NettyPacketEncoder(EnumPacketDirection.CLIENTBOUND);
+
                 protected void postInit(Channel chan) throws Exception {
                     try {
                         chan.config().setOption(ChannelOption.TCP_NODELAY, Boolean.TRUE);
                     } catch (ChannelException var3) {}
 
-                    chan.pipeline()
-                            .addLast("timeout"     , new ReadTimeoutHandler(FMLNetworkHandler.READ_TIMEOUT))
-                            .addLast("legacy_query", new LegacyPingHandler(NetworkSystem.this))
-                            .addLast("splitter"    , new NettyVarint21FrameDecoder())
-                            .addLast("decoder"     , new NettyPacketDecoder(EnumPacketDirection.SERVERBOUND))
-                            .addLast("prepender"   , new NettyVarint21FrameEncoder())
-                            .addLast("encoder"     , new NettyPacketEncoder(EnumPacketDirection.CLIENTBOUND));
+                    ChannelPipeline pipe = chan.pipeline();
+
+                    pipe.addLast("timeout"     , new ReadTimeoutHandler(FMLNetworkHandler.READ_TIMEOUT));
+                    if(ElcaConfig.ENABLE_LEGACY_PING_HANDLER) {
+                        pipe.addLast("legacy_query", new LegacyPingHandler(NetworkSystem.this));
+                    }
+                    pipe.addLast("splitter"    , NettyVarint21FrameDecoder.INSTANCE)
+                        .addLast("decoder"     , decoder)
+                        .addLast("prepender"   , NettyVarint21FrameEncoder.INSTANCE)
+                        .addLast("encoder"     , encoder);
 
                     NetworkManager manager = new NetworkManager(EnumPacketDirection.SERVERBOUND);
                     NetworkSystem.this.networkManagers.add(manager);
-                    chan.pipeline()
-                            .addLast("packet_handler", manager);
+                    pipe.addLast("packet_handler", manager);
                     manager.setNetHandler(new NetHandlerHandshakeTCP(NetworkSystem.this.server, manager));
                 }
             }).group(usedPool = lazyloadbase.getValue()).localAddress(address, port).bind().syncUninterruptibly());

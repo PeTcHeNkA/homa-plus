@@ -1,7 +1,6 @@
 package plus.fserver.server.network.packet;
 
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.network.play.server.SPacketDestroyEntities;
@@ -11,7 +10,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
 
-public class SElcaPacketDestroyEntities implements Packet<INetHandlerPlayClient> {
+public class SElcaPacketDestroyEntities extends SPacketPlayBase {
     private final Int1LinkedList.Node nodes;
 
     public SElcaPacketDestroyEntities(){

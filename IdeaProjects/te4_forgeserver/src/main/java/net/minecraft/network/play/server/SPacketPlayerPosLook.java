@@ -5,15 +5,15 @@ import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.Set;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.server.network.NetUtils;
+import plus.fserver.server.network.packet.SPacketPlayBase;
 
 
-public class SPacketPlayerPosLook implements Packet<INetHandlerPlayClient> {
+public class SPacketPlayerPosLook extends SPacketPlayBase {
     private double x;
     private double y;
     private double z;

@@ -3,16 +3,16 @@ package net.minecraft.network.play.server;
 import java.io.IOException;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.block.Block;
-import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.server.network.NetUtils;
+import plus.fserver.server.network.packet.SPacketPlayBase;
 
 
-public class SPacketBlockAction implements Packet<INetHandlerPlayClient> {
+public class SPacketBlockAction extends SPacketPlayBase {
     private BlockPos blockPosition;
     private int instrument;
     private int pitch;

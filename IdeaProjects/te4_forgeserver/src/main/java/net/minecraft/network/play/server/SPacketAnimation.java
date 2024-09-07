@@ -3,15 +3,15 @@ package net.minecraft.network.play.server;
 import java.io.IOException;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
-import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.server.network.NetUtils;
+import plus.fserver.server.network.packet.SPacketPlayBase;
 
 
-public class SPacketAnimation implements Packet<INetHandlerPlayClient> {
+public class SPacketAnimation extends SPacketPlayBase {
     private int entityId;
     private int type;
 

@@ -1,20 +1,18 @@
 package net.minecraft.network.play.server;
 
 import java.io.IOException;
-
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import org.apache.commons.lang3.Validate;
 import plus.fserver.server.network.NetUtils;
+import plus.fserver.server.network.packet.SPacketPlayBase;
 
 
-public class SPacketSoundEffect implements Packet<INetHandlerPlayClient> {
+public class SPacketSoundEffect extends SPacketPlayBase {
     private SoundEvent sound;
     private SoundCategory category;
     private int posX;

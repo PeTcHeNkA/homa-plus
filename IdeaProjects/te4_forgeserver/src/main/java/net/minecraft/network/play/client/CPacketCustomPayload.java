@@ -7,10 +7,11 @@ import java.io.*;
 import net.minecraft.network.*;
 import plus.fserver.api.Keep;
 import plus.fserver.server.network.NetUtils;
+import plus.fserver.server.network.packet.CPacketPlayBase;
 
 
 @Keep
-public class CPacketCustomPayload implements Packet<INetHandlerPlayServer> {
+public class CPacketCustomPayload extends CPacketPlayBase {
     private String channel;
     private PacketBuffer data;
 

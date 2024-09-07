@@ -1,19 +1,18 @@
 package net.minecraft.network.play.server;
 
 import java.io.IOException;
-
 import io.netty.buffer.ByteBuf;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.server.network.NetUtils;
+import plus.fserver.server.network.packet.SPacketPlayBase;
 
 
-public class SPacketPlaceGhostRecipe implements Packet<INetHandlerPlayClient> {
+public class SPacketPlaceGhostRecipe extends SPacketPlayBase {
     private int field_194314_a;
     private IRecipe field_194315_b;
 

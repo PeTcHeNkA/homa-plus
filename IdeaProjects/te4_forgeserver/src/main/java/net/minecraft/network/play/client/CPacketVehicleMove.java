@@ -3,12 +3,12 @@ package net.minecraft.network.play.client;
 import java.io.IOException;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
-import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
+import plus.fserver.server.network.packet.CPacketPlayBase;
 
 
-public class CPacketVehicleMove implements Packet<INetHandlerPlayServer> {
+public class CPacketVehicleMove extends CPacketPlayBase {
     private double x;
     private double y;
     private double z;

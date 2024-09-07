@@ -1,19 +1,18 @@
 package net.minecraft.network.play.server;
 
 import java.io.IOException;
-
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.CombatTracker;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import plus.fserver.server.network.NetUtils;
+import plus.fserver.server.network.packet.SPacketPlayBase;
 
 
-public class SPacketCombatEvent implements Packet<INetHandlerPlayClient> {
+public class SPacketCombatEvent extends SPacketPlayBase {
     public Event eventType;
     public int playerId;
     public int entityId;

@@ -24,4 +24,9 @@ public interface Packet<T extends INetHandler> {
     default void readPacketData(ByteBuf buf) throws IOException {
         readPacketData(new PacketBuffer(buf));
     }
+
+
+    default EnumConnectionState getConnectionState(){
+        return EnumConnectionState.getFromPacket(this);
+    }
 }

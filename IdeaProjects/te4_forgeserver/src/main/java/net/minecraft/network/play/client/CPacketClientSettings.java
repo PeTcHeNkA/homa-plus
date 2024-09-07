@@ -1,19 +1,18 @@
 package net.minecraft.network.play.client;
 
 import java.io.IOException;
-
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
 import net.minecraft.util.EnumHandSide;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.server.network.NetUtils;
+import plus.fserver.server.network.packet.CPacketPlayBase;
 
 
-public class CPacketClientSettings implements Packet<INetHandlerPlayServer> {
+public class CPacketClientSettings extends CPacketPlayBase {
     private String lang;
     private int view;
     private EntityPlayer.EnumChatVisibility chatVisibility;

@@ -1,10 +1,8 @@
 package net.minecraft.network.play.server;
 
 import java.io.IOException;
-
 import io.netty.buffer.ByteBuf;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.BlockIDIndexes;
@@ -14,9 +12,10 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.api.IBlockEAccess;
 import plus.fserver.server.network.NetUtils;
+import plus.fserver.server.network.packet.SPacketPlayBase;
 
 
-public class SPacketBlockChange implements Packet<INetHandlerPlayClient> {
+public class SPacketBlockChange extends SPacketPlayBase {
     private BlockPos blockPosition;
     public IBlockState blockState;
 

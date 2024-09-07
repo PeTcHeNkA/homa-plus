@@ -2,14 +2,14 @@ package net.minecraft.network.play.client;
 
 import java.io.IOException;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.fserver.server.network.packet.CPacketPlayBase;
 
 
-public class CPacketCloseWindow implements Packet<INetHandlerPlayServer> {
+public class CPacketCloseWindow extends CPacketPlayBase {
     private int windowId;
 
     public CPacketCloseWindow() {}

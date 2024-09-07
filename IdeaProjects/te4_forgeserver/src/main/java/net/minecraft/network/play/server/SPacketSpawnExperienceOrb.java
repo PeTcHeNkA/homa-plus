@@ -1,18 +1,17 @@
 package net.minecraft.network.play.server;
 
 import java.io.IOException;
-
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.item.EntityXPOrb;
-import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.server.network.NetUtils;
+import plus.fserver.server.network.packet.SPacketPlayBase;
 
 
-public class SPacketSpawnExperienceOrb implements Packet<INetHandlerPlayClient> {
+public class SPacketSpawnExperienceOrb extends SPacketPlayBase {
     private int entityID;
     private double posX;
     private double posY;

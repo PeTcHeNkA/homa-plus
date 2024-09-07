@@ -2,14 +2,14 @@ package net.minecraft.network.play.client;
 
 import java.io.IOException;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
 import net.minecraft.util.EnumHand;
 import plus.fserver.server.network.NetUtils;
+import plus.fserver.server.network.packet.CPacketPlayBase;
 
 
-public class CPacketAnimation implements Packet<INetHandlerPlayServer> {
+public class CPacketAnimation extends CPacketPlayBase {
     private EnumHand hand;
 
     public CPacketAnimation() {}

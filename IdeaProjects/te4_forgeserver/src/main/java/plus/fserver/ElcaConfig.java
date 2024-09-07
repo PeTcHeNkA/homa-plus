@@ -79,6 +79,7 @@ public class ElcaConfig {
     //public static boolean PROCESS_LIGHT_ON_SAVE      = false;
     public static boolean ASYNC_SAVE_CHUNKS          = true;
     public static boolean FAST_ENTITY_EQUALS         = true;
+    public static boolean ENABLE_LEGACY_PING_HANDLER = false;
     //public static boolean ENABLE_DATA_FIXER          = false;
 
 
