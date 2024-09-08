@@ -1059,6 +1059,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
+    private final BlockPos.MutableBlockPos checkSeePos = new BlockPos.MutableBlockPos();
     public boolean canSee(Vec3d vec31, Vec3d vec32, boolean stopOnLiquid) {
         if (!Double.isNaN(vec31.x) && !Double.isNaN(vec31.y) && !Double.isNaN(vec31.z)) {
             if (!Double.isNaN(vec32.x) && !Double.isNaN(vec32.y) && !Double.isNaN(vec32.z)) {
@@ -1073,14 +1074,14 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
                 IBlockState state = chunk.getBlockState(xPos, yPos, zPos);
 
                 EnumFacing enumfacing;
-                IBlockEAccess selector = isRemote?this:new ChunkSelector(chunk);
+                IBlockEAccess selector = isRemote?this:localSelector;
 
                 int k1 = 200;
 
                 double num1 = 0, num2 = 0, num3 = 0, num4, num5, num6, num7, num8, num9;
                 double vecX = vec31.x, vecY = vec31.y, vecZ = vec31.z;
 
-                BlockPos.MutableBlockPos blockPos = null;
+                BlockPos.MutableBlockPos blockPos = checkSeePos;
 
                 while (k1-- >= 0) {
                     if (Double.isNaN(vecX) || Double.isNaN(vecY) || Double.isNaN(vecZ)) return false;
@@ -1143,14 +1144,12 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
                     if (state != BlockIDIndexes.AIR_STATE && (state.isFullBlock() || state.getMaterial() == Material.PORTAL)) {
                         if (state.getBlock().canCollideCheck(state, stopOnLiquid)) {
-                            if(blockPos == null)blockPos = new BlockPos.MutableBlockPos();
-                            else blockPos.setPosB(xPos, yPos, zPos);
+                            blockPos.setPosB(xPos, yPos, zPos);
                             boolean rtxResult = state.hasCollisionRayTrace(this, blockPos, new Vec3d(vecX, vecY, vecZ), vec32);
                             if (rtxResult) return false;
                         }
                     } else {
-                        if(blockPos == null)blockPos = new BlockPos.MutableBlockPos();
-                        else blockPos.setPosB(xPos, yPos, zPos);
+                        blockPos.setPosB(xPos, yPos, zPos);
                         if(state.getCollisionBoundingBox(this, blockPos) != Block.NULL_AABB){
                             if (state.getBlock().canCollideCheck(state, stopOnLiquid)) {
                                 boolean rtxResult = state.hasCollisionRayTrace(this, blockPos, new Vec3d(vecX, vecY, vecZ), vec32);

@@ -136,16 +136,14 @@ public class ItemBlock extends Item {
     }
 
 
-    public boolean placeBlockAt(final ItemStack p_placeBlockAt_1_, final EntityPlayer p_placeBlockAt_2_, final World p_placeBlockAt_3_, final BlockPos p_placeBlockAt_4_, final EnumFacing p_placeBlockAt_5_, final float p_placeBlockAt_6_, final float p_placeBlockAt_7_, final float p_placeBlockAt_8_, final IBlockState p_placeBlockAt_9_) {
-        if (!p_placeBlockAt_3_.setBlockState(p_placeBlockAt_4_, p_placeBlockAt_9_, 11)) {
-            return false;
-        }
-        final IBlockState state = p_placeBlockAt_3_.getBlockState(p_placeBlockAt_4_);
-        if (state.getBlock() == this.block) {
-            setTileEntityNBT(p_placeBlockAt_3_, p_placeBlockAt_2_, p_placeBlockAt_4_, p_placeBlockAt_1_);
-            this.block.onBlockPlacedBy(p_placeBlockAt_3_, p_placeBlockAt_4_, state, (EntityLivingBase)p_placeBlockAt_2_, p_placeBlockAt_1_);
-            if (p_placeBlockAt_2_ instanceof EntityPlayerMP) {
-                CriteriaTriggers.PLACED_BLOCK.trigger((EntityPlayerMP)p_placeBlockAt_2_, p_placeBlockAt_4_, p_placeBlockAt_1_);
+    public boolean placeBlockAt(final ItemStack stack, final EntityPlayer player, final World world, final BlockPos pos, final EnumFacing facing, final float fx, final float fy, final float fz, final IBlockState state) {
+        if (!world.setBlockState(pos, state, 11)) return false;
+        final IBlockState curState = world.getBlockState(pos);
+        if (curState.getBlock() == this.block) {
+            setTileEntityNBT(world, player, pos, stack);
+            this.block.onBlockPlacedBy(world, pos, curState, player, stack);
+            if (player instanceof EntityPlayerMP) {
+                CriteriaTriggers.PLACED_BLOCK.trigger((EntityPlayerMP)player, pos, stack, curState);
             }
         }
         return true;

@@ -32,12 +32,12 @@ public class ItemSeeds extends Item implements IPlantable {
     public EnumActionResult onItemUse(final EntityPlayer player, final World world, final BlockPos pos, final EnumHand hand, final EnumFacing facing, final float hitX, final float hitY, final float hitZ) {
         final ItemStack itemstack = player.getHeldItem(hand);
         final IBlockEAccess access = world.access();
-        final IBlockState state = access.getBlockState(pos);
+        IBlockState state = access.getBlockState(pos);
         final BlockPos up;
         if (facing == EnumFacing.UP && player.canPlayerEdit(pos.offset(facing), facing, itemstack) && state.getBlock().canSustainPlant(state, access, pos, EnumFacing.UP, this) && access.isAirBlock(up = pos.up())) {
-            access.setBlockState(up, this.crops.getDefaultState(), 3);
+            access.setBlockState(up, state = this.crops.getDefaultState(), 3);
             if (player instanceof EntityPlayerMP) {
-                CriteriaTriggers.PLACED_BLOCK.trigger((EntityPlayerMP)player, up, itemstack);
+                CriteriaTriggers.PLACED_BLOCK.trigger((EntityPlayerMP)player, up, itemstack, state);
             }
             itemstack.shrink(1);
             return EnumActionResult.SUCCESS;

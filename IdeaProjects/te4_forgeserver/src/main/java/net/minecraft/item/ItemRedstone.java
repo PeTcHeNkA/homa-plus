@@ -1,5 +1,6 @@
 package net.minecraft.item;
 
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.*;
 import net.minecraft.util.math.*;
 import net.minecraft.util.*;
@@ -24,9 +25,10 @@ public class ItemRedstone extends Item {
         final BlockPos blockpos = flag ? pos : pos.offset(facing);
         final ItemStack itemstack = player.getHeldItem(hand);
         if (player.canPlayerEdit(blockpos, facing, itemstack) && world.mayPlace(access.getBlockState(blockpos).getBlock(), blockpos, false, facing, player) && Blocks.REDSTONE_WIRE.canPlaceBlockAt(world, blockpos)) {
-            access.setBlockState(blockpos, Blocks.REDSTONE_WIRE.getDefaultState(), 3);
+            IBlockState state;
+            access.setBlockState(blockpos, state = Blocks.REDSTONE_WIRE.getDefaultState(), 3);
             if (player instanceof EntityPlayerMP) {
-                CriteriaTriggers.PLACED_BLOCK.trigger((EntityPlayerMP)player, blockpos, itemstack);
+                CriteriaTriggers.PLACED_BLOCK.trigger((EntityPlayerMP)player, blockpos, itemstack, state);
             }
             itemstack.shrink(1);
             return EnumActionResult.SUCCESS;

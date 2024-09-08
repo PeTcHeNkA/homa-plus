@@ -71,6 +71,8 @@ def makePathFile():
             s += f"{name}, false, false\n"
         elif(name.startswith("net.minecraft.util")):
             s += f"{name}, false, false\n"
+        elif(name.startswith("net.minecraft.advancements.critereon")):
+            s += f"{name}, false, false\n"
         else:
             s += f"{name}\n"
     createFile("src/main/resources/elcapatch.csv", s, )

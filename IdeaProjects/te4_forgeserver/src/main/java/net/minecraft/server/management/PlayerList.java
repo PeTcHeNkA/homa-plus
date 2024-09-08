@@ -8,6 +8,7 @@ import java.io.File;
 import java.net.SocketAddress;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -95,8 +96,8 @@ public abstract class PlayerList {
         this.bannedIPs = new UserListIPBans(FILE_IPBANS);
         this.ops = new UserListOps(FILE_OPS);
         this.whiteListedPlayers = new UserListWhitelist(FILE_WHITELIST);
-        this.playerStatFiles = Maps.newHashMap();
-        this.advancements = Maps.newHashMap();
+        this.playerStatFiles = new ConcurrentHashMap<>();
+        this.advancements = new ConcurrentHashMap<>();
         this.server = server;
         this.bannedPlayers.setLanServer(false);
         this.bannedIPs.setLanServer(false);
@@ -916,17 +917,17 @@ public abstract class PlayerList {
     }
 
 
-    public PlayerAdvancements getPlayerAdvancements(EntityPlayerMP p_192054_1_) {
-        UUID uuid = p_192054_1_.getUniqueID();
-        PlayerAdvancements playeradvancements = this.advancements.get(uuid);
-        if (playeradvancements == null) {
+    public PlayerAdvancements getPlayerAdvancements(EntityPlayerMP player) {
+        UUID uuid = player.getUniqueID();
+        PlayerAdvancements cur = this.advancements.get(uuid);
+        if (cur == null) {
             File file1 = new File(this.server.getWorld(0).getSaveHandler().getWorldDirectory(), "advancements");
             File file2 = new File(file1, uuid + ".json");
-            playeradvancements = new PlayerAdvancements(this.server, file2, p_192054_1_);
-            this.advancements.put(uuid, playeradvancements);
+            cur = new PlayerAdvancements(this.server, file2, player);
+            this.advancements.put(uuid, cur);
         }
-        playeradvancements.setPlayer(p_192054_1_);
-        return playeradvancements;
+        cur.setPlayer(player);
+        return cur;
     }
 
 

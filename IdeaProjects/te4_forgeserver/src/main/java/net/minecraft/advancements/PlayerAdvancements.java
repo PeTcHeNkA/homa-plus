@@ -56,6 +56,11 @@ public class PlayerAdvancements {
     }
 
 
+    public EntityPlayerMP getPlayer(){
+        return player;
+    }
+
+
     public void dispose() {
         for (ICriterionTrigger<?> trigger : CriteriaTriggers.getAll()) {
             trigger.removeAllListeners(this);
@@ -258,7 +263,7 @@ public class PlayerAdvancements {
                 ICriterionInstance icriterioninstance = entry.getValue().getCriterionInstance();
 
                 if (icriterioninstance != null) {
-                    ICriterionTrigger<ICriterionInstance> trigger = CriteriaTriggers.<ICriterionInstance>get(icriterioninstance.getId());
+                    ICriterionTrigger<ICriterionInstance> trigger = CriteriaTriggers.get(icriterioninstance.getId());
 
                     if (trigger != null) {
                         trigger.removeListener(this,
@@ -273,8 +278,8 @@ public class PlayerAdvancements {
     public void flushDirty(EntityPlayerMP player) {
         if (!this.visibilityChanged.isEmpty() || !this.progressChanged.isEmpty()) {
             Map<ResourceLocation, AdvancementProgress> map = Maps.newHashMap();
-            Set<Advancement> set = Sets.<Advancement>newLinkedHashSet();
-            Set<ResourceLocation> set1 = Sets.<ResourceLocation>newLinkedHashSet();
+            Set<Advancement> set = Sets.newLinkedHashSet();
+            Set<ResourceLocation> set1 = Sets.newLinkedHashSet();
 
             for (Advancement advancement : this.progressChanged) {
                 if (this.visible.contains(advancement)) {

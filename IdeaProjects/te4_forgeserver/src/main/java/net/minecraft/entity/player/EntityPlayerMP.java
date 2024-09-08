@@ -256,8 +256,8 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
 
 
     @Override
-    protected void onInsideBlock(IBlockState p_191955_1_) {
-        CriteriaTriggers.ENTER_BLOCK.trigger(this, p_191955_1_);
+    protected void onInsideBlock(IBlockState state) {
+        CriteriaTriggers.ENTER_BLOCK.trigger(this, state);
     }
 
 

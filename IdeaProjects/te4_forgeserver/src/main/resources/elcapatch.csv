@@ -1,5 +1,80 @@
 net.minecraft.advancements.AdvancementProgress$Serializer
 net.minecraft.advancements.AdvancementProgress
+net.minecraft.advancements.critereon.BredAnimalsTrigger$Instance, false, false
+net.minecraft.advancements.critereon.BredAnimalsTrigger$Listeners, false, false
+net.minecraft.advancements.critereon.BredAnimalsTrigger, false, false
+net.minecraft.advancements.critereon.BrewedPotionTrigger$Instance, false, false
+net.minecraft.advancements.critereon.BrewedPotionTrigger$Listeners, false, false
+net.minecraft.advancements.critereon.BrewedPotionTrigger, false, false
+net.minecraft.advancements.critereon.ChangeDimensionTrigger$Instance, false, false
+net.minecraft.advancements.critereon.ChangeDimensionTrigger$Listeners, false, false
+net.minecraft.advancements.critereon.ChangeDimensionTrigger, false, false
+net.minecraft.advancements.critereon.ConstructBeaconTrigger$Instance, false, false
+net.minecraft.advancements.critereon.ConstructBeaconTrigger$Listeners, false, false
+net.minecraft.advancements.critereon.ConstructBeaconTrigger, false, false
+net.minecraft.advancements.critereon.ConsumeItemTrigger$Instance, false, false
+net.minecraft.advancements.critereon.ConsumeItemTrigger$Listeners, false, false
+net.minecraft.advancements.critereon.ConsumeItemTrigger, false, false
+net.minecraft.advancements.critereon.CuredZombieVillagerTrigger$Instance, false, false
+net.minecraft.advancements.critereon.CuredZombieVillagerTrigger$Listeners, false, false
+net.minecraft.advancements.critereon.CuredZombieVillagerTrigger, false, false
+net.minecraft.advancements.critereon.EffectsChangedTrigger$Instance, false, false
+net.minecraft.advancements.critereon.EffectsChangedTrigger$Listeners, false, false
+net.minecraft.advancements.critereon.EffectsChangedTrigger, false, false
+net.minecraft.advancements.critereon.EnchantedItemTrigger$Instance, false, false
+net.minecraft.advancements.critereon.EnchantedItemTrigger$Listeners, false, false
+net.minecraft.advancements.critereon.EnchantedItemTrigger, false, false
+net.minecraft.advancements.critereon.EnterBlockTrigger$Instance, false, false
+net.minecraft.advancements.critereon.EnterBlockTrigger$Listeners, false, false
+net.minecraft.advancements.critereon.EnterBlockTrigger, false, false
+net.minecraft.advancements.critereon.EntityHurtPlayerTrigger$Instance, false, false
+net.minecraft.advancements.critereon.EntityHurtPlayerTrigger$Listeners, false, false
+net.minecraft.advancements.critereon.EntityHurtPlayerTrigger, false, false
+net.minecraft.advancements.critereon.InventoryChangeTrigger$Instance, false, false
+net.minecraft.advancements.critereon.InventoryChangeTrigger$Listeners, false, false
+net.minecraft.advancements.critereon.InventoryChangeTrigger, false, false
+net.minecraft.advancements.critereon.ItemDurabilityTrigger$Instance, false, false
+net.minecraft.advancements.critereon.ItemDurabilityTrigger$Listeners, false, false
+net.minecraft.advancements.critereon.ItemDurabilityTrigger, false, false
+net.minecraft.advancements.critereon.KilledTrigger$Instance, false, false
+net.minecraft.advancements.critereon.KilledTrigger$Listeners, false, false
+net.minecraft.advancements.critereon.KilledTrigger, false, false
+net.minecraft.advancements.critereon.LevitationTrigger$Instance, false, false
+net.minecraft.advancements.critereon.LevitationTrigger$Listeners, false, false
+net.minecraft.advancements.critereon.LevitationTrigger, false, false
+net.minecraft.advancements.critereon.NetherTravelTrigger$Instance, false, false
+net.minecraft.advancements.critereon.NetherTravelTrigger$Listeners, false, false
+net.minecraft.advancements.critereon.NetherTravelTrigger, false, false
+net.minecraft.advancements.critereon.PlacedBlockTrigger$Instance, false, false
+net.minecraft.advancements.critereon.PlacedBlockTrigger$Listeners, false, false
+net.minecraft.advancements.critereon.PlacedBlockTrigger, false, false
+net.minecraft.advancements.critereon.PlayerHurtEntityTrigger$Instance, false, false
+net.minecraft.advancements.critereon.PlayerHurtEntityTrigger$Listeners, false, false
+net.minecraft.advancements.critereon.PlayerHurtEntityTrigger, false, false
+net.minecraft.advancements.critereon.PositionTrigger$Instance, false, false
+net.minecraft.advancements.critereon.PositionTrigger$Listeners, false, false
+net.minecraft.advancements.critereon.PositionTrigger, false, false
+net.minecraft.advancements.critereon.RecipeUnlockedTrigger$Instance, false, false
+net.minecraft.advancements.critereon.RecipeUnlockedTrigger$Listeners, false, false
+net.minecraft.advancements.critereon.RecipeUnlockedTrigger, false, false
+net.minecraft.advancements.critereon.SummonedEntityTrigger$Instance, false, false
+net.minecraft.advancements.critereon.SummonedEntityTrigger$Listeners, false, false
+net.minecraft.advancements.critereon.SummonedEntityTrigger, false, false
+net.minecraft.advancements.critereon.TameAnimalTrigger$Instance, false, false
+net.minecraft.advancements.critereon.TameAnimalTrigger$Listeners, false, false
+net.minecraft.advancements.critereon.TameAnimalTrigger, false, false
+net.minecraft.advancements.critereon.TickTrigger$Instance, false, false
+net.minecraft.advancements.critereon.TickTrigger$Listeners, false, false
+net.minecraft.advancements.critereon.TickTrigger, false, false
+net.minecraft.advancements.critereon.UsedEnderEyeTrigger$Instance, false, false
+net.minecraft.advancements.critereon.UsedEnderEyeTrigger$Listeners, false, false
+net.minecraft.advancements.critereon.UsedEnderEyeTrigger, false, false
+net.minecraft.advancements.critereon.UsedTotemTrigger$Instance, false, false
+net.minecraft.advancements.critereon.UsedTotemTrigger$Listeners, false, false
+net.minecraft.advancements.critereon.UsedTotemTrigger, false, false
+net.minecraft.advancements.critereon.VillagerTradeTrigger$Instance, false, false
+net.minecraft.advancements.critereon.VillagerTradeTrigger$Listeners, false, false
+net.minecraft.advancements.critereon.VillagerTradeTrigger, false, false
 net.minecraft.advancements.CriterionProgress
 net.minecraft.advancements.PlayerAdvancements$1
 net.minecraft.advancements.PlayerAdvancements
@@ -199,6 +274,9 @@ net.minecraft.entity.ai.EntityAIAvoidEntity$AvoidSelector
 net.minecraft.entity.ai.EntityAIAvoidEntity
 net.minecraft.entity.ai.EntityAIEatGrass
 net.minecraft.entity.ai.EntityAIFollowParent
+net.minecraft.entity.ai.EntityAIHurtByTarget$1
+net.minecraft.entity.ai.EntityAIHurtByTarget$Agent
+net.minecraft.entity.ai.EntityAIHurtByTarget
 net.minecraft.entity.ai.EntityAILookAtTradePlayer
 net.minecraft.entity.ai.EntityAILookIdle
 net.minecraft.entity.ai.EntityAIMoveToBlock
@@ -220,6 +298,7 @@ net.minecraft.entity.Entity$5
 net.minecraft.entity.Entity$6
 net.minecraft.entity.Entity
 net.minecraft.entity.EntityCreature
+net.minecraft.entity.EntityFlying
 net.minecraft.entity.EntityLiving$1
 net.minecraft.entity.EntityLiving$SpawnPlacementType
 net.minecraft.entity.EntityLiving
@@ -262,10 +341,12 @@ net.minecraft.entity.monster.EntityWitch
 net.minecraft.entity.monster.EntityZombie$1
 net.minecraft.entity.monster.EntityZombie$GroupData
 net.minecraft.entity.monster.EntityZombie
+net.minecraft.entity.passive.AbstractHorse
 net.minecraft.entity.passive.EntityAmbientCreature
 net.minecraft.entity.passive.EntityAnimal
 net.minecraft.entity.passive.EntityBat
 net.minecraft.entity.passive.EntityOcelot
+net.minecraft.entity.passive.EntityPig
 net.minecraft.entity.passive.EntityRabbit$AIAvoidEntity
 net.minecraft.entity.passive.EntityRabbit$AIEvilAttack
 net.minecraft.entity.passive.EntityRabbit$AIPanic
@@ -374,12 +455,15 @@ net.minecraft.network.NetHandlerPlayServer$2
 net.minecraft.network.NetHandlerPlayServer
 net.minecraft.network.NettyPacketDecoder
 net.minecraft.network.NettyPacketEncoder
+net.minecraft.network.NettyVarint21FrameDecoder
+net.minecraft.network.NettyVarint21FrameEncoder
 net.minecraft.network.NetworkManager$1
 net.minecraft.network.NetworkManager$2
 net.minecraft.network.NetworkManager$3
 net.minecraft.network.NetworkManager$4
 net.minecraft.network.NetworkManager$5
 net.minecraft.network.NetworkManager$InboundHandlerTuplePacketListener
+net.minecraft.network.NetworkManager$InboundHandlerTuplePacketListenerBase
 net.minecraft.network.NetworkManager
 net.minecraft.network.NetworkSystem$1
 net.minecraft.network.NetworkSystem$2
@@ -407,6 +491,7 @@ net.minecraft.network.play.client.CPacketUseEntity
 net.minecraft.network.play.client.CPacketVehicleMove
 net.minecraft.network.play.server.SPacketAnimation
 net.minecraft.network.play.server.SPacketBlockAction
+net.minecraft.network.play.server.SPacketBlockBreakAnim
 net.minecraft.network.play.server.SPacketBlockChange
 net.minecraft.network.play.server.SPacketChunkData
 net.minecraft.network.play.server.SPacketCombatEvent$1
@@ -424,12 +509,15 @@ net.minecraft.network.play.server.SPacketEntityHeadLook
 net.minecraft.network.play.server.SPacketEntityVelocity
 net.minecraft.network.play.server.SPacketHeldItemChange
 net.minecraft.network.play.server.SPacketKeepAlive
+net.minecraft.network.play.server.SPacketMoveVehicle
 net.minecraft.network.play.server.SPacketPlaceGhostRecipe
 net.minecraft.network.play.server.SPacketPlayerPosLook$EnumFlags
 net.minecraft.network.play.server.SPacketPlayerPosLook
 net.minecraft.network.play.server.SPacketSetSlot
 net.minecraft.network.play.server.SPacketSoundEffect
 net.minecraft.network.play.server.SPacketSpawnExperienceOrb
+net.minecraft.network.play.server.SPacketSpawnObject
+net.minecraft.network.play.server.SPacketTabComplete
 net.minecraft.network.play.server.SPacketTimeUpdate
 net.minecraft.network.play.server.SPacketUnloadChunk
 net.minecraft.network.play.server.SPacketUpdateHealth
