@@ -6,7 +6,9 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.World;
 import plus.fserver.ElcaCV2;
 import plus.fserver.utls.collections.AABBList;
 
@@ -28,6 +30,15 @@ public class BlockFx extends Block {
             throw new RuntimeException("THIS CLASS ONLY FOR COMPILE. NOT LOAD THIS");
         }//Up to 40+ times faster
         list.addIfIntersects(entityBox, getCollisionBoundingBox(state, access, pos), pos);
+    }
+
+
+    @Deprecated
+    public boolean hasCollisionRayTrace(IBlockState blockState, World worldIn, BlockPos pos, Vec3d start, Vec3d end) {
+        return blockState.getBoundingBox(worldIn, pos).checkInterceptRT(
+                start.subtract(pos.getX(), pos.getY(), pos.getZ()),
+                end  .subtract(pos.getX(), pos.getY(), pos.getZ())
+        );
     }
 
 

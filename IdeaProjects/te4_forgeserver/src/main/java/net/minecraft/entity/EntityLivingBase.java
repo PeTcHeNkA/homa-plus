@@ -1865,10 +1865,10 @@ public abstract class EntityLivingBase extends Entity {
 
 
     public boolean canEntityBeSeen(Entity entityIn) {
-        return this.world.rayTraceBlocks(
+        return this.world.canSee(
                 new Vec3d(this.posX, this.posY + (double)this.getEyeHeight(), this.posZ),
                 new Vec3d(entityIn.posX, entityIn.posY + (double)entityIn.getEyeHeight(), entityIn.posZ),
-                false, true, false) == null;
+                false);
     }
 
 

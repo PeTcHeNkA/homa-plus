@@ -504,6 +504,31 @@ public final class AxisAlignedBB {
     }
 
 
+    public boolean checkInterceptRT(Vec3d vecA, Vec3d vecB) {
+        Vec3d vec3d = this.collideWithXPlane(this.minX, vecA, vecB);
+        if(vec3d != null)return true;
+        Vec3d vec3d1 = this.collideWithXPlane(this.maxX, vecA, vecB);
+
+        if (vec3d1 != null) return true;
+
+        vec3d1 = this.collideWithYPlane(this.minY, vecA, vecB);
+
+        if (vec3d1 != null) return true;
+
+        vec3d1 = this.collideWithYPlane(this.maxY, vecA, vecB);
+
+        if (vec3d1 != null) return true;
+
+        vec3d1 = this.collideWithZPlane(this.minZ, vecA, vecB);
+
+        if (vec3d1 != null) return true;
+
+        vec3d1 = this.collideWithZPlane(this.maxZ, vecA, vecB);
+
+        return vec3d1 != null;
+    }
+
+
     @VisibleForTesting
     boolean isClosest(Vec3d p_186661_1_, @Nullable Vec3d p_186661_2_, Vec3d p_186661_3_) {
         return p_186661_2_ == null || p_186661_1_.squareDistanceTo(p_186661_3_) < p_186661_1_.squareDistanceTo(p_186661_2_);

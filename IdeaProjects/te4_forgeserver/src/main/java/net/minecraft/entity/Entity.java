@@ -1988,7 +1988,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
     protected final boolean serverIsEntityInsideOpaqueBlock(){
         final ChunkSelector access = world.localSelector;
-        final float w08 = this.width * 0.8f, yeeH = (float)posY + this.getEyeHeight();
+        final float w08 = this.width * 0.4f, yeeH = (float)posY + this.getEyeHeight();
 
         int yf = MathHelper.floor(yeeH - 0.05f);
         if(yf > 255 || yf < 0)return false;

@@ -606,21 +606,27 @@ public class Block extends net.minecraftforge.registries.IForgeRegistryEntry.Imp
     }
 
 
-    public int damageDropped(IBlockState state)
-    {
+    public int damageDropped(IBlockState state) {
         return 0;
     }
 
+
     @Deprecated //Forge: State sensitive version
-    public float getExplosionResistance(Entity exploder)
-    {
+    public float getExplosionResistance(Entity exploder) {
         return this.blockResistance / 5.0F;
     }
+
 
     @Deprecated
     @Nullable
     public RayTraceResult collisionRayTrace(IBlockState blockState, World worldIn, BlockPos pos, Vec3d start, Vec3d end) {
         return this.rayTrace(pos, start, end, blockState.getBoundingBox(worldIn, pos));
+    }
+
+
+    @Deprecated
+    public boolean hasCollisionRayTrace(IBlockState blockState, World worldIn, BlockPos pos, Vec3d start, Vec3d end) {
+        return this.rayTrace(pos, start, end, blockState.getBoundingBox(worldIn, pos)) != null;
     }
 
 
