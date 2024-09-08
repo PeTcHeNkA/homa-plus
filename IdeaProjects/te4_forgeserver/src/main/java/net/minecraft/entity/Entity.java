@@ -93,6 +93,8 @@ import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.collections.AABBList;
 import plus.fserver.utls.collections.ArrayListE6;
 import plus.tson.utl.Te4HashSet;
+
+import static net.minecraft.entity.EMoveHelper.COMMON_FUTURE;
 import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
@@ -582,7 +584,8 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         } else {
             if(world.isRemote){
                 move(type, x, y, z);
-                future.run();
+                if(future == COMMON_FUTURE)completeCommon();
+                else future.run();
             } else {
                 EMoveHelper.move(this, type, x, y, z, future);
             }

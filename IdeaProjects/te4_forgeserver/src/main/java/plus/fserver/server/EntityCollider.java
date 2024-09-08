@@ -8,7 +8,6 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import plus.fserver.utls.collections.ArrayListE6;
-import plus.fserver.utls.collections.ArrayRemSwapListE6;
 import plus.fserver.utls.collections.EntityList;
 import plus.fserver.world.CollisionPredicate;
 
@@ -100,12 +99,12 @@ public class EntityCollider {
     }
 
 
-    private interface CollideTask{
+    interface CollideTask{
         void collide(CollisionPredicate cp, int limit, EntityList<Entity> temp);
     }
 
 
-    private static void collideAll(CollisionPredicate cp, Entity[] entities, int size){
+    static void collideAll(CollisionPredicate cp, Entity[] entities, int size){
         Predicate<Entity> e1;
         Entity[] parts;
         for (int i = 0; i < size; i++){
@@ -133,7 +132,7 @@ public class EntityCollider {
     }
 
 
-    private static void collideAllB(CollisionPredicate cp, Entity[] entities, int size, int limit, EntityList<Entity> temp){
+    static void collideAllB(CollisionPredicate cp, Entity[] entities, int size, int limit, EntityList<Entity> temp){
         Predicate<Entity> e1;
         Entity[] parts;
         temp.fclear();

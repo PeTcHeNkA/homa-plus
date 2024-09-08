@@ -286,9 +286,10 @@ public final class AsyWorldTickerV2 implements ThreadFactory{
             long spend = System.nanoTime() - curNanoTime;
             long[] times = server.worldTickTimes.get(inf.id);
 
-            times[inf.tickCounter % 100] = spend;
-
-            worldserver.setMeanTT(mean(times, inf.tickCounter));
+            int counter = inf.tickCounter;
+            if(counter < 0)counter = 0;
+            times[counter % 100] = spend;
+            worldserver.setMeanTT(mean(times, counter));
 
         } catch (Exception | StackOverflowError exception){
             onError(worldserver, exception);
