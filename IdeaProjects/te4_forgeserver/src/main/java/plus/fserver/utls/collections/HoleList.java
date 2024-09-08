@@ -9,7 +9,7 @@ import java.util.ListIterator;
 
 public class HoleList<T> implements List<T> {
     private static final Object[] EMPTY = new Object[]{};
-    private static final ListIterator EMPTY_ITER = new ListIterator() {
+    static final ListIterator EMPTY_ITER = new ListIterator() {
         @Override
         public boolean hasNext() {
             return false;

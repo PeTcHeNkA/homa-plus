@@ -474,7 +474,7 @@ public class WorldClient extends World {
 
     //to merge ========================================================================================================================
     @Override
-    protected <T extends Entity> void getEntitiesWithinAABB0(List<T> list, Class <? extends T > clazz, AxisAlignedBB aabb, @Nullable Predicate<? super T > filter) {
+    public  <T extends Entity> void getEntitiesWithinAABBNoCache(List<T> list, Class <? extends T > clazz, AxisAlignedBB aabb, @Nullable Predicate<? super T > filter) {
         int j2 = MathHelper.floor((aabb.minX - MAX_ENTITY_RADIUS) / 16.0D);
         int k2 = MathHelper.ceil((aabb.maxX + MAX_ENTITY_RADIUS) / 16.0D);
         int l2 = MathHelper.floor((aabb.minZ - MAX_ENTITY_RADIUS) / 16.0D);

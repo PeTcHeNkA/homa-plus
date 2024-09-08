@@ -7,7 +7,7 @@ import java.util.function.Consumer;
 
 public class ArrayListE6<T> implements List<T> {
     public static final Object[] EMPTY_ARR = {};
-    private static final Itr EMPTY_ITR = new Itr<>(EMPTY_ARR, 0);
+    static final Itr EMPTY_ITR = new Itr<>(EMPTY_ARR, 0);
     protected Object[] data = EMPTY_ARR;
     protected int size = 0;
 

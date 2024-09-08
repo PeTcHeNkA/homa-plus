@@ -3401,7 +3401,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
                     if (!clazz.isInstance(entity) || filter != null && !filter.apply((T) entity)) {
                         EntityList<T> res = eeCache.allocArr();
 
-                        getEntitiesWithinAABB0(res, clazz, aabb, filter);
+                        getEntitiesWithinAABBNoCache(res, clazz, aabb, filter);
                         eeCache.add(key, (EntityList<Entity>)res);
                         return res;
                     }
@@ -3409,13 +3409,13 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
                 return (List<T>) entities;
             } else {
                 EntityList<T> res = eeCache.allocArr();
-                getEntitiesWithinAABB0(res, clazz, aabb, filter);
+                getEntitiesWithinAABBNoCache(res, clazz, aabb, filter);
                 eeCache.add(key, (EntityList<Entity>) res);
                 return res;
             }
         } else {
             EntityList<T> res = new EntityList<>();
-            getEntitiesWithinAABB0(res, clazz, aabb, filter);
+            getEntitiesWithinAABBNoCache(res, clazz, aabb, filter);
             return res;
         }
     }
@@ -3424,7 +3424,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public <T extends Entity> List<T> getEntitiesWithinAABBNoCache(@NotNull Class <? extends T > clazz, @NotNull AxisAlignedBB aabb,
                                                             @Nullable Predicate<? super T > filter){
         EntityList<T> res = new EntityList<>();
-        getEntitiesWithinAABB0(res, clazz, aabb, filter);
+        getEntitiesWithinAABBNoCache(res, clazz, aabb, filter);
         return res;
     }
 
@@ -4159,8 +4159,8 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     @Keep
-    protected <T extends Entity> void getEntitiesWithinAABB0(List<T> list, Class <? extends T > clazz,
-                                                             AxisAlignedBB aabb, @Nullable Predicate<? super T > filter) {
+    public <T extends Entity> void getEntitiesWithinAABBNoCache(List<T> list, Class <? extends T > clazz,
+                                                                AxisAlignedBB aabb, @Nullable Predicate<? super T > filter) {
         int maxX = MathHelper.ceil(aabb.maxX + MAX_ENTITY_RADIUS)>>4;
         int minZ = MathHelper.floor(aabb.minZ - MAX_ENTITY_RADIUS)>>4;
         int maxZ = MathHelper.ceil(aabb.maxZ + MAX_ENTITY_RADIUS)>>4;
