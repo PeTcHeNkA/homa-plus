@@ -11,7 +11,6 @@ import plus.fserver.ElcaCV;
 import plus.fserver.server.network.NetUtils;
 
 
-@ChannelHandler.Sharable
 public class NettyPacketDecoder extends ByteToMessageDecoder {
     private static final Logger LOGGER;
     private static final Marker RECEIVED_PACKET_MARKER;
@@ -42,12 +41,6 @@ public class NettyPacketDecoder extends ByteToMessageDecoder {
                 NettyPacketDecoder.LOGGER.debug(NettyPacketDecoder.RECEIVED_PACKET_MARKER, " IN: [{}:{}] {}", ctx.channel().attr((AttributeKey) NetworkManager.PROTOCOL_ATTRIBUTE_KEY).get(), id, packet.getClass().getName());
             }
         }
-    }
-
-
-    @Override
-    public boolean isSharable() {
-        return true;
     }
 
 

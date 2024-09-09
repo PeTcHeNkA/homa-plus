@@ -1,18 +1,14 @@
 package net.minecraft.network;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.codec.CorruptedFrameException;
 import java.util.List;
-import io.netty.channel.ChannelHandler.Sharable;
 import plus.fserver.server.network.NetUtils;
 
 
-@Sharable
 public class NettyVarint21FrameDecoder extends ByteToMessageDecoder {
-    public static final NettyVarint21FrameDecoder INSTANCE = new NettyVarint21FrameDecoder();
     public NettyVarint21FrameDecoder() {}
 
     @Override
@@ -45,11 +41,5 @@ public class NettyVarint21FrameDecoder extends ByteToMessageDecoder {
         }
 
         throw new CorruptedFrameException("length wider than 21-bit");
-    }
-
-
-    @Override
-    public boolean isSharable() {
-        return true;
     }
 }

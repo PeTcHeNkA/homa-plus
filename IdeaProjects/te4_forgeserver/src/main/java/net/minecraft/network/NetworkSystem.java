@@ -102,7 +102,6 @@ public class NetworkSystem {
             this.endpoints.add((new ServerBootstrap()).channel(oclass).childHandler(
                     fireWall = new ElcaFireWall<Channel>(lazyloadbase.getValue()) {
 
-                final NettyPacketDecoder decoder = new NettyPacketDecoder(EnumPacketDirection.SERVERBOUND);
                 final NettyPacketEncoder encoder = new NettyPacketEncoder(EnumPacketDirection.CLIENTBOUND);
 
                 protected void postInit(Channel chan) throws Exception {
@@ -116,8 +115,8 @@ public class NetworkSystem {
                     if(ElcaConfig.ENABLE_LEGACY_PING_HANDLER) {
                         pipe.addLast("legacy_query", new LegacyPingHandler(NetworkSystem.this));
                     }
-                    pipe.addLast("splitter"    , NettyVarint21FrameDecoder.INSTANCE)
-                        .addLast("decoder"     , decoder)
+                    pipe.addLast("splitter"    , new NettyVarint21FrameDecoder())
+                        .addLast("decoder"     , new NettyPacketDecoder(EnumPacketDirection.SERVERBOUND))
                         .addLast("prepender"   , NettyVarint21FrameEncoder.INSTANCE)
                         .addLast("encoder"     , encoder);
 
