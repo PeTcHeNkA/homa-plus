@@ -1,4 +1,4 @@
-package com.github.luben.zstd.util;
+package plus.fserver.server.zstd;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -9,9 +9,6 @@ import java.security.PrivilegedAction;
 
 
 public enum Native {;
-    private static final String nativePathOverride = "ZstdNativePath";
-    private static final String libnameShort = "zstd-jni-1.5.5-9";
-    private static final String libname = "libzstd-jni-1.5.5-9";
     private static final String errorMsg = "Unsupported OS/arch, cannot find " + resourceName() + " or load " + "zstd-jni-1.5.5-9" + " from system libraries. Please try building from source the jar or providing " + "libzstd-jni-1.5.5-9" + " in your system.";
     private static boolean loaded = false;
 
@@ -72,18 +69,14 @@ public enum Native {;
     }
 
 
-    public static synchronized void load() {
-        load(null);
-    }
-
-
     public static synchronized void load(File var0) {
         if (!loaded) {
             String var1 = resourceName();
             String var2 = System.getProperty("ZstdNativePath");
             if (var2 != null) {
-                loadLibraryFile(var2);
+                com.github.luben.zstd.util.Native.load(var0);
                 loaded = true;
+                return;
             } else {
                 try {
                     Class.forName("org.osgi.framework.BundleEvent");
@@ -106,8 +99,8 @@ public enum Native {;
 
                         try {
                             var4 = new File(var0, "libzstd-jni-1.5.5-9." + libExtension());
-
                             var4.deleteOnExit();
+
                             var5 = new FileOutputStream(var4);
                             byte[] var6 = new byte[4096];
 
@@ -161,5 +154,6 @@ public enum Native {;
                 }
             }
         }
+        com.github.luben.zstd.util.Native.assumeLoaded();
     }
 }

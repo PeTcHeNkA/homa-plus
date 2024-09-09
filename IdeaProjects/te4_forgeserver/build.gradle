@@ -116,6 +116,7 @@ jar {
         include("plus/fserver/utls/collections/ArrayListE6.class")
         include("plus/fserver/utls/collections/ArrayListEV.class")
         include("plus/fserver/utls/collections/FixedItemList.class")
+        include("plus.fserver.utls.collections.AABBList.class")
 
         include("plus/fserver/utls/WorldConstructor.class")
         include("plus/fserver/utls/McTsonUtils.class")

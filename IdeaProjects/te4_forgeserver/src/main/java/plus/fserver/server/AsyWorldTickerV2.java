@@ -1,6 +1,6 @@
 package plus.fserver.server;
 
-import com.github.luben.zstd.util.Native;
+import plus.fserver.server.zstd.Native;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.player.EntityPlayer;
