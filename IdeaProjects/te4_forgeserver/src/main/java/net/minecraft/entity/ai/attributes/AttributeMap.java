@@ -1,7 +1,6 @@
 package net.minecraft.entity.ai.attributes;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.Set;
 import net.minecraft.util.LowerStringMap;
 import plus.tson.utl.Te4HashSet;
@@ -9,7 +8,7 @@ import plus.tson.utl.Te4HashSet;
 
 public class AttributeMap extends AbstractAttributeMap {
     private final Set<IAttributeInstance> dirtyInstances = new Te4HashSet<>(8);
-    protected final Map<String, IAttributeInstance> instancesByName = new LowerStringMap<>();
+    protected final LowerStringMap<IAttributeInstance> instancesByName = new LowerStringMap<>();
 
     @Override
     public ModifiableAttributeInstance getAttributeInstance(IAttribute attribute) {

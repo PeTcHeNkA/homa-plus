@@ -92,6 +92,7 @@ import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
     private static final Logger LOGGER = LogManager.getLogger();
+    //todo maybe remove?
     private String language = "en_US";
     public NetHandlerPlayServer connection;
     public final MinecraftServer server;
@@ -112,12 +113,14 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
     private int lastFoodLevel = -99999999;
     private boolean wasHungry = true;
     private int lastExperience = -99999999;
-    private int respawnInvulnerabilityTicks = 60;
+    private byte respawnInvulnerabilityTicks = 60;
     private EntityPlayer.EnumChatVisibility chatVisibility;
+    //todo maybe remove?
     private boolean chatColours = true;
     private long playerLastActiveTime = System.currentTimeMillis();
     private Entity spectatingEntity;
     private boolean invulnerableDimensionChange;
+    //todo maybe optional remove?
     private boolean seenCredits;
     private final RecipeBookServer recipeBook = new RecipeBookServer();
     private Vec3d levitationStartPos;
@@ -128,8 +131,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
     public boolean isChangingQuantityOnly;
     public int ping;
     public boolean queuedEndExit;
-    public int renderRadius;
-    public int prevRenderRadius;
+    public short renderRadius, prevRenderRadius;
 
     //not used
     public EntityPlayerMP(World world){
@@ -270,7 +272,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
     @Override
     public void onUpdate() {
         this.interactionManager.updateBlockRemoving();
-        --this.respawnInvulnerabilityTicks;
+        if(respawnInvulnerabilityTicks>0)--this.respawnInvulnerabilityTicks;
 
         if (this.hurtResistantTime > 0) {
             --this.hurtResistantTime;

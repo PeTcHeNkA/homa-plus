@@ -237,6 +237,7 @@ net.minecraft.block.state.BlockStateContainer$StateImplementation
 net.minecraft.block.state.BlockStateContainer
 net.minecraft.block.state.IBlockProperties
 net.minecraft.block.state.IBlockState
+net.minecraft.client.entity.AbstractClientPlayer
 net.minecraft.client.Minecraft$1
 net.minecraft.client.Minecraft$10
 net.minecraft.client.Minecraft$11
@@ -544,6 +545,7 @@ net.minecraft.scoreboard.ScoreboardSaveData, false, false
 net.minecraft.server.dedicated.DedicatedServer$1
 net.minecraft.server.dedicated.DedicatedServer
 net.minecraft.server.integrated.IntegratedServer
+net.minecraft.server.management.DemoPlayerInteractionManager
 net.minecraft.server.management.PlayerChunkMap
 net.minecraft.server.management.PlayerChunkMapEntry
 net.minecraft.server.management.PlayerInteractionManager
@@ -559,6 +561,8 @@ net.minecraft.server.network.NetHandlerLoginServer$LoginState
 net.minecraft.server.network.NetHandlerLoginServer
 net.minecraft.server.network.NetHandlerStatusServer
 net.minecraft.server.ServerEula
+net.minecraft.stats.StatisticsManager
+net.minecraft.stats.StatisticsManagerServer
 net.minecraft.tileentity.TileEntityBeacon$BeamSegment
 net.minecraft.tileentity.TileEntityBeacon
 net.minecraft.tileentity.TileEntityBed
@@ -582,6 +586,8 @@ net.minecraft.util.EnumFacing$AxisDirection, false, false
 net.minecraft.util.EnumFacing$Plane, false, false
 net.minecraft.util.EnumFacing, false, false
 net.minecraft.util.EnumHand, false, false
+net.minecraft.util.FoodStats, false, false
+net.minecraft.util.LowerStringMap, false, false
 net.minecraft.util.math.AxisAlignedBB, false, false
 net.minecraft.util.math.BlockPos$1, false, false
 net.minecraft.util.math.BlockPos$2, false, false

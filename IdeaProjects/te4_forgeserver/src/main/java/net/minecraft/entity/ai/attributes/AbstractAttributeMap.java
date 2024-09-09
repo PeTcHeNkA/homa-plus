@@ -3,21 +3,24 @@ package net.minecraft.entity.ai.attributes;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import java.util.Collection;
-import java.util.Map;
-import java.util.Map.Entry;
 import javax.annotation.Nullable;
 import net.minecraft.util.LowerStringMap;
 import plus.tson.utl.Te4HashMap;
 
 
-public abstract class AbstractAttributeMap {
-    protected final Map<IAttribute, IAttributeInstance> attributes = new Te4HashMap<>(8);
-    protected final Map<String, IAttributeInstance> attributesByName = new LowerStringMap<>();
+public abstract class AbstractAttributeMap extends Te4HashMap<IAttribute, IAttributeInstance>{
+    protected final LowerStringMap<IAttributeInstance> attributesByName = new LowerStringMap<>();
     protected final Multimap<IAttribute, IAttribute> descendantsByParent = HashMultimap.create();
 
-    public IAttributeInstance getAttributeInstance(IAttribute attribute) {
-        return this.attributes.get(attribute);
+    public AbstractAttributeMap(){
+        super(8);
     }
+
+
+    public IAttributeInstance getAttributeInstance(IAttribute attribute) {
+        return super.get(attribute);
+    }
+
 
     @Nullable
     public IAttributeInstance getAttributeInstanceByName(String attributeName) {
@@ -31,7 +34,7 @@ public abstract class AbstractAttributeMap {
         } else {
             IAttributeInstance instance = this.createInstance(attribute);
             this.attributesByName.put(attribute.getName(), instance);
-            this.attributes.put(attribute, instance);
+            super.put(attribute, instance);
 
             for (IAttribute iattribute = attribute.getParent(); iattribute != null; iattribute = iattribute.getParent()) {
                 this.descendantsByParent.put(iattribute, attribute);
@@ -45,7 +48,7 @@ public abstract class AbstractAttributeMap {
     public IAttributeInstance registerAttributeUnsafe(IAttribute attribute) {
         IAttributeInstance instance = this.createInstance(attribute);
         this.attributesByName.put(attribute.getName(), instance);
-        this.attributes.put(attribute, instance);
+        super.put(attribute, instance);
 
         for (IAttribute iattribute = attribute.getParent(); iattribute != null; iattribute = iattribute.getParent()) {
             this.descendantsByParent.put(iattribute, attribute);

@@ -124,7 +124,7 @@ public abstract class PlayerList {
         }
 
         playerIn.setWorld(playerWorld);
-        playerIn.interactionManager.setWorld((WorldServer)playerIn.world);
+        //playerIn.interactionManager.setWorld((WorldServer)playerIn.world);
         String s1 = "local";
 
         if (netManager.getRemoteAddress() != null)
@@ -1067,7 +1067,7 @@ public abstract class PlayerList {
             transferEntityToWorld0(player, oldId, worldserver, newWorld, teleporter);
 
             preparePlayer1(newWorld, player, worldserver);
-            player.interactionManager.setWorld(newWorld);
+            //player.interactionManager.setWorld(newWorld);
             player.connection.setPlayerLocation(player.posX, player.posY, player.posZ, player.rotationYaw, player.rotationPitch);
 
             player.connection.netManager.sendPacketE(new SPacketPlayerAbilities(player.capabilities));

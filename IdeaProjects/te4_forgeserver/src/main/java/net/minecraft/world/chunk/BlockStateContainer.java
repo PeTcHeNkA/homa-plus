@@ -10,6 +10,7 @@ import net.minecraft.util.BlockIDIndexes;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.fserver.ElcaConfig;
 import plus.fserver.utls.collections.BitArrayMut;
 import plus.fserver.utls.collections.IntBlockIndex;
 
@@ -21,8 +22,8 @@ public class BlockStateContainer extends BitArrayMut implements IBlockStatePalet
     private int bits;
 
     public BlockStateContainer() {
-        super(4, 4096);
-        this.palette = new BlockStatePaletteLinear(this.bits = 4, this);
+        super(ElcaConfig.INIT_PALETTE_LINEAR_BITS, 4096);
+        this.palette = new BlockStatePaletteLinear(this.bits = ElcaConfig.INIT_PALETTE_LINEAR_BITS);
     }
 
 
@@ -36,8 +37,7 @@ public class BlockStateContainer extends BitArrayMut implements IBlockStatePalet
             this.bits = bitsIn;
 
             if (this.bits <= 4) {
-                this.bits = 4;
-                this.palette = new BlockStatePaletteLinear(this.bits, this);
+                this.palette = new BlockStatePaletteLinear(this.bits);
             } else if (this.bits <= 8) {
                 this.palette = new BlockStatePaletteHashMap(this.bits, this);
             } else {
@@ -46,7 +46,9 @@ public class BlockStateContainer extends BitArrayMut implements IBlockStatePalet
                 if (forceBits)
                     this.bits = bitsIn;
             }
-            this.palette.idFor(AIR_BLOCK_STATE);
+            if(this.palette.idFor(AIR_BLOCK_STATE) == -1){
+                onResize(this.bits + 1, AIR_BLOCK_STATE);
+            }
             super.init(this.bits, 4096);
         }
     }
@@ -59,6 +61,7 @@ public class BlockStateContainer extends BitArrayMut implements IBlockStatePalet
         for (int i = 0, size = super.size(); i < size; ++i) {
             this.set(i, palette.get(super.getAt(i)));
         }
+        //todo is safe?
         return this.palette.idFor(state);
     }
 
@@ -70,6 +73,7 @@ public class BlockStateContainer extends BitArrayMut implements IBlockStatePalet
 
     protected void set(int index, IBlockState state) {
         int i = this.palette.idFor(state);
+        if(i == -1)i = onResize(bits+1, state);
         super.setAt(index, i);
     }
 
@@ -82,6 +86,7 @@ public class BlockStateContainer extends BitArrayMut implements IBlockStatePalet
     public IBlockState update(int x, int y, int z, final IBlockState state){
         IBlockState result = this.palette.get(super.getAt(x = (y << 8 | z << 4 | x)));
         y = palette.idFor(state);
+        if(y == -1)y = onResize(bits+1, state);
         super.setAt(x, y);
         return result;
     }

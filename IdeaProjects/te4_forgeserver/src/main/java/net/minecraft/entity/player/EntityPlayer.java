@@ -133,9 +133,11 @@ public abstract class EntityPlayer extends EntityLivingBase {
     protected boolean sleeping;
     public BlockPos bedLocation;
     private int sleepTimer;
+    @SideOnly(Side.CLIENT)
     public float renderOffsetX;
     @SideOnly(Side.CLIENT)
     public float renderOffsetY;
+    @SideOnly(Side.CLIENT)
     public float renderOffsetZ;
     protected BlockPos spawnPos;
     protected boolean spawnForced;
@@ -1448,10 +1450,7 @@ public abstract class EntityPlayer extends EntityLivingBase {
     }
 
 
-    private void setRenderOffsetForSleep(EnumFacing bedDirection) {
-        this.renderOffsetX = -1.8F * (float)bedDirection.getXOffset();
-        this.renderOffsetZ = -1.8F * (float)bedDirection.getZOffset();
-    }
+    protected void setRenderOffsetForSleep(EnumFacing bedDirection) {}
 
 
     public void wakeUpPlayer(boolean immediately, boolean updateWorldFlag, boolean setSpawn) {

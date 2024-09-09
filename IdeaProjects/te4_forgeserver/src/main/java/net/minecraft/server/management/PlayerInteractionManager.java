@@ -19,7 +19,7 @@ import plus.fserver.server.elca.ChunkSelector;
 
 
 public class PlayerInteractionManager {
-    public World world;
+    //public World world;
     public EntityPlayerMP player;
     private GameType gameType;
     private boolean isDestroyingBlock;
@@ -36,14 +36,15 @@ public class PlayerInteractionManager {
         this.destroyPos = BlockPos.ORIGIN;
         this.delayedDestroyPos = BlockPos.ORIGIN;
         this.durabilityRemainingOnBlock = -1;
-        this.world = worldIn;
+        //this.world = worldIn;
     }
+
 
     public void setGameType(final GameType type) {
         (this.gameType = type).configurePlayerCapabilities(this.player.capabilities);
         this.player.sendPlayerAbilities();
         this.player.server.getPlayerList().sendPacketToAllPlayersE(new SPacketPlayerListItem(SPacketPlayerListItem.Action.UPDATE_GAME_MODE, this.player));
-        this.world.updateAllPlayersSleepingFlag();
+        player.world.updateAllPlayersSleepingFlag();
     }
 
 
@@ -71,11 +72,12 @@ public class PlayerInteractionManager {
 
 
     public void updateBlockRemoving() {
+        ChunkSelector selector = player.world.localSelector;
         ++this.curblockDamage;
         if (this.receivedFinishDiggingPacket) {
             final int i = this.curblockDamage - this.initialBlockDamage;
-            final IBlockState iblockstate = this.world.localSelector.getBlockState(this.delayedDestroyPos);
-            if (iblockstate.getBlock().isAir(iblockstate, world.localSelector, this.delayedDestroyPos)) {
+            final IBlockState iblockstate = selector.getBlockState(this.delayedDestroyPos);
+            if (iblockstate.getBlock().isAir(iblockstate, selector, this.delayedDestroyPos)) {
                 this.receivedFinishDiggingPacket = false;
             }
             else {
@@ -93,8 +95,8 @@ public class PlayerInteractionManager {
             }
         }
         else if (this.isDestroyingBlock) {
-            final IBlockState iblockstate2 = this.world.localSelector.getBlockState(this.destroyPos);
-            if (iblockstate2.getBlock().isAir(iblockstate2, world.localSelector, this.destroyPos)) {
+            final IBlockState iblockstate2 = selector.getBlockState(this.destroyPos);
+            if (iblockstate2.getBlock().isAir(iblockstate2, selector, this.destroyPos)) {
                 player.sendBlockBreakProgressToTracking(this.destroyPos, -1);
                 this.durabilityRemainingOnBlock = -1;
                 this.isDestroyingBlock = false;
@@ -113,20 +115,23 @@ public class PlayerInteractionManager {
 
 
     public void onBlockClicked(final BlockPos pos, final EnumFacing side) {
-        final double reachDist = this.player.getEntityAttribute(EntityPlayer.REACH_DISTANCE).getAttributeValue();
-        final PlayerInteractEvent.LeftClickBlock event = ForgeHooks.onLeftClickBlock(this.player, pos, side, ForgeHooks.rayTraceEyeHitVec(this.player, reachDist + 1.0));
+        EntityPlayerMP player = this.player;
+        final double reachDist = player.getEntityAttribute(EntityPlayer.REACH_DISTANCE).getAttributeValue();
+        final PlayerInteractEvent.LeftClickBlock event = ForgeHooks.onLeftClickBlock(player, pos, side, ForgeHooks.rayTraceEyeHitVec(this.player, reachDist + 1.0));
         if (event.isCanceled()) {
-            this.player.connection.netManager.sendPacketE(new SPacketBlockChange(this.world.localSelector, pos));
-            IBlockState state = world.localSelector.getBlockState(pos);
-            this.world.notifyBlockUpdate(pos, state, state, 3);
+            ChunkSelector selector = player.world.localSelector;
+            player.connection.netManager.sendPacketE(new SPacketBlockChange(selector, pos));
+            IBlockState state = selector.getBlockState(pos);
+            player.world.notifyBlockUpdate(pos, state, state, 3);
             return;
         }
         if (this.isCreative()) {
-            if (!this.world.extinguishFire(null, pos, side)) {
+            if (!player.world.extinguishFire(null, pos, side)) {
                 this.tryHarvestBlock(pos);
             }
         }
         else {
+            World world = player.world;
             ChunkSelector selector = world.localSelector;
             final IBlockState state = selector.getBlockState(pos);
             final Block block = state.getBlock();
@@ -134,8 +139,8 @@ public class PlayerInteractionManager {
                 if (this.gameType == GameType.SPECTATOR) {
                     return;
                 }
-                if (!this.player.isAllowEdit()) {
-                    final ItemStack itemstack = this.player.getHeldItemMainhand();
+                if (!player.isAllowEdit()) {
+                    final ItemStack itemstack = player.getHeldItemMainhand();
                     if (itemstack.isEmpty() || !itemstack.canDestroy(block)) return;
                 }
             }
@@ -143,21 +148,21 @@ public class PlayerInteractionManager {
             float f = 1.0f;
             if (!state.getBlock().isAir(state, selector, pos)) {
                 if (event.getUseBlock() != Event.Result.DENY) {
-                    block.onBlockClicked(this.world, pos, this.player);
-                    this.world.extinguishFire(null, pos, side);
+                    block.onBlockClicked(world, pos, this.player);
+                    world.extinguishFire(null, pos, side);
                 }
                 else {
                     IBlockState state2 = selector.getBlockState(pos);
-                    this.player.connection.netManager.sendPacketE(new SPacketBlockChange(state2, pos));
-                    this.world.notifyBlockUpdate(pos, state2, state2, 3);
+                    player.connection.netManager.sendPacketE(new SPacketBlockChange(state2, pos));
+                    world.notifyBlockUpdate(pos, state2, state2, 3);
                 }
                 f = state.getPlayerRelativeBlockHardness(this.player, this.player.world, pos);
             }
             if (event.getUseItem() == Event.Result.DENY) {
                 if (f >= 1.0f) {
                     IBlockState state2 = selector.getBlockState(pos);
-                    this.player.connection.netManager.sendPacketE(new SPacketBlockChange(state2, pos));
-                    this.world.notifyBlockUpdate(pos, state2, state2, 3);
+                    player.connection.netManager.sendPacketE(new SPacketBlockChange(state2, pos));
+                    world.notifyBlockUpdate(pos, state2, state2, 3);
                 }
                 return;
             }
@@ -176,10 +181,12 @@ public class PlayerInteractionManager {
 
     public void blockRemoving(final BlockPos pos) {
         if (pos.equals(this.destroyPos)) {
+            EntityPlayerMP player = this.player;
+            ChunkSelector selector = player.world.localSelector;
             final int i = this.curblockDamage - this.initialDamage;
-            final IBlockState state = this.world.localSelector.getState(pos);
-            if (!state.getBlock().isAir(state, this.world.localSelector, pos)) {
-                final float f = state.getPlayerRelativeBlockHardness(this.player, this.player.world, pos) * (i + 1);
+            final IBlockState state = selector.getState(pos);
+            if (!state.getBlock().isAir(state, selector, pos)) {
+                final float f = state.getPlayerRelativeBlockHardness(player, player.world, pos) * (i + 1);
                 if (f >= 0.7f) {
                     this.isDestroyingBlock = false;
                     player.sendBlockBreakProgressToTracking(pos, -1);
@@ -208,54 +215,58 @@ public class PlayerInteractionManager {
 
 
     private boolean removeBlock(final BlockPos pos, final boolean b) {
-        final IBlockState iblockstate = this.world.localSelector.getState(pos);
-        final boolean flag = iblockstate.getBlock().removedByPlayer(iblockstate, this.world, pos, this.player, b);
+        EntityPlayerMP player = this.player;
+        World world = player.world;
+        final IBlockState iblockstate = world.localSelector.getState(pos);
+        final boolean flag = iblockstate.getBlock().removedByPlayer(iblockstate, world, pos, player, b);
         if (flag) {
-            iblockstate.getBlock().onPlayerDestroy(this.world, pos, iblockstate);
+            iblockstate.getBlock().onPlayerDestroy(world, pos, iblockstate);
         }
         return flag;
     }
 
 
     public boolean tryHarvestBlock(final BlockPos pos) {
-        final int exp = ForgeHooks.onBlockBreakEvent(this.world, this.gameType, this.player, pos);
+        EntityPlayerMP player = this.player;
+        World world = player.world;
+        final int exp = ForgeHooks.onBlockBreakEvent(world, this.gameType, player, pos);
         if (exp == -1) {
             return false;
         }
-        final IBlockState state = this.world.localSelector.getState(pos);
-        final TileEntity tileentity = this.world.getTileEntity(pos);
+        final IBlockState state = world.localSelector.getState(pos);
+        final TileEntity tileentity = world.getTileEntity(pos);
         final Block block = state.getBlock();
-        if ((block instanceof BlockCommandBlock || block instanceof BlockStructure) && !this.player.canUseCommandBlock()) {
-            this.world.notifyBlockUpdate(pos, state, state, 3);
+        if ((block instanceof BlockCommandBlock || block instanceof BlockStructure) && !player.canUseCommandBlock()) {
+            world.notifyBlockUpdate(pos, state, state, 3);
             return false;
         }
-        final ItemStack stack = this.player.getHeldItemMainhand();
-        if (!stack.isEmpty() && stack.getItem().onBlockStartBreak(stack, pos, this.player)) {
+        final ItemStack stack = player.getHeldItemMainhand();
+        if (!stack.isEmpty() && stack.getItem().onBlockStartBreak(stack, pos, player)) {
             return false;
         }
-        this.world.playEvent(this.player, 2001, pos, Block.getStateId(state));
+        world.playEvent(player, 2001, pos, Block.getStateId(state));
         boolean flag1;
         if (this.isCreative()) {
             flag1 = this.removeBlock(pos);
-            this.player.connection.netManager.sendPacketE(new SPacketBlockChange(this.world.localSelector, pos));
+            player.connection.netManager.sendPacketE(new SPacketBlockChange(world.localSelector, pos));
         }
         else {
-            final ItemStack itemstack1 = this.player.getHeldItemMainhand();
+            final ItemStack itemstack1 = player.getHeldItemMainhand();
             final ItemStack itemstack2 = itemstack1.isEmpty() ? ItemStack.EMPTY : itemstack1.copy();
-            final boolean flag2 = state.getBlock().canHarvestBlock(this.world, pos, this.player);
+            final boolean flag2 = state.getBlock().canHarvestBlock(world, pos, player);
             if (!itemstack1.isEmpty()) {
-                itemstack1.onBlockDestroyed(this.world, state, pos, this.player);
+                itemstack1.onBlockDestroyed(world, state, pos, player);
                 if (itemstack1.isEmpty()) {
-                    ForgeEventFactory.onPlayerDestroyItem(this.player, itemstack2, EnumHand.MAIN_HAND);
+                    ForgeEventFactory.onPlayerDestroyItem(player, itemstack2, EnumHand.MAIN_HAND);
                 }
             }
             flag1 = this.removeBlock(pos, flag2);
             if (flag1 && flag2) {
-                state.getBlock().harvestBlock(this.world, this.player, pos, state, tileentity, itemstack2);
+                state.getBlock().harvestBlock(world, player, pos, state, tileentity, itemstack2);
             }
         }
         if (!this.isCreative() && flag1 && exp > 0) {
-            state.getBlock().dropXpOnBlockBreak(this.world, pos, exp);
+            state.getBlock().dropXpOnBlockBreak(world, pos, exp);
         }
         return flag1;
     }
@@ -375,7 +386,7 @@ public class PlayerInteractionManager {
 
 
     public void setWorld(final WorldServer serverWorld) {
-        this.world = serverWorld;
+        //this.world = serverWorld;
     }
 
 

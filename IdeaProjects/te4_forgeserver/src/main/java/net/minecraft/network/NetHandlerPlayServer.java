@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+
+import it.unimi.dsi.fastutil.ints.Int2ShortMap;
+import it.unimi.dsi.fastutil.ints.Int2ShortOpenHashMap;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.block.BlockCommandBlock;
@@ -109,6 +112,7 @@ import net.minecraftforge.common.ForgeHooks;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import plus.fserver.utls.math.VecDFD;
 
 
 public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
@@ -120,8 +124,9 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
     private long field_194402_f;
     private boolean field_194403_g;
     private long field_194404_h;
-    private int chatSpamThresholdCount;
-    private int itemDropThreshold;
+    private short chatSpamThresholdCount;
+    private short itemDropThreshold;
+    //todo slim this
     private final IntHashMap<Short> pendingTransactions = new IntHashMap<>();
     private double firstGoodX;
     private double firstGoodY;
@@ -136,7 +141,8 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
     private double lowestRiddenX1;
     private double lowestRiddenY1;
     private double lowestRiddenZ1;
-    private Vec3d targetPos;
+    private VecDFD targetPos;
+    //private Vec3d targetPos;
     private int teleportId;
     private int lastPositionUpdate;
     private boolean floating;
@@ -145,6 +151,7 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
     private int vehicleFloatingTickCount;
     private int movePacketCounter;
     private int lastMovePacketCounter;
+    //todo rewrite, use static + world local
     private ServerRecipeBookHelper field_194309_H = new ServerRecipeBookHelper();
 
     public NetHandlerPlayServer(MinecraftServer server, NetworkManager networkManagerIn, EntityPlayerMP playerIn) {
@@ -621,8 +628,8 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
                 private boolean flag = true;
                 @Override
                 public void run() {
-                    Vec3d pos = targetPos;
-                    if(pos==null){
+                    VecDFD pos = targetPos;
+                    if(pos == null){
                         if(flag){
                             flag = false;
                             addToQueue(this);
@@ -630,13 +637,13 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
                         return;
                     }
                     player.setPositionAndRotation(
-                            targetPos.x, targetPos.y, targetPos.z,
+                            pos.x, pos.y, pos.z,
                             player.rotationYaw, player.rotationPitch
                     );
                     if (player.isInvulnerableDimensionChange()) {
-                        lastGoodX = targetPos.x;
-                        lastGoodY = targetPos.y;
-                        lastGoodZ = targetPos.z;
+                        lastGoodX = pos.x;
+                        lastGoodY = pos.y;
+                        lastGoodZ = pos.z;
                         player.clearInvulnerableDimensionChange();
                     }
                     targetPos = null;
@@ -753,7 +760,7 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
                 case STOP_SLEEPING:
                     if (this.player.isPlayerSleeping()) {
                         this.player.wakeUpPlayer(false, true, true);
-                        this.targetPos = new Vec3d(this.player.posX, this.player.posY, this.player.posZ);
+                        this.targetPos = new VecDFD(this.player.posX, (float) this.player.posY, this.player.posZ);
                     }
                     break;
                 case START_RIDING_JUMP:
@@ -993,10 +1000,11 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
      * @author Te4hno
      */
     public void processConfirmTransaction(@NotNull CPacketConfirmTransaction packetIn) {
-        Short oshort = this.pendingTransactions.lookup(this.player.openContainer.windowId);
+        EntityPlayerMP player;
+        Short oshort = this.pendingTransactions.lookup((player = this.player).openContainer.windowId);
         if (oshort != null && packetIn.getUid() == oshort.shortValue() &&
-                this.player.openContainer.windowId == packetIn.getWindowId()
-                && !this.player.openContainer.getCanCraft(this.player) && !this.player.isSpectator()) {
+                player.openContainer.windowId == packetIn.getWindowId()
+                && !player.openContainer.getCanCraft(player) && !player.isSpectator()) {
 
             addToQueue(() -> {
                 this.player.openContainer.setCanCraft(this.player, true);
@@ -1044,15 +1052,17 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
      * @author Te4hno
      */
     public void processTryUseItemOnBlock(final CPacketPlayerTryUseItemOnBlock packetIn) {
-        final WorldServer worldserver = server.getWorld(player.dimension);
+        EntityPlayerMP lPlayer;
+        final WorldServer worldserver = (lPlayer = this.player).getServerWorld();
         final BlockPos blockpos = packetIn.getPos();
-        player.markPlayerActive();
+        lPlayer.markPlayerActive();
+        int buildLim;
 
-        if (blockpos.getY() < this.server.getBuildLimit() - 1 || packetIn.getDirection() != EnumFacing.UP && blockpos.getY() < server.getBuildLimit()) {
-            double dist = player.getEntityAttribute(EntityPlayer.REACH_DISTANCE).getAttributeValue() + 3;
+        if (blockpos.getY() < (buildLim = server.getBuildLimit()) - 1 || packetIn.getDirection() != EnumFacing.UP && blockpos.getY() < buildLim) {
+            double dist = lPlayer.getEntityAttribute(EntityPlayer.REACH_DISTANCE).getAttributeValue() + 3;
             dist *= dist;
-            if (targetPos == null && player.getDistanceSq(blockpos.getX() + 0.5, blockpos.getY() + 0.5, blockpos.getZ() + 0.5) < dist &&
-                    !server.isBlockProtected(worldserver, blockpos, player)
+            if (targetPos == null && lPlayer.getDistanceSq(blockpos.getX() + 0.5, blockpos.getY() + 0.5, blockpos.getZ() + 0.5) < dist &&
+                    !server.isBlockProtected(worldserver, blockpos, lPlayer)
                     && worldserver.isInWorldBorder(blockpos.getX(), blockpos.getZ())) {
 
                 final BlockPos blockPos2 = blockpos.offset(packetIn.getDirection());
@@ -1104,11 +1114,11 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
     public void processTryUseItem(CPacketPlayerTryUseItem packetIn) {
         //todo fix glitch click to unloaded air
         final EnumHand enumhand = packetIn.getHand();
-        ItemStack itemstack = player.getHeldItem(enumhand);
+        EntityPlayerMP lPlayer;
+        ItemStack itemstack = (lPlayer = player).getHeldItem(enumhand);
         if (!itemstack.isEmpty()) {
-            player.markPlayerActive();
-            final WorldServer world = this.server.getWorld(player.dimension);
-            addToQueue(() -> player.interactionManager.processRightClick(player, world, itemstack, enumhand));
+            lPlayer.markPlayerActive();
+            addToQueue(() -> player.interactionManager.processRightClick(player, player.world, itemstack, enumhand));
         }
     }
 
@@ -1173,7 +1183,7 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
                 this.player.setWorld(worldserver2);
                 this.server.getPlayerList().preparePlayer(this.player, worldserver1);
                 this.player.setPositionAndUpdate(entity.posX, entity.posY, entity.posZ);
-                this.player.interactionManager.setWorld(worldserver2);
+                //this.player.interactionManager.setWorld(worldserver2);
                 this.server.getPlayerList().updateTimeAndWeatherForPlayer(this.player, worldserver2);
                 this.server.getPlayerList().syncPlayerInventory(this.player);
                 net.minecraftforge.fml.common.FMLCommonHandler.instance().firePlayerChangedDimensionEvent(this.player, prevDimension, this.player.dimension);
@@ -1539,7 +1549,7 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
         double d0 = relativeSet.contains(SPacketPlayerPosLook.EnumFlags.X) ? this.player.posX : 0.0D;
         double d1 = relativeSet.contains(SPacketPlayerPosLook.EnumFlags.Y) ? this.player.posY : 0.0D;
         double d2 = relativeSet.contains(SPacketPlayerPosLook.EnumFlags.Z) ? this.player.posZ : 0.0D;
-        this.targetPos = new Vec3d(x + d0, y + d1, z + d2);
+        this.targetPos = new VecDFD(x + d0, (float) (y + d1), z + d2);
         float f = yaw;
         float f1 = pitch;
 
@@ -1556,7 +1566,7 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
         }
 
         this.lastPositionUpdate = this.networkTickCount;
-        this.player.setPositionAndRotation(this.targetPos.x, this.targetPos.y, this.targetPos.z, f, f1);
+        this.player.setPositionAndRotation(this.targetPos.x, y + d1, this.targetPos.z, f, f1);
         this.player.connection.netManager.sendPacketE(new SPacketPlayerPosLook(x, y, z, yaw, pitch, relativeSet, this.teleportId));
     }
 

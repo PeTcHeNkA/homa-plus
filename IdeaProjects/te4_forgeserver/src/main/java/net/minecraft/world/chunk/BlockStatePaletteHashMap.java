@@ -1,6 +1,5 @@
 package net.minecraft.world.chunk;
 
-import io.netty.buffer.ByteBuf;
 import io.netty.buffer.FastByteBuf;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.network.PacketBuffer;
@@ -9,8 +8,6 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.ElcaCV;
-import plus.fserver.server.network.NetUtils;
-
 import java.util.Arrays;
 
 
@@ -20,7 +17,6 @@ public class BlockStatePaletteHashMap implements IBlockStatePalette {
     private IBlockState[] byId;
     private volatile short nextFreeIndex;
     private volatile int mapSize;
-    private final IBlockStatePaletteResizer paletteResizer;
     private final int bits;
 
     public BlockStatePaletteHashMap(int bitsIn, IBlockStatePaletteResizer paletteResizerIn) {
@@ -32,7 +28,6 @@ public class BlockStatePaletteHashMap implements IBlockStatePalette {
         if(ElcaCV.FIX_NULL_HASH_PALETTE)
             Arrays.fill(byId, BlockIDIndexes.AIR_STATE);
         this.bits = bitsIn;
-        this.paletteResizer = paletteResizerIn;
     }
 
 
@@ -47,7 +42,7 @@ public class BlockStatePaletteHashMap implements IBlockStatePalette {
         int i;
         if ((i = getId(state)) == -1) {
             i = add(state);
-            if (i >= 1 << this.bits) i = this.paletteResizer.onResize(this.bits + 1, state);
+            if (i >= 1 << this.bits) return -1;
         }
         return i;
     }

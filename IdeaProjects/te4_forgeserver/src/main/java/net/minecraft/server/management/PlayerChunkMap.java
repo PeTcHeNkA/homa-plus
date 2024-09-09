@@ -224,11 +224,17 @@ public class PlayerChunkMap extends FlatMap<PlayerChunkMapEntry>{
 
 
     public void setPlayerViewRadius(int radius) {
-        nextRadius = radByFormula(radius);
+        nextRadius = radByFormula((short) radius);
     }
 
 
-    public static int radByFormula(int radius){
+    public static short radByFormula(int radius){
+        return (short) radius;
+        //return (radius>>1)+2;
+    }
+
+
+    public static short radByFormula(short radius){
         return radius;
         //return (radius>>1)+2;
     }

@@ -1,6 +1,5 @@
 package net.minecraft.world.chunk;
 
-import io.netty.buffer.ByteBuf;
 import io.netty.buffer.FastByteBuf;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -8,19 +7,14 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.BlockIDIndexes;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import plus.fserver.server.network.NetUtils;
 
 
 public class BlockStatePaletteLinear implements IBlockStatePalette {
     private final IBlockState[] states;
-    private final IBlockStatePaletteResizer resizeHandler;
-    private final int bits;
     private int arraySize;
 
-    public BlockStatePaletteLinear(int bitsIn, IBlockStatePaletteResizer resizeHandlerIn) {
+    public BlockStatePaletteLinear(int bitsIn) {
         this.states = new IBlockState[1 << bitsIn];
-        this.bits = bitsIn;
-        this.resizeHandler = resizeHandlerIn;
     }
 
 
@@ -38,7 +32,7 @@ public class BlockStatePaletteLinear implements IBlockStatePalette {
             ++this.arraySize;
             return size;
         } else {
-            return this.resizeHandler.onResize(this.bits + 1, state);
+            return -1;
         }
     }
 
