@@ -13,12 +13,10 @@ import io.netty.channel.local.LocalServerChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.ServerSocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.timeout.ReadTimeoutHandler;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.SocketAddress;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import net.minecraft.client.network.NetHandlerHandshakeMemory;
 import net.minecraft.crash.CrashReport;
@@ -30,7 +28,6 @@ import net.minecraft.server.network.NetHandlerHandshakeTCP;
 import net.minecraft.util.LazyLoadBase;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.text.TextComponentString;
-import net.minecraftforge.fml.common.network.internal.FMLNetworkHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
@@ -111,7 +108,7 @@ public class NetworkSystem {
 
                     ChannelPipeline pipe = chan.pipeline();
 
-                    pipe.addLast("timeout"     , new ReadTimeoutHandler(FMLNetworkHandler.READ_TIMEOUT));
+                    pipe.addLast("timeout"     , new TimeOutTimer());
                     if(ElcaConfig.ENABLE_LEGACY_PING_HANDLER) {
                         pipe.addLast("legacy_query", new LegacyPingHandler(NetworkSystem.this));
                     }
@@ -210,14 +207,6 @@ public class NetworkSystem {
 
     public void networkTick() {
         networkManagers.forEach(this::updateManager);
-//        synchronized (this.networkManagers) {
-//            Iterator<NetworkManager> iterator = this.networkManagers.iterator();
-//
-//            while (iterator.hasNext()) {
-//                final NetworkManager manager = iterator.next();
-//                if(!updateManager(manager))iterator.remove();
-//            }
-//        }
     }
 
 

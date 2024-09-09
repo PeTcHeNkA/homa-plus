@@ -164,7 +164,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public ChunkProviderServer chunkProviderServer;
     //END UNSAFE
 
-    private final Object[] locals;
+    //private final Object[] locals;
 
     protected World(ISaveHandler saveHandlerIn, WorldInfo info, WorldProvider providerIn, Profiler profilerIn, boolean client) {
         this(null, saveHandlerIn, info, providerIn, profilerIn, client);
@@ -202,7 +202,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         localSelector = initSelector();
         effectiveAcces = this;
 
-        locals = ElcaServerUtls.createLocals(this);
+        //locals = ElcaServerUtls.createLocals(this);
     }
 
     private int nextEntityID = 0;
@@ -344,11 +344,11 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 //            return curId++;
 //        }
 //    }
-
-
-    public Object getLocal(int id){
-        return locals[id];
-    }
+//
+//
+//    public Object getLocal(int id){
+//        return locals[id];
+//    }
 
 
     protected ChunkSelector initSelector(){

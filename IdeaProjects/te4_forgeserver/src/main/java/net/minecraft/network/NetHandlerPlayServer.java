@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import it.unimi.dsi.fastutil.ints.Int2ShortMap;
 import it.unimi.dsi.fastutil.ints.Int2ShortOpenHashMap;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -98,7 +97,6 @@ import net.minecraft.tileentity.TileEntityStructure;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
@@ -112,6 +110,7 @@ import net.minecraftforge.common.ForgeHooks;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import plus.fserver.utls.collections.TransactMap;
 import plus.fserver.utls.math.VecDFD;
 
 
@@ -127,7 +126,7 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
     private short chatSpamThresholdCount;
     private short itemDropThreshold;
     //todo slim this
-    private final IntHashMap<Short> pendingTransactions = new IntHashMap<>();
+    private final TransactMap pendingTransactions = new TransactMap();
     private double firstGoodX;
     private double firstGoodY;
     private double firstGoodZ;
@@ -151,8 +150,7 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
     private int vehicleFloatingTickCount;
     private int movePacketCounter;
     private int lastMovePacketCounter;
-    //todo rewrite, use static + world local
-    private ServerRecipeBookHelper field_194309_H = new ServerRecipeBookHelper();
+
 
     public NetHandlerPlayServer(MinecraftServer server, NetworkManager networkManagerIn, EntityPlayerMP playerIn) {
         this.server = server;
@@ -233,8 +231,7 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
             int i = (int)(this.currentTimeMillis() - this.field_194402_f);
             this.player.ping = (this.player.ping * 3 + i) / 4;
             this.field_194403_g = false;
-        } else if (!this.player.getName().equals(this.server.getServerOwner()))
-        {
+        } else if (!this.player.getName().equals(this.server.getServerOwner())) {
             this.disconnect(new TextComponentTranslation("disconnect.timeout"));
         }
     }
@@ -379,7 +376,7 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
             }
         } else {
             final EntityPlayerMP player;
-            WorldServer worldserver = this.server.getWorld((player = this.player).dimension);
+            WorldServer worldserver = (player = this.player).getServerWorld();
 
             this.lastPositionUpdate = this.networkTickCount;
 
@@ -484,64 +481,68 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
 
     @Override
     public void processPlayerDigging(@NotNull CPacketPlayerDigging packetIn) {
-        WorldServer worldserver = this.server.getWorld(player.dimension);
         player.markPlayerActive();
-        addToQueue(() -> processPlayerDigging0(packetIn, worldserver));
-    }
-
-
-    private void processPlayerDigging0(CPacketPlayerDigging packetIn, WorldServer world) {
         switch (packetIn.getAction()) {
             case SWAP_HELD_ITEMS:
                 if (!this.player.isSpectator()) {
-                    ItemStack itemstack = this.player.getHeldItem(EnumHand.OFF_HAND);
-                    this.player.setHeldItem(EnumHand.OFF_HAND, this.player.getHeldItem(EnumHand.MAIN_HAND));
-                    this.player.setHeldItem(EnumHand.MAIN_HAND, itemstack);
+                    addToQueue(() -> {
+                        EntityPlayerMP lPlayer;
+                        ItemStack itemstack = (lPlayer = player).getHeldItem(EnumHand.OFF_HAND);
+                        lPlayer.setHeldItem(EnumHand.OFF_HAND, lPlayer.getHeldItem(EnumHand.MAIN_HAND));
+                        lPlayer.setHeldItem(EnumHand.MAIN_HAND, itemstack);
+                    });
                 }
                 return;
             case DROP_ITEM:
                 if (!this.player.isSpectator()) {
-                    this.player.dropItem(false);
+                    addToQueue(() -> player.dropItem(false));
                 }
                 return;
             case DROP_ALL_ITEMS:
                 if (!this.player.isSpectator()) {
-                    this.player.dropItem(true);
+                    addToQueue(() -> player.dropItem(true));
                 }
                 return;
             case RELEASE_USE_ITEM:
-                this.player.stopActiveHand();
+                addToQueue(() -> player.stopActiveHand());
                 return;
             case START_DESTROY_BLOCK:
             case ABORT_DESTROY_BLOCK:
             case STOP_DESTROY_BLOCK:
-                BlockPos pos = packetIn.getPosition();
-                if(pos.getY() >= this.server.getBuildLimit())return;
-                final EntityPlayerMP player;
-                double d0 = (player = this.player).posX - ((double)pos.getX() + 0.5D);
-                double d1 =                 player.posY - ((double)pos.getY() + 0.5D) + 1.5D;
-                double d2 =                 player.posZ - ((double)pos.getZ() + 0.5D);
+                addToQueue(() -> processPlayerDigging0(packetIn));
+                return;
+        }
+    }
 
-                d0 = d0 * d0 + d1 * d1 + d2 * d2;
 
-                d1 = player.getEntityAttribute(EntityPlayer.REACH_DISTANCE).getAttributeValue() + 1;
+    private void processPlayerDigging0(CPacketPlayerDigging packetIn) {
+        BlockPos pos = packetIn.getPosition();
+        if (pos.getY() >= this.server.getBuildLimit()) return;
+        final EntityPlayerMP player;
+        double d0 = (player = this.player).posX - ((double) pos.getX() + 0.5D);
+        double d1 = player.posY - ((double) pos.getY() + 0.5D) + 1.5D;
+        double d2 = player.posZ - ((double) pos.getZ() + 0.5D);
 
-                if (d0 < d1 * d1) {
-                    if (packetIn.getAction() == CPacketPlayerDigging.Action.START_DESTROY_BLOCK) {
-                        if (world.isInWorldBorder(pos.getX(), pos.getZ()))
-                            player.interactionManager.onBlockClicked(pos, packetIn.getFacing());
-                        else
-                            player.connection.netManager.sendPacketE(new SPacketBlockChange(world, pos));
-                    } else {
-                        if (packetIn.getAction() == CPacketPlayerDigging.Action.STOP_DESTROY_BLOCK)
-                            player.interactionManager.blockRemoving(pos);
-                        else
-                            //if(packetIn.getAction() == CPacketPlayerDigging.Action.ABORT_DESTROY_BLOCK)
-                            player.interactionManager.cancelDestroyingBlock();
-                        if (world.localSelector.getBlockState(pos).getMaterial() != Material.AIR)
-                            player.connection.netManager.sendPacketE(new SPacketBlockChange(world, pos));
-                    }
-                }
+        d0 = d0 * d0 + d1 * d1 + d2 * d2;
+
+        d1 = player.getEntityAttribute(EntityPlayer.REACH_DISTANCE).getAttributeValue() + 1;
+
+        if (d0 < d1 * d1) {
+            WorldServer world = player.getServerWorld();
+            if (packetIn.getAction() == CPacketPlayerDigging.Action.START_DESTROY_BLOCK) {
+                if (world.isInWorldBorder(pos.getX(), pos.getZ()))
+                    player.interactionManager.onBlockClicked(pos, packetIn.getFacing());
+                else
+                    player.connection.netManager.sendPacketE(new SPacketBlockChange(world, pos));
+            } else {
+                if (packetIn.getAction() == CPacketPlayerDigging.Action.STOP_DESTROY_BLOCK)
+                    player.interactionManager.blockRemoving(pos);
+                else
+                    //if(packetIn.getAction() == CPacketPlayerDigging.Action.ABORT_DESTROY_BLOCK)
+                    player.interactionManager.cancelDestroyingBlock();
+                if (world.localSelector.getBlockState(pos).getMaterial() != Material.AIR)
+                    player.connection.netManager.sendPacketE(new SPacketBlockChange(world, pos));
+            }
         }
     }
 
@@ -927,7 +928,7 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
         this.player.markPlayerActive();
         if (!this.player.isSpectator() && this.player.openContainer.windowId == packet.func_194318_a() && this.player.openContainer.getCanCraft(this.player)) {
             addToQueue(() -> {
-                this.field_194309_H.func_194327_a(this.player, packet.func_194317_b(), packet.func_194319_c());
+                ServerRecipeBookHelper.placeRecipe(this.player, packet.func_194317_b(), packet.func_194319_c());
             });
         }
     }
@@ -996,13 +997,18 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
     }
 
 
+    public void removeTransactions(int id){
+        pendingTransactions.removeObject(id);
+    }
+
+
     /**
      * @author Te4hno
      */
     public void processConfirmTransaction(@NotNull CPacketConfirmTransaction packetIn) {
         EntityPlayerMP player;
-        Short oshort = this.pendingTransactions.lookup((player = this.player).openContainer.windowId);
-        if (oshort != null && packetIn.getUid() == oshort.shortValue() &&
+        short oshort = this.pendingTransactions.lookup((player = this.player).openContainer.windowId);
+        if (oshort != Short.MIN_VALUE && packetIn.getUid() == oshort &&
                 player.openContainer.windowId == packetIn.getWindowId()
                 && !player.openContainer.getCanCraft(player) && !player.isSpectator()) {
 

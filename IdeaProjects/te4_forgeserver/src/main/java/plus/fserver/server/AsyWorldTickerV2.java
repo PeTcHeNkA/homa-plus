@@ -1,5 +1,10 @@
 package plus.fserver.server;
 
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.fserver.api.inject.Field;
+import plus.fserver.api.inject.FieldAccessor;
+import plus.fserver.api.inject.LoadInjector;
 import plus.fserver.server.zstd.Native;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.entity.EntityTracker;
@@ -25,6 +30,9 @@ import java.util.List;
 import java.util.concurrent.*;
 
 
+@LoadInjector(fields = {
+        @Field(target = "plus.fserver.server.AsyWorldTickerV2", name = "test")
+})
 public final class AsyWorldTickerV2 implements ThreadFactory{
     private static final boolean useSync = false;
     private static final Logger LOGGER = LogManager.getLogger();
@@ -39,14 +47,16 @@ public final class AsyWorldTickerV2 implements ThreadFactory{
     private int countThreads = 0;
     private long lastError = 0;
     private final ScheduledFuture<?> netFuture;
-
     static{
         System.out.printf("Async ticker V2 initialized\n");
         Native.load(ElcaConfig.NATIVES);
     }
 
-
     public AsyWorldTickerV2(MinecraftServer server){
+        System.out.println(
+                ElcaServerUtls.compileAccess(AsyWorldTickerV2.class, Object.class, "test").get(this)
+        );
+
         this.server = server;
         this.ignoreErrors = ElcaConfig.IGNORE_ERRORS;
         service = ElcaServerUtls.getPool(server);

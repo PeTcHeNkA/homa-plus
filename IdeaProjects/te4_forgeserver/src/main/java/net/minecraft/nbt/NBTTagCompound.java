@@ -4,7 +4,6 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import net.minecraft.crash.CrashReport;
@@ -433,8 +432,9 @@ public class NBTTagCompound extends NBTBase {
 
 
     private static void writeEntry(String name, NBTBase data, DataOutput output) throws IOException {
-        output.writeByte(data.getId());
-        if (data.getId() != 0) {
+        int id;
+        output.writeByte(id = data.getId());
+        if (id != 0) {
             output.writeUTF(name);
             data.write(output);
         }

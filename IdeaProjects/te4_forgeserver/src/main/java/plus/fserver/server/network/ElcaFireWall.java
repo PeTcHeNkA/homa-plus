@@ -1,8 +1,10 @@
 package plus.fserver.server.network;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.EventLoopGroup;
+import io.netty.handler.timeout.*;
 import io.netty.util.concurrent.ScheduledFuture;
 import net.minecraft.entity.player.EntityPlayerMP;
 import org.apache.logging.log4j.LogManager;
@@ -62,7 +64,7 @@ public abstract class ElcaFireWall<T extends Channel> extends ChannelInitializer
             }
         } else {
             if(!item.allowConnect){
-                item.warn += 1;
+                item.warn += 5;
                 channel.close();
                 preInit(channel, key, item,  false);
                 return;
@@ -70,6 +72,13 @@ public abstract class ElcaFireWall<T extends Channel> extends ChannelInitializer
         }
         preInit(channel, key, item,  true);
         postInit(channel);
+    }
+
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+        softWarn(ctx.channel(), 100);
+        ctx.close();
     }
 
 
@@ -368,6 +377,27 @@ public abstract class ElcaFireWall<T extends Channel> extends ChannelInitializer
 
         public void set(boolean allowConnect){
             this.allowConnect = allowConnect;
+        }
+    }
+
+
+    public final class TimeOutTimer extends IdleStateHandler {
+        private boolean closed;
+
+        public TimeOutTimer() {
+            super(ElcaConfig.READ_TIMEOUT_TIMER, 0, 0, TimeUnit.SECONDS);
+        }
+
+
+        @Override
+        protected void channelIdle(ChannelHandlerContext ctx, IdleStateEvent evt) {
+            assert evt.state() == IdleState.READER_IDLE;
+            if (!this.closed) {
+                softWarn(ctx.channel(), 500);
+                ctx.fireExceptionCaught(ReadTimeoutException.INSTANCE);
+                ctx.close();
+                this.closed = true;
+            }
         }
     }
 }

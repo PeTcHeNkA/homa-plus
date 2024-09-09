@@ -1,4 +1,4 @@
-package plus.fserver.api;
+package plus.fserver.api.inject;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

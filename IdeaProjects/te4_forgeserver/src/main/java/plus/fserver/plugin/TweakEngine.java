@@ -19,7 +19,7 @@ public class TweakEngine implements IClassTransformer, Set<String> {
     private final Te4HashSet<String> preLoads = new Te4HashSet<>();
     private final String header;
     private final boolean debug = false;
-    private final IClassTransformer sideTransformer;
+    private final PathTransformer sideTransformer;
 
     private static class TweakInfo{
         private boolean useSideTransformer;
@@ -40,7 +40,7 @@ public class TweakEngine implements IClassTransformer, Set<String> {
         if(FMLLaunchHandler.side()==null){
             sideTransformer = null;
         } else {
-            IClassTransformer transformer = null;
+            PathTransformer transformer = null;
             try {
                 transformer = new PathTransformer();
             } catch (Throwable e) {
@@ -180,12 +180,22 @@ public class TweakEngine implements IClassTransformer, Set<String> {
     }
 
 
-    public byte[] tweakBytesIfNeed(String name) {
+    public byte[] tweakBytesIfNeed(String name, byte[] src) {
         TweakInfo info = classes.get(name);
-        if (info == null) return null;
+        if (info == null) {
+            if(sideTransformer != null)
+                return sideTransformer.transformOnlyInjects(name, src);
+            return src;
+        }
         byte[] result = info.useSafeMode ? getSafeTweaks(name) : getFastTweak(name);
-        if(sideTransformer == null || !info.useSideTransformer)return result;
-        return sideTransformer.transform(name, name, result);
+        if(result == null){
+            if(sideTransformer != null && info.useSideTransformer)
+                return sideTransformer.transformOnlyInjects(name,src);
+            return src;
+        } else {
+            if(sideTransformer == null || !info.useSideTransformer)return result;
+            return sideTransformer.transform(name, name, result);
+        }
     }
 
 
@@ -269,8 +279,6 @@ public class TweakEngine implements IClassTransformer, Set<String> {
 
     @Override
     public byte[] transform(String name, String transformedName, byte[] basicClass) {
-        byte[] result = tweakBytesIfNeed(transformedName);
-        if(result != null)return result;
-        return basicClass;
+        return tweakBytesIfNeed(transformedName, basicClass);
     }
 }

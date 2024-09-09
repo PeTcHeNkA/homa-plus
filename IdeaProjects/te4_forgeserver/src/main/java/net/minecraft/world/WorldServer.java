@@ -16,6 +16,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.util.RecipeItemHelper;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.*;
@@ -1611,5 +1612,15 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
             allTasks = newTasks;
         }
         allTasks[realSize++] = task;
+    }
+
+    private RecipeItemHelper recipeItemHelper = null;
+    public RecipeItemHelper getRecipeItemHelper(){
+        RecipeItemHelper helper;
+        if((helper = this.recipeItemHelper) == null)return recipeItemHelper = new RecipeItemHelper();
+        else {
+            helper.clear();
+            return helper;
+        }
     }
 }

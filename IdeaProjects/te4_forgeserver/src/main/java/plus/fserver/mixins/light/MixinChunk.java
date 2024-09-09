@@ -29,7 +29,7 @@ public abstract class MixinChunk implements IChunkLighting, IChunkLightingData, 
     @Shadow public abstract int getHeightValue(final int p0, final int p1);
     @Shadow @Final private World world;
     @Shadow @Final private ExtendedBlockStorage[] storageArrays;
-    @Shadow @Final private int[] heightMap;
+    @Shadow @Final private byte[] heightMap;
     @Shadow private int heightMapMinimum;
     @Shadow private boolean isTerrainPopulated;
     @Shadow private boolean isGapLightingUpdated;
@@ -102,7 +102,7 @@ public abstract class MixinChunk implements IChunkLighting, IChunkLightingData, 
             --j;
         }
         if (j != i) {
-            this.heightMap[z << 4 | x] = j;
+            this.heightMap[z << 4 | x] = (byte) j;
             if (this.world.provider.hasSkyLight()) {
                 LightingHooks.relightSkylightColumn(this.world, (Chunk)(Object)this, x, z, i, j);
             }

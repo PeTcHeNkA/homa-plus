@@ -855,7 +855,10 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
 
     @Override
     public void closeScreen() {
-        this.connection.netManager.sendPacketE(new SPacketCloseWindow(this.openContainer.windowId));
+        int id;
+        NetHandlerPlayServer conn = this.connection;
+        conn.netManager.sendPacketE(new SPacketCloseWindow(id = this.openContainer.windowId));
+        conn.removeTransactions(id);
         this.closeContainer();
     }
 

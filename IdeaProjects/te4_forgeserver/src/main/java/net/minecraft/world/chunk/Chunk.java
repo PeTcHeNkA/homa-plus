@@ -77,7 +77,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
     @Keep
     private final World world;
     @Keep
-    private final int[] heightMap;
+    private final byte[] heightMap;
     public final int x;
     public final int z;
     @Keep
@@ -164,7 +164,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
         this.world = worldIn;
         this.x = x;
         this.z = z;
-        this.heightMap = new int[256];
+        this.heightMap = new byte[256];
 
         Arrays.fill(this.precipitationHeightMap, (short) -999);
         Arrays.fill(this.blockBiomeArray, (byte) - 1);
@@ -220,7 +220,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
 
     public int getHeightValue(int x, int z) {
-        return this.heightMap[z << 4 | x];
+        return this.heightMap[z << 4 | x] & 255;
     }
 
 
@@ -255,7 +255,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
                 for (int l = i + 16; l > 0; --l) {
                     iblockstate = this.getBlockState(j, l - 1, k);
                     if (this.getBlockLightOpacity(j, l - 1, k) != 0) {
-                        this.heightMap[k << 4 | j] = l;
+                        this.heightMap[k << 4 | j] = (byte) l;
                         if (l < this.heightMapMinimum) {
                             this.heightMapMinimum = l;
                         }
@@ -277,7 +277,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
                 this.precipitationHeightMap[xPos + (zPos << 4)] = -999;
                 for (int l = i + 16; l > 0; --l) {
                     if (this.getBlockLightOpacity(xPos, l - 1, zPos) != 0) {
-                        this.heightMap[zPos << 4 | xPos] = l;
+                        this.heightMap[zPos << 4 | xPos] = (byte) l;
                         if (l < this.heightMapMinimum) {
                             this.heightMapMinimum = l;
                         }
@@ -485,7 +485,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
         if (j != i) {
             this.world.markBlocksDirtyVertical(x + this.x * 16, z + this.z * 16, j, i);
-            this.heightMap[z << 4 | x] = j;
+            this.heightMap[z << 4 | x] = (byte) j;
             int k = this.x * 16 + x;
             int l = this.z * 16 + z;
 
@@ -528,7 +528,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
                 }
             }
 
-            int l1 = this.heightMap[z << 4 | x];
+            int l1 = this.heightMap[z << 4 | x] & 255;
             int j2 = i;
             int k2 = l1;
 
@@ -595,7 +595,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
         if (prev == state) {
             return null;
         } else {
-            int i1 = this.heightMap[xzIndex];
+            int i1 = this.heightMap[xzIndex] & 255;
             Block block = state.getBlock(), prevBlock = prev.getBlock();
             int k1 = prev.getLightOpacity(this.world, pos); // Relocate old light value lookup here, so that it is called before TE is removed.
             ExtendedBlockStorage storage = this.storageArrays[py >> 4];
@@ -815,12 +815,12 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
         int x = pos.getX() & 15;
         int y = pos.getY();
         int z = pos.getZ() & 15;
-        return y >= this.heightMap[z << 4 | x];
+        return y >= (this.heightMap[z << 4 | x] & 255);
     }
 
 
     public boolean canSeeSky(int x, int y, int z) {
-        return y >= this.heightMap[(z & 15) << 4 | x & 15];
+        return y >= (this.heightMap[(z & 15) << 4 | x & 15] & 255);
     }
 
 
@@ -1393,13 +1393,27 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
 
     public int[] getHeightMap() {
+        int[] heightMap = new int[256];
+        byte[] realMap = this.heightMap;
+        for (int i = 0; i < 255; i++){
+            heightMap[i] = realMap[i] & 255;
+        }
+        return heightMap;
+    }
+
+
+    public byte[] getHeightMapRaw(){
         return this.heightMap;
     }
 
 
     public void setHeightMap(int[] newHeightMap) {
-        System.arraycopy(newHeightMap, 0, this.heightMap, 0, this.heightMap.length);
-        this.heightMapMinimum = com.google.common.primitives.Ints.min(this.heightMap); // Forge: fix MC-117412
+        final byte[] realMap = this.heightMap;
+        for (int i = 0; i < 255; i++){
+            realMap[i] = (byte) newHeightMap[i];
+        }
+        //System.arraycopy(newHeightMap, 0, this.heightMap, 0, this.heightMap.length);
+        this.heightMapMinimum = com.google.common.primitives.Ints.min(newHeightMap); // Forge: fix MC-117412
     }
 
 

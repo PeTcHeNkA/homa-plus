@@ -56,7 +56,7 @@ import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.api.Keep;
-import plus.fserver.api.VarOnly;
+import plus.fserver.api.inject.VarOnly;
 import plus.fserver.server.SStrings;
 import plus.fserver.utls.EntityLodFunc;
 import plus.fserver.utls.collections.FixedItemList;

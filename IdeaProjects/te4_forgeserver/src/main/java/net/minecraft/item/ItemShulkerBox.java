@@ -3,7 +3,7 @@ package net.minecraft.item;
 import net.minecraft.block.Block;
 import net.minecraft.init.Items;
 import net.minecraft.nbt.*;
-import plus.fserver.api.VarOnly;
+import plus.fserver.api.inject.VarOnly;
 
 
 public class ItemShulkerBox extends ItemBlock {
