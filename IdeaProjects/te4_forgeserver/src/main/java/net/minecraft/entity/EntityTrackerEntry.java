@@ -64,6 +64,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import plus.fserver.ElcaConfig;
 import plus.fserver.server.network.packet.SElcaPacketEntityEquipment;
+import plus.fserver.server.network.packet.SEntityPacketPlayBase;
 import plus.tson.utl.Te4HashSet;
 import javax.annotation.Nullable;
 import static plus.fserver.utls.math.MathUtls.F_256_T_360;
@@ -509,7 +510,7 @@ public class EntityTrackerEntry {
                 long j = i1 - this.encodedPosX;
                 long k = i2 - this.encodedPosY;
                 long l = j2 - this.encodedPosZ;
-                Packet<?> packet1 = null;
+                SEntityPacketPlayBase packet1 = null;
                 boolean flag = j * j + k * k + l * l >= 128L || this.updateCounter % 60 == 0;
                 boolean flag1 = Math.abs(k2 - this.encodedRotationYaw) >= 1 || Math.abs(i - this.encodedRotationPitch) >= 1;
 
@@ -576,7 +577,13 @@ public class EntityTrackerEntry {
 
             int k1 = MathHelper.floor(trackedEntity.getRotationYawHead() * F_256_T_360);
 
-            if (Math.abs(k1 - this.lastHeadMotion) >= 1) {
+            int amount; //5832 = 18*18*18
+            if(trackedEntity.elcaMinRange > 5832D){
+                amount = 5;
+            } else {
+                amount = 1;
+            }
+            if (Math.abs(k1 - this.lastHeadMotion) >= amount) {
                 this.sendPacketToTrackedPlayers(new SPacketEntityHeadLook(trackedEntity, (byte)k1));
                 this.lastHeadMotion = k1;
             }
@@ -605,13 +612,25 @@ public class EntityTrackerEntry {
 
     public void sendPacketToTrackedPlayers(Packet<?> packetIn){
         if(trackingPlayers.isEmpty())return;
-        ((Te4HashSet<EntityPlayerMP>)trackingPlayers).forEachIfCan(playerMP -> playerMP.addPacketToQueue(packetIn));
+        ((Te4HashSet<EntityPlayerMP>)trackingPlayers).forEachIfCan(playerMP -> playerMP.connection.netManager.addToQueueE(packetIn));
+    }
+
+
+    protected void sendPacketToTrackedPlayers(SEntityPacketPlayBase packetIn){
+        if(trackingPlayers.isEmpty())return;
+        ((Te4HashSet<EntityPlayerMP>)trackingPlayers).forEachIfCan(packetIn);
+    }
+
+
+    private void sendPacketToTrackedPlayersAndSelf(NetworkManager manager, SEntityPacketPlayBase packetIn){
+        manager.addToQueueN(packetIn);
+        sendPacketToTrackedPlayers(packetIn);
     }
 
 
     private void sendMetadata0(@Nullable NetworkManager manager) {
         EntityDataManager entitydatamanager = this.trackedEntity.getDataManager();
-        Packet<?> packet;
+        SEntityPacketPlayBase packet;
         if (entitydatamanager.isDirty()) {
             packet = new SPacketEntityMetadata(this.trackedEntity.getEntityId(), entitydatamanager, false);
 

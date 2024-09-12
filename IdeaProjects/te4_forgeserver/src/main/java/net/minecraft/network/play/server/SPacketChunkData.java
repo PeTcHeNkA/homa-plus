@@ -18,10 +18,10 @@ import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.server.network.NetUtils;
-import plus.fserver.server.network.packet.SPacketPlayBase;
+import plus.fserver.server.network.packet.SNodePacketPlayBase;
 
 
-public class SPacketChunkData extends SPacketPlayBase {
+public class SPacketChunkData extends SNodePacketPlayBase {
     private int chunkX;
     private int chunkZ;
     private int availableSections;

@@ -9,10 +9,10 @@ import net.minecraft.util.SoundEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.server.network.NetUtils;
-import plus.fserver.server.network.packet.SPacketPlayBase;
+import plus.fserver.server.network.packet.SNodePacketPlayBase;
 
 
-public class SPacketSoundEffect extends SPacketPlayBase {
+public class SPacketSoundEffect extends SNodePacketPlayBase {
     private SoundEvent sound;
     private SoundCategory category;
     private int posX;

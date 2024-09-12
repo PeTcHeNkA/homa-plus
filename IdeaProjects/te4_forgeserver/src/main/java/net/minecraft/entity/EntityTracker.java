@@ -21,8 +21,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import plus.fserver.server.AsyEntityTracker;
+import plus.fserver.server.network.packet.SEntityPacketPlayBase;
 import plus.fserver.utls.collections.ArrayListE6;
-import plus.fserver.utls.collections.ArrayRemSwapListE15;
 import plus.fserver.utls.collections.EntityChunkIter;
 import plus.fserver.utls.collections.EntityRemSwapList;
 import plus.fserver.world.EntityTrackerFactory;
@@ -194,6 +194,12 @@ public class EntityTracker {
 
 
     public void sendToTracking(Entity entity, Packet<?> packetIn) {
+        EntityTrackerEntry entry = entity.trackerEntry;
+        if (entry != null) entry.sendPacketToTrackedPlayers(packetIn);
+    }
+
+
+    public void sendToTracking(Entity entity, SEntityPacketPlayBase packetIn) {
         EntityTrackerEntry entry = entity.trackerEntry;
         if (entry != null) entry.sendPacketToTrackedPlayers(packetIn);
     }

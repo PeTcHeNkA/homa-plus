@@ -9,10 +9,10 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.server.network.NetUtils;
-import plus.fserver.server.network.packet.SPacketPlayBase;
+import plus.fserver.server.network.packet.SEntityPacketPlayBase;
 
 
-public class SPacketEntityHeadLook extends SPacketPlayBase {
+public class SPacketEntityHeadLook extends SEntityPacketPlayBase {
     private int entityId;
     private byte yaw;
 

@@ -45,7 +45,6 @@ public class SPacketBlockChange extends SPacketPlayBase {
     public void readPacketData(PacketBuffer buf) throws IOException {
         this.blockPosition = buf.readBlockPos();
         this.blockState = BlockIDIndexes.BLOCK_INDEX.get(buf.readVarInt());
-        //this.blockState = Block.BLOCK_STATE_IDS.getByValue(buf.readVarInt());
     }
 
 

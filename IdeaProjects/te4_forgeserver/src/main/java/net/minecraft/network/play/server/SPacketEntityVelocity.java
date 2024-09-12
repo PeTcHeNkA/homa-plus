@@ -8,10 +8,10 @@ import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.server.network.NetUtils;
-import plus.fserver.server.network.packet.SPacketPlayBase;
+import plus.fserver.server.network.packet.SEntityPacketPlayBase;
 
 
-public class SPacketEntityVelocity extends SPacketPlayBase {
+public class SPacketEntityVelocity extends SEntityPacketPlayBase {
     private int entityID;
     private int motionX;
     private int motionY;

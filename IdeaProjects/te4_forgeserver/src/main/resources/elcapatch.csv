@@ -429,16 +429,20 @@ net.minecraft.item.ItemSnowball
 net.minecraft.item.ItemSpade
 net.minecraft.item.ItemStack
 net.minecraft.item.ItemWrittenBook
+net.minecraft.nbt.CompressedStreamTools, false, false
 net.minecraft.nbt.NBTTagByte, false, false
 net.minecraft.nbt.NBTTagCompound, false, false
 net.minecraft.nbt.NBTTagDouble, false, false
 net.minecraft.nbt.NBTTagEnd, false, false
 net.minecraft.nbt.NBTTagFloat, false, false
 net.minecraft.nbt.NBTTagInt, false, false
+net.minecraft.nbt.NBTTagIntArrayUnsafe, false, false
 net.minecraft.nbt.NBTTagList, false, false
 net.minecraft.nbt.NBTTagLong, false, false
 net.minecraft.nbt.NBTTagShort, false, false
 net.minecraft.nbt.NBTTagString, false, false
+net.minecraft.nbt.NBTTagUnsafe$NoCopy, false, false
+net.minecraft.nbt.NBTTagUnsafe, false, false
 net.minecraft.network.datasync.EntityDataManager$DataEntry
 net.minecraft.network.datasync.EntityDataManager
 net.minecraft.network.EnumConnectionState$1
@@ -494,6 +498,7 @@ net.minecraft.network.play.server.SPacketAnimation
 net.minecraft.network.play.server.SPacketBlockAction
 net.minecraft.network.play.server.SPacketBlockBreakAnim
 net.minecraft.network.play.server.SPacketBlockChange
+net.minecraft.network.play.server.SPacketChat
 net.minecraft.network.play.server.SPacketChunkData
 net.minecraft.network.play.server.SPacketCombatEvent$1
 net.minecraft.network.play.server.SPacketCombatEvent$Event
@@ -507,22 +512,41 @@ net.minecraft.network.play.server.SPacketEntity$SPacketEntityPos
 net.minecraft.network.play.server.SPacketEntity
 net.minecraft.network.play.server.SPacketEntityEquipment
 net.minecraft.network.play.server.SPacketEntityHeadLook
+net.minecraft.network.play.server.SPacketEntityMetadata
+net.minecraft.network.play.server.SPacketEntityProperties$Snapshot
+net.minecraft.network.play.server.SPacketEntityProperties
+net.minecraft.network.play.server.SPacketEntityTeleport
 net.minecraft.network.play.server.SPacketEntityVelocity
 net.minecraft.network.play.server.SPacketHeldItemChange
+net.minecraft.network.play.server.SPacketJoinGame
 net.minecraft.network.play.server.SPacketKeepAlive
 net.minecraft.network.play.server.SPacketMoveVehicle
+net.minecraft.network.play.server.SPacketMultiBlockChange$1
+net.minecraft.network.play.server.SPacketMultiBlockChange$BlockUpdateData
+net.minecraft.network.play.server.SPacketMultiBlockChange$BlockUpdateDataBase
+net.minecraft.network.play.server.SPacketMultiBlockChange
+net.minecraft.network.play.server.SPacketOpenWindow
 net.minecraft.network.play.server.SPacketPlaceGhostRecipe
+net.minecraft.network.play.server.SPacketPlayerListHeaderFooter
 net.minecraft.network.play.server.SPacketPlayerPosLook$EnumFlags
 net.minecraft.network.play.server.SPacketPlayerPosLook
+net.minecraft.network.play.server.SPacketSetPassengers
 net.minecraft.network.play.server.SPacketSetSlot
 net.minecraft.network.play.server.SPacketSoundEffect
 net.minecraft.network.play.server.SPacketSpawnExperienceOrb
 net.minecraft.network.play.server.SPacketSpawnObject
+net.minecraft.network.play.server.SPacketSpawnPosition
+net.minecraft.network.play.server.SPacketStatistics
 net.minecraft.network.play.server.SPacketTabComplete
+net.minecraft.network.play.server.SPacketTeams
 net.minecraft.network.play.server.SPacketTimeUpdate
 net.minecraft.network.play.server.SPacketUnloadChunk
 net.minecraft.network.play.server.SPacketUpdateHealth
+net.minecraft.network.play.server.SPacketWindowItems
 net.minecraft.network.play.server.SPacketWindowProperty
+net.minecraft.network.play.server.SPacketWorldBorder$1
+net.minecraft.network.play.server.SPacketWorldBorder$Action
+net.minecraft.network.play.server.SPacketWorldBorder
 net.minecraft.network.rcon.RConThreadMain
 net.minecraft.network.status.client.CPacketPing
 net.minecraft.network.status.client.CPacketServerQuery
@@ -597,6 +621,7 @@ net.minecraft.util.math.BlockPos$PooledMutableBlockPos$1, false, false
 net.minecraft.util.math.BlockPos$PooledMutableBlockPos, false, false
 net.minecraft.util.math.BlockPos, false, false
 net.minecraft.util.math.Vec3i, false, false
+net.minecraft.util.ServerRecipeBookHelper, false, false
 net.minecraft.village.VillageCollection
 net.minecraft.world.biome.Biome$1
 net.minecraft.world.biome.Biome$BiomeProperties

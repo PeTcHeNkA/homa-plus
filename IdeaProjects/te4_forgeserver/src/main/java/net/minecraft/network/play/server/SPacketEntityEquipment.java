@@ -9,10 +9,10 @@ import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.server.network.NetUtils;
-import plus.fserver.server.network.packet.SPacketPlayBase;
+import plus.fserver.server.network.packet.SEntityPacketPlayBase;
 
 
-public class SPacketEntityEquipment extends SPacketPlayBase {
+public class SPacketEntityEquipment extends SEntityPacketPlayBase {
     private int entityID;
     private EntityEquipmentSlot equipmentSlot;
     private ItemStack itemStack;

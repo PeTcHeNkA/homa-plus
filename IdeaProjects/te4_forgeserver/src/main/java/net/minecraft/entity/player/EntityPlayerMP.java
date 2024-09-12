@@ -740,8 +740,8 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
                 ILockableContainer ilockablecontainer = (ILockableContainer)chestInventory;
 
                 if (ilockablecontainer.isLocked() && !this.canOpen(ilockablecontainer.getLockCode()) && !this.isSpectator()) {
-                    this.connection.netManager.addToQueueE(new SPacketChat(new TextComponentTranslation("container.isLocked", new Object[] {chestInventory.getDisplayName()}), ChatType.GAME_INFO));
-                    this.connection.netManager.sendPacketE(new SPacketSoundEffect(SoundEvents.BLOCK_CHEST_LOCKED, SoundCategory.BLOCKS, this.posX, this.posY, this.posZ, 1.0F, 1.0F));
+                    this.connection.netManager.addToQueueN(new SPacketSoundEffect(SoundEvents.BLOCK_CHEST_LOCKED, SoundCategory.BLOCKS, this.posX, this.posY, this.posZ, 1.0F, 1.0F));
+                    this.connection.netManager.sendPacketE(new SPacketChat(new TextComponentTranslation("container.isLocked", chestInventory.getDisplayName()), ChatType.GAME_INFO));
                     return;
                 }
             }
@@ -834,7 +834,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
 
     @Override
     public void sendAllContents(Container containerToSend, NonNullList<ItemStack> itemsList) {
-        this.connection.netManager.addToQueueE(new SPacketWindowItems(containerToSend.windowId, itemsList));
+        this.connection.netManager.addToQueueN(new SPacketWindowItems(containerToSend.windowId, itemsList));
         this.connection.netManager.sendPacketE(new SPacketSetSlot(-1, -1, this.inventory.getItemStack()));
     }
 
@@ -1262,11 +1262,6 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
     public void swingArm(EnumHand hand) {
         super.swingArm(hand);
         this.resetCooldown();
-    }
-
-
-    public void addPacketToQueue(Packet<?> packet){
-        connection.netManager.addToQueueE(packet);
     }
 
 

@@ -24,6 +24,7 @@ import org.apache.logging.log4j.Logger;
 import plus.fserver.ElcaCV;
 import plus.fserver.ElcaConfig;
 import plus.fserver.server.chunk.io.TChunkExecutor;
+import plus.fserver.server.network.packet.SNodePacketPlayBase;
 import plus.fserver.utls.collections.ArrayListE6;
 
 
@@ -98,7 +99,7 @@ public class PlayerChunkMapEntry extends ArrayListE6<EntityPlayerMP> implements 
                 return;
             }
             if (this.sentToPlayers) {
-                player.connection.netManager.addToQueueE(new SPacketUnloadChunk(posX, posZ));
+                player.connection.netManager.addToQueueN(new SPacketUnloadChunk(posX, posZ));
             }
 
             player.world.chunkUnWatchEvent.post(chunk, player);
@@ -139,14 +140,14 @@ public class PlayerChunkMapEntry extends ArrayListE6<EntityPlayerMP> implements 
                 this.sentToPlayers = true;
                 return true;
             } else try {
-                Packet<?> packet = new SPacketChunkData(this.chunk, 65535);
+                SPacketChunkData packet = new SPacketChunkData(this.chunk, 65535);
                 int size;
                 if((size = this.size) > 0){
                     this.playerChunkMap.getWorldServer().getEntityTracker().sendLeashedEntitiesInChunk(this, this.chunk);
 
                     for (int i = 0; i < size; i++) {
                         EntityPlayerMP player = getC(i);
-                        player.connection.netManager.addToQueueE(packet);
+                        player.connection.netManager.addToQueueN(packet);
                         player.world.chunkWatchEvent.post(chunk, player);
                     }
                 }
@@ -164,7 +165,7 @@ public class PlayerChunkMapEntry extends ArrayListE6<EntityPlayerMP> implements 
 
     public void sendToPlayer(EntityPlayerMP player) {
         if (this.sentToPlayers) {
-            player.connection.netManager.addToQueueE(new SPacketChunkData(this.chunk, 65535));
+            player.connection.netManager.sendPacketE(new SPacketChunkData(this.chunk, 65535));
             this.playerChunkMap.getWorldServer().getEntityTracker().sendLeashedEntitiesInChunk(player, this.chunk);
         }
     }

@@ -1,6 +1,5 @@
 package net.minecraft.network;
 
-import com.google.common.collect.Queues;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.velocitypowered.natives.compression.VelocityCompressor;
 import com.velocitypowered.natives.util.Natives;
@@ -24,6 +23,7 @@ import io.netty.util.concurrent.GenericFutureListener;
 import java.net.InetAddress;
 import java.net.SocketAddress;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.annotation.Nullable;
 import javax.crypto.SecretKey;
 import net.minecraft.util.CryptManager;
@@ -42,11 +42,12 @@ import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
 import plus.fserver.ElcaConfig;
 import plus.fserver.api.Keep;
+import plus.fserver.server.network.IPacketNodeQueue;
 import plus.fserver.server.network.NativeCompressionDecoder;
 import plus.fserver.server.network.NativeCompressionEncoder;
 
 
-public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >> {
+public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
     private static final Logger LOGGER = LogManager.getLogger();
     @Keep
     public static final Marker NETWORK_MARKER = MarkerManager.getMarker("NETWORK");
@@ -74,7 +75,7 @@ public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >> {
     };
 
     private final EnumPacketDirection direction;
-    private final Queue<NetworkManager.InboundHandlerTuplePacketListenerBase> outboundPacketsQueue = Queues.newConcurrentLinkedQueue();
+    private final ConcurrentLinkedQueue<IPacketNodeQueue> outboundPacketsQueue = new ConcurrentLinkedQueue<>();
     private Channel channel;
     private SocketAddress socketAddress;
     private INetHandler packetListener;
@@ -206,21 +207,21 @@ public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >> {
 
     @Keep
     public void flushOutboundQueue() {
-        final Queue<InboundHandlerTuplePacketListenerBase> queue;
-        NetworkManager.InboundHandlerTuplePacketListenerBase listener = (queue = this.outboundPacketsQueue).poll();
+        final Queue<IPacketNodeQueue> queue;
+        IPacketNodeQueue listener = (queue = this.outboundPacketsQueue).poll();
         while (listener != null){
-            this.dispatchPacket(listener.packet, listener.future());
+            this.dispatchPacket(listener.packet(), listener.future());
             listener = queue.poll();
         }
     }
 
 
     private void flushOutboundQueueE() {
-        final Queue<InboundHandlerTuplePacketListenerBase> queue;
-        NetworkManager.InboundHandlerTuplePacketListenerBase listener = (queue = this.outboundPacketsQueue).poll();
+        final Queue<IPacketNodeQueue> queue;
+        IPacketNodeQueue listener = (queue = this.outboundPacketsQueue).poll();
         Channel channel = this.channel;
         while (listener != null){
-            dispatchPacketE(channel, listener.packet, listener.future());
+            dispatchPacketE(channel, listener.packet(), listener.future());
             listener = queue.poll();
         }
     }
@@ -415,7 +416,7 @@ public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >> {
             super(inPacket);
             this.futureListeners = inFutureListeners;
         }
-
+        @Override
         public GenericFutureListener<? extends Future<? super Void>>[] future() {
             return futureListeners;
         }
@@ -423,15 +424,16 @@ public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >> {
 
 
     @Keep
-    public static class InboundHandlerTuplePacketListenerBase {
+    public static class InboundHandlerTuplePacketListenerBase implements IPacketNodeQueue {
         private final Packet<?> packet;
 
         public InboundHandlerTuplePacketListenerBase(Packet<?> inPacket) {
             this.packet = inPacket;
         }
 
-        public GenericFutureListener <? extends Future <? super Void >> [] future(){
-            return null;
+        @Override
+        public Packet<?> packet() {
+            return packet;
         }
     }
 
@@ -472,6 +474,11 @@ public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >> {
 
     public void addToQueueE(Packet<?> packetIn){
         this.outboundPacketsQueue.add(new NetworkManager.InboundHandlerTuplePacketListenerBase(packetIn));
+    }
+
+
+    public void addToQueueN(IPacketNodeQueue node){
+        this.outboundPacketsQueue.add(node);
     }
 
 

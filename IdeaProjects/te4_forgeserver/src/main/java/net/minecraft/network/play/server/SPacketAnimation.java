@@ -8,10 +8,10 @@ import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.server.network.NetUtils;
-import plus.fserver.server.network.packet.SPacketPlayBase;
+import plus.fserver.server.network.packet.SEntityPacketPlayBase;
 
 
-public class SPacketAnimation extends SPacketPlayBase {
+public class SPacketAnimation extends SEntityPacketPlayBase {
     private int entityId;
     private int type;
 
