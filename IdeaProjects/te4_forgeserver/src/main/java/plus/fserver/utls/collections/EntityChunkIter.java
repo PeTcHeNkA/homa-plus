@@ -14,7 +14,7 @@ public class EntityChunkIter implements Iterable<Entity>, Iterator<Entity> {
     private Entity next;
 
     public EntityChunkIter(Chunk chunk) {
-        list = (lists = chunk.getEntityLists())[0].rawValues();
+        list = (lists = chunk.getEntityLists())[0];
         calcNext();
     }
 
@@ -24,7 +24,7 @@ public class EntityChunkIter implements Iterable<Entity>, Iterator<Entity> {
             return;
         }
         while (cursor1 < 16) {
-            EntityList<Entity> res = lists[cursor1++].rawValues();
+            EntityList<Entity> res = lists[cursor1++];
             if(!res.isEmptyC()){
                 next = res.getC(0);
                 cursor2 = 1;
@@ -45,9 +45,9 @@ public class EntityChunkIter implements Iterable<Entity>, Iterator<Entity> {
     @Override
     public void forEach(Consumer<? super Entity> action) {
         ClassInheritanceMultiMap<Entity>[] lists = this.lists;
-        for (int i = 1; i < lists.length; ++i) {
-            EntityList<Entity> vals = lists[i].rawValues();
-            if(!vals.isEmptyC()) vals.forEach(action);
+        for (int i = 0; i < lists.length; ++i) {
+            EntityList<Entity> vals;
+            if(!(vals = lists[i]).isEmptyC()) vals.forEach(action);
         }
     }
 

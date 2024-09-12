@@ -203,10 +203,10 @@ public class EMoveHelper {
         }
 
 
-        public void completeMoveTasks(ClassInheritanceMultiMap<Entity> part) {
+        public void completeMoveTasks(ClassInheritanceMultiMap<Entity> list) {
             int size;
-            EntityList<Entity> list;
-            if ((size = (list = part.rawValues()).sizeC()) < 2) return;
+
+            if ((size = list.sizeC()) < 2) return;
 
             Entity[] arr = export(list, size);
 

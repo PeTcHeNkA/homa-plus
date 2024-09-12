@@ -921,7 +921,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
         if(filter == null) {
             for (EntityList<Entity> raw; minY <= maxY; ++minY)
-                if (!(raw = this.entityLists[minY].rawValues()).isEmptyC())
+                if (!(raw = this.entityLists[minY]).isEmptyC())
                     for (int i = 0; i < raw.sizeC();i++)
                         if ((entity = raw.getC(i)) != entityIn && entity.getEntityBoundingBox().intersects(aabb)) {
                             listToFill.add(entity);
@@ -933,7 +933,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
                         }
         } else {
             for (EntityList<Entity> raw; minY <= maxY; ++minY)
-                if (!(raw = this.entityLists[minY].rawValues()).isEmptyC())
+                if (!(raw = this.entityLists[minY]).isEmptyC())
                     for (int i = 0; i < raw.sizeC();i++)
                         if ((entity = raw.getC(i)) != entityIn && entity.getEntityBoundingBox().intersects(aabb)) {
                             if (filter.apply(entity)) listToFill.add(entity);
@@ -959,7 +959,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
         if(filter == null) {
             for (EntityList<Entity> raw; minY <= maxY; ++minY)
                 //if ((cursor = (raw = this.entityLists[minY].rawValues()).sizeC()-1) != 0)
-                for (int cursor = (raw = this.entityLists[minY].rawValues()).sizeC()-1; cursor != -1; cursor--)
+                for (int cursor = (raw = this.entityLists[minY]).sizeC()-1; cursor != -1; cursor--)
                     if ((entity = raw.getC(cursor)) != entityIn && entity.getEntityBoundingBox().intersects(aabb)) {
                         listToFill.addF(entity);
                         if ((parts = entity.getParts()) != null)
@@ -971,7 +971,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
         } else {
             for (EntityList<Entity> raw; minY <= maxY; ++minY)
                 //if ((cursor = (raw = this.entityLists[minY].rawValues()).sizeC()) != 0)
-                for (int cursor = (raw = this.entityLists[minY].rawValues()).sizeC()-1; cursor != -1; cursor--)
+                for (int cursor = (raw = this.entityLists[minY]).sizeC()-1; cursor != -1; cursor--)
                     if ((entity = raw.getC(cursor)) != entityIn && entity.getEntityBoundingBox().intersects(aabb)) {
                         if (filter.apply(entity)) listToFill.addF(entity);
 
@@ -994,7 +994,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
         if(filter == null)
             for (EntityList<Entity> raw; minY <= maxY; ++minY){
-                if (!(raw = this.entityLists[minY].rawValues()).isEmptyC())
+                if (!(raw = this.entityLists[minY]).isEmptyC())
                     for (int i = 0; i < raw.sizeC();i++)
                         if ((entity = raw.getC(i)).getEntityBoundingBox().intersects(aabb) && entity != entityIn) {
                             listToFill.add(entity);
@@ -1006,7 +1006,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
             }
         else
             for (EntityList<Entity> raw; minY <= maxY; ++minY){
-                if (!(raw = this.entityLists[minY].rawValues()).isEmptyC())
+                if (!(raw = this.entityLists[minY]).isEmptyC())
                     for (int i = 0; i < raw.sizeC();i++)
                         if ((entity = raw.getC(i)).getEntityBoundingBox().intersects(aabb) && entity != entityIn) {
                             if (filter.apply(entity)) listToFill.add(entity);

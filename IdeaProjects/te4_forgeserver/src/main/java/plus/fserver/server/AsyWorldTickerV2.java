@@ -1,10 +1,6 @@
 package plus.fserver.server;
 
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-import plus.fserver.api.inject.Field;
-import plus.fserver.api.inject.FieldAccessor;
-import plus.fserver.api.inject.LoadInjector;
+import plus.fserver.api.ElcaServerUtils;
 import plus.fserver.server.zstd.Native;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.entity.EntityTracker;
@@ -24,15 +20,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import plus.fserver.ElcaConfig;
-import plus.fserver.api.ElcaServerUtls;
 import plus.fserver.world.light.api.ILightingEngineProvider;
 import java.util.List;
 import java.util.concurrent.*;
 
 
-@LoadInjector(fields = {
-        @Field(target = "plus.fserver.server.AsyWorldTickerV2", name = "test")
-})
 public final class AsyWorldTickerV2 implements ThreadFactory{
     private static final boolean useSync = false;
     private static final Logger LOGGER = LogManager.getLogger();
@@ -53,13 +45,9 @@ public final class AsyWorldTickerV2 implements ThreadFactory{
     }
 
     public AsyWorldTickerV2(MinecraftServer server){
-        System.out.println(
-                ElcaServerUtls.compileAccess(AsyWorldTickerV2.class, Object.class, "test").get(this)
-        );
-
         this.server = server;
         this.ignoreErrors = ElcaConfig.IGNORE_ERRORS;
-        service = ElcaServerUtls.getPool(server);
+        service = ElcaServerUtils.getPool(server);
         //service = new AsyPoolTickerExecutor(ElcaConfig.ASY_THREAD_POOL_SIZE, this);
         EnumConnectionState.optimizeAccess();
 

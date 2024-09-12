@@ -142,7 +142,7 @@ public class ElcaCommands extends ServerCommand {
 
                 MobInfoList mobs = new MobInfoList();
 
-                for (Entity entity:chunk.getEntityLists()[shift].rawValues()){
+                for (Entity entity:chunk.getEntityLists()[shift]){
                     mobs.add(entity);
                 }
 
@@ -186,7 +186,7 @@ public class ElcaCommands extends ServerCommand {
                 sorted = false;
                 byte index = 0;
                 for (ClassInheritanceMultiMap<Entity> part:chunk.getEntityLists()){
-                    int count = part.rawValues().sizeC();
+                    int count = part.sizeC();
                     if(count > 3){
                         parts.addF(new Part(chunk, index, count));
                     }

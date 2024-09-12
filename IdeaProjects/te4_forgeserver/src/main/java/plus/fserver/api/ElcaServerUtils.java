@@ -24,8 +24,8 @@ import static net.minecraft.network.NetworkSystem.SERVER_EPOLL_EVENTLOOP;
 import static net.minecraft.network.NetworkSystem.SERVER_NIO_EVENTLOOP;
 
 
-public final class ElcaServerUtls {
-    private ElcaServerUtls(){}
+public final class ElcaServerUtils {
+    private ElcaServerUtils(){}
 
     public static boolean hasElcaServer(){
         return !ElcaCV2.LIBBUILD;

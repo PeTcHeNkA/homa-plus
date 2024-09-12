@@ -10,19 +10,18 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 
-public class ClassInheritanceMultiMap<T extends Entity> extends AbstractSet<T> {
+public class ClassInheritanceMultiMap<T extends Entity> extends EntityRemSwapList<T> {
     private static final EmptySelfIter EMPTY_BY_CLASS = new EmptySelfIter();
     private static final Set<Class<?>> ALL_KNOWN = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private final IntObjectHashMap<EntityRemSwapList<T>> map = new IntObjectHashMap<>(4);
-    private final Set<Class<?>> knownKeys = new IdentityTe4HashSet<>(4);
+    private final IdentityTe4HashSet<Class<?>> knownKeys = new IdentityTe4HashSet<>(4);
     private final Class<T> baseClass;
-    private final EntityRemSwapList.E15<T> values = new EntityRemSwapList.E15<>();
 
     public ClassInheritanceMultiMap(Class<T> baseClassIn) {
         this.baseClass = baseClassIn;
         this.knownKeys.add(baseClassIn);
         ALL_KNOWN.add(baseClassIn);
-        this.map.put(baseClassIn.hashCode(), this.values);
+        this.map.put(baseClassIn.hashCode(), this);
 
         ALL_KNOWN.forEach(this::createLookupOnInit);
     }
@@ -30,9 +29,11 @@ public class ClassInheritanceMultiMap<T extends Entity> extends AbstractSet<T> {
 
     protected void createLookupOnInit(Class<?> clazz) {
         final int key = clazz.hashCode();
-        for (T t : this.values) {
-            if (clazz.isAssignableFrom(t.getClass()))
-                this.addForClassHash(t, key);
+        Entity[] values = super.data;
+        for (int i = 0, s = size; i < s; i++) {
+            Entity entity = values[i];
+            if (clazz.isAssignableFrom(entity.getClass()))
+                this.addForClassHash((T) entity, key);
         }
         this.knownKeys.add(clazz);
     }
@@ -41,9 +42,11 @@ public class ClassInheritanceMultiMap<T extends Entity> extends AbstractSet<T> {
     protected void createLookup(Class<?> clazz) {
         ALL_KNOWN.add(clazz);
         final int key = clazz.hashCode();
-        for (T obj : this.values) {
-            if (clazz.isAssignableFrom(obj.getClass())) {
-                this.addForClassHash(obj, key);
+        Entity[] values = super.data;
+        for (int i = 0, s = size; i < s; i++) {
+            Entity entity = values[i];
+            if (clazz.isAssignableFrom(entity.getClass())) {
+                this.addForClassHash((T) entity, key);
             }
         }
         this.knownKeys.add(clazz);
@@ -103,34 +106,6 @@ public class ClassInheritanceMultiMap<T extends Entity> extends AbstractSet<T> {
             }
         }
         return flag;
-    }
-
-
-    @Override
-    public Iterator<T> iterator() {
-        return values.iterator();
-    }
-
-
-    @Override
-    public boolean isEmpty() {
-        return values.isEmptyC();
-    }
-
-
-    public boolean isEmptyC(){
-        return values.isEmptyC();
-    }
-
-
-    @Override
-    public int size() {
-        return values.size();
-    }
-
-
-    public EntityRemSwapList.E15<T> rawValues(){
-        return values;
     }
 
 
