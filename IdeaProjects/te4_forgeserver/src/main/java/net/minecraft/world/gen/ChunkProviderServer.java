@@ -32,7 +32,7 @@ import plus.fserver.server.chunk.io.TChunkTask;
 import plus.fserver.utls.collections.ChunkPopulationTask;
 
 
-public class ChunkProviderServer implements IChunkProvider {
+public class ChunkProviderServer extends Long2ObjectOpenHashMap<Chunk> implements IChunkProvider {
     @Keep
     private static final Logger LOGGER = LogManager.getLogger();
     @Keep
@@ -44,25 +44,25 @@ public class ChunkProviderServer implements IChunkProvider {
     @Keep
     public final IChunkLoader chunkLoader;
     @Keep
-    public final Long2ObjectMap<Chunk> loadedChunks = new Long2ObjectOpenHashMap<>(8192);
+    public final Long2ObjectMap<Chunk> loadedChunks = this;
     @Keep
     public final WorldServer world;
-    private final Long2ObjectOpenHashMap<Chunk> realLC = (Long2ObjectOpenHashMap) loadedChunks;
     private final ChunkPopulationTask task;
     private final boolean asyncSaveChunks;
 
 
-    public ChunkProviderServer(WorldServer worldObjIn, IChunkLoader chunkLoaderIn, IChunkGenerator chunkGeneratorIn) {
-        this.world = worldObjIn;
-        this.chunkLoader = chunkLoaderIn;
+    public ChunkProviderServer(WorldServer world, IChunkLoader chunkLoader, IChunkGenerator chunkGeneratorIn) {
+        super(2048);
+        this.world = world;
+        this.chunkLoader = chunkLoader;
         this.chunkGenerator = chunkGeneratorIn;
         task = chunkGeneratorIn.maybeAsyncPopulate()?new ChunkPopulationTask(this):null;
-        asyncSaveChunks = (chunkLoaderIn instanceof AnvilChunkLoader) && ElcaConfig.ASYNC_SAVE_CHUNKS;
+        asyncSaveChunks = (chunkLoader instanceof AnvilChunkLoader) && ElcaConfig.ASYNC_SAVE_CHUNKS;
     }
 
 
     public Collection<Chunk> getLoadedChunks() {
-        return realLC.values();
+        return super.values();
     }
 
 
@@ -76,7 +76,7 @@ public class ChunkProviderServer implements IChunkProvider {
 
 
     public void queueUnloadAll() {
-        ObjectIterator<Chunk> iter = realLC.values().iterator();
+        ObjectIterator<Chunk> iter = super.values().iterator();
         while (iter.hasNext()) {
             Chunk chunk = iter.next();
             this.queueUnload(chunk);
@@ -86,7 +86,7 @@ public class ChunkProviderServer implements IChunkProvider {
 
     @Nullable
     public Chunk getLoadedChunk(int x, int z) {
-        Chunk chunk = realLC.get(ChunkPos.asLong(x, z));
+        Chunk chunk = super.get(ChunkPos.asLong(x, z));
         if (chunk != null) chunk.setRequested(); //chunk.unloadQueued = false;
         return chunk;
     }
@@ -109,7 +109,7 @@ public class ChunkProviderServer implements IChunkProvider {
                 if (chunk == null) chunk = this.loadChunkFromFile(x, z);
 
                 if (chunk != null) {
-                    realLC.put(chunkHash, chunk);
+                    super.put(chunkHash, chunk);
                     chunk.onLoad();
                     chunk.populate(this, this.chunkGenerator);
                 }
@@ -221,7 +221,7 @@ public class ChunkProviderServer implements IChunkProvider {
     @Keep
     public boolean saveChunks(boolean all) {
         int i = 0;
-        ObjectCollection<Chunk> vs = realLC.values();
+        ObjectCollection<Chunk> vs = super.values();
         if(vs.isEmpty())return true;
         List<Chunk> list = new ArrayList<>(vs);
 
@@ -247,7 +247,7 @@ public class ChunkProviderServer implements IChunkProvider {
 
     public void onComplete(TChunkTask task){
         Chunk chunk = task.getChunk();
-        realLC.put(ChunkPos.asLong(chunk.x, chunk.z), chunk);
+        super.put(ChunkPos.asLong(chunk.x, chunk.z), chunk);
         chunk.onLoad();
         if(this.task != null) {
             this.task.add(task.getChunk());
@@ -275,7 +275,7 @@ public class ChunkProviderServer implements IChunkProvider {
                 for (LongIterator iterator = this.droppedChunks.iterator();
                      i < 100 && iterator.hasNext();) {
                     long olong = iterator.next();
-                    Chunk chunk = realLC.get(olong);
+                    Chunk chunk = super.get(olong);
 
                     if (chunk != null) {
                         if(chunk.maybeUnload()) {
@@ -287,7 +287,7 @@ public class ChunkProviderServer implements IChunkProvider {
                                 this.saveChunkData(chunk);
                                 this.saveChunkExtraData(chunk);
                             }
-                            realLC.remove(olong);
+                            super.remove(olong);
                             ++i;
                             iterator.remove();
                         } else {
@@ -295,14 +295,14 @@ public class ChunkProviderServer implements IChunkProvider {
                         }
                     }
                 }
-                if(i > 10) realLC.trim();
+                if(i > 10) super.trim();
             }
-            if (realLC.isEmpty()) {
+            if (super.isEmpty()) {
                 //DimensionManager.unloadWorld(this.world.provider.getDimension());
             } else {
                 if(++ticks>1200){
                     int limit = 0;
-                    Iterator<Chunk> iter = realLC.values().iterator();
+                    Iterator<Chunk> iter = super.values().iterator();
                     Chunk chunk;
                     while (iter.hasNext() && limit<100){
                         try {
@@ -324,7 +324,7 @@ public class ChunkProviderServer implements IChunkProvider {
                                     this.saveChunkExtraData(chunk);
                                 }
 
-                                realLC.remove(olong);
+                                super.remove(olong);
                                 iter.remove();
                                 ++limit;
                             } else {
@@ -332,7 +332,7 @@ public class ChunkProviderServer implements IChunkProvider {
                             }
                         }
                     }
-                    if(limit>10) realLC.trim();
+                    if(limit>10) super.trim();
                     if(limit >= 100){
                         ticks = 1190;
                     } else {
@@ -353,7 +353,7 @@ public class ChunkProviderServer implements IChunkProvider {
 
     @Override
     public String makeString() {
-        return "ServerChunkCache: " + realLC.size() + " Drop: " + this.droppedChunks.size();
+        return "ServerChunkCache: " + super.size() + " Drop: " + this.droppedChunks.size();
     }
 
 
@@ -374,17 +374,12 @@ public class ChunkProviderServer implements IChunkProvider {
 
 
     public int getLoadedChunkCount() {
-        return realLC.size();
-    }
-
-
-    public boolean isEmpty(){
-        return realLC.isEmpty();
+        return super.size();
     }
 
 
     public boolean chunkExists(int x, int z) {
-        return realLC.containsKey(ChunkPos.asLong(x, z));
+        return super.containsKey(ChunkPos.asLong(x, z));
     }
 
 
@@ -396,6 +391,6 @@ public class ChunkProviderServer implements IChunkProvider {
 
     @Override
     public boolean isChunkGeneratedAt(int x, int z) {
-        return realLC.containsKey(ChunkPos.asLong(x, z)) || this.chunkLoader.isChunkGeneratedAt(x, z);
+        return super.containsKey(ChunkPos.asLong(x, z)) || this.chunkLoader.isChunkGeneratedAt(x, z);
     }
 }

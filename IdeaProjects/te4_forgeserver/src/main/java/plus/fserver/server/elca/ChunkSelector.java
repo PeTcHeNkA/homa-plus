@@ -2,7 +2,6 @@ package plus.fserver.server.elca;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -19,7 +18,6 @@ import plus.fserver.api.IBlockEAccess;
 
 
 public final class ChunkSelector implements IBlockEAccess {
-    public static final IBlockState AIR_STATE = Blocks.AIR.getDefaultState();
     private final ChunkProviderServer provider;
     private Chunk chunk;
     private int curX, curZ;
@@ -121,7 +119,7 @@ public final class ChunkSelector implements IBlockEAccess {
     public int getLightFor(EnumSkyBlock type, BlockPos pos) {
         if(pos.getY() < 0 || pos.getY() > 255)return type.defaultLightValue;
         Chunk chunk1 = getLoadedE(pos.getX()>>4, pos.getZ()>>4);
-        return chunk1 == null?type.defaultLightValue:chunk.getLightFor(type, pos);
+        return chunk1 == null?type.defaultLightValue:chunk1.getLightFor(type, pos);
     }
 
 
@@ -315,8 +313,8 @@ public final class ChunkSelector implements IBlockEAccess {
                 chunk.getTopFilledSegment() + 16, pos.getZ()); pos1.getY() >= 0; pos1 = pos2) {
 
             if ((state = chunk.getBlockState(pos2 = pos1.down())).getMaterial().blocksMovement()
-                    && !state.getBlock().isLeaves(state, provider.world, pos2)
-                    && !state.getBlock().isFoliage(provider.world, pos2)) {
+                    && !state.getBlock().isLeaves(state, this, pos2)
+                    && !state.getBlock().isFoliage(this, pos2)) {
                 break;
             }
         }

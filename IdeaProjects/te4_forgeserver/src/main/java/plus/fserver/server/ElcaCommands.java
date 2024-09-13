@@ -446,7 +446,7 @@ public class ElcaCommands extends ServerCommand {
         ChunkProviderServer ch = (ChunkProviderServer) sender.getEntityWorld().getChunkProvider();
         int minX = 0, minZ = 0;
         int maxX = 0, maxZ = 0;
-        for (Chunk c:ch.loadedChunks.values()){
+        for (Chunk c:ch.values()){
             if(c.x < minX)minX = c.x;
             if(c.z < minZ)minZ = c.z;
 
@@ -455,7 +455,7 @@ public class ElcaCommands extends ServerCommand {
         }
         byte[][] table = new byte[maxX-minX+1][maxZ-minZ+1];
 
-        for (Chunk c:ch.loadedChunks.values()){
+        for (Chunk c:ch.values()){
             table[c.x-minX][c.z-minZ] = (byte) (c.maybeUnload()?1:2);
         }
 
