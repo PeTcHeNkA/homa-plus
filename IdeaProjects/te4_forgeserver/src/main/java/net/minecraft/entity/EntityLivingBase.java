@@ -952,8 +952,9 @@ public abstract class EntityLivingBase extends Entity {
         if (isPlayer() && ((EntityPlayer)this).isSpectator()) return false;
         else {
             BlockPos pos;
+            World world;
             return ForgeHooks.isLivingOnLadder(
-                    world.access().getBlockState(
+                    (world = this.world).access().getBlockState(
                             pos = world.localTempPos2.setPos(
                                     posX, getEntityBoundingBox().minY, posZ
                             )
@@ -1454,11 +1455,13 @@ public abstract class EntityLivingBase extends Entity {
                         });
                     } else {
                         float fl0 = 0.91F;
-                        BlockPos.MutableBlockPos blockPos = world.localTempPos;
-                        IBlockEAccess access = world.access();
 
                         if (this.onGround) {
-                            IBlockState underState = access.getBlockState(blockPos.setPos(this.posX, this.getEntityBoundingBox().minY - 1.0D, this.posZ));
+                            World world;
+                            IBlockEAccess access;
+                            BlockPos.MutableBlockPos blockPos = (world = this.world).localTempPos;
+
+                            IBlockState underState = (access = world.access()).getBlockState(blockPos.setPos(this.posX, this.getEntityBoundingBox().minY - 1.0D, this.posZ));
                             fl0 = underState.getBlock().getSlipperiness(underState, access, blockPos, this) * 0.91F;
                         }
 
@@ -1531,11 +1534,13 @@ public abstract class EntityLivingBase extends Entity {
 
     @Override
     public void completeCommon(){
-        BlockPos.MutableBlockPos mut = world.localTempPos;
-        IBlockEAccess curAccess = world.access();
+        World world;
+        BlockPos.MutableBlockPos mut = (world = this.world).localTempPos;
+
         float slipperiness;
         if (this.onGround) {
-            IBlockState underState = curAccess.getBlockState(mut.setPos(this.posX, this.getEntityBoundingBox().minY - 1.0D, this.posZ));
+            IBlockEAccess curAccess;
+            IBlockState underState = (curAccess = world.access()).getBlockState(mut.setPos(this.posX, this.getEntityBoundingBox().minY - 1.0D, this.posZ));
             slipperiness = underState.getBlock().getSlipperiness(underState, curAccess, mut, this) * 0.91F;
         } else {
             slipperiness = 0.91F;
@@ -1548,7 +1553,7 @@ public abstract class EntityLivingBase extends Entity {
         else {
             mut.setPos(this.posX, 0.0D, this.posZ);
 
-            if ((!this.world.isRemote || SERVER_COMPILE) || this.world.isBlockLoaded(mut) && this.world.getChunk(mut).isLoaded()) {
+            if ((!world.isRemote || SERVER_COMPILE) || world.isBlockLoaded(mut) && world.getChunk(mut).isLoaded()) {
                 if (!this.hasNoGravity())
                     this.motionY -= 0.08D;
             } else if (this.posY > 0.0D) this.motionY = -0.1D;

@@ -15,7 +15,7 @@ import net.minecraft.world.World;
 import plus.fserver.ElcaCV;
 import plus.fserver.api.IBlockEAccess;
 import plus.fserver.server.elca.ChunkLCache;
-import plus.fserver.utls.math.FastRandom;
+import plus.fserver.utls.math.MathUtls;
 
 
 public abstract class PathNavigate {
@@ -81,7 +81,21 @@ public abstract class PathNavigate {
 
     @Nullable
     public final Path getPathToXYZ(double x, double y, double z) {
-        return this.getPathToPos(new BlockPos(x, y, z));
+        if (!this.canNavigate()) return null;
+        else if (this.currentPath != null && !this.currentPath.isFinished() && targetPos != null && isNear(targetPos, x, y, z))
+            return this.currentPath;
+        else {
+            BlockPos targetPos;
+            if((targetPos = this.targetPos) == null) {
+                this.targetPos = targetPos = new BlockPos(x, y, z);
+            } else {
+                BlockPos.unsafeEdit(targetPos, MathHelper.floor(x), MathHelper.floor(y), MathHelper.floor(z));
+            }
+            EntityLiving entity;
+            ChunkLCache bigLocalCache = (entity = this.entity).world.bigLocalCache;
+            bigLocalCache.init(entity);
+            return this.pathFinder.findPath(bigLocalCache, entity, targetPos, this.getPathSearchRange());
+        }
     }
 
 
@@ -92,16 +106,19 @@ public abstract class PathNavigate {
             return this.currentPath;
         else {
             this.targetPos = pos;
-            return this.pathFinder.findPath(new ChunkLCache(entity), this.entity, this.targetPos, this.getPathSearchRange());
+            EntityLiving entity;
+            ChunkLCache bigLocalCache = (entity = this.entity).world.bigLocalCache;
+            bigLocalCache.init(entity);
+            return this.pathFinder.findPath(bigLocalCache, entity, pos, this.getPathSearchRange());
         }
     }
 
 
     private boolean isNear(BlockPos pos1, double pos2x, double pos2y, double pos2z){
         if(pos1.getY() != MathHelper.floor(pos2y))return false;
-        pos2x = FastRandom.range(pos2x, pos1.getX());
+        pos2x = MathUtls.range(pos2x, pos1.getX());
         if(pos2x>ElcaCV.PATH_NEAR_RADIUS || pos2x<-ElcaCV.PATH_NEAR_RADIUS)return false;
-        pos2x = FastRandom.range(pos2z, pos1.getZ());
+        pos2x = MathUtls.range(pos2z, pos1.getZ());
         return !(pos2x>ElcaCV.PATH_NEAR_RADIUS || pos2x<-ElcaCV.PATH_NEAR_RADIUS);
     }
 
@@ -119,8 +136,21 @@ public abstract class PathNavigate {
         else {
             if (this.currentPath != null && !this.currentPath.isFinished() && isNear(targetPos, entityIn.posX, entityIn.posY, entityIn.posZ)) return this.currentPath;
             else {
-                this.targetPos = new BlockPos(entityIn);
-                return this.pathFinder.findPath(new ChunkLCache(entity), this.entity, entityIn, this.getPathSearchRange());
+                EntityLiving entity;
+                ChunkLCache bigLocalCache = (entity = this.entity).world.bigLocalCache;
+                bigLocalCache.init(entity);
+                BlockPos targetPos;
+                if((targetPos = this.targetPos) == null) {
+                    this.targetPos = new BlockPos(entityIn);
+                } else {
+                    BlockPos.unsafeEdit(
+                            targetPos,
+                            MathHelper.floor(entity.posX),
+                            MathHelper.floor(entity.posY),
+                            MathHelper.floor(entity.posZ)
+                    );
+                }
+                return this.pathFinder.findPath(bigLocalCache, entity, entityIn, this.getPathSearchRange());
             }
         }
     }
@@ -173,26 +203,32 @@ public abstract class PathNavigate {
         if (!this.noPath()) {
             if (this.canNavigate()) {
                 this.pathFollow();
-            } else if (this.currentPath != null && this.currentPath.getCurrentPathIndex() < this.currentPath.getCurrentPathLength()) {
-                Vec3d vec3d = this.getEntityPosition();
-                Vec3d vec3d1 = this.currentPath.getVectorFromIndex(this.entity, this.currentPath.getCurrentPathIndex());
+            } else {
+                Path currentPath;
+                if ((currentPath = this.currentPath) != null && currentPath.getCurrentPathIndex() < currentPath.getCurrentPathLength()) {
+                    Entity entity;
+                    Vec3d vec3d = this.getEntityPosition();
+                    Vec3d vec3d1 = currentPath.getVectorFromIndex(entity = this.entity, currentPath.getCurrentPathIndex());
 
-                if (vec3d.y > vec3d1.y && !this.entity.onGround && MathHelper.floor(vec3d.x) ==
-                        MathHelper.floor(vec3d1.x) && MathHelper.floor(vec3d.z) == MathHelper.floor(vec3d1.z)) {
-                    this.currentPath.setCurrentPathIndex(this.currentPath.getCurrentPathIndex() + 1);
+                    if (vec3d.y > vec3d1.y && !entity.onGround && MathHelper.floor(vec3d.x) ==
+                            MathHelper.floor(vec3d1.x) && MathHelper.floor(vec3d.z) == MathHelper.floor(vec3d1.z)) {
+                        currentPath.setCurrentPathIndex(currentPath.getCurrentPathIndex() + 1);
+                    }
                 }
             }
 
             this.debugPathFinding();
 
             if (!this.noPath()) {
-                PathPoint point = currentPath.getCurrentPoint();
+                PathPoint point = this.currentPath.getCurrentPoint();
+                EntityLiving entity = this.entity;
                 double vecX = (double)point.x + (double)((int)(entity.width + 1.0F)) * 0.5;
                 double vecZ = (double)point.z + (double)((int)(entity.width + 1.0F)) * 0.5;
-                BlockPos blockpos = world.localTempPos3.setPos(vecX, point.y-1, vecZ);
-                IBlockEAccess access = world.access();
-                AxisAlignedBB box = access.getBlockState(blockpos).getBoundingBox(access, blockpos);
-                this.entity.getMoveHelper().setMoveTo(
+                World world;
+                IBlockEAccess access;
+                BlockPos blockpos = (world = this.world).localTempPos3.setPos(vecX, point.y-1, vecZ);
+                AxisAlignedBB box = (access = world.access()).getBlockState(blockpos).getBoundingBox(access, blockpos);
+                entity.getMoveHelper().setMoveTo(
                         vecX,
                         point.y + 1.1D - box.maxY,
                         vecZ,

@@ -12,7 +12,7 @@ public class ElcaCV {
     public static final boolean ENABLE_EXPLOSION_EVENT        = true;
     public static final boolean AABB_MEMORY_IMPROVEMENT       = true;
     public static final boolean ENABLE_NEIGHBOR_NOTIFY_EVENT  = false;
-    public static final double  PATH_NEAR_RADIUS              = 0.6;
+    public static final double  PATH_NEAR_RADIUS              = 0.65;
     public static final boolean CHECK_LEGAL_CHUNK_CHANGE      = false;
     public static final boolean MORE_MOBS_OPTIMIZER           = true;
     public static final boolean DISABLE_FORGE_FARMLAND        = true;
@@ -26,6 +26,7 @@ public class ElcaCV {
     public static final boolean CLIENT_COMPILE                = !SERVER_COMPILE;
     public static final boolean INTERN_NBT_KEYS               = false;
     public static final boolean ENABLE_PACKET_DEBUG           = false;
+    //public static final boolean UNSAFE_FAST_BLOCK_GET         = true;
 
     static {
         if(DEBUG_NO_SERVER) {

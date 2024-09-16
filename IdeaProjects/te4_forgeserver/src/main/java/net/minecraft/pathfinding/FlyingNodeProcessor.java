@@ -102,27 +102,27 @@ public class FlyingNodeProcessor extends WalkNodeProcessor {
 
         float maxDistanceSq = maxDistance * maxDistance;
 
-        if (pathpoint  != null && !pathpoint .visited && pathpoint .distanceToSquared(target) < maxDistanceSq) {
+        if (pathpoint  != null && !pathpoint .visited && pathpoint .distanceToSquaredInt(target) < maxDistanceSq) {
             pathOptions[i++] = pathpoint;
         }
 
-        if (pathpoint1 != null && !pathpoint1.visited && pathpoint1.distanceToSquared(target) < maxDistanceSq) {
+        if (pathpoint1 != null && !pathpoint1.visited && pathpoint1.distanceToSquaredInt(target) < maxDistanceSq) {
             pathOptions[i++] = pathpoint1;
         }
 
-        if (pathpoint2 != null && !pathpoint2.visited && pathpoint2.distanceToSquared(target) < maxDistanceSq) {
+        if (pathpoint2 != null && !pathpoint2.visited && pathpoint2.distanceToSquaredInt(target) < maxDistanceSq) {
             pathOptions[i++] = pathpoint2;
         }
 
-        if (pathpoint3 != null && !pathpoint3.visited && pathpoint3.distanceToSquared(target) < maxDistanceSq) {
+        if (pathpoint3 != null && !pathpoint3.visited && pathpoint3.distanceToSquaredInt(target) < maxDistanceSq) {
             pathOptions[i++] = pathpoint3;
         }
 
-        if (pathpoint4 != null && !pathpoint4.visited && pathpoint4.distanceToSquared(target) < maxDistanceSq) {
+        if (pathpoint4 != null && !pathpoint4.visited && pathpoint4.distanceToSquaredInt(target) < maxDistanceSq) {
             pathOptions[i++] = pathpoint4;
         }
 
-        if (pathpoint5 != null && !pathpoint5.visited && pathpoint5.distanceToSquared(target) < maxDistanceSq) {
+        if (pathpoint5 != null && !pathpoint5.visited && pathpoint5.distanceToSquaredInt(target) < maxDistanceSq) {
             pathOptions[i++] = pathpoint5;
         }
 
@@ -136,84 +136,84 @@ public class FlyingNodeProcessor extends WalkNodeProcessor {
         if (flag && flag3) {
             PathPoint pathpoint6 = this.openPoint(cur.x - 1, cur.y, cur.z - 1);
 
-            if (pathpoint6 != null && !pathpoint6.visited && pathpoint6.distanceToSquared(target) < maxDistanceSq) {
+            if (pathpoint6 != null && !pathpoint6.visited && pathpoint6.distanceToSquaredInt(target) < maxDistanceSq) {
                 pathOptions[i++] = pathpoint6;
             }
         }
         if (flag && flag2) {
             PathPoint pathpoint7 = this.openPoint(cur.x + 1, cur.y, cur.z - 1);
 
-            if (pathpoint7 != null && !pathpoint7.visited && pathpoint7.distanceToSquared(target) < maxDistanceSq) {
+            if (pathpoint7 != null && !pathpoint7.visited && pathpoint7.distanceToSquaredInt(target) < maxDistanceSq) {
                 pathOptions[i++] = pathpoint7;
             }
         }
         if (flag1 && flag3) {
             PathPoint pathpoint8 = this.openPoint(cur.x - 1, cur.y, cur.z + 1);
 
-            if (pathpoint8 != null && !pathpoint8.visited && pathpoint8.distanceToSquared(target) < maxDistanceSq) {
+            if (pathpoint8 != null && !pathpoint8.visited && pathpoint8.distanceToSquaredInt(target) < maxDistanceSq) {
                 pathOptions[i++] = pathpoint8;
             }
         }
         if (flag1 && flag2) {
             PathPoint pathpoint9 = this.openPoint(cur.x + 1, cur.y, cur.z + 1);
 
-            if (pathpoint9 != null && !pathpoint9.visited && pathpoint9.distanceToSquared(target) < maxDistanceSq) {
+            if (pathpoint9 != null && !pathpoint9.visited && pathpoint9.distanceToSquaredInt(target) < maxDistanceSq) {
                 pathOptions[i++] = pathpoint9;
             }
         }
         if (flag && flag4) {
             PathPoint pathpoint10 = this.openPoint(cur.x, cur.y + 1, cur.z - 1);
 
-            if (pathpoint10 != null && !pathpoint10.visited && pathpoint10.distanceToSquared(target) < maxDistanceSq) {
+            if (pathpoint10 != null && !pathpoint10.visited && pathpoint10.distanceToSquaredInt(target) < maxDistanceSq) {
                 pathOptions[i++] = pathpoint10;
             }
         }
         if (flag1 && flag4) {
             PathPoint pathpoint11 = this.openPoint(cur.x, cur.y + 1, cur.z + 1);
 
-            if (pathpoint11 != null && !pathpoint11.visited && pathpoint11.distanceToSquared(target) < maxDistanceSq) {
+            if (pathpoint11 != null && !pathpoint11.visited && pathpoint11.distanceToSquaredInt(target) < maxDistanceSq) {
                 pathOptions[i++] = pathpoint11;
             }
         }
         if (flag2 && flag4) {
             PathPoint pathpoint12 = this.openPoint(cur.x + 1, cur.y + 1, cur.z);
 
-            if (pathpoint12 != null && !pathpoint12.visited && pathpoint12.distanceToSquared(target) < maxDistanceSq) {
+            if (pathpoint12 != null && !pathpoint12.visited && pathpoint12.distanceToSquaredInt(target) < maxDistanceSq) {
                 pathOptions[i++] = pathpoint12;
             }
         }
         if (flag3 && flag4) {
             PathPoint pathpoint13 = this.openPoint(cur.x - 1, cur.y + 1, cur.z);
 
-            if (pathpoint13 != null && !pathpoint13.visited && pathpoint13.distanceToSquared(target) < maxDistanceSq) {
+            if (pathpoint13 != null && !pathpoint13.visited && pathpoint13.distanceToSquaredInt(target) < maxDistanceSq) {
                 pathOptions[i++] = pathpoint13;
             }
         }
         if (flag && flag5) {
             PathPoint pathpoint14 = this.openPoint(cur.x, cur.y - 1, cur.z - 1);
 
-            if (pathpoint14 != null && !pathpoint14.visited && pathpoint14.distanceToSquared(target) < maxDistanceSq) {
+            if (pathpoint14 != null && !pathpoint14.visited && pathpoint14.distanceToSquaredInt(target) < maxDistanceSq) {
                 pathOptions[i++] = pathpoint14;
             }
         }
         if (flag1 && flag5) {
             PathPoint pathpoint15 = this.openPoint(cur.x, cur.y - 1, cur.z + 1);
 
-            if (pathpoint15 != null && !pathpoint15.visited && pathpoint15.distanceToSquared(target) < maxDistanceSq) {
+            if (pathpoint15 != null && !pathpoint15.visited && pathpoint15.distanceToSquaredInt(target) < maxDistanceSq) {
                 pathOptions[i++] = pathpoint15;
             }
         }
         if (flag2 && flag5) {
             PathPoint pathpoint16 = this.openPoint(cur.x + 1, cur.y - 1, cur.z);
 
-            if (pathpoint16 != null && !pathpoint16.visited && pathpoint16.distanceToSquared(target) < maxDistanceSq) {
+            if (pathpoint16 != null && !pathpoint16.visited && pathpoint16.distanceToSquaredInt(target) < maxDistanceSq) {
                 pathOptions[i++] = pathpoint16;
             }
         }
         if (flag3 && flag5) {
             PathPoint pathpoint17 = this.openPoint(cur.x - 1, cur.y - 1, cur.z);
 
-            if (pathpoint17 != null && !pathpoint17.visited && pathpoint17.distanceToSquared(target) < maxDistanceSq) {
+            if (pathpoint17 != null && !pathpoint17.visited && pathpoint17.distanceToSquaredInt(target) < maxDistanceSq) {
                 pathOptions[i++] = pathpoint17;
             }
         }

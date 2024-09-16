@@ -317,11 +317,17 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
     @Override
     public boolean equals(Object obj) {
+        if(obj == this)return true;
         if (obj instanceof Entity) {
             return ((Entity)obj).entityId == this.entityId;
         } else {
             return false;
         }
+    }
+
+
+    public boolean equals(Entity entity) {
+        return entity == this || entity.entityId == this.entityId;
     }
 
 
@@ -3169,12 +3175,19 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
 
     public List<Entity> getPassengers() {
-        return this.riddenByEntities.isEmpty() ? Collections.emptyList() : Lists.newArrayList(this.riddenByEntities);
+        List<Entity> list;
+        if((list = riddenByEntities).isEmpty())return Collections.emptyList();
+        return Lists.newArrayList(list);
+    }
+
+
+    public List<Entity> getPassengersRaw(){
+        return riddenByEntities;
     }
 
 
     public boolean isPassenger(Entity entityIn) {
-        for (Entity entity : this.getPassengers())
+        for (Entity entity : riddenByEntities)
             if (entity.equals(entityIn)) return true;
         return false;
     }

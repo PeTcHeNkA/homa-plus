@@ -22,4 +22,24 @@ public class MathUtls {
         return motion < -0.003D || motion > 0.003D;
         //Math.abs(this.motionX) < 0.003D)
     }
+
+    public static int range(int f1, int f2){
+        if(f1>0){
+            if(f2>0) return f1>f2 ? -(f1-f2) : f2-f1;
+            else return f2-f1;
+        } else {
+            if(f2>0) return f2-f1;
+            else return f1<f2 ? -(f1-f2) : f2-f1;
+        }
+    }
+
+    public static double range(double f1, double f2){
+        if(f1>0){
+            if(f2>0) return f1>f2 ? -(f1-f2) : f2-f1;
+            else return f2-f1;
+        } else {
+            if(f2>0) return f2-f1;
+            else return f1<f2 ? -(f1-f2) : f2-f1;
+        }
+    }
 }

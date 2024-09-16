@@ -7,10 +7,10 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.ChunkProviderServer;
 import plus.fserver.ElcaConfig;
 import plus.fserver.utls.collections.AABBList;
-import plus.fserver.utls.collections.EntityList;
 import plus.tson.utl.Te4HashSet;
 import java.util.Arrays;
 
@@ -164,10 +164,10 @@ public class EMoveHelper {
 
 
     public static class ComboCollideTask extends BlockPos.MutableBlockPos{
-        private static final Entity[] EMPTY = new Entity[0];
-        private final Te4HashSet<BlockPos> allUpdate = new Te4HashSet<>();
+        private final Te4HashSet<BlockPos.MutableBlockPos> allUpdate = new Te4HashSet<>();
         private final WorldServer world;
-        private Entity[] temp = EMPTY;
+        private BlockPos.MutableBlockPos[] temp = new MutableBlockPos[12];
+        private int tempSize = 0;
 
         public ComboCollideTask(WorldServer world) {
             this.world = world;
@@ -175,42 +175,49 @@ public class EMoveHelper {
 
         public void add(Entity entity){
             setPosB(entity.chunkCoordX, entity.chunkCoordY, entity.chunkCoordZ);
-            if(!allUpdate.contains(this)){
-                allUpdate.add(new BlockPos(this));
-            }
+            if(!allUpdate.contains(this)) allUpdate.add(newPos());
+        }
+
+
+        private BlockPos.MutableBlockPos newPos(){
+            int size = tempSize-1;
+            if(size == -1)return new BlockPos.MutableBlockPos(this);
+            BlockPos.MutableBlockPos result = temp[size];
+            this.tempSize = size;
+            return result;
         }
 
 
         public void complete(){
             if(allUpdate.isEmpty())return;
             ChunkProviderServer server = world.chunkProviderServer;
-            for (BlockPos pos:allUpdate){
-                completeMoveTasks(server.getLoadedChunk(pos.getX(), pos.getZ()).getEntityLists()[pos.getY()]);
+
+            BlockPos.MutableBlockPos[] temp = this.temp;
+            int tempSize = this.tempSize;
+
+            for (BlockPos.MutableBlockPos pos: allUpdate){
+                Chunk chunk = server.getLoadedChunk(pos.getX(), pos.getZ());
+                if(chunk != null) {
+                    ClassInheritanceMultiMap<Entity> list = chunk.getEntityLists()[pos.getY()];
+                    if(list != null) completeMoveTasks(list);
+                }
+                if(tempSize == temp.length){
+                    BlockPos.MutableBlockPos[] newTemp = new MutableBlockPos[temp.length+4];
+                    System.arraycopy(temp, 0, newTemp, 0, tempSize);
+                    temp = this.temp = newTemp;
+                }
+                temp[tempSize++] = pos;
             }
+            this.tempSize = tempSize;
             allUpdate.clear();
-            Arrays.fill(temp, null);
         }
 
 
-        private Entity[] export(EntityList<Entity> src, int size){
-            Entity[] raw = src.raw();
-            Entity[] result = temp;
-            if(result.length < size){
-                result = temp = new Entity[size+2];
-            }
-            if (size >= 0) System.arraycopy(raw, 0, result, 0, size);
-            return result;
-        }
-
-
-        public void completeMoveTasks(ClassInheritanceMultiMap<Entity> list) {
+        private static void completeMoveTasks(ClassInheritanceMultiMap<Entity> list) {
+            if ((list.sizeC()) < 2) return;
+            Entity[] arr = list.raw();
             int size;
-
-            if ((size = list.sizeC()) < 2) return;
-
-            Entity[] arr = export(list, size);
-
-            for (int i = 0; i < size; i++) {
+            for (int i = 0; i < (size = list.sizeC()); i++) {
                 Entity cur;
                 MoveTask curTask;
                 if ((curTask = (cur = arr[i]).moveTask) == null) continue;
@@ -245,218 +252,4 @@ public class EMoveHelper {
             }
         }
     }
-
-
-//    public static void completeMove(Entity entity, AABBList boxes, double x, double y, double z){
-//        World world = entity.world;
-//        final int bSize = boxes.sizeC();
-//        final Object[] rawBoxes = boxes.raw();
-//
-//        double dx0 = entity.posX;
-//        double dy0 = entity.posY;
-//        double dz0 = entity.posZ;
-//
-//        double dx1 = x;
-//        double dy1 = y;
-//        double dz1 = z;
-//
-//        AxisAlignedBB axisalignedbb = entity.getEntityBoundingBox();
-//        boolean flag;
-//        int temp, num1;
-//        if (flag = y != 0.0D) {
-//            temp = 0;
-//            for (num1 = bSize; temp < num1; ++temp)
-//                y = ((AxisAlignedBB)rawBoxes[temp]).calculateYOffset(axisalignedbb, y);
-//
-//        }
-//        if (x != 0.0D) {
-//            temp = 0;
-//            for (num1 = bSize; temp < num1; ++temp)
-//                x = ((AxisAlignedBB)rawBoxes[temp]).calculateXOffset(axisalignedbb, x);
-//
-//            flag = true;
-//        }
-//
-//        if (z != 0.0D) {
-//            temp = 0;
-//
-//            for (num1 = bSize; temp < num1; ++temp)
-//                z = ((AxisAlignedBB)rawBoxes[temp]).calculateZOffset(axisalignedbb, z);
-//
-//            flag = true;
-//        }
-//
-//        AxisAlignedBB prev = world.commonWorldEntityAABB;
-//        prev.initSafe(
-//                axisalignedbb.minX, axisalignedbb.minY, axisalignedbb.minZ,
-//                axisalignedbb.maxX, axisalignedbb.maxY, axisalignedbb.maxZ
-//        );
-//        if(flag) {
-//            axisalignedbb.offsetMut(x, y, z);
-//        }
-//
-//        flag = entity.onGround || dy1 != y && dy1 < 0.0D;
-//
-//        double dx2, dy2, dz2;
-//        if (entity.stepHeight > 0.0F && flag && (dx1 != x || dz1 != z)) {
-//            dx2 = x;
-//            dy2 = y;
-//            dz2 = z;
-//
-//            //entity.setEntityBoundingBox(axisalignedbb);
-//            y = entity.stepHeight;
-//
-//            final AxisAlignedBB aab2 = entity.getEntityBoundingBox();
-//            aab2.expandTo(dx1, 0.0D, dz1, axisalignedbb = world.commonWorldEntityAABB2);
-//            double d8 = y;
-//            temp = 0;
-//
-//            for (num1 = bSize; temp < num1; ++temp)
-//                d8 = ((AxisAlignedBB)rawBoxes[temp]).calculateYOffset(axisalignedbb, d8);
-//
-//            aab2.offsetMut(0.0D, d8, 0.0D);
-//            double d18 = dx1;
-//            temp = 0;
-//
-//            for (num1 = bSize; temp < num1; ++temp)
-//                d18 = ((AxisAlignedBB)rawBoxes[temp]).calculateXOffset(aab2, d18);
-//
-//            aab2.offsetMut(d18, 0.0D, 0.0D);
-//
-//            double d19 = dz1;
-//            temp = 0;
-//
-//            for (num1 = bSize; temp < num1; ++temp)
-//                d19 = ((AxisAlignedBB)rawBoxes[temp]).calculateZOffset(aab2, d19);
-//
-//            aab2.offsetMut(0.0D, 0.0D, d19);
-//
-//            double d20 = y;
-//            temp = 0;
-//
-//            axisalignedbb = entity.getEntityBoundingBox();
-//            for (num1 = bSize; temp < num1; ++temp)
-//                d20 = ((AxisAlignedBB)rawBoxes[temp]).calculateYOffset(axisalignedbb, d20);
-//
-//            double d21 = dx1;
-//            temp = 0;
-//
-//            for (num1 = bSize; temp < num1; ++temp)
-//                d21 = ((AxisAlignedBB)rawBoxes[temp]).calculateXOffset(axisalignedbb, d21);
-//
-//            double d22 = dz1;
-//            temp = 0;
-//
-//            for (num1 = bSize; temp < num1; ++temp)
-//                d22 = ((AxisAlignedBB)rawBoxes[temp]).calculateZOffset(axisalignedbb, d22);
-//
-//            if (d18 * d18 + d19 * d19 > d21 * d21 + d22 * d22) {
-//                x = d18;
-//                z = d19;
-//                y = -d8;
-//                entity.setEntityBoundingBox(aab2);
-//            } else
-//                axisalignedbb.offsetMut(x = d21, y = -d20, z = d22);
-//
-//            temp = 0;
-//
-//            for (num1 = bSize; temp < num1; ++temp)
-//                y = ((AxisAlignedBB)rawBoxes[temp]).calculateYOffset(axisalignedbb, y);
-//
-//            if (dx2 * dx2 + dz2 * dz2 >= x * x + z * z) {
-//                x = dx2;
-//                y = dy2;
-//                z = dz2;
-//
-//                entity.getEntityBoundingBox().initSafe(
-//                        prev.minX, prev.minY, prev.minZ,
-//                        prev.maxX, prev.maxY, prev.maxZ
-//                );
-//            } else {
-//                entity.getEntityBoundingBox().offsetMut(0.0D, y, 0.0D);
-//            }
-//        }
-//        entity.resetPositionToBB();
-//
-//        entity.onGround = (entity.collidedVertically = dy1 != y) && dy1 < 0.0D;
-//        entity.collided = (entity.collidedHorizontally = dx1 != x || dz1 != z) || entity.collidedVertically;
-//
-//        BlockPos.MutableBlockPos pos;
-//        IBlockState state = world.localSelector.getState(
-//                pos = world.localTempPos.setPos(entity.posX, entity.posY - 0.20000000298023224D, entity.posZ)
-//        );
-//
-//        if (state.getMaterial() == Material.AIR) {
-//            IBlockState state1 = world.localSelector.getBlockState(pos.getX(), pos.getY()-1, pos.getZ());
-//            Block block1 = state1.getBlock();
-//
-//            if (block1 instanceof BlockFence || block1 instanceof BlockWall || block1 instanceof BlockFenceGate) {
-//                state = state1;
-//                pos.setY(pos.getY()-1);
-//            }
-//        }
-//
-//        entity.updateFallState(y, entity.onGround, state, pos);
-//
-//        if (dx1 != x) entity.motionX = 0.0D;
-//        if (dz1 != z) entity.motionZ = 0.0D;
-//
-//        Block block = state.getBlock();
-//
-//        if (entity.collidedVertically) block.onLanded(entity.world, entity);
-//
-//        if (entity.canTriggerWalking() && (!entity.onGround || !entity.isSneaking() || !(entity instanceof EntityPlayer)) && !entity.isRiding()) {
-//            dx2 = entity.posX - dx0;
-//            dy2 = block == Blocks.LADDER ? entity.posY - dy0 : 0;
-//            dz2 = entity.posZ - dz0;
-//
-//            if (entity.onGround) block.onEntityWalk(world, pos, entity);
-//
-//
-//            entity.distanceWalkedModified = (float)((double)entity.distanceWalkedModified + (double)MathHelper.sqrt(dx2 * dx2 + dz2 * dz2) * 0.6D);
-//            entity.distanceWalkedOnStepModified = (float)((double)entity.distanceWalkedOnStepModified + (double)MathHelper.sqrt(dx2 * dx2 + dy2 * dy2 + dz2 * dz2) * 0.6D);
-//
-//            if (entity.distanceWalkedOnStepModified > (float)entity.nextStepDistance && state.getMaterial() != Material.AIR) {
-//                entity.nextStepDistance = (int)entity.distanceWalkedOnStepModified + 1;
-//
-//                if (entity.isInWater()) {
-//                    Entity entity1 = entity.isBeingRidden() && entity.getControllingPassenger() != null ? entity.getControllingPassenger() : entity;
-//                    float fl1 = entity1 == entity ? 0.35F : 0.4F;
-//                    float f1 = MathHelper.sqrt(entity1.motionX * entity1.motionX * 0.20000000298023224D + entity1.motionY * entity1.motionY + entity1.motionZ * entity1.motionZ * 0.20000000298023224D) * fl1;
-//
-//                    if (f1 > 1.0F) f1 = 1.0F;
-//
-//                    entity.playSound(entity1.getSwimSound(), f1, 1.0F + (entity.rand.nextFloat() - entity.rand.nextFloat()) * 0.4F);
-//                } else entity.playStepSound(pos, block);
-//
-//            } else if (entity.distanceWalkedOnStepModified > entity.nextFlap && entity.makeFlySound() && state.getMaterial() == Material.AIR)
-//                entity.nextFlap = entity.playFlySound(entity.distanceWalkedOnStepModified);
-//        }
-//        try {
-//            entity.doBlockCollisions();
-//        } catch (Throwable throwable) {
-//            CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Checking entity block collision");
-//            CrashReportCategory cat = crashreport.makeCategory("Entity being checked for collision");
-//            entity.addEntityCrashInfo(cat);
-//            world.getMinecraftServer().ticker().onError((WorldServer) world, new ReportedException(crashreport));
-//        }
-//
-//        flag = entity.isWet();
-//
-//        entity.getEntityBoundingBox().growTo(-0.001D,-0.001D,-0.001D, axisalignedbb = world.commonWorldEntityAABB);
-//
-//        if (world.isFlammableWithin(axisalignedbb)) {
-//            entity.dealFireDamage(1);
-//            if (!flag) {
-//                ++entity.fire;
-//
-//                if (entity.fire == 0) entity.setFire(8);
-//            }
-//        } else if (entity.fire <= 0) entity.fire = (short) -entity.getFireImmuneTicks();
-//
-//        if (flag && entity.isBurning()) {
-//            entity.playSound(SoundEvents.ENTITY_GENERIC_EXTINGUISH_FIRE, 0.7F, 1.6F + (entity.rand.nextFloat() - entity.rand.nextFloat()) * 0.4F);
-//            entity.fire = (short) -entity.getFireImmuneTicks();
-//        }
-//    }
 }

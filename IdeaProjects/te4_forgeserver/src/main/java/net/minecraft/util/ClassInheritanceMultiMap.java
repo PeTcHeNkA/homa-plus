@@ -10,10 +10,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 
-public class ClassInheritanceMultiMap<T extends Entity> extends EntityRemSwapList<T> {
+public class ClassInheritanceMultiMap<T extends Entity> extends SubList<T> {
     private static final EmptySelfIter EMPTY_BY_CLASS = new EmptySelfIter();
     private static final Set<Class<?>> ALL_KNOWN = Collections.newSetFromMap(new ConcurrentHashMap<>());
-    private final IntObjectHashMap<EntityRemSwapList<T>> map = new IntObjectHashMap<>(4);
+    private final IntObjectHashMap<SubList<T>> map = new IntObjectHashMap<>(4);
     private final IdentityTe4HashSet<Class<?>> knownKeys = new IdentityTe4HashSet<>(4);
     private final Class<T> baseClass;
 
@@ -72,7 +72,7 @@ public class ClassInheritanceMultiMap<T extends Entity> extends EntityRemSwapLis
         for (Class<?> oclass : this.knownKeys) {
             if (oclass.isAssignableFrom(clazz)) {
                 if ((list = map.get(key = oclass.hashCode())) == null) {
-                    map.put(key, new EntityRemSwapList.E1V<>(obj));
+                    map.put(key, new SublistEV1<>(obj));
                 } else {
                     list.addF(obj);
                 }
@@ -85,7 +85,7 @@ public class ClassInheritanceMultiMap<T extends Entity> extends EntityRemSwapLis
     private void addForClassHash(final T value, final int key) {
         final EntityRemSwapList<T> list;
         if ((list = map.get(key)) == null) {
-            map.put(key, new EntityRemSwapList.E1V<>(value));
+            map.put(key, new SublistEV1<>(value));
         } else {
             list.addF(value);
         }
@@ -96,12 +96,12 @@ public class ClassInheritanceMultiMap<T extends Entity> extends EntityRemSwapLis
     public boolean remove(final Object obj) {
         boolean flag = false;
         final Class<?> clazz = obj.getClass();
+        Entity ent = (Entity) obj;
 
         for (Class<?> oclass : this.knownKeys) {
             if (oclass.isAssignableFrom(clazz)) {
-                EntityRemSwapList<T> list;
-
-                if ((list = map.get(oclass.hashCode())) != null && list.remove(obj))
+                SubList<T> list;
+                if ((list = map.get(oclass.hashCode())) != null && list.removeC(ent))
                     flag = true;
             }
         }
@@ -119,6 +119,33 @@ public class ClassInheritanceMultiMap<T extends Entity> extends EntityRemSwapLis
         EntityRemSwapList<T> list = map.get(initializeClassLookup(clazz).hashCode());
         if(list == null || list.isEmpty())return (Iterable<S>) EMPTY_BY_CLASS;
         return new ByClass<>(clazz, list);
+    }
+}
+
+
+class SubList<T extends Entity> extends EntityRemSwapList<T>{
+    public SubList(){}
+    public SubList(T obj) {
+        super(obj);
+    }
+    protected final boolean removeC(Entity o) {
+        for (int index = 0, s = size; index < s; index++)
+            if (o.equals(data[index])) {
+                removeSwap(index);
+                return true;
+            }
+        return false;
+    }
+}
+
+
+class SublistEV1<T extends Entity> extends SubList<T>{
+    public SublistEV1(T obj) {
+        super(obj);
+    }
+    @Override
+    public Entity[] newArrayAuto() {
+        return Arrays.copyOf(data, data.length == 1 ? 5 : data.length + 7);
     }
 }
 

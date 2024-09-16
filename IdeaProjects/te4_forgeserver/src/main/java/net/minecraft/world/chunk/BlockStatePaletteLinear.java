@@ -9,10 +9,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 
-public class BlockStatePaletteLinear implements IBlockStatePalette {
-    private final IBlockState[] states;
-    private int arraySize;
-
+public class BlockStatePaletteLinear extends BlockStatePaletteBase implements IBlockStatePalette {
     public BlockStatePaletteLinear(int bitsIn) {
         this.states = new IBlockState[1 << bitsIn];
     }
@@ -34,12 +31,6 @@ public class BlockStatePaletteLinear implements IBlockStatePalette {
         } else {
             return -1;
         }
-    }
-
-
-    @Override // not null
-    public IBlockState get(int indexKey) {
-        return indexKey >= 0 && indexKey < this.arraySize ? this.states[indexKey] : BlockIDIndexes.AIR_STATE;
     }
 
 

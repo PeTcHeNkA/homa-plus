@@ -88,7 +88,7 @@ public class WalkNodeProcessor extends NodeProcessor {
         }
 
         if (entity.getPathPriority(type) < 0.0F) {
-            Set<BlockPos> set = new Te4HashSet<>(8, 1f);
+            Te4HashSet<BlockPos> set = new Te4HashSet<>(8, 1f);
             AxisAlignedBB box = entity.getEntityBoundingBox();
             BlockPos pos;
             set.add(pos = new BlockPos(box.minX, yFactor, box.minZ));

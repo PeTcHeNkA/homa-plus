@@ -1,5 +1,6 @@
 package net.minecraft.world.chunk;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import java.util.Arrays;
 import java.util.List;
@@ -34,13 +35,10 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.spongepowered.asm.mixin.Overwrite;
 import plus.asyutl.buf.FastBuffer;
 import plus.fserver.api.BiomeIndexes;
 import plus.fserver.api.Keep;
 import plus.fserver.ElcaCV;
-import plus.fserver.utls.collections.ArrayListE6;
-import plus.fserver.utls.collections.ArrayRemSwapListE6;
 import plus.fserver.utls.collections.EntityList;
 import plus.fserver.utls.math.MathUtls;
 import plus.fserver.world.light.LightingEngine;
@@ -1183,7 +1181,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
                     array = new ExtendedBlockStorage(i << 4, flag);
                     this.storageArrays[i] = array;
                 }
-                array.getData().read(buf);
+                array.read(buf);
                 buf.readBytes(array.getBlockLight().getData());
                 if (flag) {
                     buf.readBytes(array.getSkyLight().getData());
@@ -1412,8 +1410,26 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
         for (int i = 0; i < 255; i++){
             realMap[i] = (byte) newHeightMap[i];
         }
-        //System.arraycopy(newHeightMap, 0, this.heightMap, 0, this.heightMap.length);
         this.heightMapMinimum = com.google.common.primitives.Ints.min(newHeightMap); // Forge: fix MC-117412
+    }
+
+
+    public void setHeightMap(byte[] newHeightMap) {
+        System.arraycopy(newHeightMap, 0, this.heightMap, 0, 255);
+        this.heightMapMinimum = getMinHeightMap(newHeightMap);
+    }
+
+
+    private static int getMinHeightMap(byte... array) {
+        int min = array[0] & 255;
+
+        for(int i = 1; i < array.length; ++i) {
+            int n = array[i] & 255;
+            if (n < min) {
+                min = n;
+            }
+        }
+        return min;
     }
 
 

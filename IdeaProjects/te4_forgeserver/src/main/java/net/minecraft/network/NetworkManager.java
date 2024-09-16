@@ -461,8 +461,9 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
 
     @Keep
     public void sendPacketE(Packet<?> packetIn) {
-        if (this.isChannelOpen()) {
-            channel.eventLoop().execute(() -> {
+        Channel chan;
+        if ((chan = this.channel) != null && chan.isOpen()) {
+            chan.eventLoop().execute(() -> {
                 flushOutboundQueueE();
                 dispatchPacketE(channel, packetIn, null);
             });

@@ -99,7 +99,7 @@ public class EntityRemSwapList<T extends Entity> extends EntityList<T> {
     public boolean remove(Object o) {
         for (int index = 0, s = size; index < s; index++)
             if (o.equals(data[index])) {
-                remove(index);
+                removeSwap(index);
                 return true;
             }
         return false;

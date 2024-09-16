@@ -129,6 +129,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import plus.fserver.api.IBlockEAccess;
 
 
 public class ForgeHooks {
@@ -437,16 +438,18 @@ public class ForgeHooks {
             return state.getBlock().isLadder(state, world, pos, entity);
         } else {
             AxisAlignedBB bb = entity.getEntityBoundingBox();
-            int mX = MathHelper.floor(bb.minX);
             int mY = MathHelper.floor(bb.minY);
             int mZ = MathHelper.floor(bb.minZ);
-            for (int y2 = mY; y2 < bb.maxY; y2++) {
-                for (int x2 = mX; x2 < bb.maxX; x2++) {
-                    for (int z2 = mZ; z2 < bb.maxZ; z2++) {
-                        //is safe? pos = localTempPos2
-                        BlockPos tmp = world.localTempPos2.setPos(x2, y2, z2);
-                        state = world.access().getBlockState(tmp);
-                        if (state.getBlock().isLadder(state, world.access(), tmp, entity)) {
+            IBlockEAccess access = world.access();
+            //is safe? pos = localTempPos2
+            BlockPos.MutableBlockPos mut = world.localTempPos2;
+
+            for (int x2 = MathHelper.floor(bb.minX); x2 < bb.maxX; x2++) {
+                for (int z2 = mZ; z2 < bb.maxZ; z2++) {
+                    for (int y2 = mY; y2 < bb.maxY; y2++) {
+                        mut.setPosB(x2, y2, z2);
+                        state = access.getBlockState(mut);
+                        if (state.getBlock().isLadder(state, access, mut, entity)) {
                             return true;
                         }
                     }

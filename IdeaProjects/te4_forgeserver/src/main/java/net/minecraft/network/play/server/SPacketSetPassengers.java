@@ -19,6 +19,17 @@ public class SPacketSetPassengers extends SPacketPlayBase{
 
     public SPacketSetPassengers() {}
 
+
+    public SPacketSetPassengers(Entity entity, List<Entity> passengers) {
+        this.entityId = entity.getEntityId();
+        this.passengerIds = new int[passengers.size()];
+
+        for(int i = 0; i < passengers.size(); ++i) {
+            this.passengerIds[i] = passengers.get(i).getEntityId();
+        }
+    }
+
+
     public SPacketSetPassengers(Entity entity) {
         this.entityId = entity.getEntityId();
         List<Entity> passengers = entity.getPassengers();

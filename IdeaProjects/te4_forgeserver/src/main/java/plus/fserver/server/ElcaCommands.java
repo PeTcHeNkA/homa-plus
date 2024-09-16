@@ -1,6 +1,7 @@
 package plus.fserver.server;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -30,6 +31,7 @@ import net.minecraftforge.server.command.TextComponentHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import plus.fserver.ElcaConfig;
+import plus.fserver.api.ChatPacketBuilder;
 import plus.fserver.api.ServerCommand;
 import plus.fserver.plugin.SSPatchLoader;
 import plus.fserver.utls.EntityLodFunc;
@@ -55,7 +57,7 @@ public class ElcaCommands extends ServerCommand {
     private static final String normal   = "&a";
 
     private final List<String> completions = ImmutableList.copyOf(
-        new String[]{"version", "info", "tps", "mobs", "spawn", "hotpoints"}
+        new String[]{"version", "info", "tps", "mobs", "spawn", "hotpoints", "send"}
     );
     private final DecimalFormat TIME_FORMATTER = new DecimalFormat("########0.00");
     private static final ElcaCommands cmds = new ElcaCommands();
@@ -107,6 +109,29 @@ public class ElcaCommands extends ServerCommand {
         }
         if(arg0.equalsIgnoreCase("hotpoints")){
             hotPoints(server, sender, args);
+        }
+        if(arg0.equalsIgnoreCase("send")){
+            send(server, sender, args);
+        }
+    }
+
+
+    private void send(MinecraftServer server, ICommandSender sender, String[] args){
+        String target = args[1];
+        String msg = String.join(" ", Arrays.copyOfRange(args, 2, args.length))
+                .replace("&", "§");
+
+        ChatPacketBuilder format = ChatPacketBuilder.of(msg);
+
+        if(target.equals("self") || target.equals("me") || target.equals(".")){
+            format.send(sender);
+        }
+        else if(target.equals("*") || target.equals("all")){
+            for(EntityPlayerMP player : server.getPlayerList().getPlayers()) format.send(player);
+        } else {
+            EntityPlayerMP player = server.getPlayerList().getPlayerByUsername(target);
+            if(player != null) format.send(player);
+            else reply(sender,  critical+"Player "+target+" not found!", target);
         }
     }
 
@@ -474,6 +499,21 @@ public class ElcaCommands extends ServerCommand {
 
     @Override
     public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
+        if(args.length == 2){
+            switch (args[0]){
+                case "send":{
+                    List<String> list = new ArrayList<>();
+                    server.getPlayerList().getPlayers().forEach(p -> list.add(p.getName()));
+                    list.addAll(Arrays.asList("all", ".", "*", "me", "self"));
+                    return list;
+                }
+                case "spawn":
+                    return Lists.newArrayList(
+                            "zombie ~ ~ ~ ~50 ~ ~50 0.7",
+                            "villager_golem ~ ~ ~ ~50 ~ ~50 1.5"
+                    );
+            }
+        }
         if(args.length < 2) return completions;
         return Collections.emptyList();
     }
@@ -494,6 +534,7 @@ public class ElcaCommands extends ServerCommand {
             reply(sender, danger+"It is`nt possible to specify the dimension automatically!");
         }
     }
+
 
     private static class MobInfo implements Comparable<MobInfo>{
         final String name;
@@ -532,6 +573,7 @@ public class ElcaCommands extends ServerCommand {
             return Integer.compare(o.count, count);
         }
     }
+
 
     private static class MobInfoList extends IdentityHashMap<Class<?>, MobInfo>{
         private boolean dirty = true;

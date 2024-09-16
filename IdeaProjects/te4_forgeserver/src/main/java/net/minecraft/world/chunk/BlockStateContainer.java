@@ -4,7 +4,6 @@ import javax.annotation.Nullable;
 import io.netty.buffer.FastByteBuf;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.BlockIDIndexes;
 import net.minecraft.util.math.MathHelper;
@@ -16,9 +15,8 @@ import plus.fserver.utls.collections.IntBlockIndex;
 
 
 public class BlockStateContainer extends BitArrayMut implements IBlockStatePaletteResizer {
-    private static final IBlockStatePalette REGISTRY_BASED_PALETTE = new BlockStatePaletteRegistry();
-    protected static final IBlockState AIR_BLOCK_STATE = Blocks.AIR.getDefaultState();
-    private IBlockStatePalette palette;
+    public static final BlockStatePaletteRegistry REGISTRY_BASED_PALETTE = new BlockStatePaletteRegistry();
+    private BlockStatePaletteBase palette;
     private int bits;
 
     public BlockStateContainer() {
@@ -46,8 +44,8 @@ public class BlockStateContainer extends BitArrayMut implements IBlockStatePalet
                 if (forceBits)
                     this.bits = bitsIn;
             }
-            if(this.palette.idFor(AIR_BLOCK_STATE) == -1){
-                onResize(this.bits + 1, AIR_BLOCK_STATE);
+            if(this.palette.idFor(BlockIDIndexes.AIR_STATE) == -1){
+                onResize(this.bits + 1, BlockIDIndexes.AIR_STATE);
             }
             super.init(this.bits, 4096);
         }
@@ -110,7 +108,7 @@ public class BlockStateContainer extends BitArrayMut implements IBlockStatePalet
 
         int regSize = MathHelper.log2DeBruijn(Block.BLOCK_STATE_IDS.size());
         if (this.palette == REGISTRY_BASED_PALETTE && this.bits != regSize)
-            this.onResize(regSize, AIR_BLOCK_STATE);
+            this.onResize(regSize, BlockIDIndexes.AIR_STATE);
     }
 
 

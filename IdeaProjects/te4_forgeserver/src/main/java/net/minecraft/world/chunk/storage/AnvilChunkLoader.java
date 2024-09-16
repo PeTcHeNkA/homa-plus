@@ -13,10 +13,7 @@ import javax.annotation.Nullable;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
-import net.minecraft.nbt.CompressedStreamTools;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagIntArrayUnsafe;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.*;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.datafix.DataFixer;
@@ -409,7 +406,15 @@ public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO {
         int i = compound.getInteger("xPos");
         int j = compound.getInteger("zPos");
         Chunk chunk = new Chunk(worldIn, i, j);
-        chunk.setHeightMap(compound.getIntArray("HeightMap"));
+
+        NBTBase heightMap = compound.getTag("HeightMap");
+        if(heightMap instanceof NBTTagIntArrayUnsafe){
+            chunk.setHeightMap(((NBTTagIntArrayUnsafe)heightMap).array());
+        } else {
+            chunk.setHeightMap(((NBTTagIntArray)heightMap).getIntArray());
+            compound.setTagU("HeightMap", new NBTTagIntArrayUnsafe(chunk.getHeightMapRaw()));
+        }
+
         chunk.setTerrainPopulated(compound.getBoolean("TerrainPopulated"));
         chunk.setLightPopulated(compound.getBoolean("LightPopulated"));
         chunk.setInhabitedTime(compound.getLong("InhabitedTime"));

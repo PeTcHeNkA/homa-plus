@@ -42,9 +42,41 @@ public class ChunkLCache implements IBlockEAccess {
     }
 
 
+    public void init(Entity entity){
+        int x = ((int)(entity.posX))>>4;
+        int z = ((int)(entity.posZ))>>4;
+        if(x != this.x || z != this.z){
+            this.chunk = null;
+            this.x = x;
+            this.z = z;
+
+            if (xAdd != null) {
+                xAdd.x = x + 1;
+                xAdd.z = z;
+                xAdd.cleanAll();
+            }
+            if (xMin != null) {
+                xMin.x = x - 1;
+                xMin.z = z;
+                xMin.cleanAll();
+            }
+            if (zAdd != null) {
+                zAdd.x = x;
+                zAdd.z = z + 1;
+                zAdd.cleanAll();
+            }
+            if (zMin != null) {
+                zMin.x = x;
+                zMin.z = z - 1;
+                zMin.cleanAll();
+            }
+        }
+    }
+
+
     public void init(Chunk chunk){
         this.chunk = chunk;
-        if (this.x != chunk.x && this.z != chunk.z) {
+        if (this.x != chunk.x || this.z != chunk.z) {
             this.x = chunk.x;
             this.z = chunk.z;
             if (xAdd != null) {

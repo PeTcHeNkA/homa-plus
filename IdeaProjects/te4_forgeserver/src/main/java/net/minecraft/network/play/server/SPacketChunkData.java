@@ -157,7 +157,7 @@ public class SPacketChunkData extends SNodePacketPlayBase {
             ExtendedBlockStorage storage = arrays[index];
             if (storage != Chunk.NULL_BLOCK_STORAGE && (!this.isFullChunk() || !storage.isEmpty()) && (mask & 1 << index) != 0) {
                 resultMask |= 1 << index;
-                storage.getData().write(buf);
+                storage.write(buf);
                 buf.writeBytes(storage.getBlockLight().getData());
                 if (hasSkyLight) {
                     buf.writeBytes(storage.getSkyLight().getData());
@@ -179,7 +179,7 @@ public class SPacketChunkData extends SNodePacketPlayBase {
         for(int index = 0, len = arrays.length; index < len; ++index) {
             ExtendedBlockStorage array = arrays[index];
             if (array != Chunk.NULL_BLOCK_STORAGE && (!this.isFullChunk() || !array.isEmpty()) && (mask & 1 << index) != 0) {
-                size += array.getData().getSerializedSize();
+                size += array.getSerializedSize();
                 size += array.getBlockLight().getData().length;
                 if (hasSkyLight) {
                     size += array.getSkyLight().getData().length;
@@ -202,7 +202,7 @@ public class SPacketChunkData extends SNodePacketPlayBase {
             ExtendedBlockStorage storage = arrays[index];
             if (storage != Chunk.NULL_BLOCK_STORAGE && (!fullChunk || !storage.isEmpty()) && (mask & 1 << index) != 0) {
                 resultMask |= 1 << index;
-                storage.getData().write(buf);
+                storage.write(buf);
                 buf.writeBytes(storage.getBlockLight().getData());
                 if (hasSkyLight) {
                     buf.writeBytes(storage.getSkyLight().getData());
@@ -224,7 +224,7 @@ public class SPacketChunkData extends SNodePacketPlayBase {
         for(int index = 0, len = arrays.length; index < len; ++index) {
             ExtendedBlockStorage array = arrays[index];
             if (array != Chunk.NULL_BLOCK_STORAGE && (!isFull || !array.isEmpty()) && (mask & 1 << index) != 0) {
-                size += array.getData().getSerializedSize();
+                size += array.getSerializedSize();
                 size += array.getBlockLight().getData().length;
                 if (hasSkyLight) {
                     size += array.getSkyLight().getData().length;

@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectFunction;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockIDIndexes;
+import net.minecraft.world.chunk.BlockStateContainer;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -17,6 +18,7 @@ public class IntBlockIndex implements Int2ObjectFunction<IBlockState> {
         for (Map.Entry<Integer, IBlockState> state : map.entrySet()) {
             states[state.getKey()] = state.getValue();
         }
+        BlockStateContainer.REGISTRY_BASED_PALETTE.init(states);
     }
 
 

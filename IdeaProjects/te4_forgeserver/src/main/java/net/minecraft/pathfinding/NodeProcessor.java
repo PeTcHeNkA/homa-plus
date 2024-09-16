@@ -12,7 +12,6 @@ public abstract class NodeProcessor extends PointHashMap{
     protected final BlockPos.MutableBlockPos pooledPos = new BlockPos.MutableBlockPos();
     protected IBlockEAccess blockaccess;
     protected EntityLiving entity;
-    //protected final PointHashMap pointMap = new PointHashMap();
     protected int entitySizeX;
     protected int entitySizeY;
     protected int entitySizeZ;

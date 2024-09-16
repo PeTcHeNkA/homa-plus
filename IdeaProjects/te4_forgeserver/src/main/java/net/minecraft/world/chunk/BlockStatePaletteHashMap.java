@@ -11,29 +11,24 @@ import plus.fserver.ElcaCV;
 import java.util.Arrays;
 
 
-public class BlockStatePaletteHashMap implements IBlockStatePalette {
-    private IBlockState[] values;
+public class BlockStatePaletteHashMap extends BlockStatePaletteBase implements IBlockStatePalette {
     private int[] intKeys;
     private IBlockState[] byId;
-    private volatile short nextFreeIndex;
-    private volatile int mapSize;
-    private final int bits;
+    private short nextFreeIndex;
+    private int mapSize;
+    private final byte bits;
 
     public BlockStatePaletteHashMap(int bitsIn, IBlockStatePaletteResizer paletteResizerIn) {
         int initialCapacity = 1 << bitsIn;
         initialCapacity = (int)((float)initialCapacity / 0.8F);
-        this.values = new IBlockState[initialCapacity];
+        this.states = new IBlockState[initialCapacity];
+        super.arraySize = states.length;
         this.intKeys = new int[initialCapacity];
         this.byId = new IBlockState[initialCapacity];
+
         if(ElcaCV.FIX_NULL_HASH_PALETTE)
             Arrays.fill(byId, BlockIDIndexes.AIR_STATE);
-        this.bits = bitsIn;
-    }
-
-
-    @Override
-    public IBlockState get(int idIn) {
-        return idIn >= 0 && idIn < this.byId.length ? this.byId[idIn] : BlockIDIndexes.AIR_STATE;
+        this.bits = (byte) bitsIn;
     }
 
 
@@ -102,7 +97,7 @@ public class BlockStatePaletteHashMap implements IBlockStatePalette {
     }
 
 
-    public int add(IBlockState objectIn) {
+    private int add(IBlockState objectIn) {
         int i = this.nextId();
         this.put(objectIn, i);
         return i;
@@ -123,13 +118,14 @@ public class BlockStatePaletteHashMap implements IBlockStatePalette {
 
 
     private void grow(int capacity) {
-        IBlockState[] ak = this.values;
+        IBlockState[] ak = super.states;
         IBlockState[] byIdn = new IBlockState[capacity];
         if(ElcaCV.FIX_NULL_HASH_PALETTE)
             Arrays.fill(byIdn, BlockIDIndexes.AIR_STATE);
         byId = byIdn;
         int[] aint = this.intKeys;
-        this.values = new IBlockState[capacity];
+        super.states = new IBlockState[capacity];
+        super.arraySize = capacity;
         this.intKeys = new int[capacity];
 
         this.nextFreeIndex = 0;
@@ -145,16 +141,16 @@ public class BlockStatePaletteHashMap implements IBlockStatePalette {
 
     public void put(IBlockState objectIn, int intKey) {
         int i = Math.max(intKey, this.mapSize + 1);
-        if ((float)i >= (float)this.values.length * 0.8F) {
+        if ((float)i >= (float)super.states.length * 0.8F) {
             int j;
-            for (j = this.values.length << 1; j < intKey; j <<= 1) {
+            for (j = super.states.length << 1; j < intKey; j <<= 1) {
                 ;
             }
             this.grow(j);
         }
 
         int k = this.findEmpty(this.hashObject(objectIn));
-        this.values[k] = objectIn;
+        super.states[k] = objectIn;
         this.intKeys[k] = intKey;
         this.byId[intKey] = objectIn;
         ++this.mapSize;
@@ -165,36 +161,38 @@ public class BlockStatePaletteHashMap implements IBlockStatePalette {
 
 
     private int hashObject(IBlockState obectIn) {
-        return (MathHelper.hash(obectIn.getId()) & Integer.MAX_VALUE) % this.values.length;
+        return (MathHelper.hash(obectIn.getId()) & Integer.MAX_VALUE) % super.states.length;
     }
 
 
     private int getIndex(IBlockState objectIn, int num) {
-        for (int i = num; i < this.values.length; ++i) {
-            if (this.values[i] == objectIn) return i;
-            if (this.values[i] == null) return -1;
+        IBlockState[] states = super.states;
+        for (int i = num; i < states.length; ++i) {
+            if (states[i] == objectIn) return i;
+            if (states[i] == null) return -1;
         }
         for (int j = 0; j < num; ++j) {
-            if (this.values[j] == objectIn) return j;
-            if (this.values[j] == null) return -1;
+            if (states[j] == objectIn) return j;
+            if (states[j] == null) return -1;
         }
         return -1;
     }
 
 
     private int findEmpty(int num) {
-        for (int i = num; i < this.values.length; ++i)
-            if (this.values[i] == null) return i;
+        IBlockState[] states = super.states;
+        for (int i = num; i < states.length; ++i)
+            if (states[i] == null) return i;
 
         for (int j = 0; j < num; ++j)
-            if (this.values[j] == null) return j;
+            if (states[j] == null) return j;
 
         throw new RuntimeException("Overflowed :(");
     }
 
 
     public void clear() {
-        Arrays.fill(this.values, null);
+        Arrays.fill(this.states, null);
         if(ElcaCV.FIX_NULL_HASH_PALETTE){
             this.nextFreeIndex = 0;
             this.mapSize = 0;

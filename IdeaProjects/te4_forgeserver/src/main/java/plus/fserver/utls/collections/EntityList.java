@@ -102,10 +102,12 @@ public class EntityList<T extends Entity> implements List<T> {
     }
 
 
-    @NotNull
     @Override
     public Entity[] toArray() {
-        return data;
+        int size;
+        Entity[] arr = new Entity[size = this.size];
+        System.arraycopy(data, 0, arr, 0, size);
+        return arr;
     }
 
 

@@ -159,10 +159,12 @@ public class EntityCollider {
             }
             int s;
             if((s = temp.sizeC()) > limit){
-                Entity[] raw = temp.raw();
-                for (int j = 0; j < s; j++){
-                    raw[j].attackEntityFrom(DamageSource.CRAMMING, 1);
-                }
+                Entity[] raw = temp.toArray();
+                ((WorldServer)raw[0].world).addSyncTask(() -> {
+                    for (int j = 0; j < s; j++){
+                        raw[j].attackEntityFrom(DamageSource.CRAMMING, 1);
+                    }
+                });
             }
             temp.fclear();
         }

@@ -25,6 +25,11 @@ public class NBTTagIntArrayUnsafe extends NBTBase {
     }
 
 
+    public byte[] array(){
+        return intArray;
+    }
+
+
     @Override
     void read(DataInput input, int i, NBTSizeTracker tracker) throws IOException {
         throw new UnsupportedEncodingException();

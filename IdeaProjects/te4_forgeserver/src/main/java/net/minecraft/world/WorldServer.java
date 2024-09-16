@@ -1521,12 +1521,11 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
                     Block block;
                     for (ExtendedBlockStorage storage : chunk.getBlockStorageArray()) {
                         if (storage != Chunk.NULL_BLOCK_STORAGE && storage.needsRandomTick()) {
-                            final BlockStateContainer data = storage.getData();
                             for (int lim = 0, yLoc = storage.getYLocation(); lim < rts; ++lim) {
                                 updateLCG = updateLCG * 3 + 1013904223;
                                 int rNum = updateLCG >> 2;
 
-                                IBlockState state = data.get(dx = rNum & 15, dy = rNum >> 16 & 15, dz = rNum >> 8 & 15);
+                                IBlockState state = storage.get(dx = rNum & 15, dy = rNum >> 16 & 15, dz = rNum >> 8 & 15);
 
                                 if ((block = state.getBlock()).getTickRandomly()) {
                                     block.randomTick(

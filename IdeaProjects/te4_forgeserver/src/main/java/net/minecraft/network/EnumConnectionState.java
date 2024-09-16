@@ -128,6 +128,7 @@ import plus.fserver.ElcaConfig;
 import plus.fserver.server.Reflector;
 import plus.fserver.server.network.packet.SElcaPacketDestroyEntities;
 import plus.fserver.server.network.packet.SElcaPacketEntityEquipment;
+import plus.fserver.server.network.packet.SRawPacketChat;
 
 
 public enum EnumConnectionState {
@@ -150,7 +151,10 @@ public enum EnumConnectionState {
         this.registerPacket(EnumPacketDirection.CLIENTBOUND, SPacketUpdateBossInfo.class);
         this.registerPacket(EnumPacketDirection.CLIENTBOUND, SPacketServerDifficulty.class);
         this.registerPacket(EnumPacketDirection.CLIENTBOUND, SPacketTabComplete.class);
+
         this.registerPacket(EnumPacketDirection.CLIENTBOUND, SPacketChat.class);
+        this.registerAlias(EnumPacketDirection.CLIENTBOUND, SPacketChat.class, SRawPacketChat.class);
+
         this.registerPacket(EnumPacketDirection.CLIENTBOUND, SPacketMultiBlockChange.class);
         this.registerPacket(EnumPacketDirection.CLIENTBOUND, SPacketConfirmTransaction.class);
         this.registerPacket(EnumPacketDirection.CLIENTBOUND, SPacketCloseWindow.class);

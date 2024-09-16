@@ -4,6 +4,21 @@ package plus.fserver.utls.debug;
 public class AsyncChecker extends RuntimeException{
     StackTraceElement[] elements;
     Throwable parent;
+    Thread current;
+
+    public void lock(){
+        current = Thread.currentThread();
+    }
+
+
+    public void checkCurrent(){
+        Thread cur = Thread.currentThread();
+        if(cur != current){
+            throw new RuntimeException("Try call async!");
+        }
+    }
+
+
     public void check(){
         elements = (new Throwable()).getStackTrace();
     }
