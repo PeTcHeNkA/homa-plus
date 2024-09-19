@@ -17,7 +17,10 @@ import plus.tson.utl.Te4HashSet;
 public class EntityHurtPlayerTrigger extends ConcurrentHashMap<PlayerAdvancements, EntityHurtPlayerTrigger.Listeners> implements ICriterionTrigger<EntityHurtPlayerTrigger.Instance> {
     private static final ResourceLocation ID = new ResourceLocation("entity_hurt_player");
 
-    public EntityHurtPlayerTrigger() {}
+    public EntityHurtPlayerTrigger() {
+        super(7);
+    }
+
 
     @Override
     public ResourceLocation getId() {

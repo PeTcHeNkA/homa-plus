@@ -2,6 +2,8 @@ package plus.fserver.server;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -34,6 +36,7 @@ import plus.fserver.ElcaConfig;
 import plus.fserver.api.ChatPacketBuilder;
 import plus.fserver.api.ServerCommand;
 import plus.fserver.plugin.SSPatchLoader;
+import plus.fserver.server.network.packet.SRawPacketPlayerListHeaderFooter;
 import plus.fserver.utls.EntityLodFunc;
 import plus.fserver.utls.collections.ArrayListE6;
 import plus.fserver.utls.collections.ArrayListEV;
@@ -88,7 +91,7 @@ public class ElcaCommands extends ServerCommand {
             tps(server, sender, args.length>1 && "true".equals(args[1]));return;
         }
         if(arg0.equalsIgnoreCase("info")){
-            info(server, sender);
+            info(server, sender, args);
         }
         if(arg0.equalsIgnoreCase("cvi")){
             chunkViTxt(server, sender);
@@ -512,6 +515,8 @@ public class ElcaCommands extends ServerCommand {
                             "zombie ~ ~ ~ ~50 ~ ~50 0.7",
                             "villager_golem ~ ~ ~ ~50 ~ ~50 1.5"
                     );
+                case "info":
+                    return Collections.singletonList("track");
             }
         }
         if(args.length < 2) return completions;
@@ -652,7 +657,28 @@ public class ElcaCommands extends ServerCommand {
     }
 
 
-    public void info(MinecraftServer server, ICommandSender sender){
+    public void info(MinecraftServer server, ICommandSender sender, String[] args){
+        if(args.length > 1 && args[1].equals("track")){
+            EntityPlayerMP playerMP = (EntityPlayerMP) sender;
+            WorldServer world = playerMP.getServerWorld();
+
+            ChannelFutureListener future = new ChannelFutureListener() {
+                @Override
+                public void operationComplete(ChannelFuture channelFuture) {
+                    if(playerMP.world != world || playerMP.isDead)return;
+                    world.addSyncTask(() -> playerMP.connection.netManager.sendPacket(
+                            new SRawPacketPlayerListHeaderFooter(null,
+                                    ChatPacketBuilder.toJsonMsg(getWorldInfo(world))), this
+                    ));
+                }
+            };
+            try {
+                future.operationComplete(null);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            return;
+        }
         reply(sender, warning+"Loaded worlds: "+primary+server.worlds.length);
 
         for (Integer dimId : DimensionManager.getIDs()) {
@@ -662,6 +688,11 @@ public class ElcaCommands extends ServerCommand {
 
 
     private void sendWorldInfo(WorldServer world, ICommandSender sender){
+        reply(sender, getWorldInfo(world));
+    }
+
+
+    private String getWorldInfo(WorldServer world){
         int curMobs, curChunks;
         int lod0 = 0, lod1 = 0, lod2 = 0, lod3 = 0;
         curMobs = world.loadedEntityList.size();
@@ -680,12 +711,12 @@ public class ElcaCommands extends ServerCommand {
         curChunks = world.getChunkProvider().getLoadedChunkCount();
         double worldTickTime = mean(world.getMinecraftServer().worldTickTimes.get(dimId));
         double worldTPS = Math.min(1000.0/worldTickTime, 20);
-        reply(sender, primary+"[%s]: tt: %s, tps %s, chunk: %s, mob: %s (%s, N:%s, M: %s, L: %s)",
+
+        return String.format(primary+"[%s]: tt: %s, tps %s, chunk: %s, mob: %s (%s, N:%s, M: %s, L: %s)",
                 getDimensionPrefix(dimId),
                 formatTickTime(worldTickTime),
                 formatTps(worldTPS),
-                curChunks, curMobs, lod0, lod1, lod2, lod3
-        );
+                curChunks, curMobs, lod0, lod1, lod2, lod3);
     }
 
 

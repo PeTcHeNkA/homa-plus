@@ -145,7 +145,8 @@ class SublistEV1<T extends Entity> extends SubList<T>{
     }
     @Override
     public Entity[] newArrayAuto() {
-        return Arrays.copyOf(data, data.length == 1 ? 5 : data.length + 7);
+        Entity[] data;
+        return expand(data = this.data, data.length == 1 ? 5 : data.length + 7);
     }
 }
 

@@ -24,12 +24,10 @@ import org.apache.logging.log4j.Logger;
 import plus.fserver.ElcaCV;
 import plus.fserver.ElcaConfig;
 import plus.fserver.server.chunk.io.TChunkExecutor;
-import plus.fserver.server.network.packet.SNodePacketPlayBase;
-import plus.fserver.utls.collections.ArrayListE6;
+import plus.fserver.utls.collections.EntityList;
 
 
-public class PlayerChunkMapEntry extends ArrayListE6<EntityPlayerMP> implements Runnable{
-
+public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements Runnable{
     public static final Comparator<PlayerChunkMapEntry> COMPARATOR = (o1, o2) -> {
         double d1 = o1.getClosestPlayerDistance();
         double d2 = o2.getClosestPlayerDistance();
@@ -146,7 +144,7 @@ public class PlayerChunkMapEntry extends ArrayListE6<EntityPlayerMP> implements 
                     this.playerChunkMap.getWorldServer().getEntityTracker().sendLeashedEntitiesInChunk(this, this.chunk);
 
                     for (int i = 0; i < size; i++) {
-                        EntityPlayerMP player = getC(i);
+                        EntityPlayerMP player = super.get(i);
                         player.connection.netManager.addToQueueN(packet);
                         player.world.chunkWatchEvent.post(chunk, player);
                     }
@@ -277,7 +275,7 @@ public class PlayerChunkMapEntry extends ArrayListE6<EntityPlayerMP> implements 
 
     public boolean hasPlayerMatching(Predicate<EntityPlayerMP> predicate) {
         for (int i = 0, s = size;i<s;i++) {
-            if(predicate.apply(getC(i)))return true;
+            if(predicate.apply(super.get(i)))return true;
         }
         return false;
     }
@@ -335,6 +333,14 @@ public class PlayerChunkMapEntry extends ArrayListE6<EntityPlayerMP> implements 
     @Override
     public int hashCode() {
         return posX ^ posZ;
+    }
+
+
+    @Override
+    public Entity[] newArrayAuto() {
+        Entity[] data;
+        if((data = this.data) == EMPTY_ARR)return new Entity[1];
+        return expand(data, 2);
     }
 
 

@@ -17,7 +17,10 @@ import plus.tson.utl.Te4HashSet;
 public class UsedEnderEyeTrigger extends ConcurrentHashMap<PlayerAdvancements, UsedEnderEyeTrigger.Listeners> implements ICriterionTrigger<UsedEnderEyeTrigger.Instance> {
     private static final ResourceLocation ID = new ResourceLocation("used_ender_eye");
 
-    public UsedEnderEyeTrigger() {}
+    public UsedEnderEyeTrigger() {
+        super(7);
+    }
+
 
     @Override
     public ResourceLocation getId() {

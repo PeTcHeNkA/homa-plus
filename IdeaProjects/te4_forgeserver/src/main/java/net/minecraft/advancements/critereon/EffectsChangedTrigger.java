@@ -16,7 +16,10 @@ import plus.tson.utl.Te4HashSet;
 public class EffectsChangedTrigger extends ConcurrentHashMap<PlayerAdvancements, EffectsChangedTrigger.Listeners> implements ICriterionTrigger<EffectsChangedTrigger.Instance> {
     private static final ResourceLocation ID = new ResourceLocation("effects_changed");
 
-    public EffectsChangedTrigger() {}
+    public EffectsChangedTrigger() {
+        super(7);
+    }
+
 
     @Override
     public ResourceLocation getId() {

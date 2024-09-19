@@ -394,35 +394,36 @@ public class ChunkGeneratorOverworld implements IChunkGenerator {
         int j = z * 16;
         BlockPos blockpos = new BlockPos(i, 0, j);
         Biome biome = this.world.getBiome(blockpos.add(16, 0, 16));
-        this.rand.setSeed(this.world.getSeed());
-        long k = this.rand.nextLong() / 2L * 2L + 1L;
-        long l = this.rand.nextLong() / 2L * 2L + 1L;
-        this.rand.setSeed((long)x * k + (long)z * l ^ this.world.getSeed());
+        Random rand = this.rand;
+        rand.setSeed(this.world.getSeed());
+        long k = rand.nextLong() / 2L * 2L + 1L;
+        long l = rand.nextLong() / 2L * 2L + 1L;
+        rand.setSeed((long)x * k + (long)z * l ^ this.world.getSeed());
 
         ChunkPos chunkpos = new ChunkPos(x, z);
 
-        ForgeEventFactory.onChunkPopulate(true, this, this.world, this.rand, x, z, false);
+        ForgeEventFactory.onChunkPopulate(true, this, this.world, rand, x, z, false);
 
-        if (biome != Biomes.DESERT && biome != Biomes.DESERT_HILLS && this.settings.useWaterLakes && this.rand.nextInt(this.settings.waterLakeChance) == 0)
-            if (TerrainGen.populate(this, this.world, this.rand, x, z, false, PopulateChunkEvent.Populate.EventType.LAKE)) {
-                int i1 = this.rand.nextInt(16) + 8;
-                int j1 = this.rand.nextInt(256);
-                int k1 = this.rand.nextInt(16) + 8;
-                (new WorldGenLakes(Blocks.WATER)).generate(this.world, this.rand, blockpos.add(i1, j1, k1));
+        if (biome != Biomes.DESERT && biome != Biomes.DESERT_HILLS && this.settings.useWaterLakes && rand.nextInt(this.settings.waterLakeChance) == 0)
+            if (TerrainGen.populate(this, this.world, rand, x, z, false, PopulateChunkEvent.Populate.EventType.LAKE)) {
+                int i1 = rand.nextInt(16) + 8;
+                int j1 = rand.nextInt(256);
+                int k1 = rand.nextInt(16) + 8;
+                (new WorldGenLakes(Blocks.WATER)).generate(this.world, rand, blockpos.add(i1, j1, k1));
             }
 
-        if (this.rand.nextInt(this.settings.lavaLakeChance / 10) == 0 && this.settings.useLavaLakes)
-            if (TerrainGen.populate(this, this.world, this.rand, x, z, false, PopulateChunkEvent.Populate.EventType.LAVA)) {
-                int i2 = this.rand.nextInt(16) + 8;
-                int l2 = this.rand.nextInt(this.rand.nextInt(248) + 8);
-                int k3 = this.rand.nextInt(16) + 8;
+        if (rand.nextInt(this.settings.lavaLakeChance / 10) == 0 && this.settings.useLavaLakes)
+            if (TerrainGen.populate(this, this.world, rand, x, z, false, PopulateChunkEvent.Populate.EventType.LAVA)) {
+                int i2 = rand.nextInt(16) + 8;
+                int l2 = rand.nextInt(rand.nextInt(248) + 8);
+                int k3 = rand.nextInt(16) + 8;
 
-                if (l2 < this.world.getSeaLevel() || this.rand.nextInt(this.settings.lavaLakeChance / 8) == 0) {
+                if (l2 < this.world.getSeaLevel() || rand.nextInt(this.settings.lavaLakeChance / 8) == 0) {
                     if(maybeAsyncPopulate()){
                         BlockPos lavaPos = blockpos.add(i2, l2, k3);
                         ((WorldServer)world).addSyncTask(() -> (new WorldGenLakes(Blocks.LAVA)).generate(world, rand, lavaPos));
                     } else {
-                        (new WorldGenLakes(Blocks.LAVA)).generate(this.world, this.rand, blockpos.add(i2, l2, k3));
+                        (new WorldGenLakes(Blocks.LAVA)).generate(this.world, rand, blockpos.add(i2, l2, k3));
                     }
                 }
             }
@@ -432,17 +433,17 @@ public class ChunkGeneratorOverworld implements IChunkGenerator {
         }
 
         if (this.settings.useDungeons)
-            if (TerrainGen.populate(this, this.world, this.rand, x, z, false,
+            if (TerrainGen.populate(this, this.world, rand, x, z, false,
                     PopulateChunkEvent.Populate.EventType.DUNGEON)) {
                 for (int j2 = 0; j2 < this.settings.dungeonChance; ++j2) {
-                    int i3 = this.rand.nextInt(16) + 8;
-                    int l3 = this.rand.nextInt(256);
-                    int l1 = this.rand.nextInt(16) + 8;
-                    (new WorldGenDungeons()).generate(this.world, this.rand, blockpos.add(i3, l3, l1));
+                    int i3 = rand.nextInt(16) + 8;
+                    int l3 = rand.nextInt(256);
+                    int l1 = rand.nextInt(16) + 8;
+                    (new WorldGenDungeons()).generate(this.world, rand, blockpos.add(i3, l3, l1));
                 }
             }
 
-        biome.decorate(this.world, this.rand, new BlockPos(i, 0, j));
+        biome.decorate(this.world, rand, new BlockPos(i, 0, j));
 
 
         Biome finalBiome = biome;
@@ -472,7 +473,7 @@ public class ChunkGeneratorOverworld implements IChunkGenerator {
                 WorldEntitySpawner.performWorldGenSpawning(world, finalBiome, i + 8, j + 8, 16, 16, rand);
         });
 
-        if (TerrainGen.populate(this, this.world, this.rand, x, z, false, PopulateChunkEvent.Populate.EventType.ICE)) {
+        if (TerrainGen.populate(this, this.world, rand, x, z, false, PopulateChunkEvent.Populate.EventType.ICE)) {
             Chunk chunk = world.getChunk(x, z);
             BiomeProvider bpw = world.provider.getBiomeProvider();
             IBlockState prevState, newState;
@@ -503,7 +504,7 @@ public class ChunkGeneratorOverworld implements IChunkGenerator {
             }
         }
 
-        ForgeEventFactory.onChunkPopulate(false, this, this.world, this.rand, x, z, false);
+        ForgeEventFactory.onChunkPopulate(false, this, this.world, rand, x, z, false);
 
         BlockFalling.fallInstantly = false;
     }

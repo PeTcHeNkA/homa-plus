@@ -1,6 +1,5 @@
 package net.minecraft.world.chunk;
 
-import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import java.util.Arrays;
 import java.util.List;
@@ -51,7 +50,7 @@ import plus.tson.utl.Te4HashMap;
 import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
-public class Chunk implements net.minecraftforge.common.capabilities.ICapabilityProvider, ILightingEngineProvider {
+public class Chunk implements net.minecraftforge.common.capabilities.ICapabilityProvider, ILightingEngineProvider{
     @Keep
     public static final int STORAGES_COUNT = 16;
     @Keep
@@ -152,11 +151,11 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
     public Chunk(World worldIn, int x, int z) {
         this.storageArrays = new ExtendedBlockStorage[STORAGES_COUNT];
-        this.blockBiomeArray = new byte[256];
-        this.precipitationHeightMap = new short[256];
+        byte[] biomeArr = this.blockBiomeArray = new byte[256];
+        short[] phMap = this.precipitationHeightMap = new short[256];
         this.updateSkylights = new short[16];
 
-        this.tileEntities = new Te4HashMap<>();
+        this.tileEntities = new Te4HashMap<>(8);
         this.queuedLightChecks = 4096;
         this.tileEntityPosQueue = new FastBuffer<>();
         this.world = worldIn;
@@ -164,8 +163,8 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
         this.z = z;
         this.heightMap = new byte[256];
 
-        Arrays.fill(this.precipitationHeightMap, (short) -999);
-        Arrays.fill(this.blockBiomeArray, (byte) - 1);
+        Arrays.fill(phMap, (short) -999);
+        Arrays.fill(biomeArr, (byte) - 1);
 
         ClassInheritanceMultiMap[] lists = this.entityLists = new ClassInheritanceMultiMap[16];
 
@@ -224,9 +223,10 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
     @Nullable
     private ExtendedBlockStorage getLastExtendedBlockStorage() {
-        for (int i = this.storageArrays.length - 1; i >= 0; --i)
-            if (this.storageArrays[i] != null)
-                return this.storageArrays[i];
+        ExtendedBlockStorage[] storageArrays;
+        for (int i = (storageArrays = this.storageArrays).length - 1; i >= 0; --i)
+            if (storageArrays[i] != null)
+                return storageArrays[i];
         return null;
     }
 
@@ -268,22 +268,28 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
     public void generateSkylightMap() {
         int i = this.getTopFilledSegment();
-        this.heightMapMinimum = Integer.MAX_VALUE;
+        int min = this.heightMapMinimum = Integer.MAX_VALUE;
+
+        short[] precipitationHeightMap = this.precipitationHeightMap;
+        byte[] heightMap = this.heightMap;
+        World world = this.world;
+        boolean hasSkyLight = world.provider.hasSkyLight();
+        ExtendedBlockStorage[] storageArrays = this.storageArrays;
 
         for (int xPos = 0; xPos < 16; ++xPos) {
             for (int zPos = 0; zPos < 16; ++zPos) {
-                this.precipitationHeightMap[xPos + (zPos << 4)] = -999;
+                precipitationHeightMap[xPos + (zPos << 4)] = -999;
                 for (int l = i + 16; l > 0; --l) {
                     if (this.getBlockLightOpacity(xPos, l - 1, zPos) != 0) {
-                        this.heightMap[zPos << 4 | xPos] = (byte) l;
-                        if (l < this.heightMapMinimum) {
-                            this.heightMapMinimum = l;
+                        heightMap[zPos << 4 | xPos] = (byte) l;
+                        if (l < min) {
+                            this.heightMapMinimum = min = l;
                         }
                         break;
                     }
                 }
 
-                if (this.world.provider.hasSkyLight()) {
+                if (hasSkyLight) {
                     int k1 = 15, i1 = i + 16 - 1;
                     while (true) {
                         int j1 = this.getBlockLightOpacity(xPos, i1, zPos);
@@ -293,7 +299,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
                         }
                         k1 -= j1;
                         if (k1 > 0) {
-                            ExtendedBlockStorage storage = this.storageArrays[i1 >> 4];
+                            ExtendedBlockStorage storage = storageArrays[i1 >> 4];
 
                             if (storage != null) {
                                 storage.setSkyLight(xPos, i1 & 15, zPos, k1);
@@ -469,7 +475,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
     }
 
 
-    //todo in work
+    //todo overwrited
     private void relightBlock(final int x, final int y, final int z) {
         int i = this.heightMap[z << 4 | x] & 255;
         int j = i;
@@ -692,7 +698,8 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
     public void setBlockStateFastNoTile(int x, int y, int z, final IBlockState state) {
         int l = (z &= 15) << 4 | (x &= 15);
-        if (y >= this.precipitationHeightMap[l] - 1) this.precipitationHeightMap[l] = -999;
+        short[] pchm;
+        if (y >= (pchm = this.precipitationHeightMap)[l] - 1) pchm[l] = -999;
 
         ExtendedBlockStorage storage = this.storageArrays[y >> 4];
 

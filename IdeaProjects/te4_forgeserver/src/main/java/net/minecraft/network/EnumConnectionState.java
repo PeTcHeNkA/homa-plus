@@ -129,6 +129,7 @@ import plus.fserver.server.Reflector;
 import plus.fserver.server.network.packet.SElcaPacketDestroyEntities;
 import plus.fserver.server.network.packet.SElcaPacketEntityEquipment;
 import plus.fserver.server.network.packet.SRawPacketChat;
+import plus.fserver.server.network.packet.SRawPacketPlayerListHeaderFooter;
 
 
 public enum EnumConnectionState {
@@ -219,7 +220,10 @@ public enum EnumConnectionState {
         this.registerPacket(EnumPacketDirection.CLIENTBOUND, SPacketTimeUpdate.class);
         this.registerPacket(EnumPacketDirection.CLIENTBOUND, SPacketTitle.class);
         this.registerPacket(EnumPacketDirection.CLIENTBOUND, SPacketSoundEffect.class);
+
         this.registerPacket(EnumPacketDirection.CLIENTBOUND, SPacketPlayerListHeaderFooter.class);
+        this.registerAlias(EnumPacketDirection.CLIENTBOUND, SPacketPlayerListHeaderFooter.class, SRawPacketPlayerListHeaderFooter.class);
+
         this.registerPacket(EnumPacketDirection.CLIENTBOUND, SPacketCollectItem.class);
         this.registerPacket(EnumPacketDirection.CLIENTBOUND, SPacketEntityTeleport.class);
         this.registerPacket(EnumPacketDirection.CLIENTBOUND, SPacketAdvancementInfo.class);

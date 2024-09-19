@@ -18,7 +18,10 @@ import plus.tson.utl.Te4HashSet;
 public class VillagerTradeTrigger extends ConcurrentHashMap<PlayerAdvancements, VillagerTradeTrigger.Listeners> implements ICriterionTrigger<VillagerTradeTrigger.Instance> {
     private static final ResourceLocation ID = new ResourceLocation("villager_trade");
 
-    public VillagerTradeTrigger() {}
+    public VillagerTradeTrigger() {
+        super(7);
+    }
+
 
     @Override
     public ResourceLocation getId() {

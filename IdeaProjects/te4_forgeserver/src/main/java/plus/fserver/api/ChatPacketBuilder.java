@@ -12,6 +12,7 @@ import plus.tson.format.TextFormatter;
 public final class ChatPacketBuilder {
     private final IVarGetter<EntityPlayerMP> format;
     private boolean canSendNoPlayer = true;
+    private boolean asyncRender = false;
     private ChatPacketBuilder(TextFormatter<EntityPlayerMP> format) {
         this.format = format.simplify();
     }
@@ -30,13 +31,35 @@ public final class ChatPacketBuilder {
     }
 
 
+    public static String toJsonMsg(String text){
+        return ITextComponent.Serializer.componentToJson(new TextComponentAuto(text));
+    }
+
+
+    public ChatPacketBuilder asyncRender(boolean b){
+        asyncRender = b;
+        return this;
+    }
+
+
     public SRawPacketChat build(EntityPlayerMP player){
         return new SRawPacketChat(format.get(player));
     }
 
 
+    public String buildJson(EntityPlayerMP player){
+        return format.get(player);
+    }
+
+
     public void send(EntityPlayerMP player){
-        player.connection.netManager.sendPacketE(build(player));
+        if(asyncRender){
+            player.connection.netManager.exec(
+                    () -> player.connection.netManager.sendPacketSync(build(player))
+            );
+        } else {
+            player.connection.netManager.sendPacketE(build(player));
+        }
     }
 
 

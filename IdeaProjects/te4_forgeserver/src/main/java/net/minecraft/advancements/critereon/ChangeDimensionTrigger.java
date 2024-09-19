@@ -19,7 +19,9 @@ import plus.tson.utl.Te4HashSet;
 public class ChangeDimensionTrigger extends ConcurrentHashMap<PlayerAdvancements, ChangeDimensionTrigger.Listeners> implements ICriterionTrigger<ChangeDimensionTrigger.Instance> {
     private static final ResourceLocation ID = new ResourceLocation("changed_dimension");
 
-    public ChangeDimensionTrigger() {}
+    public ChangeDimensionTrigger() {
+        super(3);
+    }
 
 
     @Override

@@ -20,7 +20,9 @@ import plus.tson.utl.Te4HashSet;
 public class BrewedPotionTrigger extends ConcurrentHashMap<PlayerAdvancements, BrewedPotionTrigger.Listeners> implements ICriterionTrigger<BrewedPotionTrigger.Instance> {
     private static final ResourceLocation ID = new ResourceLocation("brewed_potion");
 
-    public BrewedPotionTrigger() {}
+    public BrewedPotionTrigger() {
+        super(7);
+    }
 
 
     @Override

@@ -8,11 +8,23 @@ import static net.minecraft.pathfinding.PathNodeType.TYPES;
 
 public class PntMatrix extends FlatMap<PntMatrix.Chunked> {
     private Chunked last = new Chunked(null, Integer.MIN_VALUE, Integer.MIN_VALUE);
-    private final PathNodeType.Set localSet = new PathNodeType.Set();
+    private final PathNodeType.Set localSet;
+
+    public PntMatrix(int size, PathNodeType.Set localSet){
+        super(size);
+        this.localSet = localSet;
+    }
+
+
+    public PntMatrix(PathNodeType.Set localSet){
+        this(64, localSet);
+    }
+
 
     public PntMatrix(){
-        super(128);
+        this(new PathNodeType.Set());
     }
+
 
     static Branch branch(Branch[] branches, int x, int y, int z){
         if(x<8) x = z <8?0:1;
@@ -36,19 +48,21 @@ public class PntMatrix extends FlatMap<PntMatrix.Chunked> {
         PathNodeType get(int x, int y, int z){
             if(x>7) x-=8;
             if(z>7) z-=8;
-            return TYPES[(types[x | z << 3] >> (y<<3)) & 0xFF];
+            return TYPES[(types[x | z << 3] >> y) & 0xFF];
         }
         void set(int x, int y, int z, PathNodeType type){
             if(x>7) x-=8;
             if(z>7) z-=8;
             x = x | z << 3;
-            types[x] = types[x] & ~(0xff << (y<<3)) | type.id<<(y<<3);
+            int[] types = this.types;
+            types[x] = types[x] & ~(0xff << y) | type.id<<y;
         }
         void rem(int x, int y, int z){
             if(x>7) x-=8;
             if(z>7) z-=8;
             x = x | z << 3;
-            types[x] = types[x] & ~(0xff << (y<<3));
+            int[] types = this.types;
+            types[x] = types[x] & ~(0xff << y);
         }
 
         void clean(){
@@ -113,7 +127,7 @@ public class PntMatrix extends FlatMap<PntMatrix.Chunked> {
             if(group == null)return null;
             Branch branch = branch(group, x&=15, y&15, z&=15);
             if(branch == null)return null;
-            return branch.get(x, y&7, z);
+            return branch.get(x, (y&7)<<3, z);
         }
 
 
@@ -122,7 +136,7 @@ public class PntMatrix extends FlatMap<PntMatrix.Chunked> {
             if(group == null)return null;
             Branch branch = branch(group, x&=15, y&15, z&=15);
             if(branch == null)return null;
-            return branch.get(x, y&7, z);
+            return branch.get(x, (y&7)<<3, z);
         }
 
 
@@ -130,7 +144,7 @@ public class PntMatrix extends FlatMap<PntMatrix.Chunked> {
             Branch[] group = groups[y >> 4];
             if(group==null)group = groups[y >> 4] = new Branch[16];
             Branch branch = branch(group, x&=15, y&15, z&=15);
-            branch.set(x, y&7, z, type);
+            branch.set(x, (y&7)<<3, z, type);
         }
 
 
@@ -139,7 +153,7 @@ public class PntMatrix extends FlatMap<PntMatrix.Chunked> {
             Branch[] group = chunked.groups[y >> 4];
             if(group==null)group = chunked.groups[y >> 4] = new Branch[16];
             Branch branch = branch(group, x&=15, y&15, z&=15);
-            branch.set(x, y&7, z, type);
+            branch.set(x, (y&7)<<3, z, type);
         }
 
 
@@ -148,7 +162,7 @@ public class PntMatrix extends FlatMap<PntMatrix.Chunked> {
             Branch[] group = chunked.groups[y >> 4];
             if(group==null)group = chunked.groups[y >> 4] = new Branch[16];
             Branch branch = branch(group, x&=15, y&15, z&=15);
-            branch.rem(x, y&7, z);
+            branch.rem(x, (y&7)<<3, z);
         }
     }
 

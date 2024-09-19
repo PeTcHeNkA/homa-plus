@@ -37,7 +37,7 @@ public class PlayerChunkMap extends FlatMap<PlayerChunkMapEntry>{
     private boolean sortSendToPlayers = true;
     private int nextRadius = -1;
 
-    private final Int2ObjectOpenHashMap<PlayerCMapSelector> selectors = new Int2ObjectOpenHashMap<>();
+    private final Int2ObjectOpenHashMap<PlayerCMapSelector> selectors = new Int2ObjectOpenHashMap<>(7);
 
     public PlayerChunkMap(WorldServer serverWorld) {
         this.world = serverWorld;
@@ -246,7 +246,7 @@ public class PlayerChunkMap extends FlatMap<PlayerChunkMapEntry>{
         if (radius != this.playerViewRadius) {
             int i = radius - this.playerViewRadius;
 
-            Object[] data = players.toArray().clone();
+            Object[] data = players.raw().clone();
             int size = players.sizeC();
 
             for (int i2 = 0; i2 < size; i2++) {

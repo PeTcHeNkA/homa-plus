@@ -198,6 +198,7 @@ public final class AsyWorldTickerV2 implements ThreadFactory{
             inf.stop();
             return;
         }
+        worldserver.setCurThread();
         //System.out.println("Next tick: "+(System.currentTimeMillis()-inf.lastTicked) );
         ++inf.tickCounter;
 
@@ -301,6 +302,8 @@ public final class AsyWorldTickerV2 implements ThreadFactory{
             CraftingManager.index.clear();
         } catch (Throwable throwable){
             stopAnError(throwable, worldserver);
+        } finally {
+            worldserver.freeCurThread();
         }
     }
 

@@ -17,7 +17,10 @@ import plus.tson.utl.Te4HashSet;
 public class TameAnimalTrigger extends ConcurrentHashMap<PlayerAdvancements, TameAnimalTrigger.Listeners> implements ICriterionTrigger<TameAnimalTrigger.Instance> {
     private static final ResourceLocation ID = new ResourceLocation("tame_animal");
 
-    public TameAnimalTrigger() {}
+    public TameAnimalTrigger() {
+        super(7);
+    }
+
 
     @Override
     public ResourceLocation getId() {

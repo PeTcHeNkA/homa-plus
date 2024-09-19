@@ -232,8 +232,9 @@ public class EMoveHelper {
                         if(!(check = arr[j]).ignoreCollisions()) {
                             MoveTask checkTask;
                             if ((checkTask = check.moveTask) == null) {
-                                AxisAlignedBB checkBox = check.getEntityBoundingBox();
-                                if (checkBox.intersectsXZY(x1, y1, z1, x2, y2, z2)) {
+                                AxisAlignedBB checkBox;
+                                if ((checkBox = check.getEntityBoundingBox())
+                                        .intersectsXZY(x1, y1, z1, x2, y2, z2)) {
                                     curTask.addBox(checkBox);
                                     if (++lim >= ElcaConfig.MAX_ENTITY_COLLISIONS_MOVE) break l1;
                                 }

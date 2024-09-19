@@ -1,7 +1,6 @@
 package net.minecraft.entity;
 
 import java.util.*;
-
 import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.entity.ai.attributes.AttributeMap;
@@ -98,7 +97,7 @@ public class EntityTrackerEntry {
     private boolean ridingEntity;
     private boolean onGround;
     public boolean playerEntitiesUpdated;
-    public final Set<EntityPlayerMP> trackingPlayers = new Te4HashSet<>(4);//not edit this!!!
+    public final Set<EntityPlayerMP> trackingPlayers = new Te4HashSet<>(3);//not edit this!!!
 
     public EntityTrackerEntry(Entity entityIn, int rangeIn, int maxRangeIn, int updateFrequencyIn, boolean sendVelocityUpdatesIn) {
         this.trackedEntity = entityIn;

@@ -17,7 +17,10 @@ import plus.tson.utl.Te4HashSet;
 public class ConstructBeaconTrigger extends ConcurrentHashMap<PlayerAdvancements, ConstructBeaconTrigger.Listeners> implements ICriterionTrigger<ConstructBeaconTrigger.Instance> {
     private static final ResourceLocation ID = new ResourceLocation("construct_beacon");
 
-    public ConstructBeaconTrigger() {}
+    public ConstructBeaconTrigger() {
+        super(3);
+    }
+
 
     @Override
     public ResourceLocation getId() {

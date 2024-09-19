@@ -15,7 +15,9 @@ import plus.tson.utl.Te4HashSet;
 public class TickTrigger extends ConcurrentHashMap<PlayerAdvancements, TickTrigger.Listeners> implements ICriterionTrigger<TickTrigger.Instance> {
     public static final ResourceLocation ID = new ResourceLocation("tick");
 
-    public TickTrigger() {}
+    public TickTrigger() {
+        super(7);
+    }
 
 
     @Override

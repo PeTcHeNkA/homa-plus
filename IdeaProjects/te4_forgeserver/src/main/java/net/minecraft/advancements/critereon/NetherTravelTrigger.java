@@ -18,7 +18,10 @@ import plus.tson.utl.Te4HashSet;
 public class NetherTravelTrigger extends ConcurrentHashMap<PlayerAdvancements, NetherTravelTrigger.Listeners> implements ICriterionTrigger<NetherTravelTrigger.Instance> {
     private static final ResourceLocation ID = new ResourceLocation("nether_travel");
 
-    public NetherTravelTrigger() {}
+    public NetherTravelTrigger() {
+        super(3);
+    }
+
 
     @Override
     public ResourceLocation getId() {

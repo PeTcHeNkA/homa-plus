@@ -19,7 +19,10 @@ import plus.tson.utl.Te4HashSet;
 public class InventoryChangeTrigger extends ConcurrentHashMap<PlayerAdvancements, InventoryChangeTrigger.Listeners> implements ICriterionTrigger<InventoryChangeTrigger.Instance> {
     private static final ResourceLocation ID = new ResourceLocation("inventory_changed");
 
-    public InventoryChangeTrigger() {}
+    public InventoryChangeTrigger() {
+        super(7);
+    }
+
 
     @Override
     public ResourceLocation getId() {

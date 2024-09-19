@@ -371,7 +371,18 @@ public class EntityList<T extends Entity> implements List<T> {
 
 
     public Entity[] newArrayAuto(){
-        return Arrays.copyOf(data, data == EMPTY_ARR ?6: data.length+10);
+        Entity[] data;
+        if((data = this.data) == EMPTY_ARR)return new Entity[6];
+        return expand(data, 10);
+    }
+
+
+    protected static Entity[] expand(Entity[] src, int newSize){
+        int prevLen;
+        if((prevLen = src.length) == 0)return new Entity[newSize];
+        Entity[] newArr = new Entity[newSize];
+        System.arraycopy(src, 0, newArr, 0, prevLen);
+        return newArr;
     }
 
 

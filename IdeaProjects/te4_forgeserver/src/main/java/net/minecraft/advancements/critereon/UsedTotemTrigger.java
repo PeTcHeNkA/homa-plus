@@ -19,6 +19,7 @@ public class UsedTotemTrigger extends ConcurrentHashMap<PlayerAdvancements, Used
 
     public UsedTotemTrigger() {}
 
+
     @Override
     public ResourceLocation getId() {
         return ID;

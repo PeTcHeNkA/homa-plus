@@ -107,6 +107,7 @@ net.minecraft.block.BlockEndPortal
 net.minecraft.block.BlockEndPortalFrame
 net.minecraft.block.BlockEndRod$1
 net.minecraft.block.BlockEndRod
+net.minecraft.block.BlockFalling
 net.minecraft.block.BlockFallingFs
 net.minecraft.block.BlockFarmland$1
 net.minecraft.block.BlockFarmland
@@ -436,6 +437,7 @@ net.minecraft.nbt.NBTTagDouble, false, false
 net.minecraft.nbt.NBTTagEnd, false, false
 net.minecraft.nbt.NBTTagFloat, false, false
 net.minecraft.nbt.NBTTagInt, false, false
+net.minecraft.nbt.NBTTagIntArray, false, false
 net.minecraft.nbt.NBTTagIntArrayUnsafe, false, false
 net.minecraft.nbt.NBTTagList, false, false
 net.minecraft.nbt.NBTTagLong, false, false
@@ -622,6 +624,8 @@ net.minecraft.util.math.BlockPos$PooledMutableBlockPos, false, false
 net.minecraft.util.math.BlockPos, false, false
 net.minecraft.util.math.Vec3i, false, false
 net.minecraft.util.ServerRecipeBookHelper, false, false
+net.minecraft.util.SubList, false, false
+net.minecraft.util.SublistEV1, false, false
 net.minecraft.village.VillageCollection
 net.minecraft.world.biome.Biome$1
 net.minecraft.world.biome.Biome$BiomeProperties
@@ -643,6 +647,7 @@ net.minecraft.world.biome.BiomeSwamp
 net.minecraft.world.biome.BiomeVoidDecorator
 net.minecraft.world.border.WorldBorder
 net.minecraft.world.chunk.BlockStateContainer
+net.minecraft.world.chunk.BlockStatePaletteBase
 net.minecraft.world.chunk.BlockStatePaletteHashMap
 net.minecraft.world.chunk.BlockStatePaletteLinear
 net.minecraft.world.chunk.BlockStatePaletteRegistry

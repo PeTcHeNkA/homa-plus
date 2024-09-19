@@ -156,14 +156,14 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
     final SyncListCache.AABB bbCache;
     final SyncListCache.EList eeCache;
-    protected IBlockEAccess     effectiveAcces;
+    protected IBlockEAccess effectiveAcces;
     //ONLY SERVER SIDE NOT NULL!
     public final ChunkSelector localSelector;
     public final ChunkLCache   bigLocalCache = new ChunkLCache(this, Integer.MIN_VALUE, Integer.MIN_VALUE);
     public ChunkProviderServer chunkProviderServer;
     //END UNSAFE
 
-    //private final Object[] locals;
+    private Thread curThread;
 
     protected World(ISaveHandler saveHandlerIn, WorldInfo info, WorldProvider providerIn, Profiler profilerIn, boolean client) {
         this(null, saveHandlerIn, info, providerIn, profilerIn, client);
@@ -203,6 +203,24 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
         //locals = ElcaServerUtls.createLocals(this);
     }
+
+
+    public void setCurThread(){
+        curThread = Thread.currentThread();
+    }
+
+
+    public void freeCurThread(){
+        curThread = null;
+    }
+
+
+    public boolean isCurThread(){
+        Thread cur;
+        if((cur = curThread) == null)return true;
+        return cur == Thread.currentThread();
+    }
+
 
     private int nextEntityID = 0;
     private int maxEntityId  = 0x7FFFFFF0;

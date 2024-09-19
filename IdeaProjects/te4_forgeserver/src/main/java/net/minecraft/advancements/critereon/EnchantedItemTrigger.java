@@ -17,7 +17,10 @@ import plus.tson.utl.Te4HashSet;
 public class EnchantedItemTrigger extends ConcurrentHashMap<PlayerAdvancements, EnchantedItemTrigger.Listeners> implements ICriterionTrigger<EnchantedItemTrigger.Instance> {
     private static final ResourceLocation ID = new ResourceLocation("enchanted_item");
 
-    public EnchantedItemTrigger() {}
+    public EnchantedItemTrigger() {
+        super(7);
+    }
+
 
     @Override
     public ResourceLocation getId() {

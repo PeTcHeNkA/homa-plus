@@ -27,7 +27,10 @@ import plus.tson.utl.Te4HashSet;
 public class EnterBlockTrigger extends ConcurrentHashMap<PlayerAdvancements, EnterBlockTrigger.Listeners> implements ICriterionTrigger<EnterBlockTrigger.Instance> {
     private static final ResourceLocation ID = new ResourceLocation("enter_block");
 
-    public EnterBlockTrigger() {}
+    public EnterBlockTrigger() {
+        super(7);
+    }
+
 
     @Override
     public ResourceLocation getId() {

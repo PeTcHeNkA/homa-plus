@@ -24,6 +24,7 @@ import plus.fserver.server.AsyEntityTracker;
 import plus.fserver.server.network.packet.SEntityPacketPlayBase;
 import plus.fserver.utls.collections.ArrayListE6;
 import plus.fserver.utls.collections.EntityChunkIter;
+import plus.fserver.utls.collections.EntityList;
 import plus.fserver.utls.collections.EntityRemSwapList;
 import plus.fserver.world.EntityTrackerFactory;
 
@@ -229,7 +230,7 @@ public class EntityTracker {
     }
 
 
-    public void sendLeashedEntitiesInChunk(final ArrayListE6<EntityPlayerMP> players, final Chunk chunk) {
+    public void sendLeashedEntitiesInChunk(final EntityList<EntityPlayerMP> players, final Chunk chunk) {
         final ArrayListE6<Entity> list = new ArrayListE6<>(), list1 = new ArrayListE6<>();
         final int size = players.sizeC();
         for (Entity entity : new EntityChunkIter(chunk)) {
@@ -237,7 +238,7 @@ public class EntityTracker {
             if ((entry = entity.trackerEntry) != null) {
                 for (int i = 0; i < size; ++i) {
                     final EntityPlayerMP player;
-                    if (entity != (player = players.getC(i))) {
+                    if (entity != (player = players.get(i))) {
                         entry.updatePlayerEntity(player);
 
                         if (entity instanceof EntityLiving && ((EntityLiving) entity).getLeashHolder() != null){

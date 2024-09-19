@@ -17,6 +17,12 @@ public class SPacketPlayerListHeaderFooter extends SPacketPlayBase {
 
     public SPacketPlayerListHeaderFooter() {}
 
+    public SPacketPlayerListHeaderFooter(ITextComponent header, ITextComponent footer){
+        this.header = header;
+        this.footer = footer;
+    }
+
+
     @Deprecated
     public void readPacketData(PacketBuffer buf) throws IOException {
         this.header = buf.readTextComponent();

@@ -122,7 +122,7 @@ public class PooledLongQueue {
 
 
         private void release(final Segment segment) {
-            if (this.segmentPool.size() < 4096) {
+            if (this.segmentPool.size() < CACHED_QUEUE_SEGMENTS_COUNT) {
                 this.segmentPool.push(segment);
             }
         }
@@ -136,7 +136,7 @@ public class PooledLongQueue {
         private final Pool pool;
         
         private Segment(final Pool pool) {
-            this.longArray = new long[1024];
+            this.longArray = new long[QUEUE_SEGMENT_SIZE];
             this.index = 0;
             this.pool = pool;
         }

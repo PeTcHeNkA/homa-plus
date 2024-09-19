@@ -19,7 +19,10 @@ import plus.tson.utl.Te4HashSet;
 public class BredAnimalsTrigger extends ConcurrentHashMap<PlayerAdvancements, BredAnimalsTrigger.Listeners> implements ICriterionTrigger<BredAnimalsTrigger.Instance> {
     private static final ResourceLocation ID = new ResourceLocation("bred_animals");
 
-    public BredAnimalsTrigger() {}
+    public BredAnimalsTrigger() {
+        super(7);
+    }
+
 
     @Override
     public ResourceLocation getId() {

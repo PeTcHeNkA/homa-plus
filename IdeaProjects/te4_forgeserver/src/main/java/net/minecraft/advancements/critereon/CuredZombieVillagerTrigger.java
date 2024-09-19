@@ -18,7 +18,10 @@ import plus.tson.utl.Te4HashSet;
 public class CuredZombieVillagerTrigger extends ConcurrentHashMap<PlayerAdvancements, CuredZombieVillagerTrigger.Listeners> implements ICriterionTrigger<CuredZombieVillagerTrigger.Instance> {
     private static final ResourceLocation ID = new ResourceLocation("cured_zombie_villager");
 
-    public CuredZombieVillagerTrigger() {}
+    public CuredZombieVillagerTrigger() {
+        super(3);
+    }
+
 
     @Override
     public ResourceLocation getId() {

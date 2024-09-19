@@ -35,6 +35,7 @@ import net.minecraft.scoreboard.ScoreboardSaveData;
 import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerChunkMap;
+import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -865,36 +866,71 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
     public void sendToAllNearExcept(@Nullable EntityPlayer except, double x, double y, double z, double radius, Packet<?> packetIn) {
         final double radius1 = radius*radius;
         double d0, d1, d2;
-        List<EntityPlayer> players = playerEntities;
-        for (int i = 0; i < players.size(); ++i) {
-            EntityPlayer player = players.get(i);
-            if (player != except) {
-                d0 = x - player.posX;
-                d1 = y - player.posY;
-                d2 = z - player.posZ;
+        PlayerChunkMapEntry center = this.playerChunkMap.getEntry(MathHelper.floor(x), MathHelper.floor(z));
 
-                if (d0 * d0 + d1 * d1 + d2 * d2 < radius1){
-                    EntityPlayerMP mp = (EntityPlayerMP) player;
+        if(center == null) {
+            List<EntityPlayer> players = playerEntities;
+            for (int i = 0; i < players.size(); ++i) {
+                EntityPlayer player = players.get(i);
+                if (player != except) {
+                    d0 = x - player.posX;
+                    d1 = y - player.posY;
+                    d2 = z - player.posZ;
 
-                    final NetworkManager first = mp.connection.netManager;
-                    final int finalI = i;
-                    first.exec(() -> {
-                        first.sendPacketSync(packetIn);
-                        double d01, d11, d21;
-                        for (int i1 = finalI; i1 < players.size(); ++i1) {
-                            EntityPlayer player1 = players.get(i1);
-                            if (player1 != except) {
-                                d01 = x - player1.posX;
-                                d11 = y - player1.posY;
-                                d21 = z - player1.posZ;
+                    if (d0 * d0 + d1 * d1 + d2 * d2 < radius1) {
+                        EntityPlayerMP mp = (EntityPlayerMP) player;
 
-                                if (d01 * d01 + d11 * d11 + d21 * d21 < radius1){
-                                    ((EntityPlayerMP)player1).connection.netManager.sendPacketSync(packetIn);
+                        final NetworkManager first = mp.connection.netManager;
+                        final int finalI = i;
+                        first.exec(() -> {
+                            first.sendPacketSync(packetIn);
+                            double d01, d11, d21;
+                            for (int i1 = finalI; i1 < players.size(); ++i1) {
+                                EntityPlayer player1 = players.get(i1);
+                                if (player1 != except) {
+                                    d01 = x - player1.posX;
+                                    d11 = y - player1.posY;
+                                    d21 = z - player1.posZ;
+
+                                    if (d01 * d01 + d11 * d11 + d21 * d21 < radius1) {
+                                        ((EntityPlayerMP) player1).connection.netManager.sendPacketSync(packetIn);
+                                    }
                                 }
                             }
-                        }
-                    });
-                    break;
+                        });
+                        break;
+                    }
+                }
+            }
+        } else {
+            for (int i = 0; i < center.size(); ++i) {
+                EntityPlayerMP player = center.get(i);
+                if (player != except) {
+                    d0 = x - player.posX;
+                    d1 = y - player.posY;
+                    d2 = z - player.posZ;
+
+                    if (d0 * d0 + d1 * d1 + d2 * d2 < radius1) {
+                        final NetworkManager first = player.connection.netManager;
+                        final int finalI = i;
+                        first.exec(() -> {
+                            first.sendPacketSync(packetIn);
+                            double d01, d11, d21;
+                            for (int i1 = finalI; i1 < center.size(); ++i1) {
+                                EntityPlayer player1 = center.get(i1);
+                                if (player1 != except) {
+                                    d01 = x - player1.posX;
+                                    d11 = y - player1.posY;
+                                    d21 = z - player1.posZ;
+
+                                    if (d01 * d01 + d11 * d11 + d21 * d21 < radius1) {
+                                        ((EntityPlayerMP) player1).connection.netManager.sendPacketSync(packetIn);
+                                    }
+                                }
+                            }
+                        });
+                        break;
+                    }
                 }
             }
         }

@@ -32,11 +32,14 @@ public class NoiseGeneratorOctaves extends NoiseGenerator {
 
         double d3 = 1.0D, d0, d2, xOffS = xOffset * xScale, zOffS = zOffset * zScale;
         long k, l;
-        for (int j = 0; j < this.octaves; ++j) {
+
+        NoiseGeneratorImproved[] generatorCollection = this.generatorCollection;
+
+        for (int j = 0, size = this.octaves; j < size; ++j) {
             k = MathHelper.lfloor(d0 = d3 * xOffS);
             l = MathHelper.lfloor(d2 = zOffS * d3);
 
-            this.generatorCollection[j].populateNoiseArray(noiseArray,
+            generatorCollection[j].populateNoiseArray(noiseArray,
                     (d0 - (double)k) + (double)k % 16777216L,
                     yOffset * d3 * yScale,
                     (d2 - (double)l) + (double)l % 16777216L, xSize, ySize, zSize,

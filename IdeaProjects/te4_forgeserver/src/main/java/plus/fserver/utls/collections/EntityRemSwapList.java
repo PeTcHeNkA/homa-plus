@@ -23,7 +23,8 @@ public class EntityRemSwapList<T extends Entity> extends EntityList<T> {
     public static class E15<T extends Entity> extends EntityRemSwapList<T>{
         @Override
         public Entity[] newArrayAuto() {
-            return Arrays.copyOf(data, data.length + 15);
+            Entity[] data;
+            return expand(data = this.data, data.length+15);
         }
     }
 
@@ -36,7 +37,9 @@ public class EntityRemSwapList<T extends Entity> extends EntityList<T> {
 
         @Override
         public Entity[] newArrayAuto() {
-            return Arrays.copyOf(data, data.length == 1 ? 5 : data.length + 7);
+            Entity[] data;
+            int len;
+            return expand(data = this.data, (len = data.length) == 1 ? 5 : len + 7);
         }
     }
 

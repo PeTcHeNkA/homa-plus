@@ -93,8 +93,9 @@ public abstract class MixinChunk implements IChunkLighting, IChunkLightingData, 
      */
     @Overwrite
     private void relightBlock(final int x, final int y, final int z) {
+        byte[] heightMap;
         int j;
-        final int i = j = (this.heightMap[z << 4 | x] & 0xFF);
+        final int i = j = ((heightMap = this.heightMap)[z << 4 | x] & 0xFF);
         if (y > i) {
             j = y;
         }
@@ -102,11 +103,11 @@ public abstract class MixinChunk implements IChunkLighting, IChunkLightingData, 
             --j;
         }
         if (j != i) {
-            this.heightMap[z << 4 | x] = (byte) j;
+            heightMap[z << 4 | x] = (byte) j;
             if (this.world.provider.hasSkyLight()) {
                 LightingHooks.relightSkylightColumn(this.world, (Chunk)(Object)this, x, z, i, j);
             }
-            final int l1 = this.heightMap[z << 4 | x];
+            final int l1 = heightMap[z << 4 | x];
             if (l1 < this.heightMapMinimum) {
                 this.heightMapMinimum = l1;
             }
