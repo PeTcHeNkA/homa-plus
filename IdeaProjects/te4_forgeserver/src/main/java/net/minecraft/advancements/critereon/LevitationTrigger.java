@@ -79,7 +79,7 @@ public class LevitationTrigger extends ConcurrentHashMap<PlayerAdvancements, Lev
 
     static class Listeners extends Te4HashSet<ICriterionTrigger.Listener<Instance>> {
         public Listeners() {
-            super(4);
+            super(3);
         }
 
 

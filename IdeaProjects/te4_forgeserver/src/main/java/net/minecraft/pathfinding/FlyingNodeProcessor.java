@@ -9,6 +9,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import plus.fserver.api.IBlockEAccess;
 import plus.fserver.world.NavigationCache;
@@ -17,6 +18,11 @@ import plus.tson.utl.Te4HashSet;
 
 
 public class FlyingNodeProcessor extends WalkNodeProcessor {
+    public FlyingNodeProcessor(){}
+    public FlyingNodeProcessor(World world) {
+        super(world);
+    }
+
     public void init(IBlockAccess access, EntityLiving mob) {
         super.init(access, mob);
         this.avoidsWater = mob.getPathPriority(PathNodeType.WATER);
@@ -62,7 +68,7 @@ public class FlyingNodeProcessor extends WalkNodeProcessor {
         }
 
         if (this.entity.getPathPriority(type0) < 0.0F) {
-            Set<BlockPos> set = new Te4HashSet<>();
+            Set<BlockPos> set = new Te4HashSet<>(7);
             set.add(new BlockPos(this.entity.getEntityBoundingBox().minX, i, this.entity.getEntityBoundingBox().minZ));
             set.add(new BlockPos(this.entity.getEntityBoundingBox().minX, i, this.entity.getEntityBoundingBox().maxZ));
             set.add(new BlockPos(this.entity.getEntityBoundingBox().maxX, i, this.entity.getEntityBoundingBox().minZ));

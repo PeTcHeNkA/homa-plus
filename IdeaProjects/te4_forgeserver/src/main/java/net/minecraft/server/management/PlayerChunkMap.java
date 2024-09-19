@@ -26,7 +26,7 @@ public class PlayerChunkMap extends FlatMap<PlayerChunkMapEntry>{
 
     private final WorldServer world;
     private final ArrayRemSwapListE15<EntityPlayerMP> players = new ArrayRemSwapListE15<>();
-    private Te4HashSet<PlayerChunkMapEntry> dirtyEntries = new Te4HashSet<>();
+    private Te4HashSet<PlayerChunkMapEntry> dirtyEntries = new Te4HashSet<>(7);
     private final List<PlayerChunkMapEntry> pendingSendToPlayers = Lists.newLinkedList();
     private final List<PlayerChunkMapEntry> entriesWithoutChunks = Lists.newLinkedList();
     private final ArrayRemSwapListE15<PlayerChunkMapEntry> entries = new ArrayRemSwapListE15<>();
@@ -85,7 +85,7 @@ public class PlayerChunkMap extends FlatMap<PlayerChunkMapEntry>{
         //todo fixed, used other set. maybe not uptimal (memory)
         if (!this.dirtyEntries.isEmpty()) {
             Te4HashSet<PlayerChunkMapEntry> old = dirtyEntries;
-            dirtyEntries = new Te4HashSet<>();
+            dirtyEntries = new Te4HashSet<>(7);
             old.forEach(PlayerChunkMapEntry::update);
         }
 

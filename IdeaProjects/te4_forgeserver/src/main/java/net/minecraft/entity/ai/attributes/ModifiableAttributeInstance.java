@@ -24,7 +24,7 @@ public class ModifiableAttributeInstance implements IAttributeInstance {
         this.genericAttribute = genericAttributeIn;
         this.baseValue = genericAttributeIn.getDefaultValue();
         for (int i = 0; i < mapByOperation.length; i++) {
-            this.mapByOperation[i] = new Te4HashSet<>();
+            this.mapByOperation[i] = new Te4HashSet<>(7);
         }
     }
 
@@ -94,7 +94,7 @@ public class ModifiableAttributeInstance implements IAttributeInstance {
             Set<AttributeModifier> set = this.mapByName.get(modifier.getName());
 
             if (set == null) {
-                set = new Te4HashSet<>();
+                set = new Te4HashSet<>(7);
                 this.mapByName.put(modifier.getName(), set);
             }
             (this.mapByOperation[modifier.getOperation()]).add(modifier);

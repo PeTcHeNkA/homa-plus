@@ -5,11 +5,16 @@ import net.minecraft.block.material.Material;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.World;
 import plus.fserver.api.IBlockEAccess;
 
 
 public class SwimNodeProcessor extends NodeProcessor {
+    public SwimNodeProcessor(){}
+    public SwimNodeProcessor(World world){
+        super(world);
+    }
+
     @Override
     public PathPoint getStart() {
         return this.openPoint(MathHelper.floor(this.entity.getEntityBoundingBox().minX), MathHelper.floor(this.entity.getEntityBoundingBox().minY + 0.5D), MathHelper.floor(this.entity.getEntityBoundingBox().minZ));
@@ -58,10 +63,14 @@ public class SwimNodeProcessor extends NodeProcessor {
 
 
     private PathNodeType isFree(int x, int y, int z) {
-        for (int i = x; i < x + this.entitySizeX; ++i) {
-            for (int j = y; j < y + this.entitySizeY; ++j)
-                for (int k = z; k < z + this.entitySizeZ; ++k)
-                    if (blockaccess.getBlockState(pooledPos.setPos(i, j, k))
+        final int mx = (x + this.entitySizeX) & 255;
+        final int my = (y + this.entitySizeY) & 255;
+        final int mz = (z + this.entitySizeZ) & 255;
+        IBlockEAccess access = blockaccess;
+        for (int cx = x; cx < mx; ++cx) {
+            for (int cy = y; cy < my; ++cy)
+                for (int cz = z; cz < mz; ++cz)
+                    if (access.getBlockState(cx, cy, cz)
                         .getMaterial() != Material.WATER) return PathNodeType.BLOCKED;
         }
         return PathNodeType.WATER;

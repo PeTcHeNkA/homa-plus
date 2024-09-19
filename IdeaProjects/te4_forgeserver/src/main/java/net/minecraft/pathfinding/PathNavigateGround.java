@@ -26,7 +26,7 @@ public class PathNavigateGround extends PathNavigate {
 
     @Override
     protected PathFinder getPathFinder() {
-        this.nodeProcessor = new WalkNodeProcessor();
+        this.nodeProcessor = new WalkNodeProcessor(world);
         this.nodeProcessor.setCanEnterDoors(true);
         return new PathFinder(this.nodeProcessor);
     }
@@ -41,6 +41,14 @@ public class PathNavigateGround extends PathNavigate {
     @Override
     protected Vec3d getEntityPosition() {
         return new Vec3d(this.entity.posX, this.getPathablePosY(), this.entity.posZ);
+    }
+
+
+    @Override
+    protected void updateEntityPos() {
+        lastPosX = this.entity.posX;
+        lastPosY = this.getPathablePosY();
+        lastPosZ = this.entity.posZ;
     }
 
 

@@ -88,6 +88,7 @@ import plus.fserver.ElcaConfig;
 import plus.fserver.ElcaMobs;
 import plus.fserver.api.IBlockEAccess;
 import plus.fserver.ElcaCV;
+import plus.fserver.entity.ai.TeleportInfo;
 import plus.fserver.server.SStrings;
 import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.collections.AABBList;
@@ -178,16 +179,16 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
     protected boolean inPortal;
     protected byte portalCounter; //todo check mini error
     public int dimension;
-    protected BlockPos lastPortalPos;
-    protected Vec3d lastPortalVec;
-    protected EnumFacing teleportDirection;
+    @Nullable
+    protected TeleportInfo tpInfo; //todo unsafe?
     private boolean invulnerable;
     protected UUID entityUniqueID;
+    @Nullable
     protected String cachedUniqueIdString;
     @Nullable
     private CommandResultStats cmdResultStats;
     protected boolean glowing;
-    private final Set<String> tags;
+    private Set<String> tags;
     private boolean isPositionDirty;
     final float[] pistonDeltas; //todo check mini error
     long pistonDeltasGameTime;
@@ -229,9 +230,9 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         this.fire = (short) -this.getFireImmuneTicks();
         this.firstUpdate = true;
         this.entityUniqueID = MathHelper.getRandomUUID(this.rand);
-        this.cachedUniqueIdString = this.entityUniqueID.toString();
+        this.cachedUniqueIdString = null;
         //this.cmdResultStats = new CommandResultStats();
-        this.tags = new Te4HashSet<>(4);
+        //this.tags = new Te4HashSet<>(4);
         this.pistonDeltas = new float[] {0.0f, 0.0f, 0.0f};
         this.world = worldIn;
         //replace zero AABB to self
@@ -274,6 +275,10 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
     public void setEntityId(int id) {
         if(world != null && isAddedToWorld) {
+            if(!world.isRemote){
+                world.entitiesById.removeObject(this.entityId);
+                world.entitiesById.addKey(id, this);
+            }
             world.realEntityList.removeRefSwap(this);
             this.entityId = id;
             world.realEntityList.addF(this);
@@ -284,21 +289,30 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
 
     public Set<String> getTags() {
-        return this.tags;
+        Set<String> tags;
+        if((tags = this.tags) == null)return Collections.EMPTY_SET;
+        return tags;
     }
 
 
     public boolean addTag(String tag) {
-        if (this.tags.size() >= 1024) return false;
+        Set<String> tags;
+        if((tags = this.tags) == null){
+            this.tags = tags = new Te4HashSet<>(3);
+            return tags.add(tag);
+        }
+        if (tags.size() >= 1024) return false;
         else {
-            this.tags.add(tag);
+            tags.add(tag);
             return true;
         }
     }
 
 
     public boolean removeTag(String tag) {
-        return this.tags.remove(tag);
+        Set<String> tags;
+        if((tags = this.tags) == null)return false;
+        return tags.remove(tag);
     }
 
 
@@ -1768,9 +1782,9 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
             }
             tag.setBoolean(SStrings.UpdateBlocked, updateBlocked);
 
-            if (!this.tags.isEmpty()) {
+            if (this.tags != null && !this.tags.isEmpty()) {
                 NBTTagList nbttaglist = new NBTTagList();
-                for (String s : this.tags) {
+                for (String s : this.tags) { //safe
                     nbttaglist.appendTag(new NBTTagString(s));
                 }
                 tag.setTag(SStrings.Tags, nbttaglist);
@@ -1854,7 +1868,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
             if (compound.hasUniqueId(SStrings.UUID)) {
                 this.entityUniqueID = compound.getUniqueId(SStrings.UUID);
-                this.cachedUniqueIdString = this.entityUniqueID.toString();
+                this.cachedUniqueIdString = null;
             }
 
             this.mutPosition(this.posX, this.posY, this.posZ);
@@ -1880,12 +1894,13 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
             if (this.capabilities != null && compound.hasKey(SStrings.ForgeCaps)) this.capabilities.deserializeNBT(compound.getCompoundTag("ForgeCaps"));
 
             if (compound.hasKey(SStrings.Tags, 9)) {
-                this.tags.clear();
+                if(this.tags == null)this.tags = new Te4HashSet<>(3);
+                else this.tags.clear(); //safe
                 NBTTagList nbttaglist1 = compound.getTagList(SStrings.Tags, 8);
                 int i = Math.min(nbttaglist1.tagCount(), 1024);
 
                 for (int j = 0; j < i; ++j) {
-                    this.tags.add(nbttaglist1.getStringTagAt(j));
+                    this.tags.add(nbttaglist1.getStringTagAt(j)); //safe
                 }
             }
 
@@ -2186,15 +2201,14 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         if (this.timeUntilPortal > 0) {
             this.timeUntilPortal = this.getPortalCooldown();
         } else {
-            if ((!this.world.isRemote || SERVER_COMPILE) && !pos.equals(this.lastPortalPos)) {
-                this.lastPortalPos = new BlockPos(pos);
-                BlockPattern.PatternHelper helper = Blocks.PORTAL.createPatternHelper(this.world, this.lastPortalPos);
+            if ((!this.world.isRemote || SERVER_COMPILE) && !pos.equals(tpInfo)) {
+                this.tpInfo = new TeleportInfo(pos.getX(), pos.getY(), pos.getZ());
+                BlockPattern.PatternHelper helper = Blocks.PORTAL.createPatternHelper(this.world, tpInfo);
                 double d0 = helper.getForwards().getAxis() == EnumFacing.Axis.X ? (double)helper.getFrontTopLeft().getZ() : (double)helper.getFrontTopLeft().getX();
                 double d1 = helper.getForwards().getAxis() == EnumFacing.Axis.X ? this.posZ : this.posX;
                 d1 = Math.abs(MathHelper.pct(d1 - (double)(helper.getForwards().rotateY().getAxisDirection() == EnumFacing.AxisDirection.NEGATIVE ? 1 : 0), d0, d0 - (double)helper.getWidth()));
-                double d2 = MathHelper.pct(this.posY - 1.0D, (double)helper.getFrontTopLeft().getY(), (double)(helper.getFrontTopLeft().getY() - helper.getHeight()));
-                this.lastPortalVec = new Vec3d(d1, d2, 0.0D);
-                this.teleportDirection = helper.getForwards();
+                double d2 = MathHelper.pct(this.posY - 1.0D, (double)helper.getFrontTopLeft().getY(), helper.getFrontTopLeft().getY() - helper.getHeight());
+                this.tpInfo.setVec(d1, d2, helper.getForwards());
             }
             this.inPortal = true;
         }
@@ -2520,9 +2534,10 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         nbttagcompound.removeTag("Dimension");
         this.readFromNBT(nbttagcompound);
         this.timeUntilPortal = entityIn.timeUntilPortal;
-        this.lastPortalPos = entityIn.lastPortalPos;
-        this.lastPortalVec = entityIn.lastPortalVec;
-        this.teleportDirection = entityIn.teleportDirection;
+        this.tpInfo = entityIn.tpInfo;
+//        this.lastPortalPos = entityIn.lastPortalPos;
+//        this.lastPortalVec = entityIn.lastPortalVec;
+//        this.teleportDirection = entityIn.teleportDirection;
     }
 
 
@@ -2622,16 +2637,18 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
 
     public Vec3d getLastPortalVec() {
-        return this.lastPortalVec;
+        if(tpInfo == null)return Vec3d.ZERO;
+        return tpInfo.getVec();
     }
 
 
     public EnumFacing getTeleportDirection() {
-        return this.teleportDirection;
+        if(this.tpInfo == null)return EnumFacing.NORTH;
+        return this.tpInfo.direction;
     }
 
-    public boolean doesEntityNotTriggerPressurePlate()
-    {
+
+    public boolean doesEntityNotTriggerPressurePlate() {
         return false;
     }
 
@@ -2670,7 +2687,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
     public void setUniqueId(UUID uniqueIdIn) {
         this.entityUniqueID = uniqueIdIn;
-        this.cachedUniqueIdString = this.entityUniqueID.toString();
+        this.cachedUniqueIdString = null;
     }
 
 
@@ -2686,7 +2703,10 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
 
     public String getCachedUniqueIdString() {
-        return this.cachedUniqueIdString;
+        String result;
+        if((result = this.cachedUniqueIdString) == null)
+            return this.cachedUniqueIdString = entityUniqueID.toString();
+        return result;
     }
 
 
@@ -3201,7 +3221,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
 
     public <T extends Entity> Collection<T> getRecursivePassengersByType(Class<T> entityClass) {
-        Set<T> set = new Te4HashSet<>();
+        Set<T> set = new Te4HashSet<>(3);
         this.getRecursivePassengersByType(entityClass, set);
         return set;
     }

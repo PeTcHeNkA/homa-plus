@@ -76,7 +76,7 @@ public class TameAnimalTrigger extends ConcurrentHashMap<PlayerAdvancements, Tam
 
     static class Listeners extends Te4HashSet<ICriterionTrigger.Listener<Instance>> {
         public Listeners(PlayerAdvancements advancements) {
-            super(8);
+            super(7);
         }
 
         public void trigger(PlayerAdvancements adv, EntityPlayerMP player, EntityAnimal animal) {

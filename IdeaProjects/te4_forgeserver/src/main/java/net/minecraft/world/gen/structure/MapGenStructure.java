@@ -17,7 +17,7 @@ public abstract class MapGenStructure extends MapGenBase {
     protected Long2ObjectMap<StructureStart> structureMap;
 
     public MapGenStructure() {
-        this.structureMap = new Long2ObjectOpenHashMap<>(63);
+        this.structureMap = new Long2ObjectOpenHashMap<>(31);
     }
 
 

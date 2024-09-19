@@ -5,7 +5,6 @@ import com.google.common.collect.Maps;
 import io.netty.handler.codec.DecoderException;
 import io.netty.handler.codec.EncoderException;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -13,7 +12,6 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.annotation.Nullable;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectCollection;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.Entity;
@@ -26,11 +24,10 @@ import org.apache.logging.log4j.Logger;
 import plus.fserver.utls.collections.ArrayListE6;
 
 
-public class EntityDataManager {
+public class EntityDataManager extends Int2ObjectOpenHashMap<EntityDataManager.DataEntry<?>>{
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Map<Class <? extends Entity> , Integer > NEXT_ID_MAP = Maps.newHashMap();
     private final Entity entity;
-    private final Int2ObjectOpenHashMap<DataEntry<?>> entries = new Int2ObjectOpenHashMap<>();
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
     private boolean empty = true;
     private boolean dirty;
@@ -83,7 +80,7 @@ public class EntityDataManager {
         int i = key.getId();
         if (i > 254) {
             throw new IllegalArgumentException("Data value id is too big with " + i + "! (Max is " + 254 + ")");
-        } else if (this.entries.containsKey(i)) {
+        } else if (super.containsKey(i)) {
             throw new IllegalArgumentException("Duplicate id value for " + i + "!");
         } else if (DataSerializers.getSerializerId(key.getSerializer()) < 0) {
             throw new IllegalArgumentException("Unregistered serializer " + key.getSerializer() + " for " + i + "!");
@@ -97,14 +94,14 @@ public class EntityDataManager {
         int i = key.getId();
         if (i > 254) {
             throw new IllegalArgumentException("Data value id is too big with " + i + "! (Max is " + 254 + ")");
-        } else if (this.entries.containsKey(i)) {
+        } else if (super.containsKey(i)) {
             throw new IllegalArgumentException("Duplicate id value for " + i + "!");
         } else if (DataSerializers.getSerializerId(key.getSerializer()) < 0) {
             throw new IllegalArgumentException("Unregistered serializer " + key.getSerializer() + " for " + i + "!");
         } else {
             DataEntry<T> dataentry = new DataEntry<T>(key, value);
             this.lock.writeLock().lock();
-            this.entries.put(key.getId(), dataentry);
+            super.put(key.getId(), dataentry);
             this.empty = false;
             this.lock.writeLock().unlock();
             return dataentry;
@@ -115,7 +112,7 @@ public class EntityDataManager {
     private <T> void setEntry(DataParameter<T> key, T value) {
         DataEntry<T> dataentry = new DataEntry<T>(key, value);
         this.lock.writeLock().lock();
-        this.entries.put(key.getId(), dataentry);
+        super.put(key.getId(), dataentry);
         this.empty = false;
         this.lock.writeLock().unlock();
     }
@@ -125,7 +122,7 @@ public class EntityDataManager {
         //this.lock.readLock().lock();
         DataEntry dataentry;
         try {
-            dataentry = this.entries.get(key.getId());
+            dataentry = super.get(key.getId());
         } catch (Throwable throwable) {
             CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Getting synched entity data");
             CrashReportCategory crashreportcategory = crashreport.makeCategory("Synched entity data");
@@ -195,7 +192,7 @@ public class EntityDataManager {
         if (this.dirty) {
             this.lock.readLock().lock();
 
-            for (EntityDataManager.DataEntry<?> dataentry : this.entries.values()) {
+            for (EntityDataManager.DataEntry<?> dataentry : super.values()) {
                 if (dataentry.isDirty()) {
                     dataentry.setDirty(false);
                     if (list == null) {
@@ -213,7 +210,7 @@ public class EntityDataManager {
 
     public void writeEntries(PacketBuffer buf) throws IOException {
         this.lock.readLock().lock();
-        for (EntityDataManager.DataEntry<?> dataentry : this.entries.values()) {
+        for (EntityDataManager.DataEntry<?> dataentry : super.values()) {
             writeEntry(buf, dataentry);
         }
         this.lock.readLock().unlock();
@@ -226,7 +223,7 @@ public class EntityDataManager {
         this.lock.readLock().lock();
 
         ArrayListE6<DataEntry<?>> list = new ArrayListE6<>();
-        list.addAll(this.entries.values());
+        list.addAll(super.values());
 
         this.lock.readLock().unlock();
         return list;
@@ -273,7 +270,7 @@ public class EntityDataManager {
     public void setEntryValues(List <DataEntry<? >> entriesIn) {
         this.lock.writeLock().lock();
         for (DataEntry<?> dataentry : entriesIn) {
-            DataEntry<?> dataentry1 = this.entries.get(Integer.valueOf(dataentry.getKey().getId()));
+            DataEntry<?> dataentry1 = super.get(dataentry.getKey().getId());
 
             if (dataentry1 != null) {
                 this.setEntryValue(dataentry1, dataentry);
@@ -299,15 +296,10 @@ public class EntityDataManager {
     public void setClean() {
         this.dirty = false;
         this.lock.readLock().lock();
-        for (DataEntry<?> dataentry : this.entries.values()) {
+        for (DataEntry<?> dataentry : super.values()) {
             dataentry.setDirty(false);
         }
         this.lock.readLock().unlock();
-    }
-
-
-    public void trim() {
-        entries.trim();
     }
 
 

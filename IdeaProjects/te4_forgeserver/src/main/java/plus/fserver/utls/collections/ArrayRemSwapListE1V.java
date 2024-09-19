@@ -1,7 +1,5 @@
 package plus.fserver.utls.collections;
 
-import java.util.Arrays;
-
 
 public final class ArrayRemSwapListE1V<T> extends ArrayRemSwapListE6<T> {
     public ArrayRemSwapListE1V(T v) {
@@ -11,6 +9,7 @@ public final class ArrayRemSwapListE1V<T> extends ArrayRemSwapListE6<T> {
 
     @Override
     public Object[] newArrayAuto() {
-        return Arrays.copyOf(data, data.length == 1 ? 5 : data.length + 7);
+        Object[] data;
+        return expand(data = this.data, data.length == 1 ? 5 : data.length + 7);
     }
 }

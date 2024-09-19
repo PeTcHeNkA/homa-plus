@@ -101,7 +101,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     private final List<TileEntity> tileEntitiesToBeRemoved = Lists.newArrayList();
     public final List<EntityPlayer> playerEntities = Lists.newArrayList();
     public final List<Entity> weatherEffects = Lists.newArrayList();
-    protected final IntHashMap<Entity> entitiesById = new IntHashMap<>();
+    public final IntHashMap<Entity> entitiesById = new IntHashMap<>();
     private final long cloudColour = 16777215L;
     protected int skylightSubtracted;
     protected int updateLCG = (new Random()).nextInt();

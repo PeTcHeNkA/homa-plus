@@ -75,7 +75,7 @@ public class ConstructBeaconTrigger extends ConcurrentHashMap<PlayerAdvancements
 
     static class Listeners extends Te4HashSet<ICriterionTrigger.Listener<Instance>> {
         public Listeners(PlayerAdvancements advancements) {
-            super(4);
+            super(3);
         }
 
 

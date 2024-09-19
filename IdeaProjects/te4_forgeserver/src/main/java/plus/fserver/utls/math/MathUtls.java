@@ -42,4 +42,15 @@ public class MathUtls {
             else return f1<f2 ? -(f1-f2) : f2-f1;
         }
     }
+
+
+    public static double squareDistanceBetween(
+            double x1, double y1, double z1,
+            double x2, double y2, double z2
+    ) {
+        x2 -= x1;
+        y2 -= y1;
+        z2 -= z1;
+        return x2 * x2 + y2 * y2 + z2 * z2;
+    }
 }

@@ -72,7 +72,7 @@ public class ConsumeItemTrigger extends ConcurrentHashMap<PlayerAdvancements, Co
 
     static class Listeners extends Te4HashSet<ICriterionTrigger.Listener<Instance>> {
         public Listeners() {
-            super(8);
+            super(7);
         }
 
 

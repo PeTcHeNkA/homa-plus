@@ -77,7 +77,7 @@ public class UsedEnderEyeTrigger extends ConcurrentHashMap<PlayerAdvancements, U
 
     static class Listeners extends Te4HashSet<ICriterionTrigger.Listener<Instance>> {
         public Listeners() {
-            super(4);
+            super(3);
         }
 
 

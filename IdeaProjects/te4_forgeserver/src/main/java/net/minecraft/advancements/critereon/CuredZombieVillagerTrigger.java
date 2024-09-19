@@ -77,7 +77,7 @@ public class CuredZombieVillagerTrigger extends ConcurrentHashMap<PlayerAdvancem
 
     static class Listeners extends Te4HashSet<ICriterionTrigger.Listener<Instance>> {
         public Listeners() {
-            super(4);
+            super(7);
         }
 
         public void trigger(PlayerAdvancements adv, EntityPlayerMP player, EntityZombie zombie, EntityVillager villager) {

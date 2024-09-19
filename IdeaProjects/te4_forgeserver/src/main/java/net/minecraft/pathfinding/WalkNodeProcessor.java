@@ -1,6 +1,5 @@
 package net.minecraft.pathfinding;
 
-import java.util.Set;
 import javax.annotation.Nullable;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDoor;
@@ -17,6 +16,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import plus.fserver.api.IBlockEAccess;
 import plus.fserver.world.PntMatrix;
@@ -27,6 +27,14 @@ public class WalkNodeProcessor extends NodeProcessor {
     protected float avoidsWater;
     protected EntityLiving currentEntity;
     protected PntMatrix matrix;
+
+    public WalkNodeProcessor(){}
+
+
+    public WalkNodeProcessor(World world){
+        super(world);
+    }
+
 
     public void init(IBlockAccess access, EntityLiving mob) {
         super.init(access, mob);
@@ -83,7 +91,7 @@ public class WalkNodeProcessor extends NodeProcessor {
         type = chunked.getCur(blockpos2.getX(), yFactor, blockpos2.getZ());
 
         if(type == null) {
-            type = this.getPathNodeType(access, blockpos2.getX(), yFactor, blockpos2.getZ(), entity, this.entitySizeX, this.entitySizeY, this.entitySizeZ, this.getCanOpenDoors(), this.getCanEnterDoors());
+            type = this.getPathNodeType(access, blockpos2.getX(), yFactor, blockpos2.getZ(), entity, this.entitySizeX & 255, this.entitySizeY & 255, this.entitySizeZ & 255, this.getCanOpenDoors(), this.getCanEnterDoors());
             chunked.setCur(blockpos2.getX(), yFactor, blockpos2.getZ(), type);
         }
 
@@ -227,7 +235,7 @@ public class WalkNodeProcessor extends NodeProcessor {
             type = chunked.getCur(x, y, z);
 
             if(type == null) {
-                type = this.getPathNodeType(access, x, y, z, this.entity, this.entitySizeX, this.entitySizeY, this.entitySizeZ, this.getCanOpenDoors(), this.getCanEnterDoors());
+                type = this.getPathNodeType(access, x, y, z, this.entity, this.entitySizeX & 255, this.entitySizeY & 255, this.entitySizeZ & 255, this.getCanOpenDoors(), this.getCanEnterDoors());
                 //type = this.getPathNodeType(this.entity, x, y, z);
                 chunked.setCur(x, y, z, type);
             }
@@ -282,7 +290,7 @@ public class WalkNodeProcessor extends NodeProcessor {
                     if (entity.width >= 1.0F) {
                         PathNodeType type2 = chunked.getCur(x, y - 1, z);
                         if(type2==null) {
-                            type2 = this.getPathNodeType(access, x, y, z, entity, this.entitySizeX, this.entitySizeY, this.entitySizeZ, this.getCanOpenDoors(), this.getCanEnterDoors());
+                            type2 = this.getPathNodeType(access, x, y, z, entity, this.entitySizeX & 255, this.entitySizeY & 255, this.entitySizeZ & 255, this.getCanOpenDoors(), this.getCanEnterDoors());
                             chunked.setCur(x, y, z, type2);
                         }
 
@@ -390,7 +398,7 @@ public class WalkNodeProcessor extends NodeProcessor {
 
 
     private PathNodeType getPathNodeType(EntityLiving entity, int x, int y, int z) {
-        return this.getPathNodeType(this.blockaccess, x, y, z, entity, this.entitySizeX, this.entitySizeY, this.entitySizeZ, this.getCanOpenDoors(), this.getCanEnterDoors());
+        return this.getPathNodeType(this.blockaccess, x, y, z, entity, this.entitySizeX & 255, this.entitySizeY & 255, this.entitySizeZ & 255, this.getCanOpenDoors(), this.getCanEnterDoors());
     }
 
 

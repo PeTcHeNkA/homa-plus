@@ -7,7 +7,7 @@ import plus.tson.utl.Te4HashSet;
 
 
 public class AttributeMap extends AbstractAttributeMap {
-    private final Set<IAttributeInstance> dirtyInstances = new Te4HashSet<>(8);
+    private final Set<IAttributeInstance> dirtyInstances = new Te4HashSet<>(7);
     protected final LowerStringMap<IAttributeInstance> instancesByName = new LowerStringMap<>();
 
     @Override

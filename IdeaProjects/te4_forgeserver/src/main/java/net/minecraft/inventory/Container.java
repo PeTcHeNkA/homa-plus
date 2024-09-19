@@ -29,9 +29,9 @@ public abstract class Container {
     private short transactionID;
     private int dragMode = -1;
     private byte dragEvent;
-    private final Set<Slot> dragSlots            = new Te4HashSet<>(8);
+    private final Set<Slot> dragSlots            = new Te4HashSet<>(7);
     protected List<IContainerListener> listeners = new ArrayListE2<>();
-    private final Set<EntityPlayer>   playerList = new Te4HashSet<>(4);
+    private final Set<EntityPlayer>   playerList = new Te4HashSet<>(3);
 
     protected Slot addSlotToContainer(Slot slotIn) {
         slotIn.setSlotNum(inventorySlots.size());

@@ -124,7 +124,7 @@ public class EnterBlockTrigger extends ConcurrentHashMap<PlayerAdvancements, Ent
 
     static class Listeners extends Te4HashSet<ICriterionTrigger.Listener<Instance>> {
         public Listeners() {
-            super(8);
+            super(7);
         }
 
 

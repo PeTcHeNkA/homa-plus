@@ -373,7 +373,7 @@ public class EntityList<T extends Entity> implements List<T> {
     public Entity[] newArrayAuto(){
         Entity[] data;
         if((data = this.data) == EMPTY_ARR)return new Entity[6];
-        return expand(data, 10);
+        return expand(data, data.length + 10);
     }
 
 

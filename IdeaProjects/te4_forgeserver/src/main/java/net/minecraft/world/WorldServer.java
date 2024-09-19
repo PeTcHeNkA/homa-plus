@@ -84,6 +84,7 @@ import plus.fserver.utls.collections.EntityRemSwapList;
 import plus.fserver.utls.math.MathUtls;
 import plus.fserver.world.CommonWorldEntitySpawner;
 import plus.fserver.world.NavigationCache;
+import plus.tson.utl.Te4HashMap;
 import plus.tson.utl.Te4HashSet;
 
 
@@ -97,7 +98,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
             new ConcurrentSkipListSet<>()
     );
 
-    private final Map<UUID, Entity> entitiesByUuid = new HashMap<>();
+    private final Te4HashMap<UUID, Entity> entitiesByUuid = new Te4HashMap<>();
     public boolean disableLevelSaving;
     private boolean allPlayersSleeping;
     private int updateEntityTick;
@@ -817,7 +818,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
     public void onEntityAdded(Entity entityIn) {
         super.onEntityAdded(entityIn);
         this.entitiesById.addKey(entityIn.getEntityId(), entityIn);
-        this.entitiesByUuid.put(entityIn.getUniqueID(), entityIn);
+        this.entitiesByUuid.fput(entityIn.getUniqueID(), entityIn);
 
         Entity[] aentity = entityIn.getParts();
 
@@ -1176,6 +1177,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
 
 
     public final NavigationCache navCache = new NavigationCache();
+    public final BlockPos.MutableBlockPos navPooledPos = new BlockPos.MutableBlockPos();
     private int timerClean = 0;
 
 

@@ -978,9 +978,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
             this.experienceTotal = that.experienceTotal;
             this.experience = that.experience;
             this.setScore(that.getScore());
-            this.lastPortalPos = that.lastPortalPos;
-            this.lastPortalVec = that.lastPortalVec;
-            this.teleportDirection = that.teleportDirection;
+            this.tpInfo = that.tpInfo;
         } else if (this.world.getGameRules().keepInventory.getBoolean() || that.isSpectator()) {
             this.inventory.copyInventory(that.inventory);
             this.experienceLevel = that.experienceLevel;

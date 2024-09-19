@@ -36,7 +36,7 @@ public interface IBlockAccess {
 
 
     default World getWorld(){
-        return (World)this;
+        return null;
     }
     /**
      * FORGE: isSideSolid, pulled up from {@link World}

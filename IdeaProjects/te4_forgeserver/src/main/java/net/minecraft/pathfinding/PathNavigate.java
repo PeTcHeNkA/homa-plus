@@ -27,7 +27,7 @@ public abstract class PathNavigate {
     private final IAttributeInstance pathSearchRange;
     protected int totalTicks;
     private int ticksAtLastPos;
-    private Vec3d lastPosCheck = Vec3d.ZERO;
+    double lastPosX, lastPosY, lastPosZ;
     private Vec3d timeoutCachedNode = Vec3d.ZERO;
     private long timeoutTimer;
     private long lastTimeoutCheck;
@@ -180,7 +180,7 @@ public abstract class PathNavigate {
             else {
                 this.speed = speedIn;
                 this.ticksAtLastPos = this.totalTicks;
-                this.lastPosCheck = this.getEntityPosition();
+                this.updateEntityPos();
                 return true;
             }
         }
@@ -273,13 +273,15 @@ public abstract class PathNavigate {
     }
 
 
-    protected final void checkForStuck(Vec3d positionVec3) {
+    protected final void checkForStuck(Vec3d pos) {
         if (this.totalTicks - this.ticksAtLastPos > 100) {
-            if (positionVec3.squareDistanceTo(this.lastPosCheck) < 2.25D) {
+            if (pos.squareDistanceTo(lastPosX, lastPosY, lastPosZ) < 2.25D) {
                 this.clearPath();
             }
             this.ticksAtLastPos = this.totalTicks;
-            this.lastPosCheck = positionVec3;
+            lastPosX = pos.x;
+            lastPosY = pos.y;
+            lastPosZ = pos.z;
         }
 
 
@@ -291,7 +293,7 @@ public abstract class PathNavigate {
                 this.timeoutTimer += System.currentTimeMillis() - this.lastTimeoutCheck;
             } else {
                 this.timeoutCachedNode = new Vec3d(point.x, point.y, point.z);
-                double d0 = positionVec3.distanceTo(this.timeoutCachedNode);
+                double d0 = pos.distanceTo(this.timeoutCachedNode);
                 this.timeoutLimit = this.entity.getAIMoveSpeed() > 0.0F ? d0 / (double)this.entity.getAIMoveSpeed() * 1000.0D : 0.0D;
             }
 
@@ -308,11 +310,13 @@ public abstract class PathNavigate {
 
     protected final void checkForStuck(double vX, double vY, double vZ) {
         if (this.totalTicks - this.ticksAtLastPos > 100) {
-            if (this.lastPosCheck.squareDistanceTo(vX, vY, vZ) < 2.25D) {
+            if (MathUtls.squareDistanceBetween(lastPosX, lastPosY, lastPosZ, vX, vY, vZ) < 2.25D) {
                 this.clearPath();
             }
             this.ticksAtLastPos = this.totalTicks;
-            this.lastPosCheck = new Vec3d(vX, vY, vZ);
+            lastPosX = vX;
+            lastPosY = vY;
+            lastPosZ = vZ;
         }
 
         if (this.currentPath != null && !this.currentPath.isFinished()) {
@@ -343,13 +347,15 @@ public abstract class PathNavigate {
     }
 
 
-    public void clearPath()
-    {
+    public void clearPath() {
         this.currentPath = null;
     }
 
 
     protected abstract Vec3d getEntityPosition();
+
+
+    protected abstract void updateEntityPos();
 
 
     protected abstract boolean canNavigate();

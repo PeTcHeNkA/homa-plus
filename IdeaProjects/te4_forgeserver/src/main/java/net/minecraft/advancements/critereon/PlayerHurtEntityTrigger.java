@@ -74,7 +74,7 @@ public class PlayerHurtEntityTrigger extends ConcurrentHashMap<PlayerAdvancement
 
     static class Listeners extends Te4HashSet<ICriterionTrigger.Listener<Instance>> {
         public Listeners(PlayerAdvancements advancements) {
-            super(8);
+            super(7);
         }
 
 

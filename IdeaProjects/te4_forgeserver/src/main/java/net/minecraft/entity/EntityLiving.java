@@ -86,7 +86,7 @@ public abstract class EntityLiving extends EntityLivingBase {
 
     private boolean canPickUpLoot;
     private boolean persistenceRequired;
-    private final Int2FloatOpenHashMap mapPathPriority = new Int2FloatOpenHashMap();
+    private final Int2FloatOpenHashMap mapPathPriority = new Int2FloatOpenHashMap(3);
     private ResourceLocation deathLootTable;
     private long deathLootTableSeed;
     private boolean isLeashed;
@@ -225,11 +225,11 @@ public abstract class EntityLiving extends EntityLivingBase {
     protected int getExperiencePoints(EntityPlayer player) {
         if (this.experienceValue > 0) {
             int i = this.experienceValue;
-            for (int j = 0; j < this.inventoryArmor.size(); ++j)
+            for (int j = 0; j < 4; ++j)
                 if (!this.inventoryArmor.get(j).isEmpty() && this.inventoryArmorDropChances[j] <= 1.0F)
                     i += 1 + this.rand.nextInt(3);
 
-            for (int k = 0; k < this.inventoryHands.size(); ++k)
+            for (int k = 0; k < 2; ++k)
                 if (!this.inventoryHands.get(k).isEmpty() && this.inventoryHandsDropChances[k] <= 1.0F)
                     i += 1 + this.rand.nextInt(3);
             return i;
@@ -448,14 +448,14 @@ public abstract class EntityLiving extends EntityLivingBase {
         if (nbt.hasKey(SStrings.ArmorItems, 9)) {
             NBTTagList nbttaglist = nbt.getTagList(SStrings.ArmorItems, 10);
 
-            for (int i = 0; i < this.inventoryArmor.size(); ++i)
+            for (int i = 0; i < 4; ++i)
                 this.inventoryArmor.fSet(i, new ItemStack(nbttaglist.getCompoundTagAt(i)));
         }
 
         if (nbt.hasKey(SStrings.HandItems, 9)) {
             NBTTagList nbttaglist1 = nbt.getTagList(SStrings.HandItems, 10);
 
-            for (int j = 0; j < this.inventoryHands.size(); ++j)
+            for (int j = 0; j < 2; ++j)
                 this.inventoryHands.fSet(j, new ItemStack(nbttaglist1.getCompoundTagAt(j)));
         }
 

@@ -70,7 +70,7 @@ public class StatisticsManagerServer extends StatisticsManager {
 
 
     private Set<StatBase> getDirty() {
-        Te4HashSet<StatBase> result = new Te4HashSet<>();
+        Te4HashSet<StatBase> result = new Te4HashSet<>(3);
         result.addAll(this.dirty);
         this.dirty.clear();
         return result;

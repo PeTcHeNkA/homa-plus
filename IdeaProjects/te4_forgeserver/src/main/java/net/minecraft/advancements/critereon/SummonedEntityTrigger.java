@@ -73,7 +73,7 @@ public class SummonedEntityTrigger extends ConcurrentHashMap<PlayerAdvancements,
 
     static class Listeners extends Te4HashSet<ICriterionTrigger.Listener<Instance>> {
         public Listeners() {
-            super(8);
+            super(7);
         }
 
         public void trigger(PlayerAdvancements adv, EntityPlayerMP player, Entity entity) {

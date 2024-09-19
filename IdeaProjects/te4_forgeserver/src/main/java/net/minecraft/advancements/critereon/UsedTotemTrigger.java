@@ -73,7 +73,7 @@ public class UsedTotemTrigger extends ConcurrentHashMap<PlayerAdvancements, Used
 
     static class Listeners extends Te4HashSet<ICriterionTrigger.Listener<Instance>> {
         public Listeners() {
-            super(4);
+            super(3);
         }
 
         public void trigger(PlayerAdvancements adv, ItemStack stack) {

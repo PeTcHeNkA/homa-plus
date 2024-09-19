@@ -4,28 +4,45 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import plus.fserver.api.IBlockEAccess;
 import plus.fserver.utls.collections.PointHashMap;
 
 
 public abstract class NodeProcessor extends PointHashMap{
-    protected final BlockPos.MutableBlockPos pooledPos = new BlockPos.MutableBlockPos();
+    protected final BlockPos.MutableBlockPos pooledPos;
     protected IBlockEAccess blockaccess;
     protected EntityLiving entity;
-    protected int entitySizeX;
-    protected int entitySizeY;
-    protected int entitySizeZ;
+    protected byte entitySizeX;
+    protected byte entitySizeY;
+    protected byte entitySizeZ;
     protected boolean canEnterDoors;
     protected boolean canOpenDoors;
     protected boolean canSwim;
+
+    public NodeProcessor(){
+        pooledPos = new BlockPos.MutableBlockPos();
+    }
+
+
+    public NodeProcessor(IBlockAccess sourceIn){
+        World world = sourceIn.getWorld();
+        if(world != null && !world.isRemote){
+            pooledPos = ((WorldServer)world).navPooledPos;
+        } else {
+            pooledPos = new BlockPos.MutableBlockPos();
+        }
+    }
+
 
     public void init(IBlockAccess sourceIn, EntityLiving mob) {
         this.blockaccess = (IBlockEAccess) sourceIn;
         this.entity = mob;
         super.clearMap();
-        this.entitySizeX = MathHelper.floor(mob.width + 1.0F);
-        this.entitySizeY = MathHelper.floor(mob.height + 1.0F);
-        this.entitySizeZ = MathHelper.floor(mob.width + 1.0F);
+        this.entitySizeX = (byte)MathHelper.floor(mob.width  + 0.95F);
+        this.entitySizeY = (byte)MathHelper.floor(mob.height + 0.95F);
+        this.entitySizeZ = (byte)MathHelper.floor(mob.width  + 0.95F);
     }
 
 

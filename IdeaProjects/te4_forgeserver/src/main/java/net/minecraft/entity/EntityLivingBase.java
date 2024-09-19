@@ -96,8 +96,7 @@ public abstract class EntityLivingBase extends Entity {
     private AbstractAttributeMap attributeMap;
     private final CombatTracker combatTracker = new CombatTracker(this);
     private final HashMap<Potion, PotionEffect> activePotionsMap = new HashMap<>(3);
-    private final FixedItemList handInventory = new FixedItemList(2);
-    private final FixedItemList armorArray = new FixedItemList(4);
+    private final FixedItemList equipInv = new FixedItemList(6);
     public boolean isSwingInProgress;
     public EnumHand swingingHand;
     public int swingProgressInt;
@@ -1598,12 +1597,12 @@ public abstract class EntityLivingBase extends Entity {
                 if (  arrowHitTimer <= 0) setArrowCountInEntity(count - 1);
             }
 
-            updateSlot(EntityEquipmentSlot.MAINHAND, handInventory.get(0));
-            updateSlot(EntityEquipmentSlot.OFFHAND , handInventory.get(1));
-            updateSlot(EntityEquipmentSlot.FEET    , armorArray   .get(0));
-            updateSlot(EntityEquipmentSlot.LEGS    , armorArray   .get(1));
-            updateSlot(EntityEquipmentSlot.CHEST   , armorArray   .get(2));
-            updateSlot(EntityEquipmentSlot.HEAD    , armorArray   .get(3));
+            updateSlot(EntityEquipmentSlot.MAINHAND, equipInv.get(0));
+            updateSlot(EntityEquipmentSlot.OFFHAND , equipInv.get(1));
+            updateSlot(EntityEquipmentSlot.FEET    , equipInv.get(2));
+            updateSlot(EntityEquipmentSlot.LEGS    , equipInv.get(3));
+            updateSlot(EntityEquipmentSlot.CHEST   , equipInv.get(4));
+            updateSlot(EntityEquipmentSlot.HEAD    , equipInv.get(5));
 
             if ((this.ticksExisted & 31) == 0) this.getCombatTracker().reset();
 
@@ -1670,10 +1669,10 @@ public abstract class EntityLivingBase extends Entity {
 
             switch (slot.getSlotType()) {
                 case HAND:
-                    this.handInventory.fSet(slot.getIndex(), other.isEmpty() ? ItemStack.EMPTY : other.copy());
+                    this.equipInv.fSet(slot.getIndex(), other.isEmpty() ? ItemStack.EMPTY : other.copy());
                     break;
                 case ARMOR:
-                    this.armorArray   .fSet(slot.getIndex(), other.isEmpty() ? ItemStack.EMPTY : other.copy());
+                    this.equipInv.fSet(slot.getIndex()+2, other.isEmpty() ? ItemStack.EMPTY : other.copy());
             }
         }
     }

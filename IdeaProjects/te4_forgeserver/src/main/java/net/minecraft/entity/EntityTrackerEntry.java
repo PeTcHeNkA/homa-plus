@@ -74,15 +74,15 @@ import static plus.fserver.utls.math.MathUtls.F_256_T_360;
 public class EntityTrackerEntry {
     private static final Logger LOGGER = LogManager.getLogger();
     private final Entity trackedEntity;
-    private final int range;
-    private int maxRange;
+    private final short range;
+    private short maxRange;
     private final int updateFrequency;
     private long encodedPosX;
     private long encodedPosY;
     private long encodedPosZ;
-    private int encodedRotationYaw;
-    private int encodedRotationPitch;
-    private int lastHeadMotion;
+    private short encodedRotationYaw;
+    private short encodedRotationPitch;
+    private short lastHeadMotion;
     private double lastTrackedEntityMotionX;
     private double lastTrackedEntityMotionY;
     private double motionZ;
@@ -101,16 +101,16 @@ public class EntityTrackerEntry {
 
     public EntityTrackerEntry(Entity entityIn, int rangeIn, int maxRangeIn, int updateFrequencyIn, boolean sendVelocityUpdatesIn) {
         this.trackedEntity = entityIn;
-        this.range = rangeIn;
-        this.maxRange = Math.min(range, maxRangeIn);
+        this.range = (short) rangeIn;
+        this.maxRange = (short) Math.min(rangeIn, maxRangeIn);
         this.updateFrequency = updateFrequencyIn;
         this.sendVelocityUpdates = sendVelocityUpdatesIn;
         this.encodedPosX = EntityTracker.getPositionLong(entityIn.posX);
         this.encodedPosY = EntityTracker.getPositionLong(entityIn.posY);
         this.encodedPosZ = EntityTracker.getPositionLong(entityIn.posZ);
-        this.encodedRotationYaw = MathHelper.floor(entityIn.rotationYaw * F_256_T_360);
-        this.encodedRotationPitch = MathHelper.floor(entityIn.rotationPitch * F_256_T_360);
-        this.lastHeadMotion = MathHelper.floor(entityIn.getRotationYawHead() * F_256_T_360);
+        this.encodedRotationYaw   = (short) MathHelper.floor(entityIn.rotationYaw * F_256_T_360);
+        this.encodedRotationPitch = (short) MathHelper.floor(entityIn.rotationPitch * F_256_T_360);
+        this.lastHeadMotion = (short) MathHelper.floor(entityIn.getRotationYawHead() * F_256_T_360);
         this.onGround = entityIn.onGround;
     }
 
@@ -316,7 +316,7 @@ public class EntityTrackerEntry {
         if (trackedEntity instanceof EntityPlayerMP) {
             return new SPacketSpawnPlayer((EntityPlayer)trackedEntity);
         } else if (trackedEntity instanceof IAnimals) {
-            this.lastHeadMotion = MathHelper.floor(trackedEntity.getRotationYawHead() * 256.0F / 360.0F);
+            this.lastHeadMotion = (short) MathHelper.floor(trackedEntity.getRotationYawHead() * 256.0F / 360.0F);
             return new SPacketSpawnMob((EntityLivingBase)trackedEntity);
         } else if (trackedEntity instanceof EntityPainting) {
             return new SPacketSpawnPainting((EntityPainting)trackedEntity);
@@ -428,7 +428,7 @@ public class EntityTrackerEntry {
 
 
     public void setMaxRange(int maxRangeIn) {
-        this.maxRange = Math.min(range, maxRangeIn);
+        this.maxRange = (short) Math.min(range, maxRangeIn);
     }
 
 
@@ -498,8 +498,8 @@ public class EntityTrackerEntry {
 
                 if (Math.abs(j1 - this.encodedRotationYaw) >= 1 || Math.abs(l1 - this.encodedRotationPitch) >= 1) {
                     this.sendPacketToTrackedPlayers(new SPacketEntity.S16PacketEntityLook(entity.getEntityId(), (byte)j1, (byte)l1, entity.onGround));
-                    this.encodedRotationYaw = j1;
-                    this.encodedRotationPitch = l1;
+                    this.encodedRotationYaw = (short) j1;
+                    this.encodedRotationPitch = (short) l1;
                 }
 
                 this.encodedPosX = EntityTracker.getPositionLong(entity.posX);
@@ -573,8 +573,8 @@ public class EntityTrackerEntry {
                 }
 
                 if (flag1) {
-                    this.encodedRotationYaw = k2;
-                    this.encodedRotationPitch = i;
+                    this.encodedRotationYaw = (short) k2;
+                    this.encodedRotationPitch = (short) i;
                 }
                 this.ridingEntity = false;
             }
@@ -589,7 +589,7 @@ public class EntityTrackerEntry {
             }
             if (Math.abs(k1 - this.lastHeadMotion) >= amount) {
                 this.sendPacketToTrackedPlayers(new SPacketEntityHeadLook(entity, (byte)k1));
-                this.lastHeadMotion = k1;
+                this.lastHeadMotion = (short) k1;
             }
             entity.isAirBorne = false;
         }

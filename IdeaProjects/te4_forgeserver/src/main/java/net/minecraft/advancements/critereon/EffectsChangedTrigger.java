@@ -74,7 +74,7 @@ public class EffectsChangedTrigger extends ConcurrentHashMap<PlayerAdvancements,
 
     static class Listeners extends Te4HashSet<ICriterionTrigger.Listener<Instance>> {
         public Listeners() {
-            super(8);
+            super(3);
         }
 
         public void trigger(PlayerAdvancements adv, EntityPlayerMP player) {

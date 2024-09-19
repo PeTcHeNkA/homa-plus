@@ -1,5 +1,6 @@
 package plus.fserver.utls.collections;
 
+import net.minecraft.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.function.Consumer;
@@ -368,7 +369,18 @@ public class ArrayListE6<T> implements List<T> {
 
 
     public Object[] newArrayAuto(){
-        return Arrays.copyOf(data, data == EMPTY_ARR ?6: data.length+10);
+        Object[] data;
+        if((data = this.data) == EMPTY_ARR)return new Object[6];
+        return expand(data, data.length+10);
+    }
+
+
+    protected static Object[] expand(Object[] src, int newSize){
+        int prevLen;
+        if((prevLen = src.length) == 0)return new Object[newSize];
+        Object[] newArr = new Entity[newSize];
+        System.arraycopy(src, 0, newArr, 0, prevLen);
+        return newArr;
     }
 
 

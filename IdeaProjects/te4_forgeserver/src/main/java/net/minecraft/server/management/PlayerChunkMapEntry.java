@@ -340,7 +340,7 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements R
     public Entity[] newArrayAuto() {
         Entity[] data;
         if((data = this.data) == EMPTY_ARR)return new Entity[1];
-        return expand(data, 2);
+        return expand(data, data.length+2);
     }
 
 

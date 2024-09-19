@@ -81,7 +81,7 @@ public class PositionTrigger extends ConcurrentHashMap<PlayerAdvancements, Posit
 
     static class Listeners extends Te4HashSet<ICriterionTrigger.Listener<Instance>> {
         public Listeners() {
-            super(8);
+            super(7);
         }
 
         public void trigger(PlayerAdvancements adv, WorldServer world, double dx, double dy, double dz) {
