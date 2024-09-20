@@ -2544,7 +2544,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
     @Nullable
     public Entity changeDimension(int dimensionIn) {
         if (this.world.isRemote || this.isDead) return null;
-        return changeDimension(dimensionIn, this.getServer().getWorld(dimensionIn).getDefaultTeleporter());
+        return changeDimension(dimensionIn, this.getServer().getWorld(dimensionIn).getDefaultTeleporterRaw());
     }
 
 

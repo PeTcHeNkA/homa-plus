@@ -62,6 +62,7 @@ import net.minecraft.world.storage.loot.LootTableManager;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.WorldSpecificSaveHandler;
+import net.minecraftforge.common.util.ITeleporter;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.world.WorldEvent;
@@ -102,7 +103,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
     public boolean disableLevelSaving;
     private boolean allPlayersSleeping;
     private int updateEntityTick;
-    private final Teleporter worldTeleporter;
+    private ITeleporter worldTeleporter;
     @Keep
     private final WorldEntitySpawner entitySpawner;
     protected final VillageSiege villageSiege = new VillageSiege(this);
@@ -129,7 +130,6 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         this.playerChunkMap = new PlayerChunkMap(this);
 
         perWorldStorage = new MapStorage(new WorldSpecificSaveHandler(this, saveHandlerIn));
-        this.worldTeleporter = new Teleporter(this);
         this.calculateInitialSkylight();
         this.calculateInitialWeather();
         this.getWorldBorder().setSize(server.getMaxWorldSize());
@@ -138,6 +138,11 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
 
         effectiveAcces = localSelector;
         entitySpawner = makeWorldSpawner();
+    }
+
+
+    protected ITeleporter initTeleporter(){
+        return new Teleporter(this);
     }
 
 
@@ -1074,7 +1079,14 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
 
 
     public Teleporter getDefaultTeleporter() {
-        return this.worldTeleporter;
+        return (Teleporter) getDefaultTeleporterRaw();
+    }
+
+
+    public ITeleporter getDefaultTeleporterRaw() {
+        ITeleporter teleporter = this.worldTeleporter;
+        if(teleporter == null)return this.worldTeleporter = initTeleporter();
+        return teleporter;
     }
 
 
@@ -1276,31 +1288,18 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
             }
         }
 
-        this.getDefaultTeleporter().removeStalePortalLocations(this.getTotalWorldTime());
+        ITeleporter teleporter = worldTeleporter;
+        if(teleporter != null && teleporter instanceof ITickable){
+            ((ITickable) teleporter).update();
+        }
         for (Teleporter tele : customTeleporters) {
             tele.removeStalePortalLocations(getTotalWorldTime());
         }
-
         this.sendQueuedBlockEvents();
-        //mean tick time
-//        if(++meanTTSkip == 20){
-//            meanTTSkip = 0;
-//            meanTTSum = average(server.worldTickTimes.get(provider.getDimension())) * 1.0E-6D;
-//            //meanTTSum += average(FMLCommonHandler.instance().getMinecraftServerInstance().tickTimeArray) * 1.0E-6;
-//            if (++meanTTCount >= 30) {
-//                meanTTTime = meanTTSum / meanTTCount;
-//                meanTTCount = 0;
-//                meanTTSum = 1.0;
-//            }
-//            tryUpdateNavigationLimit = MathHelper.clamp((int)(meanTTTime*0.5),
-//                    ElcaConfig.STD_UPDATE_NAVIGATION_RATE, ElcaConfig.MAX_UPDATE_NAVIGATION_RATE
-//            );
-//        }
     }
 
 
     private double meanTTTime = 0.0;
-//    private int meanTTSkip = 0, meanTTCount = 0;
     //todo add multicore balance
     @Override
     public double meanTickTime() {
@@ -1310,14 +1309,6 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
     public void setMeanTT(double time){
         this.meanTTTime = time;
     }
-
-
-//    private static long average(final long[] values) {
-//        if (values == null || values.length == 0) return 0L;
-//        long sum = 0L;
-//        for (final long v : values) sum += v;
-//        return sum / values.length;
-//    }
 
 
     @Override

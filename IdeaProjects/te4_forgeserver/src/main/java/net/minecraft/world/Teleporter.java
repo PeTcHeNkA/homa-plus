@@ -15,7 +15,7 @@ import net.minecraft.block.state.*;
 import it.unimi.dsi.fastutil.objects.*;
 
 
-public class Teleporter implements ITeleporter {
+public class Teleporter implements ITeleporter, ITickable {
     protected final WorldServer world;
     protected final Random random;
     protected final Long2ObjectMap<PortalPosition> destinationCoordinateCache;
@@ -298,6 +298,14 @@ public class Teleporter implements ITeleporter {
         }
         return true;
     }
+
+
+
+    @Override
+    public void update() {
+        removeStalePortalLocations(world.getTotalWorldTime());
+    }
+
 
     public void removeStalePortalLocations(final long worldTime) {
         if (worldTime % 100L == 0L) {

@@ -6,7 +6,7 @@ import java.lang.reflect.InvocationTargetException;
 
 
 public class DimensionType {
-    private static final Int2ObjectOpenHashMap<DimensionType> dims = new Int2ObjectOpenHashMap<>();
+    private static final Int2ObjectOpenHashMap<DimensionType> dims = new Int2ObjectOpenHashMap<>(7);
 
     public static DimensionType OVERWORLD = register("overworld", "", 0, WorldProviderSurface.class, true);
     public static DimensionType NETHER    = register("the_nether", "_nether", -1, WorldProviderHell.class, false);

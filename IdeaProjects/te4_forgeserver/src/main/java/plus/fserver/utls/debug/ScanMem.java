@@ -1,12 +1,14 @@
 package plus.fserver.utls.debug;
 
+import io.netty.util.internal.shaded.org.jctools.util.UnsafeAccess;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import plus.asyutl.buf.FastBuffer;
+import plus.fserver.utls.collections.ArrayListEV;
 import plus.tson.utl.Te4HashSet;
+import java.lang.ref.Reference;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -16,32 +18,41 @@ public class ScanMem {
         void check(ScanMem ref, Object obj);
     }
 
-    private static final Int2IntOpenHashMap table = new Int2IntOpenHashMap();
-    private static final Int2ObjectOpenHashMap<Checker> altCheck = new Int2ObjectOpenHashMap<>();
+    private static final Int2IntOpenHashMap TABLE = new Int2IntOpenHashMap();
+    private static final Int2ObjectOpenHashMap<Checker> ALT_CHECK = new Int2ObjectOpenHashMap<>();
     private static final int refSize = 4;
+
     static {
-        table.put(byte.class.hashCode(),      1);
-        table.put(short.class.hashCode(),     2);
-        table.put(int.class.hashCode(),       4);
-        table.put(long.class.hashCode(),      8);
-        table.put(float.class.hashCode(),     4);
-        table.put(double.class.hashCode(),    8);
-        table.put(char.class.hashCode(),      2);
-        table.put(boolean.class.hashCode(),   1);
-        table.defaultReturnValue(0);
-        table.trim();
+        TABLE.put(byte.class.hashCode(),      1);
+        TABLE.put(short.class.hashCode(),     2);
+        TABLE.put(int.class.hashCode(),       4);
+        TABLE.put(long.class.hashCode(),      8);
+        TABLE.put(float.class.hashCode(),     4);
+        TABLE.put(double.class.hashCode(),    8);
+        TABLE.put(char.class.hashCode(),      2);
+        TABLE.put(boolean.class.hashCode(),   1);
+        TABLE.put(Class.class.hashCode(),     refSize);
+        TABLE.put(Field.class.hashCode(),     refSize);
+        TABLE.put(Method.class.hashCode(),    refSize);
+        TABLE.put(Reference.class.hashCode(), refSize*2);
+        TABLE.defaultReturnValue(-1);
+        TABLE.trim();
 
-        altCheck.put(String.class.hashCode(),    ScanMem::checkString   );
-        altCheck.put(boolean[].class.hashCode(), ScanMem::checkArrBool  );
-        altCheck.put(byte[].class.hashCode(),    ScanMem::checkArrByte  );
-        altCheck.put(int[].class.hashCode(),     ScanMem::checkArrInt   );
-        altCheck.put(short[].class.hashCode(),   ScanMem::checkArrShort );
-        altCheck.put(char[].class.hashCode(),    ScanMem::checkArrChar );
-        altCheck.put(float[].class.hashCode(),   ScanMem::checkArrFloat );
-        altCheck.put(double[].class.hashCode(),  ScanMem::checkArrDouble);
-        altCheck.put(long[].class.hashCode(),    ScanMem::checkArrLong  );
+        ALT_CHECK.put(String.class.hashCode(),    ScanMem::checkString   );
+        ALT_CHECK.put(boolean[].class.hashCode(), ScanMem::checkArrBool  );
+        ALT_CHECK.put(byte[].class.hashCode(),    ScanMem::checkArrByte  );
+        ALT_CHECK.put(int[].class.hashCode(),     ScanMem::checkArrInt   );
+        ALT_CHECK.put(short[].class.hashCode(),   ScanMem::checkArrShort );
+        ALT_CHECK.put(char[].class.hashCode(),    ScanMem::checkArrChar  );
+        ALT_CHECK.put(float[].class.hashCode(),   ScanMem::checkArrFloat );
+        ALT_CHECK.put(double[].class.hashCode(),  ScanMem::checkArrDouble);
+        ALT_CHECK.put(long[].class.hashCode(),    ScanMem::checkArrLong  );
 
-        altCheck.trim();
+        ALT_CHECK.put(Class.class.hashCode(),     ScanMem::ignoreCheck   );
+        ALT_CHECK.put(Field.class.hashCode(),     ScanMem::ignoreCheck   );
+        ALT_CHECK.put(Method.class.hashCode(),    ScanMem::ignoreCheck   );
+
+        ALT_CHECK.trim();
     }
 
     private static void checkString(ScanMem ref, Object obj){
@@ -71,7 +82,7 @@ public class ScanMem {
     private static void checkArrLong(ScanMem ref, Object obj){
         ref.total += ((long[])obj).length * 8L;
     }
-
+    private static void ignoreCheck(ScanMem ref, Object ojb){}
 
     private final IdentityHashMap<Object,Object> cache = new IdentityHashMap<>();
     private final Te4HashSet<Class<?>> noCheckRefs = new Te4HashSet<>();
@@ -80,10 +91,6 @@ public class ScanMem {
 
 
     private boolean ignoreRef(Type type){
-//        String name = type.getTypeName();
-//        for (String start:excludePackets){
-//            if(name.startsWith(start))return true;
-//        }
         return noCheckRefs.contains(type);
     }
 
@@ -92,12 +99,6 @@ public class ScanMem {
         for (Class<?> clazz:classes) noCheckRefs.add(clazz);
         return this;
     }
-//
-//
-//    public ScanMem exclude(String... str){
-//        for (String str0:str) excludePackets.add(str0);
-//        return this;
-//    }
 
 
     public ScanMem exclude(Class<?> clazz){
@@ -108,37 +109,46 @@ public class ScanMem {
 
     private void scanMemSafe(Class<?> clazz, Object obj, AtomicInteger num){
         if(obj==null || clazz == Object.class || clazz == Class.class)return;
-        if(cache.containsKey(obj))return;
+        IdentityHashMap<Object,Object> cache;
+        if((cache = this.cache).containsKey(obj))return;
+        Checker alt;
+
         cache.put(obj, obj);
-        scanMem(clazz, obj, num);
+        if((alt = ALT_CHECK.get(clazz.hashCode())) != null){
+            alt.check(this, obj);
+        } else {
+            scanMem(clazz, obj, num);
+        }
     }
 
 
     private static class Args{
-        final Class<?> clazz; final Object obj;
+        Class<?> clazz; Object obj;
         private Args(Class<?> clazz, Object obj) {
             this.clazz = clazz;
             this.obj = obj;
         }
     }
 
-    private final FastBuffer<Args> buf = new FastBuffer<>();
+    private final ArrayListEV<Args> buf = new ArrayListEV<>(32);
     private void scanMem(Class<?> clazz, Object obj, AtomicInteger num){
         if(clazz == Object.class || clazz == Class.class)return;
         if(num.addAndGet(1)>1000){
-            buf.put(new Args(clazz, obj));
-            return;
-        }
-        Checker alt = altCheck.get(clazz.hashCode());
-        if(alt != null){
-            alt.check(this, obj);
+            ArrayListEV<Args> buf = this.buf;
+            Args prev = buf.getSafe(buf.size() - 1);
+            if(prev == null){
+                buf.addF(new Args(clazz, obj));
+            } else {
+                prev.clazz = clazz;
+                prev.obj   = obj;
+            }
             return;
         }
         if(obj instanceof Object[]){
             Class<?> type = clazz.getComponentType();
             Object[] data = (Object[]) obj;
-            int size = table.get(type.hashCode());
-            if(size==0){
+            int size = TABLE.get(type.hashCode());
+            if(size==-1){
                 if(ignoreRef(type))return;
                 total += (data.length* 4L);
                 for (Object obj0:data){
@@ -149,20 +159,17 @@ public class ScanMem {
             }
             return;
         }
-        Field[] fields = clazz.getDeclaredFields();
+        for (Field field:clazz.getDeclaredFields()) checkField(obj, field, num);
 
-        for (Field field:fields){
-            checkField(obj, field, num);
-        }
         scanMem(clazz.getSuperclass(), obj, num);
     }
 
 
     private void checkField(Object obj, Field field, AtomicInteger num){
         if((field.getModifiers()&8)==8)return;
-        Type type = field.getGenericType();
-        int size = table.get(type.hashCode());
-        if(size==0){
+        Type type;
+        int size;
+        if((size = TABLE.get((type = field.getGenericType()).hashCode()))==-1){
             if(ignoreRef(type))return;
             boolean prev = field.isAccessible();
             try {
@@ -189,9 +196,12 @@ public class ScanMem {
         if(obj==null)return this;
         AtomicInteger num = new AtomicInteger();
         scanMemSafe(obj.getClass(), obj, num);
-        while (buf.hasNext()){
+        ArrayListEV<Args> buf = this.buf;
+        while (!buf.isEmptyC()){
             Runtime.getRuntime().gc();
-            Args args = buf.flush();
+            int cursor = buf.size()-1;
+            Args args = buf.get(cursor);
+            buf.setSize(cursor);
             num.set(0);
             scanMem(args.clazz, args.obj, num);
         }

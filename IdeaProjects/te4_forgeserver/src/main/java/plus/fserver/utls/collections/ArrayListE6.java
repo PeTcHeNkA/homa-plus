@@ -362,6 +362,17 @@ public class ArrayListE6<T> implements List<T> {
     }
 
 
+    public void setSize(int newSize){
+        Object[] data;
+        if((data = this.data) == EMPTY_ARR){
+            this.data = new Object[newSize];
+        } else {
+            if(data.length<=newSize)this.data = expand(data, newSize);
+        }
+        this.size = newSize;
+    }
+
+
     public void addF(Object obj){
         if(data.length<=size)data = newArrayAuto();
         data[size++] = obj;

@@ -505,7 +505,7 @@ public abstract class PlayerList {
 
 
     public void changePlayerDimension(EntityPlayerMP player, int dimensionIn) {
-        transferPlayerToDimension(player, dimensionIn, server.getWorld(dimensionIn).getDefaultTeleporter());
+        transferPlayerToDimension(player, dimensionIn, server.getWorld(dimensionIn).getDefaultTeleporterRaw());
     }
 
     // TODO: Remove (1.13)
@@ -515,7 +515,7 @@ public abstract class PlayerList {
 
 
     public void transferEntityToWorld(Entity entityIn, int lastDimension, WorldServer oldWorldIn, WorldServer toWorldIn) {
-        transferEntityToWorld(entityIn, lastDimension, oldWorldIn, toWorldIn, toWorldIn.getDefaultTeleporter());
+        transferEntityToWorld(entityIn, lastDimension, oldWorldIn, toWorldIn, toWorldIn.getDefaultTeleporterRaw());
     }
 
     // TODO: Remove (1.13)
