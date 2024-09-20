@@ -144,9 +144,9 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public boolean loaded = true;
 
     //redstone boost
-    public final RedstoneEngine.Cache redstoneCache = new RedstoneEngine.Cache();
+    RedstoneEngine.Cache redstoneCache;
     //todo warning ensure there will be no simultaneous use
-    public final BlockPos.MutableBlockPos localTempPos = new BlockPos.MutableBlockPos();
+    public final BlockPos.MutableBlockPos localTempPos  = new BlockPos.MutableBlockPos();
     public final BlockPos.MutableBlockPos localTempPos2 = new BlockPos.MutableBlockPos();
     public final BlockPos.MutableBlockPos localTempPos3 = new BlockPos.MutableBlockPos();
 
@@ -207,6 +207,13 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
     public void setCurThread(){
         curThread = Thread.currentThread();
+    }
+
+
+    public RedstoneEngine.Cache getRedstoneCache(){
+        RedstoneEngine.Cache cache;
+        if((cache = this.redstoneCache) == null)return redstoneCache = new RedstoneEngine.Cache();
+        return cache;
     }
 
 

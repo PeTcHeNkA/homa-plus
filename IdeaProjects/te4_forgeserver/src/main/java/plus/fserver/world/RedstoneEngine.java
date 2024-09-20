@@ -114,18 +114,34 @@ public class RedstoneEngine {
      */
 
 
-    public static class Cache{
-        private List<UpdateNode> updateQueue0 = new ArrayList<>();
-        private List<UpdateNode> updateQueue1 = new ArrayList<>();
-        private List<UpdateNode> updateQueue2 = new ArrayList<>();
-        private final Te4HashMap<BlockPos, UpdateNode>
-                nodeCache = new Te4HashMap<>();
+    public static class Cache extends Te4HashMap<BlockPos, UpdateNode>{
+        List<UpdateNode> updateQueue0 = new ArrayList<>();
+        List<UpdateNode> updateQueue1 = new ArrayList<>();
+        List<UpdateNode> updateQueue2 = new ArrayList<>();
+        //private final Te4HashMap<BlockPos, UpdateNode> nodeCache = new Te4HashMap<>();
 
         public boolean redstoneCanProvidePower = true;
-        private int currentWalkLayer = 0;
-        private final BlockPos.MutableBlockPos[] neighbors   = new BlockPos.MutableBlockPos[24];
-        private final UpdateNode[] tempNodes = new UpdateNode[24];
+        int currentWalkLayer = 0;
+        final BlockPos.MutableBlockPos[] neighbors   = new BlockPos.MutableBlockPos[24];
+        final UpdateNode[] tempNodes = new UpdateNode[24];
         public final BlockPosDelta mutDelta = new BlockPosDelta(0,0,0);
+        int prevModCount = modCount;
+        byte countUnused = 0;
+
+        public boolean isUsed(){
+            if(prevModCount != modCount){
+                countUnused = 0;
+                return true;
+            } else {
+                return countUnused++>5;
+            }
+        }
+
+        @Override
+        public void clear() {
+            prevModCount = modCount;
+            super.clear();
+        }
 
         public Cache(){
             for (int i=0;i<neighbors.length;i++)
@@ -377,24 +393,25 @@ public class RedstoneEngine {
     }
 
 
-    private void findNeighbors(final World worldIn, final UpdateNode upd1) {
+    private void findNeighbors(final World world, final UpdateNode upd1) {
+        Cache cache = world.getRedstoneCache();
+
         final BlockPos pos = upd1.self;
-        final BlockPos.MutableBlockPos[] neighbors = worldIn.redstoneCache.neighbors;
-        final UpdateNode[] nodes =  worldIn.redstoneCache.tempNodes;
-        final Te4HashMap<BlockPos, UpdateNode> nodeCache = worldIn.redstoneCache.nodeCache;
+        final BlockPos.MutableBlockPos[] neighbors = cache.neighbors;
+        final UpdateNode[] nodes =  cache.tempNodes;
 
         computeAllNeighbors(pos, neighbors);
         upd1.nodes = new UpdateNode[24];
 
         BlockPos pos2;
         for (int i=0; i<24; i++) {
-            UpdateNode upd2 = nodeCache.get(pos2 = neighbors[i]);
+            UpdateNode upd2 = cache.get(pos2 = neighbors[i]);
             if (upd2 == null) {
                 upd2 = new UpdateNode();
                 upd2.self = (pos2 = new BlockPos(pos2));
                 upd2.parent = pos;
-                nodeCache.fput(pos2, upd2);
-                identifyNode(worldIn, upd2);
+                cache.fput(pos2, upd2);
+                identifyNode(world, upd2);
             }
             if (update_redstone[i] || upd2.type != UpdateNode.Type.REDSTONE)
                 nodes[i] = upd2;
@@ -450,13 +467,14 @@ public class RedstoneEngine {
         final BlockPos pos = upd1.self;
         final int layer1 = layer + 1;
 
+        Cache cache = world.getRedstoneCache();
 
         for (int i=0; i<24; i++) {
             final UpdateNode upd2 = upd1.nodes[i];
 
             if (upd2 != null && layer1 > upd2.layer) {
                 upd2.layer = layer1;
-                world.redstoneCache.updateQueue1.add(upd2);
+                cache.updateQueue1.add(upd2);
 
                 upd2.parent = pos;
             }
@@ -468,7 +486,7 @@ public class RedstoneEngine {
             final UpdateNode upd2 = upd1.nodes[i];
             if (upd2 != null && layer2 > upd2.layer) {
                 upd2.layer = layer2;
-                world.redstoneCache.updateQueue2.add(upd2);
+                cache.updateQueue2.add(upd2);
                 upd2.parent = pos;
             }
         }
@@ -486,7 +504,7 @@ public class RedstoneEngine {
 
     private void breadthFirstWalk(final World worldIn) {
         Cache cache;
-        shiftQueue(cache = worldIn.redstoneCache);
+        shiftQueue(cache = worldIn.getRedstoneCache());
         cache.currentWalkLayer = 1;
         while (cache.updateQueue0.size()>0 || cache.updateQueue1.size()>0) {
             for (UpdateNode upd : cache.updateQueue0) {
@@ -504,7 +522,8 @@ public class RedstoneEngine {
 
 
     private IBlockState scheduleReentrantNeighborChanged(final World worldIn, final BlockPos pos, final IBlockState newState, final BlockPos source) {
-        final Te4HashMap<BlockPos, UpdateNode> cache = worldIn.redstoneCache.nodeCache;
+        Cache cache = worldIn.getRedstoneCache();
+
         if (source != null) {
             UpdateNode src = cache.get(source);
             if (src == null) {
@@ -538,18 +557,20 @@ public class RedstoneEngine {
             }
         }
 
-        propagateChanges(worldIn, upd, worldIn.redstoneCache.currentWalkLayer);
+        propagateChanges(worldIn, upd, cache.currentWalkLayer);
 
         return newState;
     }
 
 
-    public final void updateSurroundingRedstone(final World worldIn, final BlockPos pos, final IBlockState state, final BlockPos source) {
-        final IBlockState newState = wire.calculateCurrentChanges(worldIn, pos, pos, state);
+    public final void updateSurroundingRedstone(final World world, final BlockPos pos, final IBlockState state, final BlockPos source) {
+        final IBlockState newState = wire.calculateCurrentChanges(world, pos, pos, state);
         if (newState == state) return;
 
-        if (worldIn.redstoneCache.currentWalkLayer>0 || !worldIn.redstoneCache.nodeCache.isEmpty()) {
-            scheduleReentrantNeighborChanged(worldIn, pos, newState, source);
+        Cache cache = world.getRedstoneCache();
+
+        if (cache.currentWalkLayer>0 || !cache.isEmpty()) {
+            scheduleReentrantNeighborChanged(world, pos, newState, source);
             return;
         }
 
@@ -558,8 +579,8 @@ public class RedstoneEngine {
             src.self = source;
             src.parent = source;
             src.visited = true;
-            worldIn.redstoneCache.nodeCache.put(source, src);
-            identifyNode(worldIn, src);
+            cache.put(source, src);
+            identifyNode(world, src);
         }
 
         final UpdateNode upd = new UpdateNode();
@@ -568,10 +589,10 @@ public class RedstoneEngine {
         upd.currentState = newState;
         upd.type = UpdateNode.Type.REDSTONE;
         upd.visited = true;
-        worldIn.redstoneCache.nodeCache.put(pos, upd);
-        propagateChanges(worldIn, upd, 0);
-        breadthFirstWalk(worldIn);
-        worldIn.redstoneCache.nodeCache.clear();
+        cache.put(pos, upd);
+        propagateChanges(world, upd, 0);
+        breadthFirstWalk(world);
+        cache.clear();
     }
 
 
@@ -579,18 +600,20 @@ public class RedstoneEngine {
     private static final int[] rs_neighbors_up = {9, 11, 13, 15};
     private static final int[] rs_neighbors_dn = {8, 10, 12, 14};
 
-    private IBlockState calculateCurrentChanges(final World worldIn, final UpdateNode upd) {
+    private IBlockState calculateCurrentChanges(final World world, final UpdateNode upd) {
         IBlockState state = upd.currentState;
         final int i = state.getValue(BlockRedstoneWire.POWER);
         int j, l = 0;
 
-        worldIn.redstoneCache.redstoneCanProvidePower = false;
-        final int k = worldIn.getRedstonePowerFromNeighbors(upd.self);
-        worldIn.redstoneCache.redstoneCanProvidePower = true;
+        Cache cache = world.getRedstoneCache();
+
+        cache.redstoneCanProvidePower = false;
+        final int k = world.getRedstonePowerFromNeighbors(upd.self);
+        cache.redstoneCanProvidePower = true;
 
         if (k<15) {
             if (upd.nodes == null) {
-                findNeighbors(worldIn, upd);
+                findNeighbors(world, upd);
             }
 
             UpdateNode center_up = upd.nodes[1];
@@ -620,7 +643,7 @@ public class RedstoneEngine {
 
         if (i != j) {
             state = state.withProperty(BlockRedstoneWire.POWER, j);
-            editRedstoneState((WorldServer) worldIn, upd.self, state);
+            editRedstoneState((WorldServer) world, upd.self, state);
         }
         return state;
     }

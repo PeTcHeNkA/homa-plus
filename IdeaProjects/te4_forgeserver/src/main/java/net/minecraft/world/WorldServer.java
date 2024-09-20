@@ -44,7 +44,6 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.village.VillageCollection;
 import net.minecraft.village.VillageSiege;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.chunk.BlockStateContainer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
@@ -85,6 +84,7 @@ import plus.fserver.utls.collections.EntityRemSwapList;
 import plus.fserver.utls.math.MathUtls;
 import plus.fserver.world.CommonWorldEntitySpawner;
 import plus.fserver.world.NavigationCache;
+import plus.fserver.world.RedstoneEngine;
 import plus.tson.utl.Te4HashMap;
 import plus.tson.utl.Te4HashSet;
 
@@ -1295,6 +1295,9 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         for (Teleporter tele : customTeleporters) {
             tele.removeStalePortalLocations(getTotalWorldTime());
         }
+        RedstoneEngine.Cache cache = redstoneCache;
+        if(cache != null && !cache.isUsed())redstoneCache = null;
+
         this.sendQueuedBlockEvents();
     }
 

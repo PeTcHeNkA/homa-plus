@@ -1,9 +1,6 @@
 package net.minecraft.scoreboard;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import javax.annotation.Nullable;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -17,8 +14,8 @@ public class Scoreboard {
     private final Map<IScoreCriteria, List<ScoreObjective>> scoreObjectiveCriterias = new Te4HashMap<>();
     private final Map<String, Map<ScoreObjective, Score>> entitiesScoreObjectives = new Te4HashMap<>();
     private final ScoreObjective[] objectiveDisplaySlots = new ScoreObjective[19];
-    private final Map<String, ScorePlayerTeam> teams = new Te4HashMap<>();
-    private final Map<String, ScorePlayerTeam> teamMemberships = new Te4HashMap<>();
+    private final Map<String, ScorePlayerTeam> teams = new Te4HashMap<>(3);
+    private final Map<String, ScorePlayerTeam> teamMemberships = new Te4HashMap<>(3);
     private static String[] displaySlots;
 
     @Nullable
@@ -55,7 +52,7 @@ public class Scoreboard {
 
     public Collection<ScoreObjective> getObjectivesFromCriteria(IScoreCriteria criteria) {
         Collection<ScoreObjective> collection = this.scoreObjectiveCriterias.get(criteria);
-        return collection == null ? new ArrayList<>() : new ArrayList<>(collection);
+        return collection == null ? Collections.EMPTY_LIST : new ArrayList<>(collection);
     }
 
 
@@ -78,7 +75,7 @@ public class Scoreboard {
             Map<ScoreObjective, Score> map = this.entitiesScoreObjectives.get(username);
 
             if (map == null) {
-                map = new Te4HashMap<>();
+                map = new Te4HashMap<>(3);
                 this.entitiesScoreObjectives.put(username, map);
             }
 

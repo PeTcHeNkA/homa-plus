@@ -226,14 +226,15 @@ public class BlockRedstoneWire extends BlockFs {
 
     @Override
     public int getStrongPower(final IBlockState state, final IBlockAccess access, final BlockPos pos, final EnumFacing side) {
-        return access.getWorld().redstoneCache.redstoneCanProvidePower ?
+        return access.getWorld().getRedstoneCache().redstoneCanProvidePower ?
                 getWeakPower(state, access, pos, side) : 0;
     }
 
 
     @Override
     public int getWeakPower(final IBlockState blockState, final IBlockAccess access, final BlockPos pos, final EnumFacing side) {
-        if (!access.getWorld().redstoneCache.redstoneCanProvidePower) return 0;
+        RedstoneEngine.Cache cache;
+        if (!(cache = access.getWorld().getRedstoneCache()).redstoneCanProvidePower) return 0;
         final int i = blockState.getValue(BlockRedstoneWire.POWER);
         if (i == 0) return 0;
         if (side == EnumFacing.UP) return i;
@@ -241,7 +242,7 @@ public class BlockRedstoneWire extends BlockFs {
         int mask = 0;
         //todo unchecked
         ChunkSelector selector = access.getWorld().localSelector;
-        BlockPosDelta delta = access.getWorld().redstoneCache.mutDelta;
+        BlockPosDelta delta = cache.mutDelta;
         delta.setPos(pos.getX(), pos.getY(), pos.getZ());
         for (final EnumFacing enumfacing : BlockIDIndexes.FACING_HORIZONTAL)
             if (this.isPowerSourceAt(selector, delta, enumfacing))
@@ -359,12 +360,14 @@ public class BlockRedstoneWire extends BlockFs {
 
 
     public IBlockState calculateCurrentChanges(final World world, final BlockPos pos1, final BlockPos pos2, IBlockState state) {
+        RedstoneEngine.Cache cache = world.getRedstoneCache();
+
         final IBlockState iblockstate = state;
         final int i = state.getValue(BlockRedstoneWire.POWER);
         int l = 0;
-        world.redstoneCache.redstoneCanProvidePower = false;
+        cache.redstoneCanProvidePower = false;
         final int k = world.getRedstonePowerFromNeighbors(pos1);
-        world.redstoneCache.redstoneCanProvidePower = true;
+        cache.redstoneCanProvidePower = true;
         if (k < 15) {
             IBlockEAccess access = world.access();
             for (final EnumFacing enumfacing : BlockIDIndexes.FACING_HORIZONTAL) {

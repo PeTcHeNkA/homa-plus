@@ -10,18 +10,20 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.storage.WorldSavedData;
+import plus.fserver.utls.collections.ArrayListE2;
 import plus.fserver.utls.collections.ArrayListE6;
 
 
-public class VillageCollection extends WorldSavedData {
+public class VillageCollection extends WorldSavedData implements ITickable {
     private World world;
-    private final ArrayListE6<BlockPos>        villagerPositionsList = new ArrayListE6<>();
-    private final ArrayListE6<VillageDoorInfo> newDoors              = new ArrayListE6<>();
-    private final ArrayListE6<Village>         villageList           = new ArrayListE6<>();
+    private final ArrayListE2<BlockPos>        villagerPositionsList = new ArrayListE2<>();
+    private final ArrayListE2<VillageDoorInfo> newDoors              = new ArrayListE2<>();
+    private final ArrayListE2<Village>         villageList           = new ArrayListE2<>();
     private int tickCounter;
 
     public VillageCollection(String name) {
@@ -36,13 +38,13 @@ public class VillageCollection extends WorldSavedData {
     }
 
 
-    public void setWorldsForAll(World p_82566_1_) {
-        this.world = p_82566_1_;
+    public void setWorldsForAll(World world) {
+        this.world = world;
         ArrayListE6.Itr var2 = this.villageList.iterator();
 
         while(var2.hasNext()) {
             Village village = (Village)var2.nextObj();
-            village.setWorld(p_82566_1_);
+            village.setWorld(world);
         }
     }
 
@@ -244,7 +246,6 @@ public class VillageCollection extends WorldSavedData {
             village.readVillageDataFromNBT(nbttagcompound);
             this.villageList.add(village);
         }
-
     }
 
 
@@ -274,5 +275,11 @@ public class VillageCollection extends WorldSavedData {
     @Override
     public boolean shouldCopyNbtOnAsync() {
         return false;
+    }
+
+
+    @Override
+    public void update() {
+        tick();
     }
 }

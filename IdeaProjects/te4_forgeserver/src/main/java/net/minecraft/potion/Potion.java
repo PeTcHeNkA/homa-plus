@@ -64,12 +64,6 @@ public class Potion extends IForgeRegistryEntry.Impl<Potion> {
     }
 
 
-    @Override
-    public int hashCode() {
-        return getId();
-    }
-
-
     protected Potion setIconIndex(final int x, final int y) {
         this.statusIconIndex = x + y * 8;
         return this;
