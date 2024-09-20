@@ -141,19 +141,23 @@ public class GameRules {
 
         public void setValue(String value) {
             this.valueString = value;
-            this.valueBoolean = Boolean.parseBoolean(value);
             this.valueInteger = this.valueBoolean ? 1 : 0;
 
-            try {
-                this.valueInteger = Integer.parseInt(value);
-            }
-            catch (NumberFormatException var4) {
-                ;
-            }
-            try {
-                this.valueDouble = Double.parseDouble(value);
-            } catch (NumberFormatException var3) {
-                ;
+            char chr = value.charAt(0);
+            if(chr >= '0' && chr <= '9') {
+                try {
+                    this.valueInteger = Integer.parseInt(value);
+                } catch (NumberFormatException var4) {
+                    ;
+                }
+                try {
+                    this.valueDouble = Double.parseDouble(value);
+                } catch (NumberFormatException var3) {
+                    ;
+                }
+                valueBoolean = valueDouble > 0;
+            } else {
+                this.valueBoolean = Boolean.parseBoolean(value);
             }
         }
 
