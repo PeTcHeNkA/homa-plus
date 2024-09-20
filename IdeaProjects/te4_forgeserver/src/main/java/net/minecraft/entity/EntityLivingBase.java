@@ -66,6 +66,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.living.LivingEquipmentChangeEvent;
 import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
+import net.minecraftforge.event.entity.living.PotionColorCalculationEvent;
 import net.minecraftforge.event.entity.living.PotionEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -76,6 +77,7 @@ import plus.fserver.ElcaConfig;
 import plus.fserver.api.IBlockEAccess;
 import plus.fserver.server.SStrings;
 import plus.fserver.utls.collections.FixedItemList;
+import plus.fserver.utls.collections.PotionMap;
 import plus.fserver.utls.math.MathUtls;
 import plus.fserver.utls.math.Vec3dMut;
 import static plus.fserver.ElcaCV.SERVER_COMPILE;
@@ -95,7 +97,7 @@ public abstract class EntityLivingBase extends Entity {
     private static final DataParameter<Integer> ARROW_COUNT_IN_ENTITY = EntityDataManager.createKey(EntityLivingBase.class, DataSerializers.VARINT);
     private AbstractAttributeMap attributeMap;
     private final CombatTracker combatTracker = new CombatTracker(this);
-    private final HashMap<Potion, PotionEffect> activePotionsMap = new HashMap<>(3);
+    private PotionMap activePotionsMap;
     private final FixedItemList equipInv = new FixedItemList(6);
     public boolean isSwingInProgress;
     public EnumHand swingingHand;
@@ -150,7 +152,7 @@ public abstract class EntityLivingBase extends Entity {
     protected double interpTargetZ;
     protected double interpTargetYaw;
     protected double interpTargetPitch;
-    private boolean potionsNeedUpdate = true;
+    //private boolean potionsNeedUpdate = true;
     private EntityLivingBase revengeTarget;
     private int revengeTimer;
     private EntityLivingBase lastAttackedEntity;
@@ -404,10 +406,11 @@ public abstract class EntityLivingBase extends Entity {
             }
         }
 
-        if (!this.activePotionsMap.isEmpty()) {
+        HashMap<Potion,PotionEffect> map = this.activePotionsMap;
+        if (map != null && !map.isEmpty()) {
             NBTTagList list = new NBTTagList();
 
-            for (PotionEffect potioneffect : this.activePotionsMap.values()) {
+            for (PotionEffect potioneffect : map.values()) {
                 list.appendTag(potioneffect.writeCustomPotionEffectToNBT(new NBTTagCompound()));
             }
             nbt.setTag(SStrings.ActiveEffects, list);
@@ -427,11 +430,14 @@ public abstract class EntityLivingBase extends Entity {
         if (nbt.hasKey(SStrings.ActiveEffects, 9)) {
             NBTTagList list = nbt.getTagList(SStrings.ActiveEffects, 10);
 
+            HashMap<Potion, PotionEffect> map;
+            if((map = activePotionsMap) == null)map = activePotionsMap = new PotionMap();
+
             for (int i = 0; i < list.tagCount(); ++i) {
                 PotionEffect effect = PotionEffect.readCustomPotionEffectFromNBT(list.getCompoundTagAt(i));
 
                 if (effect != null)
-                    this.activePotionsMap.put(effect.getPotion(), effect);
+                    map.put(effect.getPotion(), effect);
             }
         }
         if (nbt.hasKey(SStrings.Health, 99)) {
@@ -455,8 +461,9 @@ public abstract class EntityLivingBase extends Entity {
 
 
     protected void updatePotionEffects() {
-        if(activePotionsMap.isEmpty())return;
-        Iterator<PotionEffect> iterator = this.activePotionsMap.values().iterator();
+        PotionMap map;
+        if((map = activePotionsMap) == null || map.isEmpty())return;
+        Iterator<PotionEffect> iterator = map.values().iterator();
 
         try {
             while (iterator.hasNext()) {
@@ -475,11 +482,11 @@ public abstract class EntityLivingBase extends Entity {
         }
         catch (ConcurrentModificationException ignored) {}
 
-        if (this.potionsNeedUpdate) {
+        if (map.potionsNeedUpdate) {
             if (!this.world.isRemote || SERVER_COMPILE) {
                 this.updatePotionMetadata();
             }
-            this.potionsNeedUpdate = false;
+            map.potionsNeedUpdate = false;
         }
 
         int i = this.dataManager.get(POTION_EFFECTS);
@@ -504,13 +511,14 @@ public abstract class EntityLivingBase extends Entity {
 
 
     protected void updatePotionMetadata() {
-        if (this.activePotionsMap.isEmpty()) {
+        PotionMap map;
+        if ((map = this.activePotionsMap) == null || map.isEmpty()) {
             this.resetPotionEffectMetadata();
             this.setInvisible(false);
         } else {
-            Collection<PotionEffect> collection = this.activePotionsMap.values();
-            net.minecraftforge.event.entity.living.PotionColorCalculationEvent event = new net.minecraftforge.event.entity.living.PotionColorCalculationEvent(this, PotionUtils.getPotionColorFromEffectList(collection), areAllPotionsAmbient(collection), collection);
-            net.minecraftforge.common.MinecraftForge.EVENT_BUS.postF(event);
+            Collection<PotionEffect> collection = map.values();
+            PotionColorCalculationEvent event = new PotionColorCalculationEvent(this, PotionUtils.getPotionColorFromEffectList(collection), areAllPotionsAmbient(collection), collection);
+            MinecraftForge.EVENT_BUS.postF(event);
             this.dataManager.set(HIDE_PARTICLES, event.areParticlesHidden());
             this.dataManager.set(POTION_EFFECTS, event.getColor());
             this.setInvisible(this.isPotionActive(MobEffects.INVISIBILITY));
@@ -533,10 +541,12 @@ public abstract class EntityLivingBase extends Entity {
 
     public void clearActivePotions() {
         if (!this.world.isRemote || SERVER_COMPILE) {
-            Iterator<PotionEffect> iterator = this.activePotionsMap.values().iterator();
+            PotionMap map;
+            if((map = this.activePotionsMap) == null)return;
+            Iterator<PotionEffect> iterator = map.values().iterator();
             while (iterator.hasNext()) {
                 PotionEffect effect = iterator.next();
-                if(net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.living.PotionEvent.PotionRemoveEvent(this, effect))) continue;
+                if(MinecraftForge.EVENT_BUS.post(new PotionEvent.PotionRemoveEvent(this, effect))) continue;
 
                 this.onFinishedPotionEffect(effect);
                 iterator.remove();
@@ -546,32 +556,50 @@ public abstract class EntityLivingBase extends Entity {
 
 
     public Collection<PotionEffect> getActivePotionEffects() {
-        return this.activePotionsMap.values();
+        PotionMap map;
+        if((map = this.activePotionsMap) == null)return Collections.EMPTY_LIST;
+        return map.values();
     }
 
 
     public Map<Potion, PotionEffect> getActivePotionMap() {
-        return this.activePotionsMap;
+        PotionMap map;
+        if((map = this.activePotionsMap) == null)return Collections.EMPTY_MAP;
+        return map;
     }
 
 
     public boolean isPotionActive(Potion potionIn) {
-        return this.activePotionsMap.containsKey(potionIn);
+        PotionMap map;
+        if((map = this.activePotionsMap) == null)return false;
+        return map.containsKey(potionIn);
     }
 
 
     @Nullable
     public PotionEffect getActivePotionEffect(Potion potionIn) {
-        return this.activePotionsMap.get(potionIn);
+        PotionMap map;
+        if((map = this.activePotionsMap) == null)return null;
+        return map.get(potionIn);
     }
 
 
     public void addPotionEffect(PotionEffect potioneffectIn) {
         if (this.isPotionApplicable(potioneffectIn)) {
-            PotionEffect potioneffect = this.activePotionsMap.get(potioneffectIn.getPotion());
-            net.minecraftforge.common.MinecraftForge.EVENT_BUS.postF(new net.minecraftforge.event.entity.living.PotionEvent.PotionAddedEvent(this, potioneffect, potioneffectIn));
+            PotionMap map;
+
+            PotionEffect potioneffect;
+            if((map = this.activePotionsMap) != null){
+                potioneffect = this.activePotionsMap.get(potioneffectIn.getPotion());
+            } else {
+                potioneffect = null;
+            }
+
+            MinecraftForge.EVENT_BUS.postF(new PotionEvent.PotionAddedEvent(this, potioneffect, potioneffectIn));
+
             if (potioneffect == null) {
-                this.activePotionsMap.put(potioneffectIn.getPotion(), potioneffectIn);
+                if(map == null)map = this.activePotionsMap = new PotionMap();
+                map.put(potioneffectIn.getPotion(), potioneffectIn);
                 this.onNewPotionEffect(potioneffectIn);
             } else {
                 potioneffect.combine(potioneffectIn);
@@ -582,7 +610,7 @@ public abstract class EntityLivingBase extends Entity {
 
 
     public boolean isPotionApplicable(PotionEffect effect) {
-        net.minecraftforge.event.entity.living.PotionEvent.PotionApplicableEvent event = new net.minecraftforge.event.entity.living.PotionEvent.PotionApplicableEvent(this, effect);
+        PotionEvent.PotionApplicableEvent event = new net.minecraftforge.event.entity.living.PotionEvent.PotionApplicableEvent(this, effect);
         net.minecraftforge.common.MinecraftForge.EVENT_BUS.postF(event);
         if (event.getResult() != net.minecraftforge.fml.common.eventhandler.Event.Result.DEFAULT) return event.getResult() == net.minecraftforge.fml.common.eventhandler.Event.Result.ALLOW;
         if (this.getCreatureAttribute() == EnumCreatureAttribute.UNDEAD) {
@@ -600,7 +628,9 @@ public abstract class EntityLivingBase extends Entity {
 
     @Nullable
     public PotionEffect removeActivePotionEffect(@Nullable Potion potion) {
-        return this.activePotionsMap.remove(potion);
+        PotionMap map;
+        if((map = activePotionsMap) == null) return null;
+        return map.remove(potion);
     }
 
 
@@ -612,14 +642,16 @@ public abstract class EntityLivingBase extends Entity {
 
 
     protected void onNewPotionEffect(PotionEffect id) {
-        this.potionsNeedUpdate = true;
+        PotionMap map;
+        if((map = activePotionsMap) != null) map.potionsNeedUpdate = true;
         if (!this.world.isRemote || SERVER_COMPILE)
             id.getPotion().applyAttributesModifiersToEntity(this, this.getAttributeMap(), id.getAmplifier());
     }
 
 
     protected void onChangedPotionEffect(PotionEffect id, boolean flag) {
-        this.potionsNeedUpdate = true;
+        PotionMap map;
+        if((map = activePotionsMap) != null) map.potionsNeedUpdate = true;
         if (flag && !this.world.isRemote || SERVER_COMPILE) {
             Potion potion = id.getPotion();
             potion.removeAttributesModifiersFromEntity(this, this.getAttributeMap(), id.getAmplifier());
@@ -629,7 +661,8 @@ public abstract class EntityLivingBase extends Entity {
 
 
     protected void onFinishedPotionEffect(PotionEffect effect) {
-        this.potionsNeedUpdate = true;
+        PotionMap map;
+        if((map = activePotionsMap) != null) map.potionsNeedUpdate = true;
         if (!this.world.isRemote || SERVER_COMPILE)
             effect.getPotion().removeAttributesModifiersFromEntity(this, this.getAttributeMap(), effect.getAmplifier());
     }
@@ -2051,8 +2084,11 @@ public abstract class EntityLivingBase extends Entity {
 
 
     protected void markPotionsDirty() {
-        this.potionsNeedUpdate = true;
+        PotionMap map;
+        if((map = activePotionsMap) == null)return;
+        map.potionsNeedUpdate = true;
     }
+
 
     /***
      * Removes all potion effects that have curativeItem as a curative item for its effect
@@ -2060,14 +2096,17 @@ public abstract class EntityLivingBase extends Entity {
      */
     public void curePotionEffects(ItemStack curativeItem) {
         if (!world.isRemote || SERVER_COMPILE) {
-            Iterator<PotionEffect> iterator = this.activePotionsMap.values().iterator();
+            PotionMap map;
+            if((map = activePotionsMap) == null)return;
+
+            Iterator<PotionEffect> iterator = map.values().iterator();
             while (iterator.hasNext()) {
                 PotionEffect effect = iterator.next();
 
                 if (effect.isCurativeItem(curativeItem) && !net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.living.PotionEvent.PotionRemoveEvent(this, effect))) {
                     onFinishedPotionEffect(effect);
                     iterator.remove();
-                    this.potionsNeedUpdate = true;
+                    map.potionsNeedUpdate = true;
                 }
             }
         }

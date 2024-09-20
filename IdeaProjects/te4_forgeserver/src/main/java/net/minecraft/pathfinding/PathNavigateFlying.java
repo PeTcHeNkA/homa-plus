@@ -15,7 +15,7 @@ public class PathNavigateFlying extends PathNavigate {
 
     @Override
     protected PathFinder getPathFinder() {
-        this.nodeProcessor = new FlyingNodeProcessor(world);
+        this.nodeProcessor = new FlyingNodeProcessor(entity.world);
         this.nodeProcessor.setCanEnterDoors(true);
         return new PathFinder(this.nodeProcessor);
     }
@@ -159,7 +159,7 @@ public class PathNavigateFlying extends PathNavigate {
     }
 
 
-    public boolean canEntityStandOnPos(BlockPos p_188555_1_) {
-        return this.world.getBlockState(p_188555_1_).isTopSolid();
+    public boolean canEntityStandOnPos(BlockPos pos) {
+        return entity.world.getBlockState(pos).isTopSolid();
     }
 }

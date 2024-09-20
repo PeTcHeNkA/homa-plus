@@ -86,7 +86,7 @@ public abstract class EntityLiving extends EntityLivingBase {
 
     private boolean canPickUpLoot;
     private boolean persistenceRequired;
-    private final Int2FloatOpenHashMap mapPathPriority = new Int2FloatOpenHashMap(3);
+    private Int2FloatOpenHashMap mapPathPriority;
     private ResourceLocation deathLootTable;
     private long deathLootTableSeed;
     private boolean isLeashed;
@@ -95,13 +95,11 @@ public abstract class EntityLiving extends EntityLivingBase {
 
     public EntityLiving(World worldIn) {
         super(worldIn);
-        mapPathPriority.defaultReturnValue(Float.NaN);
         this.tasks = new EntityAITasks(worldIn);
         this.targetTasks = new EntityAITasks(world);
         this.lookHelper = new EntityLookHelper(this);
         this.moveHelper = new EntityMoveHelper(this);
         this.jumpHelper = new EntityJumpHelper(this);
-        //this.bodyHelper = this.createBodyHelper();
         this.navigator = this.createNavigator(worldIn);
         this.senses = new EntitySenses(this);
 
@@ -131,14 +129,23 @@ public abstract class EntityLiving extends EntityLivingBase {
 
 
     public float getPathPriority(PathNodeType nodeType) {
-        float f = this.mapPathPriority.get(nodeType.id);
+        Int2FloatOpenHashMap mapPathPriority;
+        if((mapPathPriority = this.mapPathPriority) == null)
+            return nodeType.getPriority();
+
+        float f = mapPathPriority.get(nodeType.id);
         //is nan?
         return f == f ? f : nodeType.getPriority();
     }
 
 
     public void setPathPriority(PathNodeType nodeType, float priority) {
-        this.mapPathPriority.put(nodeType.id, priority);
+        Int2FloatOpenHashMap mapPathPriority;
+        if((mapPathPriority = this.mapPathPriority) == null) {
+            this.mapPathPriority = mapPathPriority = new Int2FloatOpenHashMap(3);
+            mapPathPriority.defaultReturnValue(Float.NaN);
+        }
+        mapPathPriority.put(nodeType.id, priority);
     }
 
 

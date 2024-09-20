@@ -2,7 +2,7 @@ package net.minecraft.pathfinding;
 
 
 public class PathHeap {
-    private PathPoint[] pathPoints = new PathPoint[128];
+    private PathPoint[] pathPoints = new PathPoint[64];
     private int count;
 
     public PathPoint addPoint(PathPoint point) {

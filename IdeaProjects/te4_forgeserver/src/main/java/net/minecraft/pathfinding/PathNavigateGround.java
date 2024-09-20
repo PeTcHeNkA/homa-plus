@@ -26,7 +26,7 @@ public class PathNavigateGround extends PathNavigate {
 
     @Override
     protected PathFinder getPathFinder() {
-        this.nodeProcessor = new WalkNodeProcessor(world);
+        this.nodeProcessor = new WalkNodeProcessor(entity.world);
         this.nodeProcessor.setCanEnterDoors(true);
         return new PathFinder(this.nodeProcessor);
     }
@@ -54,6 +54,7 @@ public class PathNavigateGround extends PathNavigate {
 
     @Override
     public Path getPathToPos(BlockPos pos) {
+        World world = entity.world;
         Chunk chunk = world.getChunk(pos);
         if(pos.getY()<0||pos.getY()>255)return null;
         if (chunk.getBlockState(pos).getMaterial() == Material.AIR) {
@@ -68,7 +69,7 @@ public class PathNavigateGround extends PathNavigate {
                 return super.getPathToPos(blockpos);
             }
             BlockPos.unsafeEdit(blockpos, blockpos.getX(), lim, blockpos.getZ());
-            lim = Math.min(blockpos.getY()+32, this.world.getHeight());
+            lim = Math.min(blockpos.getY()+32, world.getHeight());
             while (blockpos.getY() < lim && chunk.getBlockState(blockpos).getMaterial() == Material.AIR){
                 BlockPos.unsafeEdit(blockpos, blockpos.getX(), blockpos.getY()+1, blockpos.getZ());
             }
@@ -79,7 +80,7 @@ public class PathNavigateGround extends PathNavigate {
             return super.getPathToPos(pos);
         } else {
             BlockPos blockpos1;
-            for (blockpos1 = pos.up(); blockpos1.getY() < this.world.getHeight() && chunk.getBlockState(blockpos1).getMaterial().isSolid(); blockpos1 = blockpos1.up()) {
+            for (blockpos1 = pos.up(); blockpos1.getY() < world.getHeight() && chunk.getBlockState(blockpos1).getMaterial().isSolid(); blockpos1 = blockpos1.up()) {
                 ;
             }
             return super.getPathToPos(blockpos1);
@@ -96,7 +97,7 @@ public class PathNavigateGround extends PathNavigate {
     private int getPathablePosY() {
         Entity entity = this.entity;
         if (entity.isInWater() && this.getCanSwim()) {
-            IBlockEAccess access = world.access();
+            IBlockEAccess access = entity.world.access();
             int i = (int)entity.getEntityBoundingBox().minY, px, pz, j = 0;
 
             Block block = access.getBlockState(px = MathHelper.floor(entity.posX), i, pz = MathHelper.floor(entity.posZ)).getBlock();
@@ -118,16 +119,18 @@ public class PathNavigateGround extends PathNavigate {
         super.removeSunnyPath();
 
         if (this.shouldAvoidSun) {
-            if (this.world.canSeeSky(
-                    MathHelper.floor(this.entity.posX),
-                    (int)(this.entity.getEntityBoundingBox().minY + 0.5D),
-                    MathHelper.floor(this.entity.posZ)
+            Entity entity = this.entity;
+            World world = entity.world;
+            if (world.canSeeSky(
+                    MathHelper.floor(entity.posX),
+                    (int)(entity.getEntityBoundingBox().minY + 0.5D),
+                    MathHelper.floor(entity.posZ)
             )) return;
             PathPoint pathpoint;
             for (int i = 0; i < this.currentPath.getCurrentPathLength(); ++i) {
                 pathpoint = this.currentPath.getPathPointFromIndex(i);
 
-                if (this.world.canSeeSky(pathpoint.x, pathpoint.y, pathpoint.z)) {
+                if (world.canSeeSky(pathpoint.x, pathpoint.y, pathpoint.z)) {
                     this.currentPath.setCurrentPathLength(i - 1);
                     return;
                 }
@@ -199,11 +202,11 @@ public class PathNavigateGround extends PathNavigate {
             d1 = d1 * d2;
 
             //todo maybe non-threadsafe
-            IBlockEAccess access = world.access();
+            IBlockEAccess access = entity.world.access();
             PntMatrix matrix = ((WalkNodeProcessor)nodeProcessor).matrix;
             //todo maybe this equal "if false"
             if(matrix == null){
-                matrix = ((WorldServer)world).navCache.getBy(entity);
+                matrix = ((WorldServer)entity.world).navCache.getBy(entity);
             }
             PntMatrix.Chunked chunked = matrix.getChunked(fX, fZ);
 

@@ -20,7 +20,7 @@ import plus.fserver.utls.math.MathUtls;
 
 public abstract class PathNavigate {
     protected EntityLiving entity;
-    protected World world;
+    //protected World world; todo is safe?
     @Nullable
     protected Path currentPath;
     protected double speed;
@@ -41,7 +41,7 @@ public abstract class PathNavigate {
 
     public PathNavigate(EntityLiving entityIn, World worldIn) {
         this.entity = entityIn;
-        this.world = worldIn;
+        //this.world = worldIn;
         this.pathSearchRange = entityIn.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE);
         this.pathFinder = this.getPathFinder();
     }
@@ -66,11 +66,12 @@ public abstract class PathNavigate {
 
 
     public void updatePath() {
-        if (this.world.getTotalWorldTime() - this.lastTimeUpdated > world.tryUpdateNavigationLimit) {
+        World world = entity.world;
+        if (world.getTotalWorldTime() - this.lastTimeUpdated > world.tryUpdateNavigationLimit) {
             if (this.targetPos != null) {
                 this.currentPath = null;
                 this.currentPath = this.getPathToPos(this.targetPos);
-                this.lastTimeUpdated = this.world.getTotalWorldTime();
+                this.lastTimeUpdated = world.getTotalWorldTime();
                 this.tryUpdatePath = false;
             }
         } else {
@@ -226,7 +227,7 @@ public abstract class PathNavigate {
                 double vecZ = (double)point.z + (double)((int)(entity.width + 1.0F)) * 0.5;
                 World world;
                 IBlockEAccess access;
-                BlockPos blockpos = (world = this.world).localTempPos3.setPos(vecX, point.y-1, vecZ);
+                BlockPos blockpos = (world = entity.world).localTempPos3.setPos(vecX, point.y-1, vecZ);
                 AxisAlignedBB box = (access = world.access()).getBlockState(blockpos).getBoundingBox(access, blockpos);
                 entity.getMoveHelper().setMoveTo(
                         vecX,
@@ -369,7 +370,7 @@ public abstract class PathNavigate {
     protected void removeSunnyPath() {
         if (this.currentPath != null) {
             Path cur = this.currentPath;
-            IBlockEAccess access = world.access();
+            IBlockEAccess access = entity.world.access();
             for (int i = 0; i < cur.getCurrentPathLength(); ++i) {
                 PathPoint curPoint = cur.getPathPointFromIndex(i);
 
@@ -390,7 +391,7 @@ public abstract class PathNavigate {
 
 
     public boolean canEntityStandOnPos(BlockPos pos) {
-        return this.world.getBlockState(pos.down()).isFullBlock();
+        return entity.world.getBlockState(pos.down()).isFullBlock();
     }
 
 

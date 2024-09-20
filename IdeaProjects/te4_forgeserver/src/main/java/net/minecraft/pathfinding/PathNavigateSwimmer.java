@@ -16,7 +16,7 @@ public class PathNavigateSwimmer extends PathNavigate {
 
     @Override
     protected PathFinder getPathFinder() {
-        return new PathFinder(new SwimNodeProcessor(world));
+        return new PathFinder(new SwimNodeProcessor(entity.world));
     }
 
 
@@ -65,13 +65,13 @@ public class PathNavigateSwimmer extends PathNavigate {
 
     @Override
     protected boolean isDirectPathBetweenPoints(Vec3d vec1, Vec3d vec2, int x, int y, int z) {
-        RayTraceResult result = this.world.rayTraceBlocks(vec1, new Vec3d(vec2.x, vec2.y + (double)this.entity.height * 0.5, vec2.z), false, true, false);
+        RayTraceResult result = entity.world.rayTraceBlocks(vec1, new Vec3d(vec2.x, vec2.y + (double)this.entity.height * 0.5, vec2.z), false, true, false);
         return result == null || result.typeOfHit == Type.MISS;
     }
 
 
     @Override
     public boolean canEntityStandOnPos(BlockPos pos) {
-        return !this.world.access().getBlockState(pos).isFullBlock();
+        return !entity.world.access().getBlockState(pos).isFullBlock();
     }
 }
