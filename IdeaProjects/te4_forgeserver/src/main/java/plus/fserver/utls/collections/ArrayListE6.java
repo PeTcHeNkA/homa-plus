@@ -389,7 +389,7 @@ public class ArrayListE6<T> implements List<T> {
     protected static Object[] expand(Object[] src, int newSize){
         int prevLen;
         if((prevLen = src.length) == 0)return new Object[newSize];
-        Object[] newArr = new Entity[newSize];
+        Object[] newArr = new Object[newSize];
         System.arraycopy(src, 0, newArr, 0, prevLen);
         return newArr;
     }
