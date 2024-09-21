@@ -11,8 +11,6 @@
     "expmem.ItemStackPatch",
     "light.MixinChunk",
     "light.MixinChunkProviderServer",
-    "light.MixinExtendedBlockStorage",
-    "light.MixinSPacketChunkData",
     "pf.EntityXPOrbPatch",
     "pf.GameDataPatch",
     "pf.SpawnListEntryPatch",

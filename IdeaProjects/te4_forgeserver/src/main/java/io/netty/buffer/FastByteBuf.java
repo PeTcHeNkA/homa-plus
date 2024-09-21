@@ -32,17 +32,6 @@ public class FastByteBuf extends UnpooledHeapByteBuf {
     }
 
 
-    public void writeVarInt(int input) {
-        this.ensureAccessible();
-        byte[] arr = this.array;
-        while ((input & 0xFFFFFF80) != 0x0) {
-            arr[this.writerIndex++] = (byte) ((input & 0x7F) | 0x80);
-            input >>>= 7;
-        }
-        arr[this.writerIndex++] = (byte) input;
-    }
-
-
     public void writeBytesALL(int count, byte b){
         ensureWritable0(count);
         byte[] arr = this.array;
@@ -50,6 +39,16 @@ public class FastByteBuf extends UnpooledHeapByteBuf {
             arr[i] = b;
         }
         this.writerIndex += count;
+    }
+
+
+    public void writeVarInt(int input) {
+        this.ensureAccessible();
+        while ((input & 0xFFFFFF80) != 0x0) {
+            this.writeByteF((input & 0x7F) | 0x80);
+            input >>>= 7;
+        }
+        this.writeByteF(input);
     }
 
 
@@ -72,7 +71,7 @@ public class FastByteBuf extends UnpooledHeapByteBuf {
 
     private void writeByteF(int value) {
         this.ensureWritable0(1);
-        array[this.writerIndex++] = (byte) value;
+        this._setByte(this.writerIndex++, value);
     }
 
 

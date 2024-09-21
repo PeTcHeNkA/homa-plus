@@ -1,6 +1,8 @@
 package plus.fserver.world.light;
 
 import io.netty.buffer.FastByteBuf;
+import net.minecraft.nbt.NBTTagByteArray;
+import net.minecraft.nbt.NBTTagEmptyByteArray;
 
 
 public final class LightArray {
@@ -24,7 +26,7 @@ public final class LightArray {
     public LightArray(byte[] data) {
         this.data = data;
         if (data != null && data.length != 2048) {
-            throw new IllegalArgumentException("ChunkNibbleArrays should be 2048 bytes not: " + data.length);
+            throw new IllegalArgumentException("ChunkLightArrays should be 2048 bytes not: " + data.length);
         }
     }
 
@@ -101,7 +103,23 @@ public final class LightArray {
 
 
     public byte[] getData() {
-        return this.data;
+        byte[] data = this.data;
+        if(data == null)return this.data = new byte[2048];
+        return data;
+    }
+
+
+    public NBTTagByteArray toSkyLightNbt(){
+        byte[] data = this.data;
+        if(data == null)return new NBTTagEmptyByteArray(2048, (byte) 0xFF);
+        return new NBTTagByteArray(data);
+    }
+
+
+    public NBTTagByteArray toBlockLightNbt(){
+        byte[] data = this.data;
+        if(data == null)return new NBTTagEmptyByteArray(2048, (byte) 0x00);
+        return new NBTTagByteArray(data);
     }
 
 

@@ -5,12 +5,11 @@ import java.io.IOException;
 
 
 public class NBTTagEmptyByteArray extends NBTTagByteArray{
-    private static byte[] EMPTY = new byte[0];
     private int len;
     private byte value;
 
     public NBTTagEmptyByteArray(int len, byte value){
-        super(EMPTY);
+        super(NBTTagCompound.empty);
         this.len = len;
         this.value = value;
     }

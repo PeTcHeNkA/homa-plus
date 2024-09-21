@@ -4,21 +4,21 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.chunk.BlockStateContainer;
-import net.minecraft.world.chunk.NibbleArray;
+import plus.fserver.world.light.LightArray;
 
 
 public class ExtendedBlockStorage extends BlockStateContainer{
     private final int yBase;
     private int blockRefCount;
     private int tickRefCount;
-    private NibbleArray blockLight;
-    private NibbleArray skyLight;
+    private LightArray blockLight;
+    private LightArray skyLight;
 
     public ExtendedBlockStorage(int y, boolean storeSkylight) {
         this.yBase = y;
-        this.blockLight = new NibbleArray();
+        this.blockLight = new LightArray();
         if (storeSkylight) {
-            this.skyLight = new NibbleArray();
+            this.skyLight = new LightArray();
         }
     }
 
@@ -53,22 +53,22 @@ public class ExtendedBlockStorage extends BlockStateContainer{
 
 
     public void setSkyLight(int x, int y, int z, int value) {
-        this.skyLight.set(x, y, z, value);
+        this.skyLight.setSkyLight(x, y, z, value);
     }
 
 
     public int getSkyLight(int x, int y, int z) {
-        return this.skyLight.get(x, y, z);
+        return this.skyLight.getBlockLight(x, y, z);
     }
 
 
     public void setBlockLight(int x, int y, int z, int value) {
-        this.blockLight.set(x, y, z, value);
+        this.blockLight.setBlockLight(x, y, z, value);
     }
 
 
     public int getBlockLight(int x, int y, int z) {
-        return this.blockLight.get(x, y, z);
+        return this.blockLight.getBlockLight(x, y, z);
     }
 
 
@@ -94,22 +94,22 @@ public class ExtendedBlockStorage extends BlockStateContainer{
     }
 
 
-    public NibbleArray getBlockLight() {
+    public LightArray getBlockLight() {
         return this.blockLight;
     }
 
 
-    public NibbleArray getSkyLight() {
+    public LightArray getSkyLight() {
         return this.skyLight;
     }
 
 
-    public void setBlockLight(NibbleArray newBlocklightArray) {
+    public void setBlockLight(LightArray newBlocklightArray) {
         this.blockLight = newBlocklightArray;
     }
 
 
-    public void setSkyLight(NibbleArray newSkylightArray) {
+    public void setSkyLight(LightArray newSkylightArray) {
         this.skyLight = newSkylightArray;
     }
 }

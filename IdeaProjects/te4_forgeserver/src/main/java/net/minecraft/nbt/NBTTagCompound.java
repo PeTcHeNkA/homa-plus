@@ -17,7 +17,7 @@ import plus.tson.utl.Te4HashMap;
 
 
 public class NBTTagCompound extends NBTBase {
-    private static final byte[] empty = {};
+    static final byte[] empty = {};
     private static final int[] emptyI = {};
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Pattern SIMPLE_VALUE = Pattern.compile("[A-Za-z0-9._+-]+");

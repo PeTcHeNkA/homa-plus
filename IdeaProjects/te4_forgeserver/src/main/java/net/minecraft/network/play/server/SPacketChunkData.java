@@ -19,6 +19,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.server.network.NetUtils;
 import plus.fserver.server.network.packet.SNodePacketPlayBase;
+import plus.fserver.world.light.api.ILightingEngineProvider;
 
 
 public class SPacketChunkData extends SNodePacketPlayBase {
@@ -147,51 +148,51 @@ public class SPacketChunkData extends SNodePacketPlayBase {
         buf.writerIndex(0);
         return buf;
     }
-
-
-    public int extractChunkData(PacketBuffer buf, Chunk chunk, boolean hasSkyLight, int mask) {
-        int resultMask = 0;
-        ExtendedBlockStorage[] arrays = chunk.getBlockStorageArray();
-
-        for(int index = 0, len = arrays.length; index < len; ++index) {
-            ExtendedBlockStorage storage = arrays[index];
-            if (storage != Chunk.NULL_BLOCK_STORAGE && (!this.isFullChunk() || !storage.isEmpty()) && (mask & 1 << index) != 0) {
-                resultMask |= 1 << index;
-                storage.write(buf);
-                buf.writeBytes(storage.getBlockLight().getData());
-                if (hasSkyLight) {
-                    buf.writeBytes(storage.getSkyLight().getData());
-                }
-            }
-        }
-
-        if (this.isFullChunk()) {
-            buf.writeBytes(chunk.getBiomeArray());
-        }
-        return resultMask;
-    }
-
-
-    protected int calculateChunkSize(Chunk chunk, boolean hasSkyLight, int mask) {
-        int size = 0;
-        ExtendedBlockStorage[] arrays = chunk.getBlockStorageArray();
-
-        for(int index = 0, len = arrays.length; index < len; ++index) {
-            ExtendedBlockStorage array = arrays[index];
-            if (array != Chunk.NULL_BLOCK_STORAGE && (!this.isFullChunk() || !array.isEmpty()) && (mask & 1 << index) != 0) {
-                size += array.getSerializedSize();
-                size += 2048;
-                if (hasSkyLight) {
-                    size += 2048;
-                }
-            }
-        }
-
-        if (this.isFullChunk()) {
-            size += chunk.getBiomeArray().length;
-        }
-        return size;
-    }
+//
+//
+//    public int extractChunkData(PacketBuffer buf, Chunk chunk, boolean hasSkyLight, int mask) {
+//        int resultMask = 0;
+//        ExtendedBlockStorage[] arrays = chunk.getBlockStorageArray();
+//
+//        for(int index = 0, len = arrays.length; index < len; ++index) {
+//            ExtendedBlockStorage storage = arrays[index];
+//            if (storage != Chunk.NULL_BLOCK_STORAGE && (!this.isFullChunk() || !storage.isEmpty()) && (mask & 1 << index) != 0) {
+//                resultMask |= 1 << index;
+//                storage.write(buf);
+//                buf.writeBytes(storage.getBlockLight().getData());
+//                if (hasSkyLight) {
+//                    buf.writeBytes(storage.getSkyLight().getData());
+//                }
+//            }
+//        }
+//
+//        if (this.isFullChunk()) {
+//            buf.writeBytes(chunk.getBiomeArray());
+//        }
+//        return resultMask;
+//    }
+//
+//
+//    protected int calculateChunkSize(Chunk chunk, boolean hasSkyLight, int mask) {
+//        int size = 0;
+//        ExtendedBlockStorage[] arrays = chunk.getBlockStorageArray();
+//
+//        for(int index = 0, len = arrays.length; index < len; ++index) {
+//            ExtendedBlockStorage array = arrays[index];
+//            if (array != Chunk.NULL_BLOCK_STORAGE && (!this.isFullChunk() || !array.isEmpty()) && (mask & 1 << index) != 0) {
+//                size += array.getSerializedSize();
+//                size += 2048;
+//                if (hasSkyLight) {
+//                    size += 2048;
+//                }
+//            }
+//        }
+//
+//        if (this.isFullChunk()) {
+//            size += chunk.getBiomeArray().length;
+//        }
+//        return size;
+//    }
 
 
     private static int extractChunkData(FastByteBuf buf, Chunk chunk, boolean hasSkyLight, int mask, boolean fullChunk) {
@@ -203,9 +204,11 @@ public class SPacketChunkData extends SNodePacketPlayBase {
             if (storage != Chunk.NULL_BLOCK_STORAGE && (!fullChunk || !storage.isEmpty()) && (mask & 1 << index) != 0) {
                 resultMask |= 1 << index;
                 storage.write(buf);
-                buf.writeBytes(storage.getBlockLight().getData());
+                storage.getBlockLight().writeBlockLightTo(buf);
+                //buf.writeBytes(storage.getBlockLight().getData());
                 if (hasSkyLight) {
-                    buf.writeBytes(storage.getSkyLight().getData());
+                    storage.getSkyLight().writeBlockLightTo(buf);
+                    //buf.writeBytes(storage.getSkyLight().getData());
                 }
             }
         }
@@ -218,6 +221,9 @@ public class SPacketChunkData extends SNodePacketPlayBase {
 
 
     private static int calculateChunkSize(Chunk chunk, boolean hasSkyLight, int mask, boolean isFull) {
+        //light engine
+        //chunk.getLightingEngine().processLightUpdates();
+
         int size = 0;
         ExtendedBlockStorage[] arrays = chunk.getBlockStorageArray();
 
