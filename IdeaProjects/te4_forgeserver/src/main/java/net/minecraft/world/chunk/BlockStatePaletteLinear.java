@@ -10,8 +10,13 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 
 public class BlockStatePaletteLinear extends BlockStatePaletteBase implements IBlockStatePalette {
-    public BlockStatePaletteLinear(int bitsIn) {
+    private final IBlockStatePaletteResizer resizeHandler;
+    private final int bits;
+
+    public BlockStatePaletteLinear(int bitsIn, IBlockStatePaletteResizer resizeHandlerIn) {
         this.states = new IBlockState[1 << bitsIn];
+        this.bits = bitsIn;
+        this.resizeHandler = resizeHandlerIn;
     }
 
 
@@ -29,7 +34,7 @@ public class BlockStatePaletteLinear extends BlockStatePaletteBase implements IB
             ++this.arraySize;
             return size;
         } else {
-            return -1;
+            return this.resizeHandler.onResize(this.bits + 1, state);
         }
     }
 
