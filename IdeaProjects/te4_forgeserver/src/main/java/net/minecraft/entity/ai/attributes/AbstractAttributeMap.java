@@ -13,7 +13,7 @@ public abstract class AbstractAttributeMap extends Te4HashMap<IAttribute, IAttri
     protected final Multimap<IAttribute, IAttribute> descendantsByParent = HashMultimap.create();
 
     public AbstractAttributeMap(){
-        super(7);
+        super(8);
     }
 
 
