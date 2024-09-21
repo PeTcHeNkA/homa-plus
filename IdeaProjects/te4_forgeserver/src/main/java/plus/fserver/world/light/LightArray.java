@@ -136,7 +136,8 @@ public final class LightArray {
     public void writeBlockLightTo(FastByteBuf buf){
         byte[] data = this.data;
         if(data == null){
-            writeEmptyBlockLight(buf);
+            buf.writerIndex(buf.writerIndex()+2048);
+            //writeEmptyBlockLight(buf);
         } else {
             buf.writeBytes(data);
         }
