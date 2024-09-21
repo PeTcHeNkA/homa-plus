@@ -28,10 +28,10 @@ public abstract class MixinSPacketChunkData {
 
             if (extendedblockstorage != Chunk.NULL_BLOCK_STORAGE && (!this.isFullChunk() || !extendedblockstorage.isEmpty()) && (num & 1 << j) != 0) {
                 i = i + extendedblockstorage.getData().getSerializedSize();
-                i = i + extendedblockstorage.getBlockLight().getData().length;
+                i = i + 2048;
 
                 if (flag) {
-                    i += extendedblockstorage.getSkyLight().getData().length;
+                    i += 2048;
                 }
             }
         }

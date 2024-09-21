@@ -5,13 +5,6 @@ public class FastByteBuf extends UnpooledHeapByteBuf {
     private static final UnpooledByteBufAllocator ALLOC = UnpooledByteBufAllocator.DEFAULT;
     private final int maxCapacity;
 
-    public FastByteBuf(int initialCapacity, int maxCapacity) {
-        super(ALLOC, initialCapacity, maxCapacity);
-        this.maxCapacity = maxCapacity;
-        this.writerIndex = 0;
-    }
-
-
     public FastByteBuf(byte[] initialArray, int maxCapacity) {
         super(ALLOC, initialArray, maxCapacity);
         this.maxCapacity = maxCapacity;
@@ -41,11 +34,22 @@ public class FastByteBuf extends UnpooledHeapByteBuf {
 
     public void writeVarInt(int input) {
         this.ensureAccessible();
+        byte[] arr = this.array;
         while ((input & 0xFFFFFF80) != 0x0) {
-            this.writeByteF((input & 0x7F) | 0x80);
+            arr[this.writerIndex++] = (byte) ((input & 0x7F) | 0x80);
             input >>>= 7;
         }
-        this.writeByteF(input);
+        arr[this.writerIndex++] = (byte) input;
+    }
+
+
+    public void writeBytesALL(int count, byte b){
+        ensureWritable0(count);
+        byte[] arr = this.array;
+        for (int i = 0; i < count; i++){
+            arr[i] = b;
+        }
+        this.writerIndex += count;
     }
 
 
@@ -68,7 +72,7 @@ public class FastByteBuf extends UnpooledHeapByteBuf {
 
     private void writeByteF(int value) {
         this.ensureWritable0(1);
-        this._setByte(this.writerIndex++, value);
+        array[this.writerIndex++] = (byte) value;
     }
 
 
