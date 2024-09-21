@@ -11,8 +11,9 @@ public class BitArrayMut {
     private long maxEntryValue;
     private int arraySize;
 
+    public BitArrayMut(){}
+
     public BitArrayMut(int bitsPerEntryIn, int arraySizeIn) {
-        Validate.inclusiveBetween(1L, 32L, bitsPerEntryIn);
         this.arraySize = arraySizeIn;
         this.bitsPerEntry = bitsPerEntryIn;
         this.maxEntryValue = (1L << bitsPerEntryIn) - 1L;
@@ -20,8 +21,17 @@ public class BitArrayMut {
     }
 
 
+    public BitArrayMut copy(){
+        BitArrayMut copy = new BitArrayMut();
+        copy.longArray = longArray;
+        copy.bitsPerEntry = bitsPerEntry;
+        copy.maxEntryValue = maxEntryValue;
+        copy.arraySize = arraySize;
+        return copy;
+    }
+
+
     public void init(int bitsPerEntryIn, int arraySizeIn) {
-        Validate.inclusiveBetween(1L, 32L, bitsPerEntryIn);
         this.arraySize = arraySizeIn;
         this.bitsPerEntry = bitsPerEntryIn;
         this.maxEntryValue = (1L << bitsPerEntryIn) - 1L;

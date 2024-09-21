@@ -70,10 +70,11 @@ public class BlockStatePaletteLinear extends BlockStatePaletteBase implements IB
 
     @Override
     public int getSerializedSize() {
-        int i = PacketBuffer.getVarIntSize(this.arraySize);
-        IBlockState state;
-        for (int j = 0; j < this.arraySize; ++j) {
-            state = this.states[j];
+        final int size;
+        int i = PacketBuffer.getVarIntSize(size = this.arraySize);
+        IBlockState[] states = this.states;
+        for (int j = 0; j < size; ++j) {
+            IBlockState state = states[j];
             i += PacketBuffer.getVarIntSize(state==null? BlockIDIndexes.AIR_STATE_ID:state.getId());
         }
         return i;

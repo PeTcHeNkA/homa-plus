@@ -180,9 +180,9 @@ public class SPacketChunkData extends SNodePacketPlayBase {
             ExtendedBlockStorage array = arrays[index];
             if (array != Chunk.NULL_BLOCK_STORAGE && (!this.isFullChunk() || !array.isEmpty()) && (mask & 1 << index) != 0) {
                 size += array.getSerializedSize();
-                size += array.getBlockLight().getData().length;
+                size += 2048;
                 if (hasSkyLight) {
-                    size += array.getSkyLight().getData().length;
+                    size += 2048;
                 }
             }
         }
@@ -225,9 +225,9 @@ public class SPacketChunkData extends SNodePacketPlayBase {
             ExtendedBlockStorage array = arrays[index];
             if (array != Chunk.NULL_BLOCK_STORAGE && (!isFull || !array.isEmpty()) && (mask & 1 << index) != 0) {
                 size += array.getSerializedSize();
-                size += array.getBlockLight().getData().length;
+                size += 2048;
                 if (hasSkyLight) {
-                    size += array.getSkyLight().getData().length;
+                    size += 2048;
                 }
             }
         }
