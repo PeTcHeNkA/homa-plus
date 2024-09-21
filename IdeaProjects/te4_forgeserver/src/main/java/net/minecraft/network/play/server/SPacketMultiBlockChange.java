@@ -24,7 +24,7 @@ public class SPacketMultiBlockChange extends SPacketPlayBase {
         BlockUpdateData[] changedBlocks = this.changedBlocks = new BlockUpdateData[count];
 
         for(int i = 0; i < changedBlocks.length; ++i) {
-            changedBlocks[i] = new BlockUpdateData(updates[i], chunk);
+            changedBlocks[i] = new BlockUpdateData(this, updates[i], chunk);
         }
     }
 
@@ -109,7 +109,8 @@ public class SPacketMultiBlockChange extends SPacketPlayBase {
         }
 
 
-        public BlockUpdateData(short offset, Chunk chunk) {
+        public BlockUpdateData(SPacketMultiBlockChange parent, short offset, Chunk chunk) {
+            setParent(parent);
             this.offset = offset;
             this.blockState = chunk.getBlockStateUnchecked(
                     (chunk.x << 4) + (offset >> 12 & 15),

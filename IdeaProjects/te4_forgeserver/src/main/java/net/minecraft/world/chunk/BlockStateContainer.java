@@ -9,7 +9,6 @@ import net.minecraft.util.BlockIDIndexes;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import plus.fserver.ElcaConfig;
 import plus.fserver.utls.collections.BitArrayMut;
 import plus.fserver.utls.collections.IntBlockIndex;
 
@@ -20,46 +19,42 @@ public class BlockStateContainer extends BitArrayMut implements IBlockStatePalet
     private int bits;
 
     public BlockStateContainer() {
-        super(ElcaConfig.INIT_PALETTE_LINEAR_BITS, 4096);
-        this.palette = new BlockStatePaletteLinear(this.bits = ElcaConfig.INIT_PALETTE_LINEAR_BITS);
+        this.setBits(3, false);
     }
 
 
-    private void setBits(int bitsIn) {
-        setBits(bitsIn, false);
-    }
-
-
-    private void setBits(int bitsIn, boolean forceBits) {
+    private BitArrayMut setBits(int bitsIn, boolean forceBits) {
         if (bitsIn != this.bits) {
             this.bits = bitsIn;
 
             if (this.bits <= 4) {
                 this.palette = new BlockStatePaletteLinear(this.bits);
             } else if (this.bits <= 8) {
-                this.palette = new BlockStatePaletteHashMap(this.bits, this);
+                this.palette = new BlockStatePaletteHashMap(this.bits);
             } else {
                 this.palette = REGISTRY_BASED_PALETTE;
                 this.bits = MathHelper.log2DeBruijn(BlockIDIndexes.BLOCK_INDEX.size());
-                if (forceBits)
-                    this.bits = bitsIn;
+                if (forceBits) this.bits = bitsIn;
             }
             if(this.palette.idFor(BlockIDIndexes.AIR_STATE) == -1){
                 onResize(this.bits + 1, BlockIDIndexes.AIR_STATE);
             }
+            BitArrayMut result = super.copy();
             super.init(this.bits, 4096);
+            return result;
         }
+        return this;
     }
 
 
     @Override
     public int onResize(int bits, IBlockState state) {
         IBlockStatePalette palette = this.palette;
-        this.setBits(bits);
-        for (int i = 0, size = super.size(); i < size; ++i) {
-            this.set(i, palette.get(super.getAt(i)));
+        BitArrayMut bitarray = this.setBits(bits, false);
+
+        for (int i = 0, size = bitarray.size(); i < size; ++i) {
+            this.set(i, palette.get(bitarray.getAt(i)));
         }
-        //todo is safe?
         return this.palette.idFor(state);
     }
 
