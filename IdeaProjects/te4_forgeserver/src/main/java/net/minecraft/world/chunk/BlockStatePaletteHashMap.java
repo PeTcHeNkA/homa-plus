@@ -12,16 +12,13 @@ import java.util.Arrays;
 
 
 public class BlockStatePaletteHashMap extends BlockStatePaletteBase implements IBlockStatePalette {
-    IBlockState[] stateIndex;
-
+    private IBlockState[] stateIndex;
     private int[] intKeys;
+    private short nextFreeIndex;
+    private int mapSize;
+    private final byte bits;
 
-    private volatile short nextFreeIndex;
-    private volatile int mapSize;
-    private final IBlockStatePaletteResizer paletteResizer;
-    private final int bits;
-
-    public BlockStatePaletteHashMap(int bitsIn, IBlockStatePaletteResizer paletteResizerIn) {
+    public BlockStatePaletteHashMap(int bitsIn) {
         int initialCapacity = 1 << bitsIn;
         initialCapacity = (int)((float)initialCapacity / 0.8F);
         this.stateIndex = new IBlockState[initialCapacity];
@@ -32,8 +29,7 @@ public class BlockStatePaletteHashMap extends BlockStatePaletteBase implements I
 
         if(ElcaCV.FIX_NULL_HASH_PALETTE)
             Arrays.fill(states, BlockIDIndexes.AIR_STATE);
-        this.bits = bitsIn;
-        this.paletteResizer = paletteResizerIn;
+        this.bits = (byte) bitsIn;
     }
 
 
@@ -42,7 +38,7 @@ public class BlockStatePaletteHashMap extends BlockStatePaletteBase implements I
         int i;
         if ((i = getId(state)) == -1) {
             i = add(state);
-            if (i >= 1 << this.bits) i = this.paletteResizer.onResize(this.bits + 1, state);
+            if (i >= 1 << this.bits) return -1;
         }
         return i;
     }
@@ -102,7 +98,7 @@ public class BlockStatePaletteHashMap extends BlockStatePaletteBase implements I
     }
 
 
-    public int add(IBlockState objectIn) {
+    private int add(IBlockState objectIn) {
         int i = this.nextId();
         this.put(objectIn, i);
         return i;
@@ -144,7 +140,7 @@ public class BlockStatePaletteHashMap extends BlockStatePaletteBase implements I
     }
 
 
-    public void put(IBlockState objectIn, int intKey) {
+    private void put(IBlockState objectIn, int intKey) {
         int i = Math.max(intKey, this.mapSize + 1);
         if ((float)i >= (float)this.stateIndex.length * 0.8F) {
             int j;
@@ -196,7 +192,7 @@ public class BlockStatePaletteHashMap extends BlockStatePaletteBase implements I
     }
 
 
-    public void clear() {
+    private void clear() {
         Arrays.fill(this.stateIndex, null);
         if(ElcaCV.FIX_NULL_HASH_PALETTE){
             this.nextFreeIndex = 0;
@@ -210,7 +206,7 @@ public class BlockStatePaletteHashMap extends BlockStatePaletteBase implements I
     }
 
 
-    public int size() {
+    private int size() {
         return this.mapSize;
     }
 }
