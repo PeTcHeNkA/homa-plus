@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import javax.annotation.Nullable;
+
+import com.google.common.collect.ImmutableList;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -29,6 +31,7 @@ import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -168,10 +171,11 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
         ClassInheritanceMultiMap[] lists = this.entityLists = new ClassInheritanceMultiMap[16];
 
-        for (int i = 0; i < lists.length; ++i) {
-            lists[i] = new ClassInheritanceMultiMap<>(Entity.class);
+        if(world.isRemote) {
+            for (int i = 0; i < lists.length; ++i) {
+                lists[i] = new ClassInheritanceMultiMap<>(Entity.class);
+            }
         }
-        //capabilities = ForgeEventFactory.gatherCapabilities(this);
     }
 
 
@@ -781,12 +785,14 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
         }
         int part = MathHelper.floor(entityIn.posY)>>4;
 
+
+        ClassInheritanceMultiMap<Entity>[] lists = entityLists;
+
         if (part < 0) {
             part = 0;
         }
-
-        if (part >= this.entityLists.length) {
-            part = this.entityLists.length - 1;
+        else if (part >= lists.length) {
+            part = lists.length - 1;
         }
 
         MinecraftForge.EVENT_BUS.postF(world.enteringChunk.initEntering(entityIn, this.x, this.z, entityIn.chunkCoordX, entityIn.chunkCoordZ));
@@ -794,7 +800,11 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
         entityIn.chunkCoordX = this.x;
         entityIn.chunkCoordY = part;
         entityIn.chunkCoordZ = this.z;
-        this.entityLists[part].add(entityIn);
+
+        ClassInheritanceMultiMap<Entity> list = lists[part];
+        if(list == null)list = lists[part] = new ClassInheritanceMultiMap<>(Entity.class);
+
+        list.add(entityIn);
         this.markDirty(); // Forge - ensure chunks are marked to save after an entity add
     }
 
@@ -805,14 +815,20 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
 
     public void removeEntityAtIndex(Entity entityIn, int index) {
+        ClassInheritanceMultiMap<Entity>[] lists = entityLists;
+
         if (index < 0) {
             index = 0;
         }
-        if (index >= this.entityLists.length) {
-            index = this.entityLists.length - 1;
+        else if (index >= lists.length) {
+            index = lists.length - 1;
         }
-        this.entityLists[index].remove(entityIn);
-        this.markDirty(); // Forge - ensure chunks are marked to save after entity removals
+
+        ClassInheritanceMultiMap<Entity> list = lists[index];
+        if(list != null) {
+            list.remove(entityIn);
+            this.markDirty(); // Forge - ensure chunks are marked to save after entity removals
+        }
     }
 
 
@@ -891,24 +907,33 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
     public void onLoad() {
         this.loaded = true;
-        this.world.addTileEntities(this.tileEntities.values());
+        World world = this.world;
+        world.addTileEntities(this.tileEntities.values());
         for (ClassInheritanceMultiMap<Entity> entities : this.entityLists) {
-            this.world.loadEntities(com.google.common.collect.ImmutableList.copyOf(entities));
+            if(entities != null)
+                world.loadEntities(ImmutableList.copyOf(entities));
         }
-        net.minecraftforge.common.MinecraftForge.EVENT_BUS.postF(new net.minecraftforge.event.world.ChunkEvent.Load(this));
+        MinecraftForge.EVENT_BUS.postF(new ChunkEvent.Load(this));
     }
 
 
     public void onUnload() {
-        java.util.Arrays.stream(entityLists).forEach(map -> map.getByClass(net.minecraft.entity.player.EntityPlayer.class).forEach(pl -> world.updateEntityWithOptionalForce(pl, false))); // FORGE - Fix for MC-92916
         this.loaded = false;
+        World lWorld = this.world;
         for (TileEntity tileentity : this.tileEntities.values()) {
-            this.world.markTileEntityForRemoval(tileentity);
+            lWorld.markTileEntityForRemoval(tileentity);
         }
+
         for (ClassInheritanceMultiMap<Entity> entities : this.entityLists) {
-            this.world.unloadEntities(entities);
+            if(entities != null){
+                // FORGE - Fix for MC-92916
+                entities.getByClass(net.minecraft.entity.player.EntityPlayer.class)
+                        .forEach(pl -> world.updateEntityWithOptionalForce(pl, false));
+
+                lWorld.unloadEntities(entities);
+            }
         }
-        net.minecraftforge.common.MinecraftForge.EVENT_BUS.postF(new net.minecraftforge.event.world.ChunkEvent.Unload(this));
+        MinecraftForge.EVENT_BUS.postF(new ChunkEvent.Unload(this));
     }
 
 
@@ -923,33 +948,40 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
         Entity[] parts;
         Entity entity;
+        ClassInheritanceMultiMap<Entity>[] list = this.entityLists;
 
         if(filter == null) {
             for (EntityList<Entity> raw; minY <= maxY; ++minY)
-                if (!(raw = this.entityLists[minY]).isEmptyC())
-                    for (int i = 0; i < raw.sizeC();i++)
-                        if ((entity = raw.getC(i)) != entityIn && entity.getEntityBoundingBox().intersects(aabb)) {
-                            listToFill.add(entity);
-                            if ((parts = entity.getParts()) != null)
-                                for (Entity entity1 : parts)
-                                    if (entity1 != entityIn && entity1.getEntityBoundingBox().intersects(aabb))
-                                        listToFill.add(entity1);
-                            if (--max < 0) return;
-                        }
+                if ((raw = list[minY]) != null) {
+                    int size;
+                    if((size = raw.sizeC()) != 0)
+                        for (int i = 0; i < size; i++)
+                            if ((entity = raw.getC(i)) != entityIn && entity.getEntityBoundingBox().intersects(aabb)) {
+                                listToFill.add(entity);
+                                if ((parts = entity.getParts()) != null)
+                                    for (Entity entity1 : parts)
+                                        if (entity1 != entityIn && entity1.getEntityBoundingBox().intersects(aabb))
+                                            listToFill.add(entity1);
+                                if (--max < 0) return;
+                            }
+                }
         } else {
             for (EntityList<Entity> raw; minY <= maxY; ++minY)
-                if (!(raw = this.entityLists[minY]).isEmptyC())
-                    for (int i = 0; i < raw.sizeC();i++)
-                        if ((entity = raw.getC(i)) != entityIn && entity.getEntityBoundingBox().intersects(aabb)) {
-                            if (filter.apply(entity)) listToFill.add(entity);
+                if ((raw = list[minY]) != null) {
+                    int size;
+                    if((size = raw.sizeC()) != 0)
+                        for (int i = 0; i < size; i++)
+                            if ((entity = raw.getC(i)) != entityIn && entity.getEntityBoundingBox().intersects(aabb)) {
+                                if (filter.apply(entity)) listToFill.add(entity);
 
-                            if ((parts = entity.getParts()) != null)
-                                for (Entity entity1 : parts)
-                                    if (entity1 != entityIn && entity1.getEntityBoundingBox().intersects(aabb)
-                                            && (filter.apply(entity1)))
-                                        listToFill.add(entity1);
-                            if (--max < 0) return;
-                        }
+                                if ((parts = entity.getParts()) != null)
+                                    for (Entity entity1 : parts)
+                                        if (entity1 != entityIn && entity1.getEntityBoundingBox().intersects(aabb)
+                                                && (filter.apply(entity1)))
+                                            listToFill.add(entity1);
+                                if (--max < 0) return;
+                            }
+                }
         }
     }
 
@@ -960,33 +992,34 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
         Entity[] parts;
         Entity entity;
+        ClassInheritanceMultiMap<Entity>[] list = this.entityLists;
 
         if(filter == null) {
             for (EntityList<Entity> raw; minY <= maxY; ++minY)
-                //if ((cursor = (raw = this.entityLists[minY].rawValues()).sizeC()-1) != 0)
-                for (int cursor = (raw = this.entityLists[minY]).sizeC()-1; cursor != -1; cursor--)
-                    if ((entity = raw.getC(cursor)) != entityIn && entity.getEntityBoundingBox().intersects(aabb)) {
-                        listToFill.addF(entity);
-                        if ((parts = entity.getParts()) != null)
-                            for (Entity entity1 : parts)
-                                if (entity1 != entityIn && entity1.getEntityBoundingBox().intersects(aabb))
-                                    listToFill.addF(entity1);
-                        if (--max < 0) return;
-                    }
+                if ((raw = list[minY]) != null)
+                    for (int cursor = raw.sizeC() - 1; cursor != -1; cursor--)
+                        if ((entity = raw.getC(cursor)) != entityIn && entity.getEntityBoundingBox().intersects(aabb)) {
+                            listToFill.addF(entity);
+                            if ((parts = entity.getParts()) != null)
+                                for (Entity entity1 : parts)
+                                    if (entity1 != entityIn && entity1.getEntityBoundingBox().intersects(aabb))
+                                        listToFill.addF(entity1);
+                            if (--max < 0) return;
+                        }
         } else {
             for (EntityList<Entity> raw; minY <= maxY; ++minY)
-                //if ((cursor = (raw = this.entityLists[minY].rawValues()).sizeC()) != 0)
-                for (int cursor = (raw = this.entityLists[minY]).sizeC()-1; cursor != -1; cursor--)
-                    if ((entity = raw.getC(cursor)) != entityIn && entity.getEntityBoundingBox().intersects(aabb)) {
-                        if (filter.apply(entity)) listToFill.addF(entity);
+                if ((raw = list[minY]) != null)
+                    for (int cursor = raw.sizeC()-1; cursor != -1; cursor--)
+                        if ((entity = raw.getC(cursor)) != entityIn && entity.getEntityBoundingBox().intersects(aabb)) {
+                            if (filter.apply(entity)) listToFill.addF(entity);
 
-                        if ((parts = entity.getParts()) != null)
-                            for (Entity entity1 : parts)
-                                if (entity1 != entityIn && entity1.getEntityBoundingBox().intersects(aabb)
-                                        && (filter.apply(entity1)))
-                                    listToFill.addF(entity1);
-                        if (--max < 0) return;
-                    }
+                            if ((parts = entity.getParts()) != null)
+                                for (Entity entity1 : parts)
+                                    if (entity1 != entityIn && entity1.getEntityBoundingBox().intersects(aabb)
+                                            && (filter.apply(entity1)))
+                                        listToFill.addF(entity1);
+                            if (--max < 0) return;
+                        }
         }
     }
 
@@ -996,31 +1029,38 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
             maxY = MathUtls.clamp16c(aabb.maxY + World.MAX_ENTITY_RADIUS);
 
         Entity entity;
+        ClassInheritanceMultiMap<Entity>[] list = this.entityLists;
 
         if(filter == null)
             for (EntityList<Entity> raw; minY <= maxY; ++minY){
-                if (!(raw = this.entityLists[minY]).isEmptyC())
-                    for (int i = 0; i < raw.sizeC();i++)
-                        if ((entity = raw.getC(i)).getEntityBoundingBox().intersects(aabb) && entity != entityIn) {
-                            listToFill.add(entity);
-                            if (entity.getParts() != null)
-                                for (Entity entity1 : entity.getParts())
-                                    if (entity1 != entityIn && entity1.getEntityBoundingBox().intersects(aabb))
-                                        listToFill.add(entity1);
-                        }
+                if ((raw = list[minY]) != null) {
+                    int size;
+                    if ((size = raw.sizeC()) != 0)
+                        for (int i = 0; i < size; i++)
+                            if ((entity = raw.getC(i)).getEntityBoundingBox().intersects(aabb) && entity != entityIn) {
+                                listToFill.add(entity);
+                                if (entity.getParts() != null)
+                                    for (Entity entity1 : entity.getParts())
+                                        if (entity1 != entityIn && entity1.getEntityBoundingBox().intersects(aabb))
+                                            listToFill.add(entity1);
+                            }
+                }
             }
         else
             for (EntityList<Entity> raw; minY <= maxY; ++minY){
-                if (!(raw = this.entityLists[minY]).isEmptyC())
-                    for (int i = 0; i < raw.sizeC();i++)
-                        if ((entity = raw.getC(i)).getEntityBoundingBox().intersects(aabb) && entity != entityIn) {
-                            if (filter.apply(entity)) listToFill.add(entity);
-                            if (entity.getParts() != null)
-                                for (Entity entity1 : entity.getParts())
-                                    if (entity1 != entityIn && entity1.getEntityBoundingBox().intersects(aabb)
-                                            && (filter.apply(entity1)))
-                                        listToFill.add(entity1);
-                        }
+                if ((raw = list[minY]) != null) {
+                    int size;
+                    if ((size = raw.sizeC()) != 0)
+                        for (int i = 0; i < size; i++)
+                            if ((entity = raw.getC(i)).getEntityBoundingBox().intersects(aabb) && entity != entityIn) {
+                                if (filter.apply(entity)) listToFill.add(entity);
+                                if (entity.getParts() != null)
+                                    for (Entity entity1 : entity.getParts())
+                                        if (entity1 != entityIn && entity1.getEntityBoundingBox().intersects(aabb)
+                                                && (filter.apply(entity1)))
+                                            listToFill.add(entity1);
+                            }
+                }
             }
     }
 
@@ -1028,10 +1068,17 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
     public <T extends Entity> void getEntitiesOfTypeWithinAABB(final Class <? extends T > entityClass, final AxisAlignedBB aabb, final List<T> listToFill, @Nullable final Predicate <? super T > filter) {
         final int i = MathUtls.clamp16c(aabb.minY - World.MAX_ENTITY_RADIUS),
                   j = MathUtls.clamp16c(aabb.maxY + World.MAX_ENTITY_RADIUS);
-        for (int k = i; k <= j; ++k)
-            for (T t : this.entityLists[k].getByClass(entityClass))
-                if (t.getEntityBoundingBox().intersects(aabb) && (filter == null || filter.apply(t)))
-                    listToFill.add(t);
+
+        ClassInheritanceMultiMap<Entity>[] lists = this.entityLists;
+
+        for (int k = i; k <= j; ++k) {
+            ClassInheritanceMultiMap<Entity> list1 = lists[k];
+            if(list1 != null) {
+                for (T t : list1.getByClass(entityClass))
+                    if (t.getEntityBoundingBox().intersects(aabb) && (filter == null || filter.apply(t)))
+                        listToFill.add(t);
+            }
+        }
     }
 
 

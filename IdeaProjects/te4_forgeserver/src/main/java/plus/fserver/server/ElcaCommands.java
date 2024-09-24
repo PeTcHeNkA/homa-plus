@@ -162,6 +162,7 @@ public class ElcaCommands extends ServerCommand {
                 return entry.getWatchingPlayers();
             }
             public void display(){
+                Chunk chunk = this.chunk;
                 int x = chunk.x * 16 + 8;
                 int y = shift * 16 + 8;
                 int z = chunk.z * 16 + 8;
@@ -170,8 +171,11 @@ public class ElcaCommands extends ServerCommand {
 
                 MobInfoList mobs = new MobInfoList();
 
-                for (Entity entity:chunk.getEntityLists()[shift]){
-                    mobs.add(entity);
+                ClassInheritanceMultiMap<Entity> list = chunk.getEntityLists()[shift];
+                if(list != null) {
+                    for (Entity entity : list) {
+                        mobs.add(entity);
+                    }
                 }
 
                 String inf = "  &ePos: x:"+x+", y:"+y+", z: "+z+ ", count:"+count;
@@ -214,11 +218,13 @@ public class ElcaCommands extends ServerCommand {
                 sorted = false;
                 byte index = 0;
                 for (ClassInheritanceMultiMap<Entity> part:chunk.getEntityLists()){
-                    int count = part.sizeC();
-                    if(count > 3){
-                        parts.addF(new Part(chunk, index, count));
+                    if(part != null) {
+                        int count = part.sizeC();
+                        if (count > 3) {
+                            parts.addF(new Part(chunk, index, count));
+                        }
+                        ++index;
                     }
-                    ++index;
                 }
             }
 

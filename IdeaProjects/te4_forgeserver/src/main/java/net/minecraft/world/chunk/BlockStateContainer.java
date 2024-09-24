@@ -161,7 +161,10 @@ public class BlockStateContainer extends BitArrayMut implements IBlockStatePalet
 
 
     public int getSerializedSize() {
-        return 1 + this.palette.getSerializedSize() + PacketBuffer.getVarIntSize(super.size()) + super.getBackingLongArray().length << 3;
+        return 1
+                + this.palette.getSerializedSize()
+                + PacketBuffer.getVarIntSize(super.size())
+                + super.getBackingLongArray().length << 3;
     }
 
 

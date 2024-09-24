@@ -62,7 +62,7 @@ public class ElcaConfig {
     public static int MAX_CONNECTIONS_PER        = 15;
     public static int MAX_CONNECTIONS_TIME       = 1000;
     public static int MAX_CONNECTION_WARN        = 10;
-    public static int INIT_PALETTE_LINEAR_BITS   = 3;
+    public static int INIT_PALETTE_LINEAR_BITS   = 4; //should also set on client
     public static int READ_TIMEOUT_TIMER         = 17;
 
     //public static boolean FAST_LIGHT                 = true;

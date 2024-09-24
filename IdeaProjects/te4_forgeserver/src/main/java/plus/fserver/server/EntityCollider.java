@@ -47,19 +47,21 @@ public class EntityCollider {
 
 
     public void collideAll(ClassInheritanceMultiMap<Entity>[] entityLists){
-        for (ClassInheritanceMultiMap<Entity> list:entityLists){
-            int size;
-            if((size = list.sizeC()) < 2)continue;
-            if(size > 12){
-                Entity[] entities = export(list, size);
-                temp = EMPTY;
-                if(size > limit){
-                    task.add((cp, limit1, temp) -> collideAllB(cp, entities, size, limit1, temp));
+        for (ClassInheritanceMultiMap<Entity> list:entityLists) {
+            if (list != null) {
+                int size;
+                if ((size = list.sizeC()) < 2) continue;
+                if (size > 12) {
+                    Entity[] entities = export(list, size);
+                    temp = EMPTY;
+                    if (size > limit) {
+                        task.add((cp, limit1, temp) -> collideAllB(cp, entities, size, limit1, temp));
+                    } else {
+                        task.add((cp, limit12, temp) -> collideAll(cp, entities, size));
+                    }
                 } else {
-                    task.add((cp, limit12, temp) -> collideAll(cp, entities, size));
+                    collideAll(entityCP, export(list, size), size);
                 }
-            } else {
-                collideAll(entityCP, export(list, size), size);
             }
         }
     }

@@ -15,6 +15,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.nbt.*;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ClassInheritanceMultiMap;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.datafix.FixTypes;
@@ -343,9 +344,12 @@ public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO {
         chunkIn.setHasEntities(false);
         NBTTagList nbttaglist1 = new NBTTagList();
 
-        for (int i = 0; i < chunkIn.getEntityLists().length; ++i) {
+        for (ClassInheritanceMultiMap<Entity> list : chunkIn.getEntityLists()) {
+            if(list == null) continue;
+
             NBTTagCompound tagCompound;
-            for (Entity entity : chunkIn.getEntityLists()[i]) {
+
+            for (Entity entity : list) {
                 tagCompound = new NBTTagCompound();
                 try {
                     if (entity.writeToNBTOptional(tagCompound)) {
