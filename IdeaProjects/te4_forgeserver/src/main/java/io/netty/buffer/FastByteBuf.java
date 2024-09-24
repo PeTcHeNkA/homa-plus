@@ -35,10 +35,11 @@ public class FastByteBuf extends UnpooledHeapByteBuf {
     public void writeBytesALL(int count, byte b){
         ensureWritable0(count);
         byte[] arr = this.array;
-        for (int i = 0; i < count; i++){
+        int start = writerIndex, max = start + count;
+        for (int i = start; i < max; i++){
             arr[i] = b;
         }
-        this.writerIndex += count;
+        this.writerIndex = max;
     }
 
 

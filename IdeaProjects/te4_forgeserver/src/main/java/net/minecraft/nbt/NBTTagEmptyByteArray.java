@@ -8,6 +8,12 @@ public class NBTTagEmptyByteArray extends NBTTagByteArray{
     private int len;
     private byte value;
 
+    public NBTTagEmptyByteArray(byte[] ref, int len, byte value){
+        super(ref);
+        this.len = len;
+        this.value = value;
+    }
+
     public NBTTagEmptyByteArray(int len, byte value){
         super(NBTTagCompound.empty);
         this.len = len;

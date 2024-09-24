@@ -1189,9 +1189,9 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
                     this.storageArrays[i] = array;
                 }
                 array.read(buf);
-                buf.readBytes(array.getBlockLight().getData());
+                buf.readBytes(array.getBlockLightData());
                 if (flag) {
-                    buf.readBytes(array.getSkyLight().getData());
+                    buf.readBytes(array.getSkyLightData());
                 }
             }
         }

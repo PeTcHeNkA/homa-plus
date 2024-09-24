@@ -37,7 +37,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import plus.fserver.server.SStrings;
 import plus.fserver.utls.NbtUtils;
-import plus.fserver.world.light.LightArray;
 import plus.fserver.world.light.LightingHooks;
 import plus.fserver.world.light.api.IChunkLightingData;
 
@@ -321,16 +320,16 @@ public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO {
                 tag.setByte("Y", (byte)(storage.getYLocation() >> 4 & 255));
                 byte[] abyte = new byte[4096];
                 NibbleArray nibblearray = new NibbleArray();
-                NibbleArray nibblearray1 = storage.getData().getDataForNBT(abyte, nibblearray);
+                NibbleArray nibblearray1 = storage.getDataForNBT(abyte, nibblearray);
                 tag.setByteArray("Blocks", abyte);
                 tag.setByteArray("Data", nibblearray.getData());
                 if (nibblearray1 != null)
                     tag.setByteArray("Add", nibblearray1.getData());
 
-                tag.setTag("BlockLight", storage.getBlockLight().toBlockLightNbt());
+                tag.setTag("BlockLight", storage.toBlockLightNbt());
 
                 if (flag)
-                    tag.setTag("SkyLight", storage.getSkyLight().toBlockLightNbt());
+                    tag.setTag("SkyLight", storage.toSkyLightNbt());
                 else{
 //                    if(empty==null)
 //                        empty = new byte[storage.getBlockLight().getData().length];
@@ -426,18 +425,18 @@ public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO {
         for (int l = 0; l < nbttaglist.tagCount(); ++l) {
             NBTTagCompound nbttagcompound = nbttaglist.getCompoundTagAt(l);
             int i1 = nbttagcompound.getByte("Y");
-            ExtendedBlockStorage extendedblockstorage = new ExtendedBlockStorage(i1 << 4, flag);
+            ExtendedBlockStorage storage = new ExtendedBlockStorage(i1 << 4, flag);
             byte[] abyte = nbttagcompound.getByteArray("Blocks");
             NibbleArray nibblearray = new NibbleArray(nbttagcompound.getByteArray("Data"));
             NibbleArray nibblearray1 = nbttagcompound.hasKey("Add", 7) ? new NibbleArray(nbttagcompound.getByteArray("Add")) : null;
-            extendedblockstorage.getData().setDataFromNBT(abyte, nibblearray, nibblearray1);
-            extendedblockstorage.setBlockLight(new LightArray(nbttagcompound.getByteArray("BlockLight"), (byte) 0x00));
+            storage.setDataFromNBT(abyte, nibblearray, nibblearray1);
+            storage.setBlockLight(nbttagcompound.getByteArray("BlockLight"));
 
             if (flag)
-                extendedblockstorage.setSkyLight(new LightArray(nbttagcompound.getByteArray("SkyLight"), (byte) 0x00));
+                storage.setSkyLight(nbttagcompound.getByteArray("SkyLight"));
 
-            extendedblockstorage.recalculateRefCounts();
-            storages[i1] = extendedblockstorage;
+            storage.recalculateRefCounts();
+            storages[i1] = storage;
         }
 
         chunk.setStorageArrays(storages);

@@ -418,7 +418,7 @@ public class LightingEngine implements ILightingEngine {
 
     private IBlockState posToState(final BlockPos pos, final ExtendedBlockStorage section) {
         if (section != Chunk.NULL_BLOCK_STORAGE)
-            return section.getData().get(pos.getX() & 0xF, pos.getY() & 0xF, pos.getZ() & 0xF);
+            return section.get(pos.getX() & 0xF, pos.getY() & 0xF, pos.getZ() & 0xF);
         return BlockIDIndexes.AIR_STATE;
     }
 

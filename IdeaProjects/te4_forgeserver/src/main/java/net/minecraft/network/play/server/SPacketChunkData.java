@@ -204,10 +204,10 @@ public class SPacketChunkData extends SNodePacketPlayBase {
             if (storage != Chunk.NULL_BLOCK_STORAGE && (!fullChunk || !storage.isEmpty()) && (mask & 1 << index) != 0) {
                 resultMask |= 1 << index;
                 storage.write(buf);
-                storage.getBlockLight().writeBlockLightTo(buf);
+                storage.writeBlockLightTo(buf);
                 //buf.writeBytes(storage.getBlockLight().getData());
                 if (hasSkyLight) {
-                    storage.getSkyLight().writeBlockLightTo(buf);
+                    storage.writeSkyLightTo(buf);
                     //buf.writeBytes(storage.getSkyLight().getData());
                 }
             }

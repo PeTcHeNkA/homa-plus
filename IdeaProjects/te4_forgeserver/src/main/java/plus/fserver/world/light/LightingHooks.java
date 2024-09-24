@@ -227,11 +227,10 @@ public class LightingHooks {
                 final ExtendedBlockStorage storage = storages[j];
                 if (storage != Chunk.NULL_BLOCK_STORAGE) {
                     final int yBase = j * 16;
-                    final BlockStateContainer data = storage.getData();
                     for (int y = 0; y < 16; ++y)
                         for (int z = 0; z < 16; ++z)
                             for (int x = 0; x < 16; ++x)
-                                if (data.get(x, y, z).getLightValue(world, pos) > 0)
+                                if (storage.get(x, y, z).getLightValue(world, pos) > 0)
                                     world.checkLightFor(EnumSkyBlock.BLOCK, pos.setPos(xBase + x, yBase + y, zBase + z));
                 }
             }
