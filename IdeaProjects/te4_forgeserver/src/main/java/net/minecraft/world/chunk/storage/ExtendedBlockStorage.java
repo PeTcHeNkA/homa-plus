@@ -13,14 +13,13 @@ import java.util.Arrays;
 public class ExtendedBlockStorage extends BlockStateContainer{
     private static final byte[] ALL_15      = new byte[]{15};
     private static final byte[] ALL_ZERO    = new byte[]{0};
-    private final byte data;
+    private final int yBase;
     private short blockRefCount;
     private short tickRefCount;
-    private byte[] blockLight;           //null (all-0) or any
-    private byte[] skyLight = ALL_15;  //all-0 or all-15 or any
+    private byte[] blockLight, skyLight = ALL_ZERO;
 
     public ExtendedBlockStorage(int y, boolean storeSkylight) {
-        this.data = (byte) (y & 15);
+        this.yBase = y;
     }
 
 
@@ -41,16 +40,6 @@ public class ExtendedBlockStorage extends BlockStateContainer{
     public boolean isEmpty() {
         return this.blockRefCount == 0;
     }
-//
-//
-//    public boolean isEmptyLight(){
-//        if(this.blockRefCount != 0 || blockLight != null)return false;
-//        byte[] data;
-//        if((data = this.skyLight).length == 1) {
-//            return data[0] == 15;
-//        }
-//        return false;
-//    }
 
 
     public boolean needsRandomTick() {
@@ -59,7 +48,7 @@ public class ExtendedBlockStorage extends BlockStateContainer{
 
 
     public int getYLocation() {
-        return this.data & 15;
+        return this.yBase;
     }
 
 
@@ -75,11 +64,7 @@ public class ExtendedBlockStorage extends BlockStateContainer{
 
 
     public int getSkyLight(int x, int y, int z) {
-        final byte[] data;
-        if((data = this.skyLight).length == 1) return data[0];
-        int index = getCoordinateIndex(x, y, z);
-        int arrIndex = getNibbleIndex(index);
-        return isLowerNibble(index) ? data[arrIndex] & 15 : data[arrIndex] >> 4 & 15;
+        return getSkyFromIndex(getCoordinateIndex(x, y, z));
     }
 
 
@@ -94,9 +79,21 @@ public class ExtendedBlockStorage extends BlockStateContainer{
 
 
     public int getBlockLight(int x, int y, int z) {
+        return this.getBlockFromIndex(getCoordinateIndex(x, y, z));
+    }
+
+
+    private int getBlockFromIndex(int index) {
         byte[] data;
         if((data = this.blockLight) == null)return 0;
-        int index = getCoordinateIndex(x, y, z);
+        int arrIndex = getNibbleIndex(index);
+        return isLowerNibble(index) ? data[arrIndex] & 15 : data[arrIndex] >> 4 & 15;
+    }
+
+
+    private int getSkyFromIndex(int index) {
+        byte[] data;
+        if((data = this.skyLight).length == 1)return data[0];
         int arrIndex = getNibbleIndex(index);
         return isLowerNibble(index) ? data[arrIndex] & 15 : data[arrIndex] >> 4 & 15;
     }
