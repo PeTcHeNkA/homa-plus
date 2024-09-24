@@ -7,6 +7,8 @@ import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagByteArray;
 import net.minecraft.nbt.NBTTagEmptyByteArray;
 import net.minecraft.world.chunk.BlockStateContainer;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.util.Arrays;
 
 
@@ -178,7 +180,7 @@ public class ExtendedBlockStorage extends BlockStateContainer{
     public NBTTagByteArray toSkyLightNbt(){
         byte[] data = this.skyLight;
         if(data.length == 1){
-            return new NBTTagEmptyByteArray(2048, data[0]);
+            return new NBTTagEmptyByteArray(data,2048, data[0]);
         }
         return new NBTTagByteArray(data);
     }
@@ -194,8 +196,14 @@ public class ExtendedBlockStorage extends BlockStateContainer{
     }
 
 
+    public void tryFreeLight(){
+        this.blockLight = lightBlockBytes(this.blockLight);
+        this.skyLight   = lightSkyBytes(this.skyLight);
+    }
 
-    static byte[] lightBlockBytes(byte[] data){
+
+    @Nullable
+    static byte[] lightBlockBytes(@Nullable byte[] data){
         if(data == null || data.length == 0)return null;
         byte empty = 0x00;
         if(data.length != 2048)throw new IllegalArgumentException();
@@ -205,21 +213,26 @@ public class ExtendedBlockStorage extends BlockStateContainer{
     }
 
 
-    static byte[] lightSkyBytes(byte[] data){
+    @NotNull
+    static byte[] lightSkyBytes(@Nullable byte[] data){
         if(data == null)return ALL_ZERO;
         int len;
         if((len = data.length) == 1){
-            byte b = data[0];
-            if(b == 15)return ALL_15;
-            return ALL_ZERO;
+            byte fill = data[0];
+            if(fill == 15)return ALL_15;
+            if(fill == 0)return ALL_ZERO;
+            return new byte[]{fill};
         }
         if(len == 0)return ALL_ZERO;
         if(len != 2048)throw new IllegalArgumentException();
-        for (int i = 0; i < 2048; i++) {
+        byte first = data[0];
+        for (int i = 1; i < 2048; i++) {
             byte cur = data[i];
-            if (cur != 0 && cur != -127) return data;
+            if (cur != first) return data;
         }
-        return data[0] == 0? ALL_ZERO : ALL_15;
+        if(first == 0)return ALL_ZERO;
+        if(first == 15)return ALL_15;
+        return new byte[]{first};
     }
 
 

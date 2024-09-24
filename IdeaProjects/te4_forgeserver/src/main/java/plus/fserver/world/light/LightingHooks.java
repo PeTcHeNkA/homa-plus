@@ -217,11 +217,11 @@ public class LightingHooks {
 
 
     public static void initChunkLighting(final Chunk chunk, final World world) {
-        final int xBase, zBase;
-        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos(xBase = chunk.x << 4, 0, zBase = chunk.z << 4);
+        final int xBase = chunk.x << 4, zBase = chunk.z << 4;
 
-        //pos.delta(-16, 0, -16), pos.delta(31, 255, 31)
         if (world.isAreaLoaded(xBase-16, 0, zBase+16, xBase+31, 255, zBase+31, false)) {
+            BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos(xBase, 0, zBase);
+
             final ExtendedBlockStorage[] storages = chunk.getBlockStorageArray();
             for (int j = 0; j < storages.length; ++j) {
                 final ExtendedBlockStorage storage = storages[j];
@@ -238,9 +238,14 @@ public class LightingHooks {
                 chunk.setSkylightUpdated();
             }
             ((IChunkLightingData)chunk).setLightInitialized(true);
+
+            for (final ExtendedBlockStorage storage : storages) {
+                if (storage != Chunk.NULL_BLOCK_STORAGE) storage.tryFreeLight();
+            }
         }
     }
-    
+
+
     public static void checkChunkLighting(final Chunk chunk, final World world) {
         if (!((IChunkLightingData)chunk).isLightInitialized()) {
             initChunkLighting(chunk, world);
@@ -257,7 +262,8 @@ public class LightingHooks {
         }
         chunk.setLightPopulated(true);
     }
-    
+
+
     public static void initSkylightForSection(final World world, final Chunk chunk, final ExtendedBlockStorage section) {
         if (world.provider.hasSkyLight()) {
             for (int x = 0; x < 16; ++x) {

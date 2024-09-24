@@ -9,6 +9,7 @@ import net.minecraft.util.BlockIDIndexes;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.fserver.ElcaConfig;
 import plus.fserver.utls.collections.BitArrayMut;
 import plus.fserver.utls.collections.IntBlockIndex;
 
@@ -19,7 +20,7 @@ public class BlockStateContainer extends BitArrayMut implements IBlockStatePalet
     private int bits;
 
     public BlockStateContainer() {
-        this.setBits(3, false);
+        this.setBits(ElcaConfig.INIT_PALETTE_LINEAR_BITS, false);
     }
 
 
@@ -27,7 +28,7 @@ public class BlockStateContainer extends BitArrayMut implements IBlockStatePalet
         if (bitsIn != this.bits) {
             this.bits = bitsIn;
 
-            if (this.bits <= 4) {
+            if (this.bits <= 2) {
                 this.palette = new BlockStatePaletteLinear(this.bits);
             } else if (this.bits <= 8) {
                 this.palette = new BlockStatePaletteHashMap(this.bits);
