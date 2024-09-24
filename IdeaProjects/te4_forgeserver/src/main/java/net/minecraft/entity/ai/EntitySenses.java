@@ -2,12 +2,12 @@ package net.minecraft.entity.ai;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
-import plus.fserver.utls.collections.ArrayListE6;
+import plus.fserver.utls.collections.EntityList;
 
 
-public class EntitySenses extends ArrayListE6<Entity>{
+public class EntitySenses extends EntityList<Entity> {
     private final EntityLiving entity;
-    private final ArrayListE6<Entity> unseenEntities = new ArrayListE6<>();
+    private final EntityList<Entity> unseenEntities = new EntityList<>();
     private boolean flag = true;
 
     public EntitySenses(EntityLiving entityIn) {

@@ -175,7 +175,6 @@ public abstract class EntityPlayer extends EntityLivingBase {
         this.openContainer = this.inventoryContainer;
         BlockPos blockpos = worldIn.getSpawnPoint();
         this.setLocationAndAngles((double)blockpos.getX() + 0.5D, blockpos.getY() + 1, (double)blockpos.getZ() + 0.5D, 0.0F, 0.0F);
-        this.unused180 = 180.0F;
     }
 
 

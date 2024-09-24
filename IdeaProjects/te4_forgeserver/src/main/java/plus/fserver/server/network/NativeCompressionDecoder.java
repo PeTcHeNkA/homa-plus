@@ -24,11 +24,10 @@ public class NativeCompressionDecoder extends ByteToMessageDecoder {
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws DataFormatException, Exception {
         if (in.readableBytes() != 0) {
-            PacketBuffer packetbuffer = new PacketBuffer(in);
-            int size = packetbuffer.readVarInt();
+            int size = NetUtils.readVarInt(in);
 
             if (size == 0) {
-                out.add(packetbuffer.readBytes(packetbuffer.readableBytes()));
+                out.add(in.readBytes(in.readableBytes()));
             } else {
                 if (size < this.threshold) {
                     throw new DecoderException("Badly compressed packet - size of " + size + " is below server threshold of " + this.threshold);

@@ -45,6 +45,7 @@ public class PathNavigateFlying extends PathNavigate {
         return this.getPathToPos(new BlockPos(p_75494_1_));
     }
 
+
     public void onUpdateNavigation() {
         ++this.totalTicks;
         if (this.tryUpdatePath) {
@@ -69,6 +70,7 @@ public class PathNavigateFlying extends PathNavigate {
             }
         }
     }
+
 
     protected boolean isDirectPathBetweenPoints(Vec3d p_75493_1_, Vec3d p_75493_2_, int p_75493_3_, int p_75493_4_, int p_75493_5_) {
         int lvt_6_1_ = MathHelper.floor(p_75493_1_.x);

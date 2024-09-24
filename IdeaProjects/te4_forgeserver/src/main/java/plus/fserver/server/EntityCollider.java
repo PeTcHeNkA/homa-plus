@@ -14,15 +14,12 @@ import plus.fserver.world.CollisionPredicate;
 
 public class EntityCollider {
     private final CollisionPredicate entityCP = new CollisionPredicate();
-
-    private static final Entity[] EMPTY = new Entity[0];
-    private final WorldServer world;
-    private Entity[] temp = EMPTY;
+    private final AsyWorldTickerV2 ticker;
     private AsyncCollideTask task = new AsyncCollideTask();
     private int limit;
 
     public EntityCollider(WorldServer world) {
-        this.world = world;
+        ticker = world.getMinecraftServer().ticker();
     }
 
 
@@ -32,9 +29,9 @@ public class EntityCollider {
 
 
     public void complete(){
-        temp = EMPTY;
-        if(!task.isEmptyC()) {
-            world.addAsyncTask(task);
+        AsyncCollideTask curTask;
+        if(!(curTask = task).isEmptyC()) {
+            ticker.runAsync(curTask);
             task = new AsyncCollideTask();
         }
         entityCP.reset();
@@ -52,29 +49,17 @@ public class EntityCollider {
                 int size;
                 if ((size = list.sizeC()) < 2) continue;
                 if (size > 12) {
-                    Entity[] entities = export(list, size);
-                    temp = EMPTY;
+                    Entity[] entities = list.toArray();
                     if (size > limit) {
                         task.add((cp, limit1, temp) -> collideAllB(cp, entities, size, limit1, temp));
                     } else {
                         task.add((cp, limit12, temp) -> collideAll(cp, entities, size));
                     }
                 } else {
-                    collideAll(entityCP, export(list, size), size);
+                    collideAll(entityCP, list.raw(), size);
                 }
             }
         }
-    }
-
-
-    private Entity[] export(EntityList<Entity> src, int size){
-        Entity[] raw = src.raw();
-        Entity[] result = temp;
-        if(result.length < size){
-            result = temp = new Entity[size];
-        }
-        if (size >= 0) System.arraycopy(raw, 0, result, 0, size);
-        return result;
     }
 
 

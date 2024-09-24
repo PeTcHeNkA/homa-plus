@@ -29,7 +29,6 @@ public class EntityDataManager extends Int2ObjectOpenHashMap<EntityDataManager.D
     private static final Map<Class <? extends Entity> , Integer > NEXT_ID_MAP = Maps.newHashMap();
     private final Entity entity;
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
-    private boolean empty = true;
     private boolean dirty;
 
     public EntityDataManager(Entity entityIn) {
@@ -102,7 +101,6 @@ public class EntityDataManager extends Int2ObjectOpenHashMap<EntityDataManager.D
             DataEntry<T> dataentry = new DataEntry<T>(key, value);
             this.lock.writeLock().lock();
             super.put(key.getId(), dataentry);
-            this.empty = false;
             this.lock.writeLock().unlock();
             return dataentry;
         }
@@ -113,7 +111,6 @@ public class EntityDataManager extends Int2ObjectOpenHashMap<EntityDataManager.D
         DataEntry<T> dataentry = new DataEntry<T>(key, value);
         this.lock.writeLock().lock();
         super.put(key.getId(), dataentry);
-        this.empty = false;
         this.lock.writeLock().unlock();
     }
 
@@ -285,11 +282,6 @@ public class EntityDataManager extends Int2ObjectOpenHashMap<EntityDataManager.D
     @SideOnly(Side.CLIENT)
     protected <T> void setEntryValue(EntityDataManager.DataEntry<T> target, EntityDataManager.DataEntry<?> source) {
         target.setValue((T)source.getValue());
-    }
-
-
-    public boolean isEmpty() {
-        return this.empty;
     }
 
 
