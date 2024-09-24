@@ -1,4 +1,4 @@
-package plus.fserver.world;
+package plus.fserver.entity;
 
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;

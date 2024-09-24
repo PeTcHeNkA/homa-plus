@@ -9,7 +9,7 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import plus.fserver.utls.collections.ArrayListE6;
 import plus.fserver.utls.collections.EntityList;
-import plus.fserver.world.CollisionPredicate;
+import plus.fserver.entity.CollisionPredicate;
 
 
 public class EntityCollider {

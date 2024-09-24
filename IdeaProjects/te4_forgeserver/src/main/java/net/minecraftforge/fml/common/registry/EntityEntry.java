@@ -5,7 +5,7 @@ import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityList.EntityEggInfo;
 import net.minecraft.world.World;
 import net.minecraftforge.registries.IForgeRegistryEntry.Impl;
-import plus.fserver.world.SpawnEntityFactory;
+import plus.fserver.entity.SpawnEntityFactory;
 import java.util.function.Function;
 
 

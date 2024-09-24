@@ -1,4 +1,4 @@
-package plus.fserver.world;
+package plus.fserver.entity;
 
 import io.netty.util.collection.IntObjectHashMap;
 import net.minecraft.entity.Entity;

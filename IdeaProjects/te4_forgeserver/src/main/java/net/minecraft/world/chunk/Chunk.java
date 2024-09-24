@@ -171,7 +171,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
         ClassInheritanceMultiMap[] lists = this.entityLists = new ClassInheritanceMultiMap[16];
 
-        if(world.isRemote) {
+        if(worldIn.isRemote && !SERVER_COMPILE) {
             for (int i = 0; i < lists.length; ++i) {
                 lists[i] = new ClassInheritanceMultiMap<>(Entity.class);
             }

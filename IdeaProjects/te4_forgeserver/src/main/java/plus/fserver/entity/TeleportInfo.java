@@ -1,4 +1,4 @@
-package plus.fserver.entity.ai;
+package plus.fserver.entity;
 
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;

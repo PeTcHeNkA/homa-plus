@@ -1,11 +1,10 @@
-package plus.fserver.world;
+package plus.fserver.entity;
 
 import io.netty.util.collection.IntObjectHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceArrayMap;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityBoat;
 import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.entity.item.EntityTNTPrimed;
 import net.minecraft.entity.monster.*;
 import net.minecraft.entity.passive.*;

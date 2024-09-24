@@ -26,7 +26,7 @@ import plus.fserver.utls.collections.ArrayListE6;
 import plus.fserver.utls.collections.EntityChunkIter;
 import plus.fserver.utls.collections.EntityList;
 import plus.fserver.utls.collections.EntityRemSwapList;
-import plus.fserver.world.EntityTrackerFactory;
+import plus.fserver.entity.EntityTrackerFactory;
 
 
 public class EntityTracker {

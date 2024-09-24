@@ -88,11 +88,10 @@ import plus.fserver.ElcaConfig;
 import plus.fserver.ElcaMobs;
 import plus.fserver.api.IBlockEAccess;
 import plus.fserver.ElcaCV;
-import plus.fserver.entity.ai.TeleportInfo;
+import plus.fserver.entity.TeleportInfo;
 import plus.fserver.server.SStrings;
 import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.collections.AABBList;
-import plus.fserver.utls.collections.ArrayListE6;
 import plus.tson.utl.Te4HashSet;
 
 import static net.minecraft.entity.EMoveHelper.COMMON_FUTURE;

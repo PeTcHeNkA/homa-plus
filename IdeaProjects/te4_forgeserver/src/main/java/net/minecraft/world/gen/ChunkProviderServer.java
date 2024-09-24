@@ -52,7 +52,7 @@ public class ChunkProviderServer extends Long2ObjectOpenHashMap<Chunk> implement
 
 
     public ChunkProviderServer(WorldServer world, IChunkLoader chunkLoader, IChunkGenerator chunkGeneratorIn) {
-        super(2048);
+        super(1024);
         this.world = world;
         this.chunkLoader = chunkLoader;
         this.chunkGenerator = chunkGeneratorIn;

@@ -67,7 +67,7 @@ import plus.fserver.ElcaCV;
 import plus.fserver.api.Keep;
 import plus.fserver.server.elca.ChunkLCache;
 import plus.fserver.utls.math.MathUtls;
-import plus.fserver.world.CollisionPredicate;
+import plus.fserver.entity.CollisionPredicate;
 import plus.fserver.server.elca.AABKey;
 import plus.fserver.utls.collections.*;
 import plus.fserver.utls.math.BlockPosDelta;
