@@ -1,40 +1,33 @@
 package plus.fserver.plugin;
 
 import net.minecraft.launchwrapper.*;
-import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.*;
 import org.objectweb.asm.*;
 import org.objectweb.asm.tree.*;
 import plus.fserver.ElcaConfig;
-import plus.fserver.api.inject.Field;
-import plus.fserver.api.inject.LoadInjector;
-import plus.fserver.api.inject.VarOnly;
 import java.util.*;
 
 
 public class PathTransformer implements IClassTransformer {
-    private static String SIDE;
-    private static final boolean DEBUG = false;
-    private static final String SIDE_ONLY_DESC = Type.getDescriptor(SideOnly.class);
-    private static final String VAR_ONLY_DESC  = Type.getDescriptor(VarOnly.class);
-    private static final String LOAD_INJECT    = Type.getDescriptor(LoadInjector.class);
-    private final Map<String, Field[]> injects = new HashMap<>();
+    static final HashMap<String, InjectInfo[]> injects = new HashMap<>();
+    static String SIDE;
+    static final String SIDE_ONLY_DESC = "Lnet/minecraftforge/fml/relauncher/SideOnly;";//Type.getDescriptor(SideOnly.class);
+    static final String VAR_ONLY_DESC  = "Lplus/fserver/api/inject/VarOnly;"           ;//Type.getDescriptor(VarOnly.class);
+    static final String LOAD_INJECT    = "Lplus/fserver/api/inject/LoadInjector;"      ;//Type.getDescriptor(LoadInjector.class);
 
-    public PathTransformer(){
-        System.out.println(Loader.instance().activeModContainer());
-    }
+    public PathTransformer(){}
 
 
-    public byte[] transformOnlyInjects(final String name, final byte[] bytes){
+    public static byte[] transformOnlyInjects(final String name, final byte[] bytes){
         final ClassNode classNode = new ClassNode();
         final ClassReader classReader = new ClassReader(bytes);
         classReader.accept(classNode, 0);
 
         checkInjects(classNode.visibleAnnotations);
 
-        Field[] field = injects.get(name);
+        InjectInfo[] field = injects.get(name);
         if(field != null){
-            for (Field cur:field){
+            for (InjectInfo cur:field){
                 injectField(classNode, cur);
             }
         } else {
@@ -75,7 +68,8 @@ public class PathTransformer implements IClassTransformer {
                 lambdaGatherer.accept(method);
             }
         }
-        for (List<Handle> handles = lambdaGatherer.getDynamicLambdaHandles(); !handles.isEmpty(); handles = lambdaGatherer.getDynamicLambdaHandles()) {
+        for (ArrayList<Handle> handles = lambdaGatherer.dynamicLambdaHandles;
+                !handles.isEmpty(); handles = lambdaGatherer.dynamicLambdaHandles) {
             lambdaGatherer = new LambdaGatherer();
             methods = classNode.methods.iterator();
             while (methods.hasNext()) {
@@ -91,36 +85,37 @@ public class PathTransformer implements IClassTransformer {
                 }
             }
         }
+        return completeTransforms(classNode, transformedName);
+    }
 
-        Field[] field = injects.get(transformedName);
+
+    static byte[] completeTransforms(ClassNode node, String transformedName){
+        InjectInfo[] field = injects.get(transformedName);
         if(field != null){
-            for (Field cur:field){
-                injectField(classNode, cur);
+            for (InjectInfo cur:field){
+                injectField(node, cur);
             }
         }
 
-        final ClassWriter writer = new ClassWriter(1);
-        classNode.accept(writer);
+        final ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+        node.accept(writer);
         return writer.toByteArray();
     }
 
 
-    public static void injectField(ClassNode classNode, Field field){
-        //String clazz = field.target().replace(".","/");
-        String name  = field.name();
-
-        Class<?> type = field.type();
+    private static void injectField(ClassNode classNode, InjectInfo field){
+        Class<?> type = field.type;
         String typeName;
         if(type == Object.class){
-            typeName = "L"+field.tName().replace(".","/")+";";
+            typeName = "L"+field.tName.replace(".","/")+";";
         } else {
             typeName = "L"+type.getName().replace(".","/")+";";
         }
-        classNode.visitField(0x1, name, typeName, null, null);
+        classNode.visitField(0x1, field.name, typeName, null, null);
     }
 
 
-    private static Field build(List values){
+    static InjectInfo build(List values){
         String target = null, name = null, tName = null;
         Class<?> type = null;
 
@@ -142,11 +137,11 @@ public class PathTransformer implements IClassTransformer {
                     break;
             }
         }
-        return new Field.Container(target, name, type, tName);
+        return new InjectInfo(target, name, type, tName);
     }
 
 
-    private void checkInjects(final List<AnnotationNode> anns){
+    public static void checkInjects(final List<AnnotationNode> anns){
         if (anns == null) return;
         for (final AnnotationNode ann : anns) {
             List<Object> values;
@@ -154,12 +149,12 @@ public class PathTransformer implements IClassTransformer {
             if (ann.desc.equals(LOAD_INJECT)) {
                 String key = (String) values.get(0);
                 if(key.equals("field")){
-                    Field field = build((List) values.get(1));
+                    InjectInfo field = build((List) values.get(1));
                     checkAndAdd(field);
                 } else if(key.equals("fields")){
                     List list = (List) values.get(1);
                     for (Object obj: list){
-                        Field field = build(((AnnotationNode) obj).values);
+                        InjectInfo field = build(((AnnotationNode) obj).values);
                         checkAndAdd(field);
                     }
                 }
@@ -168,24 +163,54 @@ public class PathTransformer implements IClassTransformer {
     }
 
 
-    private void checkAndAdd(Field field){
-        if(field.name().isEmpty()){
-            if(field.target().isEmpty())return;
+    private static void checkAndAdd(InjectInfo field){
+        if(field.name.isEmpty()){
+            if(field.target.isEmpty())return;
             throw new RuntimeException("Field Injector: Field`s name not defined!");
         }
-        if(field.target().isEmpty()){
+        if(field.target.isEmpty()){
             throw new RuntimeException("Field Injector: Target`s name not defined!");
         }
-        Field[] fields = injects.get(field.target());
+        InjectInfo[] fields = injects.get(field.target);
         if(fields != null){
-            Field[] newFields = new Field[fields.length+1];
+            InjectInfo[] newFields = new InjectInfo[fields.length+1];
             System.arraycopy(fields, 0, newFields, 0, fields.length);
             newFields[fields.length] = field;
             fields = newFields;
         } else {
-            fields = new Field[]{field};
+            fields = new InjectInfo[]{field};
         }
-        injects.put(field.target(), fields);
+        injects.put(field.target, fields);
+    }
+
+
+    static boolean checkVarOnly(AnnotationNode ann){
+        if(ann.desc.equals(VAR_ONLY_DESC)){
+            List<Object> values = ann.values;
+            String var = null;
+            Boolean defValue = null;
+            for (int x = 0; x < values.size() - 1; x += 2) {
+                final Object key = values.get(x);
+                final Object value = values.get(x + 1);
+                if(var == null && key.equals("var")){
+                    var = key.toString();
+                    if(defValue != null)break;
+                }
+                if(defValue == null && key.equals("def")){
+                    if(value instanceof Boolean){
+                        defValue = (Boolean) value;
+                    } else {
+                        defValue = false;
+                    }
+                    if(var != null)break;
+                }
+            }
+            if(var != null){
+                if(defValue == null)defValue = false;
+                return ElcaConfig.getVar(var, defValue);
+            }
+        }
+        return false;
     }
 
 
@@ -195,8 +220,7 @@ public class PathTransformer implements IClassTransformer {
         for (final AnnotationNode ann : anns) {
             List<Object> values;
             if((values = ann.values) == null)continue;
-            String desc;
-            if ((desc = ann.desc).equals(SIDE_ONLY_DESC)) {
+            if (ann.desc.equals(SIDE_ONLY_DESC)) {
                 for (int x = 0; x < values.size() - 1; x += 2) {
                     final Object key = values.get(x);
                     final Object value = values.get(x + 1);
@@ -204,31 +228,7 @@ public class PathTransformer implements IClassTransformer {
                         return true;
                     }
                 }
-            }
-            else if(desc.equals(VAR_ONLY_DESC)){
-                String var = null;
-                Boolean defValue = null;
-                for (int x = 0; x < values.size() - 1; x += 2) {
-                    final Object key = values.get(x);
-                    final Object value = values.get(x + 1);
-                    if(var == null && key.equals("var")){
-                        var = key.toString();
-                        if(defValue != null)break;
-                    }
-                    if(defValue == null && key.equals("def")){
-                        if(value instanceof Boolean){
-                            defValue = (Boolean) value;
-                        } else {
-                            defValue = false;
-                        }
-                        if(var != null)break;
-                    }
-                }
-                if(var != null){
-                    if(defValue == null)defValue = false;
-                    return ElcaConfig.getVar(var, defValue);
-                }
-            }
+            } else if(checkVarOnly(ann))return true;
         }
         return false;
     }
@@ -241,11 +241,10 @@ public class PathTransformer implements IClassTransformer {
 
     private static class LambdaGatherer extends MethodVisitor {
         private static final Handle META_FACTORY;
-        private final List<Handle> dynamicLambdaHandles;
+        final ArrayList<Handle> dynamicLambdaHandles = new ArrayList<>();
 
         public LambdaGatherer() {
             super(327680);
-            this.dynamicLambdaHandles = new ArrayList<>();
         }
 
         public void accept(final MethodNode method) {
@@ -268,13 +267,25 @@ public class PathTransformer implements IClassTransformer {
         }
 
 
-        public List<Handle> getDynamicLambdaHandles() {
-            return this.dynamicLambdaHandles;
-        }
-
-
         static {
             META_FACTORY = new Handle(6, "java/lang/invoke/LambdaMetafactory", "metafactory", "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;", false);
+        }
+    }
+
+
+    public static class InjectInfo{
+        final String target, name, tName;
+        final Class<?> type;
+
+        public InjectInfo(String target, String name, Class<?> type, String tName) {
+            if (target == null) target = "";
+            if (name == null) name = "";
+            if (type == null) type = Object.class;
+            if (tName == null) tName = "java.lang.Object";
+            this.target = target;
+            this.name = name;
+            this.tName = tName;
+            this.type = type;
         }
     }
 }

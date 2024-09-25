@@ -19,7 +19,7 @@ public class TweakEngine implements IClassTransformer, Set<String> {
     private final Te4HashSet<String> preLoads = new Te4HashSet<>();
     private final String header;
     private final boolean debug = false;
-    private final PathTransformer sideTransformer;
+    private final IClassTransformer sideTransformer;
 
     private static class TweakInfo{
         private boolean useSideTransformer;
@@ -40,9 +40,13 @@ public class TweakEngine implements IClassTransformer, Set<String> {
         if(FMLLaunchHandler.side()==null){
             sideTransformer = null;
         } else {
-            PathTransformer transformer = null;
+            IClassTransformer transformer = null;
             try {
-                transformer = new PathTransformer();
+                if(PathTransformer21.canUse()){
+                    transformer = new PathTransformer21();
+                } else {
+                    transformer = new PathTransformer();
+                }
             } catch (Throwable e) {
                 throw new RuntimeException(e);
             }
@@ -184,13 +188,13 @@ public class TweakEngine implements IClassTransformer, Set<String> {
         TweakInfo info = classes.get(name);
         if (info == null) {
             if(sideTransformer != null)
-                return sideTransformer.transformOnlyInjects(name, src);
+                return PathTransformer.transformOnlyInjects(name, src);
             return src;
         }
         byte[] result = info.useSafeMode ? getSafeTweaks(name) : getFastTweak(name);
         if(result == null){
             if(sideTransformer != null && info.useSideTransformer)
-                return sideTransformer.transformOnlyInjects(name,src);
+                return PathTransformer.transformOnlyInjects(name,src);
             return src;
         } else {
             if(sideTransformer == null || !info.useSideTransformer)return result;
