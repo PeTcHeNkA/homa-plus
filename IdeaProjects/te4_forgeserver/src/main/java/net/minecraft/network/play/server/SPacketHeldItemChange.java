@@ -7,10 +7,10 @@ import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.server.network.NetUtils;
-import plus.fserver.server.network.packet.SPacketPlayBase;
+import plus.fserver.server.network.packet.SNodePacketPlayBase;
 
 
-public class SPacketHeldItemChange extends SPacketPlayBase {
+public class SPacketHeldItemChange extends SNodePacketPlayBase {
     private int heldItemHotbarIndex;
 
     public SPacketHeldItemChange() {}

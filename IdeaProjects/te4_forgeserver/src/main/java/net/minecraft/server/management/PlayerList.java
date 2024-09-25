@@ -105,101 +105,120 @@ public abstract class PlayerList {
     }
 
 
-    public void initializeConnectionToPlayer(NetworkManager netManager, EntityPlayerMP playerIn, NetHandlerPlayServer connection) {
-        GameProfile gameprofile = playerIn.getGameProfile();
+    public void initializeConnectionToPlayer(NetworkManager netManager, EntityPlayerMP player, NetHandlerPlayServer conn) {
+        GameProfile gameprofile = player.getGameProfile();
         PlayerProfileCache playerprofilecache = this.server.getPlayerProfileCache();
         GameProfile gameprofile1 = playerprofilecache.getProfileByUUID(gameprofile.getId());
         String s = gameprofile1 == null ? gameprofile.getName() : gameprofile1.getName();
         playerprofilecache.addEntry(gameprofile);
-        NBTTagCompound nbttagcompound = this.readPlayerDataFromFile(playerIn);
-        playerIn.setWorld(this.server.getWorld(playerIn.dimension));
+        NBTTagCompound nbt = this.readPlayerDataFromFile(player);
 
-        World playerWorld = this.server.getWorld(playerIn.dimension);
-        if (playerWorld == null)
-        {
-            playerIn.dimension = 0;
+        World playerWorld = this.server.getWorld(player.dimension);
+
+        if (playerWorld == null) {
+            player.dimension = 0;
             playerWorld = this.server.getWorld(0);
             BlockPos spawnPoint = playerWorld.provider.getRandomizedSpawnPoint();
-            playerIn.setPosition(spawnPoint.getX(), spawnPoint.getY(), spawnPoint.getZ());
+            player.setPosition(spawnPoint.getX(), spawnPoint.getY(), spawnPoint.getZ());
         }
 
-        playerIn.setWorld(playerWorld);
-        //playerIn.interactionManager.setWorld((WorldServer)playerIn.world);
+        player.setWorld(playerWorld);
+        //player.interactionManager.setWorld((WorldServer)player.world);
         String s1 = "local";
 
-        if (netManager.getRemoteAddress() != null)
-        {
+        if (netManager.getRemoteAddress() != null) {
             s1 = netManager.getRemoteAddress().toString();
         }
 
-        LOGGER.info("{}[{}] logged in with entity id {} at ({}, {}, {})", playerIn.getName(), s1, Integer.valueOf(playerIn.getEntityId()), Double.valueOf(playerIn.posX), Double.valueOf(playerIn.posY), Double.valueOf(playerIn.posZ));
-        WorldServer worldserver = this.server.getWorld(playerIn.dimension);
-        WorldInfo worldinfo = worldserver.getWorldInfo();
-        this.setPlayerGameTypeBasedOnOther(playerIn, (EntityPlayerMP)null, worldserver);
-        playerIn.connection = connection;
-        net.minecraftforge.fml.common.FMLCommonHandler.instance().fireServerConnectionEvent(netManager);
-        connection.sendPacket(new SPacketJoinGame(playerIn.getEntityId(), playerIn.interactionManager.getGameType(), worldinfo.isHardcoreModeEnabled(), worldserver.provider.getDimension(), worldserver.getDifficulty(), this.getMaxPlayers(), worldinfo.getTerrainType(), worldserver.getGameRules().getBoolean("reducedDebugInfo")));
-        connection.sendPacket(new SPacketCustomPayload("MC|Brand", (new PacketBuffer(Unpooled.buffer())).writeString(this.getServerInstance().getServerModName())));
-        connection.sendPacket(new SPacketServerDifficulty(worldinfo.getDifficulty(), worldinfo.isDifficultyLocked()));
-        connection.sendPacket(new SPacketPlayerAbilities(playerIn.capabilities));
-        connection.sendPacket(new SPacketHeldItemChange(playerIn.inventory.currentItem));
-        this.updatePermissionLevel(playerIn);
-        playerIn.getStatFile().markAllDirty();
-        playerIn.getRecipeBook().init(playerIn);
-        this.sendScoreboard((ServerScoreboard)worldserver.getScoreboard(), playerIn);
-        this.server.refreshStatusNextTick();
-        TextComponentTranslation textcomponenttranslation;
+        LOGGER.info("{}[{}] logged in with entity id {} at ({}, {}, {})", player.getName(), s1, Integer.valueOf(player.getEntityId()), Double.valueOf(player.posX), Double.valueOf(player.posY), Double.valueOf(player.posZ));
 
-        if (playerIn.getName().equalsIgnoreCase(s)) {
-            textcomponenttranslation = new TextComponentTranslation("multiplayer.player.joined", new Object[] {playerIn.getDisplayName()});
-        } else {
-            textcomponenttranslation = new TextComponentTranslation("multiplayer.player.joined.renamed", new Object[] {playerIn.getDisplayName(), s});
+        WorldServer worldserver = this.server.getWorld(player.dimension);
+
+        this.setPlayerGameTypeBasedOnOther(player, (EntityPlayerMP)null, worldserver);
+        player.connection = conn;
+
+        worldserver.addSyncTask(
+                () -> initializeConnectionToPlayerSync(worldserver, s, nbt, netManager, player, conn)
+        );
+    }
+
+
+    private void initializeConnectionToPlayerSync(WorldServer world, String name, NBTTagCompound nbt, NetworkManager netManager, EntityPlayerMP player, NetHandlerPlayServer conn) {
+        WorldInfo worldinfo = world.getWorldInfo();
+
+        FMLCommonHandler.instance().fireServerConnectionEvent(netManager);
+
+        netManager.addToQueueN(new SPacketJoinGame(
+                player.getEntityId(),
+                player.interactionManager.getGameType(), worldinfo.isHardcoreModeEnabled(),
+                world.provider.getDimension()          , world.getDifficulty(),
+                this.getMaxPlayers()                   , worldinfo.getTerrainType(),
+                world.getGameRules().getBoolean("reducedDebugInfo"))
+        );
+        netManager.addToQueueN(new SPacketCustomPayload("MC|Brand", (new PacketBuffer(Unpooled.buffer())).writeString(this.getServerInstance().getServerModName())));
+        netManager.addToQueueN(new SPacketServerDifficulty(worldinfo.getDifficulty(), worldinfo.isDifficultyLocked()));
+        netManager.addToQueueN(new SPacketHeldItemChange(player.inventory.currentItem));
+        netManager.sendPacketE(new SPacketPlayerAbilities(player.capabilities));
+
+        this.updatePermissionLevel(player);
+        player.getStatFile().markAllDirty();
+        player.getRecipeBook().init(player);
+        this.sendScoreboard((ServerScoreboard)world.getScoreboard(), player);
+        this.server.refreshStatusNextTick();
+
+        if(ElcaConfig.ENABLE_DEFAULT_JOIN_MESSAGE) {
+            TextComponentTranslation joinMag;
+            if (player.getName().equalsIgnoreCase(name)) {
+                joinMag = new TextComponentTranslation("multiplayer.player.joined", player.getDisplayName());
+            } else {
+                joinMag = new TextComponentTranslation("multiplayer.player.joined.renamed", player.getDisplayName(), name);
+            }
+            joinMag.getStyle().setColor(TextFormatting.YELLOW);
+            this.sendMessage(joinMag);
         }
 
-        textcomponenttranslation.getStyle().setColor(TextFormatting.YELLOW);
-        this.sendMessage(textcomponenttranslation);
-        this.playerLoggedIn(playerIn);
-        connection.setPlayerLocation(playerIn.posX, playerIn.posY, playerIn.posZ, playerIn.rotationYaw, playerIn.rotationPitch);
-        this.updateTimeAndWeatherForPlayer(playerIn, worldserver);
+        this.playerLoggedIn(player);
+        conn.setPlayerLocation(player.posX, player.posY, player.posZ, player.rotationYaw, player.rotationPitch);
+        this.updateTimeAndWeatherForPlayer(player, world);
 
         if (!this.server.getResourcePackUrl().isEmpty()) {
-            playerIn.loadResourcePack(this.server.getResourcePackUrl(), this.server.getResourcePackHash());
+            player.loadResourcePack(this.server.getResourcePackUrl(), this.server.getResourcePackHash());
         }
 
-        for (PotionEffect potioneffect : playerIn.getActivePotionEffects()) {
-            connection.sendPacket(new SPacketEntityEffect(playerIn.getEntityId(), potioneffect));
+        for (PotionEffect potioneffect : player.getActivePotionEffects()) {
+            netManager.sendPacketE(new SPacketEntityEffect(player.getEntityId(), potioneffect));
         }
 
-        if (nbttagcompound != null && nbttagcompound.hasKey("RootVehicle", 10)) {
-            NBTTagCompound nbttagcompound1 = nbttagcompound.getCompoundTag("RootVehicle");
-            Entity entity1 = AnvilChunkLoader.readWorldEntity(nbttagcompound1.getCompoundTag("Entity"), worldserver, true);
+        if (nbt != null && nbt.hasKey("RootVehicle", 10)) {
+            NBTTagCompound nbttagcompound1 = nbt.getCompoundTag("RootVehicle");
+            Entity entity1 = AnvilChunkLoader.readWorldEntity(nbttagcompound1.getCompoundTag("Entity"), world, true);
 
             if (entity1 != null) {
                 UUID uuid = nbttagcompound1.getUniqueId("Attach");
 
                 if (entity1.getUniqueID().equals(uuid)) {
-                    playerIn.startRiding(entity1, true);
+                    player.startRiding(entity1, true);
                 } else {
                     for (Entity entity : entity1.getRecursivePassengers()) {
                         if (entity.getUniqueID().equals(uuid)) {
-                            playerIn.startRiding(entity, true);
+                            player.startRiding(entity, true);
                             break;
                         }
                     }
                 }
 
-                if (!playerIn.isRiding()) {
+                if (!player.isRiding()) {
                     LOGGER.warn("Couldn't reattach entity to player");
-                    worldserver.removeEntityDangerously(entity1);
+                    world.removeEntityDangerously(entity1);
 
                     for (Entity entity2 : entity1.getRecursivePassengers()) {
-                        worldserver.removeEntityDangerously(entity2);
+                        world.removeEntityDangerously(entity2);
                     }
                 }
             }
         }
-        playerIn.addSelfToInternalCraftingInventory();
-        net.minecraftforge.fml.common.FMLCommonHandler.instance().firePlayerLoggedIn(playerIn);
+        player.addSelfToInternalCraftingInventory();
+        FMLCommonHandler.instance().firePlayerLoggedIn(player);
     }
 
 

@@ -11,10 +11,10 @@ import net.minecraft.world.WorldType;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.server.network.NetUtils;
-import plus.fserver.server.network.packet.SPacketPlayBase;
+import plus.fserver.server.network.packet.SNodePacketPlayBase;
 
 
-public class SPacketJoinGame extends SPacketPlayBase {
+public class SPacketJoinGame extends SNodePacketPlayBase {
     private int playerId;
     private boolean hardcoreMode;
     private GameType gameType;

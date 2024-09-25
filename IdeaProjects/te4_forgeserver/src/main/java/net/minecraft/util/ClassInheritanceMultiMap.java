@@ -129,9 +129,17 @@ class SubList<T extends Entity> extends EntityRemSwapList<T>{
         super(obj);
     }
     protected final boolean removeC(Entity o) {
+        Entity[] data = this.data;
         for (int index = 0, s = size; index < s; index++)
             if (o.equals(data[index])) {
-                removeSwap(index);
+                if(size == index+1){
+                    data[--size] = null;
+                    return true;
+                }
+                Entity swap = data[size-1];
+                data[index] = swap;
+                data[size-1] = null;
+                --size;
                 return true;
             }
         return false;

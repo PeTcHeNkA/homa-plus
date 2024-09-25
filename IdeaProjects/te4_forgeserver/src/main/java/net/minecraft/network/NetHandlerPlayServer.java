@@ -1534,9 +1534,9 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
                 try {
                     int j1 = buf.readVarInt();
                     this.player.inventory.pickItem(j1);
-                    netManager.sendPacket(new SPacketSetSlot(-2, this.player.inventory.currentItem, this.player.inventory.getStackInSlot(this.player.inventory.currentItem)));
-                    netManager.sendPacket(new SPacketSetSlot(-2, j1, this.player.inventory.getStackInSlot(j1)));
-                    netManager.sendPacket(new SPacketHeldItemChange(this.player.inventory.currentItem));
+                    netManager.addToQueueN(new SPacketSetSlot(-2, this.player.inventory.currentItem, this.player.inventory.getStackInSlot(this.player.inventory.currentItem)));
+                    netManager.addToQueueN(new SPacketSetSlot(-2, j1, this.player.inventory.getStackInSlot(j1)));
+                    netManager.sendPacketE(new SPacketHeldItemChange(this.player.inventory.currentItem));
                 } catch (Exception exception) {
                     LOGGER.error("Couldn't pick item", exception);
                 }

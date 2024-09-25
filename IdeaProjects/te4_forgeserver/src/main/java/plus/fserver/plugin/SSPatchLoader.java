@@ -17,10 +17,10 @@ public class SSPatchLoader implements ITweaker{
     public static final String ELCA_VERSION;
 
     static {
-        String version = "2.5.2.07";
+        String version = "3.0.0.41";
         boolean isDev = true;
 
-        int num  = 0;
+        long num  = 0;
         boolean[] flags = {
             ENABLE_COLLISION_EVENTS      ,
             ENABLE_EXPLOSION_EVENT       ,
@@ -34,11 +34,14 @@ public class SSPatchLoader implements ITweaker{
             ENABLE_NOTCH_SECRET          ,
             ENTITY_FAST_WET              ,
             FIX_NULL_HASH_PALETTE        ,
+            SERVER_COMPILE               ,
+            INTERN_NBT_KEYS              ,
+            ENABLE_PACKET_DEBUG
         };
         for (int i=0;i< flags.length;i++)
             if(flags[i]) num |= 1<<i;
 
-        version += "-x"+Integer.toHexString(num);
+        version += "-x"+Long.toHexString(num);
         if(isDev){
             version += "-dev";
         }

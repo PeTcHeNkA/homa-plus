@@ -288,6 +288,8 @@ net.minecraft.entity.ai.EntityAINearestAttackableTarget
 net.minecraft.entity.ai.EntityAIPanic
 net.minecraft.entity.ai.EntityAITarget
 net.minecraft.entity.ai.EntityAITasks
+net.minecraft.entity.ai.EntityMoveHelper$Action
+net.minecraft.entity.ai.EntityMoveHelper
 net.minecraft.entity.ai.EntitySenses
 net.minecraft.entity.EMoveHelper$ComboCollideTask
 net.minecraft.entity.EMoveHelper$MoveTask
@@ -434,6 +436,7 @@ net.minecraft.nbt.CompressedStreamTools, false, false
 net.minecraft.nbt.NBTTagByte, false, false
 net.minecraft.nbt.NBTTagCompound, false, false
 net.minecraft.nbt.NBTTagDouble, false, false
+net.minecraft.nbt.NBTTagEmptyByteArray, false, false
 net.minecraft.nbt.NBTTagEnd, false, false
 net.minecraft.nbt.NBTTagFloat, false, false
 net.minecraft.nbt.NBTTagInt, false, false
@@ -506,6 +509,7 @@ net.minecraft.network.play.server.SPacketCombatEvent$1
 net.minecraft.network.play.server.SPacketCombatEvent$Event
 net.minecraft.network.play.server.SPacketCombatEvent
 net.minecraft.network.play.server.SPacketConfirmTransaction
+net.minecraft.network.play.server.SPacketCustomPayload
 net.minecraft.network.play.server.SPacketDisconnect
 net.minecraft.network.play.server.SPacketEntity$S15PacketEntityRelMove
 net.minecraft.network.play.server.SPacketEntity$S16PacketEntityLook
@@ -532,6 +536,7 @@ net.minecraft.network.play.server.SPacketPlaceGhostRecipe
 net.minecraft.network.play.server.SPacketPlayerListHeaderFooter
 net.minecraft.network.play.server.SPacketPlayerPosLook$EnumFlags
 net.minecraft.network.play.server.SPacketPlayerPosLook
+net.minecraft.network.play.server.SPacketServerDifficulty
 net.minecraft.network.play.server.SPacketSetPassengers
 net.minecraft.network.play.server.SPacketSetSlot
 net.minecraft.network.play.server.SPacketSoundEffect
@@ -559,13 +564,16 @@ net.minecraft.pathfinding.Path, false, false
 net.minecraft.pathfinding.PathFinder, false, false
 net.minecraft.pathfinding.PathHeap, false, false
 net.minecraft.pathfinding.PathNavigate, false, false
+net.minecraft.pathfinding.PathNavigateFlying, false, false
 net.minecraft.pathfinding.PathNavigateGround, false, false
+net.minecraft.pathfinding.PathNavigateSwimmer, false, false
 net.minecraft.pathfinding.PathNodeType$Set, false, false
 net.minecraft.pathfinding.PathNodeType, false, false
 net.minecraft.pathfinding.PathPoint, false, false
 net.minecraft.pathfinding.PathWorldListener, false, false
 net.minecraft.pathfinding.SwimNodeProcessor, false, false
 net.minecraft.pathfinding.WalkNodeProcessor, false, false
+net.minecraft.potion.Potion
 net.minecraft.scoreboard.Scoreboard, false, false
 net.minecraft.scoreboard.ScoreboardSaveData, false, false
 net.minecraft.server.dedicated.DedicatedServer$1
@@ -602,6 +610,7 @@ net.minecraft.util.BlockIDIndexes, false, false
 net.minecraft.util.ByClass, false, false
 net.minecraft.util.ChatAllowedCharacters, false, false
 net.minecraft.util.ClassInheritanceMultiMap, false, false
+net.minecraft.util.CombatTracker, false, false
 net.minecraft.util.CooldownTrackerServer, false, false
 net.minecraft.util.EntitySelectors$1, false, false
 net.minecraft.util.EntitySelectors$ArmoredMob, false, false
@@ -806,6 +815,8 @@ net.minecraft.world.storage.MapStorage$1, false, false
 net.minecraft.world.storage.MapStorage$SaveTask, false, false
 net.minecraft.world.storage.MapStorage, false, false
 net.minecraft.world.storage.WorldSavedData, false, false
+net.minecraft.world.Teleporter$PortalPosition
+net.minecraft.world.Teleporter
 net.minecraft.world.World$1
 net.minecraft.world.World$2
 net.minecraft.world.World$3

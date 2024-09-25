@@ -8,10 +8,10 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.server.network.NetUtils;
-import plus.fserver.server.network.packet.SPacketPlayBase;
+import plus.fserver.server.network.packet.SNodePacketPlayBase;
 
 
-public class SPacketOpenWindow extends SPacketPlayBase {
+public class SPacketOpenWindow extends SNodePacketPlayBase {
     private int windowId;
     private String inventoryType;
     private ITextComponent windowTitle;

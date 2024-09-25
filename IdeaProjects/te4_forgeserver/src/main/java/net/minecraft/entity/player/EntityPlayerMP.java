@@ -771,14 +771,18 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
         net.minecraftforge.common.MinecraftForge.EVENT_BUS.postF(new net.minecraftforge.event.entity.player.PlayerContainerEvent.Open(this, this.openContainer));
         IInventory iinventory = ((ContainerMerchant)this.openContainer).getMerchantInventory();
         ITextComponent itextcomponent = villager.getDisplayName();
-        this.connection.netManager.sendPacketE(new SPacketOpenWindow(this.currentWindowId, "minecraft:villager", itextcomponent, iinventory.getSizeInventory()));
+
         MerchantRecipeList merchantrecipelist = villager.getRecipes(this);
 
         if (merchantrecipelist != null) {
+            this.connection.netManager.addToQueueN(new SPacketOpenWindow(this.currentWindowId, "minecraft:villager", itextcomponent, iinventory.getSizeInventory()));
+
             PacketBuffer packetbuffer = new PacketBuffer(Unpooled.buffer());
             packetbuffer.writeInt(this.currentWindowId);
             merchantrecipelist.writeToBuf(packetbuffer);
             this.connection.netManager.sendPacketE(new SPacketCustomPayload("MC|TrList", packetbuffer));
+        } else {
+            this.connection.netManager.sendPacketE(new SPacketOpenWindow(this.currentWindowId, "minecraft:villager", itextcomponent, iinventory.getSizeInventory()));
         }
     }
 

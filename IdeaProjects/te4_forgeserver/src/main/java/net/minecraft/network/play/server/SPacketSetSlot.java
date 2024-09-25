@@ -8,10 +8,10 @@ import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.server.network.NetUtils;
-import plus.fserver.server.network.packet.SPacketPlayBase;
+import plus.fserver.server.network.packet.SNodePacketPlayBase;
 
 
-public class SPacketSetSlot extends SPacketPlayBase {
+public class SPacketSetSlot extends SNodePacketPlayBase {
     private int windowId;
     private int slot;
     private ItemStack item;

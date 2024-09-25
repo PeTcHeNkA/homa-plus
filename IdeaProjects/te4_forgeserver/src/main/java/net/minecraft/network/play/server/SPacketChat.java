@@ -9,10 +9,10 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.server.network.NetUtils;
-import plus.fserver.server.network.packet.SPacketPlayBase;
+import plus.fserver.server.network.packet.SNodePacketPlayBase;
 
 
-public class SPacketChat extends SPacketPlayBase {
+public class SPacketChat extends SNodePacketPlayBase {
     private ITextComponent chatComponent;
     private ChatType type;
 

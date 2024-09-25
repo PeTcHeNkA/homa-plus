@@ -66,22 +66,23 @@ public class ElcaConfig {
     public static int READ_TIMEOUT_TIMER         = 17;
 
     //public static boolean FAST_LIGHT                 = true;
-    public static boolean SLOW_SWIM_AI               = true;
-    public static boolean SLOW_TEMP_CHECK            = true;
-    public static boolean SLOW_WANDER                = true;
-    public static boolean DISABLE_SESSION_LOCK       = true;
-    public static boolean IGNORE_ERRORS              = true;
-    public static boolean REMOVE_ERROR_ENTITIES      = true;
-    public static boolean OVERWORLD_ASYNC_POPULATION = true;
+    public static boolean SLOW_SWIM_AI                = true;
+    public static boolean SLOW_TEMP_CHECK             = true;
+    public static boolean SLOW_WANDER                 = true;
+    public static boolean DISABLE_SESSION_LOCK        = true;
+    public static boolean IGNORE_ERRORS               = true;
+    public static boolean REMOVE_ERROR_ENTITIES       = true;
+    public static boolean OVERWORLD_ASYNC_POPULATION  = true;
 
-    //public static boolean TICK_ONLY_TRACKED_ENTITIES = true;
-    public static boolean REMOVE_SERVER_THREAD       = false;
-    public static boolean SKIP_CHECK_NETWORK         = true;
-    public static boolean PRINT_CAUSE_SERVER_STOP    = true;
-    //public static boolean PROCESS_LIGHT_ON_SAVE      = false;
-    public static boolean ASYNC_SAVE_CHUNKS          = true;
-    public static boolean FAST_ENTITY_EQUALS         = true;
-    public static boolean ENABLE_LEGACY_PING_HANDLER = false;
+    //public static boolean TICK_ONLY_TRACKED_ENTITIES  = true;
+    public static boolean REMOVE_SERVER_THREAD        = false;
+    public static boolean SKIP_CHECK_NETWORK          = true;
+    public static boolean PRINT_CAUSE_SERVER_STOP     = true;
+    //public static boolean PROCESS_LIGHT_ON_SAVE       = false;
+    public static boolean ASYNC_SAVE_CHUNKS           = true;
+    public static boolean FAST_ENTITY_EQUALS          = true;
+    public static boolean ENABLE_LEGACY_PING_HANDLER  = false;
+    public static boolean ENABLE_DEFAULT_JOIN_MESSAGE = true;
     //public static boolean ENABLE_DATA_FIXER          = false;
 
 
@@ -167,6 +168,7 @@ public class ElcaConfig {
         OVERWORLD_ASYNC_POPULATION = calc(map, "overworld-async-population"  , OVERWORLD_ASYNC_POPULATION );
         SKIP_CHECK_NETWORK         = calc(map, "skip-check-network"          , SKIP_CHECK_NETWORK         );
         PRINT_CAUSE_SERVER_STOP    = calc(map, "print-case-stop"             , PRINT_CAUSE_SERVER_STOP    );
+        ENABLE_DEFAULT_JOIN_MESSAGE= calc(map, "endable-def-join-msg"        , ENABLE_DEFAULT_JOIN_MESSAGE);
 
         MAX_CONNECTIONS_PER        = calc(map, "max-connections-per"         , MAX_CONNECTIONS_PER        );
         MAX_CONNECTIONS_TIME       = calc(map, "max-connections-time"        , MAX_CONNECTIONS_TIME       );
