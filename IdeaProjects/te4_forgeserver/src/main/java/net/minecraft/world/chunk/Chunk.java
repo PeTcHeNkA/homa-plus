@@ -909,9 +909,11 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
         this.loaded = true;
         World world = this.world;
         world.addTileEntities(this.tileEntities.values());
+
         for (ClassInheritanceMultiMap<Entity> entities : this.entityLists) {
-            if(entities != null)
+            if (entities != null) {
                 world.loadEntities(ImmutableList.copyOf(entities));
+            }
         }
         MinecraftForge.EVENT_BUS.postF(new ChunkEvent.Load(this));
     }

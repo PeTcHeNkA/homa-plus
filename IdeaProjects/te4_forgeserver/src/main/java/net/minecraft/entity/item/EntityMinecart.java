@@ -1,7 +1,5 @@
 package net.minecraft.entity.item;
 
-import java.util.List;
-import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.block.Block;

@@ -14,12 +14,12 @@ import plus.fserver.entity.CollisionPredicate;
 
 public class EntityCollider {
     private final CollisionPredicate entityCP = new CollisionPredicate();
-    private final AsyWorldTickerV2 ticker;
+    private final WorldServer world;
     private AsyncCollideTask task = new AsyncCollideTask();
     private int limit;
 
     public EntityCollider(WorldServer world) {
-        ticker = world.getMinecraftServer().ticker();
+        this.world = world;
     }
 
 
@@ -31,7 +31,7 @@ public class EntityCollider {
     public void complete(){
         AsyncCollideTask curTask;
         if(!(curTask = task).isEmptyC()) {
-            ticker.runAsync(curTask);
+            world.addAsyncTask(curTask);
             task = new AsyncCollideTask();
         }
         entityCP.reset();

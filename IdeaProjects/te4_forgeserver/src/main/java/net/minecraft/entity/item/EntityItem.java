@@ -45,6 +45,8 @@ import plus.fserver.utls.collections.AABBList;
 import plus.fserver.utls.collections.ArrayListE6;
 import java.util.Random;
 
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
+
 
 public class EntityItem extends Entity {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -198,7 +200,7 @@ public class EntityItem extends Entity {
 
             //this.handleWaterMovement();
 
-            if (!this.world.isRemote) {
+            if (!this.world.isRemote || SERVER_COMPILE) {
                 double d3 = this.motionX - d0;
                 double d4 = this.motionY - d1;
                 double d5 = this.motionZ - d2;
@@ -207,14 +209,13 @@ public class EntityItem extends Entity {
                 if (d6 > 0.01D) {
                     this.isAirBorne = true;
                 }
-            }
 
-            if (!this.world.isRemote && this.age >= lifespan) {
-                int hook = ForgeEventFactory.onItemExpire(this, item);
-                if (hook < 0) this.setDead();
-                else          this.lifespan += hook;
+                if (this.age >= lifespan) {
+                    int hook = ForgeEventFactory.onItemExpire(this, item);
+                    if (hook < 0) this.setDead();
+                    else          this.lifespan += hook;
+                }
             }
-            //if (item.isEmpty()) this.setDead();
         }
     }
 

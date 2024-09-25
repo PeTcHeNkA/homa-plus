@@ -65,11 +65,14 @@ public abstract class MixinChunk implements IChunkLighting, IChunkLightingData, 
     @Overwrite
     public void onLoad() {
         this.loaded = true;
-        this.world.addTileEntities(this.tileEntities.values());
-        for (ClassInheritanceMultiMap<Entity> entities : this.entityLists)
-            this.world.loadEntities(ImmutableList.copyOf(entities));
+        World world = this.world;
+        world.addTileEntities(this.tileEntities.values());
+
+        for (ClassInheritanceMultiMap<Entity> entities : this.entityLists) {
+            if(entities != null) world.loadEntities(ImmutableList.copyOf(entities));
+        }
+
         MinecraftForge.EVENT_BUS.postF(new ChunkEvent.Load((Chunk)(Object)this));
-        LightingHooks.scheduleRelightChecksForChunkBoundaries(this.world, (Chunk)(Object)this);
     }
 
 
