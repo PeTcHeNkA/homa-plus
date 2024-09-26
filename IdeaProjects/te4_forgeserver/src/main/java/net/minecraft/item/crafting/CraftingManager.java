@@ -19,6 +19,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nullable;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
@@ -34,7 +35,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import plus.fserver.api.Keep;
 import plus.fserver.server.CraftIndex;
-import plus.tson.utl.Te4HashMap;
 
 
 public class CraftingManager {
@@ -43,7 +43,12 @@ public class CraftingManager {
     @Keep
     public static final RegistryNamespaced<ResourceLocation, IRecipe> REGISTRY = GameData.getWrapper(IRecipe.class);
     @Keep
-    public static final Te4HashMap<CraftIndex, IRecipe> index = new Te4HashMap<>();
+    private static final ConcurrentHashMap<CraftIndex, IRecipe> index = new ConcurrentHashMap<>();
+
+    public static void clear(){
+        index.clear();
+    }
+
 
     public static boolean init() {
         try {
@@ -202,7 +207,7 @@ public class CraftingManager {
         if(cIndex.isEmpty())return null;
         for (IRecipe irecipe : REGISTRY) {
             if (irecipe.matches(craftMatrix, worldIn)) {
-                index.fput(cIndex, irecipe);
+                index.put(cIndex, irecipe);
                 return irecipe;
             }
         }
@@ -219,7 +224,7 @@ public class CraftingManager {
         if(!cIndex.isEmpty()) {
             for (IRecipe irecipe : REGISTRY) {
                 if (irecipe.matches(craftMatrix, worldIn)) {
-                    index.fput(cIndex, irecipe);
+                    index.put(cIndex, irecipe);
                     return irecipe.getRemainingItems(craftMatrix);
                 }
             }

@@ -587,13 +587,16 @@ public abstract class Biome extends IForgeRegistryEntry.Impl<Biome> {
             this.maxGroupCount = p_i1970_4_;
         }
 
+
+        @Override
         public String toString() {
             return this.entityClass.getSimpleName() + "*(" + this.minGroupCount + "-" + this.maxGroupCount + "):" + this.itemWeight;
         }
 
+
         public EntityLiving newInstance(World world) throws Exception {
             EntityEntry entry = EntityRegistry.getEntry(this.entityClass);
-            return entry != null ? (EntityLiving)entry.newInstance(world) : (EntityLiving)this.entityClass.getConstructor(World.class).newInstance(world);
+            return entry != null ? (EntityLiving)entry.newInstance(world) : this.entityClass.getConstructor(World.class).newInstance(world);
         }
     }
 

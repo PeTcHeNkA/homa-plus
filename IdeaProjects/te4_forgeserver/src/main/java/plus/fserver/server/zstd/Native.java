@@ -9,10 +9,7 @@ import java.security.PrivilegedAction;
 
 
 public enum Native {;
-    private static final String errorMsg = "Unsupported OS/arch, cannot find " + resourceName() + " or load " + "zstd-jni-1.5.5-9" + " from system libraries. Please try building from source the jar or providing " + "libzstd-jni-1.5.5-9" + " in your system.";
     private static boolean loaded = false;
-
-    private Native() {}
 
     private static String osName() {
         String var0 = System.getProperty("os.name").toLowerCase().replace(' ', '_');
@@ -89,7 +86,7 @@ public enum Native {;
                             loadLibrary("zstd-jni-1.5.5-9");
                             loaded = true;
                         } catch (UnsatisfiedLinkError var21) {
-                            UnsatisfiedLinkError var29 = new UnsatisfiedLinkError(var21.getMessage() + "\n" + errorMsg);
+                            UnsatisfiedLinkError var29 = new UnsatisfiedLinkError(var21.getMessage() + ": Unsupported OS/arch");
                             var29.setStackTrace(var21.getStackTrace());
                             throw var29;
                         }
@@ -120,7 +117,7 @@ public enum Native {;
                                         try {
                                             loadLibrary("zstd-jni-1.5.5-9");
                                         } catch (UnsatisfiedLinkError var23) {
-                                            UnsatisfiedLinkError var9 = new UnsatisfiedLinkError(var24.getMessage() + "\n" + var23.getMessage() + "\n" + errorMsg);
+                                            UnsatisfiedLinkError var9 = new UnsatisfiedLinkError(var24.getMessage() + " : " + var23.getMessage() + ": Unsupported OS/arch");
                                             var9.setStackTrace(var23.getStackTrace());
                                             throw var9;
                                         }

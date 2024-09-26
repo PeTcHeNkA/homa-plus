@@ -24,7 +24,6 @@ public abstract class RegionFilePatch {
     @Shadow @Final private File fileName;
 
 
-
     /**
      * @author Te4hno
      * @reason ZSTD

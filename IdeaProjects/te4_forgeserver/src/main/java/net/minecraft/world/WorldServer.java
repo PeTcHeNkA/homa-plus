@@ -75,7 +75,7 @@ import plus.fserver.api.Keep;
 import plus.fserver.api.MeanTicker;
 import plus.fserver.api.ElcaWorldServer;
 import plus.fserver.ElcaCV;
-import plus.fserver.server.EntityCollider;
+import plus.fserver.entity.EntityCollider;
 import plus.fserver.server.chunk.io.TChunkTask;
 import plus.fserver.server.chunk.io.TQueuedChunk;
 import plus.fserver.server.elca.ChunkSelector;

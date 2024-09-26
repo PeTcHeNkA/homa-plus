@@ -299,7 +299,7 @@ public final class AsyWorldTickerV2 implements ThreadFactory{
             }
             lastError = curTime;
             worldserver.cleanCache();
-            CraftingManager.index.clear();
+            CraftingManager.clear();
         } catch (Throwable throwable){
             stopAnError(throwable, worldserver);
         } finally {

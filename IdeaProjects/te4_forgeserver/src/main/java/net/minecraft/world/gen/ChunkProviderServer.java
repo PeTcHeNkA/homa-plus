@@ -30,6 +30,7 @@ import plus.fserver.api.Keep;
 import plus.fserver.server.chunk.io.TChunkExecutor;
 import plus.fserver.server.chunk.io.TChunkTask;
 import plus.fserver.utls.collections.ChunkPopulationTask;
+import plus.fserver.world.light.api.ILightingEngineProvider;
 
 
 public class ChunkProviderServer extends Long2ObjectOpenHashMap<Chunk> implements IChunkProvider {
@@ -220,6 +221,7 @@ public class ChunkProviderServer extends Long2ObjectOpenHashMap<Chunk> implement
 
     @Keep
     public boolean saveChunks(boolean all) {
+        boolean needProcess = true;
         int i = 0;
         ObjectCollection<Chunk> vs = super.values();
         if(vs.isEmpty())return true;
@@ -227,11 +229,14 @@ public class ChunkProviderServer extends Long2ObjectOpenHashMap<Chunk> implement
 
         for (int j = 0; j < list.size(); ++j) {
             Chunk chunk = list.get(j);
-
             if (all) {
                 this.saveChunkExtraData(chunk);
             }
             if (chunk.needsSaving(all)) {
+                if(needProcess){
+                    this.world.getLightingEngine().processLightUpdates();
+                    needProcess = false;
+                }
                 this.saveChunkData(chunk);
                 chunk.setModified(false);
                 ++i;

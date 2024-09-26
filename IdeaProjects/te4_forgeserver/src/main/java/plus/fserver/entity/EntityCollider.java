@@ -1,4 +1,4 @@
-package plus.fserver.server;
+package plus.fserver.entity;
 
 import com.google.common.base.Predicate;
 import net.minecraft.entity.Entity;
@@ -9,7 +9,6 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import plus.fserver.utls.collections.ArrayListE6;
 import plus.fserver.utls.collections.EntityList;
-import plus.fserver.entity.CollisionPredicate;
 
 
 public class EntityCollider {

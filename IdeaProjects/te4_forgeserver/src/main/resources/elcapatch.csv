@@ -622,6 +622,7 @@ net.minecraft.util.EnumFacing$Plane, false, false
 net.minecraft.util.EnumFacing, false, false
 net.minecraft.util.EnumHand, false, false
 net.minecraft.util.FoodStats, false, false
+net.minecraft.util.IntIdentityHashBiMap, false, false
 net.minecraft.util.LowerStringMap, false, false
 net.minecraft.util.math.AxisAlignedBB, false, false
 net.minecraft.util.math.BlockPos$1, false, false

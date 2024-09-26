@@ -1,8 +1,8 @@
-package plus.fserver.server.ai;
+package plus.fserver.entity.ai;
 
 import java.util.*;
 import net.minecraft.entity.ai.*;
-import plus.fserver.server.ai.goals.CustomPriotizedSlowedGoal;
+import plus.fserver.entity.ai.goals.CustomPriotizedSlowedGoal;
 import plus.fserver.ElcaConfig;
 import java.util.function.*;
 

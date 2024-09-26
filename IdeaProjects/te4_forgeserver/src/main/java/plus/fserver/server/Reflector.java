@@ -1,15 +1,13 @@
 package plus.fserver.server;
 
-import sun.misc.Unsafe;
 import java.lang.invoke.*;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.util.function.Supplier;
 
 
 public class Reflector {
     public static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
-    private static Unsafe UNSAFE;
+//    private static Unsafe UNSAFE;
 
     public static <T> Constructor<T> getCtor(Class<T> clazz, Class<?>... args) {
         try {
@@ -59,17 +57,17 @@ public class Reflector {
             return null;
         }
     }
-
-
-    public static Unsafe getUnsafe(){
-        if(UNSAFE != null)return UNSAFE;
-        try {
-            Field f = Unsafe.class.getDeclaredField("theUnsafe");
-            f.setAccessible(true);
-            Unsafe unsafe = (Unsafe) f.get(null);
-            return UNSAFE = unsafe;
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
-    }
+//
+//
+//    public static Unsafe getUnsafe(){
+//        if(UNSAFE != null)return UNSAFE;
+//        try {
+//            Field f = Unsafe.class.getDeclaredField("theUnsafe");
+//            f.setAccessible(true);
+//            Unsafe unsafe = (Unsafe) f.get(null);
+//            return UNSAFE = unsafe;
+//        } catch (NoSuchFieldException | IllegalAccessException e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
 }

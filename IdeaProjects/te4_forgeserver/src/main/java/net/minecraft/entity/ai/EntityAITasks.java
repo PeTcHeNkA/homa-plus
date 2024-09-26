@@ -7,8 +7,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import plus.fserver.ElcaConfig;
 import plus.fserver.api.MeanTicker;
-import plus.fserver.server.ai.CustomGoalTypeData;
-import plus.fserver.server.ai.goals.CustomPriotizedSlowedGoal;
+import plus.fserver.entity.ai.CustomGoalTypeData;
+import plus.fserver.entity.ai.goals.CustomPriotizedSlowedGoal;
 import plus.fserver.utls.collections.ArrayListEV;
 import plus.tson.utl.Te4HashSet;
 

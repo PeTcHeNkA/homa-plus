@@ -1,4 +1,4 @@
-package plus.fserver.server.ai.goals;
+package plus.fserver.entity.ai.goals;
 
 import net.minecraft.entity.ai.*;
 import org.jetbrains.annotations.NotNull;
