@@ -24,8 +24,6 @@ public class NettyVarint21FrameDecoder extends ByteToMessageDecoder {
 
             bytes[i] = buf.readByte();
             if (bytes[i] >= 0) {
-                //ByteBuf pBuf = Unpooled.wrappedBuffer(bytes);
-                //try {
                 int size = NetUtils.readVarInt(bytes);
                 if (buf.readableBytes() < size) {
                     buf.resetReaderIndex();
@@ -33,9 +31,6 @@ public class NettyVarint21FrameDecoder extends ByteToMessageDecoder {
                 }
 
                 msg.add(buf.readBytes(size));
-//                } finally {
-//                    pBuf.release();
-//                }
                 return;
             }
         }

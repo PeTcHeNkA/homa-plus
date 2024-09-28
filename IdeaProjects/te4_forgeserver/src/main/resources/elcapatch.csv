@@ -832,6 +832,7 @@ net.minecraft.world.WorldProviderHell
 net.minecraft.world.WorldServer$1
 net.minecraft.world.WorldServer$ServerBlockEventList
 net.minecraft.world.WorldServer
+net.minecraft.world.WorldType
 net.minecraftforge.common.chunkio.ChunkIOExecutor, true
 net.minecraftforge.common.DimensionManager$1, true
 net.minecraftforge.common.DimensionManager$Dimension, true
@@ -850,6 +851,7 @@ net.minecraftforge.common.ForgeHooks$2, true
 net.minecraftforge.common.ForgeHooks$LootTableContext, true
 net.minecraftforge.common.ForgeHooks$SeedEntry, true
 net.minecraftforge.common.ForgeHooks, true
+net.minecraftforge.common.ForgeModContainer, true
 net.minecraftforge.event.entity.EntityEvent$CanUpdate, true
 net.minecraftforge.event.entity.EntityEvent$EnteringChunk, true
 net.minecraftforge.event.entity.EntityEvent$EntityConstructing, true
@@ -898,3 +900,4 @@ net.minecraftforge.event.world.ChunkWatchEvent, true
 net.minecraftforge.event.world.GetCollisionBoxesEvent, true
 net.minecraftforge.fml.common.eventhandler.EventBus, true
 net.minecraftforge.fml.common.registry.EntityEntry, true
+net.minecraftforge.registries.ForgeRegistryHook, true
