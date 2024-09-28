@@ -39,7 +39,6 @@ import org.apache.logging.log4j.Logger;
 import plus.fserver.server.SStrings;
 import plus.fserver.utls.NbtUtils;
 import plus.fserver.world.light.LightingHooks;
-import plus.fserver.world.light.api.IChunkLightingData;
 
 
 public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO {
@@ -401,7 +400,7 @@ public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO {
                 net.minecraftforge.fml.common.FMLLog.log.error("A capability provider has thrown an exception trying to write state. It will not persist. Report this to the mod author", exception);
             }
         }
-        compound.setBoolean("LightPopulated", ((IChunkLightingData)chunkIn).isLightInitialized());
+        compound.setBoolean("LightPopulated", chunkIn.isLightInitialized());
     }
 
 
@@ -452,7 +451,7 @@ public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO {
             chunk.getCapabilities().deserializeNBT(compound.getCompoundTag("ForgeCaps"));
         }
         LightingHooks.readNeighborLightChecksFromNBT(chunk, compound);
-        ((IChunkLightingData)chunk).setLightInitialized(compound.getBoolean("LightPopulated"));
+        chunk.setLightInitialized(compound.getBoolean("LightPopulated"));
 
         return chunk;
     }

@@ -1,4 +1,4 @@
-package plus.fserver.world.light.api;
+package plus.fserver.world.light;
 
 import net.minecraft.world.*;
 import net.minecraft.util.math.*;

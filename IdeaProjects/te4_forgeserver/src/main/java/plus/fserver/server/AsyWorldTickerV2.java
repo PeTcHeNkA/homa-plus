@@ -20,7 +20,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import plus.fserver.ElcaConfig;
-import plus.fserver.world.light.api.ILightingEngineProvider;
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -181,9 +180,10 @@ public final class AsyWorldTickerV2 implements ThreadFactory{
             return;
         }
         WorldServer worldserver = DimensionManager.getWorld(inf.id);
-        if(worldserver==null || !worldserver.loaded){
+        if(worldserver == null || !worldserver.loaded){
             inf.stop();
-            ((ILightingEngineProvider)worldserver).getLightingEngine().processLightUpdates();
+            if(worldserver != null)
+                worldserver.getLightingEngine().processLightUpdates();
         }
     }
 

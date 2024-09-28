@@ -12,8 +12,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import plus.fserver.utls.collections.PooledLongQueue;
-import plus.fserver.world.light.api.IChunkLighting;
-import plus.fserver.world.light.api.ILightingEngine;
 
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -386,7 +384,7 @@ public class LightingEngine implements ILightingEngine {
 
 
     private int getCursorCachedLight(final EnumSkyBlock lightType) {
-        return ((IChunkLighting)this.curChunk).getCachedLightFor(lightType, this.curPos);
+        return this.curChunk.getCachedLightFor(lightType, this.curPos);
     }
 
 

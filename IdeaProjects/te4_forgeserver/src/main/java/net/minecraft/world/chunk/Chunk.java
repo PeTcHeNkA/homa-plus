@@ -45,15 +45,13 @@ import plus.fserver.utls.math.MathUtls;
 import plus.fserver.world.light.LightingEngine;
 import plus.fserver.world.light.LightingHooks;
 import plus.fserver.world.light.WorldChunkSlice;
-import plus.fserver.world.light.api.IChunkLighting;
-import plus.fserver.world.light.api.IChunkLightingData;
-import plus.fserver.world.light.api.ILightingEngine;
-import plus.fserver.world.light.api.ILightingEngineProvider;
+import plus.fserver.world.light.ILightingEngine;
+import plus.fserver.world.light.ILightingEngineProvider;
 import plus.tson.utl.Te4HashMap;
 import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
-public class Chunk implements net.minecraftforge.common.capabilities.ICapabilityProvider, ILightingEngineProvider, IChunkLighting, IChunkLightingData {
+public class Chunk implements net.minecraftforge.common.capabilities.ICapabilityProvider, ILightingEngineProvider{
     @Keep
     public static final int STORAGES_COUNT = 16;
     @Keep
@@ -710,7 +708,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
     }
 
 
-    @Override
+    //phosphor lighting
     public int getCachedLightFor(final EnumSkyBlock type, final BlockPos pos) {
         final int i = pos.getX() & 0xF, j = pos.getY(), k = pos.getZ() & 0xF;
         final ExtendedBlockStorage extendedblockstorage = this.storageArrays[j >> 4];
@@ -1307,14 +1305,14 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
      */
     public void checkLight() {
         this.isTerrainPopulated = true;
-        if (!((IChunkLightingData)this).isLightInitialized()) {
+        if (!this.isLightInitialized()) {
             LightingHooks.initChunkLighting(this, world);
         }
         for (int x = -1; x <= 1; ++x) {
             for (int z = -1; z <= 1; ++z) {
                 if (x != 0 || z != 0) {
                     final Chunk nChunk = world.getChunkProvider().getLoadedChunk(this.x + x, this.z + z);
-                    if (nChunk == null || !((IChunkLightingData)nChunk).isLightInitialized()) {
+                    if (nChunk == null || !nChunk.isLightInitialized()) {
                         return;
                     }
                 }
@@ -1605,36 +1603,30 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
     }
 
 
+    //phosphor light
     private short[] neighborLightChecks;
     private boolean isLightInitialized;
 
 
-    @Override
     public short[] getNeighborLightChecks() {
         return this.neighborLightChecks;
     }
 
 
-    @Override
     public void setNeighborLightChecks(final short[] data) {
         this.neighborLightChecks = data;
     }
 
 
-    @Override
     public boolean isLightInitialized() {
         return this.isLightInitialized;
     }
 
 
-    @Override
     public void setLightInitialized(final boolean lightInitialized) {
         this.isLightInitialized = lightInitialized;
     }
-
-
-    @Override
-    public void setSkylightUpdatedPublic() {}
+    //phosphor light end
 
 
     @Override

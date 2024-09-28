@@ -3,11 +3,9 @@ package plus.fserver.world.light;
 import net.minecraft.util.*;
 import net.minecraft.world.chunk.*;
 import net.minecraft.util.math.*;
-import net.minecraft.world.chunk.BlockStateContainer;
 import net.minecraft.world.chunk.storage.*;
 import net.minecraft.nbt.*;
 import net.minecraft.world.*;
-import plus.fserver.world.light.api.IChunkLightingData;
 
 
 public class LightingHooks {
@@ -70,7 +68,7 @@ public class LightingHooks {
 
     public static void flagChunkBoundaryForUpdate(final Chunk chunk, final short sectionMask, final EnumSkyBlock lightType, final EnumFacing dir, final EnumFacing.AxisDirection axisDirection, final EnumBoundaryFacing boundaryFacing) {
         initNeighborLightChecks(chunk);
-        final short[] neighborLightChecks = ((IChunkLightingData)chunk).getNeighborLightChecks();
+        final short[] neighborLightChecks = chunk.getNeighborLightChecks();
         final int flagIndex = getFlagIndex(lightType, dir, axisDirection, boundaryFacing);
         neighborLightChecks[flagIndex] |= sectionMask;
         chunk.markDirty();
@@ -112,26 +110,23 @@ public class LightingHooks {
     }
 
 
-    private static void mergeFlags(final EnumSkyBlock lightType, final Chunk inChunk, final Chunk outChunk, final EnumFacing dir, final EnumFacing.AxisDirection axisDir) {
-        final IChunkLightingData outChunkLightingData = (IChunkLightingData)outChunk;
-        if (outChunkLightingData.getNeighborLightChecks() == null) {
+    private static void mergeFlags(final EnumSkyBlock type, final Chunk inChunk, final Chunk outChunk, final EnumFacing dir, final EnumFacing.AxisDirection axisDir) {
+        if (outChunk.getNeighborLightChecks() == null) {
             return;
         }
-        final IChunkLightingData inChunkLightingData = (IChunkLightingData)inChunk;
         initNeighborLightChecks(inChunk);
-        final int inIndex = getFlagIndex(lightType, dir, axisDir, EnumBoundaryFacing.IN);
-        final int outIndex = getFlagIndex(lightType, dir.getOpposite(), axisDir, EnumBoundaryFacing.OUT);
-        final short[] neighborLightChecks = inChunkLightingData.getNeighborLightChecks();
-        neighborLightChecks[inIndex] |= outChunkLightingData.getNeighborLightChecks()[outIndex];
+        final int inIndex = getFlagIndex(type, dir, axisDir, EnumBoundaryFacing.IN);
+        final int outIndex = getFlagIndex(type, dir.getOpposite(), axisDir, EnumBoundaryFacing.OUT);
+        final short[] neighborLightChecks = inChunk.getNeighborLightChecks();
+        neighborLightChecks[inIndex] |= outChunk.getNeighborLightChecks()[outIndex];
     }
 
     
     private static void scheduleRelightChecksForBoundary(final World world, final Chunk chunk, Chunk nChunk, Chunk sChunk, final EnumSkyBlock lightType, final int xOffset, final int zOffset, final EnumFacing.AxisDirection axisDir) {
-        final IChunkLightingData chunkLightingData = (IChunkLightingData)chunk;
-        if (chunkLightingData.getNeighborLightChecks() == null) return;
+        if (chunk.getNeighborLightChecks() == null) return;
 
         final int flagIndex = getFlagIndex(lightType, xOffset, zOffset, axisDir, EnumBoundaryFacing.IN);
-        final int flags = chunkLightingData.getNeighborLightChecks()[flagIndex];
+        final int flags = chunk.getNeighborLightChecks()[flagIndex];
         if (flags == 0) {
             return;
         }
@@ -148,10 +143,9 @@ public class LightingHooks {
             }
         }
         final int reverseIndex = getFlagIndex(lightType, -xOffset, -zOffset, axisDir, EnumBoundaryFacing.OUT);
-        chunkLightingData.getNeighborLightChecks()[flagIndex] = 0;
-        final IChunkLightingData nChunkLightingData = (IChunkLightingData)nChunk;
-        if (nChunkLightingData.getNeighborLightChecks() != null) {
-            nChunkLightingData.getNeighborLightChecks()[reverseIndex] = 0;
+        chunk.getNeighborLightChecks()[flagIndex] = 0;
+        if (nChunk.getNeighborLightChecks() != null) {
+            nChunk.getNeighborLightChecks()[reverseIndex] = 0;
         }
         chunk.markDirty();
         nChunk.markDirty();
@@ -176,9 +170,8 @@ public class LightingHooks {
 
 
     public static void initNeighborLightChecks(final Chunk chunk) {
-        final IChunkLightingData lightingData = (IChunkLightingData)chunk;
-        if (lightingData.getNeighborLightChecks() == null) {
-            lightingData.setNeighborLightChecks(new short[32]);
+        if (chunk.getNeighborLightChecks() == null) {
+            chunk.setNeighborLightChecks(new short[32]);
         }
     }
 //
@@ -205,7 +198,7 @@ public class LightingHooks {
             final NBTTagList list = nbt.getTagList("NeighborLightChecks", 2);
             if (list.tagCount() == 32) {
                 initNeighborLightChecks(chunk);
-                final short[] neighborLightChecks = ((IChunkLightingData)chunk).getNeighborLightChecks();
+                final short[] neighborLightChecks = chunk.getNeighborLightChecks();
                 for (int i = 0; i < 32; ++i) {
                     neighborLightChecks[i] = ((NBTTagShort)list.get(i)).getShort();
                 }
@@ -237,7 +230,7 @@ public class LightingHooks {
             if (world.provider.hasSkyLight()) {
                 chunk.setSkylightUpdated();
             }
-            ((IChunkLightingData)chunk).setLightInitialized(true);
+            chunk.setLightInitialized(true);
 
             for (final ExtendedBlockStorage storage : storages) {
                 if (storage != Chunk.NULL_BLOCK_STORAGE) storage.tryFreeLight();
@@ -247,14 +240,14 @@ public class LightingHooks {
 
 
     public static void checkChunkLighting(final Chunk chunk, final World world) {
-        if (!((IChunkLightingData)chunk).isLightInitialized()) {
+        if (!chunk.isLightInitialized()) {
             initChunkLighting(chunk, world);
         }
         for (int x = -1; x <= 1; ++x) {
             for (int z = -1; z <= 1; ++z) {
                 if (x != 0 || z != 0) {
                     final Chunk nChunk = world.getChunkProvider().getLoadedChunk(chunk.x + x, chunk.z + z);
-                    if (nChunk == null || !((IChunkLightingData)nChunk).isLightInitialized()) {
+                    if (nChunk == null || !nChunk.isLightInitialized()) {
                         return;
                     }
                 }
