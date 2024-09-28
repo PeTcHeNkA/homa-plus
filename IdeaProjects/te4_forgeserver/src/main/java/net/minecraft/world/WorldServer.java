@@ -91,6 +91,8 @@ import plus.tson.utl.Te4HashSet;
 
 public class WorldServer extends World implements IThreadListener, ElcaWorldServer, MeanTicker {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final long spawnOnSetTickRate = 400L;
+
     private final MinecraftServer server;
     private EntityTracker entityTracker;
     private final PlayerChunkMap playerChunkMap;
@@ -106,7 +108,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
     private ITeleporter worldTeleporter;
     @Keep
     private final WorldEntitySpawner entitySpawner;
-    protected final VillageSiege villageSiege = new VillageSiege(this);
+    protected VillageSiege villageSiege;
     private final WorldServer.ServerBlockEventList[] blockEventQueue = new WorldServer.ServerBlockEventList[] {new WorldServer.ServerBlockEventList(), new WorldServer.ServerBlockEventList()};
     private int blockEventCacheIndex;
     private final List<NextTickListEntry> pendingTickListEntriesThisTick = new ArrayList<>();
@@ -115,7 +117,6 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
     @Keep
     public List<Teleporter> customTeleporters = new ArrayList<>();
 
-    private static final long spawnOnSetTickRate = 400L;
 
     private final ConcurrentHashMap<TQueuedChunk, TChunkTask> _chunkTasks = new ConcurrentHashMap<>();
     private final ConcurrentLinkedQueue<Runnable> _syncTasks = new ConcurrentLinkedQueue<>();
@@ -129,7 +130,6 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         this.entityTracker = new EntityTracker(this).init();
         this.playerChunkMap = new PlayerChunkMap(this);
 
-        perWorldStorage = new MapStorage(new WorldSpecificSaveHandler(this, saveHandlerIn));
         this.calculateInitialSkylight();
         this.calculateInitialWeather();
         this.getWorldBorder().setSize(server.getMaxWorldSize());
@@ -138,6 +138,14 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
 
         effectiveAcces = localSelector;
         entitySpawner = makeWorldSpawner();
+
+        initUnimportant();
+    }
+
+
+    protected void initUnimportant(){
+        villageSiege = new VillageSiege(this);
+        perWorldStorage = new MapStorage(new WorldSpecificSaveHandler(this, saveHandler));
     }
 
 
@@ -1284,7 +1292,8 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         if(ElcaConfig.VILLAGE_TICK_RATE!=-1){
             if(prevWorldTotalTime % ElcaConfig.VILLAGE_TICK_RATE==0) {
                 this.villageCollection.tick();
-                this.villageSiege.tick();
+                VillageSiege vsl = villageSiege;
+                if(vsl != null) vsl.tick();
             }
         }
 

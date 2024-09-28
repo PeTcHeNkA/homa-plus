@@ -53,7 +53,7 @@ public class ChunkProviderServer extends Long2ObjectOpenHashMap<Chunk> implement
 
 
     public ChunkProviderServer(WorldServer world, IChunkLoader chunkLoader, IChunkGenerator chunkGeneratorIn) {
-        super(1024);
+        super(512);
         this.world = world;
         this.chunkLoader = chunkLoader;
         this.chunkGenerator = chunkGeneratorIn;
@@ -273,9 +273,6 @@ public class ChunkProviderServer extends Long2ObjectOpenHashMap<Chunk> implement
         if(task != null) task.reRunIfNeed();
         if (!this.world.disableLevelSaving) {
             if (!this.droppedChunks.isEmpty()) {
-//                for (ChunkPos forced : this.world.getPersistentChunks().keySet()) {
-//                    this.droppedChunks.remove(ChunkPos.asLong(forced.x, forced.z));
-//                }
                 int i = 0;
                 for (LongIterator iterator = this.droppedChunks.iterator();
                      i < 100 && iterator.hasNext();) {
