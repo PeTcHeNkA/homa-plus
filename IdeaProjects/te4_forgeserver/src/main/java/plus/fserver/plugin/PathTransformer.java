@@ -175,7 +175,7 @@ public class PathTransformer implements IClassTransformer {
             if (ann.desc.equals(LOAD_INJECT)) {
                 String key = (String) values.get(0);
                 if(key.equals("field")){
-                    InjectInfo field = build((List) values.get(1));
+                    InjectInfo field = build(((AnnotationNode)values.get(1)).values);
                     checkAndAdd(field);
                 } else if(key.equals("fields")){
                     List list = (List) values.get(1);

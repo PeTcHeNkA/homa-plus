@@ -1,5 +1,6 @@
 package plus.fserver.plugin;
 
+import io.netty.util.internal.shaded.org.jctools.util.UnsafeAccess;
 import sun.misc.Resource;
 
 import java.io.ByteArrayInputStream;
@@ -20,12 +21,16 @@ public class MemoryClassLoader{
 
 
     static Class<?> loadUnsafe(ClassLoader loader, String name, byte[] data) throws Exception{
-        Method method = URLClassLoader.class.getDeclaredMethod("defineClass",
-                String.class, Resource.class);
-
-        method.setAccessible(true);
-
-        return (Class<?>) method.invoke(loader, name, new MemorySrc(data));
+        return UnsafeAccess.UNSAFE.defineClass(
+                name, data, 0, data.length, loader, null
+        );
+//
+//        Method method = URLClassLoader.class.getDeclaredMethod("defineClass",
+//                String.class, Resource.class);
+//
+//        method.setAccessible(true);
+//
+//        return (Class<?>) method.invoke(loader, name, new MemorySrc(data));
     }
 
 
