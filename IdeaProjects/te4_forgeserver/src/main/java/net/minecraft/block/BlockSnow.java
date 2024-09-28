@@ -48,7 +48,8 @@ public class BlockSnow extends BlockFx {
 
     @Override
     public boolean isPassable(IBlockAccess access, BlockPos pos) {
-        return access.getBlockState(pos).getValue(LAYERS).intValue() < 5;
+        Integer val = access.getBlockState(pos).getValue(LAYERS);
+        return val == null || val.intValue() < 5;
     }
 
 

@@ -1204,10 +1204,11 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
 
 
     public void tickSyncTasks(){
-        Runnable task = _syncTasks.poll();
+        ConcurrentLinkedQueue<Runnable> syncTasks;
+        Runnable task = (syncTasks = _syncTasks).poll();
         while(task != null){
             task.run();
-            task = _syncTasks.poll();
+            task = syncTasks.poll();
         }
     }
 

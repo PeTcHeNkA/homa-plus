@@ -653,8 +653,12 @@ public class WorldClient extends World {
 
 
     public int getRedstonePower(BlockPos pos, EnumFacing facing) {
-        IBlockState iblockstate1 = this.getBlockState(pos);
-        return iblockstate1.getBlock().shouldCheckWeakPower(iblockstate1, this, pos, facing) ? this.getStrongPower(pos) : iblockstate1.getWeakPower(this, pos, facing);
+        return 0;
+        //getRedstoneCache().redstoneCanProvidePower = false;
+        //IBlockState iblockstate1 = this.getBlockState(pos);
+        //if(iblockstate1.getBlock().shouldCheckWeakPower(iblockstate1, this, pos, facing))return 0;
+
+       // return iblockstate1.getBlock().shouldCheckWeakPower(iblockstate1, this, pos, facing) ? 0 : iblockstate1.getWeakPower(this, pos, facing);
     }
 
 

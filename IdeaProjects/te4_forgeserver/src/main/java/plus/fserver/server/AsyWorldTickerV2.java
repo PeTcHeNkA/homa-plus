@@ -252,6 +252,7 @@ public final class AsyWorldTickerV2{
                 }
             }
             worldserver.tick();
+            worldserver.tickSyncTasks();
             worldserver.updateEntities();
             FMLCommonHandler.instance().onPostWorldTick(worldserver);
 
