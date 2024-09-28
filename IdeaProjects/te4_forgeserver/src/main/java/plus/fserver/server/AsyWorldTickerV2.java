@@ -19,13 +19,12 @@ import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 import plus.fserver.ElcaConfig;
 import java.util.List;
 import java.util.concurrent.*;
 
 
-public final class AsyWorldTickerV2 implements ThreadFactory{
+public final class AsyWorldTickerV2{
     private static final boolean useSync = false;
     private static final Logger LOGGER = LogManager.getLogger();
     public final ScheduledExecutorService service;
@@ -36,11 +35,13 @@ public final class AsyWorldTickerV2 implements ThreadFactory{
     private boolean enabled = true;
     private Throwable error;
     private int tickCounter;
-    private int countThreads = 0;
     private long lastError = 0;
     private final ScheduledFuture<?> netFuture;
     static{
-        System.out.printf("Async ticker V2 initialized\n");
+        LogManager.getLogger("ELCA").info("Async ticker V2 initialized");
+        if(useSync){
+            LogManager.getLogger("ELCA").warn("Use sync world ticking");
+        }
         Native.load(ElcaConfig.NATIVES);
     }
 
@@ -116,15 +117,6 @@ public final class AsyWorldTickerV2 implements ThreadFactory{
     }
 
 
-    @Override
-    public Thread newThread(@NotNull Runnable r) {
-        Thread thread = new Thread(r);
-        thread.setName("MC World thread#"+(countThreads++));
-        thread.setDaemon(true);
-        return thread;
-    }
-
-
     private final class WorldInfo{
         final int id;
         public int checkToUnload;
@@ -150,8 +142,8 @@ public final class AsyWorldTickerV2 implements ThreadFactory{
 
 
         public void stop(){
-            if(tickCounter==-1)return;
-            System.out.println("STOP TICKING WORLD "+id);
+            if(tickCounter == -1)return;
+            LogManager.getLogger("ELCA").info("Stop ticking world #"+id);
             tickCounter = -1;
             infs.remove(id);
             try {
