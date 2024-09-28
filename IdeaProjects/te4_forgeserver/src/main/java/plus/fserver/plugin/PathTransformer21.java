@@ -51,14 +51,14 @@ public class PathTransformer21 implements IClassTransformer {
         ClassReader classReader = new ClassReader(bytes);
         classReader.accept(classNode, 0);
 
-        if (remove(classNode.visibleAnnotations, SIDE)) {
+        if (remove(classNode.visibleAnnotations, SIDE) > 0) {
             throw new RuntimeException(String.format("Attempted to load class %s for invalid side %s", classNode.name, SIDE));
         }
 
         Iterator<FieldNode> fields = classNode.fields.iterator();
         while(fields.hasNext()) {
             FieldNode field = fields.next();
-            if (remove(field.visibleAnnotations, SIDE)) {
+            if (remove(field.visibleAnnotations, SIDE) > 0) {
                 fields.remove();
             }
         }
@@ -66,10 +66,15 @@ public class PathTransformer21 implements IClassTransformer {
         LambdaGatherer lambdaGatherer = new LambdaGatherer();
         Iterator<MethodNode> methods = classNode.methods.iterator();
         while(methods.hasNext()) {
-            MethodNode method = methods.next();
-            if (remove(method.visibleAnnotations, SIDE)) {
-                methods.remove();
-                lambdaGatherer.accept(method);
+            final MethodNode method = methods.next();
+            int res = this.remove(method.visibleAnnotations, SIDE);
+            if (res > 0) {
+                if(res == 1){
+                    methods.remove();
+                    lambdaGatherer.accept(method);
+                } else {
+                    removeCode(method);
+                }
             }
         }
 
@@ -93,8 +98,8 @@ public class PathTransformer21 implements IClassTransformer {
     }
 
 
-    private boolean remove(List<AnnotationNode> anns, String side) {
-        if (anns == null) return false;
+    private int remove(List<AnnotationNode> anns, String side) {
+        if (anns == null) return 0;
 
         for (AnnotationNode ann : anns) {
             if(ann.values == null)continue;
@@ -106,14 +111,17 @@ public class PathTransformer21 implements IClassTransformer {
                     if (key instanceof String && key.equals("value")) {
                         if (value instanceof String[] ) {
                             if (!((String[])value)[1].equals(side)) {
-                                return true;
+                                return 1;
                             }
                         }
                     }
                 }
-            } else if(checkVarOnly(ann))return true;
+            } else {
+                int res = checkVarOnly(ann);
+                if(res > 0)return res;
+            }
         }
-        return false;
+        return 0;
     }
 
 

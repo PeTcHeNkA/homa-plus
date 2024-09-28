@@ -1,5 +1,6 @@
 package plus.fserver;
 
+import net.minecraftforge.fml.relauncher.FMLLaunchHandler;
 import plus.tson.TsonFile;
 import plus.tson.TsonMap;
 import plus.tson.TsonObj;
@@ -13,7 +14,7 @@ import static plus.tson.ext.TsonBoolUtils.*;
 public class ElcaConfig {
     //fast-water-check
     //fix-shulcer-nbt-view
-    private static final Te4HashMap<String,Boolean> VARS = new Te4HashMap<>();
+    private static Te4HashMap<String,Boolean> VARS;
 
     public static File NATIVES;
     public static final String SERVER_ID            = "ElcaServer";
@@ -80,7 +81,7 @@ public class ElcaConfig {
     public static boolean PRINT_CAUSE_SERVER_STOP     = true;
     //public static boolean PROCESS_LIGHT_ON_SAVE       = false;
     public static boolean ASYNC_SAVE_CHUNKS           = true;
-    public static boolean FAST_ENTITY_EQUALS          = true;
+    //public static boolean FAST_ENTITY_EQUALS          = true;
     public static boolean ENABLE_LEGACY_PING_HANDLER  = false;
     public static boolean ENABLE_DEFAULT_JOIN_MESSAGE = true;
     //public static boolean ENABLE_DATA_FIXER          = false;
@@ -94,10 +95,21 @@ public class ElcaConfig {
     }
 
 
-    public static TsonFile load(){
+    static {
+        load();
+    }
+
+
+    public static void load(){
+        if(VARS != null)return;
+        Te4HashMap<String,Boolean> vars = VARS = new Te4HashMap<>();
+
         TsonFile file = new TsonFile("elca-config.tson");
         init(file);
-        return file;
+
+        if(!ElcaCV.DEBUG_NO_SERVER){
+            vars.put("SIDE_SERVER", FMLLaunchHandler.side().isServer());
+        }
     }
 
 
@@ -115,6 +127,7 @@ public class ElcaConfig {
 
 
     public static boolean getVar(String key, boolean def){
+        if(VARS == null)load();
         return VARS.getOrDefault(key, def);
     }
 

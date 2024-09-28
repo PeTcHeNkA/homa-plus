@@ -4,7 +4,6 @@ import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraft.launchwrapper.ITweaker;
 import net.minecraft.launchwrapper.LaunchClassLoader;
 import org.apache.logging.log4j.LogManager;
-import org.spongepowered.asm.launch.MixinBootstrap;
 import org.spongepowered.asm.mixin.Mixins;
 import java.io.File;
 import java.lang.reflect.Field;
@@ -38,7 +37,7 @@ public class SSPatchLoader implements ITweaker{
             INTERN_NBT_KEYS              ,
             ENABLE_PACKET_DEBUG
         };
-        for (int i=0;i< flags.length;i++)
+        for (int i = 0; i < flags.length; i++)
             if(flags[i]) num |= 1<<i;
 
         version += "-x"+Long.toHexString(num);
@@ -68,10 +67,21 @@ public class SSPatchLoader implements ITweaker{
     public void acceptOptions(List<String> args, File gameDir, File assetsDir, String profile) {}
 
 
+    private static void tryInstallMixins(){
+        try {
+            Class.forName("org.spongepowered.asm.launch.MixinBootstrap")
+                    .getDeclaredMethod("init").invoke(null);
+
+            Mixins.addConfiguration("mixins.fserver.json");
+        } catch (Exception e) {
+            LogManager.getLogger("ELCA").warn("Mixin System don`t loaded");
+        }
+    }
+
+
     @Override
     public void injectIntoClassLoader(LaunchClassLoader classLoader) {
-        MixinBootstrap.init();
-        Mixins.addConfiguration("mixins.fserver.json");
+        tryInstallMixins();
         try {
             editTransformers(classLoader);
         } catch (NoSuchFieldException | IllegalAccessException e) {

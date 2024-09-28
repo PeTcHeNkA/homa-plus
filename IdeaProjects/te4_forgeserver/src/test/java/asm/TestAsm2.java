@@ -2,35 +2,17 @@ package asm;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
+import plus.fserver.api.inject.VarOnly;
 
 
 public class TestAsm2 {
-    World world;
 
-
-    public static int vi1(Entity entity){
+    @VarOnly(var = "SIDE_SERVER", def = true, code = true)
+    public static void vi1(Entity entity){
         if(entity.world.isRemote){
-            return 1;
+            System.out.println(1);
         } else {
-            return 2;
-        }
-    }
-
-
-    public static int vi2(Entity entity){
-        if(!entity.world.isRemote){
-            return 1;
-        } else {
-            return 2;
-        }
-    }
-
-
-    public int vi3(){
-        if(!world.isRemote){
-            return 1;
-        } else {
-            return 2;
+            System.out.println(2);
         }
     }
 }

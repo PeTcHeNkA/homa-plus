@@ -187,14 +187,12 @@ public class TweakEngine implements IClassTransformer, Set<String> {
     public byte[] tweakBytesIfNeed(String name, byte[] src) {
         TweakInfo info = classes.get(name);
         if (info == null) {
-            if(sideTransformer != null)
-                return PathTransformer.transformOnlyInjects(name, src);
-            return src;
+            return PathTransformer.transformFast(name, src);
         }
         byte[] result = info.useSafeMode ? getSafeTweaks(name) : getFastTweak(name);
         if(result == null){
-            if(sideTransformer != null && info.useSideTransformer)
-                return PathTransformer.transformOnlyInjects(name,src);
+            if(info.useSideTransformer)
+                return PathTransformer.transformFast(name,src);
             return src;
         } else {
             if(sideTransformer == null || !info.useSideTransformer)return result;

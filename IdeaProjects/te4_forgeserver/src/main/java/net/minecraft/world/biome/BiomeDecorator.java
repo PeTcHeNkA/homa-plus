@@ -8,6 +8,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.gen.ChunkGeneratorSettings;
 import net.minecraft.world.gen.feature.WorldGenAbstractTree;
 import net.minecraft.world.gen.feature.WorldGenBigMushroom;
@@ -25,7 +26,6 @@ import net.minecraft.world.gen.feature.WorldGenerator;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.terraingen.DecorateBiomeEvent;
 import net.minecraftforge.event.terraingen.OreGenEvent;
-import plus.fserver.api.ElcaWorldInfo;
 import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.math.BlockPosDelta;
 import plus.fserver.world.generator.ChunkGenSettingsPlus;
@@ -355,7 +355,7 @@ public class BiomeDecorator {
     protected final void generateOres(final ChunkSelector selector, final World worldIn, final Random random, final BlockPos chunkPos) {
         MinecraftForge.ORE_GEN_BUS.postF(new OreGenEvent.Pre(worldIn, random, chunkPos));
 
-        ChunkGenSettingsPlus settings = ((ElcaWorldInfo) worldIn.getWorldInfo()).getChunkGenSettings();
+        ChunkGenSettingsPlus settings = ((WorldServer)worldIn).getChunkGenSettings();
 
         genOre1(selector, worldIn, chunkPos, random, settings.settings.dirtCount,    settings.dirtGen,     settings.settings.dirtMinHeight,    settings.settings.dirtMaxHeight    );
         genOre1(selector, worldIn, chunkPos, random, settings.settings.gravelCount,  settings.gravelOreGen,settings.settings.gravelMinHeight,  settings.settings.gravelMaxHeight  );

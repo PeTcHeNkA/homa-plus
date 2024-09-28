@@ -5,8 +5,6 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.ClassNode;
 import plus.fserver.api.inject.Field;
-import plus.tson.TsonFile;
-import java.io.File;
 
 
 public class FieldAccessGen {
@@ -49,7 +47,7 @@ public class FieldAccessGen {
         classNode.accept(writer);
 
         byte[] bytes = writer.toByteArray();
-        TsonFile.write(new File(className+".class"), bytes);
+        //TsonFile.write(new File(className+".class"), bytes);
 
         try {
             return MemoryClassLoader.define(loader, "plus.fserver.jit." + className, bytes).newInstance();

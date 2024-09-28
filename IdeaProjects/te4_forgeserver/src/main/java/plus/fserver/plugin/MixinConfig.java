@@ -11,9 +11,8 @@ import java.util.Set;
 
 public class MixinConfig implements IMixinConfigPlugin {
     @Override
-    public void onLoad(String mixinPackage) {
+    public void onLoad(String mixinPackage) {}
 
-    }
 
     @Override
     public String getRefMapperConfig() {
@@ -23,10 +22,6 @@ public class MixinConfig implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        if(mixinClassName.equals("plus.fserver.mixins.server.FastEntityEq")){
-            return ElcaConfig.FAST_ENTITY_EQUALS;
-        }
-        //if(mixinClassName.contains("plus.fserver.mixins.light"))return ElcaConfig.FAST_LIGHT;
         return true;
     }
 

@@ -14,6 +14,9 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraftforge.fml.common.network.handshake.NetworkDispatcher;
+import net.minecraftforge.registries.ForgeRegistry;
+import net.minecraftforge.registries.ForgeRegistryHook;
+import net.minecraftforge.registries.IForgeRegistryEntry;
 import plus.fserver.ElcaCV2;
 import plus.fserver.api.inject.FieldAccessor;
 import plus.fserver.plugin.FieldAccessGen;
@@ -108,5 +111,10 @@ public final class ElcaServerUtils {
         if(ElcaCV2.LIBBUILD)throw new UnsupportedOperationException("Use only on Elca Server!");
         Object obj = FieldAccessGen.compile(FieldAccessor.class.getClassLoader(), clazz.getName(), type.getName(), name);
         return (FieldAccessor<I, T>) obj;
+    }
+
+
+    public static <V extends IForgeRegistryEntry<V>> void unsafeRegister(ForgeRegistry<V> registry, int id, V obj) {
+        ForgeRegistryHook.register(registry, id, obj);
     }
 }

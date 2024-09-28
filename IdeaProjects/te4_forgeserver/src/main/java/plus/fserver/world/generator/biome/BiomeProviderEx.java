@@ -5,6 +5,8 @@ import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.init.Biomes;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeProvider;
@@ -13,7 +15,6 @@ import net.minecraft.world.gen.layer.GenLayerEdge;
 import net.minecraft.world.storage.WorldInfo;
 import org.jetbrains.annotations.NotNull;
 import plus.fserver.api.BiomeIndexes;
-import plus.fserver.api.ElcaWorldInfo;
 import plus.fserver.world.generator.GenSession;
 import plus.fserver.world.generator.biome.layers.*;
 import plus.tson.TsonMap;
@@ -32,15 +33,17 @@ public class BiomeProviderEx extends BiomeProvider{
     private final ConcurrentLinkedQueue<EIntCache> cache = new ConcurrentLinkedQueue<>();
     private final long seed;
 
-    public BiomeProviderEx(WorldInfo info, BiomeLib lib) {
-        this(info.getSeed(), info.getTerrainType(), info, lib);
+    public BiomeProviderEx(World world, WorldInfo info, BiomeLib lib) {
+        this(world, info.getSeed(), info.getTerrainType(), info, lib);
     }
 
 
-    public BiomeProviderEx(long seed, WorldType worldTypeIn, WorldInfo info, BiomeLib lib) {
+    public BiomeProviderEx(World world, long seed, WorldType worldTypeIn, WorldInfo info, BiomeLib lib) {
         this.seed = seed;
         if (worldTypeIn == WorldType.CUSTOMIZED && !info.getGeneratorOptions().isEmpty()) {
-            settings = ((ElcaWorldInfo)info).getChunkGenSettings().settings;
+            if(world instanceof WorldServer) {
+                settings = ((WorldServer)world).getChunkGenSettings().settings;
+            }
         }
         EGenLayer[] agenlayer = createLayers(seed, worldTypeIn, settings, lib);
 

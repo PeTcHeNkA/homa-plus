@@ -5,6 +5,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.fserver.api.inject.VarOnly;
 
 
 public class Slot {
@@ -24,12 +25,13 @@ public class Slot {
     }
 
 
-
+    @VarOnly(var = "SIDE_SERVER", code = true)
     public void setSlotNum(int num) {
         this.slotNumber = num;
     }
 
 
+    @VarOnly(var = "SIDE_SERVER", code = true)
     public void defSlotCli(int x, int y){
         this.xPos = x;
         this.yPos = y;

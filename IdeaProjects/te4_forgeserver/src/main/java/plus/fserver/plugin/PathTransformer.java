@@ -4,6 +4,7 @@ import net.minecraft.launchwrapper.*;
 import net.minecraftforge.fml.relauncher.*;
 import org.objectweb.asm.*;
 import org.objectweb.asm.tree.*;
+import plus.fserver.ElcaCV;
 import plus.fserver.ElcaConfig;
 import java.util.*;
 
@@ -18,7 +19,7 @@ public class PathTransformer implements IClassTransformer {
     public PathTransformer(){}
 
 
-    public static byte[] transformOnlyInjects(final String name, final byte[] bytes){
+    public static byte[] transformFast(final String name, final byte[] bytes){
         final ClassNode classNode = new ClassNode();
         final ClassReader classReader = new ClassReader(bytes);
         classReader.accept(classNode, 0);
@@ -26,16 +27,36 @@ public class PathTransformer implements IClassTransformer {
         checkInjects(classNode.visibleAnnotations);
 
         InjectInfo[] field = injects.get(name);
+        boolean modified = false;
+
         if(field != null){
             for (InjectInfo cur:field){
                 injectField(classNode, cur);
+                modified = true;
             }
+        }
+
+        Iterator<MethodNode> methods = classNode.methods.iterator();
+        while (methods.hasNext()) {
+            final MethodNode method = methods.next();
+            int res = remVarOnly(method.visibleAnnotations, SIDE);
+            if (res > 0) {
+                if(res == 1){
+                    methods.remove();
+                } else {
+                    removeCode(method);
+                }
+                modified = true;
+            }
+        }
+
+        if(modified) {
+            final ClassWriter writer = new ClassWriter(1);
+            classNode.accept(writer);
+            return writer.toByteArray();
         } else {
             return bytes;
         }
-        final ClassWriter writer = new ClassWriter(1);
-        classNode.accept(writer);
-        return writer.toByteArray();
     }
 
 
@@ -47,7 +68,7 @@ public class PathTransformer implements IClassTransformer {
         final ClassReader classReader = new ClassReader(bytes);
         classReader.accept(classNode, 0);
 
-        if (this.remove(classNode.visibleAnnotations, SIDE)) {
+        if (remove(classNode.visibleAnnotations, SIDE) > 0) {
             throw new RuntimeException(String.format("Attempted to load class %s for invalid side %s", classNode.name, SIDE));
         }
         checkInjects(classNode.visibleAnnotations);
@@ -55,7 +76,7 @@ public class PathTransformer implements IClassTransformer {
         final Iterator<FieldNode> fields = classNode.fields.iterator();
         while (fields.hasNext()) {
             final FieldNode field = fields.next();
-            if (this.remove(field.visibleAnnotations, SIDE)) {
+            if (remove(field.visibleAnnotations, SIDE) > 0) {
                 fields.remove();
             }
         }
@@ -63,9 +84,14 @@ public class PathTransformer implements IClassTransformer {
         Iterator<MethodNode> methods = classNode.methods.iterator();
         while (methods.hasNext()) {
             final MethodNode method = methods.next();
-            if (this.remove(method.visibleAnnotations, SIDE)) {
-                methods.remove();
-                lambdaGatherer.accept(method);
+            int res = remove(method.visibleAnnotations, SIDE);
+            if (res > 0) {
+                if(res == 1){
+                    methods.remove();
+                    lambdaGatherer.accept(method);
+                } else {
+                    removeCode(method);
+                }
             }
         }
         for (ArrayList<Handle> handles = lambdaGatherer.dynamicLambdaHandles;
@@ -184,17 +210,17 @@ public class PathTransformer implements IClassTransformer {
     }
 
 
-    static boolean checkVarOnly(AnnotationNode ann){
+    static int checkVarOnly(AnnotationNode ann){
         if(ann.desc.equals(VAR_ONLY_DESC)){
             List<Object> values = ann.values;
             String var = null;
             Boolean defValue = null;
+            Boolean onlyCode = null;
             for (int x = 0; x < values.size() - 1; x += 2) {
                 final Object key = values.get(x);
                 final Object value = values.get(x + 1);
                 if(var == null && key.equals("var")){
-                    var = key.toString();
-                    if(defValue != null)break;
+                    var = value.toString();
                 }
                 if(defValue == null && key.equals("def")){
                     if(value instanceof Boolean){
@@ -202,20 +228,49 @@ public class PathTransformer implements IClassTransformer {
                     } else {
                         defValue = false;
                     }
-                    if(var != null)break;
+                }
+                if(onlyCode == null && key.equals("code")){
+                    if(value instanceof Boolean){
+                        onlyCode = (Boolean) value;
+                    } else {
+                        onlyCode = false;
+                    }
                 }
             }
             if(var != null){
                 if(defValue == null)defValue = false;
-                return ElcaConfig.getVar(var, defValue);
+                boolean result = ElcaConfig.getVar(var, defValue);
+                if(!result)return 0;
+                if(onlyCode != null && onlyCode)return 2;
+                return 1;
             }
         }
-        return false;
+        return 0;
     }
 
 
-    private boolean remove(final List<AnnotationNode> anns, final String side) {
-        if (anns == null) return false;
+    static void removeCode(MethodNode node){
+        int maxLocals = node.maxLocals;
+        node.instructions.clear();
+        node.visitInsn(Opcodes.RETURN);
+        node.visitMaxs(0, maxLocals);
+    }
+
+
+    private static int remVarOnly(final List<AnnotationNode> anns, final String side) {
+        if (anns == null) return 0;
+
+        for (final AnnotationNode ann : anns) {
+            if(ann.values == null)continue;
+            int res = checkVarOnly(ann);
+            if(res > 0)return res;
+        }
+        return 0;
+    }
+
+
+    private static int remove(final List<AnnotationNode> anns, final String side) {
+        if (anns == null) return 0;
 
         for (final AnnotationNode ann : anns) {
             List<Object> values;
@@ -225,17 +280,24 @@ public class PathTransformer implements IClassTransformer {
                     final Object key = values.get(x);
                     final Object value = values.get(x + 1);
                     if (key instanceof String && key.equals("value") && value instanceof String[] && !((String[])value)[1].equals(side)) {
-                        return true;
+                        return 1;
                     }
                 }
-            } else if(checkVarOnly(ann))return true;
+            } else {
+                int res = checkVarOnly(ann);
+                if(res > 0)return res;
+            }
         }
-        return false;
+        return 0;
     }
 
 
     static {
-        SIDE = FMLLaunchHandler.side().name();
+        if(ElcaCV.DEBUG_NO_SERVER){
+            SIDE = "CLIENT";
+        } else {
+            SIDE = FMLLaunchHandler.side().name();
+        }
     }
 
 

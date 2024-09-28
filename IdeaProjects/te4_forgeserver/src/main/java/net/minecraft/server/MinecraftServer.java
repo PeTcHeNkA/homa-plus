@@ -86,6 +86,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import plus.fserver.ElcaConfig;
 import plus.fserver.api.BiomeIndexes;
+import plus.fserver.api.ServerCommand;
 import plus.fserver.server.AsyWorldTickerV2;
 import plus.fserver.server.ElcaCommands;
 
@@ -190,7 +191,12 @@ public abstract class MinecraftServer implements ICommandSender, Runnable, IThre
 
 
     public ServerCommandManager createCommandManager() {
-        return new ServerCommandManager(this);
+        ServerCommandManager scm = new ServerCommandManager(this);
+
+        for(ServerCommand cmd: ServerCommand.commands){
+            scm.registerCommand(cmd);
+        }
+        return scm;
     }
 
 

@@ -48,6 +48,7 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraft.world.chunk.storage.IChunkLoader;
+import net.minecraft.world.gen.ChunkGeneratorSettings;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.gen.feature.WorldGeneratorBonusChest;
@@ -85,6 +86,7 @@ import plus.fserver.utls.math.MathUtls;
 import plus.fserver.world.CommonWorldEntitySpawner;
 import plus.fserver.world.NavigationCache;
 import plus.fserver.world.RedstoneEngine;
+import plus.fserver.world.generator.ChunkGenSettingsPlus;
 import plus.tson.utl.Te4HashMap;
 import plus.tson.utl.Te4HashSet;
 
@@ -1661,5 +1663,14 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
             helper.clear();
             return helper;
         }
+    }
+
+
+    private ChunkGenSettingsPlus genSettingsPlus;
+
+    public ChunkGenSettingsPlus getChunkGenSettings() {
+        if(genSettingsPlus == null) genSettingsPlus = new ChunkGenSettingsPlus(ChunkGeneratorSettings.Factory
+                .jsonToFactory(getWorldInfo().getGeneratorOptions()).build());
+        return genSettingsPlus;
     }
 }

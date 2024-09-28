@@ -14,4 +14,8 @@ public @interface VarOnly {
 
     //default value. If result == true, marked element removed
     boolean def() default false;
+
+
+    //ir result == true, remove only code
+    boolean code() default false;
 }

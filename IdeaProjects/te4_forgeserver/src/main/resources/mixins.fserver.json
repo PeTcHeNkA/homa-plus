@@ -9,15 +9,7 @@
   "mixins": [
     "exp.RegionFilePatch",
     "expmem.ItemStackPatch",
-    "light.MixinChunk",
     "pf.EntityXPOrbPatch",
-    "pf.GameDataPatch",
-    "stabile.ForgeRegistryPatch",
-    "stabile.ServerCommandPatch",
-    "stabile.WorldInfoPatch",
-    "stabile.WorldTypePatch"
-  ],
-  "server": [
-    "server.SlotCli"
+    "pf.GameDataPatch"
   ]
 }

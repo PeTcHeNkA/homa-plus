@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import javax.annotation.Nullable;
-
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -46,6 +45,7 @@ import plus.fserver.utls.math.MathUtls;
 import plus.fserver.world.light.LightingEngine;
 import plus.fserver.world.light.LightingHooks;
 import plus.fserver.world.light.WorldChunkSlice;
+import plus.fserver.world.light.api.IChunkLighting;
 import plus.fserver.world.light.api.IChunkLightingData;
 import plus.fserver.world.light.api.ILightingEngine;
 import plus.fserver.world.light.api.ILightingEngineProvider;
@@ -53,7 +53,7 @@ import plus.tson.utl.Te4HashMap;
 import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
-public class Chunk implements net.minecraftforge.common.capabilities.ICapabilityProvider, ILightingEngineProvider{
+public class Chunk implements net.minecraftforge.common.capabilities.ICapabilityProvider, ILightingEngineProvider, IChunkLighting, IChunkLightingData {
     @Keep
     public static final int STORAGES_COUNT = 16;
     @Keep
@@ -479,82 +479,26 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
     }
 
 
-    //todo overwrited
+
     private void relightBlock(final int x, final int y, final int z) {
-        int i = this.heightMap[z << 4 | x] & 255;
-        int j = i;
+        byte[] heightMap;
+        int j;
+        final int i = j = ((heightMap = this.heightMap)[z << 4 | x] & 0xFF);
         if (y > i) {
             j = y;
         }
-
         while (j > 0 && this.getBlockLightOpacity(x, j - 1, z) == 0) {
             --j;
         }
-
         if (j != i) {
-            this.world.markBlocksDirtyVertical(x + this.x * 16, z + this.z * 16, j, i);
-            this.heightMap[z << 4 | x] = (byte) j;
-            int k = this.x * 16 + x;
-            int l = this.z * 16 + z;
-
+            heightMap[z << 4 | x] = (byte) j;
             if (this.world.provider.hasSkyLight()) {
-                if (j < i) {
-                    for (int j1 = j; j1 < i; ++j1) {
-                        ExtendedBlockStorage storage = this.storageArrays[j1 >> 4];
-
-                        if (storage != NULL_BLOCK_STORAGE) {
-                            storage.setSkyLight(x, j1 & 15, z, 15);
-                            this.world.notifyLightSet(new BlockPos((this.x << 4) + x, j1, (this.z << 4) + z));
-                        }
-                    }
-                } else {
-                    for (int i1 = i; i1 < j; ++i1) {
-                        ExtendedBlockStorage storage = this.storageArrays[i1 >> 4];
-
-                        if (storage != null) {
-                            storage.setSkyLight(x, i1 & 15, z, 0);
-                            this.world.notifyLightSet(new BlockPos((this.x << 4) + x, i1, (this.z << 4) + z));
-                        }
-                    }
-                }
-
-                int k1 = 15;
-
-                while (j > 0 && k1 > 0) {
-                    --j;
-                    int i2 = this.getBlockLightOpacity(x, j, z);
-                    if (i2 == 0) {
-                        i2 = 1;
-                    }
-                    k1 -= i2;
-                    if (k1 < 0) {
-                        k1 = 0;
-                    }
-                    ExtendedBlockStorage storage = this.storageArrays[j >> 4];
-                    if (storage != null)
-                        storage.setSkyLight(x, j & 15, z, k1);
-                }
+                LightingHooks.relightSkylightColumn(this.world, (Chunk)(Object)this, x, z, i, j);
             }
-
-            int l1 = this.heightMap[z << 4 | x] & 255;
-            int j2 = i;
-            int k2 = l1;
-
-            if (l1 < i) {
-                j2 = l1;
-                k2 = i;
-            }
-
+            final int l1 = heightMap[z << 4 | x];
             if (l1 < this.heightMapMinimum) {
                 this.heightMapMinimum = l1;
             }
-            if (this.world.provider.hasSkyLight()) {
-                for (EnumFacing enumfacing : HORIZONTAL) {
-                    this.updateSkylightNeighborHeight(k + enumfacing.getXOffset(), l + enumfacing.getZOffset(), j2, k2);
-                }
-                this.updateSkylightNeighborHeight(k, l, j2, k2);
-            }
-            this.dirty = true;
         }
     }
 
@@ -716,19 +660,10 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
 
     @Keep
-    public int getLightFor(EnumSkyBlock type, BlockPos pos) {
-        int i = pos.getX() & 15;
-        int j = pos.getY();
-        int k = pos.getZ() & 15;
-        ExtendedBlockStorage extendedblockstorage = this.storageArrays[j >> 4];
+    public int getLightFor(final EnumSkyBlock type, final BlockPos pos) {
+        this.getLightingEngine().processLightUpdatesForType(type);
 
-        if (extendedblockstorage == NULL_BLOCK_STORAGE) {
-            return this.canSeeSky(pos) ? type.defaultLightValue : 0;
-        } else if (type == EnumSkyBlock.SKY) {
-            return !this.world.provider.hasSkyLight() ? 0 : extendedblockstorage.getSkyLight(i, j & 15, k);
-        } else {
-            return type == EnumSkyBlock.BLOCK ? extendedblockstorage.getBlockLight(i, j & 15, k) : type.defaultLightValue;
-        }
+        return this.getCachedLightFor(type, pos);
     }
 
 
@@ -740,7 +675,9 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
         if (storage == NULL_BLOCK_STORAGE) {
             storage = new ExtendedBlockStorage(ay >> 4 << 4, this.world.provider.hasSkyLight());
             this.storageArrays[ay >> 4] = storage;
-            this.generateSkylightMap();
+
+            LightingHooks.initSkylightForSection(this.world, this, this.storageArrays[pos.getY() >> 4]);
+            //this.generateSkylightMap();
         }
 
         this.dirty = true;
@@ -756,18 +693,38 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
 
     public int getLightSubtracted(BlockPos pos, int amount) {
+        this.getLightingEngine().processLightUpdates();
+
         int i = pos.getX() & 15, j = pos.getY(), k = pos.getZ() & 15;
         ExtendedBlockStorage storage = this.storageArrays[j >> 4];
 
         if (storage == null) {
             return this.world.provider.hasSkyLight() && amount < EnumSkyBlock.SKY.defaultLightValue ? EnumSkyBlock.SKY.defaultLightValue - amount : 0;
         } else {
-            int l = !this.world.provider.hasSkyLight() ? 0 : storage.getSkyLight(i, j & 15, k);
-            l = l - amount;
+            int l = !this.world.provider.hasSkyLight() ? 0 : storage.getSkyLight(i, j & 15, k) - amount;
             int i1 = storage.getBlockLight(i, j & 15, k);
 
             if (i1 > l) l = i1;
             return l;
+        }
+    }
+
+
+    @Override
+    public int getCachedLightFor(final EnumSkyBlock type, final BlockPos pos) {
+        final int i = pos.getX() & 0xF, j = pos.getY(), k = pos.getZ() & 0xF;
+        final ExtendedBlockStorage extendedblockstorage = this.storageArrays[j >> 4];
+        if (extendedblockstorage == null) {
+            if (this.canSeeSky(pos)) return type.defaultLightValue;
+            return 0;
+        } else if (type == EnumSkyBlock.SKY) {
+            if (!this.world.provider.hasSkyLight()) return 0;
+            return extendedblockstorage.getSkyLight(i, j & 0xF, k);
+        } else {
+            if (type == EnumSkyBlock.BLOCK) {
+                return extendedblockstorage.getBlockLight(i, j & 0xF, k);
+            }
+            return type.defaultLightValue;
         }
     }
 
@@ -911,11 +868,12 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
         world.addTileEntities(this.tileEntities.values());
 
         for (ClassInheritanceMultiMap<Entity> entities : this.entityLists) {
-            if (entities != null) {
-                world.loadEntities(ImmutableList.copyOf(entities));
-            }
+            if (entities != null) world.loadEntities(ImmutableList.copyOf(entities));
         }
+
         MinecraftForge.EVENT_BUS.postF(new ChunkEvent.Load(this));
+
+        LightingHooks.scheduleRelightChecksForChunkBoundaries(this.world, this);
     }
 
 
@@ -1645,6 +1603,38 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
         }
         return this.precipitationHeightMap[k];
     }
+
+
+    private short[] neighborLightChecks;
+    private boolean isLightInitialized;
+
+
+    @Override
+    public short[] getNeighborLightChecks() {
+        return this.neighborLightChecks;
+    }
+
+
+    @Override
+    public void setNeighborLightChecks(final short[] data) {
+        this.neighborLightChecks = data;
+    }
+
+
+    @Override
+    public boolean isLightInitialized() {
+        return this.isLightInitialized;
+    }
+
+
+    @Override
+    public void setLightInitialized(final boolean lightInitialized) {
+        this.isLightInitialized = lightInitialized;
+    }
+
+
+    @Override
+    public void setSkylightUpdatedPublic() {}
 
 
     @Override

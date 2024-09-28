@@ -49,9 +49,12 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements R
 
     public PlayerChunkMapEntry(PlayerChunkMap mapIn, int chunkX, int chunkZ) {
         this.playerChunkMap = mapIn;
-        this.posX = chunkX;this.posZ = chunkZ;
-        if(ElcaCV.DEBUG_NO_SERVER)return;
-        mapIn.getWorldServer().getChunkProvider().loadChunk(chunkX, chunkZ, this);
+        this.posX = chunkX;
+        this.posZ = chunkZ;
+
+        if(!ElcaCV.DEBUG_NO_SERVER){
+            mapIn.getWorldServer().getChunkProvider().loadChunk(chunkX, chunkZ, this);
+        }
     }
 
 
