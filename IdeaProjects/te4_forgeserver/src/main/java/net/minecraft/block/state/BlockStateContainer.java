@@ -473,8 +473,8 @@ public class BlockStateContainer {
 
 
         @Override
-        public boolean hasCollisionRayTrace(World worldIn, BlockPos pos, Vec3d start, Vec3d end) {
-            return this.block.hasCollisionRayTrace(this, worldIn, pos, start, end);
+        public boolean hasCollisionRayTrace(IBlockAccess access, BlockPos pos, Vec3d start, Vec3d end) {
+            return this.block.hasCollisionRayTrace(this, access, pos, start, end);
         }
 
 

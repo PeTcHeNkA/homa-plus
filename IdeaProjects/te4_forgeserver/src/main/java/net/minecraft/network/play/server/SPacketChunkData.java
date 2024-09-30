@@ -17,30 +17,126 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import org.jetbrains.annotations.Nullable;
+import plus.fserver.ElcaConfig;
 import plus.fserver.server.network.NetUtils;
 import plus.fserver.server.network.packet.SNodePacketPlayBase;
+import static io.netty.util.internal.shaded.org.jctools.util.UnsafeAccess.UNSAFE;
 
 
 public class SPacketChunkData extends SNodePacketPlayBase {
+    private static final long tempShift;
+
+    private final static Node[] temp;
+    private static int cursor = 0;
+
+    private static class Node{
+        volatile byte[] temp;
+        @Nullable
+        byte[] tryGet(int minSize){
+            byte[] temp = this.temp;
+            if(temp == null || temp.length < minSize)return null;
+            if(UNSAFE.compareAndSwapObject(this, tempShift, temp, null)){
+                return temp;
+            }
+            return null;
+        }
+        boolean tryFree(byte[] src){
+            byte[] temp = this.temp;
+            if(temp == null || temp.length < src.length) {
+                return UNSAFE.compareAndSwapObject(this, tempShift, temp, src);
+            }
+            return false;
+        }
+    }
+
     private int chunkX;
     private int chunkZ;
     private int availableSections;
     private byte[] buffer;
+    private int size;
     private List<NBTTagCompound> tileEntityTags;
     private boolean fullChunk;
+
+    static {
+        temp = new Node[ElcaConfig.CACHE_CHUNK_DATA];
+        for (int i = 0; i < temp.length; i++){
+            temp[i] = new Node();
+        }
+        try {
+            tempShift = UNSAFE.objectFieldOffset(SPacketChunkData.Node.class.getDeclaredField("temp"));
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    private static byte[] alloc(int minSize) {
+        Node[] nodes = temp;
+        for (int i = cursor, s = nodes.length; i < s; i++){
+            Node node = nodes[i];
+            byte[] result;
+            if((result = node.tryGet(minSize)) != null){
+                cursor = i;
+                return result;
+            }
+        }
+        for (int i = 0, s = cursor; i < s; i++){
+            Node node = nodes[i];
+            byte[] result;
+            if((result = node.tryGet(minSize)) != null){
+                cursor = i;
+                return result;
+            }
+        }
+        return new byte[minSize];
+    }
+
+
+    private static void free(byte[] src){
+        Node[] nodes = temp;
+        for (int i = cursor, s = nodes.length; i < s; i++) {
+            Node node = nodes[i];
+            if(node.tryFree(src)){
+                cursor = i;
+                return;
+            }
+        }
+        for (int i = 0, s = cursor; i < s; i++) {
+            Node node = nodes[i];
+            if(node.tryFree(src)){
+                cursor = i;
+                return;
+            }
+        }
+    }
+
 
     public SPacketChunkData() {}
 
 
     public SPacketChunkData(Chunk chunk, int mask) {
+        this(chunk, mask, false);
+    }
+
+
+    public SPacketChunkData(Chunk chunk, int mask, boolean pooled) {
         this.chunkX = chunk.x;
         this.chunkZ = chunk.z;
         boolean hasSkyLight = chunk.getWorld().provider.hasSkyLight();
 
-        this.availableSections = extractChunkData(
-            new FastByteBuf(this.buffer = new byte[
-                calculateChunkSize(chunk, hasSkyLight, mask, fullChunk = mask == 65535)
-            ]),
+        int size = calculateChunkSize(chunk, hasSkyLight, mask, fullChunk = mask == 65535);
+
+        byte[] bytes;
+        if(pooled){
+            this.size = size;
+            bytes = alloc(size);
+        } else {
+            bytes = new byte[size];
+            this.size = -1;
+        }
+
+        this.availableSections = extractChunkData(new FastByteBuf(buffer = bytes),
             chunk, hasSkyLight, mask, fullChunk
         );
 
@@ -96,8 +192,18 @@ public class SPacketChunkData extends SNodePacketPlayBase {
         buf.writeInt(this.chunkZ);
         buf.writeBoolean(this.fullChunk);
         buf.writeVarInt(this.availableSections);
-        buf.writeVarInt(this.buffer.length);
-        buf.writeBytes(this.buffer);
+
+        byte[] bytes = this.buffer;
+        int size;
+        if((size = this.size) == -1){
+            buf.writeVarInt(bytes.length);
+            buf.writeBytes(bytes,0, bytes.length);
+        } else {
+            buf.writeVarInt(size);
+            buf.writeBytes(bytes,0, size);
+            free(bytes);
+        }
+
         buf.writeVarInt(this.tileEntityTags.size());
 
         Iterator iter = this.tileEntityTags.iterator();
@@ -115,10 +221,21 @@ public class SPacketChunkData extends SNodePacketPlayBase {
 
         buf.writeInt(this.chunkX);
         buf.writeInt(this.chunkZ);
+
         buf.writeBoolean(this.fullChunk);
         NetUtils.writeVarInt(buf, this.availableSections);
-        NetUtils.writeVarInt(buf, this.buffer.length);
-        buf.writeBytes(this.buffer);
+
+        byte[] bytes = this.buffer;
+        int size;
+        if((size = this.size) == -1){
+            NetUtils.writeVarInt(buf, bytes.length);
+            buf.writeBytes(bytes,0, bytes.length);
+        } else {
+            NetUtils.writeVarInt(buf, size);
+            buf.writeBytes(bytes,0, size);
+            free(bytes);
+        }
+
         NetUtils.writeVarInt(buf, this.tileEntityTags.size());
 
         Iterator iter = this.tileEntityTags.iterator();
@@ -133,6 +250,9 @@ public class SPacketChunkData extends SNodePacketPlayBase {
     @Override
     public void processPacket(INetHandlerPlayClient pCli) {
         pCli.handleChunkData(this);
+        if(size == -1)return;
+        free(buffer);
+        buffer = null;
     }
 
 
@@ -147,51 +267,6 @@ public class SPacketChunkData extends SNodePacketPlayBase {
         buf.writerIndex(0);
         return buf;
     }
-//
-//
-//    public int extractChunkData(PacketBuffer buf, Chunk chunk, boolean hasSkyLight, int mask) {
-//        int resultMask = 0;
-//        ExtendedBlockStorage[] arrays = chunk.getBlockStorageArray();
-//
-//        for(int index = 0, len = arrays.length; index < len; ++index) {
-//            ExtendedBlockStorage storage = arrays[index];
-//            if (storage != Chunk.NULL_BLOCK_STORAGE && (!this.isFullChunk() || !storage.isEmpty()) && (mask & 1 << index) != 0) {
-//                resultMask |= 1 << index;
-//                storage.write(buf);
-//                buf.writeBytes(storage.getBlockLight().getData());
-//                if (hasSkyLight) {
-//                    buf.writeBytes(storage.getSkyLight().getData());
-//                }
-//            }
-//        }
-//
-//        if (this.isFullChunk()) {
-//            buf.writeBytes(chunk.getBiomeArray());
-//        }
-//        return resultMask;
-//    }
-//
-//
-//    protected int calculateChunkSize(Chunk chunk, boolean hasSkyLight, int mask) {
-//        int size = 0;
-//        ExtendedBlockStorage[] arrays = chunk.getBlockStorageArray();
-//
-//        for(int index = 0, len = arrays.length; index < len; ++index) {
-//            ExtendedBlockStorage array = arrays[index];
-//            if (array != Chunk.NULL_BLOCK_STORAGE && (!this.isFullChunk() || !array.isEmpty()) && (mask & 1 << index) != 0) {
-//                size += array.getSerializedSize();
-//                size += 2048;
-//                if (hasSkyLight) {
-//                    size += 2048;
-//                }
-//            }
-//        }
-//
-//        if (this.isFullChunk()) {
-//            size += chunk.getBiomeArray().length;
-//        }
-//        return size;
-//    }
 
 
     private static int extractChunkData(FastByteBuf buf, Chunk chunk, boolean hasSkyLight, int mask, boolean fullChunk) {

@@ -126,6 +126,8 @@ public class CommonWorldEntitySpawner extends WorldEntitySpawner {
 
                         inner:
                         for (Chunk chunk : shuffled) {
+                            //todo remove this and fix
+                            if(chunk == null)continue;
                             spawnPos.setRandomChunkPos(chunk);
                             selector.setChunk(chunk);
                             int sX, sY, sZ;

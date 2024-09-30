@@ -109,6 +109,7 @@ public class ChunkProviderServer extends Long2ObjectOpenHashMap<Chunk> implement
                 if (chunk == null) chunk = this.loadChunkFromFile(x, z);
 
                 if (chunk != null) {
+                    //todo check async?
                     super.put(chunkHash, chunk);
                     chunk.onLoad();
                     chunk.populate(this, this.chunkGenerator);
@@ -251,6 +252,7 @@ public class ChunkProviderServer extends Long2ObjectOpenHashMap<Chunk> implement
 
     public void onComplete(TChunkTask task){
         Chunk chunk = task.getChunk();
+        //todo check async
         super.put(ChunkPos.asLong(chunk.x, chunk.z), chunk);
         chunk.onLoad();
         if(this.task != null) {

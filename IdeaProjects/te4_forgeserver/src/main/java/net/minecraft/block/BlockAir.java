@@ -46,7 +46,7 @@ public class BlockAir extends Block {
 
 
     @Deprecated
-    public boolean hasCollisionRayTrace(IBlockState blockState, World worldIn, BlockPos pos, Vec3d start, Vec3d end) {
+    public boolean hasCollisionRayTrace(IBlockState blockState, IBlockAccess access, BlockPos pos, Vec3d start, Vec3d end) {
         return false;
     }
 

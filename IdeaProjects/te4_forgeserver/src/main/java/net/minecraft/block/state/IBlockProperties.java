@@ -103,7 +103,7 @@ public interface IBlockProperties {
 
     RayTraceResult collisionRayTrace(World worldIn, BlockPos pos, Vec3d start, Vec3d end);
 
-    boolean hasCollisionRayTrace(World worldIn, BlockPos pos, Vec3d start, Vec3d end);
+    boolean hasCollisionRayTrace(IBlockAccess access, BlockPos pos, Vec3d start, Vec3d end);
 
     @Deprecated // Forge: Use isSideSolid(IBlockAccess, BlockPos, EnumFacing.UP) instead
     boolean isTopSolid();

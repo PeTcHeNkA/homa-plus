@@ -185,18 +185,19 @@ public abstract class MinecraftServer implements ICommandSender, Runnable, IThre
     }
 
 
-    static {
-        ElcaCommands.init();
+    public ServerCommandManager createCommandManager() {
+        ServerCommandManager scm = new ServerCommandManager(this);
+        onCreatedCmdManager(scm);
+        return scm;
     }
 
 
-    public ServerCommandManager createCommandManager() {
-        ServerCommandManager scm = new ServerCommandManager(this);
+    protected static void onCreatedCmdManager(ServerCommandManager scm){
+        scm.registerCommand(new ElcaCommands());
 
         for(ServerCommand cmd: ServerCommand.commands){
             scm.registerCommand(cmd);
         }
-        return scm;
     }
 
 

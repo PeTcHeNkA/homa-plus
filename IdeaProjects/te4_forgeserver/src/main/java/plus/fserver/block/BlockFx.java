@@ -34,8 +34,8 @@ public class BlockFx extends Block {
 
 
     @Deprecated
-    public boolean hasCollisionRayTrace(IBlockState blockState, World worldIn, BlockPos pos, Vec3d start, Vec3d end) {
-        return blockState.getBoundingBox(worldIn, pos).checkInterceptRT(
+    public boolean hasCollisionRayTrace(IBlockState blockState, IBlockAccess access, BlockPos pos, Vec3d start, Vec3d end) {
+        return blockState.getBoundingBox(access, pos).checkInterceptRT(
                 start.subtract(pos.getX(), pos.getY(), pos.getZ()),
                 end  .subtract(pos.getX(), pos.getY(), pos.getZ())
         );

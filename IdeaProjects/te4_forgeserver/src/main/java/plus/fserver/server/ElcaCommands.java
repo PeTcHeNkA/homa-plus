@@ -63,14 +63,8 @@ public class ElcaCommands extends ServerCommand {
         new String[]{"version", "info", "tps", "mobs", "spawn", "hotpoints", "send"}
     );
     private final DecimalFormat TIME_FORMATTER = new DecimalFormat("########0.00");
-    private static final ElcaCommands cmds = new ElcaCommands();
-    public static void init(){}
 
-    static {
-        cmds.register();
-    }
-
-    private ElcaCommands() {
+    public ElcaCommands() {
         super("elca", "/elca <args>", 4);
     }
 

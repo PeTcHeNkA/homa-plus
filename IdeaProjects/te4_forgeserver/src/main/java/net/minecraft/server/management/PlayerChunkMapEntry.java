@@ -141,9 +141,10 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements R
                 this.sentToPlayers = true;
                 return true;
             } else try {
-                SPacketChunkData packet = new SPacketChunkData(this.chunk, 65535);
                 int size;
                 if((size = this.size) > 0){
+                    SPacketChunkData packet = new SPacketChunkData(this.chunk, 65535, size==1);
+
                     this.playerChunkMap.getWorldServer().getEntityTracker().sendLeashedEntitiesInChunk(this, this.chunk);
 
                     for (int i = 0; i < size; i++) {
@@ -166,7 +167,7 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements R
 
     public void sendToPlayer(EntityPlayerMP player) {
         if (this.sentToPlayers) {
-            player.connection.netManager.sendPacketE(new SPacketChunkData(this.chunk, 65535));
+            player.connection.netManager.sendPacketE(new SPacketChunkData(this.chunk, 65535, true));
             this.playerChunkMap.getWorldServer().getEntityTracker().sendLeashedEntitiesInChunk(player, this.chunk);
         }
     }
@@ -232,7 +233,7 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements R
                     }
                 }
                 else if (this.changes >= net.minecraftforge.common.ForgeModContainer.clumpingThreshold) {
-                    this.sendPacket(new SPacketChunkData(this.chunk, this.changedSectionFilter));
+                    this.sendPacket(new SPacketChunkData(this.chunk, this.changedSectionFilter, true));
                     //TODO: FDix Mojang's fuckup to modded by combining all TE data into the chunk data packet... seriously... packet size explosion!
                 } else {
                     this.sendPacket(new SPacketMultiBlockChange(this.changes, this.changedBlocks, this.chunk));

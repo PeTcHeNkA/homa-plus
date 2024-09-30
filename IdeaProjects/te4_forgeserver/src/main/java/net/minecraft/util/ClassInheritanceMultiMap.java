@@ -2,6 +2,7 @@ package net.minecraft.util;
 
 import com.google.common.collect.Iterators;
 import io.netty.util.collection.IntObjectHashMap;
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.minecraft.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import plus.fserver.utls.collections.*;
@@ -14,7 +15,7 @@ public class ClassInheritanceMultiMap<T extends Entity> extends SubList<T> {
     private static final EmptySelfIter EMPTY_BY_CLASS = new EmptySelfIter();
     private static final Set<Class<?>> ALL_KNOWN = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private final IntObjectHashMap<SubList<T>> map = new IntObjectHashMap<>(4);
-    private final IdentityTe4HashSet<Class<?>> knownKeys = new IdentityTe4HashSet<>(4);
+    private final ReferenceOpenHashSet<Class<?>> knownKeys = new ReferenceOpenHashSet<>(4);
     private final Class<T> baseClass;
 
     public ClassInheritanceMultiMap(Class<T> baseClassIn) {

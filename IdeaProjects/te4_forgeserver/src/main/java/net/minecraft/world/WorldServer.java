@@ -505,7 +505,11 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
                 }
             }
         }
-        collideTask.complete();
+        try {
+            collideTask.complete();
+        } catch (Exception e){
+            server.ticker().onError(this, e);
+        }
     }
 
 

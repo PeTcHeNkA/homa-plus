@@ -65,6 +65,7 @@ public class ElcaConfig {
     public static int MAX_CONNECTION_WARN        = 10;
     public static int INIT_PALETTE_LINEAR_BITS   = 4; //should also set on client
     public static int READ_TIMEOUT_TIMER         = 17;
+    public static int CACHE_CHUNK_DATA           = 24;
 
     //public static boolean FAST_LIGHT                 = true;
     public static boolean SLOW_SWIM_AI                = true;
@@ -187,6 +188,7 @@ public class ElcaConfig {
         MAX_CONNECTIONS_TIME       = calc(map, "max-connections-time"        , MAX_CONNECTIONS_TIME       );
 
         INIT_PALETTE_LINEAR_BITS   = calc(map, "init-palette-linear-bits"    , INIT_PALETTE_LINEAR_BITS   );
+        CACHE_CHUNK_DATA           = calc(map, "cache-chunk-data"            , CACHE_CHUNK_DATA           );
 
         if(INIT_PALETTE_LINEAR_BITS > 4 || INIT_PALETTE_LINEAR_BITS < 2){
             throw new Error("Linear palette bits should be in 2, 3 or 4");

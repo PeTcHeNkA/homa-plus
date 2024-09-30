@@ -625,8 +625,8 @@ public class Block extends net.minecraftforge.registries.IForgeRegistryEntry.Imp
 
 
     @Deprecated
-    public boolean hasCollisionRayTrace(IBlockState blockState, World worldIn, BlockPos pos, Vec3d start, Vec3d end) {
-        return this.rayTrace(pos, start, end, blockState.getBoundingBox(worldIn, pos)) != null;
+    public boolean hasCollisionRayTrace(IBlockState blockState, IBlockAccess access, BlockPos pos, Vec3d start, Vec3d end) {
+        return this.rayTrace(pos, start, end, blockState.getBoundingBox(access, pos)) != null;
     }
 
 

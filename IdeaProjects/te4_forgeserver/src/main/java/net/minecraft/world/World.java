@@ -6,6 +6,8 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import java.util.*;
 import javax.annotation.Nullable;
+
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.minecraft.advancements.AdvancementManager;
 import net.minecraft.advancements.FunctionManager;
 import net.minecraft.block.Block;
@@ -1084,7 +1086,14 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     private final BlockPos.MutableBlockPos checkSeePos = new BlockPos.MutableBlockPos();
+
+
     public boolean canSee(Vec3d vec31, Vec3d vec32, boolean stopOnLiquid) {
+        return canSee(isRemote?this:localSelector, vec31, vec32, stopOnLiquid);
+    }
+
+
+    public boolean canSee(IBlockEAccess selector, Vec3d vec31, Vec3d vec32, boolean stopOnLiquid) {
         if (!Double.isNaN(vec31.x) && !Double.isNaN(vec31.y) && !Double.isNaN(vec31.z)) {
             if (!Double.isNaN(vec32.x) && !Double.isNaN(vec32.y) && !Double.isNaN(vec32.z)) {
                 int sX   = MathHelper.floor(vec32.x);
@@ -1098,7 +1107,6 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
                 IBlockState state = chunk.getBlockState(xPos, yPos, zPos);
 
                 EnumFacing enumfacing;
-                IBlockEAccess selector = isRemote?this:localSelector;
 
                 int k1 = 200;
 
@@ -1828,7 +1836,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
         //tile entities
         if (!this.tileEntitiesToBeRemoved.isEmpty()) {
-            IdentityTe4HashSet<TileEntity> remove = new IdentityTe4HashSet<>();
+            ReferenceOpenHashSet<TileEntity> remove = new ReferenceOpenHashSet<>();
             for (TileEntity tile : tileEntitiesToBeRemoved) {
                 if(remove.add(tile)) tile.onChunkUnload();
             }
@@ -2106,26 +2114,31 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
-    public float getBlockDensity(IBlockEAccess selector, Vec3d vec, AxisAlignedBB bb) {
-        double d0 = 1.0D / ((bb.maxX - bb.minX) * 2.0D + 1.0D);
-        double d1 = 1.0D / ((bb.maxY - bb.minY) * 2.0D + 1.0D);
-        double d2 = 1.0D / ((bb.maxZ - bb.minZ) * 2.0D + 1.0D);
-        double d3 = (1.0D - Math.floor(1.0D / d0) * d0) / 2.0D;
-        double d4 = (1.0D - Math.floor(1.0D / d2) * d2) / 2.0D;
+    public float getBlockDensity(IBlockEAccess selector, Vec3d vec,
+                                 AxisAlignedBB bb) {
+        final double bbMaxX = bb.maxX, bbMaxY = bb.maxY, bbMaxZ = bb.maxZ,
+                bbMinX = bb.minX, bbMinY = bb.minY, bbMinZ = bb.minZ;
+
+        double d0 = 1.0D / ((bbMaxX - bbMinX) * 2.0D + 1.0D);
+        double d1 = 1.0D / ((bbMaxY - bbMinY) * 2.0D + 1.0D);
+        double d2 = 1.0D / ((bbMaxZ - bbMinZ) * 2.0D + 1.0D);
 
         if (d0 >= 0.0D && d1 >= 0.0D && d2 >= 0.0D) {
-            int j2 = 0;
-            int k2 = 0;
+            double d3 = (1.0D - Math.floor(1.0D / d0) * d0) * 0.5D;
+            double d4 = (1.0D - Math.floor(1.0D / d2) * d2) * 0.5D;
+
+            int j2 = 0, k2 = 0;
+
+            final BlockPos.MutableBlockPos blockPos = checkSeePos;
 
             for (float f = 0.0F; f <= 1.0F; f = (float)((double)f + d0)) {
                 for (float f1 = 0.0F; f1 <= 1.0F; f1 = (float)((double)f1 + d1)) {
                     for (float f2 = 0.0F; f2 <= 1.0F; f2 = (float)((double)f2 + d2)) {
-                        double d5 = bb.minX + (bb.maxX - bb.minX) * (double)f;
-                        double d6 = bb.minY + (bb.maxY - bb.minY) * (double)f1;
-                        double d7 = bb.minZ + (bb.maxZ - bb.minZ) * (double)f2;
+                        double d5 = bbMinX + (bbMaxX - bbMinX) * (double)f;
+                        double d6 = bbMinY + (bbMaxY - bbMinY) * (double)f1;
+                        double d7 = bbMinZ + (bbMaxZ - bbMinZ) * (double)f2;
 
-                        if (this.rayTraceBlocks(selector, new Vec3d(d5 + d3, d6, d7 + d4), vec,
-                                false, false, false) == null) {
+                        if (rtxForExplosion(blockPos, selector, new Vec3d(d5 + d3, d6, d7 + d4), vec)) {
                             ++j2;
                         }
                         ++k2;
@@ -2135,6 +2148,113 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             return (float)j2 / (float)k2;
         } else {
             return 0.0F;
+        }
+    }
+
+
+    //return true if null
+    private static boolean rtxForExplosion(BlockPos.MutableBlockPos blockPos, IBlockEAccess selector, Vec3d st, Vec3d end) {
+        if (!Double.isNaN(st.x) && !Double.isNaN(st.y) && !Double.isNaN(st.z)) {
+            if (!Double.isNaN(end.x) && !Double.isNaN(end.y) && !Double.isNaN(end.z)) {
+                int xPos, yPos, zPos;
+
+                blockPos.setPosB(
+                        xPos = MathHelper.floor(st.x),
+                        yPos = MathHelper.floor(st.y),
+                        zPos = MathHelper.floor(st.z)
+                );
+
+                IBlockState state;
+
+                if ((state = selector.getBlockState(blockPos))
+                        .hasCollisionRayTrace(selector, blockPos, st, end)) {
+                    return false;
+                }
+
+                double num1 = 0, num2 = 0, num3 = 0, num4, num5, num6, num7, num8, num9;
+                double vecX = st.x, vecY = st.y, vecZ = st.z;
+
+                final int sX = MathHelper.floor(end.x);
+                final int sY = MathHelper.floor(end.y);
+                final int sZ = MathHelper.floor(end.z);
+
+                int k1 = 200;
+                while (k1-- >= 0) {
+                    if (
+                            Double.isNaN(vecX) || Double.isNaN(vecY) || Double.isNaN(vecZ)
+                            || (xPos == sX && yPos == sY && zPos == sZ)
+                    ) return true;
+
+                    num7 = end.x - vecX;
+                    num8 = end.y - vecY;
+                    num9 = end.z - vecZ;
+
+                    if (sX > xPos) {
+                        num1 = xPos + 1d;
+                        num4 = (num1 - vecX) / num7;
+                    } else if (sX < xPos) {
+                        num1 = xPos;
+                        num4 = (num1 - vecX) / num7;
+                    } else {
+                        num4 = 999d;
+                    }
+
+                    if (sY > yPos) {
+                        num2 = yPos + 1;
+                        num5 = (num2 - vecY) / num8;
+                    } else if (sY < yPos) {
+                        num2 = yPos;
+                        num5 = (num2 - vecY) / num8;
+                    } else {
+                        num5 = 999d;
+                    }
+
+                    if (sZ > zPos) {
+                        num3 = zPos + 1;
+                        num6 = (num3 - vecZ) / num9;
+                    } else if (sZ < zPos) {
+                        num3 = zPos;
+                        num6 = (num3 - vecZ) / num9;
+                    } else {
+                        num6 = 999d;
+                    }
+
+                    if (num4 == -0.0D) num4 = -1.0E-4D;
+                    if (num5 == -0.0D) num5 = -1.0E-4D;
+                    if (num6 == -0.0D) num6 = -1.0E-4D;
+
+                    EnumFacing enumfacing;
+
+                    if (num4 < num5 && num4 < num6) {
+                        enumfacing = sX > xPos ? EnumFacing.WEST : EnumFacing.EAST;
+                        vecX = num1; vecY = vecY + num8 * num4; vecZ = vecZ + num9 * num4;
+                    } else if (num5 < num6) {
+                        enumfacing = sY > yPos ? EnumFacing.DOWN : EnumFacing.UP;
+                        vecX = vecX + num7 * num5; vecY = num2; vecZ = vecZ + num9 * num5;
+                    } else {
+                        enumfacing = sZ > zPos ? EnumFacing.NORTH : EnumFacing.SOUTH;
+                        vecX = vecX + num7 * num6; vecY = vecY + num8 * num6; vecZ = num3;
+                    }
+
+                    state = selector.getBlockState(
+                            xPos = MathHelper.floor(vecX) - (enumfacing == EnumFacing.EAST ? 1 : 0),
+                            yPos = MathHelper.floor(vecY) - (enumfacing == EnumFacing.UP ? 1 : 0),
+                            zPos = MathHelper.floor(vecZ) - (enumfacing == EnumFacing.SOUTH ? 1 : 0)
+                    );
+
+                    blockPos.setPosB(xPos, yPos, zPos);
+                    if (state.getBlock().canCollideCheck(state, false)) {
+                        boolean result = state.hasCollisionRayTrace(selector, blockPos, new Vec3d(vecX, vecY, vecZ), end);
+
+                        if (result)return false;
+                    }
+                }
+                return true;
+            } else {
+                return true;
+            }
+        } else {
+            return true;
         }
     }
 

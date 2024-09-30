@@ -63,13 +63,17 @@ public class IntegratedServer extends MinecraftServer {
     }
 
 
+    @Override
     public ServerCommandManager createCommandManager() {
-        return new IntegratedServerCommandManager(this);
+        IntegratedServerCommandManager scm = new IntegratedServerCommandManager(this);
+        onCreatedCmdManager(scm);
+        return scm;
     }
 
 
+    @Override
     public boolean init() throws IOException {
-        LOGGER.info("Starting integrated minecraft server version 1.12.2");
+        LOGGER.info("Starting integrated minecraft Elca Server version 1.12.2");
         this.setOnlineMode(true);
         this.setCanSpawnAnimals(true);
         this.setCanSpawnNPCs(true);
