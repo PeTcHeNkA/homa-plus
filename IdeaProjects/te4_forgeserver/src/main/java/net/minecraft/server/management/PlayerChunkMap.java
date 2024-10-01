@@ -26,7 +26,6 @@ public class PlayerChunkMap extends FlatMap<PlayerChunkMapEntry>{
     private Te4HashSet<PlayerChunkMapEntry> dirtyEntries = new Te4HashSet<>(7);
     private final List<PlayerChunkMapEntry> pendingSendToPlayers = Lists.newLinkedList();
     private final List<PlayerChunkMapEntry> entriesWithoutChunks = Lists.newLinkedList();
-    //private final ArrayRemSwapListE15<PlayerChunkMapEntry> entries = new ArrayRemSwapListE15<>();
 
     private int playerViewRadius;
     private long previousTotalWorldTime;
@@ -128,9 +127,12 @@ public class PlayerChunkMap extends FlatMap<PlayerChunkMapEntry>{
             }
         }
 
-        if (world.curPlayerEntities.isEmpty()) {
-            world.getChunkProvider().queueUnloadAll();
-        }
+        if (world.curPlayerEntities.isEmpty()) unloadAll();
+    }
+
+
+    protected void unloadAll(){
+        world.getChunkProvider().queueUnloadAll();
     }
 
 
@@ -140,6 +142,7 @@ public class PlayerChunkMap extends FlatMap<PlayerChunkMapEntry>{
     }
 
 
+    @Nullable
     public PlayerChunkMapEntry getOrCreateEntry(int chunkX, int chunkZ) {
         PlayerChunkMapEntry entry = get(chunkX, chunkZ);
 
@@ -175,6 +178,7 @@ public class PlayerChunkMap extends FlatMap<PlayerChunkMapEntry>{
         Chunk chunk = entry.getChunk();
 
         if (chunk != null) {
+            chunk.pcmEntry = null;
             WorldServer world = (WorldServer) chunk.getWorld();
             world.getChunkProvider().queueUnload(chunk);
         }

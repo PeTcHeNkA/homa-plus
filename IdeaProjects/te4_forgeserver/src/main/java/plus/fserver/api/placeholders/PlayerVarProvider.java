@@ -109,7 +109,7 @@ public class PlayerVarProvider extends TreeVarProvider<EntityPlayerMP,PlayerVarP
         return String.valueOf(world.getTotalWorldTime());
     }
     private static String chunks(World world){
-        return String.valueOf(world.chunkProviderServer.loadedChunks.size());
+        return String.valueOf(world.chunkProviderServer.size());
     }
     private static String entities(World world){
         return String.valueOf(world.loadedEntityList.size());

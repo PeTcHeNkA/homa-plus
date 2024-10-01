@@ -55,7 +55,7 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements C
         this.posZ = chunkZ;
 
         if(!ElcaCV.DEBUG_NO_SERVER){
-            mapIn.getWorldServer().getChunkProvider().loadChunk(chunkX, chunkZ, this);
+            chunk = mapIn.getWorldServer().getChunkProvider().loadChunk(chunkX, chunkZ, this);
         }
     }
 
@@ -64,7 +64,7 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements C
     public void accept(@Nullable Chunk chunk) {
         if(chunk != null){
             this.chunk = chunk;
-            chunk.entry = this;
+            chunk.pcmEntry = this;
             chunk.setUnloadQueued(false);
         } else {
             LOGGER.warn("Chunk [{} {}] dont loaded, maybe error?", posX, posZ);

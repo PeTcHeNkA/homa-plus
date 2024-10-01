@@ -74,7 +74,7 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
         Chunk[] chunks = super.value;
         for (Chunk chunk : chunks) {
             PlayerChunkMapEntry entry;
-            if (chunk != null && (entry = chunk.entry) != null) task.accept(entry);
+            if (chunk != null && (entry = chunk.pcmEntry) != null) task.accept(entry);
         }
     }
 

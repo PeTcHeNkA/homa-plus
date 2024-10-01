@@ -158,7 +158,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
         if(b) state |= 16;
         else state &= ~16;
     }
-    public PlayerChunkMapEntry entry;
+    public PlayerChunkMapEntry pcmEntry;
 
     public Chunk(World worldIn, int x, int z) {
         this.storageArrays = new ExtendedBlockStorage[STORAGES_COUNT];
@@ -886,6 +886,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
 
     public void onUnload() {
+        pcmEntry = null;
         this.loaded = false;
         World lWorld = this.world;
         for (TileEntity tileentity : this.tileEntities.values()) {

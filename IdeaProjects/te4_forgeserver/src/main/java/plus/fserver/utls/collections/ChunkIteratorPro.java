@@ -27,7 +27,7 @@ public class ChunkIteratorPro implements Iterator<Chunk>, Iterable<Chunk> {
         while (cursor < size) {
             Chunk chunk = chunks[cursor++];
             PlayerChunkMapEntry entry;
-            if (chunk == null || (entry = chunk.entry) == null) continue;
+            if (chunk == null || (entry = chunk.pcmEntry) == null) continue;
             if (chunk.isPersistent()){
                 next = chunk;
                 this.cursor = cursor;
@@ -59,7 +59,7 @@ public class ChunkIteratorPro implements Iterator<Chunk>, Iterable<Chunk> {
         Chunk[] chunks = this.chunks;
         for (Chunk chunk : chunks) {
             PlayerChunkMapEntry entry;
-            if (chunk != null && (entry = chunk.entry) != null) task.accept(entry);
+            if (chunk != null && (entry = chunk.pcmEntry) != null) task.accept(entry);
         }
     }
 

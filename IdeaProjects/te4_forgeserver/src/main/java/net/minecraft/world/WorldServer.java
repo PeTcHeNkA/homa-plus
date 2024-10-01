@@ -1313,7 +1313,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         }
         if((prevWorldTotalTime & 127) == 0) poledSlice = null;
 
-        playerChunkMap.tick();
+        tickChunkMap();
 
         if(ElcaConfig.VILLAGE_TICK_RATE!=-1){
             if(prevWorldTotalTime % ElcaConfig.VILLAGE_TICK_RATE==0) {
@@ -1334,6 +1334,11 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         if(cache != null && !cache.isUsed())redstoneCache = null;
 
         this.sendQueuedBlockEvents();
+    }
+
+
+    public void tickChunkMap(){
+        playerChunkMap.tick();
     }
 
 
