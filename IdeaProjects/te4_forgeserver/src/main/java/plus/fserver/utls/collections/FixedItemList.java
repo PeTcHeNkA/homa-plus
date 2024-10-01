@@ -21,6 +21,11 @@ public class FixedItemList implements Iterable<ItemStack>{
     }
 
 
+    public ItemStack[] raw(){
+        return items;
+    }
+
+
     public int size(){
         return items.length;
     }

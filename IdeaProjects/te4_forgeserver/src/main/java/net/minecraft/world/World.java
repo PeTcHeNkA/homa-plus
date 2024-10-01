@@ -101,7 +101,11 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public final ArrayRemSwapListE15<TileEntity> tickableTileEntities = new ArrayRemSwapListE15<>();
     private final List<TileEntity> addedTileEntityList = Lists.newArrayList();
     private final List<TileEntity> tileEntitiesToBeRemoved = Lists.newArrayList();
+
     public final List<EntityPlayer> playerEntities = Lists.newArrayList();
+    public List<EntityPlayer> curPlayerEntities = Lists.newArrayList();
+    public boolean playersModified = false;
+
     public final List<Entity> weatherEffects = Lists.newArrayList();
     public final IntHashMap<Entity> entitiesById = new IntHashMap<>();
     private final long cloudColour = 16777215L;
@@ -1401,6 +1405,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             if (entityIn instanceof EntityPlayer) {
                 EntityPlayer entityplayer = (EntityPlayer)entityIn;
                 this.playerEntities.add(entityplayer);
+                this.playersModified = true;
                 this.updateAllPlayersSleepingFlag();
             }
 
@@ -1439,6 +1444,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         entityIn.setDead();
         if (entityIn instanceof EntityPlayer) {
             this.playerEntities.remove(entityIn);
+            this.playersModified = true;
             this.updateAllPlayersSleepingFlag();
             this.onEntityRemoved(entityIn);
         }
@@ -1451,6 +1457,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
         if (entityIn instanceof EntityPlayer) {
             this.playerEntities.remove(entityIn);
+            this.playersModified = true;
             this.updateAllPlayersSleepingFlag();
         }
 
@@ -1748,8 +1755,9 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
     public void tickLoadedEntities(){
         for (EntityRemSwapList.E15<Entity> list:realEntityList.getRaw()) {
+            Entity[] raw = list.raw();
             for (int cursor = 0; cursor < list.sizeC(); ++cursor) {
-                Entity entity = list.getC(cursor);
+                Entity entity = raw[cursor];
                 Entity ridding = entity.getRidingEntity();
 
                 if (ridding != null) {
@@ -2402,6 +2410,10 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
     private double worldBMinx, worldBMinz, worldBMaxx, worldBMaxz;
     public void tick() {
+        if(playersModified){
+            curPlayerEntities = Lists.newArrayList(playerEntities);
+        }
+
         this.updateWeather();
         if(ElcaCV.ENABLE_COLLISION_EVENTS) collisionEvent.reset();
         if(ElcaCV.MORE_MOBS_OPTIMIZER){
@@ -3538,13 +3550,14 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
      */
     public List<AxisAlignedBB> getCollisionBoxes(@Nullable Entity entityIn, @NotNull AxisAlignedBB aabb) {
         if(ElcaCV.MORE_MOBS_OPTIMIZER) {
-            AABKey key = bbCache.key(aabb);
+            SyncListCache.AABB bbCache;
+            AABKey key = (bbCache = this.bbCache).key(aabb);
 
-            AABBList res = this.bbCache.getC(key);
+            AABBList res = bbCache.getC(key);
             if (res != null) return res;
             res = bbCache.allocArr();
             getCollisionBoxes0(res, entityIn, aabb);
-            this.bbCache.add(key, res);
+            bbCache.add(key, res);
             return res;
         } else {
             AABBList res = new AABBList();
@@ -3561,7 +3574,8 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         if(ElcaCV.MORE_MOBS_OPTIMIZER) {
             final AABKey key;
             AABBList res;
-            if ((res = bbCache.getC(key = bbCache.key(aabb))) != null) return res;
+            SyncListCache.AABB bbCache;
+            if ((res = (bbCache = this.bbCache).getC(key = bbCache.key(aabb))) != null) return res;
             getCollisionBoxesNoCacheLimited(res = bbCache.allocArr(), entityIn, aabb, lim);
             bbCache.add(key, res);
             return res;
@@ -3594,7 +3608,8 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         if(ElcaCV.MORE_MOBS_OPTIMIZER) {
             final AABKey key;
             AABBList res;
-            if ((res = bbCache.getC(key = bbCache.key(aabb))) != null){
+            SyncListCache.AABB bbCache;
+            if ((res = (bbCache = this.bbCache).getC(key = bbCache.key(aabb))) != null){
                 res.fclear();
                 getCollisionBoxesNoCacheLimited(res, entityIn, aabb, lim);
             } else {
@@ -3616,16 +3631,17 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public List<Entity> getEntitiesInAABBexcluding(@Nullable Entity entityIn, @NotNull AxisAlignedBB aabb,
                                                    @Nullable Predicate<? super Entity > predicate){
         if(ElcaCV.MORE_MOBS_OPTIMIZER) {
-            AABKey key = eeCache.key(aabb);
+            SyncListCache.EList eeCache;
+            AABKey key = (eeCache = this.eeCache).key(aabb);
 
-            final EntityList<Entity> entities = this.eeCache.getC(key);
+            final EntityList<Entity> entities = eeCache.getC(key);
             if (entities != null) {
                 if (predicate != null && !entities.isEmptyC()) {
                     for (final Entity entity : entities) {
                         if (!predicate.apply(entity)) {
                             EntityList<Entity> res = eeCache.allocArr();
                             getEntitiesInAABBexcludingNoCache(res, entityIn, aabb, predicate);
-                            this.eeCache.add(key, res);
+                            eeCache.add(key, res);
                             return res;
                         }
                     }
@@ -3634,7 +3650,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             } else {
                 EntityList<Entity> res = eeCache.allocArr();
                 getEntitiesInAABBexcludingNoCache(res, entityIn, aabb, predicate);
-                this.eeCache.add(key, res);
+                eeCache.add(key, res);
                 return res;
             }
         } else {
@@ -3652,9 +3668,10 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public <T extends Entity> List<T> getEntitiesWithinAABB(@NotNull Class <? extends T > clazz, @NotNull AxisAlignedBB aabb,
                                                             @Nullable Predicate<? super T > filter){
         if(ElcaCV.MORE_MOBS_OPTIMIZER) {
-            AABKey key = eeCache.key(aabb);
+            SyncListCache.EList eeCache;
+            AABKey key = (eeCache = this.eeCache).key(aabb);
             //AABKey key = new AABKey(aabb);
-            final EntityList<Entity> entities = this.eeCache.getC(key);
+            final EntityList<Entity> entities = eeCache.getC(key);
             if (entities != null) {
                 if (entities.isEmptyC()) return (List<T>) entities;
                 for (final Entity entity : entities) {
@@ -3746,7 +3763,9 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public EntityList<Entity> getEntitiesInAABBexcludingLimited(@Nullable Entity entityIn, @NotNull AxisAlignedBB aabb,
                                                           @Nullable Predicate<? super Entity > predicate, int lim){
         if(ElcaCV.MORE_MOBS_OPTIMIZER) {
-            AABKey key = eeCache.key(aabb);
+            SyncListCache.EList eeCache;
+            AABKey key = (eeCache = this.eeCache).key(aabb);
+
             final EntityList<Entity> entities = eeCache.getC(key);
             if (entities != null) {
                 int size;

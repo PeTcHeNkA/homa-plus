@@ -504,7 +504,10 @@ net.minecraft.network.play.server.SPacketBlockAction
 net.minecraft.network.play.server.SPacketBlockBreakAnim
 net.minecraft.network.play.server.SPacketBlockChange
 net.minecraft.network.play.server.SPacketChat
+net.minecraft.network.play.server.SPacketChunkData$1
+net.minecraft.network.play.server.SPacketChunkData$Node
 net.minecraft.network.play.server.SPacketChunkData
+net.minecraft.network.play.server.SPacketCollectItem
 net.minecraft.network.play.server.SPacketCombatEvent$1
 net.minecraft.network.play.server.SPacketCombatEvent$Event
 net.minecraft.network.play.server.SPacketCombatEvent
@@ -516,6 +519,7 @@ net.minecraft.network.play.server.SPacketEntity$S16PacketEntityLook
 net.minecraft.network.play.server.SPacketEntity$S17PacketEntityLookMove
 net.minecraft.network.play.server.SPacketEntity$SPacketEntityPos
 net.minecraft.network.play.server.SPacketEntity
+net.minecraft.network.play.server.SPacketEntityAttach
 net.minecraft.network.play.server.SPacketEntityEquipment
 net.minecraft.network.play.server.SPacketEntityHeadLook
 net.minecraft.network.play.server.SPacketEntityMetadata
@@ -856,6 +860,7 @@ net.minecraftforge.event.entity.EntityEvent$CanUpdate, true
 net.minecraftforge.event.entity.EntityEvent$EnteringChunk, true
 net.minecraftforge.event.entity.EntityEvent$EntityConstructing, true
 net.minecraftforge.event.entity.EntityEvent, true
+net.minecraftforge.event.entity.EntityJoinWorldEvent, true
 net.minecraftforge.event.entity.living.LivingAttackEvent, true
 net.minecraftforge.event.entity.living.LivingDamageEvent, true
 net.minecraftforge.event.entity.living.LivingEvent$LivingJumpEvent, true

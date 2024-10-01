@@ -13,6 +13,7 @@ import net.minecraft.network.play.server.SPacketEntityAttach;
 import net.minecraft.network.play.server.SPacketSetPassengers;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.fml.common.registry.EntityRegistry;
@@ -116,8 +117,13 @@ public class EntityTracker {
     }
 
 
+    protected List<EntityPlayer> trackedPlayers(){
+        return this.world.curPlayerEntities;
+    }
+
+
     public void onTrack(EntityTrackerEntry entry){
-        entry.updatePlayerEntities(this.world.playerEntities);
+        entry.updatePlayerEntities(trackedPlayers());
     }
 
 
@@ -127,8 +133,11 @@ public class EntityTracker {
             EntityPlayerMP player = (EntityPlayerMP)entityIn;
 
             for (EntityRemSwapList.E15<Entity> list: world.realEntityList.getRaw()) {
+                final Entity[] raw = list.raw();
                 for (int cursor = 0, s = list.sizeC(); cursor < s; ++cursor) {
-                    if((entry = list.getC(cursor).trackerEntry) != null)
+                    Entity entity;
+                    if((entity = raw[cursor]) == null)break;
+                    if((entry = entity.trackerEntry) != null)
                         entry.removeFromTrackedPlayers(player);
                     else
                         System.out.println("WARN: TRYING TO REMOVE ENTITY WITH NULL TRACKER");
@@ -147,13 +156,16 @@ public class EntityTracker {
     protected boolean fastUpdate = false;
 
     public void tick() {
-        List<EntityPlayer> players = this.world.playerEntities;
+        List<EntityPlayer> players = trackedPlayers();
         EntityTrackerEntry entry;
         if(fastUpdate){
             fastUpdate = false;
             for (EntityRemSwapList.E15<Entity> list: world.realEntityList.getRaw()) {
+                final Entity[] raw = list.raw();
                 for (int cursor = 0, s = list.sizeC(); cursor < s; ++cursor) {
-                    if((entry = list.getC(cursor).trackerEntry) != null)
+                    Entity entity;
+                    if((entity = raw[cursor]) == null)break;
+                    if((entry = entity.trackerEntry) != null)
                         entry.updatePlayerList(players);
                 }
             }
@@ -161,9 +173,11 @@ public class EntityTracker {
             fastUpdate = true;
             ArrayList<EntityPlayerMP> toUpdate = this.toUpdate;
 
-            for (EntityRemSwapList.E15<Entity> list: world.realEntityList.getRaw())
+            for (EntityRemSwapList.E15<Entity> list: world.realEntityList.getRaw()) {
+                final Entity[] raw = list.raw();
                 for (int cursor = 0, s = list.sizeC(); cursor < s; ++cursor) {
-                    Entity entity = list.getC(cursor);
+                    Entity entity;
+                    if((entity = raw[cursor]) == null)break;
                     if ((entry = entity.trackerEntry) != null) {
                         entry.updatePlayerList(players);
                         if (entry.playerEntitiesUpdated) {
@@ -171,7 +185,7 @@ public class EntityTracker {
                         }
                     }
                 }
-
+            }
             for (int i = 0, s = toUpdate.size(); i < s; ++i) {
                 updatePlayer1(toUpdate.get(i));
             }
@@ -181,12 +195,15 @@ public class EntityTracker {
 
 
     public void updateVisibility(EntityPlayerMP player) {
+        List<EntityPlayer> players = trackedPlayers();
         EntityTrackerEntry entry;
-        for (EntityRemSwapList.E15<Entity> list: world.realEntityList.getRaw()) {
+        for (EntityRemSwapList.E15<Entity> list: this.world.realEntityList.getRaw()) {
+            final Entity[] raw = list.raw();
             for (int cursor = 0, s = list.sizeC(); cursor < s; ++cursor) {
-                Entity entity = list.getC(cursor);
+                Entity entity;
+                if((entity = raw[cursor]) == null)break;
                 if ((entry = entity.trackerEntry) != null) {
-                    if (entity == player) entry.updatePlayerEntities(this.world.playerEntities);
+                    if (entity == player) entry.updatePlayerEntities(players);
                     else entry.updatePlayerEntity(player);
                 }
             }
@@ -195,12 +212,22 @@ public class EntityTracker {
 
 
     public void sendToTracking(Entity entity, Packet<?> packetIn) {
+        sendToTrackingS(entity, packetIn);
+    }
+
+
+    public void sendToTracking(Entity entity, SEntityPacketPlayBase packetIn) {
+        sendToTrackingS(entity, packetIn);
+    }
+
+
+    public static void sendToTrackingS(Entity entity, SEntityPacketPlayBase packetIn) {
         EntityTrackerEntry entry = entity.trackerEntry;
         if (entry != null) entry.sendPacketToTrackedPlayers(packetIn);
     }
 
 
-    public void sendToTracking(Entity entity, SEntityPacketPlayBase packetIn) {
+    public static void sendToTrackingS(Entity entity, Packet<?> packetIn) {
         EntityTrackerEntry entry = entity.trackerEntry;
         if (entry != null) entry.sendPacketToTrackedPlayers(packetIn);
     }
@@ -215,6 +242,11 @@ public class EntityTracker {
 
 
     public void sendToTrackingAndSelf(Entity entity, Packet<?> packetIn) {
+        sendToTrackingAndSelfS(entity, packetIn);
+    }
+
+
+    public static void sendToTrackingAndSelfS(Entity entity, Packet<?> packetIn) {
         EntityTrackerEntry entry = entity.trackerEntry;
         if (entry != null) entry.sendToTrackingAndSelf(packetIn);
     }
@@ -223,8 +255,12 @@ public class EntityTracker {
     public void removePlayerFromTrackers(EntityPlayerMP player) {
         EntityTrackerEntry entry;
         for (EntityRemSwapList.E15<Entity> list: world.realEntityList.getRaw()) {
+            final Entity[] raw = list.raw();
             for (int cursor = 0, s = list.sizeC(); cursor < s; ++cursor) {
-                if ((entry = list.getC(cursor).trackerEntry) != null) entry.removeTrackedPlayerSymmetric(player);
+                Entity entity;
+                if((entity = raw[cursor]) == null)break;
+                if ((entry = entity.trackerEntry) != null)
+                    entry.removeTrackedPlayerSymmetric(player);
             }
         }
     }
@@ -268,13 +304,21 @@ public class EntityTracker {
     }
 
 
-    public void sendLeashedEntitiesInChunk(EntityPlayerMP player, Chunk chunk) {
-        ArrayListE6<Entity> leashed  = new ArrayListE6<>();
-        ArrayListE6<Entity> passengers = new ArrayListE6<>();
 
-        for (EntityRemSwapList.E15<Entity> list: world.realEntityList.getRaw()) {
+    public void sendLeashedEntitiesInChunk(EntityPlayerMP player, Chunk chunk) {
+        sendLeashedEntitiesInChunkS(player, chunk);
+    }
+
+
+    public static void sendLeashedEntitiesInChunkS(EntityPlayerMP player, Chunk chunk) {
+        EntityList<Entity> leashed    = new EntityList<>();
+        EntityList<Entity> passengers = new EntityList<>();
+
+        for (EntityRemSwapList.E15<Entity> list: player.world.realEntityList.getRaw()) {
+            final Entity[] raw = list.raw();
             for (int cursor = 0, s = list.sizeC(); cursor < s; ++cursor) {
-                Entity entity = list.getC(cursor);
+                Entity entity;
+                if((entity = raw[cursor]) == null)break;
                 EntityTrackerEntry entry = entity.trackerEntry;
                 if (entry != null) {
                     if (entity != player && entity.chunkCoordX == chunk.x && entity.chunkCoordZ == chunk.z) {
@@ -305,8 +349,11 @@ public class EntityTracker {
         this.maxTrackingDistanceThreshold = ((distance - 1) << 4);
         EntityTrackerEntry entry;
         for (EntityRemSwapList.E15<Entity> list: world.realEntityList.getRaw()) {
+            final Entity[] raw = list.raw();
             for (int cursor = 0, s = list.sizeC(); cursor < s; ++cursor) {
-                if ((entry = list.getC(cursor).trackerEntry) != null)
+                Entity entity;
+                if((entity = raw[cursor]) == null)break;
+                if ((entry = entity.trackerEntry) != null)
                     entry.setMaxRange(this.maxTrackingDistanceThreshold);
             }
         }
@@ -331,8 +378,11 @@ public class EntityTracker {
     private void updatePlayer1(EntityPlayerMP player) {
         EntityTrackerEntry entry;
         for (EntityRemSwapList.E15<Entity> list: world.realEntityList.getRaw()) {
+            final Entity[] raw = list.raw();
             for (int cursor = 0, s = list.sizeC(); cursor < s; ++cursor) {
-                if ((entry = list.getC(cursor).trackerEntry) != null)
+                Entity entity;
+                if((entity = raw[cursor]) == null)break;
+                if ((entry = entity.trackerEntry) != null)
                     if (entry.getTrackedEntity() != player)
                         entry.updatePlayerEntity(player);
             }

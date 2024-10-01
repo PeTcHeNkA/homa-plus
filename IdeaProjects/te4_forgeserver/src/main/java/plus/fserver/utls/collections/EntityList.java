@@ -183,7 +183,7 @@ public class EntityList<T extends Entity> implements List<T> {
         private final int max;
         private int cursor = 0;
 
-        private Itr(Object[] data, int max) {
+        Itr(Object[] data, int max) {
             this.data = data;
             this.max = max;
         }

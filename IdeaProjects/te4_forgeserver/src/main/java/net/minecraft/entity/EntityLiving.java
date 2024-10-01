@@ -996,7 +996,7 @@ public abstract class EntityLiving extends EntityLivingBase {
             if ((!this.world.isRemote || SERVER_COMPILE) && dropLead) this.dropItem(Items.LEAD, 1);
 
             if ((!this.world.isRemote || SERVER_COMPILE) && sendPacket && this.world instanceof WorldServer)
-                ((WorldServer)this.world).getEntityTracker().sendToTracking(this, new SPacketEntityAttach(this, (Entity)null));
+                EntityTracker.sendToTrackingS(this, new SPacketEntityAttach(this, (Entity)null));
         }
     }
 
@@ -1020,7 +1020,7 @@ public abstract class EntityLiving extends EntityLivingBase {
         this.leashHolder = entityIn;
 
         if ((!this.world.isRemote || SERVER_COMPILE) && sendAttachNotification && this.world instanceof WorldServer) {
-            ((WorldServer)this.world).getEntityTracker().sendToTracking(this, new SPacketEntityAttach(this, this.leashHolder));
+            EntityTracker.sendToTrackingS(this, new SPacketEntityAttach(this, this.leashHolder));
         }
 
         if (this.isRiding()) this.dismountRidingEntity();

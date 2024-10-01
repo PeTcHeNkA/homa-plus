@@ -1,6 +1,5 @@
 package plus.fserver.utls.collections;
 
-import net.minecraft.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.function.Consumer;

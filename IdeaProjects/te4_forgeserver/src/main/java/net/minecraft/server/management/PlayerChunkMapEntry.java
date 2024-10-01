@@ -1,11 +1,14 @@
 package net.minecraft.server.management;
 
 import com.google.common.base.Predicate;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
@@ -167,16 +170,18 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements R
 
     public void sendToPlayer(EntityPlayerMP player) {
         if (this.sentToPlayers) {
-            player.connection.netManager.sendPacketE(new SPacketChunkData(this.chunk, 65535, true));
-            this.playerChunkMap.getWorldServer().getEntityTracker().sendLeashedEntitiesInChunk(player, this.chunk);
+            Chunk chunk = this.chunk;
+            player.connection.netManager.sendPacketE(new SPacketChunkData(chunk, 65535, true));
+            EntityTracker.sendLeashedEntitiesInChunkS(player, chunk);
         }
     }
 
 
     public void updateChunkInhabitedTime() {
         long i = this.playerChunkMap.getWorldServer().getTotalWorldTime();
-        if (this.chunk != null) {
-            this.chunk.setInhabitedTime(this.chunk.getInhabitedTime() + i - this.lastUpdateInhabitedTime);
+        Chunk chunk;
+        if ((chunk = this.chunk) != null) {
+            chunk.setInhabitedTime(this.chunk.getInhabitedTime() + i - this.lastUpdateInhabitedTime);
         }
         this.lastUpdateInhabitedTime = i;
     }
@@ -184,20 +189,23 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements R
 
     public void blockChanged(int x, int y, int z) {
         if (this.sentToPlayers) {
-            if (this.changes == 0) {
+            int changes;
+            if ((changes = this.changes) == 0) {
                 this.playerChunkMap.entryChanged(this);
             }
             this.changedSectionFilter |= 1 << (y >> 4);
             short short1 = (short) (x << 12 | z << 8 | y);
 
-            for (int i = 0; i < this.changes; ++i) {
-                if (this.changedBlocks[i] == short1) {
+            short[] changedBlocks = this.changedBlocks;
+
+            for (int i = 0; i < changes; ++i) {
+                if (changedBlocks[i] == short1)
                     return;
-                }
             }
-            if (this.changes == this.changedBlocks.length)
-                this.changedBlocks = java.util.Arrays.copyOf(this.changedBlocks, this.changedBlocks.length << 1);
-            this.changedBlocks[this.changes++] = short1;
+            if (changes == changedBlocks.length)
+                this.changedBlocks = changedBlocks = Arrays.copyOf(changedBlocks, changedBlocks.length << 1);
+
+            changedBlocks[this.changes++] = short1;
         }
     }
 
@@ -220,9 +228,11 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements R
         if (this.sentToPlayers && this.chunk != null) {
             if (this.changes != 0) {
                 if (this.changes == 1) {
-                    int cX = (this.changedBlocks[0] >> 12 & 15) + (posX << 4);
-                    int cY =  this.changedBlocks[0] & 255;
-                    int cZ = (this.changedBlocks[0] >> 8 & 15) + (posZ << 4);
+                    short cPos = this.changedBlocks[0];
+
+                    int cX = (cPos >> 12 & 15) + (posX << 4);
+                    int cY =  cPos & 255;
+                    int cZ = (cPos >> 8 & 15) + (posZ << 4);
 
                     IBlockState state = chunk.getBlockStateUnchecked(cX, cY, cZ);
                     BlockPos blockpos;
@@ -236,22 +246,28 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements R
                     this.sendPacket(new SPacketChunkData(this.chunk, this.changedSectionFilter, true));
                     //TODO: FDix Mojang's fuckup to modded by combining all TE data into the chunk data packet... seriously... packet size explosion!
                 } else {
-                    this.sendPacket(new SPacketMultiBlockChange(this.changes, this.changedBlocks, this.chunk));
+                    short[] changedBlocks = this.changedBlocks;
+                    Chunk chunk = this.chunk;
+                    WorldServer world = playerChunkMap.getWorldServer();
+
+                    this.sendPacket(new SPacketMultiBlockChange(this.changes, changedBlocks, chunk));
                     //} Keep this in the else until we figure out a fix for mojang's derpitude on the
                     // data packet so we don't double send crap.
                     //{// Forge: Send only the tile entities that are updated, Adding this brace
                     // lets us keep the indent and the patch small
-                    BlockPos.MutableBlockPos pos = playerChunkMap.getWorldServer().localTempPos;
+                    BlockPos.MutableBlockPos pos = world.localTempPos;
 
                     for (int l = 0; l < this.changes; ++l) {
-                        int cX = (this.changedBlocks[l] >> 12 & 15) + posX << 4;
-                        int cY = this.changedBlocks[l] & 255;
-                        int cZ = (this.changedBlocks[l] >> 8 & 15) + posZ << 4;
+                        short cPos = changedBlocks[l];
+
+                        int cX = (cPos >> 12 & 15) + posX << 4;
+                        int cY =  cPos & 255;
+                        int cZ = (cPos >> 8 & 15) + posZ << 4;
 
                         IBlockState state = chunk.getBlockStateUnchecked(cX, cY, cZ);
 
                         if (state.hasTile()) {
-                            this.sendBlockEntity(this.playerChunkMap.getWorldServer().getTileEntity(pos.setPos(cX, cY, cZ)));
+                            this.sendBlockEntity(world.getTileEntity(pos.setPos(cX, cY, cZ)));
                         }
                     }
                 }
@@ -349,7 +365,7 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements R
 
 
     public List<EntityPlayerMP> getWatchingPlayers() {
-        if(isSentToPlayers())return java.util.Collections.unmodifiableList(this);
-        return java.util.Collections.emptyList();
+        if(isSentToPlayers())return Collections.unmodifiableList(this);
+        return Collections.emptyList();
     }
 }

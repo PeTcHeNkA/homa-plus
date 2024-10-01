@@ -81,6 +81,7 @@ import plus.fserver.server.chunk.io.TChunkTask;
 import plus.fserver.server.chunk.io.TQueuedChunk;
 import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.collections.ChunkIterator;
+import plus.fserver.utls.collections.EntityIDHashSplitedList;
 import plus.fserver.utls.collections.EntityRemSwapList;
 import plus.fserver.utls.math.MathUtls;
 import plus.fserver.world.CommonWorldEntitySpawner;
@@ -482,8 +483,9 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         }
         ChunkProviderServer cps = chunkProviderServer;
         for (EntityRemSwapList.E15<Entity> list:realEntityList.getRaw()) {
+            Entity[] raw = list.raw();
             for (int cursor = 0; cursor < list.sizeC(); ++cursor) {
-                Entity entity = list.getC(cursor);
+                Entity entity = raw[cursor];
                 Entity ridding = entity.getRidingEntity();
 
                 if (ridding != null) {
@@ -791,10 +793,13 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
 
     @Override
     public void loadEntities(Collection<Entity> entityCollection) {
-        for (Entity entity : Lists.newArrayList(entityCollection)) {
-            if (this.canAddEntity(entity) && !MinecraftForge.EVENT_BUS.post(
-                    new EntityJoinWorldEvent(entity, this))) {
-                this.realEntityList.addF(entity);
+        if(entityCollection.isEmpty())return;
+        EntityIDHashSplitedList realEntityList = this.realEntityList;
+        EntityJoinWorldEvent event = new EntityJoinWorldEvent();
+        for (Entity entity : entityCollection) {
+            event.initJoinEvent(entity, this);
+            if (this.canAddEntity(entity) && !MinecraftForge.EVENT_BUS.post(event)) {
+                realEntityList.addF(entity);
                 this.onEntityAdded(entity);
             }
         }
@@ -803,7 +808,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
 
     private boolean canAddEntity(Entity entity) {
         if (entity.isDead) {
-            LOGGER.warn("Tried to add entity {} but it was marked as removed already", (Object)EntityList.getKey(entity));
+            LOGGER.warn("Tried to add entity {} but it was marked as removed already", EntityList.getKey(entity));
             return false;
         } else {
             UUID uuid = entity.getUniqueID();
@@ -959,7 +964,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
 
     @Override
     public void setEntityState(Entity entityIn, byte state) {
-        this.getEntityTracker().sendToTrackingAndSelf(entityIn, new SPacketEntityStatus(entityIn, state));
+        EntityTracker.sendToTrackingAndSelfS(entityIn, new SPacketEntityStatus(entityIn, state));
     }
 
 

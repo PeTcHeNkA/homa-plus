@@ -618,7 +618,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
         if (entityplayer$sleepresult == EntityPlayer.SleepResult.OK) {
             this.addStat(StatList.SLEEP_IN_BED);
             Packet<?> packet = new SPacketUseBed(this, bedLocation);
-            this.getServerWorld().getEntityTracker().sendToTracking(this, packet);
+            EntityTracker.sendToTrackingS(this, packet);
             this.connection.setPlayerLocation(this.posX, this.posY, this.posZ, this.rotationYaw, this.rotationPitch);
             this.connection.netManager.sendPacketE(packet);
             CriteriaTriggers.SLEPT_IN_BED.trigger(this);
@@ -629,7 +629,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
 
     public void wakeUpPlayer(boolean immediately, boolean updateWorldFlag, boolean setSpawn) {
         if (this.isPlayerSleeping()) {
-            this.getServerWorld().getEntityTracker().sendToTrackingAndSelf(this, new SPacketAnimation(this, 2));
+            EntityTracker.sendToTrackingAndSelfS(this, new SPacketAnimation(this, 2));
         }
         super.wakeUpPlayer(immediately, updateWorldFlag, setSpawn);
 
@@ -1063,13 +1063,13 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
 
     @Override
     public void onCriticalHit(Entity entityHit) {
-        this.getServerWorld().getEntityTracker().sendToTrackingAndSelf(this, new SPacketAnimation(entityHit, 4));
+        EntityTracker.sendToTrackingAndSelfS(this, new SPacketAnimation(entityHit, 4));
     }
 
 
     @Override
     public void onEnchantmentCritical(Entity entityHit) {
-        this.getServerWorld().getEntityTracker().sendToTrackingAndSelf(this, new SPacketAnimation(entityHit, 5));
+        EntityTracker.sendToTrackingAndSelfS(this, new SPacketAnimation(entityHit, 5));
     }
 
 

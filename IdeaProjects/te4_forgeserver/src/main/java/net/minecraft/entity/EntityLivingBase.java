@@ -1147,7 +1147,7 @@ public abstract class EntityLivingBase extends Entity {
             this.isSwingInProgress = true;
             this.swingingHand = hand;
             if (!this.world.isRemote || SERVER_COMPILE)
-                ((WorldServer)this.world).getEntityTracker().sendToTracking(this, new SPacketAnimation(this, hand == EnumHand.MAIN_HAND ? 0 : 3));
+                EntityTracker.sendToTrackingS(this, new SPacketAnimation(this, hand == EnumHand.MAIN_HAND ? 0 : 3));
         }
     }
 
@@ -1630,12 +1630,14 @@ public abstract class EntityLivingBase extends Entity {
                 if (  arrowHitTimer <= 0) setArrowCountInEntity(count - 1);
             }
 
-            updateSlot(EntityEquipmentSlot.MAINHAND, equipInv.get(0));
-            updateSlot(EntityEquipmentSlot.OFFHAND , equipInv.get(1));
-            updateSlot(EntityEquipmentSlot.FEET    , equipInv.get(2));
-            updateSlot(EntityEquipmentSlot.LEGS    , equipInv.get(3));
-            updateSlot(EntityEquipmentSlot.CHEST   , equipInv.get(4));
-            updateSlot(EntityEquipmentSlot.HEAD    , equipInv.get(5));
+            ItemStack[] env = this.equipInv.raw();
+
+            updateSlot(EntityEquipmentSlot.MAINHAND, env[0]);
+            updateSlot(EntityEquipmentSlot.OFFHAND , env[1]);
+            updateSlot(EntityEquipmentSlot.FEET    , env[2]);
+            updateSlot(EntityEquipmentSlot.LEGS    , env[3]);
+            updateSlot(EntityEquipmentSlot.CHEST   , env[4]);
+            updateSlot(EntityEquipmentSlot.HEAD    , env[5]);
 
             if ((this.ticksExisted & 31) == 0) this.getCombatTracker().reset();
 
@@ -1689,7 +1691,8 @@ public abstract class EntityLivingBase extends Entity {
 
         if (!ItemStack.areItemStacksEqual(other, stack)) {
             if (!ItemStack.areItemStacksEqualUsingNBTShareTag(other, stack))
-                ((WorldServer)this.world).getEntityTracker().sendToTracking(this, new SPacketEntityEquipment(this.getEntityId(), slot, other));
+                EntityTracker.sendToTrackingS(this, new SPacketEntityEquipment(this.getEntityId(), slot, other));
+
             MinecraftForge.EVENT_BUS.postF(new LivingEquipmentChangeEvent(this, slot, stack, other));
 
             if (!stack.isEmpty())
@@ -1892,10 +1895,8 @@ public abstract class EntityLivingBase extends Entity {
 
     public void onItemPickup(Entity entityIn, int quantity) {
         if (!entityIn.isDead && !this.world.isRemote) {
-            EntityTracker tracker = ((WorldServer)this.world).getEntityTracker();
-
             if (entityIn instanceof EntityItem || entityIn instanceof EntityArrow || entityIn instanceof EntityXPOrb) {
-                tracker.sendToTracking(entityIn, new SPacketCollectItem(entityIn.getEntityId(), this.getEntityId(), quantity));
+                EntityTracker.sendToTrackingS(entityIn, new SPacketCollectItem(entityIn.getEntityId(), this.getEntityId(), quantity));
             }
         }
     }

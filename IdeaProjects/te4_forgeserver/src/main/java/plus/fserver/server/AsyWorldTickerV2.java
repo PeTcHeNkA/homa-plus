@@ -259,19 +259,22 @@ public final class AsyWorldTickerV2{
 
             EntityTracker tracker = worldserver.getEntityTracker();
             if(!tracker.isAsync()) {
-                if(false && worldserver.meanTickTime() > ElcaConfig.MEAN_OVERLOAD){
+                if(worldserver.meanTickTime() > ElcaConfig.MEAN_OVERLOAD){
                     tracker.tick();
                     AsyEntityTracker asy = tracker.toAsync();
                     worldserver.setTracker(asy);
 
                     inf.tracker = service.scheduleAtFixedRate(() -> {
-                        if(asy.world().meanTickTime() > ElcaConfig.MEAN_OVERLOAD){
-                            asy.tick();
-                        } else {
-                            asy.world().setTracker(asy.toSync());
-                            //worldserver.addSyncTask(asy::runTasks);
-                            inf.tracker.cancel(false);
-                            inf.tracker = null;
+                        try {
+                            if(asy.world().meanTickTime() > ElcaConfig.MEAN_OVERLOAD){
+                                asy.tick();
+                            } else {
+                                asy.world().setTracker(asy.toSync());
+                                inf.tracker.cancel(false);
+                                inf.tracker = null;
+                            }
+                        } catch (Throwable e){
+                            onError(asy.world(), e);
                         }
                     }, 50, 50, TimeUnit.MILLISECONDS);
                 } else {

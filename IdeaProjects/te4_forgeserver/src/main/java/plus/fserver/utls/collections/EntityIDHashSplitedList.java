@@ -223,9 +223,9 @@ public class EntityIDHashSplitedList implements List<Entity> {
     @Override
     public void forEach(Consumer<? super Entity> action) {
         for (EntityRemSwapList.E15<Entity> list:lists){
-            Object[] data = list.data;
+            Entity[] data = list.data;
             for (int i = 0, s = list.size; i < s; i++)
-                action.accept((Entity)data[i]);
+                action.accept(data[i]);
         }
     }
 

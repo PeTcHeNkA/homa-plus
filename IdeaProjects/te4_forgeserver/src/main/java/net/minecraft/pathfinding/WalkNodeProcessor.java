@@ -140,13 +140,14 @@ public class WalkNodeProcessor extends NodeProcessor {
         PntMatrix.Chunked chunked = matrix.getChunked(cur.x, cur.z);
         PathNodeType type = chunked.getCur(cur.x, cur.y + 1, cur.z);
 
+        EntityLiving entity = this.entity;
         if(type == null) {
-            type = this.getPathNodeType(this.entity, cur.x, cur.y + 1, cur.z);
+            type = this.getPathNodeType(entity, cur.x, cur.y + 1, cur.z);
             chunked.setCur(cur.x, cur.y + 1, cur.z, type);
         }
 
-        if (this.entity.getPathPriority(type) >= 0.0F)
-            stepH = MathHelper.floor(Math.max(1.0F, this.entity.stepHeight));
+        if (entity.getPathPriority(type) >= 0.0F)
+            stepH = MathHelper.floor(Math.max(1.0F, entity.stepHeight));
 
 
         BlockPos.MutableBlockPos pooledPos;

@@ -5,13 +5,9 @@ import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.EntityTrackerEntry;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.world.WorldServer;
-import plus.fserver.utls.collections.ArrayListE10;
 
 
 public class AsyEntityTracker extends EntityTracker {
-//    private ArrayListE10<Runnable> tasks = new ArrayListE10<>();
-//    private ArrayListE10<Runnable> swap  = new ArrayListE10<>();
-
     public AsyEntityTracker(WorldServer world) {
         super(world);
     }
@@ -35,18 +31,6 @@ public class AsyEntityTracker extends EntityTracker {
     public boolean isAsync() {
         return true;
     }
-
-
-//    public void runTasks(){
-//        ArrayListE10<Runnable> tasks;
-//        synchronized (this) {
-//            tasks = this.tasks;
-//            this.tasks = this.swap;
-//            this.swap = tasks;
-//        }
-//        tasks.forEach(Runnable::run);
-//        tasks.clear();
-//    }
 
 
     @Override

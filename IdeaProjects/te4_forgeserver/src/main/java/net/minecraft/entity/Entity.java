@@ -380,11 +380,11 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
     protected void setSize(float width, float height) {
         if (width != this.width || height != this.height) {
-            float f = this.width;
+            float prevWidth = this.width;
             this.width = width;
             this.height = height;
 
-            if (this.width < f) {
+            if (width < prevWidth) {
                 double d0 = (double)width / 2.0D;
                 this.setEntityBoundingBox(new AxisAlignedBB(this.posX - d0, this.posY, this.posZ - d0, this.posX + d0, this.posY + (double)this.height, this.posZ + d0));
                 return;
@@ -392,13 +392,13 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
             AxisAlignedBB box = this.getEntityBoundingBox();
             box.init(
-                    box.minX, box.minY, box.minZ, box.minX + (double)this.width,
-                    box.minY + (double)this.height, box.minZ + (double)this.width
+                    box.minX, box.minY, box.minZ, box.minX + (double)width,
+                    box.minY + (double)this.height, box.minZ + (double)width
             );
             this.setEntityBoundingBox(box);
 
-            if (this.width > f && !this.firstUpdate && !this.world.isRemote)
-                this.move(MoverType.SELF, f - this.width, 0.0D, f - this.width);
+            if (width > prevWidth && !this.firstUpdate && !this.world.isRemote)
+                this.move(MoverType.SELF, prevWidth - width, 0.0D, prevWidth - width);
         }
     }
 
@@ -427,10 +427,11 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         this.posX = x;
         this.posY = y;
         this.posZ = z;
-        // Forge - Process chunk registration after moving.
-        if (this.isAddedToWorld() && !this.world.isRemote)
+
+        if (this.isAddedToWorld() && (SERVER_COMPILE || !this.world.isRemote))
             this.world.updateEntityWithOptionalForce(this, false);
-        float f = this.width / 2.0F;
+
+        float f = this.width * 0.5F;
         float f1 = this.height;
 
         AxisAlignedBB box = this.getEntityBoundingBox();
@@ -498,8 +499,9 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
                     this.inPortal = false;
                 }
             } else {
-                if (this.portalCounter > 0) this.portalCounter -= 4;
-                if (this.portalCounter < 0) this.portalCounter  = 0;
+                int portalCounter = this.portalCounter;
+                if (portalCounter > 0) this.portalCounter -= 4;
+                if (portalCounter < 0) this.portalCounter  = 0;
             }
             this.decrementTimeUntilPortal();
         }
@@ -627,7 +629,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
             getEntityBoundingBox().offsetMut(x, y, z);
             this.resetPositionToBB();
         } else {
-            if(!world.isRemote && enableMoveAccelerator()){
+            if((SERVER_COMPILE || !world.isRemote) && enableMoveAccelerator()){
                 EMoveHelper.move(this, type, x, y, z, null);
                 return;
             }
@@ -792,14 +794,14 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
                 temp = 0;
 
                 for (num1 = bSize; temp < num1; ++temp)
-                    d8 = ((AxisAlignedBB)rawBoxes[temp]).calculateYOffset(axisalignedbb, d8);
+                    d8 = rawBoxes[temp].calculateYOffset(axisalignedbb, d8);
 
                 aab2.offsetMut(0.0D, d8, 0.0D);
                 double d18 = dx1;
                 temp = 0;
 
                 for (num1 = bSize; temp < num1; ++temp)
-                    d18 = ((AxisAlignedBB)rawBoxes[temp]).calculateXOffset(aab2, d18);
+                    d18 = rawBoxes[temp].calculateXOffset(aab2, d18);
 
                 aab2.offsetMut(d18, 0.0D, 0.0D);
 
@@ -807,7 +809,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
                 temp = 0;
 
                 for (num1 = bSize; temp < num1; ++temp)
-                    d19 = ((AxisAlignedBB)rawBoxes[temp]).calculateZOffset(aab2, d19);
+                    d19 = rawBoxes[temp].calculateZOffset(aab2, d19);
 
                 aab2.offsetMut(0.0D, 0.0D, d19);
 
@@ -816,19 +818,19 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
                 axisalignedbb = boundingBox;
                 for (num1 = bSize; temp < num1; ++temp)
-                    d20 = ((AxisAlignedBB)rawBoxes[temp]).calculateYOffset(axisalignedbb, d20);
+                    d20 = rawBoxes[temp].calculateYOffset(axisalignedbb, d20);
 
                 double d21 = dx1;
                 temp = 0;
 
                 for (num1 = bSize; temp < num1; ++temp)
-                    d21 = ((AxisAlignedBB)rawBoxes[temp]).calculateXOffset(axisalignedbb, d21);
+                    d21 = rawBoxes[temp].calculateXOffset(axisalignedbb, d21);
 
                 double d22 = dz1;
                 temp = 0;
 
                 for (num1 = bSize; temp < num1; ++temp)
-                    d22 = ((AxisAlignedBB)rawBoxes[temp]).calculateZOffset(axisalignedbb, d22);
+                    d22 = rawBoxes[temp].calculateZOffset(axisalignedbb, d22);
 
                 if (d18 * d18 + d19 * d19 > d21 * d21 + d22 * d22) {
                     x = d18;
@@ -841,7 +843,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
                 temp = 0;
 
                 for (num1 = bSize; temp < num1; ++temp)
-                    y = ((AxisAlignedBB)rawBoxes[temp]).calculateYOffset(axisalignedbb, y);
+                    y = rawBoxes[temp].calculateYOffset(axisalignedbb, y);
 
                 if (dx2 * dx2 + dz2 * dz2 >= x * x + z * z) {
                     x = dx2;
