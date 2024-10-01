@@ -624,6 +624,11 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
     }
 
 
+    protected boolean onUpdateChunkSection(Entity entityIn){
+        return true;
+    }
+
+
     @Override
     protected void updateEntityChunkSection(Entity entity, boolean forceUpdate){
         //  1 / 16 = 0,0625
@@ -632,19 +637,23 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         int cZpos = MathHelper.floor(entity.posZ * 0.0625);
 
         if (!entity.addedToChunk || entity.chunkCoordX != cXpos || entity.chunkCoordY != cYpos || entity.chunkCoordZ != cZpos) {
-            ChunkProviderServer cps = chunkProviderServer;
-            Chunk chunk;
-            if (entity.addedToChunk) {
-                chunk = cps.getLoadedChunk(entity.chunkCoordX, entity.chunkCoordZ);
-                if(chunk != null) chunk.removeEntityAtIndex(entity, entity.chunkCoordY);
-            }
-            chunk = cps.getLoadedChunk(cXpos, cZpos);
+            if(onUpdateChunkSection(entity)) {
+                ChunkProviderServer cps = chunkProviderServer;
+                Chunk chunk;
+                if (entity.addedToChunk) {
+                    chunk = cps.getLoadedChunk(entity.chunkCoordX, entity.chunkCoordZ);
+                    if (chunk != null) chunk.removeEntityAtIndex(entity, entity.chunkCoordY);
+                }
+                chunk = cps.getLoadedChunk(cXpos, cZpos);
 
-            if (!entity.setPositionNonDirty() && chunk == null) {
-                entity.addedToChunk = false;
+                if (!entity.setPositionNonDirty() && chunk == null) {
+                    entity.addedToChunk = false;
+                } else {
+                    if (chunk == null) chunk = cps.provideChunk(cXpos, cZpos);
+                    chunk.addEntity(entity);
+                }
             } else {
-                if(chunk == null)chunk = cps.provideChunk(cXpos, cZpos);
-                chunk.addEntity(entity);
+                return;
             }
         }
 

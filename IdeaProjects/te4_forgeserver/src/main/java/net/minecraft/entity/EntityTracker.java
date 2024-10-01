@@ -13,7 +13,6 @@ import net.minecraft.network.play.server.SPacketEntityAttach;
 import net.minecraft.network.play.server.SPacketSetPassengers;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.fml.common.registry.EntityRegistry;

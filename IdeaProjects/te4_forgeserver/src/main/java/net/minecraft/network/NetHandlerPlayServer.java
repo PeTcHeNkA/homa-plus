@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-
-import it.unimi.dsi.fastutil.ints.Int2ShortOpenHashMap;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.block.BlockCommandBlock;
@@ -141,7 +139,6 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
     private double lowestRiddenY1;
     private double lowestRiddenZ1;
     private VecDFD targetPos;
-    //private Vec3d targetPos;
     private int teleportId;
     private int lastPositionUpdate;
     private boolean floating;
