@@ -5,6 +5,8 @@ import it.unimi.dsi.fastutil.objects.ObjectCollection;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import java.io.IOException;
 import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
@@ -61,22 +63,40 @@ public class ChunkProviderServer extends Long2ObjectOpenHashMap<Chunk> implement
     }
 
 
+    public void forChunks(Consumer<Chunk> task) {
+        Chunk[] raw = super.value;
+        for (int i = 0, s = raw.length; i < s; i++){
+            Chunk chunk = raw[i];
+            if(chunk != null) task.accept(chunk);
+        }
+    }
+
+
     public Collection<Chunk> getLoadedChunks() {
         return super.values();
     }
 
 
+    public void putChunk(long key, Chunk chunk){
+        super.put(key, chunk);
+    }
+
+
+    public void removeChunk(long key){
+        super.remove(key);
+    }
+
+
     public void queueUnload(Chunk chunkIn) {
-        if (this.world.provider.canDropChunk(chunkIn.x, chunkIn.z)) {
+        if (chunkIn.getWorld().provider.canDropChunk(chunkIn.x, chunkIn.z)) {
             this.droppedChunks.add(ChunkPos.asLong(chunkIn.x, chunkIn.z));
             chunkIn.setUnloadQueued();
-            //chunkIn.unloadQueued = true;
         }
     }
 
 
     public void queueUnloadAll() {
-        ObjectIterator<Chunk> iter = super.values().iterator();
+        Iterator<Chunk> iter = getLoadedChunks().iterator();
         while (iter.hasNext()) {
             Chunk chunk = iter.next();
             this.queueUnload(chunk);
@@ -103,14 +123,14 @@ public class ChunkProviderServer extends Long2ObjectOpenHashMap<Chunk> implement
         Chunk chunk = this.getLoadedChunk(x, z);
         if (chunk == null) {
             long chunkHash = ChunkPos.asLong(x, z);
-            chunk = ForgeChunkManager.fetchDormantChunk(chunkHash, this.world);
+            chunk = ForgeChunkManager.fetchDormantChunk(chunkHash, world(x,z));
             if (chunk != null || !(this.chunkLoader instanceof AnvilChunkLoader)) {
                 if (!loadingChunks.add(chunkHash)) FMLLog.bigWarning("There is an attempt to load a chunk ({},{}) in dimension {} that is already being loaded. This will cause weird chunk breakages.", x, z, this.world.provider.getDimension());
                 if (chunk == null) chunk = this.loadChunkFromFile(x, z);
 
                 if (chunk != null) {
                     //todo check async?
-                    super.put(chunkHash, chunk);
+                    putChunk(chunkHash, chunk);
                     chunk.onLoad();
                     chunk.populate(this, this.chunkGenerator);
                 }
@@ -121,17 +141,17 @@ public class ChunkProviderServer extends Long2ObjectOpenHashMap<Chunk> implement
 
                 if(runnable == null){
                     if(loader.isChunkGeneratedAt(x, z)){
-                        chunk = TChunkExecutor.syncChunkLoad(this.world, loader, this, x, z);
+                        chunk = TChunkExecutor.syncChunkLoad(world(x,z), loader, this, x, z);
                     } else {
-                        chunk = TChunkExecutor.syncChunkGen(this.world, loader, this, x, z);
+                        chunk = TChunkExecutor.syncChunkGen(world(x,z), loader, this, x, z);
                     }
                 } else {
                     if(loader.isChunkGeneratedAt(x, z)){
-                        TChunkExecutor.queueChunkLoad(this.world, loader, this, x, z, runnable);
+                        TChunkExecutor.queueChunkLoad(world(x,z), loader, this, x, z, runnable);
                         return null;
                     }else {
                         if(chunkGenerator.maybeAsync()){
-                            TChunkExecutor.queueChunkGenerate(this.world, loader, this, x, z, runnable);
+                            TChunkExecutor.queueChunkGenerate(world(x,z), loader, this, x, z, runnable);
                             return null;
                         }
                     }
@@ -150,7 +170,7 @@ public class ChunkProviderServer extends Long2ObjectOpenHashMap<Chunk> implement
         if (chunk == null) {
             long i = ChunkPos.asLong(x, z);
             try {
-                chunk = TChunkExecutor.syncChunkGen(world, (AnvilChunkLoader)this.chunkLoader, this, x, z);
+                chunk = TChunkExecutor.syncChunkGen(world(x,z), (AnvilChunkLoader)this.chunkLoader, this, x, z);
             } catch (Throwable throwable) {
                 CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Exception generating new chunk");
                 CrashReportCategory crashreportcategory = crashreport.makeCategory("Chunk to be generated");
@@ -164,12 +184,18 @@ public class ChunkProviderServer extends Long2ObjectOpenHashMap<Chunk> implement
     }
 
 
+    protected WorldServer world(int x, int z){
+        return world;
+    }
+
+
     @Nullable
     private Chunk loadChunkFromFile(int x, int z) {
         try {
-            Chunk chunk = this.chunkLoader.loadChunk(this.world, x, z);
+            World world = world(x, z);
+            Chunk chunk = this.chunkLoader.loadChunk(world, x, z);
             if (chunk != null) {
-                chunk.setLastSaveTime(this.world.getTotalWorldTime());
+                chunk.setLastSaveTime(world.getTotalWorldTime());
                 this.chunkGenerator.recreateStructures(chunk, x, z);
             }
             return chunk;
@@ -183,9 +209,8 @@ public class ChunkProviderServer extends Long2ObjectOpenHashMap<Chunk> implement
     @Keep
     public void saveChunkExtraData(Chunk chunkIn) {
         try {
-            this.chunkLoader.saveExtraChunkData(this.world, chunkIn);
-        }
-        catch (Exception exception) {
+            this.chunkLoader.saveExtraChunkData(chunkIn.getWorld(), chunkIn);
+        } catch (Exception exception) {
             LOGGER.error("Couldn't save entities", exception);
         }
     }
@@ -194,8 +219,9 @@ public class ChunkProviderServer extends Long2ObjectOpenHashMap<Chunk> implement
     @Keep
     public void saveChunkData(Chunk chunk) {
         try {
-            chunk.setLastSaveTime(this.world.getTotalWorldTime());
-            this.chunkLoader.saveChunk(this.world, chunk);
+            WorldServer world = (WorldServer)chunk.getWorld();
+            chunk.setLastSaveTime(world.getTotalWorldTime());
+            this.chunkLoader.saveChunk(world, chunk);
         } catch (IOException ioexception) {
             LOGGER.error("Couldn't save chunk", ioexception);
         }
@@ -206,10 +232,11 @@ public class ChunkProviderServer extends Long2ObjectOpenHashMap<Chunk> implement
 
 
     @Keep
-    public void saveChunkData(List<NextTickListEntry> pendings, Chunk chunkIn) {
+    public void saveChunkData(List<NextTickListEntry> pendings, Chunk chunk) {
         try {
-            chunkIn.setLastSaveTime(this.world.getTotalWorldTime());
-            this.chunkLoader.saveChunk(pendings, this.world, chunkIn);
+            World world = chunk.getWorld();
+            chunk.setLastSaveTime(world.getTotalWorldTime());
+            this.chunkLoader.saveChunk(pendings, world, chunk);
         } catch (IOException ioexception) {
             LOGGER.error("Couldn't save chunk", ioexception);
         }
@@ -223,7 +250,7 @@ public class ChunkProviderServer extends Long2ObjectOpenHashMap<Chunk> implement
     public boolean saveChunks(boolean all) {
         boolean needProcess = true;
         int i = 0;
-        ObjectCollection<Chunk> vs = super.values();
+        Collection<Chunk> vs = getLoadedChunks();
         if(vs.isEmpty())return true;
         List<Chunk> list = new ArrayList<>(vs);
 
@@ -234,7 +261,7 @@ public class ChunkProviderServer extends Long2ObjectOpenHashMap<Chunk> implement
             }
             if (chunk.needsSaving(all)) {
                 if(needProcess){
-                    this.world.getLightingEngine().processLightUpdates();
+                    chunk.getLightingEngine().processLightUpdates();
                     needProcess = false;
                 }
                 this.saveChunkData(chunk);
@@ -253,7 +280,7 @@ public class ChunkProviderServer extends Long2ObjectOpenHashMap<Chunk> implement
     public void onComplete(TChunkTask task){
         Chunk chunk = task.getChunk();
         //todo check async
-        super.put(ChunkPos.asLong(chunk.x, chunk.z), chunk);
+        putChunk(ChunkPos.asLong(chunk.x, chunk.z), chunk);
         chunk.onLoad();
         if(this.task != null) {
             this.task.add(task.getChunk());
@@ -284,13 +311,13 @@ public class ChunkProviderServer extends Long2ObjectOpenHashMap<Chunk> implement
                         if(chunk.maybeUnload()) {
                             chunk.onUnload();
                             if(asyncSaveChunks){
-                                TChunkExecutor.queueChunkUnload(world, (AnvilChunkLoader)chunkLoader,this, chunk);
+                                TChunkExecutor.queueChunkUnload((WorldServer)chunk.getWorld(), (AnvilChunkLoader)chunkLoader,this, chunk);
                             } else {
                                 ForgeChunkManager.putDormantChunk(olong, chunk);
                                 this.saveChunkData(chunk);
                                 this.saveChunkExtraData(chunk);
                             }
-                            super.remove(olong);
+                            removeChunk(olong);
                             ++i;
                             iterator.remove();
                         } else {
@@ -298,14 +325,14 @@ public class ChunkProviderServer extends Long2ObjectOpenHashMap<Chunk> implement
                         }
                     }
                 }
-                if(i > 10) super.trim();
+                if(i > 32) super.trim();
             }
             if (super.isEmpty()) {
                 //DimensionManager.unloadWorld(this.world.provider.getDimension());
             } else {
                 if(++ticks>1200){
                     int limit = 0;
-                    Iterator<Chunk> iter = super.values().iterator();
+                    Iterator<Chunk> iter = getLoadedChunks().iterator();
                     Chunk chunk;
                     while (iter.hasNext() && limit<100){
                         try {
@@ -320,14 +347,14 @@ public class ChunkProviderServer extends Long2ObjectOpenHashMap<Chunk> implement
                                 chunk.onUnload();
 
                                 if(asyncSaveChunks){
-                                    TChunkExecutor.queueChunkUnload(world, (AnvilChunkLoader)chunkLoader,this, chunk);
+                                    TChunkExecutor.queueChunkUnload((WorldServer)chunk.getWorld(), (AnvilChunkLoader)chunkLoader,this, chunk);
                                 } else {
                                     ForgeChunkManager.putDormantChunk(olong, chunk);
                                     this.saveChunkData(chunk);
                                     this.saveChunkExtraData(chunk);
                                 }
 
-                                super.remove(olong);
+                                removeChunk(olong);
                                 iter.remove();
                                 ++limit;
                             } else {
@@ -335,7 +362,7 @@ public class ChunkProviderServer extends Long2ObjectOpenHashMap<Chunk> implement
                             }
                         }
                     }
-                    if(limit>10) super.trim();
+                    if(limit > 32) super.trim();
                     if(limit >= 100){
                         ticks = 1190;
                     } else {

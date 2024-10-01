@@ -261,7 +261,7 @@ public final class AsyWorldTickerV2{
             if(!tracker.isAsync()) {
                 if(worldserver.meanTickTime() > ElcaConfig.MEAN_OVERLOAD){
                     tracker.tick();
-                    AsyEntityTracker asy = tracker.toAsync();
+                    EntityTracker asy = tracker.toAsync();
                     worldserver.setTracker(asy);
 
                     inf.tracker = service.scheduleAtFixedRate(() -> {

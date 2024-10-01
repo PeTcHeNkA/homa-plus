@@ -14,7 +14,7 @@ public class AsyEntityTracker extends EntityTracker {
 
 
     @Override
-    public AsyEntityTracker toAsync(){
+    public EntityTracker toAsync(){
         return this;
     }
 

@@ -320,6 +320,11 @@ public abstract class PlayerList {
 
 
     public void serverUpdateMovingPlayer(EntityPlayerMP playerIn) {
+        serverUpdateMovingPlayerS(playerIn);
+    }
+
+
+    public static void serverUpdateMovingPlayerS(EntityPlayerMP playerIn) {
         playerIn.getServerWorld().getPlayerChunkMap().updateMovingPlayer(playerIn);
     }
 

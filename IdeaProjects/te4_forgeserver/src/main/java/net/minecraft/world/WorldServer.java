@@ -130,7 +130,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
             throw new RuntimeException("DEBUG NO SERVER IS ENABLED!");
         }
         this.server = server;
-        this.entityTracker = new EntityTracker(this).init();
+        createTracker();
         this.playerChunkMap = new PlayerChunkMap(this);
 
         this.calculateInitialSkylight();
@@ -143,6 +143,11 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         entitySpawner = makeWorldSpawner();
 
         initUnimportant();
+    }
+
+
+    protected void createTracker(){
+        this.entityTracker = new EntityTracker(this).init();
     }
 
 
@@ -624,7 +629,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
     }
 
 
-    protected boolean onUpdateChunkSection(Entity entityIn){
+    protected boolean onUpdateChunkSection(Entity entityIn, int cx, int cy, int cz){
         return true;
     }
 
@@ -637,7 +642,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         int cZpos = MathHelper.floor(entity.posZ * 0.0625);
 
         if (!entity.addedToChunk || entity.chunkCoordX != cXpos || entity.chunkCoordY != cYpos || entity.chunkCoordZ != cZpos) {
-            if(onUpdateChunkSection(entity)) {
+            if(onUpdateChunkSection(entity, cXpos, cYpos, cZpos)) {
                 ChunkProviderServer cps = chunkProviderServer;
                 Chunk chunk;
                 if (entity.addedToChunk) {
@@ -903,7 +908,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         PlayerChunkMapEntry center = this.playerChunkMap.getEntry(MathHelper.floor(x), MathHelper.floor(z));
 
         if(center == null) {
-            List<EntityPlayer> players = playerEntities;
+            List<EntityPlayer> players = curPlayerEntities;
             for (int i = 0; i < players.size(); ++i) {
                 EntityPlayer player = players.get(i);
                 if (player != except) {

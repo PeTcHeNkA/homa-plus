@@ -1752,8 +1752,8 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
             tag.setTag(SStrings.Motion,             this.newDoubleNBTList(this.motionX, this.motionY, this.motionZ));
             tag.setTag(SStrings.Rotation,           this.newFloatNBTList(this.rotationYaw, this.rotationPitch));
             tag.setFloat(SStrings.FallDistance,     this.fallDistance);
-            tag.setShortU(SStrings.Fire, (short)     this.fire);
-            tag.setShortU(SStrings.Air, (short)      this.getAir());
+            tag.setShortU(SStrings.Fire,            this.fire);
+            tag.setShortU(SStrings.Air, (short)     this.getAir());
             tag.setBoolean(SStrings.OnGround,       this.onGround);
             tag.setInteger(SStrings.Dimension,      this.dimension);
             tag.setBoolean(SStrings.Invulnerable,   this.invulnerable);
@@ -2536,9 +2536,12 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         this.readFromNBT(nbttagcompound);
         this.timeUntilPortal = entityIn.timeUntilPortal;
         this.tpInfo = entityIn.tpInfo;
-//        this.lastPortalPos = entityIn.lastPortalPos;
-//        this.lastPortalVec = entityIn.lastPortalVec;
-//        this.teleportDirection = entityIn.teleportDirection;
+
+        EntityTrackerEntry trackerEntry = entityIn.trackerEntry;
+        if(trackerEntry != null){
+            trackerEntry.reInit(this);
+            this.trackerEntry = trackerEntry;
+        }
     }
 
 
@@ -2554,17 +2557,19 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         if ((!this.world.isRemote || SERVER_COMPILE) && !this.isDead) {
             if (!ForgeHooks.onTravelToDimension(this, dimensionIn)) return null;
             MinecraftServer server = this.getServer();
-            int i = this.dimension;
-            WorldServer wFrom = server.getWorld(i);
+            int curDim = this.dimension;
+            WorldServer wFrom = server.getWorld(curDim);
             WorldServer wTo = server.getWorld(dimensionIn);
+
+            //this.dimension = Integer.MIN_VALUE;
+            this.world.removeEntity(this);
             this.dimension = dimensionIn;
 
-            if (i == 1 && dimensionIn == 1 && teleporter.isVanilla()) {
+            if (curDim == 1 && dimensionIn == 1 && teleporter.isVanilla()) {
                 wTo = server.getWorld(0);
                 this.dimension = 0;
             }
 
-            this.world.removeEntity(this);
             this.isDead = false;
             BlockPos blockpos;
 
@@ -2593,7 +2598,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
             if (entity != null) {
                 entity.copyDataFromOld(this);
 
-                if (i == 1 && dimensionIn == 1 && teleporter.isVanilla()) {
+                if (curDim == 1 && dimensionIn == 1 && teleporter.isVanilla()) {
                     BlockPos blockpos1 = wTo.getTopSolidOrLiquidBlock(wTo.getSpawnPoint());
                     entity.moveToBlockPosAndAngles(blockpos1, entity.rotationYaw, entity.rotationPitch);
                 } else {

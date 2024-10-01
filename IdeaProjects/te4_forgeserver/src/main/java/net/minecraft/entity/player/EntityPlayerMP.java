@@ -48,6 +48,7 @@ import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.server.management.PlayerInteractionManager;
+import net.minecraft.server.management.PlayerList;
 import net.minecraft.server.management.UserListOpsEntry;
 import net.minecraft.stats.RecipeBookServer;
 import net.minecraft.stats.StatBase;
@@ -302,7 +303,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
         if (entity != this) {
             if (entity.isEntityAlive()) {
                 this.setPositionAndRotation(entity.posX, entity.posY, entity.posZ, entity.rotationYaw, entity.rotationPitch);
-                this.server.getPlayerList().serverUpdateMovingPlayer(this);
+                PlayerList.serverUpdateMovingPlayerS(this);
 
                 if (this.isSneaking()) {
                     this.setSpectatingEntity(this);

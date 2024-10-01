@@ -6,14 +6,13 @@ import net.minecraft.entity.EntitySpawnPlacementRegistry;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.server.management.PlayerChunkMap;
-import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.SpawnPos;
 import net.minecraft.world.WorldEntitySpawner;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.living.LivingPackSizeEvent;
 import net.minecraftforge.fml.common.eventhandler.Event;
@@ -62,7 +61,7 @@ public class CommonWorldEntitySpawner extends WorldEntitySpawner {
                 shuffled = this.shuffled = null;
                 int preFactor = 0;
                 chunkSet.clear();
-                PlayerChunkMap map = world.getPlayerChunkMap();
+                ChunkProviderServer map = world.chunkProviderServer;
                 int range = ElcaConfig.MAX_WORLD_SPAWNER_RANGE;
 
                 for (EntityPlayer player : world.playerEntities) {
@@ -79,11 +78,10 @@ public class CommonWorldEntitySpawner extends WorldEntitySpawner {
                                     ++preFactor;
 
                                     if (!(dx == -range || dx == range || dz == -range || dz == range) && world.isInWorldBorderChunk(chunkX, chunkZ)) {
-                                        PlayerChunkMapEntry entry = map.getEntry(dx + cX, dz + cZ);
+                                        Chunk chunk = map.getLoadedChunk(dx + cX, dz + cZ);
 
-                                        if (entry != null && entry.isSentToPlayers()) {
-                                            Chunk chunk = entry.getChunk();
-                                            if(chunk != null)chunkSet.put(chunkX, chunkZ, chunk);
+                                        if (chunk != null && chunk.isSentToPlayers()) {
+                                            chunkSet.put(chunkX, chunkZ, chunk);
                                         }
                                     }
                                 }

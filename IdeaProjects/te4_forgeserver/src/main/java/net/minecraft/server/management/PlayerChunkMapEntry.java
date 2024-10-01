@@ -109,6 +109,7 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements R
             player.world.chunkUnWatchEvent.post(chunk, player);
             //MinecraftForge.EVENT_BUS.postF(player.world.chunkUnWatchEvent.init(chunk, player));
             if (isEmpty()) {
+                this.chunk = null;
                 this.playerChunkMap.removeEntry(this);
             }
         }
@@ -142,13 +143,15 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements R
                 this.changes = 0;
                 this.changedSectionFilter = 0;
                 this.sentToPlayers = true;
+                chunk.setSentToPlayers(true);
                 return true;
             } else try {
+                Chunk chunk = this.chunk;
                 int size;
                 if((size = this.size) > 0){
-                    SPacketChunkData packet = new SPacketChunkData(this.chunk, 65535, size==1);
+                    SPacketChunkData packet = new SPacketChunkData(chunk, 65535, size==1);
 
-                    this.playerChunkMap.getWorldServer().getEntityTracker().sendLeashedEntitiesInChunk(this, this.chunk);
+                    this.playerChunkMap.getWorldServer().getEntityTracker().sendLeashedEntitiesInChunk(this, chunk);
 
                     for (int i = 0; i < size; i++) {
                         EntityPlayerMP player = super.get(i);
@@ -158,6 +161,7 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements R
                 }
                 this.changes = changedSectionFilter = 0;
                 this.sentToPlayers = true;
+                chunk.setSentToPlayers(true);
                 return true;
             } catch (Exception e){
                 WorldServer world = ((WorldServer)chunk.getWorld());
@@ -194,19 +198,24 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements R
                 this.playerChunkMap.entryChanged(this);
             }
             this.changedSectionFilter |= 1 << (y >> 4);
-            short short1 = (short) (x << 12 | z << 8 | y);
+            short codedPos = (short) (x << 12 | z << 8 | y);
 
             short[] changedBlocks = this.changedBlocks;
 
             for (int i = 0; i < changes; ++i) {
-                if (changedBlocks[i] == short1)
-                    return;
+                if (changedBlocks[i] == codedPos) return;
             }
-            if (changes == changedBlocks.length)
-                this.changedBlocks = changedBlocks = Arrays.copyOf(changedBlocks, changedBlocks.length << 1);
-
-            changedBlocks[this.changes++] = short1;
+            blockChanged(codedPos);
         }
+    }
+
+
+    protected void blockChanged(short codedPos){
+        short[] changedBlocks = this.changedBlocks;
+        if (changes == changedBlocks.length)
+            this.changedBlocks = changedBlocks = Arrays.copyOf(changedBlocks, changedBlocks.length << 1);
+
+        changedBlocks[this.changes++] = codedPos;
     }
 
 

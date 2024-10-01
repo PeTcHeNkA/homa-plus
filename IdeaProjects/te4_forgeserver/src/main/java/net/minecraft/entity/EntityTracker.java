@@ -56,7 +56,7 @@ public class EntityTracker {
     }
 
 
-    public AsyEntityTracker toAsync(){
+    public EntityTracker toAsync(){
         AsyEntityTracker asy = new AsyEntityTracker(world);
         asy.maxTrackingDistanceThreshold = maxTrackingDistanceThreshold;
         return asy;

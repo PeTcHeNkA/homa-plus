@@ -1,6 +1,8 @@
 package net.minecraft.entity;
 
 import java.util.*;
+import java.util.function.Consumer;
+
 import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.entity.ai.attributes.AttributeMap;
@@ -73,7 +75,7 @@ import static plus.fserver.utls.math.MathUtls.F_256_T_360;
 
 public class EntityTrackerEntry {
     private static final Logger LOGGER = LogManager.getLogger();
-    private final Entity trackedEntity;
+    private Entity trackedEntity;
     private final short range;
     private short maxRange;
     private final int updateFrequency;
@@ -97,7 +99,12 @@ public class EntityTrackerEntry {
     private boolean ridingEntity;
     private boolean onGround;
     public boolean playerEntitiesUpdated;
-    public final Set<EntityPlayerMP> trackingPlayers = new Te4HashSet<>(3);//not edit this!!!
+    public final Set<EntityPlayerMP> trackingPlayers = new Te4HashSet<EntityPlayerMP>(3){
+        @Override
+        public void forEach(Consumer<? super EntityPlayerMP> action) {
+            super.forEachIfCan(action);
+        }
+    };
 
     public EntityTrackerEntry(Entity entityIn, int rangeIn, int maxRangeIn, int updateFrequencyIn, boolean sendVelocityUpdatesIn) {
         this.trackedEntity = entityIn;
@@ -112,6 +119,11 @@ public class EntityTrackerEntry {
         this.encodedRotationPitch = (short) MathHelper.floor(entityIn.rotationPitch * F_256_T_360);
         this.lastHeadMotion = (short) MathHelper.floor(entityIn.getRotationYawHead() * F_256_T_360);
         this.onGround = entityIn.onGround;
+    }
+
+
+    public void reInit(Entity entityIn){
+        this.trackedEntity = entityIn;
     }
 
 
@@ -615,12 +627,12 @@ public class EntityTrackerEntry {
 
 
     public void sendPacketToTrackedPlayers(Packet<?> packetIn){
-        ((Te4HashSet<EntityPlayerMP>)trackingPlayers).forEachIfCan(playerMP -> playerMP.connection.netManager.addToQueueE(packetIn));
+        trackingPlayers.forEach(playerMP -> playerMP.connection.netManager.addToQueueE(packetIn));
     }
 
 
     protected void sendPacketToTrackedPlayers(SEntityPacketPlayBase packetIn){
-        ((Te4HashSet<EntityPlayerMP>)trackingPlayers).forEachIfCan(packetIn);
+        trackingPlayers.forEach(packetIn);
     }
 
 

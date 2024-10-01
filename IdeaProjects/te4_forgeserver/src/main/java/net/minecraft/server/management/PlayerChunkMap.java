@@ -5,7 +5,10 @@ import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Consumer;
 import javax.annotation.Nullable;
+
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -14,18 +17,17 @@ import net.minecraft.world.chunk.Chunk;
 import plus.fserver.ElcaConfig;
 import plus.fserver.server.chunk.PlayerCMapSelector;
 import plus.fserver.utls.collections.ArrayRemSwapListE15;
-import plus.fserver.utls.collections.ArrayRemSwapListE6;
 import plus.fserver.utls.collections.ChunkIterator;
 import plus.fserver.utls.collections.FlatMap;
 import plus.tson.utl.Te4HashSet;
 
 
 public class PlayerChunkMap extends FlatMap<PlayerChunkMapEntry>{
+    protected static final Int2ObjectOpenHashMap<PlayerCMapSelector> SELECTORS = new Int2ObjectOpenHashMap<>(7);
     public static final Predicate<EntityPlayerMP> NOT_SPECTATOR = player -> player != null && !player.isSpectator();
     public static final Predicate<EntityPlayerMP> CAN_GENERATE_CHUNKS = player -> player != null && (!player.isSpectator() || player.getServerWorld().getGameRules().getBoolean("spectatorsGenerateChunks"));
 
     private final WorldServer world;
-    private final ArrayRemSwapListE15<EntityPlayerMP> players = new ArrayRemSwapListE15<>();
     private Te4HashSet<PlayerChunkMapEntry> dirtyEntries = new Te4HashSet<>(7);
     private final List<PlayerChunkMapEntry> pendingSendToPlayers = Lists.newLinkedList();
     private final List<PlayerChunkMapEntry> entriesWithoutChunks = Lists.newLinkedList();
@@ -36,8 +38,6 @@ public class PlayerChunkMap extends FlatMap<PlayerChunkMapEntry>{
     private boolean sortMissingChunks = true;
     private boolean sortSendToPlayers = true;
     private int nextRadius = -1;
-
-    private final Int2ObjectOpenHashMap<PlayerCMapSelector> selectors = new Int2ObjectOpenHashMap<>(7);
 
     public PlayerChunkMap(WorldServer serverWorld) {
         this.world = serverWorld;
@@ -60,7 +60,7 @@ public class PlayerChunkMap extends FlatMap<PlayerChunkMapEntry>{
     }
 
 
-    public ArrayRemSwapListE6<PlayerChunkMapEntry> getEntries() {
+    public Iterable<PlayerChunkMapEntry> getEntries() {
         return entries;
     }
 
@@ -72,13 +72,11 @@ public class PlayerChunkMap extends FlatMap<PlayerChunkMapEntry>{
         }
 
         if (i - this.previousTotalWorldTime > 8000L) {
-            ArrayRemSwapListE15<PlayerChunkMapEntry> entries = this.entries;
             this.previousTotalWorldTime = i;
-            for (int j = 0, s = entries.sizeC(); j < s; ++j) {
-                PlayerChunkMapEntry entry = entries.getC(j);
+            getEntries().forEach(entry -> {
                 entry.update();
                 entry.updateChunkInhabitedTime();
-            }
+            });
         }
 
         //todo java.util.ConcurrentModificationException
@@ -134,7 +132,7 @@ public class PlayerChunkMap extends FlatMap<PlayerChunkMapEntry>{
             }
         }
 
-        if (this.players.isEmptyC()) {
+        if (world.curPlayerEntities.isEmpty()) {
             world.getChunkProvider().queueUnloadAll();
         }
     }
@@ -150,10 +148,7 @@ public class PlayerChunkMap extends FlatMap<PlayerChunkMapEntry>{
         PlayerChunkMapEntry entry = get(chunkX, chunkZ);
 
         if (entry == null) {
-            entry = new PlayerChunkMapEntry(this, chunkX, chunkZ);
-            this.entries.addF(entry);
-
-            put(chunkX, chunkZ, entry);
+            entry = createEntry(chunkX, chunkZ);
 
             if (entry.getChunk() == null) {
                 this.entriesWithoutChunks.add(entry);
@@ -167,6 +162,29 @@ public class PlayerChunkMap extends FlatMap<PlayerChunkMapEntry>{
     }
 
 
+    protected PlayerChunkMapEntry createEntry(int chunkX, int chunkZ){
+        PlayerChunkMapEntry entry = new PlayerChunkMapEntry(this, chunkX, chunkZ);
+        this.entries.addF(entry);
+        put(chunkX, chunkZ, entry);
+        return entry;
+    }
+
+
+    public void removeEntry(PlayerChunkMapEntry entry) {
+        entry.updateChunkInhabitedTime();
+        remove(entry.posX, entry.posZ);
+        this.entries.removeRef(entry);
+        this.pendingSendToPlayers.remove(entry);
+        this.entriesWithoutChunks.remove(entry);
+        Chunk chunk = entry.getChunk();
+
+        if (chunk != null) {
+            WorldServer world = (WorldServer) chunk.getWorld();
+            world.getChunkProvider().queueUnload(chunk);
+        }
+    }
+
+
     public void markBlockForUpdate(BlockPos pos) {
         PlayerChunkMapEntry entry = get(pos.getX() >> 4, pos.getZ() >> 4);
         if (entry != null) entry.blockChanged(pos.getX() & 15, pos.getY(), pos.getZ() & 15);
@@ -176,9 +194,11 @@ public class PlayerChunkMap extends FlatMap<PlayerChunkMapEntry>{
     public final PlayerCMapSelector getBy(int radius){
         if(radius>playerViewRadius)radius = playerViewRadius;
         if(radius<3)radius = 3;
-        PlayerCMapSelector sel = selectors.get(radius);
+        PlayerCMapSelector sel = SELECTORS.get(radius);
         if(sel == null){
-            selectors.put(radius, sel = new PlayerCMapSelector(radius));
+            synchronized (SELECTORS) {
+                SELECTORS.put(radius, sel = new PlayerCMapSelector(radius));
+            }
         }
         return sel;
     }
@@ -187,7 +207,7 @@ public class PlayerChunkMap extends FlatMap<PlayerChunkMapEntry>{
     public void addPlayer(EntityPlayerMP player) {
         PlayerCMapSelector sel = getBy(player.prevRenderRadius = player.renderRadius);
         sel.addPlayer(this, player);
-        players.addF(player);
+        //players.addF(player);
         this.markSortPending();
     }
 
@@ -195,7 +215,7 @@ public class PlayerChunkMap extends FlatMap<PlayerChunkMapEntry>{
     public void removePlayer(EntityPlayerMP player) {
         PlayerCMapSelector sel = getBy(player.renderRadius);
         sel.removePlayer(this, player);
-        players.removeRef(player);
+        //players.removeRef(player);
         this.markSortPending();
     }
 
@@ -246,21 +266,21 @@ public class PlayerChunkMap extends FlatMap<PlayerChunkMapEntry>{
         if (radius != this.playerViewRadius) {
             int i = radius - this.playerViewRadius;
 
-            Object[] data = players.raw().clone();
-            int size = players.sizeC();
+            List<EntityPlayer> players = world.curPlayerEntities;
+            int size = players.size();
 
-            for (int i2 = 0; i2 < size; i2++) {
-                EntityPlayerMP entityplayermp = (EntityPlayerMP) data[i2];
-                int j = (int)entityplayermp.posX >> 4;
-                int k = (int)entityplayermp.posZ >> 4;
+            for (int cursor = 0; cursor < size; cursor++) {
+                EntityPlayerMP player = (EntityPlayerMP) players.get(cursor);
+                int j = (int)player.posX >> 4;
+                int k = (int)player.posZ >> 4;
 
                 if (i > 0) {
                     for (int j1 = j - radius; j1 <= j + radius; ++j1) {
                         for (int k1 = k - radius; k1 <= k + radius; ++k1) {
-                            PlayerChunkMapEntry playerchunkmapentry = this.getOrCreateEntry(j1, k1);
+                            PlayerChunkMapEntry entry = this.getOrCreateEntry(j1, k1);
 
-                            if (!playerchunkmapentry.contains(entityplayermp)) {
-                                playerchunkmapentry.addPlayer(entityplayermp);
+                            if (entry != null && !entry.contains(player)) {
+                                entry.addPlayer(player);
                             }
                         }
                     }
@@ -268,7 +288,8 @@ public class PlayerChunkMap extends FlatMap<PlayerChunkMapEntry>{
                     for (int l = j - this.playerViewRadius; l <= j + this.playerViewRadius; ++l) {
                         for (int i1 = k - this.playerViewRadius; i1 <= k + this.playerViewRadius; ++i1) {
                             if (!this.overlaps(l, i1, j, k, radius)) {
-                                this.getOrCreateEntry(l, i1).removePlayer(entityplayermp);
+                                PlayerChunkMapEntry entry = getEntry(l, i1);
+                                if(entry != null) entry.removePlayer(player);
                             }
                         }
                     }
@@ -299,21 +320,6 @@ public class PlayerChunkMap extends FlatMap<PlayerChunkMapEntry>{
 
     public void entryChanged(PlayerChunkMapEntry entry) {
         this.dirtyEntries.add(entry);
-    }
-
-
-    public void removeEntry(PlayerChunkMapEntry entry) {
-        entry.updateChunkInhabitedTime();
-        remove(entry.posX, entry.posZ);
-        this.entries.removeRef(entry);
-        //this.dirtyEntries.remove(entry);
-        this.pendingSendToPlayers.remove(entry);
-        this.entriesWithoutChunks.remove(entry);
-        Chunk chunk = entry.getChunk();
-
-        if (chunk != null) {
-            this.getWorldServer().getChunkProvider().queueUnload(chunk);
-        }
     }
 
 
