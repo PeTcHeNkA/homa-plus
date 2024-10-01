@@ -3,6 +3,7 @@ package net.minecraftforge.event.world;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.eventhandler.ListenerList;
 import javax.annotation.Nullable;
 import java.util.List;
 
@@ -51,4 +52,18 @@ public class GetCollisionBoxesEvent extends WorldEvent {
     public List<AxisAlignedBB> getCollisionBoxesList() {
         return collisionBoxesList;
     }
+
+
+    //Elca-Forge event system
+    //Start generated code
+    private static ListenerList LISTENER_LIST;
+    protected void setup() {
+        super.setup();
+        if (LISTENER_LIST == null)
+            LISTENER_LIST = new ListenerList(super.getListenerList());
+    }
+    public ListenerList getListenerList() {
+        return LISTENER_LIST;
+    }
+    //End generated code
 }

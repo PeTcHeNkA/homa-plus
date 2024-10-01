@@ -57,4 +57,18 @@ public class LivingPackSizeEvent extends LivingEvent {
             return entity.getMaxSpawnedInChunk();
         }
     }
+
+
+    //Elca-Forge event system
+    //Start generated code
+    private static ListenerList LISTENER_LIST;
+    protected void setup() {
+        super.setup();
+        if (LISTENER_LIST == null)
+            LISTENER_LIST = new ListenerList(super.getListenerList());
+    }
+    public ListenerList getListenerList() {
+        return LISTENER_LIST;
+    }
+    //End generated code
 }

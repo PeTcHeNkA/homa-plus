@@ -5,6 +5,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.fml.common.eventhandler.EventBus;
 import net.minecraftforge.fml.common.eventhandler.IEventListener;
+import net.minecraftforge.fml.common.eventhandler.ListenerList;
 
 
 public class LivingEvent extends EntityEvent {
@@ -67,6 +68,20 @@ public class LivingEvent extends EntityEvent {
 
         @Deprecated
         public LivingUpdateEvent(EntityLivingBase e){ super(e); }
+
+
+        //Elca-Forge event system
+        //Start generated code
+        private static ListenerList LISTENER_LIST;
+        protected void setup() {
+            super.setup();
+            if (LISTENER_LIST == null)
+                LISTENER_LIST = new ListenerList(super.getListenerList());
+        }
+        public ListenerList getListenerList() {
+            return LISTENER_LIST;
+        }
+        //End generated code
     }
 
 
@@ -75,5 +90,33 @@ public class LivingEvent extends EntityEvent {
 
 
         public LivingJumpEvent(){}
+
+
+        //Elca-Forge event system
+        //Start generated code
+        private static ListenerList LISTENER_LIST;
+        protected void setup() {
+            super.setup();
+            if (LISTENER_LIST == null)
+                LISTENER_LIST = new ListenerList(super.getListenerList());
+        }
+        public ListenerList getListenerList() {
+            return LISTENER_LIST;
+        }
+        //End generated code
     }
+
+
+    //Elca-Forge event system
+    //Start generated code
+    private static ListenerList LISTENER_LIST;
+    protected void setup() {
+        super.setup();
+        if (LISTENER_LIST == null)
+            LISTENER_LIST = new ListenerList(super.getListenerList());
+    }
+    public ListenerList getListenerList() {
+        return LISTENER_LIST;
+    }
+    //End generated code
 }

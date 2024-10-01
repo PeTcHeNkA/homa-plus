@@ -12,6 +12,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.fml.common.eventhandler.EventBus;
 import net.minecraftforge.fml.common.eventhandler.IEventListener;
+import net.minecraftforge.fml.common.eventhandler.ListenerList;
 
 
 public class PlayerEvent extends LivingEvent {
@@ -71,6 +72,20 @@ public class PlayerEvent extends LivingEvent {
         public void setCanHarvest(boolean success){
             this.success = success;
         }
+
+
+        //Elca-Forge event system
+        //Start generated code
+        private static ListenerList LISTENER_LIST;
+        protected void setup() {
+            super.setup();
+            if (LISTENER_LIST == null)
+                LISTENER_LIST = new ListenerList(super.getListenerList());
+        }
+        public ListenerList getListenerList() {
+            return LISTENER_LIST;
+        }
+        //End generated code
     }
 
 
@@ -143,6 +158,20 @@ public class PlayerEvent extends LivingEvent {
         public boolean isCancelable() {
             return true;
         }
+
+
+        //Elca-Forge event system
+        //Start generated code
+        private static ListenerList LISTENER_LIST;
+        protected void setup() {
+            super.setup();
+            if (LISTENER_LIST == null)
+                LISTENER_LIST = new ListenerList(super.getListenerList());
+        }
+        public ListenerList getListenerList() {
+            return LISTENER_LIST;
+        }
+        //End generated code
     }
 
 
@@ -170,6 +199,20 @@ public class PlayerEvent extends LivingEvent {
         public void setDisplayname(String displayname) {
             this.displayname = displayname;
         }
+
+
+        //Elca-Forge event system
+        //Start generated code
+        private static ListenerList LISTENER_LIST;
+        protected void setup() {
+            super.setup();
+            if (LISTENER_LIST == null)
+                LISTENER_LIST = new ListenerList(super.getListenerList());
+        }
+        public ListenerList getListenerList() {
+            return LISTENER_LIST;
+        }
+        //End generated code
     }
 
 
@@ -192,6 +235,20 @@ public class PlayerEvent extends LivingEvent {
         public boolean isWasDeath() {
             return wasDeath;
         }
+
+
+        //Elca-Forge event system
+        //Start generated code
+        private static ListenerList LISTENER_LIST;
+        protected void setup() {
+            super.setup();
+            if (LISTENER_LIST == null)
+                LISTENER_LIST = new ListenerList(super.getListenerList());
+        }
+        public ListenerList getListenerList() {
+            return LISTENER_LIST;
+        }
+        //End generated code
     }
 
 
@@ -223,6 +280,20 @@ public class PlayerEvent extends LivingEvent {
         public Entity getTarget() {
             return target;
         }
+
+
+        //Elca-Forge event system
+        //Start generated code
+        private static ListenerList LISTENER_LIST;
+        protected void setup() {
+            super.setup();
+            if (LISTENER_LIST == null)
+                LISTENER_LIST = new ListenerList(super.getListenerList());
+        }
+        public ListenerList getListenerList() {
+            return LISTENER_LIST;
+        }
+        //End generated code
     }
 
 
@@ -254,6 +325,20 @@ public class PlayerEvent extends LivingEvent {
         public Entity getTarget() {
             return target;
         }
+
+
+        //Elca-Forge event system
+        //Start generated code
+        private static ListenerList LISTENER_LIST;
+        protected void setup() {
+            super.setup();
+            if (LISTENER_LIST == null)
+                LISTENER_LIST = new ListenerList(super.getListenerList());
+        }
+        public ListenerList getListenerList() {
+            return LISTENER_LIST;
+        }
+        //End generated code
     }
 
 
@@ -282,7 +367,22 @@ public class PlayerEvent extends LivingEvent {
         public String getPlayerUUID() {
             return playerUUID;
         }
+
+
+        //Elca-Forge event system
+        //Start generated code
+        private static ListenerList LISTENER_LIST;
+        protected void setup() {
+            super.setup();
+            if (LISTENER_LIST == null)
+                LISTENER_LIST = new ListenerList(super.getListenerList());
+        }
+        public ListenerList getListenerList() {
+            return LISTENER_LIST;
+        }
+        //End generated code
     }
+
 
     public static class SaveToFile extends PlayerEvent {
         private final File playerDirectory;
@@ -309,6 +409,20 @@ public class PlayerEvent extends LivingEvent {
         public String getPlayerUUID() {
             return playerUUID;
         }
+
+
+        //Elca-Forge event system
+        //Start generated code
+        private static ListenerList LISTENER_LIST;
+        protected void setup() {
+            super.setup();
+            if (LISTENER_LIST == null)
+                LISTENER_LIST = new ListenerList(super.getListenerList());
+        }
+        public ListenerList getListenerList() {
+            return LISTENER_LIST;
+        }
+        //End generated code
     }
 
 
@@ -328,5 +442,33 @@ public class PlayerEvent extends LivingEvent {
         public double getVisibilityModifier() {
             return visibilityModifier;
         }
+
+
+        //Elca-Forge event system
+        //Start generated code
+        private static ListenerList LISTENER_LIST;
+        protected void setup() {
+            super.setup();
+            if (LISTENER_LIST == null)
+                LISTENER_LIST = new ListenerList(super.getListenerList());
+        }
+        public ListenerList getListenerList() {
+            return LISTENER_LIST;
+        }
+        //End generated code
     }
+
+
+    //Elca-Forge event system
+    //Start generated code
+    private static ListenerList LISTENER_LIST;
+    protected void setup() {
+        super.setup();
+        if (LISTENER_LIST == null)
+            LISTENER_LIST = new ListenerList(super.getListenerList());
+    }
+    public ListenerList getListenerList() {
+        return LISTENER_LIST;
+    }
+    //End generated code
 }

@@ -7,6 +7,7 @@ import net.minecraft.world.chunk.storage.AnvilChunkLoader;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraftforge.fml.common.FMLLog;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.Consumer;
 
 
 public abstract class TChunkTask implements Runnable{
@@ -14,7 +15,7 @@ public abstract class TChunkTask implements Runnable{
     protected final AnvilChunkLoader loader;
     protected final ChunkProviderServer provider;
     protected Chunk chunk;
-    protected final ConcurrentLinkedQueue<Runnable> callbacks = new ConcurrentLinkedQueue<>();
+    protected final ConcurrentLinkedQueue<Consumer<Chunk>> callbacks = new ConcurrentLinkedQueue<>();
     protected boolean finished = false;
 
 
@@ -56,12 +57,12 @@ public abstract class TChunkTask implements Runnable{
     public abstract void syncCallback();
 
 
-    public void addCallback(Runnable callback) {
+    public void addCallback(Consumer<Chunk> callback) {
         this.callbacks.add(callback);
     }
 
 
-    public void removeCallback(Runnable callback) {
+    public void removeCallback(Consumer<Chunk> callback) {
         this.callbacks.remove(callback);
     }
 
@@ -85,8 +86,9 @@ public abstract class TChunkTask implements Runnable{
 
 
     public void runCallbacks() {
-        for (Runnable r : this.callbacks) {
-            r.run();
+        Chunk chunk = this.chunk;
+        for (Consumer<Chunk> r : this.callbacks) {
+            r.accept(chunk);
         }
         this.callbacks.clear();
     }

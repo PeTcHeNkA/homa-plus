@@ -5,6 +5,7 @@ import net.minecraft.tileentity.MobSpawnerBaseLogic;
 import net.minecraftforge.fml.common.eventhandler.Cancelable;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.eventhandler.ListenerList;
 
 
 public class LivingSpawnEvent extends LivingEvent {
@@ -93,6 +94,20 @@ public class LivingSpawnEvent extends LivingEvent {
         public boolean hasResult() {
             return true;
         }
+
+
+        //Elca-Forge event system
+        //Start generated code
+        private static ListenerList LISTENER_LIST;
+        protected void setup() {
+            super.setup();
+            if (LISTENER_LIST == null)
+                LISTENER_LIST = new ListenerList(super.getListenerList());
+        }
+        public ListenerList getListenerList() {
+            return LISTENER_LIST;
+        }
+        //End generated code
     }
 
 
@@ -131,6 +146,20 @@ public class LivingSpawnEvent extends LivingEvent {
         public boolean isCancelable() {
             return true;
         }
+
+
+        //Elca-Forge event system
+        //Start generated code
+        private static ListenerList LISTENER_LIST;
+        protected void setup() {
+            super.setup();
+            if (LISTENER_LIST == null)
+                LISTENER_LIST = new ListenerList(super.getListenerList());
+        }
+        public ListenerList getListenerList() {
+            return LISTENER_LIST;
+        }
+        //End generated code
     }
 
 
@@ -146,5 +175,33 @@ public class LivingSpawnEvent extends LivingEvent {
         public void initAllowDespawn(EntityLiving entity){
             initLivingSpawnEvent(entity, entity.world, (float)entity.posX, (float)entity.posY, (float)entity.posZ);
         }
+
+
+        //Elca-Forge event system
+        //Start generated code
+        private static ListenerList LISTENER_LIST;
+        protected void setup() {
+            super.setup();
+            if (LISTENER_LIST == null)
+                LISTENER_LIST = new ListenerList(super.getListenerList());
+        }
+        public ListenerList getListenerList() {
+            return LISTENER_LIST;
+        }
+        //End generated code
     }
+
+
+    //Elca-Forge event system
+    //Start generated code
+    private static ListenerList LISTENER_LIST;
+    protected void setup() {
+        super.setup();
+        if (LISTENER_LIST == null)
+            LISTENER_LIST = new ListenerList(super.getListenerList());
+    }
+    public ListenerList getListenerList() {
+        return LISTENER_LIST;
+    }
+    //End generated code
 }

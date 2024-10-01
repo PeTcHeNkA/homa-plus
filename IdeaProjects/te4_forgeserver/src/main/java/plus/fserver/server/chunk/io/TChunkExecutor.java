@@ -8,6 +8,8 @@ import net.minecraft.world.chunk.storage.AnvilChunkLoader;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraftforge.fml.common.FMLLog;
 
+import java.util.function.Consumer;
+
 
 public class TChunkExecutor {
     public static Chunk syncChunkLoad(WorldServer world, AnvilChunkLoader loader,
@@ -28,7 +30,7 @@ public class TChunkExecutor {
 
 
     public static void queueChunkLoad(WorldServer world, AnvilChunkLoader loader, IChunkProvider provider,
-                                      int x, int z, Runnable runnable) {
+                                      int x, int z, Consumer<Chunk> runnable) {
         TQueuedChunk key = new TQueuedChunk(x, z, world);
 
         TChunkTask task = world.getChunkTasks().get(key);
@@ -74,7 +76,7 @@ public class TChunkExecutor {
 
 
     public static void queueChunkGenerate(WorldServer world, AnvilChunkLoader loader, IChunkProvider provider,
-                                          int x, int z, Runnable runnable) {
+                                          int x, int z, Consumer<Chunk> runnable) {
         TQueuedChunk key = new TQueuedChunk(x, z, world);
 
         TChunkTask task = world.getChunkTasks().get(key);
@@ -89,7 +91,7 @@ public class TChunkExecutor {
     }
 
 
-    public static void dropQueuedChunkLoad(World world, int x, int z, Runnable runnable) {
+    public static void dropQueuedChunkLoad(World world, int x, int z, Consumer<Chunk> runnable) {
         TQueuedChunk key = new TQueuedChunk(x, z, world);
 
         WorldServer sworld = (WorldServer) world;

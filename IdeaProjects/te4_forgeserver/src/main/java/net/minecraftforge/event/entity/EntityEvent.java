@@ -4,6 +4,7 @@ import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraft.entity.Entity;
 import net.minecraftforge.fml.common.eventhandler.EventBus;
 import net.minecraftforge.fml.common.eventhandler.IEventListener;
+import net.minecraftforge.fml.common.eventhandler.ListenerList;
 
 
 public class EntityEvent extends Event {
@@ -31,6 +32,20 @@ public class EntityEvent extends Event {
         public EntityConstructing(Entity entity) {
             super(entity);
         }
+
+
+        //Elca-Forge event system
+        //Start generated code
+        private static ListenerList LISTENER_LIST;
+        protected void setup() {
+            super.setup();
+            if (LISTENER_LIST == null)
+                LISTENER_LIST = new ListenerList(super.getListenerList());
+        }
+        public ListenerList getListenerList() {
+            return LISTENER_LIST;
+        }
+        //End generated code
     }
 
 
@@ -63,6 +78,20 @@ public class EntityEvent extends Event {
         public void setCanUpdate(boolean canUpdate) {
             this.canUpdate = canUpdate;
         }
+
+
+        //Elca-Forge event system
+        //Start generated code
+        private static ListenerList LISTENER_LIST;
+        protected void setup() {
+            super.setup();
+            if (LISTENER_LIST == null)
+                LISTENER_LIST = new ListenerList(super.getListenerList());
+        }
+        public ListenerList getListenerList() {
+            return LISTENER_LIST;
+        }
+        //End generated code
     }
 
 
@@ -97,5 +126,33 @@ public class EntityEvent extends Event {
         public void setOldChunkX(int oldChunkX) { this.oldChunkX = oldChunkX; }
         public int getOldChunkZ() { return oldChunkZ; }
         public void setOldChunkZ(int oldChunkZ) { this.oldChunkZ = oldChunkZ; }
+
+
+        //Elca-Forge event system
+        //Start generated code
+        private static ListenerList LISTENER_LIST;
+        protected void setup() {
+            super.setup();
+            if (LISTENER_LIST == null)
+                LISTENER_LIST = new ListenerList(super.getListenerList());
+        }
+        public ListenerList getListenerList() {
+            return LISTENER_LIST;
+        }
+        //End generated code
     }
+
+
+    //Elca-Forge event system
+    //Start generated code
+    private static ListenerList LISTENER_LIST;
+    protected void setup() {
+        super.setup();
+        if (LISTENER_LIST == null)
+            LISTENER_LIST = new ListenerList(super.getListenerList());
+    }
+    public ListenerList getListenerList() {
+        return LISTENER_LIST;
+    }
+    //End generated code
 }

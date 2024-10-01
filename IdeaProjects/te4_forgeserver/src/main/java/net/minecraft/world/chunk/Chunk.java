@@ -14,6 +14,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.init.Biomes;
 import net.minecraft.init.Blocks;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockIDIndexes;
 import net.minecraft.util.ClassInheritanceMultiMap;
@@ -157,6 +158,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
         if(b) state |= 16;
         else state &= ~16;
     }
+    public PlayerChunkMapEntry entry;
 
     public Chunk(World worldIn, int x, int z) {
         this.storageArrays = new ExtendedBlockStorage[STORAGES_COUNT];

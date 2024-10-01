@@ -3,6 +3,7 @@ package net.minecraftforge.event.entity.living;
 import net.minecraftforge.fml.common.eventhandler.Cancelable;
 import net.minecraft.util.DamageSource;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraftforge.fml.common.eventhandler.ListenerList;
 
 
 @Cancelable
@@ -44,4 +45,18 @@ public class LivingDamageEvent extends LivingEvent {
     public boolean isCancelable() {
         return true;
     }
+
+
+    //Elca-Forge event system
+    //Start generated code
+    private static ListenerList LISTENER_LIST;
+    protected void setup() {
+        super.setup();
+        if (LISTENER_LIST == null)
+            LISTENER_LIST = new ListenerList(super.getListenerList());
+    }
+    public ListenerList getListenerList() {
+        return LISTENER_LIST;
+    }
+    //End generated code
 }

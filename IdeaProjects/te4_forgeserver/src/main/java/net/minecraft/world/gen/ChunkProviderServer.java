@@ -1,16 +1,14 @@
 package net.minecraft.world.gen;
 
 import it.unimi.dsi.fastutil.longs.*;
-import it.unimi.dsi.fastutil.objects.ObjectCollection;
-import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import java.io.IOException;
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.EnumCreatureType;
+import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -31,10 +29,12 @@ import plus.fserver.ElcaConfig;
 import plus.fserver.api.Keep;
 import plus.fserver.server.chunk.io.TChunkExecutor;
 import plus.fserver.server.chunk.io.TChunkTask;
+import plus.fserver.utls.collections.ChunkIteratorPro;
 import plus.fserver.utls.collections.ChunkPopulationTask;
+import plus.fserver.utls.collections.Long2ChunkMap;
 
 
-public class ChunkProviderServer extends Long2ObjectOpenHashMap<Chunk> implements IChunkProvider {
+public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider {
     @Keep
     private static final Logger LOGGER = LogManager.getLogger();
     @Keep
@@ -52,9 +52,8 @@ public class ChunkProviderServer extends Long2ObjectOpenHashMap<Chunk> implement
     private final ChunkPopulationTask task;
     private final boolean asyncSaveChunks;
 
-
     public ChunkProviderServer(WorldServer world, IChunkLoader chunkLoader, IChunkGenerator chunkGeneratorIn) {
-        super(512);
+        super(256);
         this.world = world;
         this.chunkLoader = chunkLoader;
         this.chunkGenerator = chunkGeneratorIn;
@@ -65,10 +64,23 @@ public class ChunkProviderServer extends Long2ObjectOpenHashMap<Chunk> implement
 
     public void forChunks(Consumer<Chunk> task) {
         Chunk[] raw = super.value;
-        for (int i = 0, s = raw.length; i < s; i++){
-            Chunk chunk = raw[i];
-            if(chunk != null) task.accept(chunk);
+        for (Chunk chunk : raw) {
+            if (chunk != null) task.accept(chunk);
         }
+    }
+
+
+    public void forEntries(Consumer<PlayerChunkMapEntry> task) {
+        Chunk[] chunks = super.value;
+        for (Chunk chunk : chunks) {
+            PlayerChunkMapEntry entry;
+            if (chunk != null && (entry = chunk.entry) != null) task.accept(entry);
+        }
+    }
+
+
+    public ChunkIteratorPro forChunks(int radius){
+        return new ChunkIteratorPro(super.value, radius);
     }
 
 
@@ -114,12 +126,22 @@ public class ChunkProviderServer extends Long2ObjectOpenHashMap<Chunk> implement
 
     @Nullable
     public Chunk loadChunk(int x, int z) {
-        return loadChunk(x, z, null);
+        return loadChunk(x, z, (Consumer<Chunk>) null);
     }
 
 
     @Nullable
     public Chunk loadChunk(int x, int z, @Nullable Runnable runnable) {
+        if(runnable == null){
+            return loadChunk(x, z, (Consumer<Chunk>) null);
+        } else {
+            return loadChunk(x, z, chunk -> runnable.run());
+        }
+    }
+
+
+    @Nullable
+    public Chunk loadChunk(int x, int z, @Nullable Consumer<Chunk> runnable) {
         Chunk chunk = this.getLoadedChunk(x, z);
         if (chunk == null) {
             long chunkHash = ChunkPos.asLong(x, z);
@@ -159,7 +181,7 @@ public class ChunkProviderServer extends Long2ObjectOpenHashMap<Chunk> implement
             }
             if(chunk != null) chunk.setRequested();
         }
-        if (runnable != null) runnable.run();
+        if (runnable != null) runnable.accept(chunk);
         return chunk;
     }
 

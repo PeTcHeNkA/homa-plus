@@ -80,7 +80,7 @@ import plus.fserver.entity.EntityCollider;
 import plus.fserver.server.chunk.io.TChunkTask;
 import plus.fserver.server.chunk.io.TQueuedChunk;
 import plus.fserver.server.elca.ChunkSelector;
-import plus.fserver.utls.collections.ChunkIterator;
+import plus.fserver.utls.collections.ChunkIteratorPro;
 import plus.fserver.utls.collections.EntityIDHashSplitedList;
 import plus.fserver.utls.collections.EntityRemSwapList;
 import plus.fserver.utls.math.MathUtls;
@@ -452,7 +452,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
     private void collideAll(){
         EntityCollider collider = this.collider;
         collider.begin(getGameRules().maxEntityCramming.getInt());
-        for (Chunk chunk:this.playerChunkMap.getChunkIterator(ElcaConfig.CHUNK_TICK_RADIUS_1)){
+        for (Chunk chunk: chunkProviderServer.forChunks(ElcaConfig.CHUNK_TICK_RADIUS_1)){
             collider.collideAll(chunk);
         }
         collider.complete();
@@ -1501,8 +1501,9 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
 
     protected void updateBlocks(final int factor) {
         this.playerCheckLight();
+        ChunkProviderServer cps = chunkProviderServer;
         if (isDebug) {
-            for (Iterator<Chunk> iterator = this.playerChunkMap.getChunkIterator(); iterator.hasNext();){
+            for (Iterator<Chunk> iterator = cps.forChunks(ElcaConfig.CHUNK_TICK_RADIUS_2); iterator.hasNext();){
                 iterator.next().onTick(false);
             }
         } else {
@@ -1530,7 +1531,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
             EntityCollider collider = this.collider;
             collider.begin(getGameRules().maxEntityCramming.getInt());
 
-            for (ChunkIterator iter = this.playerChunkMap.getChunkIterator(radius); iter.hasNext();){
+            for (ChunkIteratorPro iter = cps.forChunks(radius); iter.hasNext();){
                 selector.setChunk(chunk = iter.next());
                 collider.collideAll(chunk);
 
