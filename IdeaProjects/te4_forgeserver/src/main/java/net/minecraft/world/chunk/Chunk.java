@@ -14,6 +14,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.init.Biomes;
 import net.minecraft.init.Blocks;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockIDIndexes;
 import net.minecraft.util.ClassInheritanceMultiMap;
@@ -112,6 +113,8 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
     //100   (4)  = should tick
     //1000  (8)  = now sawing
     //10000 (16) = sent to players
+
+    public PlayerChunkMapEntry chunkMapEntry;
 
     public boolean isNotUnloadQueued(){
         return (state & 1) == 1;
@@ -885,6 +888,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
     public void onUnload() {
         state = 0;
+        chunkMapEntry = null;
         this.loaded = false;
         World lWorld = this.world;
         for (TileEntity tileentity : this.tileEntities.values()) {

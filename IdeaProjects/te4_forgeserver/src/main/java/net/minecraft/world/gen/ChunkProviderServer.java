@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.EnumCreatureType;
+import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -29,6 +30,7 @@ import plus.fserver.api.Keep;
 import plus.fserver.server.chunk.io.TChunkExecutor;
 import plus.fserver.server.chunk.io.TChunkTask;
 import plus.fserver.server.chunk.io.WrappedChunkRunnable;
+import plus.fserver.utls.collections.ChunkIteratorPro;
 import plus.fserver.utls.collections.ChunkPopulationTask;
 import plus.fserver.utls.collections.Long2ChunkMap;
 
@@ -67,6 +69,21 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
         for (Chunk chunk : raw) {
             if (chunk != null) task.accept(chunk);
         }
+    }
+
+
+    public void forEntries(Consumer<PlayerChunkMapEntry> task) {
+        Chunk[] raw = super.value;
+        for (Chunk chunk : raw) {
+            PlayerChunkMapEntry entry;
+            if (chunk != null && (entry = chunk.chunkMapEntry) != null)
+                task.accept(entry);
+        }
+    }
+
+
+    public ChunkIteratorPro forChunks(int radius){
+        return new ChunkIteratorPro(super.value, radius);
     }
 
 

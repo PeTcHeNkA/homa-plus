@@ -13,10 +13,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
-import plus.fserver.ElcaConfig;
+import net.minecraft.world.gen.ChunkProviderServer;
 import plus.fserver.server.chunk.PlayerCMapSelector;
-import plus.fserver.utls.collections.ArrayRemSwapListE15;
-import plus.fserver.utls.collections.ChunkIterator;
 import plus.fserver.utls.collections.FlatMap;
 import plus.tson.utl.Te4HashSet;
 
@@ -27,10 +25,11 @@ public class PlayerChunkMap extends FlatMap<PlayerChunkMapEntry>{
     public static final Predicate<EntityPlayerMP> CAN_GENERATE_CHUNKS = player -> player != null && (!player.isSpectator() || player.getServerWorld().getGameRules().getBoolean("spectatorsGenerateChunks"));
 
     private final WorldServer world;
+    private final ChunkProviderServer provider;
     private Te4HashSet<PlayerChunkMapEntry> dirtyEntries = new Te4HashSet<>(7);
     private final List<PlayerChunkMapEntry> pendingSendToPlayers = Lists.newLinkedList();
     private final List<PlayerChunkMapEntry> entriesWithoutChunks = Lists.newLinkedList();
-    private final ArrayRemSwapListE15<PlayerChunkMapEntry> entries = new ArrayRemSwapListE15<>();
+    //private final ArrayRemSwapListE15<PlayerChunkMapEntry> entries = new ArrayRemSwapListE15<>();
 
     private int playerViewRadius;
     private long previousTotalWorldTime;
@@ -40,6 +39,7 @@ public class PlayerChunkMap extends FlatMap<PlayerChunkMapEntry>{
 
     public PlayerChunkMap(WorldServer serverWorld) {
         this.world = serverWorld;
+        this.provider = serverWorld.getChunkProvider();
         this.setPlayerViewRadiusU(serverWorld.getMinecraftServer().getPlayerList().getViewDistance());
     }
 
@@ -49,19 +49,24 @@ public class PlayerChunkMap extends FlatMap<PlayerChunkMapEntry>{
     }
 
 
-    public ChunkIterator getChunkIterator() {
-        return new ChunkIterator(entries, ElcaConfig.CHUNK_TICK_RADIUS_2);
+    public ChunkProviderServer getProvider(){
+        return provider;
     }
 
 
-    public ChunkIterator getChunkIterator(int radius) {
-        return new ChunkIterator(entries, radius);
-    }
-
-
-    public Iterable<PlayerChunkMapEntry> getEntries() {
-        return entries;
-    }
+//    public ChunkIterator getChunkIterator() {
+//        return new ChunkIterator(entries, ElcaConfig.CHUNK_TICK_RADIUS_2);
+//    }
+//
+//
+//    public ChunkIterator getChunkIterator(int radius) {
+//        return new ChunkIterator(entries, radius);
+//    }
+//
+//
+//    public Iterable<PlayerChunkMapEntry> getEntries() {
+//        return entries;
+//    }
 
 
     public void tick() {
@@ -72,7 +77,7 @@ public class PlayerChunkMap extends FlatMap<PlayerChunkMapEntry>{
 
         if (i - this.previousTotalWorldTime > 8000L) {
             this.previousTotalWorldTime = i;
-            getEntries().forEach(entry -> {
+            provider.forEntries(entry -> {
                 entry.update(this);
                 entry.updateChunkInhabitedTime(this);
             });
@@ -166,7 +171,7 @@ public class PlayerChunkMap extends FlatMap<PlayerChunkMapEntry>{
 
     protected PlayerChunkMapEntry createEntry(int chunkX, int chunkZ){
         PlayerChunkMapEntry entry = new PlayerChunkMapEntry(this, chunkX, chunkZ);
-        this.entries.addF(entry);
+        //this.entries.addF(entry);
         put(chunkX, chunkZ, entry);
         return entry;
     }
@@ -175,12 +180,13 @@ public class PlayerChunkMap extends FlatMap<PlayerChunkMapEntry>{
     public void removeEntry(PlayerChunkMapEntry entry) {
         entry.updateChunkInhabitedTime(this);
         remove(entry.posX, entry.posZ);
-        this.entries.removeRef(entry);
+        //this.entries.removeRef(entry);
         this.pendingSendToPlayers.remove(entry);
         this.entriesWithoutChunks.remove(entry);
         Chunk chunk = entry.getChunk();
 
         if (chunk != null) {
+            chunk.chunkMapEntry = null;
             WorldServer world = (WorldServer) chunk.getWorld();
             world.getChunkProvider().queueUnload(chunk);
         }

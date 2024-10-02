@@ -58,7 +58,7 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements C
         this.posZ = chunkZ;
 
         if(!ElcaCV.DEBUG_NO_SERVER){
-            mapIn.getWorldServer().getChunkProvider().loadChunk(chunkX, chunkZ, this);
+            mapIn.getProvider().loadChunk(chunkX, chunkZ, this);
         }
     }
 
@@ -67,6 +67,7 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements C
     public void accept(@Nullable Chunk chunk) {
         this.chunk = chunk;
         if(chunk != null){
+            chunk.chunkMapEntry = this;
             chunk.setUnloadQueued(false);
         } else {
             FMLLog.bigWarning("Cant complete chunk PCME loading callback at [{} {}]", posX, posZ);
@@ -128,9 +129,9 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements C
             return true;
         } else {
             if (canGenerate) {
-                this.chunk = map.getWorldServer().getChunkProvider().provideChunk(posX, posZ);
+                this.chunk = map.getProvider().provideChunk(posX, posZ);
             } else {
-                this.chunk = map.getWorldServer().getChunkProvider().loadChunk(posX, posZ);
+                this.chunk = map.getProvider().loadChunk(posX, posZ);
             }
             return this.chunk != null;
         }
