@@ -79,7 +79,7 @@ public abstract class TChunkTask implements Runnable{
 
 
     public boolean hasCallback() {
-        return this.callbacks.isEmpty();
+        return !this.callbacks.isEmpty();
     }
 
 
