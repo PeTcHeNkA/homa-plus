@@ -650,8 +650,9 @@ public class RedstoneEngine {
 
 
     private void editRedstoneState(WorldServer world, BlockPos pos, IBlockState newState){
-        Chunk chunk = world.localSelector.getChunkE(pos.getX()>>4, pos.getZ()>>4);
-        chunk.setBlockStateFastNoTile(pos.getX(), pos.getY(), pos.getZ(), newState);
+        int px, pz;
+        Chunk chunk = world.localSelector.getChunkE((px = pos.getX())>>4, (pz = pos.getZ())>>4);
+        chunk.setBlockStateFastNoTile(px, pos.getY(), pz, newState);
         world.getPlayerChunkMap().markBlockForUpdate(pos);
     }
 

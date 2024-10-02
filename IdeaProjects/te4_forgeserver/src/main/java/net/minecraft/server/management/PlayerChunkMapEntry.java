@@ -23,6 +23,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.gen.ChunkProviderServer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import plus.fserver.ElcaCV;
@@ -46,17 +47,38 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements C
     @Nullable
     private Chunk chunk;
     private int changes, changedSectionFilter;
-    private long lastUpdateInhabitedTime;
+    private long lastUpdateInhabitedTime = -1;
     private boolean sentToPlayers, loading = true;
 
-    public PlayerChunkMapEntry(PlayerChunkMap mapIn, int chunkX, int chunkZ) {
+    public PlayerChunkMapEntry(Chunk chunk, int chunkX, int chunkZ) {
+        this.chunk = chunk;
+        this.posX = chunkX;
+        this.posZ = chunkZ;
+        accept(chunk);
+    }
+
+
+    public boolean isNewEntry(){
+        return lastUpdateInhabitedTime == -1;
+    }
+
+
+    public void markCreated(){
+        lastUpdateInhabitedTime = 0;
+    }
+
+
+    public PlayerChunkMapEntry(PlayerChunkMap map, int chunkX, int chunkZ) {
+        this(map.getProvider(), chunkX, chunkZ);
+    }
+
+
+    public PlayerChunkMapEntry(ChunkProviderServer provider, int chunkX, int chunkZ) {
         //this.playerChunkMap = mapIn;
         this.posX = chunkX;
         this.posZ = chunkZ;
 
-        if(!ElcaCV.DEBUG_NO_SERVER){
-            chunk = mapIn.getWorldServer().getChunkProvider().loadChunk(chunkX, chunkZ, this);
-        }
+        chunk = provider.loadChunk(chunkX, chunkZ, this);
     }
 
 
@@ -126,9 +148,9 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements C
             return true;
         } else {
             if (canGenerate) {
-                this.chunk = map.getWorldServer().getChunkProvider().provideChunk(posX, posZ);
+                this.chunk = map.getProvider().provideChunk(posX, posZ);
             } else {
-                this.chunk = map.getWorldServer().getChunkProvider().loadChunk(posX, posZ);
+                this.chunk = map.getProvider().loadChunk(posX, posZ);
             }
             return this.chunk != null;
         }

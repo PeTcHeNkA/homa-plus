@@ -11,6 +11,7 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.SPacketEntityAttach;
 import net.minecraft.network.play.server.SPacketSetPassengers;
+import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.WorldServer;
@@ -122,30 +123,39 @@ public class EntityTracker {
 
 
     public void onTrack(EntityTrackerEntry entry){
-        entry.updatePlayerEntities(trackedPlayers());
+        Entity entity = entry.getTrackedEntity();
+        Chunk chunk = entity.world.chunkProviderServer
+                .getLoadedChunk(entity.chunkCoordX, entity.chunkCoordZ);
+
+        PlayerChunkMapEntry pEntry;
+        if(chunk != null && (pEntry = chunk.pcmEntry) != null){
+            entry.updatePlayerEntities(pEntry);
+        } else {
+            entry.updatePlayerEntities(trackedPlayers());
+        }
     }
 
 
-    public void untrack(Entity entityIn) {
+    public void untrack(Entity entity) {
         EntityTrackerEntry entry;
-        if (entityIn instanceof EntityPlayerMP) {
-            EntityPlayerMP player = (EntityPlayerMP)entityIn;
+        if (entity instanceof EntityPlayerMP) {
+            EntityPlayerMP player = (EntityPlayerMP)entity;
 
             for (EntityRemSwapList.E15<Entity> list: world.realEntityList.getRaw()) {
                 final Entity[] raw = list.raw();
                 for (int cursor = 0, s = list.sizeC(); cursor < s; ++cursor) {
-                    Entity entity;
-                    if((entity = raw[cursor]) == null)break;
-                    if((entry = entity.trackerEntry) != null)
+                    Entity curEntity;
+                    if((curEntity = raw[cursor]) == null)break;
+                    if((entry = curEntity.trackerEntry) != null)
                         entry.removeFromTrackedPlayers(player);
                     else
                         System.out.println("WARN: TRYING TO REMOVE ENTITY WITH NULL TRACKER");
                 }
             }
         }
-        entry = entityIn.trackerEntry;
+        entry = entity.trackerEntry;
         if (entry != null) {
-            entityIn.trackerEntry = null;
+            entity.trackerEntry = null;
             entry.sendDestroyEntityPacketToTrackedPlayers();
         }
     }
@@ -387,4 +397,17 @@ public class EntityTracker {
             }
         }
     }
+
+    //Chunk chunk = player.getServerWorld().chunkProviderServer.getLoadedChunk(player.chunkCoordX, player.chunkCoordZ);
+    //        PlayerChunkMapEntry pEntry;
+    //        if(chunk != null && (pEntry = chunk.pcmEntry) != null){
+    //            final Entity[] raw = pEntry.raw();;
+    //            for (int i = 0, s = pEntry.sizeC(); i < s; i++){
+    //                Entity entity;
+    //                if((entity = raw[i]) == null)break;
+    //                EntityTrackerEntry entry;
+    //                if ((entry = entity.trackerEntry) != null && entry.getTrackedEntity() != player)
+    //                        entry.updatePlayerEntity(player);
+    //            }
+    //        }
 }

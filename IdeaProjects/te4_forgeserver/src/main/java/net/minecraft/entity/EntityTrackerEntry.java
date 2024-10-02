@@ -59,8 +59,10 @@ import net.minecraft.network.play.server.SPacketSpawnPainting;
 import net.minecraft.network.play.server.SPacketSpawnPlayer;
 import net.minecraft.network.play.server.SPacketUseBed;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.storage.MapData;
 import net.minecraftforge.fml.common.network.internal.FMLNetworkHandler;
 import org.apache.logging.log4j.LogManager;
@@ -294,24 +296,23 @@ public class EntityTrackerEntry {
         double distance = (trackedEntity = this.trackedEntity).getDistanceSq(player.posX, player.posY, player.posZ);
         if(distance < trackedEntity.elcaMinRange)trackedEntity.elcaMinRange = distance;
         return distance >= -maxRange || distance <= -distance && trackedEntity.isSpectatedByPlayer(player);
-        //return distance >= -maxRange && distance <= maxRange && trackedEntity.isSpectatedByPlayer(player);
-
-//        double d0 = player.posX - (double)this.encodedPosX * 0.000244140625; // 1/4096.0D = 0.000244140625
-//        double i = Math.min(this.range, this.maxRange);
-//        return d0 >= -i && d0 <= i &&
-//                (d0=player.posZ - (double)this.encodedPosZ * 0.000244140625) >= -i && d0 <= i
-//                && this.trackedEntity.isSpectatedByPlayer(player);
     }
 
 
-    private boolean isPlayerWatchingThisChunk(EntityPlayerMP playerMP) {
-        return playerMP.getServerWorld().getPlayerChunkMap().isPlayerWatchingChunk(playerMP, this.trackedEntity.chunkCoordX, this.trackedEntity.chunkCoordZ);
+    private boolean isPlayerWatchingThisChunk(EntityPlayerMP player) {
+        Entity trackedEntity = this.trackedEntity;
+        Chunk chunk = player.getServerWorld().getLoadedChunk(trackedEntity.chunkCoordX, trackedEntity.chunkCoordZ);
+        if(chunk == null)return false;
+        PlayerChunkMapEntry entry;
+        if((entry = chunk.pcmEntry) == null)return false;
+
+        return entry.containsRef(player) && entry.isSentToPlayers();
     }
 
 
-    public void updatePlayerEntities(List<EntityPlayer> players) {
+    public void updatePlayerEntities(List<? extends EntityPlayer> players) {
         this.trackedEntity.elcaMinRange = 1073741824d;
-        for (int i = 0; i < players.size(); ++i)
+        for (int i = 0, s = players.size(); i < s; ++i)
             updatePlayerEntity((EntityPlayerMP)players.get(i));
     }
 
@@ -456,6 +457,10 @@ public class EntityTrackerEntry {
     }
 
 
+
+
+
+
     public void updatePlayerList(List<EntityPlayer> players) {
         Entity entity = this.trackedEntity;
         if (this.playerEntitiesUpdated = (!this.updatedPlayerVisibility ||
@@ -490,14 +495,14 @@ public class EntityTrackerEntry {
 
             if (itemstack.getItem() instanceof ItemMap) {
                 MapData mapdata = ((ItemMap) itemstack.getItem()).getMapData(itemstack, entity.world);
+                if(mapdata != null) {
+                    this.trackingPlayers.forEach(player -> {
+                        mapdata.updateVisiblePlayers(player, itemstack);
+                        Packet<?> packet = ((ItemMap) itemstack.getItem()).createMapDataPacket(itemstack, entity.world, player);
 
-                for (EntityPlayer entityplayer : players) {
-                    EntityPlayerMP entityplayermp = (EntityPlayerMP)entityplayer;
-                    mapdata.updateVisiblePlayers(entityplayermp, itemstack);
-                    Packet<?> packet = ((ItemMap) itemstack.getItem()).createMapDataPacket(itemstack, entity.world, entityplayermp);
-
-                    if (packet != null)
-                        entityplayermp.connection.netManager.sendPacketE(packet);
+                        if (packet != null)
+                            player.connection.netManager.sendPacketE(packet);
+                    });
                 }
             }
             this.sendMetadata0( null);

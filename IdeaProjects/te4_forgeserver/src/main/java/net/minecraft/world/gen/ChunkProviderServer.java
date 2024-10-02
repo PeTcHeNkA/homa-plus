@@ -25,6 +25,7 @@ import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.fml.common.FMLLog;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import plus.fserver.ElcaConfig;
 import plus.fserver.api.Keep;
 import plus.fserver.server.chunk.io.TChunkExecutor;
@@ -40,13 +41,13 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
     @Keep
     private final LongSet droppedChunks = new LongOpenHashSet();
     @Keep
-    private final LongSet loadingChunks = new LongOpenHashSet();
+    private LongSet loadingChunks;
     @Keep
     public final IChunkGenerator chunkGenerator;
     @Keep
     public final IChunkLoader chunkLoader;
-    @Keep
-    public final Long2ObjectMap<Chunk> loadedChunks = this;
+//    @Keep
+//    public final Long2ObjectMap<Chunk> loadedChunks = this;
     @Keep
     public final WorldServer world;
     private final ChunkPopulationTask task;
@@ -108,11 +109,7 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
 
 
     public void queueUnloadAll() {
-        Iterator<Chunk> iter = getLoadedChunks().iterator();
-        while (iter.hasNext()) {
-            Chunk chunk = iter.next();
-            this.queueUnload(chunk);
-        }
+        forChunks(this::queueUnload);
     }
 
 
@@ -121,6 +118,60 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
         Chunk chunk = super.get(ChunkPos.asLong(x, z));
         if (chunk != null) chunk.setRequested(); //chunk.unloadQueued = false;
         return chunk;
+    }
+
+
+    @Nullable
+    public PlayerChunkMapEntry getEntry(int x, int z) {
+        Chunk chunk = super.get(ChunkPos.asLong(x, z));
+        if (chunk == null) {
+            return TChunkExecutor.getEntry(world, this, x, z, false);
+        } else {
+            return chunk.pcmEntry;
+        }
+    }
+
+
+    @Nullable
+    public PlayerChunkMapEntry getLoadedEntry(int x, int z) {
+        Chunk chunk = super.get(ChunkPos.asLong(x, z));
+        if (chunk == null) {
+            return null;
+        } else {
+            return chunk.pcmEntry;
+        }
+    }
+
+
+    @NotNull
+    public PlayerChunkMapEntry getOrCreateEntry(int x, int z) {
+        Chunk chunk = super.get(ChunkPos.asLong(x, z));
+        PlayerChunkMapEntry entry;
+        if (chunk == null) {
+            entry = TChunkExecutor.getEntry(world, this, x, z, true);
+        } else {
+            entry = chunk.pcmEntry;
+            if(entry == null){
+                return new PlayerChunkMapEntry(chunk, x, z);
+            }
+        }
+        return entry;
+    }
+
+
+    @NotNull
+    public PlayerChunkMapEntry getOrCreateEntryForPCM(int x, int z) {
+        Chunk chunk = super.get(ChunkPos.asLong(x, z));
+        PlayerChunkMapEntry entry;
+        if (chunk == null) {
+            entry = TChunkExecutor.getEntry(world, this, x, z, true);
+        } else {
+            entry = chunk.pcmEntry;
+            if(entry == null){
+                return new PlayerChunkMapEntry(chunk, x, z);
+            }
+        }
+        return entry;
     }
 
 
@@ -145,8 +196,14 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
         Chunk chunk = this.getLoadedChunk(x, z);
         if (chunk == null) {
             long chunkHash = ChunkPos.asLong(x, z);
-            chunk = ForgeChunkManager.fetchDormantChunk(chunkHash, world(x,z));
+            WorldServer world = world(x,z);
+            chunk = ForgeChunkManager.fetchDormantChunk(chunkHash, world);
+
             if (chunk != null || !(this.chunkLoader instanceof AnvilChunkLoader)) {
+                LongSet loadingChunks;
+                if((loadingChunks = this.loadingChunks) == null){
+                    this.loadingChunks = loadingChunks = new LongOpenHashSet();
+                }
                 if (!loadingChunks.add(chunkHash)) FMLLog.bigWarning("There is an attempt to load a chunk ({},{}) in dimension {} that is already being loaded. This will cause weird chunk breakages.", x, z, this.world.provider.getDimension());
                 if (chunk == null) chunk = this.loadChunkFromFile(x, z);
 
@@ -163,17 +220,17 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
 
                 if(runnable == null){
                     if(loader.isChunkGeneratedAt(x, z)){
-                        chunk = TChunkExecutor.syncChunkLoad(world(x,z), loader, this, x, z);
+                        chunk = TChunkExecutor.syncChunkLoad(world, loader, this, x, z);
                     } else {
-                        chunk = TChunkExecutor.syncChunkGen(world(x,z), loader, this, x, z);
+                        chunk = TChunkExecutor.syncChunkGen(world, loader, this, x, z);
                     }
                 } else {
                     if(loader.isChunkGeneratedAt(x, z)){
-                        TChunkExecutor.queueChunkLoad(world(x,z), loader, this, x, z, runnable);
+                        TChunkExecutor.queueChunkLoad(world, loader, this, x, z, runnable);
                         return null;
-                    }else {
+                    } else {
                         if(chunkGenerator.maybeAsync()){
-                            TChunkExecutor.queueChunkGenerate(world(x,z), loader, this, x, z, runnable);
+                            TChunkExecutor.queueChunkGenerate(world, loader, this, x, z, runnable);
                             return null;
                         }
                     }
@@ -194,12 +251,12 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
             try {
                 chunk = TChunkExecutor.syncChunkGen(world(x,z), (AnvilChunkLoader)this.chunkLoader, this, x, z);
             } catch (Throwable throwable) {
-                CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Exception generating new chunk");
-                CrashReportCategory crashreportcategory = crashreport.makeCategory("Chunk to be generated");
-                crashreportcategory.addCrashSection("Location", String.format("%d,%d", x, z));
-                crashreportcategory.addCrashSection("Position hash", i);
-                crashreportcategory.addCrashSection("Generator", this.chunkGenerator);
-                throw new ReportedException(crashreport);
+                CrashReport report = CrashReport.makeCrashReport(throwable, "Exception generating new chunk");
+                CrashReportCategory cat = report.makeCategory("Chunk to be generated");
+                cat.addCrashSection("Location", String.format("%d,%d", x, z));
+                cat.addCrashSection("Position hash", i);
+                cat.addCrashSection("Generator", this.chunkGenerator);
+                throw new ReportedException(report);
             }
         }
         return chunk;

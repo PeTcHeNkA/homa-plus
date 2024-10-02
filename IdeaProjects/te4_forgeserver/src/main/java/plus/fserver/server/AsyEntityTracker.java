@@ -48,8 +48,8 @@ public class AsyEntityTracker extends EntityTracker {
 
 
     @Override
-    public synchronized void untrack(Entity entityIn) {
-        super.untrack(entityIn);
+    public synchronized void untrack(Entity entity) {
+        super.untrack(entity);
         //tasks.addF((Runnable) () -> AsyEntityTracker.super.untrack(entityIn));
     }
 

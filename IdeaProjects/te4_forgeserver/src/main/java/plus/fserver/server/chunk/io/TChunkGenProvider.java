@@ -1,18 +1,19 @@
 package plus.fserver.server.chunk.io;
 
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
 import net.minecraft.world.gen.ChunkProviderServer;
 
 
 public class TChunkGenProvider extends TChunkTask implements Runnable{
-    TChunkGenProvider(TQueuedChunk chunk, AnvilChunkLoader loader, ChunkProviderServer provider) {
-        super(chunk, loader, provider);
+    TChunkGenProvider(WorldServer world, TQueuedChunk chunk, AnvilChunkLoader loader, ChunkProviderServer provider) {
+        super(world, chunk, loader, provider);
     }
 
 
     @Override
     public void runTask() {
-        chunk = worldServer().getChunkProvider().chunkGenerator.generateChunk(chunkInfo.x, chunkInfo.z);
+        chunk = world().getChunkProvider().chunkGenerator.generateChunk(chunkInfo.x, chunkInfo.z);
     }
 
 
@@ -20,11 +21,11 @@ public class TChunkGenProvider extends TChunkTask implements Runnable{
     public void syncCallback() {
         try {
             if (chunk != null) {
-                worldServer().getChunkProvider().onComplete(this);
+                world().getChunkProvider().onComplete(this);
             }
-            this.runCallbacks();
-        } catch (Throwable throwable){
-            throwable.printStackTrace();
+        } catch (Throwable err){
+            onError(err);
         }
+        if(chunk != null) this.runCallbacks();
     }
 }

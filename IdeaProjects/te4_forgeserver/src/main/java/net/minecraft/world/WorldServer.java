@@ -131,7 +131,6 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         }
         this.server = server;
         createTracker();
-        this.playerChunkMap = new PlayerChunkMap(this);
 
         this.calculateInitialSkylight();
         this.calculateInitialWeather();
@@ -143,6 +142,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         entitySpawner = makeWorldSpawner();
 
         initUnimportant();
+        this.playerChunkMap = new PlayerChunkMap(this);
     }
 
 
@@ -905,7 +905,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
     public void sendToAllNearExcept(@Nullable EntityPlayer except, double x, double y, double z, double radius, Packet<?> packetIn) {
         final double radius1 = radius*radius;
         double d0, d1, d2;
-        PlayerChunkMapEntry center = this.playerChunkMap.getEntry(MathHelper.floor(x), MathHelper.floor(z));
+        PlayerChunkMapEntry center = chunkProviderServer.getLoadedEntry(MathHelper.floor(x), MathHelper.floor(z));
 
         if(center == null) {
             List<EntityPlayer> players = curPlayerEntities;

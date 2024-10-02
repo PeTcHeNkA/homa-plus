@@ -1,7 +1,7 @@
 package plus.fserver.server.chunk.io;
 
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
 import net.minecraft.world.gen.ChunkProviderServer;
@@ -15,14 +15,15 @@ import java.io.IOException;
 public class TChunkIOProvider extends TChunkTask {
     private NBTTagCompound nbt;
 
-    TChunkIOProvider(TQueuedChunk chunk, AnvilChunkLoader loader, ChunkProviderServer provider) {
-        super(chunk, loader, provider);
+    TChunkIOProvider(WorldServer world, TQueuedChunk chunk, AnvilChunkLoader loader, ChunkProviderServer provider) {
+        super(world, chunk, loader, provider);
     }
 
 
     @Override
     public void runTask() throws IOException {
-        Object[] data = this.loader.loadChunk__Async(chunkInfo.world, chunkInfo.x, chunkInfo.z);
+        TQueuedChunk chunkInfo = this.chunkInfo;
+        Object[] data = this.loader.loadChunk__Async(world, chunkInfo.x, chunkInfo.z);
         if (data != null) {
             this.nbt = (NBTTagCompound) data[1];
             this.chunk = (Chunk) data[0];
@@ -33,19 +34,21 @@ public class TChunkIOProvider extends TChunkTask {
     @Override
     public void syncCallback() {
         try {
-            if (chunk != null) {
-                this.loader.loadEntities(this.chunkInfo.world, this.nbt.getCompoundTag(SStrings.CL_LEVEL), this.chunk);
+            Chunk chunk;
+            if ((chunk = this.chunk) != null) {
+                TQueuedChunk chunkInfo = this.chunkInfo;
+                this.loader.loadEntities(world, this.nbt.getCompoundTag(SStrings.CL_LEVEL), chunk);
 
-                MinecraftForge.EVENT_BUS.postF(new ChunkDataEvent.Load(this.chunk, this.nbt));
+                MinecraftForge.EVENT_BUS.postF(new ChunkDataEvent.Load(chunk, this.nbt));
 
-                this.chunk.setLastSaveTime(provider.world.getTotalWorldTime());
-                this.provider.chunkGenerator.recreateStructures(this.chunk, this.chunkInfo.x, this.chunkInfo.z);
+                chunk.setLastSaveTime(provider.world.getTotalWorldTime());
+                this.provider.chunkGenerator.recreateStructures(chunk, chunkInfo.x, chunkInfo.z);
 
-                worldServer().getChunkProvider().onComplete(this);
+                world().getChunkProvider().onComplete(this);
             }
-            this.runCallbacks();
-        } catch (Throwable throwable){
-            throwable.printStackTrace();
+        } catch (Throwable error){
+            onError(error);
         }
+        this.runCallbacks();
     }
 }

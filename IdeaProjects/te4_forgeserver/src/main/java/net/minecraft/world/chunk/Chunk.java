@@ -886,6 +886,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
 
     public void onUnload() {
+        state = 0;
         pcmEntry = null;
         this.loaded = false;
         World lWorld = this.world;

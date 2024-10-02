@@ -1,25 +1,27 @@
 package plus.fserver.server.chunk.io;
 
-import net.minecraft.world.World;
+import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
 import net.minecraft.world.gen.ChunkProviderServer;
-import net.minecraftforge.fml.common.FMLLog;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
 
 public abstract class TChunkTask implements Runnable{
+    protected final ConcurrentLinkedQueue<Consumer<Chunk>> callbacks = new ConcurrentLinkedQueue<>();
     protected final TQueuedChunk chunkInfo;
     protected final AnvilChunkLoader loader;
     protected final ChunkProviderServer provider;
+    protected final WorldServer world;
+    protected PlayerChunkMapEntry entry;
     protected Chunk chunk;
-    protected final ConcurrentLinkedQueue<Consumer<Chunk>> callbacks = new ConcurrentLinkedQueue<>();
     protected boolean finished = false;
 
 
-    TChunkTask(TQueuedChunk chunk, AnvilChunkLoader loader, ChunkProviderServer provider) {
+    TChunkTask(WorldServer world, TQueuedChunk chunk, AnvilChunkLoader loader, ChunkProviderServer provider) {
+        this.world = world;
         this.chunkInfo = chunk;
         this.loader = loader;
         this.provider = provider;
@@ -33,10 +35,7 @@ public abstract class TChunkTask implements Runnable{
             try {
                 runTask();
             } catch (Throwable throwable) {
-                FMLLog.log.error(
-                        "Exception run chunk task at ["+chunkInfo.x+", "+chunkInfo.z+"]",
-                        throwable
-                );
+                onError(new RuntimeException("Exception run chunk task at ["+chunkInfo.x+", "+chunkInfo.z+"]", throwable));
             } finally {
                 this.finished = true;
                 this.notifyAll();
@@ -58,7 +57,16 @@ public abstract class TChunkTask implements Runnable{
 
 
     public void addCallback(Consumer<Chunk> callback) {
-        this.callbacks.add(callback);
+        if(finished)callback.accept(chunk);
+        else this.callbacks.add(callback);
+        if(callback instanceof PlayerChunkMapEntry){
+            entry = (PlayerChunkMapEntry) callback;
+        }
+    }
+
+
+    public PlayerChunkMapEntry getPCEntry(){
+        return entry;
     }
 
 
@@ -81,16 +89,27 @@ public abstract class TChunkTask implements Runnable{
 
 
     public boolean hasCallback() {
-        return this.callbacks.size() > 0;
+        return this.callbacks.isEmpty();
     }
 
 
     public void runCallbacks() {
         Chunk chunk = this.chunk;
-        for (Consumer<Chunk> r : this.callbacks) {
-            r.accept(chunk);
+        ConcurrentLinkedQueue<Consumer<Chunk>> callbacks = this.callbacks;
+        Consumer<Chunk> task = callbacks.poll();
+        while (task != null){
+            try {
+                task.accept(chunk);
+            } catch (Throwable e){
+                onError(e);
+            }
+            task = callbacks.poll();
         }
-        this.callbacks.clear();
+    }
+
+
+    protected final void onError(Throwable e){
+        world.getMinecraftServer().ticker().onError(world, e);
     }
 
 
@@ -104,12 +123,7 @@ public abstract class TChunkTask implements Runnable{
     }
 
 
-    public World world(){
-        return chunkInfo.world;
-    }
-
-
-    public WorldServer worldServer(){
-        return (WorldServer) chunkInfo.world;
+    public WorldServer world(){
+        return world;
     }
 }

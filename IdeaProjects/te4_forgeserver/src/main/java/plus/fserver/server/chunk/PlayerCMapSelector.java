@@ -70,8 +70,7 @@ public class PlayerCMapSelector{
             int mdZ = (item & 0xFF) - 32;
             int mdX = (item >> 8) - 32;
 
-            PlayerChunkMapEntry entry = pcm.getOrCreateEntry(curX - mdX, curZ - mdZ);
-            if(entry != null) entry.addPlayer(pcm, player);
+            pcm.getOrCreateEntry(curX - mdX, curZ - mdZ).addPlayer(pcm, player);
         }
         player.managedPosX = player.posX;
         player.managedPosZ = player.posZ;
@@ -108,8 +107,7 @@ public class PlayerCMapSelector{
                 int mdX = (item >> 8) - 32;
 
                 if(range(0,0, mdX, mdZ) > minRad){
-                    PlayerChunkMapEntry entry = pcm.getOrCreateEntry(curX - mdX, curZ - mdZ);
-                    if(entry != null) entry.addPlayer(pcm, player);
+                    pcm.getOrCreateEntry(curX - mdX, curZ - mdZ).addPlayer(pcm, player);
                 }
             }
         } else {
@@ -133,29 +131,29 @@ public class PlayerCMapSelector{
 
 
     public void updateMovingPlayer(PlayerChunkMap pcm, EntityPlayerMP player) {
-        int curX = (int)player.posX >> 4;
-        int curZ = (int)player.posZ >> 4;
-        double d0 = player.managedPosX - player.posX;
-        double d1 = player.managedPosZ - player.posZ;
-        double d2 = d0 * d0 + d1 * d1;
+        double temp;
+        int curX = (int)(temp = player.posX) >> 4;
+        double d0 = player.managedPosX - temp;
 
-        if (d2 >= 64d) {
+        int curZ = (int)(temp = player.posZ) >> 4;
+        double d1 = player.managedPosZ - temp;
+
+        temp = d0 * d0 + d1 * d1;
+
+        if (temp >= 64d) {
             int preX = (int)player.managedPosX >> 4;
             int preZ = (int)player.managedPosZ >> 4;
 
-            int dX = curX - preX;
-            int dZ = curZ - preZ;
-
-            if (dX != 0 || dZ != 0) {
-                int radSq = (radius+1) * (radius+1);
+            if (curX != preX || curZ != preZ) {
+                int radSq = radius+1;
+                radSq = radSq * radSq;
 
                 for (int item:mask){
                     int mdZ = (item & 0xFF) - 32;
                     int mdX = (item >> 8) - 32;
 
                     if(range(preX, preZ, curX-mdX, curZ-mdZ) > radSq){
-                        PlayerChunkMapEntry entry = pcm.getOrCreateEntry(curX - mdX, curZ - mdZ);
-                        if(entry != null) entry.addPlayer(pcm, player);
+                        pcm.getOrCreateEntry(curX - mdX, curZ - mdZ).addPlayer(pcm, player);
                     }
 
                     if(range(curX, curZ, preX-mdX, preZ-mdZ) > radSq){
@@ -167,7 +165,7 @@ public class PlayerCMapSelector{
                 player.managedPosZ = player.posZ;
                 pcm.markSortPending();
             }
-        } else if (player.prevRenderRadius != player.renderRadius && d2 > 16d) {
+        } else if (player.prevRenderRadius != player.renderRadius && temp > 16d) {
             if(player.renderRadius > player.prevRenderRadius){
                 pcm.getBy(player.renderRadius).updatePlayerRadius(pcm, player);
             } else {
