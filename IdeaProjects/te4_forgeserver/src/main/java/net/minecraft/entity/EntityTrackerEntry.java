@@ -59,10 +59,8 @@ import net.minecraft.network.play.server.SPacketSpawnPainting;
 import net.minecraft.network.play.server.SPacketSpawnPlayer;
 import net.minecraft.network.play.server.SPacketUseBed;
 import net.minecraft.potion.PotionEffect;
-import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.storage.MapData;
 import net.minecraftforge.fml.common.network.internal.FMLNetworkHandler;
 import org.apache.logging.log4j.LogManager;
@@ -299,14 +297,8 @@ public class EntityTrackerEntry {
     }
 
 
-    private boolean isPlayerWatchingThisChunk(EntityPlayerMP player) {
-        Entity trackedEntity = this.trackedEntity;
-        Chunk chunk = player.getServerWorld().getLoadedChunk(trackedEntity.chunkCoordX, trackedEntity.chunkCoordZ);
-        if(chunk == null)return false;
-        PlayerChunkMapEntry entry;
-        if((entry = chunk.pcmEntry) == null)return false;
-
-        return entry.containsRef(player) && entry.isSentToPlayers();
+    private boolean isPlayerWatchingThisChunk(EntityPlayerMP playerMP) {
+        return playerMP.getServerWorld().getPlayerChunkMap().isPlayerWatchingChunk(playerMP, this.trackedEntity.chunkCoordX, this.trackedEntity.chunkCoordZ);
     }
 
 
@@ -455,10 +447,6 @@ public class EntityTrackerEntry {
         double distance = (trackedEntity = this.trackedEntity).getDistanceSq(player.posX, player.posY, player.posZ);
         if (distance < trackedEntity.elcaMinRange) trackedEntity.elcaMinRange = distance;
     }
-
-
-
-
 
 
     public void updatePlayerList(List<EntityPlayer> players) {

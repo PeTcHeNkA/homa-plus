@@ -309,6 +309,7 @@ net.minecraft.entity.EntityLiving
 net.minecraft.entity.EntityLivingBase$1
 net.minecraft.entity.EntityLivingBase
 net.minecraft.entity.EntityTracker
+net.minecraft.entity.EntityTrackerEntry$1
 net.minecraft.entity.EntityTrackerEntry
 net.minecraft.entity.item.EntityArmorStand$1
 net.minecraft.entity.item.EntityArmorStand
@@ -903,6 +904,9 @@ net.minecraftforge.event.world.ChunkWatchEvent$UnWatch, true
 net.minecraftforge.event.world.ChunkWatchEvent$Watch, true
 net.minecraftforge.event.world.ChunkWatchEvent, true
 net.minecraftforge.event.world.GetCollisionBoxesEvent, true
+net.minecraftforge.fml.common.eventhandler.Event$HasResult, true
+net.minecraftforge.fml.common.eventhandler.Event$Result, true
+net.minecraftforge.fml.common.eventhandler.Event, true
 net.minecraftforge.fml.common.eventhandler.EventBus, true
 net.minecraftforge.fml.common.registry.EntityEntry, true
 net.minecraftforge.registries.ForgeRegistryHook, true

@@ -8,7 +8,6 @@ import javax.annotation.Nullable;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.EnumCreatureType;
-import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -25,12 +24,10 @@ import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.fml.common.FMLLog;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 import plus.fserver.ElcaConfig;
 import plus.fserver.api.Keep;
 import plus.fserver.server.chunk.io.TChunkExecutor;
 import plus.fserver.server.chunk.io.TChunkTask;
-import plus.fserver.utls.collections.ChunkIteratorPro;
 import plus.fserver.utls.collections.ChunkPopulationTask;
 import plus.fserver.utls.collections.Long2ChunkMap;
 
@@ -53,6 +50,7 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
     private final ChunkPopulationTask task;
     private final boolean asyncSaveChunks;
 
+
     public ChunkProviderServer(WorldServer world, IChunkLoader chunkLoader, IChunkGenerator chunkGeneratorIn) {
         super(256);
         this.world = world;
@@ -68,20 +66,6 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
         for (Chunk chunk : raw) {
             if (chunk != null) task.accept(chunk);
         }
-    }
-
-
-    public void forEntries(Consumer<PlayerChunkMapEntry> task) {
-        Chunk[] chunks = super.value;
-        for (Chunk chunk : chunks) {
-            PlayerChunkMapEntry entry;
-            if (chunk != null && (entry = chunk.pcmEntry) != null) task.accept(entry);
-        }
-    }
-
-
-    public ChunkIteratorPro forChunks(int radius){
-        return new ChunkIteratorPro(super.value, radius);
     }
 
 
@@ -122,77 +106,13 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
 
 
     @Nullable
-    public PlayerChunkMapEntry getEntry(int x, int z) {
-        Chunk chunk = super.get(ChunkPos.asLong(x, z));
-        if (chunk == null) {
-            return TChunkExecutor.getEntry(world, this, x, z, false);
-        } else {
-            return chunk.pcmEntry;
-        }
-    }
-
-
-    @Nullable
-    public PlayerChunkMapEntry getLoadedEntry(int x, int z) {
-        Chunk chunk = super.get(ChunkPos.asLong(x, z));
-        if (chunk == null) {
-            return null;
-        } else {
-            return chunk.pcmEntry;
-        }
-    }
-
-
-    @NotNull
-    public PlayerChunkMapEntry getOrCreateEntry(int x, int z) {
-        Chunk chunk = super.get(ChunkPos.asLong(x, z));
-        PlayerChunkMapEntry entry;
-        if (chunk == null) {
-            entry = TChunkExecutor.getEntry(world, this, x, z, true);
-        } else {
-            entry = chunk.pcmEntry;
-            if(entry == null){
-                return new PlayerChunkMapEntry(chunk, x, z);
-            }
-        }
-        return entry;
-    }
-
-
-    @NotNull
-    public PlayerChunkMapEntry getOrCreateEntryForPCM(int x, int z) {
-        Chunk chunk = super.get(ChunkPos.asLong(x, z));
-        PlayerChunkMapEntry entry;
-        if (chunk == null) {
-            entry = TChunkExecutor.getEntry(world, this, x, z, true);
-        } else {
-            entry = chunk.pcmEntry;
-            if(entry == null){
-                return new PlayerChunkMapEntry(chunk, x, z);
-            }
-        }
-        return entry;
-    }
-
-
-    @Nullable
     public Chunk loadChunk(int x, int z) {
-        return loadChunk(x, z, (Consumer<Chunk>) null);
+        return loadChunk(x, z, null);
     }
 
 
     @Nullable
     public Chunk loadChunk(int x, int z, @Nullable Runnable runnable) {
-        if(runnable == null){
-            return loadChunk(x, z, (Consumer<Chunk>) null);
-        } else {
-            return loadChunk(x, z, chunk -> runnable.run());
-        }
-    }
-
-
-    @Nullable
-    public Chunk loadChunk(int x, int z, @Nullable Consumer<Chunk> runnable) {
         Chunk chunk = this.getLoadedChunk(x, z);
         if (chunk == null) {
             long chunkHash = ChunkPos.asLong(x, z);
@@ -238,7 +158,7 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
             }
             if(chunk != null) chunk.setRequested();
         }
-        if (runnable != null) runnable.accept(chunk);
+        if (runnable != null) runnable.run();
         return chunk;
     }
 
@@ -410,6 +330,9 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
                 //DimensionManager.unloadWorld(this.world.provider.getDimension());
             } else {
                 if(++ticks>1200){
+                    LongSet lc = loadingChunks;
+                    if(lc != null && lc.isEmpty())loadingChunks = null;
+
                     int limit = 0;
                     Iterator<Chunk> iter = getLoadedChunks().iterator();
                     Chunk chunk;

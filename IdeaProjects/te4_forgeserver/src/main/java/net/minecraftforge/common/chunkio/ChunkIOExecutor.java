@@ -16,12 +16,12 @@ public class ChunkIOExecutor {
 
 
     public static void queueChunkLoad(World world, AnvilChunkLoader loader, ChunkProviderServer provider, int x, int z, Runnable runnable) {
-        TChunkExecutor.queueChunkLoad((WorldServer) world, loader, provider, x, z, chunk -> runnable.run());
+        TChunkExecutor.queueChunkLoad((WorldServer) world, loader, provider, x, z, runnable);
     }
 
 
     public static void dropQueuedChunkLoad(World world, int x, int z, Runnable runnable) {
-        TChunkExecutor.dropQueuedChunkLoad(world, x, z, chunk -> runnable.run());
+        TChunkExecutor.dropQueuedChunkLoad(world, x, z, runnable);
     }
 
 

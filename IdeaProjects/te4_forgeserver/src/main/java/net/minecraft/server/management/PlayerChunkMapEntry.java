@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
@@ -23,7 +22,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.gen.ChunkProviderServer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import plus.fserver.ElcaCV;
@@ -32,7 +30,7 @@ import plus.fserver.server.chunk.io.TChunkExecutor;
 import plus.fserver.utls.collections.EntityList;
 
 
-public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements Consumer<Chunk> {
+public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements Runnable{
     public static final Comparator<PlayerChunkMapEntry> COMPARATOR = (o1, o2) -> {
         double d1 = o1.getClosestPlayerDistance();
         double d2 = o2.getClosestPlayerDistance();
@@ -42,55 +40,31 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements C
     };
 
     private static final Logger LOGGER = LogManager.getLogger();
+    private final PlayerChunkMap playerChunkMap;
     public final int posX, posZ;
-    private short[] changedBlocks = null;
+    private short[] changedBlocks = new short[ElcaConfig.MIN_CHANGED_BLOCKS_BUF];
     @Nullable
     private Chunk chunk;
     private int changes, changedSectionFilter;
-    private long lastUpdateInhabitedTime = -1;
+    private long lastUpdateInhabitedTime;
     private boolean sentToPlayers, loading = true;
 
-    public PlayerChunkMapEntry(Chunk chunk, int chunkX, int chunkZ) {
-        this.chunk = chunk;
-        this.posX = chunkX;
-        this.posZ = chunkZ;
-        accept(chunk);
-    }
 
-
-    public boolean isNewEntry(){
-        return lastUpdateInhabitedTime == -1;
-    }
-
-
-    public void markCreated(){
-        lastUpdateInhabitedTime = 0;
-    }
-
-
-    public PlayerChunkMapEntry(PlayerChunkMap map, int chunkX, int chunkZ) {
-        this(map.getProvider(), chunkX, chunkZ);
-    }
-
-
-    public PlayerChunkMapEntry(ChunkProviderServer provider, int chunkX, int chunkZ) {
-        //this.playerChunkMap = mapIn;
+    public PlayerChunkMapEntry(PlayerChunkMap mapIn, int chunkX, int chunkZ) {
+        this.playerChunkMap = mapIn;
         this.posX = chunkX;
         this.posZ = chunkZ;
 
-        chunk = provider.loadChunk(chunkX, chunkZ, this);
+        if(!ElcaCV.DEBUG_NO_SERVER){
+            mapIn.getWorldServer().getChunkProvider().loadChunk(chunkX, chunkZ, this);
+        }
     }
 
 
     @Override
-    public void accept(@Nullable Chunk chunk) {
-        if(chunk != null){
-            this.chunk = chunk;
-            chunk.pcmEntry = this;
-            chunk.setUnloadQueued(false);
-        } else {
-            LOGGER.warn("Chunk [{} {}] dont loaded, maybe error?", posX, posZ);
-        }
+    public void run() {
+        chunk = this.playerChunkMap.getWorldServer().getChunkProvider().loadChunk(posX, posZ);
+        if(chunk != null)chunk.setUnloadQueued(false);
         loading = false;
     }
 
@@ -101,12 +75,12 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements C
     }
 
 
-    public void addPlayer(PlayerChunkMap map, EntityPlayerMP player) {
+    public void addPlayer(EntityPlayerMP player) {
         if (containsRef(player)) {
             LOGGER.debug("Failed to add player. {} already is in chunk {}, {}", player, posX, posZ);
         } else {
             if (isEmpty()) {
-                this.lastUpdateInhabitedTime = map.getWorldServer().getTotalWorldTime();
+                this.lastUpdateInhabitedTime = this.playerChunkMap.getWorldServer().getTotalWorldTime();
             }
             addF(player);
             if (this.sentToPlayers) {
@@ -118,13 +92,13 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements C
     }
 
 
-    public void removePlayer(PlayerChunkMap map, EntityPlayerMP player) {
+    public void removePlayer(EntityPlayerMP player) {
         if (removeRef(player)) {
             if (this.chunk == null) {
 
                 if (isEmpty()) {
-                    if (this.loading) TChunkExecutor.dropQueuedChunkLoad(map.getWorldServer(), posX, posZ, this);
-                    map.removeEntry(this);
+                    if (this.loading) TChunkExecutor.dropQueuedChunkLoad(this.playerChunkMap.getWorldServer(), posX, posZ, this);
+                    this.playerChunkMap.removeEntry(this);
                 }
                 return;
             }
@@ -136,28 +110,28 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements C
             //MinecraftForge.EVENT_BUS.postF(player.world.chunkUnWatchEvent.init(chunk, player));
             if (isEmpty()) {
                 this.chunk = null;
-                map.removeEntry(this);
+                this.playerChunkMap.removeEntry(this);
             }
         }
     }
 
 
-    public boolean providePlayerChunk(PlayerChunkMap map, boolean canGenerate) {
+    public boolean providePlayerChunk(boolean canGenerate) {
         if (this.loading) return false;
         if (this.chunk != null) {
             return true;
         } else {
             if (canGenerate) {
-                this.chunk = map.getProvider().provideChunk(posX, posZ);
+                this.chunk = this.playerChunkMap.getWorldServer().getChunkProvider().provideChunk(posX, posZ);
             } else {
-                this.chunk = map.getProvider().loadChunk(posX, posZ);
+                this.chunk = this.playerChunkMap.getWorldServer().getChunkProvider().loadChunk(posX, posZ);
             }
             return this.chunk != null;
         }
     }
 
 
-    public boolean sendToPlayers(PlayerChunkMap map) {
+    public boolean sendToPlayers() {
         if (this.sentToPlayers) {
             return true;
         } else if (this.chunk == null) {
@@ -177,7 +151,7 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements C
                 if((size = this.size) > 0){
                     SPacketChunkData packet = new SPacketChunkData(chunk, 65535, size==1);
 
-                    map.getWorldServer().getEntityTracker().sendLeashedEntitiesInChunk(this, chunk);
+                    this.playerChunkMap.getWorldServer().getEntityTracker().sendLeashedEntitiesInChunk(this, chunk);
 
                     for (int i = 0; i < size; i++) {
                         EntityPlayerMP player = super.get(i);
@@ -207,8 +181,8 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements C
     }
 
 
-    public void updateChunkInhabitedTime(PlayerChunkMap map) {
-        long i = map.getWorldServer().getTotalWorldTime();
+    public void updateChunkInhabitedTime() {
+        long i = this.playerChunkMap.getWorldServer().getTotalWorldTime();
         Chunk chunk;
         if ((chunk = this.chunk) != null) {
             chunk.setInhabitedTime(this.chunk.getInhabitedTime() + i - this.lastUpdateInhabitedTime);
@@ -217,22 +191,19 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements C
     }
 
 
-    public void blockChanged(PlayerChunkMap map, int x, int y, int z) {
+    public void blockChanged(int x, int y, int z) {
         if (this.sentToPlayers) {
             int changes;
             if ((changes = this.changes) == 0) {
-                map.entryChanged(this);
+                this.playerChunkMap.entryChanged(this);
             }
             this.changedSectionFilter |= 1 << (y >> 4);
             short codedPos = (short) (x << 12 | z << 8 | y);
 
             short[] changedBlocks = this.changedBlocks;
-            if(changedBlocks == null){
-                this.changedBlocks = new short[ElcaConfig.MIN_CHANGED_BLOCKS_BUF];
-            } else {
-                for (int i = 0; i < changes; ++i) {
-                    if (changedBlocks[i] == codedPos) return;
-                }
+
+            for (int i = 0; i < changes; ++i) {
+                if (changedBlocks[i] == codedPos) return;
             }
             blockChanged(codedPos);
         }
@@ -261,8 +232,8 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements C
     }
 
 
-    //todo maybe use Elca cache? MC -> Netty ????
-    public void update(PlayerChunkMap map) {
+    //todo maybe use Elca cache? MC -> Netty
+    public void update() {
         if (this.sentToPlayers && this.chunk != null) {
             if (this.changes != 0) {
                 if (this.changes == 1) {
@@ -277,7 +248,7 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements C
                     this.sendPacket(new SPacketBlockChange(state, blockpos = new BlockPos(cX, cY, cZ)));
 
                     if (state.hasTile()) {
-                        this.sendBlockEntity(map.getWorldServer().getTileEntity(blockpos));
+                        this.sendBlockEntity(this.playerChunkMap.getWorldServer().getTileEntity(blockpos));
                     }
                 }
                 else if (this.changes >= net.minecraftforge.common.ForgeModContainer.clumpingThreshold) {
@@ -286,7 +257,7 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements C
                 } else {
                     short[] changedBlocks = this.changedBlocks;
                     Chunk chunk = this.chunk;
-                    WorldServer world = map.getWorldServer();
+                    WorldServer world = playerChunkMap.getWorldServer();
 
                     this.sendPacket(new SPacketMultiBlockChange(this.changes, changedBlocks, chunk));
                     //} Keep this in the else until we figure out a fix for mojang's derpitude on the

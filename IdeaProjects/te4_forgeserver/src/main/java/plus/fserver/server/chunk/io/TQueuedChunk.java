@@ -30,6 +30,12 @@ public class TQueuedChunk {
 
     @Override
     public String toString() {
-        return "{x = " + x + ", z = " + z + "}";
+        StringBuilder result = new StringBuilder();
+        String NEW_LINE = System.getProperty("line.separator");
+        result.append(this.getClass().getName() + " {" + NEW_LINE);
+        result.append(" x: " + x + NEW_LINE);
+        result.append(" z: " + z + NEW_LINE);
+        result.append("}");
+        return result.toString();
     }
 }

@@ -16,7 +16,7 @@ public class TChunkUnloadTask extends TChunkTask{
     public TChunkUnloadTask(WorldServer world, TQueuedChunk key, AnvilChunkLoader loader, ChunkProviderServer provider, Chunk chunk) {
         super(world, key, loader, provider);
         this.chunk = chunk;
-        chunk.setSaveStatus(true);
+        this.chunk.setSaveStatus(true);
 
         List<NextTickListEntry> pendings = null;
         try {
@@ -30,16 +30,12 @@ public class TChunkUnloadTask extends TChunkTask{
 
     @Override
     public void runTask() {
-        Chunk chunk = this.chunk;
         try {
-            List<NextTickListEntry> pendings;
-            ChunkProviderServer provider = this.provider;
-
             chunk.getLightingEngine().awaitUnlock();
-            if((pendings = this.pendings) != null) provider.saveChunkData(pendings, chunk);
+            if(pendings != null) provider.saveChunkData(pendings, chunk);
             provider.saveChunkExtraData(chunk);
         } finally {
-            chunk.setSaveStatus(false);
+            this.chunk.setSaveStatus(false);
         }
     }
 
@@ -47,11 +43,10 @@ public class TChunkUnloadTask extends TChunkTask{
     @Override
     public void syncCallback() {
         try {
-            Chunk chunk = this.chunk;
-            ForgeChunkManager.putDormantChunk(ChunkPos.asLong(chunk.x, chunk.z), chunk);
-        } catch (Throwable err){
-            onError(err);
+            ForgeChunkManager.putDormantChunk(ChunkPos.asLong(chunk.x, chunk.z), this.chunk);
+            this.runCallbacks();
+        } catch (Throwable throwable){
+            throwable.printStackTrace();
         }
-        this.runCallbacks();
     }
 }

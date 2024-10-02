@@ -1,23 +1,22 @@
 package plus.fserver.server.chunk.io;
 
-import net.minecraft.server.management.PlayerChunkMapEntry;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
 import net.minecraft.world.gen.ChunkProviderServer;
+import net.minecraftforge.fml.common.FMLLog;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.function.Consumer;
 
 
 public abstract class TChunkTask implements Runnable{
-    protected final ConcurrentLinkedQueue<Consumer<Chunk>> callbacks = new ConcurrentLinkedQueue<>();
     protected final TQueuedChunk chunkInfo;
     protected final AnvilChunkLoader loader;
     protected final ChunkProviderServer provider;
-    protected final WorldServer world;
-    protected PlayerChunkMapEntry entry;
     protected Chunk chunk;
+    protected final ConcurrentLinkedQueue<Runnable> callbacks = new ConcurrentLinkedQueue<>();
     protected boolean finished = false;
+    protected WorldServer world;
 
 
     TChunkTask(WorldServer world, TQueuedChunk chunk, AnvilChunkLoader loader, ChunkProviderServer provider) {
@@ -56,21 +55,12 @@ public abstract class TChunkTask implements Runnable{
     public abstract void syncCallback();
 
 
-    public void addCallback(Consumer<Chunk> callback) {
-        if(finished)callback.accept(chunk);
-        else this.callbacks.add(callback);
-        if(callback instanceof PlayerChunkMapEntry){
-            entry = (PlayerChunkMapEntry) callback;
-        }
+    public void addCallback(Runnable callback) {
+        this.callbacks.add(callback);
     }
 
 
-    public PlayerChunkMapEntry getPCEntry(){
-        return entry;
-    }
-
-
-    public void removeCallback(Consumer<Chunk> callback) {
+    public void removeCallback(Runnable callback) {
         this.callbacks.remove(callback);
     }
 
@@ -94,12 +84,11 @@ public abstract class TChunkTask implements Runnable{
 
 
     public void runCallbacks() {
-        Chunk chunk = this.chunk;
-        ConcurrentLinkedQueue<Consumer<Chunk>> callbacks = this.callbacks;
-        Consumer<Chunk> task = callbacks.poll();
+        ConcurrentLinkedQueue<Runnable> callbacks = this.callbacks;
+        Runnable task = callbacks.poll();
         while (task != null){
             try {
-                task.accept(chunk);
+                task.run();
             } catch (Throwable e){
                 onError(e);
             }

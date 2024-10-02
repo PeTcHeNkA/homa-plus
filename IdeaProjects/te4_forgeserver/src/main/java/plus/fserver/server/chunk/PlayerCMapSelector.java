@@ -69,8 +69,8 @@ public class PlayerCMapSelector{
         for (int item : mask) {
             int mdZ = (item & 0xFF) - 32;
             int mdX = (item >> 8) - 32;
-
-            pcm.getOrCreateEntry(curX - mdX, curZ - mdZ).addPlayer(pcm, player);
+            PlayerChunkMapEntry entry = pcm.getOrCreateEntry(curX - mdX, curZ - mdZ);
+            if(entry != null) entry.addPlayer(player);
         }
         player.managedPosX = player.posX;
         player.managedPosZ = player.posZ;
@@ -86,7 +86,7 @@ public class PlayerCMapSelector{
             int mdZ = (item & 0xFF) - 32;
             int mdX = (item >> 8) - 32;
             PlayerChunkMapEntry entry = pcm.getEntry(curX - mdX, curZ - mdZ);
-            if(entry != null) entry.removePlayer(pcm, player);
+            if(entry != null) entry.removePlayer(player);
         }
     }
 
@@ -107,7 +107,8 @@ public class PlayerCMapSelector{
                 int mdX = (item >> 8) - 32;
 
                 if(range(0,0, mdX, mdZ) > minRad){
-                    pcm.getOrCreateEntry(curX - mdX, curZ - mdZ).addPlayer(pcm, player);
+                    PlayerChunkMapEntry entry = pcm.getOrCreateEntry(curX - mdX, curZ - mdZ);
+                    if(entry != null) entry.addPlayer(player);
                 }
             }
         } else {
@@ -121,7 +122,7 @@ public class PlayerCMapSelector{
 
                 if(range(0,0, mdX, mdZ) > minRad){
                     PlayerChunkMapEntry entry = pcm.getEntry(curX - mdX, curZ - mdZ);
-                    if(entry != null) entry.removePlayer(pcm, player);
+                    if(entry != null) entry.removePlayer(player);
                 }
             }
         }
@@ -131,41 +132,42 @@ public class PlayerCMapSelector{
 
 
     public void updateMovingPlayer(PlayerChunkMap pcm, EntityPlayerMP player) {
-        double temp;
-        int curX = (int)(temp = player.posX) >> 4;
-        double d0 = player.managedPosX - temp;
+        int curX = (int)player.posX >> 4;
+        int curZ = (int)player.posZ >> 4;
+        double d0 = player.managedPosX - player.posX;
+        double d1 = player.managedPosZ - player.posZ;
+        double d2 = d0 * d0 + d1 * d1;
 
-        int curZ = (int)(temp = player.posZ) >> 4;
-        double d1 = player.managedPosZ - temp;
-
-        temp = d0 * d0 + d1 * d1;
-
-        if (temp >= 64d) {
+        if (d2 >= 64d) {
             int preX = (int)player.managedPosX >> 4;
             int preZ = (int)player.managedPosZ >> 4;
 
-            if (curX != preX || curZ != preZ) {
-                int radSq = radius+1;
-                radSq = radSq * radSq;
+            int dX = curX - preX;
+            int dZ = curZ - preZ;
+
+            if (dX != 0 || dZ != 0) {
+                int radSq = (radius+1) * (radius+1);
 
                 for (int item:mask){
                     int mdZ = (item & 0xFF) - 32;
                     int mdX = (item >> 8) - 32;
 
+
                     if(range(preX, preZ, curX-mdX, curZ-mdZ) > radSq){
-                        pcm.getOrCreateEntry(curX - mdX, curZ - mdZ).addPlayer(pcm, player);
+                        PlayerChunkMapEntry entry = pcm.getOrCreateEntry(curX - mdX, curZ - mdZ);
+                        entry.addPlayer(player);
                     }
 
                     if(range(curX, curZ, preX-mdX, preZ-mdZ) > radSq){
                         PlayerChunkMapEntry entry = pcm.getEntry(preX-mdX, preZ-mdZ);
-                        if(entry != null) entry.removePlayer(pcm, player);
+                        if(entry != null) entry.removePlayer(player);
                     }
                 }
                 player.managedPosX = player.posX;
                 player.managedPosZ = player.posZ;
                 pcm.markSortPending();
             }
-        } else if (player.prevRenderRadius != player.renderRadius && temp > 16d) {
+        } else if (player.prevRenderRadius != player.renderRadius && d2 > 16d) {
             if(player.renderRadius > player.prevRenderRadius){
                 pcm.getBy(player.renderRadius).updatePlayerRadius(pcm, player);
             } else {

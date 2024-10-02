@@ -80,7 +80,7 @@ import plus.fserver.entity.EntityCollider;
 import plus.fserver.server.chunk.io.TChunkTask;
 import plus.fserver.server.chunk.io.TQueuedChunk;
 import plus.fserver.server.elca.ChunkSelector;
-import plus.fserver.utls.collections.ChunkIteratorPro;
+import plus.fserver.utls.collections.ChunkIterator;
 import plus.fserver.utls.collections.EntityIDHashSplitedList;
 import plus.fserver.utls.collections.EntityRemSwapList;
 import plus.fserver.utls.math.MathUtls;
@@ -131,6 +131,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         }
         this.server = server;
         createTracker();
+        this.playerChunkMap = new PlayerChunkMap(this);
 
         this.calculateInitialSkylight();
         this.calculateInitialWeather();
@@ -142,7 +143,6 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         entitySpawner = makeWorldSpawner();
 
         initUnimportant();
-        this.playerChunkMap = new PlayerChunkMap(this);
     }
 
 
@@ -452,7 +452,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
     private void collideAll(){
         EntityCollider collider = this.collider;
         collider.begin(getGameRules().maxEntityCramming.getInt());
-        for (Chunk chunk: chunkProviderServer.forChunks(ElcaConfig.CHUNK_TICK_RADIUS_1)){
+        for (Chunk chunk:this.playerChunkMap.getChunkIterator(ElcaConfig.CHUNK_TICK_RADIUS_1)){
             collider.collideAll(chunk);
         }
         collider.complete();
@@ -905,7 +905,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
     public void sendToAllNearExcept(@Nullable EntityPlayer except, double x, double y, double z, double radius, Packet<?> packetIn) {
         final double radius1 = radius*radius;
         double d0, d1, d2;
-        PlayerChunkMapEntry center = chunkProviderServer.getLoadedEntry(MathHelper.floor(x), MathHelper.floor(z));
+        PlayerChunkMapEntry center = this.playerChunkMap.getEntry(MathHelper.floor(x), MathHelper.floor(z));
 
         if(center == null) {
             List<EntityPlayer> players = curPlayerEntities;
@@ -1313,7 +1313,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         }
         if((prevWorldTotalTime & 127) == 0) poledSlice = null;
 
-        tickChunkMap();
+        playerChunkMap.tick();
 
         if(ElcaConfig.VILLAGE_TICK_RATE!=-1){
             if(prevWorldTotalTime % ElcaConfig.VILLAGE_TICK_RATE==0) {
@@ -1334,11 +1334,6 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         if(cache != null && !cache.isUsed())redstoneCache = null;
 
         this.sendQueuedBlockEvents();
-    }
-
-
-    public void tickChunkMap(){
-        playerChunkMap.tick();
     }
 
 
@@ -1506,9 +1501,8 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
 
     protected void updateBlocks(final int factor) {
         this.playerCheckLight();
-        ChunkProviderServer cps = chunkProviderServer;
         if (isDebug) {
-            for (Iterator<Chunk> iterator = cps.forChunks(ElcaConfig.CHUNK_TICK_RADIUS_2); iterator.hasNext();){
+            for (Iterator<Chunk> iterator = this.playerChunkMap.getChunkIterator(); iterator.hasNext();){
                 iterator.next().onTick(false);
             }
         } else {
@@ -1536,7 +1530,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
             EntityCollider collider = this.collider;
             collider.begin(getGameRules().maxEntityCramming.getInt());
 
-            for (ChunkIteratorPro iter = cps.forChunks(radius); iter.hasNext();){
+            for (ChunkIterator iter = this.playerChunkMap.getChunkIterator(radius); iter.hasNext();){
                 selector.setChunk(chunk = iter.next());
                 collider.collideAll(chunk);
 

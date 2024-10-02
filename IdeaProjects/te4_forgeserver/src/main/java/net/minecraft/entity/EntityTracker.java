@@ -124,11 +124,9 @@ public class EntityTracker {
 
     public void onTrack(EntityTrackerEntry entry){
         Entity entity = entry.getTrackedEntity();
-        Chunk chunk = entity.world.chunkProviderServer
-                .getLoadedChunk(entity.chunkCoordX, entity.chunkCoordZ);
+        PlayerChunkMapEntry pEntry = ((WorldServer)entity.world).getPlayerChunkMap().getEntry(entity.chunkCoordX, entity.chunkCoordZ);
 
-        PlayerChunkMapEntry pEntry;
-        if(chunk != null && (pEntry = chunk.pcmEntry) != null){
+        if(pEntry != null){
             entry.updatePlayerEntities(pEntry);
         } else {
             entry.updatePlayerEntities(trackedPlayers());
@@ -397,17 +395,4 @@ public class EntityTracker {
             }
         }
     }
-
-    //Chunk chunk = player.getServerWorld().chunkProviderServer.getLoadedChunk(player.chunkCoordX, player.chunkCoordZ);
-    //        PlayerChunkMapEntry pEntry;
-    //        if(chunk != null && (pEntry = chunk.pcmEntry) != null){
-    //            final Entity[] raw = pEntry.raw();;
-    //            for (int i = 0, s = pEntry.sizeC(); i < s; i++){
-    //                Entity entity;
-    //                if((entity = raw[i]) == null)break;
-    //                EntityTrackerEntry entry;
-    //                if ((entry = entity.trackerEntry) != null && entry.getTrackedEntity() != player)
-    //                        entry.updatePlayerEntity(player);
-    //            }
-    //        }
 }

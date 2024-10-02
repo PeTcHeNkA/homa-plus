@@ -1,6 +1,7 @@
 package plus.fserver.server.chunk.io;
 
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
@@ -34,8 +35,8 @@ public class TChunkIOProvider extends TChunkTask {
     @Override
     public void syncCallback() {
         try {
-            Chunk chunk;
-            if ((chunk = this.chunk) != null) {
+            Chunk chunk = this.chunk;
+            if (chunk != null) {
                 TQueuedChunk chunkInfo = this.chunkInfo;
                 this.loader.loadEntities(world, this.nbt.getCompoundTag(SStrings.CL_LEVEL), chunk);
 
@@ -44,11 +45,11 @@ public class TChunkIOProvider extends TChunkTask {
                 chunk.setLastSaveTime(provider.world.getTotalWorldTime());
                 this.provider.chunkGenerator.recreateStructures(chunk, chunkInfo.x, chunkInfo.z);
 
-                world().getChunkProvider().onComplete(this);
+                world.getChunkProvider().onComplete(this);
             }
-        } catch (Throwable error){
-            onError(error);
+            this.runCallbacks();
+        } catch (Throwable throwable){
+            throwable.printStackTrace();
         }
-        this.runCallbacks();
     }
 }

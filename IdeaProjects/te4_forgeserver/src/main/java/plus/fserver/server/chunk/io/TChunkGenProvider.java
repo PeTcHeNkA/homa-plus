@@ -23,9 +23,9 @@ public class TChunkGenProvider extends TChunkTask implements Runnable{
             if (chunk != null) {
                 world().getChunkProvider().onComplete(this);
             }
-        } catch (Throwable err){
-            onError(err);
+            this.runCallbacks();
+        } catch (Throwable throwable){
+            throwable.printStackTrace();
         }
-        if(chunk != null) this.runCallbacks();
     }
 }

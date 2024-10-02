@@ -1391,15 +1391,15 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         // do not drop any items while restoring blocksnapshots. Prevents dupes
         if (!this.isRemote && (entityIn == null || (entityIn instanceof net.minecraft.entity.item.EntityItem && this.restoringBlockSnapshots))) return false;
 
-        int chunkX = MathHelper.floor(entityIn.posX / 16.0D);
-        int chunkZ = MathHelper.floor(entityIn.posZ / 16.0D);
+        int i = MathHelper.floor(entityIn.posX / 16.0D);
+        int j = MathHelper.floor(entityIn.posZ / 16.0D);
         boolean flag = entityIn.forceSpawn;
 
         if (entityIn instanceof EntityPlayer) {
             flag = true;
         }
 
-        if (!flag && !this.isChunkLoaded(chunkX, chunkZ, false)) {
+        if (!flag && !this.isChunkLoaded(i, j, false)) {
             return false;
         } else {
             if (entityIn instanceof EntityPlayer) {
@@ -1410,7 +1410,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             }
 
             if (MinecraftForge.EVENT_BUS.post(new EntityJoinWorldEvent(entityIn, this)) && !flag) return false;
-            this.getChunk(chunkX, chunkZ).addEntity(entityIn);
+            this.getChunk(i, j).addEntity(entityIn);
             this.realEntityList.addF(entityIn);
             this.onEntityAdded(entityIn);
             return true;
