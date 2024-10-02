@@ -28,6 +28,7 @@ import plus.fserver.ElcaConfig;
 import plus.fserver.api.Keep;
 import plus.fserver.server.chunk.io.TChunkExecutor;
 import plus.fserver.server.chunk.io.TChunkTask;
+import plus.fserver.server.chunk.io.WrappedChunkRunnable;
 import plus.fserver.utls.collections.ChunkPopulationTask;
 import plus.fserver.utls.collections.Long2ChunkMap;
 
@@ -107,12 +108,22 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
 
     @Nullable
     public Chunk loadChunk(int x, int z) {
-        return loadChunk(x, z, null);
+        return loadChunk(x, z, (Consumer<Chunk>) null);
     }
 
 
     @Nullable
     public Chunk loadChunk(int x, int z, @Nullable Runnable runnable) {
+        if(runnable != null) {
+            return loadChunk(x, z, new WrappedChunkRunnable(runnable));
+        } else {
+            return loadChunk(x, z, (Consumer<Chunk>) null);
+        }
+    }
+
+
+    @Nullable
+    public Chunk loadChunk(int x, int z, @Nullable Consumer<Chunk> runnable) {
         Chunk chunk = this.getLoadedChunk(x, z);
         if (chunk == null) {
             long chunkHash = ChunkPos.asLong(x, z);
@@ -158,7 +169,7 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
             }
             if(chunk != null) chunk.setRequested();
         }
-        if (runnable != null) runnable.run();
+        if (runnable != null) runnable.accept(chunk);
         return chunk;
     }
 

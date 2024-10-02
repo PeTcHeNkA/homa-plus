@@ -1052,7 +1052,7 @@ public abstract class PlayerList {
         WorldServer worldserver = this.server.getWorld(playerIn.dimension);
         worldserver.getChunkProvider().loadChunk(
                 MathHelper.floor(playerIn.posX) >> 4, MathHelper.floor(playerIn.posZ) >> 4,
-                () -> {
+                (chunk) -> {
                     worldserver.spawnEntity(playerIn);
                     PlayerList.this.preparePlayer(playerIn, null);
                     playerIn.connection.setLock(false);
