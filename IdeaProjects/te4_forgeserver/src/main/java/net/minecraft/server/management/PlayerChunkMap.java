@@ -263,8 +263,11 @@ public class PlayerChunkMap extends Long2ObjectOpenHashMap<PlayerChunkMapEntry> 
 
 
     public boolean isPlayerWatchingChunk(EntityPlayerMP player, int chunkX, int chunkZ) {
-        PlayerChunkMapEntry entry = super.get(ChunkPos.asLong(chunkX, chunkZ));
-        return entry != null && entry.containsRef(player) && entry.isSentToPlayers();
+        Chunk chunk;
+        if((chunk = provider.getLoadedChunk(chunkX, chunkZ)) == null)return false;
+        PlayerChunkMapEntry entry;
+        if((entry = chunk.chunkMapEntry) == null)return false;
+        return entry.containsRef(player) && entry.isSentToPlayers();
     }
 
 

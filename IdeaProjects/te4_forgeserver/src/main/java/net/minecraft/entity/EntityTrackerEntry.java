@@ -59,8 +59,10 @@ import net.minecraft.network.play.server.SPacketSpawnPainting;
 import net.minecraft.network.play.server.SPacketSpawnPlayer;
 import net.minecraft.network.play.server.SPacketUseBed;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.storage.MapData;
 import net.minecraftforge.fml.common.network.internal.FMLNetworkHandler;
 import org.apache.logging.log4j.LogManager;
@@ -297,8 +299,13 @@ public class EntityTrackerEntry {
     }
 
 
-    private boolean isPlayerWatchingThisChunk(EntityPlayerMP playerMP) {
-        return playerMP.getServerWorld().getPlayerChunkMap().isPlayerWatchingChunk(playerMP, this.trackedEntity.chunkCoordX, this.trackedEntity.chunkCoordZ);
+    private boolean isPlayerWatchingThisChunk(EntityPlayerMP player) {
+        Chunk chunk;
+        Entity trackedEntity = this.trackedEntity;
+        if((chunk = player.getServerWorld().chunkProviderServer.getLoadedChunk(trackedEntity.chunkCoordX, trackedEntity.chunkCoordZ)) == null)return false;
+        PlayerChunkMapEntry entry;
+        if((entry = chunk.chunkMapEntry) == null)return false;
+        return entry.containsRef(player) && entry.isSentToPlayers();
     }
 
 
