@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.annotation.Nullable;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -22,17 +21,24 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import plus.fserver.utls.collections.ArrayListE6;
+import plus.fserver.utls.collections.Int2ObjectMap;
 
 
-public class EntityDataManager extends Int2ObjectOpenHashMap<EntityDataManager.DataEntry<?>>{
+public class EntityDataManager extends Int2ObjectMap<EntityDataManager.DataEntry<?>> {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Map<Class <? extends Entity> , Integer > NEXT_ID_MAP = Maps.newHashMap();
     private final Entity entity;
-    private final ReadWriteLock lock = new ReentrantReadWriteLock();
+    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
     private boolean dirty;
 
     public EntityDataManager(Entity entityIn) {
         this.entity = entityIn;
+    }
+
+
+    @Override
+    protected DataEntry<?>[] newArray(int size) {
+        return new DataEntry[size];
     }
 
 
@@ -99,9 +105,10 @@ public class EntityDataManager extends Int2ObjectOpenHashMap<EntityDataManager.D
             throw new IllegalArgumentException("Unregistered serializer " + key.getSerializer() + " for " + i + "!");
         } else {
             DataEntry<T> dataentry = new DataEntry<T>(key, value);
-            this.lock.writeLock().lock();
+            ReentrantReadWriteLock.WriteLock wLock = this.lock.writeLock();
+            wLock.lock();
             super.put(key.getId(), dataentry);
-            this.lock.writeLock().unlock();
+            wLock.unlock();
             return dataentry;
         }
     }
@@ -109,9 +116,10 @@ public class EntityDataManager extends Int2ObjectOpenHashMap<EntityDataManager.D
 
     private <T> void setEntry(DataParameter<T> key, T value) {
         DataEntry<T> dataentry = new DataEntry<T>(key, value);
-        this.lock.writeLock().lock();
+        ReentrantReadWriteLock.WriteLock wLock = this.lock.writeLock();
+        wLock.lock();
         super.put(key.getId(), dataentry);
-        this.lock.writeLock().unlock();
+        wLock.unlock();
     }
 
 
@@ -139,23 +147,25 @@ public class EntityDataManager extends Int2ObjectOpenHashMap<EntityDataManager.D
     public <T> void set(DataParameter<T> key, T value) {
         EntityDataManager.DataEntry<T> entry = this.getEntry(key);
         if (!Objects.equals(value, entry.getValue())) {
-            this.lock.writeLock().lock();
+            ReentrantReadWriteLock.WriteLock wLock = this.lock.writeLock();
+            wLock.lock();
             entry.setValue(value);
             this.entity.notifyDataManagerChange(key);
             entry.setDirty(true);
             this.dirty = true;
-            this.lock.writeLock().unlock();
+            wLock.unlock();
         }
     }
 
 
     public <T> void setU(EntityDataManager.DataEntry<T> entry, DataParameter<T> key, T value) {
-        this.lock.writeLock().lock();
+        ReentrantReadWriteLock.WriteLock wLock = this.lock.writeLock();
+        wLock.lock();
         entry.setValue(value);
         this.entity.notifyDataManagerChange(key);
         entry.setDirty(true);
         this.dirty = true;
-        this.lock.writeLock().unlock();
+        wLock.unlock();
     }
 
 
@@ -197,10 +207,12 @@ public class EntityDataManager extends Int2ObjectOpenHashMap<EntityDataManager.D
         ArrayListE6<EntityDataManager.DataEntry<?>> list = null;
 
         if (this.dirty) {
-            this.lock.readLock().lock();
+            ReentrantReadWriteLock.ReadLock rloc = this.lock.readLock();
+            rloc.lock();
 
-            for (EntityDataManager.DataEntry<?> dataentry : super.values()) {
-                if (dataentry.isDirty()) {
+            DataEntry<?> dataentry;
+            for (Object o : value) {
+                if (o != null && (dataentry = (DataEntry<?>) o).isDirty()) {
                     dataentry.setDirty(false);
                     if (list == null) {
                         list = new ArrayListE6<>();
@@ -208,7 +220,7 @@ public class EntityDataManager extends Int2ObjectOpenHashMap<EntityDataManager.D
                     list.addF(dataentry.copy());
                 }
             }
-            this.lock.readLock().unlock();
+            rloc.unlock();
         }
         this.dirty = false;
         return list;
@@ -216,23 +228,32 @@ public class EntityDataManager extends Int2ObjectOpenHashMap<EntityDataManager.D
 
 
     public void writeEntries(PacketBuffer buf) throws IOException {
-        this.lock.readLock().lock();
-        for (EntityDataManager.DataEntry<?> dataentry : super.values()) {
-            writeEntry(buf, dataentry);
+        ReentrantReadWriteLock.ReadLock rLoc = this.lock.readLock();
+        rLoc.lock();
+        for (Object o : value) {
+            if(o != null) writeEntry(buf, (DataEntry<?>) o);
         }
-        this.lock.readLock().unlock();
+        rLoc.unlock();
         buf.writeByte(255);
     }
 
 
     @Nullable
     public List<EntityDataManager.DataEntry<?>> getAll() {
-        this.lock.readLock().lock();
+        ReentrantReadWriteLock.ReadLock rLoc = this.lock.readLock();
+        rLoc.lock();
 
-        ArrayListE6<DataEntry<?>> list = new ArrayListE6<>();
-        list.addAll(super.values());
+        Object[] raw = new Object[super.size()];
+        ArrayListE6<DataEntry<?>> list = new ArrayListE6<>(raw);
 
-        this.lock.readLock().unlock();
+        int cursor = 0;
+        for (Object o : value) {
+            if(o != null){
+                //todo is safe?
+                raw[cursor++] = o;
+            }
+        }
+        rLoc.unlock();
         return list;
     }
 
@@ -252,8 +273,8 @@ public class EntityDataManager extends Int2ObjectOpenHashMap<EntityDataManager.D
 
 
     @Nullable
-    public static List < EntityDataManager.DataEntry<? >> readEntries(PacketBuffer buf) throws IOException {
-        List < EntityDataManager.DataEntry<? >> list = null;
+    public static List<EntityDataManager.DataEntry<?>> readEntries(PacketBuffer buf) throws IOException {
+        List<EntityDataManager.DataEntry<?>> list = null;
         int i;
 
         while ((i = buf.readUnsignedByte()) != 255) {
@@ -274,7 +295,7 @@ public class EntityDataManager extends Int2ObjectOpenHashMap<EntityDataManager.D
 
 
     @SideOnly(Side.CLIENT)
-    public void setEntryValues(List <DataEntry<? >> entriesIn) {
+    public void setEntryValues(List<DataEntry<?>> entriesIn) {
         this.lock.writeLock().lock();
         for (DataEntry<?> dataentry : entriesIn) {
             DataEntry<?> dataentry1 = super.get(dataentry.getKey().getId());
@@ -297,11 +318,12 @@ public class EntityDataManager extends Int2ObjectOpenHashMap<EntityDataManager.D
 
     public void setClean() {
         this.dirty = false;
-        this.lock.readLock().lock();
-        for (DataEntry<?> dataentry : super.values()) {
-            dataentry.setDirty(false);
+        ReentrantReadWriteLock.ReadLock rLock = this.lock.readLock();
+        rLock.lock();
+        for (Object o : value) {
+            if(o != null) ((DataEntry<?>) o).setDirty(false);
         }
-        this.lock.readLock().unlock();
+        rLock.unlock();
     }
 
 
