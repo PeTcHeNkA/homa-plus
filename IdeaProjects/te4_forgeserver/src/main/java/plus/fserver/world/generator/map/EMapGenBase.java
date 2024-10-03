@@ -16,13 +16,14 @@ public class EMapGenBase {
     public void generate(World world, GenSession session, int num1, int num2, ChunkPrimer primer) {
         int range = this.range;
         this.world = world;
-        session.rand.setSeed(world.getSeed());
-        long l1 = session.rand.nextLong();
-        long l2 = session.rand.nextLong();
+        Random rand = session.rand;
+        rand.setSeed(world.getSeed());
+        long l1 = rand.nextLong();
+        long l2 = rand.nextLong();
 
         for(int num3 = num1 - range; num3 <= num1 + range; ++num3) {
             for(int i = num2 - range; i <= num2 + range; ++i) {
-                session.rand.setSeed(((long)num3 * l1) ^ ((long)i * l2) ^ world.getSeed());
+                rand.setSeed(((long)num3 * l1) ^ ((long)i * l2) ^ world.getSeed());
                 this.recursiveGenerate(world, session, num3, i, num1, num2, primer);
             }
         }
@@ -39,6 +40,5 @@ public class EMapGenBase {
     }
 
 
-    protected void recursiveGenerate(World world, GenSession session, int num1, int num2, int num3, int num4, ChunkPrimer primer) {
-    }
+    protected void recursiveGenerate(World world, GenSession session, int num1, int num2, int num3, int num4, ChunkPrimer primer) {}
 }

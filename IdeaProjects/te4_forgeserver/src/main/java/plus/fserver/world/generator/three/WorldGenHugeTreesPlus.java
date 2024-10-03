@@ -15,7 +15,7 @@ public abstract class WorldGenHugeTreesPlus extends WorldGenHugeTrees {
     public static CrownCreator JUNGLE(int delta){
         return (inst, selector, worldIn, pos, width) -> {
             for (int j = -2 - delta; j <= 0; ++j) {
-                inst.growLeavesLayerStrict(selector, worldIn, pos.up(j), width + 1 - j);
+                inst.growLeavesLayerStrict(selector, pos.up(j), width + 1 - j);
             }
         };
     }
@@ -32,7 +32,7 @@ public abstract class WorldGenHugeTreesPlus extends WorldGenHugeTrees {
             for (int k = y - i; k <= y; ++k) {
                 int l = y - k;
                 int i1 = MathHelper.floor((float) l / (float) i * floor);
-                inst.growLeavesLayerStrict(selector, worldIn, new BlockPos(x, k, z), i1 + (l > 0 && i1 == j && (k & 1) == 0 ? 1 : 0));
+                inst.growLeavesLayerStrict(selector, new BlockPos(x, k, z), i1 + (l > 0 && i1 == j && (k & 1) == 0 ? 1 : 0));
                 j = i1;
             }
         };

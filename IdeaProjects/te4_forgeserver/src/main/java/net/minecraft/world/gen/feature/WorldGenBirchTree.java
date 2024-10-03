@@ -40,6 +40,7 @@ public class WorldGenBirchTree extends WorldGenAbstractTree {
         }
 
         boolean flag = true;
+        boolean notify = needNotify();
 
         if (position.getY() >= 1 && position.getY() + i + 1 <= 256) {
             if(selector == null)selector = new ChunkSelector(world);
@@ -93,7 +94,7 @@ public class WorldGenBirchTree extends WorldGenAbstractTree {
                                     IBlockState state2 = selector.getState(blockpos);
 
                                     if (state2.getBlock().isAir(state2, world, blockpos) || state2.getBlock().isAir(state2, world, blockpos)) {
-                                        this.setBlockAndNotifyAdequately(selector, blockpos, LEAF);
+                                        setBlockAndNotifyAdequately(selector, blockpos, LEAF, notify);
                                     }
                                 }
                             }
@@ -105,7 +106,7 @@ public class WorldGenBirchTree extends WorldGenAbstractTree {
                         IBlockState state2 = selector.getState(upN);
 
                         if (state2.getBlock().isAir(state2, world, upN) || state2.getBlock().isLeaves(state2, world, upN)) {
-                            this.setBlockAndNotifyAdequately(selector, position.up(j2), LOG);
+                            setBlockAndNotifyAdequately(selector, position.up(j2), LOG, notify);
                         }
                     }
                     return true;

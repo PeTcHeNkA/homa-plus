@@ -83,6 +83,8 @@ public class WorldGenSwamp extends WorldGenAbstractTree {
             if (!flag) {
                 return false;
             } else {
+                boolean notify = needNotify();
+
                 BlockPos temp = position0.down();
                 IBlockState state = worldIn.getBlockState(temp);
                 boolean isSoil = state.getBlock().canSustainPlant(state, worldIn, temp, net.minecraft.util.EnumFacing.UP, ((net.minecraft.block.BlockSapling)Blocks.SAPLING));
@@ -106,7 +108,7 @@ public class WorldGenSwamp extends WorldGenAbstractTree {
                                     state = selector.getState(pos);
 
                                     if (state.getBlock().canBeReplacedByLeaves(state, worldIn, pos)) {
-                                        this.setBlockAndNotifyAdequately(selector, pos, LEAF);
+                                        setBlockAndNotifyAdequately(selector, pos, LEAF, notify);
                                     }
                                 }
                             }
@@ -120,7 +122,7 @@ public class WorldGenSwamp extends WorldGenAbstractTree {
                         block2 = state.getBlock();
 
                         if (block2.isAir(state, worldIn, temp) || block2.isLeaves(state, worldIn, temp) || block2 == Blocks.FLOWING_WATER || block2 == Blocks.WATER) {
-                            this.setBlockAndNotifyAdequately(selector, position0.up(l1), TRUNK);
+                            setBlockAndNotifyAdequately(selector, position0.up(l1), TRUNK, notify);
                         }
                     }
 
@@ -135,22 +137,22 @@ public class WorldGenSwamp extends WorldGenAbstractTree {
                                     pos.setPos(posX-1, posY, posZ);
 
                                     if (rand.nextInt(4) == 0 && selector.isAirBlock(pos)) {
-                                        this.addVine(selector, pos, BlockVine.EAST);
+                                        addVine(selector, pos, BlockVine.EAST, notify);
                                     }
                                     pos.setPos(posX+1, posY, posZ);
 
                                     if (rand.nextInt(4) == 0 && selector.isAirBlock(pos)) {
-                                        this.addVine(selector, pos, BlockVine.WEST);
+                                        addVine(selector, pos, BlockVine.WEST, notify);
                                     }
                                     pos.setPos(posX, posY, posZ-1);
 
                                     if (rand.nextInt(4) == 0 && selector.isAirBlock(pos)) {
-                                        this.addVine(selector, pos, BlockVine.SOUTH);
+                                        addVine(selector, pos, BlockVine.SOUTH, notify);
                                     }
                                     pos.setPos(posX, posY, posZ+1);
 
                                     if (rand.nextInt(4) == 0 && selector.isAirBlock(pos)) {
-                                        this.addVine(selector, pos, BlockVine.NORTH);
+                                        addVine(selector, pos, BlockVine.NORTH, notify);
                                     }
                                 }
                             }
@@ -167,13 +169,13 @@ public class WorldGenSwamp extends WorldGenAbstractTree {
     }
 
 
-    private void addVine(ChunkSelector selector, BlockPos.MutableBlockPos pos, PropertyBool prop) {
+    private static void addVine(ChunkSelector selector, BlockPos.MutableBlockPos pos, PropertyBool prop, boolean notify) {
         IBlockState iblockstate = Blocks.VINE.getDefaultState().withProperty(prop, Boolean.TRUE);
-        this.setBlockAndNotifyAdequately(selector, pos, iblockstate);
+        setBlockAndNotifyAdequately(selector, pos, iblockstate, notify);
         int i = 4;
 
         for (pos.setY(pos.getY()-1); selector.isAirBlock(pos) && i > 0; --i) {
-            this.setBlockAndNotifyAdequately(selector, pos, iblockstate);
+            setBlockAndNotifyAdequately(selector, pos, iblockstate, notify);
             pos.setY(pos.getY()-1);
         }
     }

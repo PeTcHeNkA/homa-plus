@@ -23,6 +23,8 @@ public class WorldGenIceSpike extends WorldGenerator {
         if (selector.getBlockState(pos).getBlock() != Blocks.SNOW) {
             return false;
         } else {
+            boolean notify = needNotify();
+
             pos = pos.up(rand.nextInt(4));
 
             int i = rand.nextInt(4) + 7;
@@ -51,7 +53,7 @@ public class WorldGenIceSpike extends WorldGenerator {
                             Block block = state.getBlock();
 
                             if (state.getBlock().isAir(state, selector, mut) || block == Blocks.DIRT || block == Blocks.SNOW || block == Blocks.ICE) {
-                                this.setBlockAndNotifyAdequately(selector, mut, Blocks.PACKED_ICE.getDefaultState());
+                                setBlockAndNotifyAdequately(selector, mut, Blocks.PACKED_ICE.getDefaultState(), notify);
                             }
 
                             if (y != 0 && lim > 1) {
@@ -60,7 +62,7 @@ public class WorldGenIceSpike extends WorldGenerator {
                                 state = selector.getBlockState(mut);
                                 block = state.getBlock();
                                 if (state.getBlock().isAir(state, selector, mut) || block == Blocks.DIRT || block == Blocks.SNOW || block == Blocks.ICE) {
-                                    this.setBlockAndNotifyAdequately(selector, mut, Blocks.PACKED_ICE.getDefaultState());
+                                    setBlockAndNotifyAdequately(selector, mut, Blocks.PACKED_ICE.getDefaultState(), notify);
                                 }
                             }
                         }
@@ -90,7 +92,7 @@ public class WorldGenIceSpike extends WorldGenerator {
                             break;
                         }
 
-                        this.setBlockAndNotifyAdequately(selector, blockpos, Blocks.PACKED_ICE.getDefaultState());
+                        setBlockAndNotifyAdequately(selector, blockpos, Blocks.PACKED_ICE.getDefaultState(), notify);
                         blockpos = blockpos.down();
                         --j2;
                         if (j2 <= 0) {

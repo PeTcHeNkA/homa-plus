@@ -67,6 +67,7 @@ public class WorldGenTaiga2 extends WorldGenAbstractTree {
             if (!flag) {
                 return false;
             } else {
+                boolean notify = needNotify();
                 BlockPos temp = position.down();
                 IBlockState state = worldIn.getBlockState(temp);
 
@@ -88,7 +89,7 @@ public class WorldGenTaiga2 extends WorldGenAbstractTree {
                                     state = selector.getState(temp = new BlockPos(i2, j4, k2));
 
                                     if (state.getBlock().canBeReplacedByLeaves(state, worldIn, temp)) {
-                                        this.setBlockAndNotifyAdequately(selector, temp, LEAF);
+                                        setBlockAndNotifyAdequately(selector, temp, LEAF, notify);
                                     }
                                 }
                             }
@@ -112,7 +113,7 @@ public class WorldGenTaiga2 extends WorldGenAbstractTree {
                         state = selector.getState(temp);
 
                         if (state.getBlock().isAir(state, worldIn, temp) || state.getBlock().isLeaves(state, worldIn, temp)) {
-                            this.setBlockAndNotifyAdequately(selector, temp, TRUNK);
+                            setBlockAndNotifyAdequately(selector, temp, TRUNK, notify);
                         }
                     }
                     return true;

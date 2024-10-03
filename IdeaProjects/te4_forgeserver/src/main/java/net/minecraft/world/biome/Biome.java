@@ -126,9 +126,12 @@ public abstract class Biome extends IForgeRegistryEntry.Impl<Biome> {
     protected Map<EnumCreatureType, List<SpawnListEntry>> modSpawnableLists;
     @Keep
     protected List<FlowerEntry> flowers;
+    private int registryBiomeId = -1;
 
     public static int getIdForBiome(Biome biome) {
-        return REGISTRY.getIDForObject(biome);
+        int id = biome.registryBiomeId;
+        if(id == -1)return biome.registryBiomeId = REGISTRY.getIDForObject(biome);
+        return id;
     }
 
 

@@ -42,8 +42,10 @@ public class WorldGenShrub extends WorldGenTrees {
         IBlockState state = selector.getState(position);
 
         if (state.getBlock().canSustainPlant(state, worldIn, position, EnumFacing.UP, ((BlockSapling)Blocks.SAPLING))) {
+            boolean notify = needNotify();
             position = position.up();
-            this.setBlockAndNotifyAdequately(selector, position, this.woodMetadata);
+            setBlockAndNotifyAdequately(selector, position, this.woodMetadata, notify);
+            IBlockState leaves = this.leavesMetadata;
 
             for (int i = position.getY(); i <= position.getY() + 2; ++i) {
                 int j = i - position.getY();
@@ -60,7 +62,7 @@ public class WorldGenShrub extends WorldGenTrees {
                             state = selector.getState(blockpos);
 
                             if (state.getBlock().canBeReplacedByLeaves(state, worldIn, blockpos)) {
-                                this.setBlockAndNotifyAdequately(selector, blockpos, this.leavesMetadata);
+                                setBlockAndNotifyAdequately(selector, blockpos, leaves, notify);
                             }
                         }
                     }

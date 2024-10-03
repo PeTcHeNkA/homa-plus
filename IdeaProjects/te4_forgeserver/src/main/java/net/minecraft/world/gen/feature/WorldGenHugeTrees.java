@@ -106,13 +106,14 @@ public abstract class WorldGenHugeTrees extends WorldGenAbstractTree {
 
     @Keep
     public void growLeavesLayerStrict(World worldIn, BlockPos layerCenter, int width) {
-        growLeavesLayerStrict(new ChunkSelector(worldIn), worldIn, layerCenter, width);
+        growLeavesLayerStrict(new ChunkSelector(worldIn), layerCenter, width);
     }
 
 
     @Keep
-    public void growLeavesLayerStrict(ChunkSelector selector, World worldIn, BlockPos layerCenter, int width) {
+    public void growLeavesLayerStrict(ChunkSelector selector, BlockPos layerCenter, int width) {
         int i = width * width;
+        boolean notify = needNotify();
 
         for (int j = -width; j <= width + 1; ++j) {
             for (int k = -width; k <= width + 1; ++k) {
@@ -123,8 +124,8 @@ public abstract class WorldGenHugeTrees extends WorldGenAbstractTree {
                     BlockPos blockpos = layerCenter.add(j, 0, k);
                     IBlockState state = selector.getState(blockpos);
 
-                    if (state.getBlock().isAir(state, worldIn, blockpos) || state.getBlock().isLeaves(state, worldIn, blockpos)) {
-                        this.setBlockAndNotifyAdequately(worldIn, blockpos, this.leavesMetadata);
+                    if (state.getBlock().isAir(state, selector, blockpos) || state.getBlock().isLeaves(state, selector, blockpos)) {
+                        setBlockAndNotifyAdequately(selector, blockpos, this.leavesMetadata, notify);
                     }
                 }
             }
@@ -142,6 +143,7 @@ public abstract class WorldGenHugeTrees extends WorldGenAbstractTree {
     protected void growLeavesLayer(ChunkSelector selector, BlockPos layerCenter, int width) {
         WorldServer worldIn = selector.getWorld();
         int i = width * width;
+        boolean notify = needNotify();
 
         for (int j = -width; j <= width; ++j) {
             for (int k = -width; k <= width; ++k) {
@@ -150,7 +152,7 @@ public abstract class WorldGenHugeTrees extends WorldGenAbstractTree {
                     IBlockState state = selector.getState(blockpos);
 
                     if (state.getBlock().isAir(state, worldIn, blockpos) || state.getBlock().isLeaves(state, worldIn, blockpos)) {
-                        this.setBlockAndNotifyAdequately(selector, blockpos, this.leavesMetadata);
+                        setBlockAndNotifyAdequately(selector, blockpos, this.leavesMetadata, notify);
                     }
                 }
             }

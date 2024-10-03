@@ -39,23 +39,26 @@ public class WorldGenMegaPineTree extends WorldGenHugeTrees {
         if (!this.ensureGrowable(selector, world, pos, i)) {
             return false;
         } else {
+            IBlockState wood = this.woodMetadata;
+            boolean notify = needNotify();
             this.createCrown(selector, pos.getX(), pos.getZ(), pos.getY() + i, 0, rand);
 
-            for (int j = 0; j < i; ++j) {
-                if (isAirLeaves(selector, world, pos.up(j))) {
-                    this.setBlockAndNotifyAdequately(selector, pos.up(j), this.woodMetadata);
+            for (int dy = 0; dy < i; ++dy) {
+                BlockPos upped;
+                if (isAirLeaves(selector, world, upped = pos.up(dy))) {
+                    setBlockAndNotifyAdequately(selector, upped, wood, notify);
                 }
-                if (j < i - 1) {
-                    if (isAirLeaves(selector, world, pos.add(1, j, 0))) {
-                        this.setBlockAndNotifyAdequately(selector, pos.add(1, j, 0), this.woodMetadata);
+                if (dy < i - 1) {
+                    if (isAirLeaves(selector, world, pos.add(1, dy, 0))) {
+                        setBlockAndNotifyAdequately(selector, pos.add(1, dy, 0), wood, notify);
                     }
 
-                    if (isAirLeaves(selector, world, pos.add(1, j, 1))) {
-                        this.setBlockAndNotifyAdequately(selector, pos.add(1, j, 1), this.woodMetadata);
+                    if (isAirLeaves(selector, world, pos.add(1, dy, 1))) {
+                        setBlockAndNotifyAdequately(selector, pos.add(1, dy, 1), wood, notify);
                     }
 
-                    if (isAirLeaves(selector, world, pos.add(0, j, 1))) {
-                        this.setBlockAndNotifyAdequately(selector, pos.add(0, j, 1), this.woodMetadata);
+                    if (isAirLeaves(selector, world, pos.add(0, dy, 1))) {
+                        setBlockAndNotifyAdequately(selector, pos.add(0, dy, 1), wood, notify);
                     }
                 }
             }
@@ -70,7 +73,7 @@ public class WorldGenMegaPineTree extends WorldGenHugeTrees {
         for (int k = y - i; k <= y; ++k) {
             int l = y - k;
             int i1 = factor + MathHelper.floor((float)l / (float)i * 3.5F);
-            this.growLeavesLayerStrict(selector, selector.getWorld(), new BlockPos(x, k, z), i1 + (l > 0 && i1 == j && (k & 1) == 0 ? 1 : 0));
+            this.growLeavesLayerStrict(selector, new BlockPos(x, k, z), i1 + (l > 0 && i1 == j && (k & 1) == 0 ? 1 : 0));
             j = i1;
         }
     }
@@ -79,41 +82,43 @@ public class WorldGenMegaPineTree extends WorldGenHugeTrees {
     @Override
     public void generateSaplings(World worldIn, Random random, BlockPos pos) {
         ChunkSelector selector = new ChunkSelector(worldIn);
-        this.placePodzolCircle(selector, worldIn, pos.west().north());
-        this.placePodzolCircle(selector, worldIn, pos.east(2).north());
-        this.placePodzolCircle(selector, worldIn, pos.west().south(2));
-        this.placePodzolCircle(selector, worldIn, pos.east(2).south(2));
+        boolean notify = needNotify();
+
+        placePodzolCircle(selector, worldIn, pos.west().north(), notify);
+        placePodzolCircle(selector, worldIn, pos.east(2).north(), notify);
+        placePodzolCircle(selector, worldIn, pos.west().south(2), notify);
+        placePodzolCircle(selector, worldIn, pos.east(2).south(2), notify);
 
         for (int i = 0; i < 5; ++i) {
             int j = random.nextInt(64);
             int k = j % 8;
             int l = j / 8;
             if (k == 0 || k == 7 || l == 0 || l == 7) {
-                this.placePodzolCircle(selector, worldIn, pos.add(-3 + k, 0, -3 + l));
+                placePodzolCircle(selector, worldIn, pos.add(-3 + k, 0, -3 + l), notify);
             }
         }
     }
 
 
-    private void placePodzolCircle(ChunkSelector selector, World worldIn, BlockPos center) {
+    private static void placePodzolCircle(ChunkSelector selector, World worldIn, BlockPos center, boolean notify) {
         for (int i = -2; i <= 2; ++i) {
             for (int j = -2; j <= 2; ++j) {
                 if (Math.abs(i) != 2 || Math.abs(j) != 2) {
-                    this.placePodzolAt(selector, worldIn, center.add(i, 0, j));
+                    placePodzolAt(selector, worldIn, center.add(i, 0, j), notify);
                 }
             }
         }
     }
 
 
-    private void placePodzolAt(ChunkSelector selector, World worldIn, BlockPos pos) {
+    private static void placePodzolAt(ChunkSelector selector, World worldIn, BlockPos pos, boolean notify) {
         for (int i = 2; i >= -3; --i) {
             BlockPos blockpos = pos.up(i);
             IBlockState iblockstate = selector.getState(blockpos);
             Block block = iblockstate.getBlock();
 
             if (block.canSustainPlant(iblockstate, worldIn, blockpos, EnumFacing.UP, ((BlockSapling)Blocks.SAPLING))) {
-                this.setBlockAndNotifyAdequately(selector, blockpos, PODZOL);
+                setBlockAndNotifyAdequately(selector, blockpos, PODZOL, notify);
                 break;
             }
             if (iblockstate.getMaterial() != Material.AIR && i < 0) {

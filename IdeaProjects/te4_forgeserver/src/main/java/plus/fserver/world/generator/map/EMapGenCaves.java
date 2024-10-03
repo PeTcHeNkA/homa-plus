@@ -23,22 +23,22 @@ public class EMapGenCaves extends EMapGenBase {
 
     protected void addRoom(GenSession session, long seed, int num2, int num3, ChunkPrimer primer,
                            double d1, double d2, double d3) {
-        this.addTunnel(session, seed, num2, num3, primer, d1, d2, d3, 1.0F + session.rand.nextFloat() * 6.0F, 0.0F, 0.0F, -1, -1, 0.5D);
+        this.addTunnel(session, new Random(seed), num2, num3, primer, d1, d2, d3, 1.0F + session.rand.nextFloat() * 6.0F, 0.0F, 0.0F, -1, -1, 0.5D);
     }
 
 
-    protected void addTunnel(GenSession session, long seed, int num1, int num2, ChunkPrimer primer,
+    protected void addTunnel(GenSession session, Random random, int num1, int num2, ChunkPrimer primer,
                              double di1, double di2, double di3, float fi1, float fi2, float fi3,
                              int num3, int num4, double di4) {
         double d0 = num1 * 16 + 8;
         double d1 = num2 * 16 + 8;
         float f = 0.0F;
         float f1 = 0.0F;
-        Random random = new Random(seed);
+        //Random random = new Random(seed);
 
         if (num4 <= 0) {
-            int i = this.range * 16 - 16;
-            num4 = i - random.nextInt(i / 4);
+            int i = (this.range * 16) - 16;
+            num4 = i - random.nextInt(i >> 2);
         }
 
         boolean flag2 = false;
@@ -47,7 +47,9 @@ public class EMapGenCaves extends EMapGenBase {
             num3 = num4 / 2;
             flag2 = true;
         }
-        int j = random.nextInt(num4 / 2) + num4 / 4;
+        int j = random.nextInt(num4 >> 1) + (num4 >> 2);
+
+        Biome[] biomesForGeneration = session.biomesForGeneration;
 
         for (boolean flag = random.nextInt(6) == 0; num3 < num4; ++num3) {
             double d2 = 1.5D + (double)(MathHelper.sin((float)num3 * (float)Math.PI / (float)num4) * fi1);
@@ -71,9 +73,13 @@ public class EMapGenCaves extends EMapGenBase {
             f1 = f1 + (random.nextFloat() - random.nextFloat()) * random.nextFloat() * 2.0F;
             f = f + (random.nextFloat() - random.nextFloat()) * random.nextFloat() * 4.0F;
 
+
+
             if (!flag2 && num3 == j && fi1 > 1.0F && num4 > 0) {
-                this.addTunnel(session, random.nextLong(), num1, num2, primer, di1, di2, di3, random.nextFloat() * 0.5F + 0.5F, fi2 - ((float)Math.PI / 2F), fi3 / 3.0F, num3, num4, 1.0D);
-                this.addTunnel(session, random.nextLong(), num1, num2, primer, di1, di2, di3, random.nextFloat() * 0.5F + 0.5F, fi2 + ((float)Math.PI / 2F), fi3 / 3.0F, num3, num4, 1.0D);
+                Random subRand = new Random(random.nextLong());
+                this.addTunnel(session, subRand, num1, num2, primer, di1, di2, di3, random.nextFloat() * 0.5F + 0.5F, fi2 - ((float)Math.PI / 2F), fi3 / 3.0F, num3, num4, 1.0D);
+                subRand.setSeed(random.nextLong());
+                this.addTunnel(session, subRand, num1, num2, primer, di1, di2, di3, random.nextFloat() * 0.5F + 0.5F, fi2 + ((float)Math.PI / 2F), fi3 / 3.0F, num3, num4, 1.0D);
                 return;
             }
 
@@ -153,12 +159,11 @@ public class EMapGenCaves extends EMapGenBase {
                                             IBlockState iblockstate1 = primer.getBlockState(j3, j2, i2);
                                             IBlockState iblockstate2 = MoreObjects.firstNonNull(primer.getBlockState(j3, j2 + 1, i2), BLK_AIR);
 
-                                            if (isTopBlock(primer, session, j3, j2, i2))
-                                            {
+                                            if (isTopBlock(primer, biomesForGeneration, j3, j2, i2)) {
                                                 flag1 = true;
                                             }
 
-                                            digBlock(session, primer, j3, j2, i2, flag1, iblockstate1, iblockstate2);
+                                            digBlock(biomesForGeneration, primer, j3, j2, i2, flag1, iblockstate1, iblockstate2);
                                         }
                                     }
                                 }
@@ -174,111 +179,107 @@ public class EMapGenCaves extends EMapGenBase {
     }
 
 
-    protected boolean canReplaceBlock(IBlockState p_175793_1_, IBlockState p_175793_2_)
-    {
-        if (p_175793_1_.getBlock() == Blocks.STONE)
-        {
+    protected static boolean canReplaceBlock(IBlockState state, IBlockState st2) {
+        if (state.getBlock() == Blocks.STONE) {
             return true;
         }
-        else if (p_175793_1_.getBlock() == Blocks.DIRT)
-        {
+        else if (state.getBlock() == Blocks.DIRT) {
             return true;
         }
-        else if (p_175793_1_.getBlock() == Blocks.GRASS)
-        {
+        else if (state.getBlock() == Blocks.GRASS) {
             return true;
         }
-        else if (p_175793_1_.getBlock() == Blocks.HARDENED_CLAY)
-        {
+        else if (state.getBlock() == Blocks.HARDENED_CLAY) {
             return true;
         }
-        else if (p_175793_1_.getBlock() == Blocks.STAINED_HARDENED_CLAY)
-        {
+        else if (state.getBlock() == Blocks.STAINED_HARDENED_CLAY) {
             return true;
         }
-        else if (p_175793_1_.getBlock() == Blocks.SANDSTONE)
-        {
+        else if (state.getBlock() == Blocks.SANDSTONE) {
             return true;
         }
-        else if (p_175793_1_.getBlock() == Blocks.RED_SANDSTONE)
-        {
+        else if (state.getBlock() == Blocks.RED_SANDSTONE) {
             return true;
         }
-        else if (p_175793_1_.getBlock() == Blocks.MYCELIUM)
-        {
+        else if (state.getBlock() == Blocks.MYCELIUM) {
             return true;
         }
-        else if (p_175793_1_.getBlock() == Blocks.SNOW_LAYER)
-        {
+        else if (state.getBlock() == Blocks.SNOW_LAYER) {
             return true;
         }
-        else
-        {
-            return (p_175793_1_.getBlock() == Blocks.SAND || p_175793_1_.getBlock() == Blocks.GRAVEL) && p_175793_2_.getMaterial() != Material.WATER;
+        else {
+            return (state.getBlock() == Blocks.SAND || state.getBlock() == Blocks.GRAVEL) && st2.getMaterial() != Material.WATER;
         }
     }
 
 
     @Override
     protected void recursiveGenerate(World world, GenSession session, int num1, int num2, int num3, int num4, ChunkPrimer primer) {
-        int i = session.rand.nextInt(session.rand.nextInt(session.rand.nextInt(15) + 1) + 1);
+        Random rand = session.rand;
+        int i = rand.nextInt(rand.nextInt(rand.nextInt(15) + 1) + 1);
 
-        if (session.rand.nextInt(7) != 0) {
+        if (rand.nextInt(7) != 0) {
             i = 0;
         }
 
+        Random subRand = new Random();
+
         for (int j = 0; j < i; ++j) {
-            double d0 = num1 * 16 + session.rand.nextInt(16);
-            double d1 = session.rand.nextInt(session.rand.nextInt(120) + 8);
-            double d2 = num2 * 16 + session.rand.nextInt(16);
+            double d0 = num1 * 16 + rand.nextInt(16);
+            double d1 = rand.nextInt(rand.nextInt(120) + 8);
+            double d2 = num2 * 16 + rand.nextInt(16);
             int k = 1;
 
-            if (session.rand.nextInt(4) == 0) {
-                this.addRoom(session, session.rand.nextLong(), num3, num4, primer, d0, d1, d2);
-                k += session.rand.nextInt(4);
+            if (rand.nextInt(4) == 0) {
+                this.addRoom(session, rand.nextLong(), num3, num4, primer, d0, d1, d2);
+                k += rand.nextInt(4);
             }
 
             for (int l = 0; l < k; ++l) {
-                float f = session.rand.nextFloat() * ((float)Math.PI * 2F);
-                float f1 = (session.rand.nextFloat() - 0.5F) * 2.0F / 8.0F;
-                float f2 = session.rand.nextFloat() * 2.0F + session.rand.nextFloat();
+                float f = rand.nextFloat() * ((float)Math.PI * 2F);
+                float f1 = (rand.nextFloat() - 0.5F) * 2.0F / 8.0F;
+                float f2 = rand.nextFloat() * 2.0F + rand.nextFloat();
 
-                if (session.rand.nextInt(10) == 0) {
-                    f2 *= session.rand.nextFloat() * session.rand.nextFloat() * 3.0F + 1.0F;
+                if (rand.nextInt(10) == 0) {
+                    f2 *= rand.nextFloat() * rand.nextFloat() * 3.0F + 1.0F;
                 }
 
-                this.addTunnel(session, session.rand.nextLong(), num3, num4, primer, d0, d1, d2, f2, f, f1, 0, 0, 1.0D);
+                subRand.setSeed(rand.nextLong());
+
+                this.addTunnel(session, subRand, num3, num4, primer, d0, d1, d2, f2, f, f1, 0, 0, 1.0D);
             }
         }
     }
 
 
-    protected boolean isOceanBlock(ChunkPrimer data, int x, int y, int z, int chunkX, int chunkZ) {
+    protected static boolean isOceanBlock(ChunkPrimer data, int x, int y, int z, int chunkX, int chunkZ) {
         Block block = data.getBlockState(x, y, z).getBlock();
         return block== Blocks.FLOWING_WATER || block == Blocks.WATER;
     }
 
 
-    private boolean isExceptionBiome(Biome biome) {
+    private static boolean isExceptionBiome(Biome biome) {
         if (biome == Biomes.BEACH) return true;
         return biome == Biomes.DESERT;
     }
 
 
-    private boolean isTopBlock(ChunkPrimer data, GenSession session, int x, int y, int z) {
-        Biome biome = session.biomesForGeneration[x + z * 16];
+    private static boolean isTopBlock(ChunkPrimer data, Biome[] biomesForGeneration, int x, int y, int z) {
+        Biome biome = biomesForGeneration[x + z * 16];
+        //Biome biome = session.biomesForGeneration[x + z * 16];
         IBlockState state = data.getBlockState(x, y, z);
         return (isExceptionBiome(biome) ? state.getBlock() == Blocks.GRASS : state == biome.topBlock);
     }
 
 
-    protected void digBlock(GenSession session, ChunkPrimer data, int x, int y, int z, boolean foundTop, IBlockState state, IBlockState up) {
-        Biome biome = session.biomesForGeneration[x + z * 16];
+    protected static void digBlock(Biome[] biomesForGeneration, ChunkPrimer data, int x, int y, int z, boolean foundTop, IBlockState state, IBlockState up) {
+        Biome biome = biomesForGeneration[x + z * 16];
+        //Biome biome = session.biomesForGeneration[x + z * 16];
 
         IBlockState top = biome.topBlock;
         IBlockState filler = biome.fillerBlock;
 
-        if (this.canReplaceBlock(state, up) || state.getBlock() == top.getBlock() || state.getBlock() == filler.getBlock()) {
+        if (canReplaceBlock(state, up) || state.getBlock() == top.getBlock() || state.getBlock() == filler.getBlock()) {
             if (y - 1 < 10) {
                 data.setBlockState(x, y, z, BLK_LAVA);
             } else {

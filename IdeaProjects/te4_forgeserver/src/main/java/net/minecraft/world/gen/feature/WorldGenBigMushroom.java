@@ -36,6 +36,7 @@ public class WorldGenBigMushroom extends WorldGenerator {
     @Override
     public boolean generate(World world, @Nullable ChunkSelector selector, Random rand, BlockPos position) {
         Block block = this.mushroomType;
+        boolean notify = needNotify();
 
         if (block == null) {
             block = rand.nextBoolean() ? Blocks.BROWN_MUSHROOM_BLOCK : Blocks.RED_MUSHROOM_BLOCK;
@@ -170,7 +171,7 @@ public class WorldGenBigMushroom extends WorldGenerator {
                                     IBlockState state = selector.getState(blockpos);
 
                                     if (state.getBlock().canBeReplacedByLeaves(state, world, blockpos)) {
-                                        this.setBlockAndNotifyAdequately(selector, blockpos, block.getDefaultState().withProperty(BlockHugeMushroom.VARIANT, type));
+                                        setBlockAndNotifyAdequately(selector, blockpos, block.getDefaultState().withProperty(BlockHugeMushroom.VARIANT, type), notify);
                                     }
                                 }
                             }
@@ -181,7 +182,7 @@ public class WorldGenBigMushroom extends WorldGenerator {
                         IBlockState iblockstate = selector.getState(temp = position.up(i3));
 
                         if (iblockstate.getBlock().canBeReplacedByLeaves(iblockstate, world, temp)) {
-                            this.setBlockAndNotifyAdequately(selector, temp, block.getDefaultState().withProperty(BlockHugeMushroom.VARIANT, BlockHugeMushroom.EnumType.STEM));
+                            setBlockAndNotifyAdequately(selector, temp, block.getDefaultState().withProperty(BlockHugeMushroom.VARIANT, BlockHugeMushroom.EnumType.STEM), notify);
                         }
                     }
                     return true;

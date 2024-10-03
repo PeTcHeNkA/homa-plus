@@ -33,6 +33,7 @@ public class WorldGenStalactite extends CWorldGenerator {
         BlockPos.MutableBlockPos shifted = new BlockPos.MutableBlockPos();
         for(int num = 0; num < 24; ++num) {
             FastRandom.INST.setRandom8x8x4(shifted, start);
+
             shifted.setY(
                     rand.nextInt(selector.getPrecipitationHeight(shifted.getX(), shifted.getZ())) & 255
             );
@@ -65,6 +66,7 @@ public class WorldGenStalactite extends CWorldGenerator {
                                 selector.setCurStateFast(pos.getX(), curY, pos.getZ(), headState);
                             else break gen;
                         }
+                        ++curY;
                         while (curY-- > 0 && tailSize-- > 0) {
                             pos.setY(curY);
                             if (selector.isCurAir(pos))

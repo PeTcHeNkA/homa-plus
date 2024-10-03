@@ -101,6 +101,7 @@ public class WorldGenBigTree extends WorldGenAbstractTree {
 
     @Keep
     void crosSection(ChunkSelector selector, BlockPos pos, float num, IBlockState state1) {
+        boolean notify = needNotify();
         int i = (int)((double)num + 0.618D);
         World world = selector.getWorld();
         IBlockState state;
@@ -114,7 +115,7 @@ public class WorldGenBigTree extends WorldGenAbstractTree {
 
                     if (state.getBlock().isAir(state, world, blockpos) ||
                             state.getBlock().isLeaves(state, world, blockpos)) {
-                        this.setBlockAndNotifyAdequately(selector, blockpos, state1);
+                        setBlockAndNotifyAdequately(selector, blockpos, state1, notify);
                     }
                 }
             }
@@ -167,6 +168,7 @@ public class WorldGenBigTree extends WorldGenAbstractTree {
 
 
     void limb(ChunkSelector selector, BlockPos pod2, BlockPos pos2) {
+        boolean notify = needNotify();
         BlockPos blockpos = pos2.add(-pod2.getX(), -pod2.getY(), -pod2.getZ());
         int i = this.getGreatestDistance(blockpos);
         float f = (float)blockpos.getX() / (float)i;
@@ -176,9 +178,9 @@ public class WorldGenBigTree extends WorldGenAbstractTree {
         for (int j = 0; j <= i; ++j) {
             blockpos = pod2.add(0.5F + (float)j * f, 0.5F + (float)j * f1, 0.5F + (float)j * f2);
 
-            this.setBlockAndNotifyAdequately(
+            setBlockAndNotifyAdequately(
                     selector, blockpos,
-                    defLogState.withProperty(BlockLog.LOG_AXIS, this.getLogAxis(pod2, blockpos))
+                    defLogState.withProperty(BlockLog.LOG_AXIS, this.getLogAxis(pod2, blockpos)), notify
             );
         }
     }

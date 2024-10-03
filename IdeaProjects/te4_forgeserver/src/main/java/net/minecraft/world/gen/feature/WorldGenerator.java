@@ -56,4 +56,19 @@ public abstract class WorldGenerator {
             selector.setBlockState(pos, state, ForgeModContainer.fixVanillaCascading ? 2| 16 : 2);
         }
     }
+
+
+    protected boolean needNotify(){
+        return doBlockNotify;
+    }
+
+
+    @Keep
+    protected static void setBlockAndNotifyAdequately(ChunkSelector selector, BlockPos pos, IBlockState state, boolean notify) {
+        if (notify) {
+            selector.setBlockState(pos, state, 3);
+        } else {
+            selector.setBlockState(pos, state, ForgeModContainer.fixVanillaCascading ? 2| 16 : 2);
+        }
+    }
 }

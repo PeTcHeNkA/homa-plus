@@ -79,6 +79,7 @@ public class WorldGenTrees extends WorldGenAbstractTree {
             if (!flag) {
                 return false;
             } else {
+                boolean notify = needNotify();
                 BlockPos temp;
                 IBlockState state = selector.getState(temp = position.down());
 
@@ -100,7 +101,7 @@ public class WorldGenTrees extends WorldGenAbstractTree {
                                     state = selector.getState(blockPos.setPos(k1, i3, i2));
 
                                     if (state.getBlock().isAir(state, worldIn, blockPos) || state.getBlock().isLeaves(state, worldIn, blockPos) || state.getMaterial() == Material.VINE) {
-                                        this.setBlockAndNotifyAdequately(selector, blockPos, this.metaLeaves);
+                                        setBlockAndNotifyAdequately(selector, blockPos, this.metaLeaves, notify);
                                     }
                                 }
                             }
@@ -111,24 +112,24 @@ public class WorldGenTrees extends WorldGenAbstractTree {
                         state = selector.getState(temp = position.up(j3));
 
                         if (state.getBlock().isAir(state, worldIn, temp) || state.getBlock().isLeaves(state, worldIn, temp) || state.getMaterial() == Material.VINE) {
-                            this.setBlockAndNotifyAdequately(selector, position.up(j3), this.metaWood);
+                            setBlockAndNotifyAdequately(selector, position.up(j3), this.metaWood, notify);
 
                             if (this.vinesGrow && j3 > 0) {
 
                                 if (rand.nextInt(3) > 0 && selector.isAirBlock(position.add(-1, j3, 0))) {
-                                    this.addVine(selector, position.add(-1, j3, 0), BlockVine.EAST);
+                                    addVine(selector, position.add(-1, j3, 0), BlockVine.EAST, notify);
                                 }
 
                                 if (rand.nextInt(3) > 0 && selector.isAirBlock(position.add(1, j3, 0))) {
-                                    this.addVine(selector, position.add(1, j3, 0), BlockVine.WEST);
+                                    addVine(selector, position.add(1, j3, 0), BlockVine.WEST, notify);
                                 }
 
                                 if (rand.nextInt(3) > 0 && selector.isAirBlock(position.add(0, j3, -1))) {
-                                    this.addVine(selector, position.add(0, j3, -1), BlockVine.SOUTH);
+                                    addVine(selector, position.add(0, j3, -1), BlockVine.SOUTH, notify);
                                 }
 
                                 if (rand.nextInt(3) > 0 && selector.isAirBlock(position.add(0, j3, 1))) {
-                                    this.addVine(selector, position.add(0, j3, 1), BlockVine.NORTH);
+                                    addVine(selector, position.add(0, j3, 1), BlockVine.NORTH, notify);
                                 }
                             }
                         }
@@ -148,19 +149,19 @@ public class WorldGenTrees extends WorldGenAbstractTree {
                                     if (state.getBlock().isLeaves(state, worldIn, blockPos)) {
                                         if (rand.nextInt(4) == 0
                                                 && selector.isAirBlock(temp = blockPos.west())) {
-                                            this.addHangingVine(selector, temp, BlockVine.EAST);
+                                            addHangingVine(selector, temp, BlockVine.EAST, notify);
                                         }
                                         if (rand.nextInt(4) == 0
                                                 && selector.isAirBlock(temp = blockPos.east())) {
-                                            this.addHangingVine(selector, temp, BlockVine.WEST);
+                                            addHangingVine(selector, temp, BlockVine.WEST, notify);
                                         }
                                         if (rand.nextInt(4) == 0
                                                 && selector.isAirBlock(temp = blockPos.north())) {
-                                            this.addHangingVine(selector, temp, BlockVine.SOUTH);
+                                            addHangingVine(selector, temp, BlockVine.SOUTH, notify);
                                         }
                                         if (rand.nextInt(4) == 0
                                                 && selector.isAirBlock(temp = blockPos.south())) {
-                                            this.addHangingVine(selector, temp, BlockVine.NORTH);
+                                            addHangingVine(selector, temp, BlockVine.NORTH, notify);
                                         }
                                     }
                                 }
@@ -194,17 +195,17 @@ public class WorldGenTrees extends WorldGenAbstractTree {
     }
 
 
-    private void addVine(ChunkSelector selector, BlockPos pos, PropertyBool prop) {
-        this.setBlockAndNotifyAdequately(selector, pos, Blocks.VINE.getDefaultState().withProperty(prop, Boolean.TRUE));
+    private static void addVine(ChunkSelector selector, BlockPos pos, PropertyBool prop, boolean notify) {
+        setBlockAndNotifyAdequately(selector, pos, Blocks.VINE.getDefaultState().withProperty(prop, Boolean.TRUE), notify);
     }
 
 
-    private void addHangingVine(ChunkSelector selector, BlockPos pos, PropertyBool prop) {
-        this.addVine(selector, pos, prop);
+    private static void addHangingVine(ChunkSelector selector, BlockPos pos, PropertyBool prop, boolean notify) {
+        addVine(selector, pos, prop, notify);
         int i = 4;
 
         for (BlockPos blockpos = pos.down(); selector.isAirBlock(blockpos) && i > 0; --i) {
-            this.addVine(selector, blockpos, prop);
+            addVine(selector, blockpos, prop, notify);
             blockpos = blockpos.down();
         }
     }

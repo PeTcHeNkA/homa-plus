@@ -76,6 +76,9 @@ public class WorldGenSavannaTree extends WorldGenAbstractTree {
             if (!flag) {
                 return false;
             } else {
+                boolean notify = needNotify();
+                IBlockState wood = this.wood, leaves = this.leaves;
+
                 BlockPos down = position.down();
                 IBlockState state = selector.getState(down);
                 boolean isSoil = state.getBlock().canSustainPlant(state, worldIn, down, EnumFacing.UP, ((BlockSapling)Blocks.SAPLING));
@@ -102,7 +105,7 @@ public class WorldGenSavannaTree extends WorldGenAbstractTree {
                         state = selector.getState(blockpos);
 
                         if (state.getBlock().isAir(state, worldIn, blockpos) || state.getBlock().isLeaves(state, worldIn, blockpos)) {
-                            this.setBlockAndNotifyAdequately(selector, blockpos, wood);
+                            setBlockAndNotifyAdequately(selector, blockpos, wood, notify);
 
                             k1 = i2;
                         }
@@ -113,7 +116,7 @@ public class WorldGenSavannaTree extends WorldGenAbstractTree {
                     for (int j3 = -3; j3 <= 3; ++j3) {
                         for (int i4 = -3; i4 <= 3; ++i4) {
                             if (Math.abs(j3) != 3 || Math.abs(i4) != 3) {
-                                this.placeLeafAt(selector, worldIn, blockpos2.add(j3, 0, i4));
+                                placeLeafAt(selector, worldIn, blockpos2.add(j3, 0, i4), leaves, notify);
                             }
                         }
                     }
@@ -122,13 +125,13 @@ public class WorldGenSavannaTree extends WorldGenAbstractTree {
 
                     for (int k3 = -1; k3 <= 1; ++k3) {
                         for (int j4 = -1; j4 <= 1; ++j4) {
-                            this.placeLeafAt(selector, worldIn, blockpos2.add(k3, 0, j4));
+                            placeLeafAt(selector, worldIn, blockpos2.add(k3, 0, j4), leaves, notify);
                         }
                     }
-                    this.placeLeafAt(selector, worldIn, blockpos2.east(2));
-                    this.placeLeafAt(selector, worldIn, blockpos2.west(2));
-                    this.placeLeafAt(selector, worldIn, blockpos2.south(2));
-                    this.placeLeafAt(selector, worldIn, blockpos2.north(2));
+                    placeLeafAt(selector, worldIn, blockpos2.east(2), leaves, notify);
+                    placeLeafAt(selector, worldIn, blockpos2.west(2), leaves, notify);
+                    placeLeafAt(selector, worldIn, blockpos2.south(2), leaves, notify);
+                    placeLeafAt(selector, worldIn, blockpos2.north(2), leaves, notify);
                     i3 = position.getX();
                     j1 = position.getZ();
                     EnumFacing enumfacing1 = EnumFacing.Plane.HORIZONTAL.random(rand);
@@ -147,7 +150,7 @@ public class WorldGenSavannaTree extends WorldGenAbstractTree {
                                 state = selector.getState(blockpos1);
 
                                 if (state.getBlock().isAir(state, worldIn, blockpos1) || state.getBlock().isLeaves(state, worldIn, blockpos1)) {
-                                    this.setBlockAndNotifyAdequately(selector, blockpos1, wood);
+                                    setBlockAndNotifyAdequately(selector, blockpos1, wood, notify);
                                     k1 = j2;
                                 }
                             }
@@ -159,14 +162,14 @@ public class WorldGenSavannaTree extends WorldGenAbstractTree {
                             for (int i5 = -2; i5 <= 2; ++i5) {
                                 for (int k5 = -2; k5 <= 2; ++k5) {
                                     if (Math.abs(i5) != 2 || Math.abs(k5) != 2) {
-                                        this.placeLeafAt(selector, worldIn, blockpos3.add(i5, 0, k5));
+                                        placeLeafAt(selector, worldIn, blockpos3.add(i5, 0, k5), leaves, notify);
                                     }
                                 }
                             }
                             blockpos3 = blockpos3.up();
                             for (int j5 = -1; j5 <= 1; ++j5) {
                                 for (int l5 = -1; l5 <= 1; ++l5) {
-                                    this.placeLeafAt(selector, worldIn, blockpos3.add(j5, 0, l5));
+                                    placeLeafAt(selector, worldIn, blockpos3.add(j5, 0, l5), leaves, notify);
                                 }
                             }
                         }
@@ -182,10 +185,10 @@ public class WorldGenSavannaTree extends WorldGenAbstractTree {
     }
 
 
-    private void placeLeafAt(ChunkSelector selector, World worldIn, BlockPos pos) {
+    private static void placeLeafAt(ChunkSelector selector, World worldIn, BlockPos pos, IBlockState leaves, boolean notify) {
         IBlockState state = selector.getState(pos);
         if (state.getBlock().isAir(state, worldIn, pos) || state.getBlock().isLeaves(state, worldIn, pos)) {
-            this.setBlockAndNotifyAdequately(selector, pos, leaves);
+            setBlockAndNotifyAdequately(selector, pos, leaves, notify);
         }
     }
 }

@@ -31,7 +31,9 @@ public class WorldGenMegaJungle extends WorldGenHugeTrees {
         if (!this.ensureGrowable(selector, worldIn, position, i)) {
             return false;
         } else {
-            this.createCrown(selector, worldIn, position.up(i), 2);
+            boolean notify = this.needNotify();
+            IBlockState wood = this.woodMetadata;
+            this.createCrown(selector, position.up(i), 2);
 
             for (int j = position.getY() + i - 2 - rand.nextInt(4); j > position.getY() + i / 2; j -= 2 + rand.nextInt(4)) {
                 float f = rand.nextFloat() * ((float)Math.PI * 2F);
@@ -41,7 +43,7 @@ public class WorldGenMegaJungle extends WorldGenHugeTrees {
                 for (int i1 = 0; i1 < 5; ++i1) {
                     k = position.getX() + (int)(1.5F + MathHelper.cos(f) * (float)i1);
                     l = position.getZ() + (int)(1.5F + MathHelper.sin(f) * (float)i1);
-                    this.setBlockAndNotifyAdequately(selector, new BlockPos(k, j - 3 + i1 / 2, l), this.woodMetadata);
+                    setBlockAndNotifyAdequately(selector, new BlockPos(k, j - 3 + i1 / 2, l), wood, notify);
                 }
 
                 int j2 = 1 + rand.nextInt(2);
@@ -56,11 +58,11 @@ public class WorldGenMegaJungle extends WorldGenHugeTrees {
                 BlockPos blockpos = position.up(i2);
 
                 if (this.isAirLeaves(selector, worldIn, blockpos)) {
-                    this.setBlockAndNotifyAdequately(selector, blockpos, this.woodMetadata);
+                    setBlockAndNotifyAdequately(selector, blockpos, wood, notify);
 
                     if (i2 > 0) {
-                        this.placeVine(selector, rand, blockpos.west(), BlockVine.EAST);
-                        this.placeVine(selector, rand, blockpos.north(), BlockVine.SOUTH);
+                        placeVine(selector, rand, blockpos.west(), BlockVine.EAST, notify);
+                        placeVine(selector, rand, blockpos.north(), BlockVine.SOUTH, notify);
                     }
                 }
 
@@ -68,30 +70,30 @@ public class WorldGenMegaJungle extends WorldGenHugeTrees {
                     BlockPos blockpos1 = blockpos.east();
 
                     if (this.isAirLeaves(selector, worldIn, blockpos1)) {
-                        this.setBlockAndNotifyAdequately(selector, blockpos1, this.woodMetadata);
+                        setBlockAndNotifyAdequately(selector, blockpos1, wood, notify);
 
                         if (i2 > 0) {
-                            this.placeVine(selector, rand, blockpos1.east(), BlockVine.WEST);
-                            this.placeVine(selector, rand, blockpos1.north(), BlockVine.SOUTH);
+                            placeVine(selector, rand, blockpos1.east(), BlockVine.WEST, notify);
+                            placeVine(selector, rand, blockpos1.north(), BlockVine.SOUTH, notify);
                         }
                     }
                     BlockPos blockpos2 = blockpos.south().east();
 
                     if (this.isAirLeaves(selector, worldIn, blockpos2)) {
-                        this.setBlockAndNotifyAdequately(selector, blockpos2, this.woodMetadata);
+                        setBlockAndNotifyAdequately(selector, blockpos2, wood, notify);
 
                         if (i2 > 0) {
-                            this.placeVine(selector, rand, blockpos2.east(), BlockVine.WEST);
-                            this.placeVine(selector, rand, blockpos2.south(), BlockVine.NORTH);
+                            placeVine(selector, rand, blockpos2.east(), BlockVine.WEST, notify);
+                            placeVine(selector, rand, blockpos2.south(), BlockVine.NORTH, notify);
                         }
                     }
                     BlockPos blockpos3 = blockpos.south();
 
                     if (this.isAirLeaves(selector, worldIn, blockpos3)) {
-                        this.setBlockAndNotifyAdequately(selector, blockpos3, this.woodMetadata);
+                        setBlockAndNotifyAdequately(selector, blockpos3, wood, notify);
                         if (i2 > 0) {
-                            this.placeVine(selector, rand, blockpos3.west(), BlockVine.EAST);
-                            this.placeVine(selector, rand, blockpos3.south(), BlockVine.NORTH);
+                            placeVine(selector, rand, blockpos3.west(), BlockVine.EAST, notify);
+                            placeVine(selector, rand, blockpos3.south(), BlockVine.NORTH, notify);
                         }
                     }
                 }
@@ -101,16 +103,16 @@ public class WorldGenMegaJungle extends WorldGenHugeTrees {
     }
 
 
-    private void placeVine(ChunkSelector selector, Random random, BlockPos pos, PropertyBool bool) {
+    private static void placeVine(ChunkSelector selector, Random random, BlockPos pos, PropertyBool bool, boolean notify) {
         if (random.nextInt(3) > 0 && selector.isAirBlock(pos)) {
-            this.setBlockAndNotifyAdequately(selector, pos, Blocks.VINE.getDefaultState().withProperty(bool, Boolean.TRUE));
+            setBlockAndNotifyAdequately(selector, pos, Blocks.VINE.getDefaultState().withProperty(bool, Boolean.TRUE), notify);
         }
     }
 
 
-    private void createCrown(ChunkSelector selector, World world, BlockPos pos, int num) {
+    private void createCrown(ChunkSelector selector, BlockPos pos, int num) {
         for (int j = -2; j <= 0; ++j) {
-            this.growLeavesLayerStrict(selector, world, pos.up(j), num + 1 - j);
+            this.growLeavesLayerStrict(selector, pos.up(j), num + 1 - j);
         }
     }
 
