@@ -316,8 +316,9 @@ public abstract class EntityLiving extends EntityLivingBase {
     public boolean handleWaterMovement() {
         if (this.getRidingEntity() instanceof EntityBoat) this.inWater = false;
         else if(((lodLvl() + 1) & ticksExisted) == 0){
+            World world;
             AxisAlignedBB box;
-            getEntityBoundingBox().growTo(-0.001D, -0.4010000059604645D, -0.001D, box = world.commonWorldEntityAABB);
+            getEntityBoundingBox().growTo(-0.001D, -0.4010000059604645D, -0.001D, box = (world = this.world).commonWorldEntityAABB);
             if (world.handleMaterialAcceleration(box, Material.WATER, this)) {
                 if (!this.inWater && !this.firstUpdate) this.doWaterSplashEffect();
 

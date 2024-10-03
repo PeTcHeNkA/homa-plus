@@ -149,6 +149,16 @@ public class EntityDataManager extends Int2ObjectOpenHashMap<EntityDataManager.D
     }
 
 
+    public <T> void setU(EntityDataManager.DataEntry<T> entry, DataParameter<T> key, T value) {
+        this.lock.writeLock().lock();
+        entry.setValue(value);
+        this.entity.notifyDataManagerChange(key);
+        entry.setDirty(true);
+        this.dirty = true;
+        this.lock.writeLock().unlock();
+    }
+
+
     public <T> void setU(DataParameter<T> key, T value) {
         EntityDataManager.DataEntry<T> entry = this.getEntry(key);
         if (!Objects.equals(value, entry.getValue())) {

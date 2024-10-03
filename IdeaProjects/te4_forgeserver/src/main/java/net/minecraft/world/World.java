@@ -1843,6 +1843,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         tickLoadedEntities();
 
         this.processingLoadedTiles = true; //FML Move above remove to prevent CMEs
+        List<TileEntity> loadedTileEntityList = this.loadedTileEntityList;
 
         //tile entities
         if (!this.tileEntitiesToBeRemoved.isEmpty()) {
@@ -1852,7 +1853,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             }
 
             this.tickableTileEntities.removeAll(remove);
-            this.loadedTileEntityList.removeAll(remove);
+            loadedTileEntityList.removeAll(remove);
             this.tileEntitiesToBeRemoved.clear();
         }
 
@@ -1886,7 +1887,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
             if (tileentity.isInvalid()) {
                 iterator.remove();
-                this.loadedTileEntityList.remove(tileentity);
+                loadedTileEntityList.remove(tileentity);
 
                 if (this.isBlockLoaded(tileentity.getPos())) {
                     //Forge: Bugfix: If we set the tile entity it immediately sets it in the chunk, so we could be desyned
@@ -1899,12 +1900,13 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
         this.processingLoadedTiles = false;
 
-        if (!this.addedTileEntityList.isEmpty()) {
-            for (int j1 = 0; j1 < this.addedTileEntityList.size(); ++j1) {
-                TileEntity tileentity1 = this.addedTileEntityList.get(j1);
+        List<TileEntity> addedTileEntityList = this.addedTileEntityList;
+        if (!addedTileEntityList.isEmpty()) {
+            for (int j1 = 0; j1 < addedTileEntityList.size(); ++j1) {
+                TileEntity tileentity1 = addedTileEntityList.get(j1);
 
                 if (!tileentity1.isInvalid()) {
-                    if (!this.loadedTileEntityList.contains(tileentity1)) {
+                    if (!loadedTileEntityList.contains(tileentity1)) {
                         this.addTileEntity(tileentity1);
                     }
 
@@ -1916,7 +1918,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
                     }
                 }
             }
-            this.addedTileEntityList.clear();
+            addedTileEntityList.clear();
         }
     }
 
@@ -4208,13 +4210,14 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         int maxZ = MathHelper.ceil(bb.maxZ);
 
         BlockPos.MutableBlockPos pos = tempPooledLocalPos;
+        ChunkSelector selector = localSelector;
         IBlockState state;
         for (int xPos = MathHelper.floor(bb.minX); xPos < maxX; ++xPos)
             for (int yPos = minY; yPos < maxY; ++yPos) {
                 for (int zPos = minZ; zPos < maxZ; ++zPos) {
-
-                    state = localSelector.getStateUnchecked(xPos, yPos, zPos);
-                    Boolean result = state.getBlock().isAABBInsideMaterial(this, pos.setPos(xPos, yPos, zPos), bb, materialIn);
+                    state = selector.getStateUnchecked(xPos, yPos, zPos);
+                    pos.setPosB(xPos, yPos, zPos);
+                    Boolean result = state.getBlock().isAABBInsideMaterial(this, pos, bb, materialIn);
                     if (result != null) {
                         if (!result) continue;
                         return true;

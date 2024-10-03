@@ -1420,8 +1420,9 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
 
     public boolean isInLava() {
+        World world;
         AxisAlignedBB box;
-        getEntityBoundingBox().growTo(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D, box = world.commonWorldEntityAABB);
+        getEntityBoundingBox().growTo(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D, box = (world = this.world).commonWorldEntityAABB);
         return world.isMaterialInBB(box, Material.LAVA);
     }
 
@@ -2354,11 +2355,16 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
 
     protected void setFlag(int flag, boolean set) {
-        byte b0 = this.dataManager.get(FLAGS);
+        EntityDataManager dm;
+        EntityDataManager.DataEntry<Byte> entry = (dm = dataManager).getEntry(FLAGS);
+        byte prev = entry.getValue(), cur;
         if (set) {
-            this.dataManager.set(FLAGS, (byte) (b0 | 1 << flag));
+            cur = (byte) (prev | 1 << flag);
         } else {
-            this.dataManager.set(FLAGS, (byte) (b0 & ~(1 << flag)));
+            cur = (byte) (prev & ~(1 << flag));
+        }
+        if(cur != prev){
+            dm.setU(entry, FLAGS, cur);
         }
     }
 
