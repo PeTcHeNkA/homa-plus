@@ -13,7 +13,8 @@ public class TChunkGenProvider extends TChunkTask implements Runnable{
 
     @Override
     public void runTask() {
-        chunk = world().getChunkProvider().chunkGenerator.generateChunk(chunkInfo.x, chunkInfo.z);
+        TQueuedChunk inf = chunkInfo;
+        chunk = world().getChunkProvider().chunkGenerator.generateChunk(inf.x, inf.z);
     }
 
 

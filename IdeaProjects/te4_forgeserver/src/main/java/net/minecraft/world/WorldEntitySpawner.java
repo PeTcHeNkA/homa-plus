@@ -14,6 +14,7 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import plus.fserver.api.Keep;
+import plus.fserver.server.elca.ChunkSelector;
 
 
 public class WorldEntitySpawner {
@@ -65,24 +66,28 @@ public class WorldEntitySpawner {
 
 
     @Keep
-    public static boolean canCreatureTypeSpawnBody(EntityLiving.SpawnPlacementType type, World world, BlockPos pos) {{
-            IBlockState state = world.access().getBlockState(pos);
+    public static boolean canCreatureTypeSpawnBody(EntityLiving.SpawnPlacementType type, World world, BlockPos pos) {
+        if(world.isRemote)return true;
+        ChunkSelector selector = world.localSelector;
+        Chunk chunk = selector.getLoadedE(pos.getX()>>4, pos.getZ()>>4);
+        if(chunk == null)return false;
 
-            if (type == EntityLiving.SpawnPlacementType.IN_WATER) {
-                return state.getMaterial() == Material.WATER &&
-                        world.access().getBlockState(pos.getX(), pos.getY()-1, pos.getZ()).getMaterial() == Material.WATER
-                        && !world.access().getBlockState(pos.getX(), pos.getY()+1, pos.getZ()).isNormalCube();
+        IBlockState state = chunk.getBlockState(pos);
+
+        if (type == EntityLiving.SpawnPlacementType.IN_WATER) {
+            return state.getMaterial() == Material.WATER &&
+                    selector.getBlockState(pos.getX(), pos.getY() - 1, pos.getZ()).getMaterial() == Material.WATER
+                    && !selector.getBlockState(pos.getX(), pos.getY() + 1, pos.getZ()).isNormalCube();
+        } else {
+            BlockPos down = pos.down();
+            IBlockState downState = chunk.getBlockState(down);
+
+            if (!downState.getBlock().canCreatureSpawn(downState, selector, down, type)) {
+                return false;
             } else {
-                BlockPos down = pos.down();
-                IBlockState downState = world.getBlockState(down);
-
-                if (!downState.getBlock().canCreatureSpawn(downState, world, down, type)) {
-                    return false;
-                } else {
-                    Block block = world.access().getBlockState(down).getBlock();
-                    return block != Blocks.BEDROCK && block != Blocks.BARRIER && isValidEmptySpawnBlock(state)
-                            && isValidEmptySpawnBlock(world.access().getBlockState(pos.getX(), pos.getY()+1, pos.getZ()));
-                }
+                Block block = selector.getBlockState(down).getBlock();
+                return block != Blocks.BEDROCK && block != Blocks.BARRIER && isValidEmptySpawnBlock(state)
+                        && isValidEmptySpawnBlock(selector.getBlockState(pos.getX(), pos.getY() + 1, pos.getZ()));
             }
         }
     }

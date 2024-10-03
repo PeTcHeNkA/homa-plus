@@ -156,6 +156,7 @@ public class CommonWorldEntitySpawner extends WorldEntitySpawner {
 
                                         if (entry != null || !world.isAnyPlayerWithinRangeAt(px, sY, pz, 24.0D)) {
                                             if (entry == null) {
+                                                if(selector.getLoadedE(sx2>>4,sz2>>4) == null)break;
                                                 entry = world.getSpawnListEntryForTypeAt(creatureType, spawnPos);
 
                                                 if (entry == null) break;

@@ -1155,8 +1155,9 @@ public abstract class EntityLiving extends EntityLivingBase {
 
 
         public boolean canSpawnAt(World world, BlockPos pos) {
-            return this.spawnPredicate != null ? this.spawnPredicate.test(world, pos) :
-                    net.minecraft.world.WorldEntitySpawner.canCreatureTypeSpawnBody(this, world, pos);
+            BiPredicate<IBlockAccess, BlockPos> spawnPredicate;
+            return (spawnPredicate = this.spawnPredicate) != null ? spawnPredicate.test(world, pos) :
+                    WorldEntitySpawner.canCreatureTypeSpawnBody(this, world, pos);
         }
     }
 }

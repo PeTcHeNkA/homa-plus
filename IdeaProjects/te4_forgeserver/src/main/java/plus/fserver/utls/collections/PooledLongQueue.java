@@ -1,5 +1,7 @@
 package plus.fserver.utls.collections;
 
+import io.netty.util.internal.shaded.org.jctools.queues.ConcurrentCircularArrayQueue;
+
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
@@ -104,26 +106,27 @@ public class PooledLongQueue {
     }
 
 
-    public static class Pool {
-        private final Deque<Segment> segmentPool;
+    public static class Pool extends ConcurrentLinkedDeque<Segment>{
+        //private final Deque<Segment> segmentPool;
         
         public Pool() {
-            this.segmentPool = new ConcurrentLinkedDeque<>();
+            //this.segmentPool = new ConcurrentLinkedDeque<>();
             //this.segmentPool = new ArrayDeque<>();
         }
 
 
         private Segment acquire() {
-            if (this.segmentPool.isEmpty()) {
+            Segment segment = pollFirst();
+            if (segment == null) {
                 return new Segment(this);
             }
-            return this.segmentPool.pop();
+            return segment;
         }
 
 
         private void release(final Segment segment) {
-            if (this.segmentPool.size() < CACHED_QUEUE_SEGMENTS_COUNT) {
-                this.segmentPool.push(segment);
+            if (super.size() < CACHED_QUEUE_SEGMENTS_COUNT) {
+                super.push(segment);
             }
         }
     }

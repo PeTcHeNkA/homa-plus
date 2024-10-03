@@ -155,6 +155,9 @@ public class ChunkGeneratorOverworld implements IChunkGenerator {
         }
 
         this.generateHeightmap(session, x * 4, 0, z * 4);
+        double[] heightMap = session.heightMap;
+        int seaLvl = this.settings.seaLevel;
+        IBlockState oceanBlock = this.oceanBlock;
 
         for (int i = 0; i < 4; ++i) {
             int j = i * 5;
@@ -167,14 +170,14 @@ public class ChunkGeneratorOverworld implements IChunkGenerator {
                 int l1 = (k + l + 1) * 33;
 
                 for (int i2 = 0; i2 < 32; ++i2) {
-                    double d1 = session.heightMap[i1 + i2];
-                    double d2 = session.heightMap[j1 + i2];
-                    double d3 = session.heightMap[k1 + i2];
-                    double d4 = session.heightMap[l1 + i2];
-                    double d5 = (session.heightMap[i1 + i2 + 1] - d1) * 0.125D;
-                    double d6 = (session.heightMap[j1 + i2 + 1] - d2) * 0.125D;
-                    double d7 = (session.heightMap[k1 + i2 + 1] - d3) * 0.125D;
-                    double d8 = (session.heightMap[l1 + i2 + 1] - d4) * 0.125D;
+                    double d1 =  heightMap[i1 + i2];
+                    double d2 =  heightMap[j1 + i2];
+                    double d3 =  heightMap[k1 + i2];
+                    double d4 =  heightMap[l1 + i2];
+                    double d5 = (heightMap[i1 + i2 + 1] - d1) * 0.125D;
+                    double d6 = (heightMap[j1 + i2 + 1] - d2) * 0.125D;
+                    double d7 = (heightMap[k1 + i2 + 1] - d3) * 0.125D;
+                    double d8 = (heightMap[l1 + i2 + 1] - d4) * 0.125D;
 
                     for (int j2 = 0; j2 < 8; ++j2) {
                         double d10 = d1;
@@ -189,8 +192,8 @@ public class ChunkGeneratorOverworld implements IChunkGenerator {
                             for (int l2 = 0; l2 < 4; ++l2) {
                                 if ((lvt_45_1_ += d16) > 0.0D) {
                                     primer.setBlockState(i * 4 + k2, i2 * 8 + j2, l * 4 + l2, BlockIDIndexes.STONE_STATE);
-                                } else if (i2 * 8 + j2 < this.settings.seaLevel) {
-                                    primer.setBlockState(i * 4 + k2, i2 * 8 + j2, l * 4 + l2, this.oceanBlock);
+                                } else if (i2 * 8 + j2 < seaLvl) {
+                                    primer.setBlockState(i * 4 + k2, i2 * 8 + j2, l * 4 + l2, oceanBlock);
                                 }
                             }
                             d10 += d12;
@@ -209,12 +212,13 @@ public class ChunkGeneratorOverworld implements IChunkGenerator {
 
     public void replaceBiomeBlocks(GenSession session, int x, int z, ChunkPrimer primer, Biome[] biomesIn) {
         if (!net.minecraftforge.event.ForgeEventFactory.onReplaceBiomeBlocks(this, x, z, primer, this.world)) return;
-        session.depthBuffer = this.surfaceNoise.getRegion(session.depthBuffer, x * 16, z * 16, 16, 16, 0.0625D, 0.0625D, 1.0D);
-
+        double[] depthBuffer = session.depthBuffer = this.surfaceNoise.getRegion(session.depthBuffer, x * 16, z * 16, 16, 16, 0.0625D, 0.0625D, 1.0D);
+        World world = this.world;
+        Random rand = session.rand;
         for (int dX = 0; dX < 16; ++dX) {
             for (int dZ = 0; dZ < 16; ++dZ) {
-                Biome biome = biomesIn[dZ + dX * 16];
-                biome.genTerrainBlocks(this.world, session.rand, primer, x * 16 + dX, z * 16 + dZ, session.depthBuffer[dZ + dX * 16]);
+                Biome biome = biomesIn[dZ + (dX << 4)];
+                biome.genTerrainBlocks(world, rand, primer, (x << 4) + dX, (z << 4) + dZ, depthBuffer[dZ + (dX << 4)]);
             }
         }
     }
@@ -304,6 +308,9 @@ public class ChunkGeneratorOverworld implements IChunkGenerator {
         double[] maxLimitRegion  = session.maxLimitRegion  = this.maxLimitPerlinNoise.generateNoiseOctaves(session.maxLimitRegion, x, y, z, 5, 33, 5, f, f1, f);
         Biome[] biomesForGeneration = session.biomesForGeneration;
 
+        float[] biomeWeights = session.biomeWeights;
+        double[] heightMap   = session.heightMap;
+
         int i = 0;
         int j = 0;
 
@@ -326,7 +333,7 @@ public class ChunkGeneratorOverworld implements IChunkGenerator {
                             f6 = 1.0F + f6 * 4.0F;
                         }
 
-                        float f7 = session.biomeWeights[j1 + 2 + (k1 + 2) * 5] / (f5 + 2.0F);
+                        float f7 = biomeWeights[j1 + 2 + (k1 + 2) * 5] / (f5 + 2.0F);
 
                         if (biome1.getBaseHeight() > biome.getBaseHeight()) {
                             f7 /= 2.0F;
@@ -389,7 +396,7 @@ public class ChunkGeneratorOverworld implements IChunkGenerator {
                         d5 = d5 * (1.0D - d6) + -10.0D * d6;
                     }
 
-                    session.heightMap[i] = d5;
+                    heightMap[i] = d5;
                     ++i;
                 }
             }

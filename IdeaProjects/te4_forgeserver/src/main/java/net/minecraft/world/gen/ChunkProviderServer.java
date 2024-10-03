@@ -327,36 +327,64 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
     public boolean tick() {
         if(task != null) task.reRunIfNeed();
         if (!this.world.disableLevelSaving) {
-            if (!this.droppedChunks.isEmpty()) {
-                int i = 0;
-                for (LongIterator iterator = this.droppedChunks.iterator();
-                     i < 100 && iterator.hasNext();) {
-                    long olong = iterator.next();
-                    Chunk chunk = super.get(olong);
+            LongSet droppedChunks = this.droppedChunks;
+            int size = droppedChunks.size();
 
-                    if (chunk != null) {
-                        if(chunk.maybeUnload()) {
-                            chunk.onUnload();
-                            if(asyncSaveChunks){
-                                TChunkExecutor.queueChunkUnload((WorldServer)chunk.getWorld(), (AnvilChunkLoader)chunkLoader,this, chunk);
+            if(size != 0){
+                if (size >= 100) {
+                    int i = 0;
+                    for (LongIterator iterator = droppedChunks.iterator();
+                         i < 100 && iterator.hasNext();) {
+                        long olong = iterator.next();
+                        Chunk chunk = super.get(olong);
+
+                        if (chunk != null) {
+                            if(chunk.maybeUnload()) {
+                                chunk.onUnload();
+                                if(asyncSaveChunks){
+                                    TChunkExecutor.queueChunkUnload((WorldServer)chunk.getWorld(), (AnvilChunkLoader)chunkLoader,this, chunk);
+                                } else {
+                                    ForgeChunkManager.putDormantChunk(olong, chunk);
+                                    this.saveChunkData(chunk);
+                                    this.saveChunkExtraData(chunk);
+                                }
+                                removeChunk(olong);
+                                ++i;
+                                iterator.remove();
                             } else {
-                                ForgeChunkManager.putDormantChunk(olong, chunk);
-                                this.saveChunkData(chunk);
-                                this.saveChunkExtraData(chunk);
+                                chunk.setRequested(false);
                             }
-                            removeChunk(olong);
-                            ++i;
-                            iterator.remove();
-                        } else {
-                            chunk.setRequested(false);
                         }
                     }
+                    super.trim();
+                } else {
+                    int i = 0;
+                    for (long olong : droppedChunks) {
+                        Chunk chunk = super.get(olong);
+
+                        if (chunk != null) {
+                            if (chunk.maybeUnload()) {
+                                chunk.onUnload();
+                                if (asyncSaveChunks) {
+                                    TChunkExecutor.queueChunkUnload((WorldServer) chunk.getWorld(), (AnvilChunkLoader) chunkLoader, this, chunk);
+                                } else {
+                                    ForgeChunkManager.putDormantChunk(olong, chunk);
+                                    this.saveChunkData(chunk);
+                                    this.saveChunkExtraData(chunk);
+                                }
+                                removeChunk(olong);
+                                ++i;
+                            } else {
+                                chunk.setRequested(false);
+                            }
+                        }
+                    }
+                    droppedChunks.clear();
+                    if(i > 32)super.trim();
                 }
-                if(i > 32) super.trim();
             }
-            if (super.isEmpty()) {
-                //DimensionManager.unloadWorld(this.world.provider.getDimension());
-            } else {
+
+            if (!super.isEmpty()) {
                 if(++ticks>1200){
                     LongSet lc = loadingChunks;
                     if(lc != null && lc.isEmpty())loadingChunks = null;
