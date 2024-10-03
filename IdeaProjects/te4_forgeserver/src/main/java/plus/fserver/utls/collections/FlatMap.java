@@ -63,19 +63,22 @@ public class FlatMap<T> {
 
     public T remove(int x, int z){
         final int hash;
+        Node[] nodes = this.nodes;
         Node node = nodes[hash = hash(x, z)], prev = null;
         while (node != null){
             if(node.x == x && node.z == z){
+                Object result = node.chunk;
+                if(result == null)return null;
                 if(prev == null) {
                     if (node.next != null)
                         nodes[hash] = node.next;
                     else
                         node.chunk = null;
                 } else
-                    prev.next   = node.next;
+                    prev.next = node.next;
 
                 count -= 1;
-                return (T) node.chunk;
+                return (T) result;
             }
             node = (prev = node).next;
         }

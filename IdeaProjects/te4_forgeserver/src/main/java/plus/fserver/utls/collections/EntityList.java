@@ -349,7 +349,10 @@ public class EntityList<T extends Entity> implements List<T> {
 
     @Override
     public boolean add(T obj){
-        if(data.length<=size)data = newArrayAuto();
+        Entity[] data;
+        if((data = this.data).length <= size){
+            data = this.data = newArrayAuto();
+        }
         data[size++] = obj;
         return true;
     }

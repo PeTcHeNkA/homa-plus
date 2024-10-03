@@ -24,12 +24,12 @@ public class PlayerCMapSelector{
 
     public static int range(int x1, int y1, int x2, int y2) {
         int temp;
-        if(x1>x2){
+        if(x1 > x2){
             temp = x1;
             x1 = x2;
             x2 = temp;
         }
-        if(y1>y2){
+        if(y1 >y2){
             temp = y1;
             y1 = y2;
             y2 = temp;
@@ -152,8 +152,7 @@ public class PlayerCMapSelector{
 
 
                     if(range(preX, preZ, curX-mdX, curZ-mdZ) > radSq){
-                        PlayerChunkMapEntry entry = pcm.getOrCreateEntry(curX - mdX, curZ - mdZ);
-                        entry.addPlayer(pcm, player);
+                        pcm.getOrCreateEntry(curX - mdX, curZ - mdZ).addPlayer(pcm, player);
                     }
 
                     if(range(curX, curZ, preX-mdX, preZ-mdZ) > radSq){

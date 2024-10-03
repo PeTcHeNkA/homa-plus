@@ -24,7 +24,6 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.ForgeModContainer;
-import net.minecraftforge.fml.common.FMLLog;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import plus.fserver.ElcaCV;
@@ -49,7 +48,13 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements C
     private Chunk chunk;
     private int changes, changedSectionFilter;
     private long lastUpdateInhabitedTime;
-    private boolean sentToPlayers, loading = true;
+    private boolean sentToPlayers = false, loading = true;
+
+    public PlayerChunkMapEntry(Chunk chunk){
+        this.posX = chunk.x;
+        this.posZ = chunk.z;
+        accept(chunk);
+    }
 
 
     public PlayerChunkMapEntry(PlayerChunkMap mapIn, int chunkX, int chunkZ) {
@@ -65,12 +70,10 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements C
 
     @Override
     public void accept(@Nullable Chunk chunk) {
-        this.chunk = chunk;
         if(chunk != null){
+            this.chunk = chunk;
             chunk.chunkMapEntry = this;
             chunk.setUnloadQueued(false);
-        } else {
-            FMLLog.bigWarning("Cant complete chunk PCME loading callback at [{} {}]", posX, posZ);
         }
         loading = false;
     }
@@ -83,9 +86,7 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements C
 
 
     public void addPlayer(PlayerChunkMap map, EntityPlayerMP player) {
-        if (containsRef(player)) {
-            LOGGER.debug("Failed to add player. {} already is in chunk {}, {}", player, posX, posZ);
-        } else {
+        if (!containsRef(player)) {
             if (isEmpty()) {
                 this.lastUpdateInhabitedTime = map.getWorldServer().getTotalWorldTime();
             }
@@ -102,7 +103,6 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements C
     public void removePlayer(PlayerChunkMap map, EntityPlayerMP player) {
         if (removeRef(player)) {
             if (this.chunk == null) {
-
                 if (isEmpty()) {
                     if (this.loading) TChunkExecutor.dropQueuedChunkLoad(map.getWorldServer(), posX, posZ, this);
                     map.removeEntry(this);
@@ -116,8 +116,9 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements C
             player.world.chunkUnWatchEvent.post(chunk, player);
             //MinecraftForge.EVENT_BUS.postF(player.world.chunkUnWatchEvent.init(chunk, player));
             if (isEmpty()) {
-                this.chunk = null;
                 map.removeEntry(this);
+                this.sentToPlayers = false;
+                this.chunk = null;
             }
         }
     }

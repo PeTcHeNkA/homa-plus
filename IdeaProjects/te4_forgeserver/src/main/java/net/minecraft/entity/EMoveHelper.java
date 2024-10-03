@@ -214,13 +214,16 @@ public class EMoveHelper {
 
 
         private static void completeMoveTasks(ClassInheritanceMultiMap<Entity> list) {
-            if ((list.sizeC()) < 2) return;
-            Entity[] arr = list.raw();
             int size;
-            for (int i = 0; i < (size = list.sizeC()); i++) {
-                Entity cur;
+            if ((size = list.sizeC()) < 2) return;
+            Entity[] arr = list.raw();
+            //fix out of index exception when list modified in other thread
+            size = Math.min(size, arr.length-1);
+            for (int i = 0; i < size; i++) {
                 MoveTask curTask;
-                if ((curTask = (cur = arr[i]).moveTask) == null) continue;
+                Entity cur;
+                //fix null pointer exception when list modified in other thread
+                if((cur = arr[i]) == null || (curTask = cur.moveTask) == null)continue;
 
                 int lim;
                 l1: if(!cur.ignoreCollisions() && (lim = curTask.sizeC()) < ElcaConfig.MAX_ENTITY_COLLISIONS_MOVE) {
@@ -229,7 +232,7 @@ public class EMoveHelper {
                            x2 =  aabb.maxX                   , y2 = aabb.maxY, z2 = aabb.maxZ;
                     for (int j = i + 1; j < size; j++) {
                         Entity check;
-                        if(!(check = arr[j]).ignoreCollisions()) {
+                        if((check = arr[j]) != null && !check.ignoreCollisions()) {
                             MoveTask checkTask;
                             if ((checkTask = check.moveTask) == null) {
                                 AxisAlignedBB checkBox;

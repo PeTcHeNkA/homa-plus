@@ -66,6 +66,8 @@ public class ElcaConfig {
     public static int INIT_PALETTE_LINEAR_BITS   = 4; //should also set on client
     public static int READ_TIMEOUT_TIMER         = 17;
     public static int CACHE_CHUNK_DATA           = 24;
+    public static int PCM_MAX_LOAD_PER_TICK      = 50;
+    public static int PCM_MAX_SEND_PER_TICK      = 128;
 
     //public static boolean FAST_LIGHT                 = true;
     public static boolean SLOW_SWIM_AI                = true;
@@ -189,6 +191,9 @@ public class ElcaConfig {
 
         INIT_PALETTE_LINEAR_BITS   = calc(map, "init-palette-linear-bits"    , INIT_PALETTE_LINEAR_BITS   );
         CACHE_CHUNK_DATA           = calc(map, "cache-chunk-data"            , CACHE_CHUNK_DATA           );
+
+        PCM_MAX_LOAD_PER_TICK      = calc(map, "pcm-max-load-per-tick"       , PCM_MAX_LOAD_PER_TICK      );
+        PCM_MAX_SEND_PER_TICK      = calc(map, "pcm-max-send-per-tick"       , PCM_MAX_SEND_PER_TICK      );
 
         if(INIT_PALETTE_LINEAR_BITS > 4 || INIT_PALETTE_LINEAR_BITS < 2){
             throw new Error("Linear palette bits should be in 2, 3 or 4");

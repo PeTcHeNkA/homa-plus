@@ -490,8 +490,12 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         ChunkProviderServer cps = chunkProviderServer;
         for (EntityRemSwapList.E15<Entity> list:realEntityList.getRaw()) {
             Entity[] raw = list.raw();
-            for (int cursor = 0; cursor < list.sizeC(); ++cursor) {
+
+            int size = list.sizeC();
+            for (int cursor = 0; cursor < size; ++cursor) {
                 Entity entity = raw[cursor];
+//                if((entity = raw[cursor]) == null)
+//                    continue;
                 Entity ridding = entity.getRidingEntity();
 
                 if (ridding != null) {
@@ -509,6 +513,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
                         if(chunk != null) chunk.removeEntity(entity);
                     }
                     list.removeSwap(cursor--);
+                    --size;
                     this.onEntityRemoved(entity);
                 }
             }
