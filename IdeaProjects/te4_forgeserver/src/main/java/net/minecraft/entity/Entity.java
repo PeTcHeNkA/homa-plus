@@ -1747,7 +1747,8 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
     }
 
 
-    public NBTTagCompound writeToNBT(NBTTagCompound tag) {
+    //todo is safe?
+    public final NBTTagCompound writeToNBT(NBTTagCompound tag) {
         try {
             tag.setTag(SStrings.Pos,                this.newDoubleNBTList(this.posX, this.posY, this.posZ));
             tag.setTag(SStrings.Motion,             this.newDoubleNBTList(this.motionX, this.motionY, this.motionZ));
@@ -2378,6 +2379,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         this.dataManager.setU(AIR, air);
     }
 
+
     public void setAir(Integer air) {
         this.dataManager.setU(AIR, air);
     }
@@ -2536,11 +2538,100 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
     }
 
 
+    private void copyDataFromOldU(Entity entityIn) {
+        try {
+            this.motionX = entityIn.motionX;
+            this.motionY = entityIn.motionY;
+            this.motionZ = entityIn.motionZ;
+
+            if (Math.abs(this.motionX) > 10.0D) {
+                this.motionX = 0.0D;
+            }
+
+            if (Math.abs(this.motionY) > 10.0D) {
+                this.motionY = 0.0D;
+            }
+
+            if (Math.abs(this.motionZ) > 10.0D) {
+                this.motionZ = 0.0D;
+            }
+
+            this.posX = entityIn.posX;
+            this.posY = entityIn.posY;
+            this.posZ = entityIn.posZ;
+            this.lastTickPosX = this.posX;
+            this.lastTickPosY = this.posY;
+            this.lastTickPosZ = this.posZ;
+            this.prevPosX = this.posX;
+            this.prevPosY = this.posY;
+            this.prevPosZ = this.posZ;
+            this.rotationYaw = entityIn.rotationYaw;
+            this.rotationPitch = entityIn.rotationPitch;
+            this.prevRotationYaw = this.rotationYaw;
+            this.prevRotationPitch = this.rotationPitch;
+            this.setRotationYawHead(this.rotationYaw);
+            this.setRenderYawOffset(this.rotationYaw);
+            this.fallDistance = entityIn.fallDistance;
+            this.fire = entityIn.fire;
+            this.setAir(entityIn.getAir());
+            this.onGround = entityIn.onGround;
+
+            this.invulnerable = entityIn.invulnerable;
+            this.timeUntilPortal = entityIn.timeUntilPortal;
+
+            this.entityUniqueID = entityIn.entityUniqueID;
+            this.cachedUniqueIdString = null;
+
+            this.mutPosition(this.posX, this.posY, this.posZ);
+            this.setRotation(this.rotationYaw, this.rotationPitch);
+
+            String customName = entityIn.getCustomNameTag();
+            if(!customName.isEmpty())this.setCustomNameTag(customName);
+
+            this.setAlwaysRenderNameTag(entityIn.getAlwaysRenderNameTag());
+
+            this.cmdResultStats = entityIn.cmdResultStats;
+
+            this.setSilent(entityIn.isSilent());
+            this.setNoGravity(entityIn.hasNoGravity());
+            this.setGlowing(entityIn.isGlowing());
+            updateBlocked = entityIn.updateBlocked;
+
+            if(entityIn.customEntityData != null){
+                this.customEntityData = entityIn.customEntityData;
+            }
+
+            if(entityIn.capabilities != null && this.capabilities != null){
+                this.capabilities.deserializeNBT(entityIn.capabilities.serializeNBT());
+            }
+
+            if(entityIn.tags != null && !entityIn.tags.isEmpty()){
+                //is safe?
+                this.tags = entityIn.tags;
+            }
+
+            NBTTagCompound compound = new NBTTagCompound();
+            entityIn.writeEntityToNBT(compound);
+            this.readEntityFromNBT(compound);
+
+            if (this.shouldSetPosAfterLoading()) {
+                this.mutPosition(this.posX, this.posY, this.posZ);
+            }
+        } catch (Throwable throwable) {
+            CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Loading entity NBT");
+            CrashReportCategory crashreportcategory = crashreport.makeCategory("Entity being loaded");
+            this.addEntityCrashInfo(crashreportcategory);
+            throw new ReportedException(crashreport);
+        }
+    }
+
+
     private void copyDataFromOld(Entity entityIn) {
-        NBTTagCompound nbttagcompound = entityIn.writeToNBT(new NBTTagCompound());
-        nbttagcompound.removeTag("Dimension");
-        this.readFromNBT(nbttagcompound);
-        this.timeUntilPortal = entityIn.timeUntilPortal;
+        copyDataFromOldU(entityIn);
+//        NBTTagCompound nbttagcompound = entityIn.writeToNBT(new NBTTagCompound());
+//        nbttagcompound.removeTag("Dimension");
+//        this.readFromNBT(nbttagcompound);
+        //this.timeUntilPortal = entityIn.timeUntilPortal;
         this.tpInfo = entityIn.tpInfo;
 
         EntityTrackerEntry trackerEntry = entityIn.trackerEntry;
@@ -2768,7 +2859,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
 
     public boolean getAlwaysRenderNameTag() {
-        return ((Boolean)this.dataManager.get(CUSTOM_NAME_VISIBLE)).booleanValue();
+        return this.dataManager.get(CUSTOM_NAME_VISIBLE).booleanValue();
     }
 
 

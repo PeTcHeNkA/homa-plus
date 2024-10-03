@@ -245,7 +245,7 @@ public class PlayerChunkMap extends Long2ObjectOpenHashMap<PlayerChunkMapEntry> 
     }
 
 
-    private boolean overlaps(int x1, int z1, int x2, int z2, int radius) {
+    private static boolean overlaps(int x1, int z1, int x2, int z2, int radius) {
         int i = x1 - x2;
         int j = z1 - z2;
 

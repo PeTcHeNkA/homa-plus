@@ -199,7 +199,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
     @Override
     public void writeEntityToNBT(NBTTagCompound nbt) {
         super.writeEntityToNBT(nbt);
-        nbt.setInteger("playerGameType", this.interactionManager.getGameType().getID());
+        nbt.setIntegerU("playerGameType", this.interactionManager.getGameType().getID());
         nbt.setBoolean("seenCredits", this.seenCredits);
 
         if (this.enteredNetherPosition != null) {
