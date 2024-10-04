@@ -67,23 +67,23 @@ public class EntityAIAvoidEntity<T extends Entity> extends EntityAIBase {
 
     @Override
     public boolean shouldExecute() {
-        List<T> list = this.entity.world.getEntitiesWithinAABB(this.classToAvoid,
-                this.entity.getEntityBoundingBox().grow(this.avoidDistance, 3.0, this.avoidDistance),
+        EntityCreature entity;
+        List<T> list = (entity = this.entity).world.getEntitiesWithinAABB(this.classToAvoid,
+                entity.getEntityBoundingBox().grow(this.avoidDistance, 3.0, this.avoidDistance),
                 predicate
         );
 
         if (list.isEmpty()) {
             return false;
         } else {
-            this.closestLivingEntity = list.get(0);
-            Vec3d vec = RandomPositionGenerator.findRandomTargetBlockAwayFrom(this.entity, 16, 7, new Vec3d(this.closestLivingEntity.posX, this.closestLivingEntity.posY, this.closestLivingEntity.posZ));
+            Entity closest = this.closestLivingEntity = list.get(0);
+            Vec3d vec = RandomPositionGenerator.findRandomTargetBlockAwayFrom(entity, 16, 7, new Vec3d(closest.posX, closest.posY, closest.posZ));
             if (vec == null) {
                 return false;
-            } else if (this.closestLivingEntity.getDistanceSq(vec.x, vec.y, vec.z) < this.closestLivingEntity.getDistanceSq(this.entity)) {
+            } else if (closest.getDistanceSq(vec.x, vec.y, vec.z) < closest.getDistanceSq(entity)) {
                 return false;
             } else {
-                this.path = this.navigation.getPathToXYZ(vec.x, vec.y, vec.z);
-                return this.path != null;
+                return (this.path = this.navigation.getPathToXYZ(vec.x, vec.y, vec.z)) != null;
             }
         }
     }

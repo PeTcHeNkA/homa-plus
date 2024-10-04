@@ -11,17 +11,22 @@ import net.minecraft.world.storage.ISaveHandler;
 
 
 public abstract class WorldServerC64 extends WorldServerMulti {
-    public int selfMinX, selfMinZ, selfMaxX, selfMaxZ, selfMinY, selfMaxY;
+    public final MergedWorldManager.Bound bound;
+    //public int selfMinX, selfMinZ, selfMaxX, selfMaxZ;
 
-    public WorldServerC64(MinecraftServer server, ISaveHandler handler, int dim, WorldServer delegate, Profiler profiler) {
+    public WorldServerC64(MergedWorldManager.Bound bound, MinecraftServer server, ISaveHandler handler, int dim, WorldServer delegate, Profiler profiler) {
         super(server, handler, dim, delegate, profiler);
+        this.bound = bound;
+        //this.selfMinX = bound.selfMinX;
     }
 
 
-    public boolean isSelfPos(int cx, int cy, int cz){
-        return cx >= selfMinX && cx < selfMaxX &&
-               cz >= selfMinZ && cz < selfMaxZ &&
-               cy >= selfMinY && cy < selfMaxY;
+    public boolean isSelfPos(int cx, int cz){
+        return bound.isSelfPos(cx, cz);
+//        int mask = this.mask;
+//        cx = cx & mask; cz = cz & mask;
+//        return cx >= selfMinX && cx < selfMaxX &&
+//                cz >= selfMinZ && cz < selfMaxZ;
     }
 
 
@@ -32,15 +37,15 @@ public abstract class WorldServerC64 extends WorldServerMulti {
     }
 
 
-    protected abstract int foundDimByPos(int cx, int cy, int cz);
+    protected abstract int foundDimByPos(int cx, int cz);
 
 
     @Override
     protected boolean onUpdateChunkSection(Entity entityIn, int cx, int cy, int cz) {
-        if(isSelfPos(cx, cy, cz)){
+        if(isSelfPos(cx, cz)){
             return true;
         } else {
-            entityIn.changeDimension(foundDimByPos(cx, cy, cz), EmptyTeleporter.INSTANCE);
+            entityIn.changeDimension(foundDimByPos(cx, cz), EmptyTeleporter.INSTANCE);
             return false;
         }
     }

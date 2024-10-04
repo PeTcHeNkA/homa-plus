@@ -276,8 +276,8 @@ public class PlayerChunkMap extends Long2ObjectOpenHashMap<PlayerChunkMapEntry> 
     }
 
 
-    public static short radByFormula(int radius){
-        return (short) radius;
+    public static byte radByFormula(int radius){
+        return (byte)radius;
         //return (radius>>1)+2;
     }
 

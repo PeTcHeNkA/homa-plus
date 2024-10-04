@@ -57,16 +57,7 @@ import net.minecraft.stats.StatisticsManagerServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityCommandBlock;
 import net.minecraft.tileentity.TileEntitySign;
-import net.minecraft.util.CooldownTracker;
-import net.minecraft.util.CooldownTrackerServer;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.EntityDamageSource;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.EnumHandSide;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ReportedException;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundCategory;
+import net.minecraft.util.*;
 import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.datafix.FixTypes;
 import net.minecraft.util.math.BlockPos;
@@ -117,22 +108,29 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
     private byte respawnInvulnerabilityTicks = 60;
     private EntityPlayer.EnumChatVisibility chatVisibility;
     //todo maybe remove?
-    private boolean chatColours = true;
+    //private boolean chatColours = true;
     private long playerLastActiveTime = System.currentTimeMillis();
     private Entity spectatingEntity;
-    private boolean invulnerableDimensionChange;
+    //private boolean invulnerableDimensionChange;
     //todo maybe optional remove?
-    private boolean seenCredits;
+    //private boolean seenCredits;
     private final RecipeBookServer recipeBook = new RecipeBookServer();
     private Vec3d levitationStartPos;
     private int levitatingSince;
-    private boolean disconnected;
+    //private boolean disconnected;
     private Vec3d enteredNetherPosition;
     public int currentWindowId;
     public boolean isChangingQuantityOnly;
     public int ping;
     public boolean queuedEndExit;
-    public short renderRadius, prevRenderRadius;
+    public byte renderRadius, prevRenderRadius;
+
+    public byte bits;
+    //1     | 1  - is disconnected
+    //10    | 2  - chat colorus
+    //100   | 4  - should update player chunk map
+    //1000  | 8  - bool `invulnerableDimensionChange`
+    //10000 | 16 - bool `seenCredits`
 
     //not used
     public EntityPlayerMP(World world){
@@ -158,6 +156,28 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
     }
 
 
+    public boolean isChatColored(){
+        return (bits & 2) == 2;
+    }
+    public void setChatColored(boolean b){
+        if(b)bits |= 2;
+        else bits &= ~2;
+    }
+    private boolean isSeenCredits(){
+        return (bits & 16) == 16;
+    }
+    private void setSeenCredits(boolean b){
+        if(b)bits |= 16;
+        else bits &= ~16;
+    }
+    public boolean shouldPCMUpdate(){
+        return (bits & 4) == 0;
+    }
+    public void setShouldPCMUpdate(boolean b){
+        if(b)bits |= 4;
+        else bits &= ~4;
+    }
+
     @Override
     public void readEntityFromNBT(NBTTagCompound nbt) {
         super.readEntityFromNBT(nbt);
@@ -174,7 +194,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
             this.enteredNetherPosition = new Vec3d(nbttagcompound.getDouble("x"), nbttagcompound.getDouble("y"), nbttagcompound.getDouble("z"));
         }
 
-        this.seenCredits = nbt.getBoolean("seenCredits");
+        this.setSeenCredits(nbt.getBoolean("seenCredits"));
 
         if (nbt.hasKey("recipeBook", 10)) {
             this.recipeBook.read(nbt.getCompoundTag("recipeBook"));
@@ -200,7 +220,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
     public void writeEntityToNBT(NBTTagCompound nbt) {
         super.writeEntityToNBT(nbt);
         nbt.setIntegerU("playerGameType", this.interactionManager.getGameType().getID());
-        nbt.setBoolean("seenCredits", this.seenCredits);
+        nbt.setBoolean("seenCredits", this.isSeenCredits());
 
         if (this.enteredNetherPosition != null) {
             NBTTagCompound nbttagcompound = new NBTTagCompound();
@@ -339,11 +359,13 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
                 }
             }
 
-            if (this.getHealth() != this.lastHealth || this.lastFoodLevel != this.foodStats.getFoodLevel() || this.foodStats.getSaturationLevel() == 0.0F != this.wasHungry) {
-                this.connection.netManager.sendPacketE(new SPacketUpdateHealth(this.getHealth(), this.foodStats.getFoodLevel(), this.foodStats.getSaturationLevel()));
+            FoodStats foodStats = this.foodStats;
+
+            if (this.getHealth() != this.lastHealth || this.lastFoodLevel != foodStats.getFoodLevel() || foodStats.getSaturationLevel() == 0.0F != this.wasHungry) {
+                this.connection.netManager.sendPacketE(new SPacketUpdateHealth(this.getHealth(), foodStats.getFoodLevel(), foodStats.getSaturationLevel()));
                 this.lastHealth = this.getHealth();
-                this.lastFoodLevel = this.foodStats.getFoodLevel();
-                this.wasHungry = this.foodStats.getSaturationLevel() == 0.0F;
+                this.lastFoodLevel = foodStats.getFoodLevel();
+                this.wasHungry = foodStats.getSaturationLevel() == 0.0F;
             }
 
             if (this.getHealth() + this.getAbsorptionAmount() != this.lastHealthScore) {
@@ -351,8 +373,8 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
                 this.updateScorePoints(IScoreCriteria.HEALTH, MathHelper.ceil(this.lastHealthScore));
             }
 
-            if (this.foodStats.getFoodLevel() != this.lastFoodScore) {
-                this.lastFoodScore = this.foodStats.getFoodLevel();
+            if (foodStats.getFoodLevel() != this.lastFoodScore) {
+                this.lastFoodScore = foodStats.getFoodLevel();
                 this.updateScorePoints(IScoreCriteria.FOOD, MathHelper.ceil((float)this.lastFoodScore));
             }
 
@@ -556,7 +578,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
     @Override
     public Entity changeDimension(int dimensionIn, net.minecraftforge.common.util.ITeleporter teleporter) {
         if (!net.minecraftforge.common.ForgeHooks.onTravelToDimension(this, dimensionIn)) return this;
-        this.invulnerableDimensionChange = true;
+        this.setInvulnerableDimensionChange(true);
 
         if (this.dimension == 0 && dimensionIn == -1) {
             this.enteredNetherPosition = new Vec3d(this.posX, this.posY, this.posZ);
@@ -568,8 +590,8 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
             this.world.removeEntity(this);
             if (!this.queuedEndExit) {
                 this.queuedEndExit = true;
-                this.connection.netManager.sendPacketE(new SPacketChangeGameState(4, this.seenCredits ? 0.0F : 1.0F));
-                this.seenCredits = true;
+                this.connection.netManager.sendPacketE(new SPacketChangeGameState(4, this.isSeenCredits() ? 0.0F : 1.0F));
+                this.setSeenCredits(true);
             }
             return this;
         } else {
@@ -941,7 +963,8 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
 
 
     public void mountEntityAndWakeUp() {
-        this.disconnected = true;
+        bits |= 1;
+        //this.disconnected = true;
         this.removePassengers();
         if (this.sleeping) {
             this.wakeUpPlayer(true, false, false);
@@ -950,7 +973,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
 
 
     public boolean hasDisconnected() {
-        return this.disconnected;
+        return (bits & 1) == 1;
     }
 
 
@@ -992,6 +1015,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
             this.setScore(that.getScore());
         }
 
+        this.bits = that.bits;
         this.xpSeed = that.xpSeed;
         this.enderChest = that.enderChest;
         this.getDataManager().set(PLAYER_MODEL_FLAG, that.getDataManager().get(PLAYER_MODEL_FLAG));
@@ -1000,7 +1024,6 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
         this.lastFoodLevel = -1;
         this.recipeBook.copyFrom(that.recipeBook);
         this.entityRemoveQueue.addAll(that.entityRemoveQueue);
-        this.seenCredits = that.seenCredits;
         this.enteredNetherPosition = that.enteredNetherPosition;
         this.setLeftShoulderEntity(that.getLeftShoulderEntity());
         this.setRightShoulderEntity(that.getRightShoulderEntity());
@@ -1155,7 +1178,8 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
         renderRadius = PlayerChunkMap.radByFormula(packetIn.getViewRadius());
         this.language = packetIn.getLang();
         this.chatVisibility = packetIn.getChatVisibility();
-        this.chatColours = packetIn.isColorsEnabled();
+        setChatColored(packetIn.isColorsEnabled());
+        //this.chatColours = packetIn.isColorsEnabled();
         this.getDataManager().set(PLAYER_MODEL_FLAG, (byte) packetIn.getModelPartFlags());
         this.getDataManager().set(MAIN_HAND, (byte) (packetIn.getMainHand() == EnumHandSide.LEFT ? 0 : 1));
     }
@@ -1235,7 +1259,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
 
     @Override
     protected void decrementTimeUntilPortal() {
-        if (this.timeUntilPortal > 0 && !this.invulnerableDimensionChange) {
+        if (this.timeUntilPortal > 0 && !this.isInvulnerableDimensionChange()) {
             --this.timeUntilPortal;
         }
     }
@@ -1269,12 +1293,18 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
 
 
     public boolean isInvulnerableDimensionChange() {
-        return this.invulnerableDimensionChange;
+        return (bits & 8) == 8;
     }
 
 
     public void clearInvulnerableDimensionChange() {
-        this.invulnerableDimensionChange = false;
+        setInvulnerableDimensionChange(false);
+    }
+
+
+    private void setInvulnerableDimensionChange(boolean b){
+        if(b)bits |= 8;
+        else bits &= ~8;
     }
 
 
