@@ -79,10 +79,10 @@ public class EntityGuardian extends EntityMob {
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
         AbstractAttributeMap map = this.getAttributeMap();
-        map.getAttributeInstance(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(6.0D);
-        map.getAttributeInstance(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.5D);
-        map.getAttributeInstance(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(16.0D);
-        map.getAttributeInstance(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(30.0D);
+        map.get(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(6.0D);
+        map.get(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.5D);
+        map.get(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(16.0D);
+        map.get(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(30.0D);
     }
 
 

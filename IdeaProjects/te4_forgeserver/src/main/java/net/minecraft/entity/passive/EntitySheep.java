@@ -105,8 +105,8 @@ public class EntitySheep extends EntityAnimal implements IShearable {
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
         AbstractAttributeMap map = getAttributeMap();
-        map.getAttributeInstance(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(8.0);
-        map.getAttributeInstance(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.23000000417232513);
+        map.get(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(8.0);
+        map.get(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.23000000417232513);
     }
 
 

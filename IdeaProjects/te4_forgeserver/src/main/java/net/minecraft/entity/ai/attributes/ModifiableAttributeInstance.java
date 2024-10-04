@@ -184,7 +184,7 @@ public class ModifiableAttributeInstance implements IAttributeInstance {
         set.addAll(this.getModifiersByOperation(operation));
 
         for (IAttribute iattribute = this.genericAttribute.getParent(); iattribute != null; iattribute = iattribute.getParent()) {
-            IAttributeInstance iattributeinstance = this.attributeMap.getAttributeInstance(iattribute);
+            IAttributeInstance iattributeinstance = this.attributeMap.get(iattribute);
 
             if (iattributeinstance != null) {
                 set.addAll(iattributeinstance.getModifiersByOperation(operation));

@@ -92,10 +92,10 @@ public class EntityEnderman extends EntityMob {
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
         AbstractAttributeMap map = this.getAttributeMap();
-        map.getAttributeInstance(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(40.0D);
-        map.getAttributeInstance(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.30000001192092896D);
-        map.getAttributeInstance(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(7.0D);
-        map.getAttributeInstance(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(64.0D);
+        map.get(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(40.0D);
+        map.get(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.30000001192092896D);
+        map.get(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(7.0D);
+        map.get(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(64.0D);
     }
 
 

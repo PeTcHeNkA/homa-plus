@@ -91,10 +91,10 @@ public class EntityZombie extends EntityMob {
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
         AbstractAttributeMap map = this.getAttributeMap();
-        map.getAttributeInstance(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(35.0D);
-        map.getAttributeInstance(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.23000000417232513D);
-        map.getAttributeInstance(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(3.0D);
-        map.getAttributeInstance(SharedMonsterAttributes.ARMOR).setBaseValue(2.0D);
+        map.get(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(35.0D);
+        map.get(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.23000000417232513D);
+        map.get(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(3.0D);
+        map.get(SharedMonsterAttributes.ARMOR).setBaseValue(2.0D);
         map.registerAttribute(SPAWN_REINFORCEMENTS_CHANCE).setBaseValue(
                 this.rand.nextDouble() * ForgeModContainer.zombieSummonBaseChance);
     }

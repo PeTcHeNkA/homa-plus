@@ -172,10 +172,11 @@ public abstract class EntityLivingBase extends Entity {
         this.applyEntityAttributes();
         this.setHealth(this.getMaxHealth());
         this.preventEntitySpawning = true;
-        this.randomUnused1 = (float)((Math.random() + 1.0D) * 0.009999999776482582D);
+        Random rand = super.rand;
+        this.randomUnused1 = (float)((rand.nextDouble() + 1.0D) * 0.009999999776482582D);
         this.setPosition(this.posX, this.posY, this.posZ);
-        this.randomUnused2 = (float)Math.random() * 12398.0F;
-        this.rotationYaw = (float)(Math.random() * (Math.PI * 2D));
+        this.randomUnused2 = rand.nextFloat() * 12398.0F;
+        this.rotationYaw = (float)(rand.nextDouble() * (Math.PI * 2D));
         this.rotationYawHead = this.rotationYaw;
         this.stepHeight = 0.6F;
     }
@@ -1219,12 +1220,14 @@ public abstract class EntityLivingBase extends Entity {
 
 
     public IAttributeInstance getEntityAttribute(IAttribute attribute) {
-        return this.getAttributeMap().getAttributeInstance(attribute);
+        return this.getAttributeMap().get(attribute);
     }
 
 
     public AbstractAttributeMap getAttributeMap() {
-        return this.attributeMap == null? attributeMap = new AttributeMap(): attributeMap;
+        AbstractAttributeMap map = this.attributeMap;
+        if(map != null)return map;
+        return this.attributeMap = new AttributeMap();
     }
 
 

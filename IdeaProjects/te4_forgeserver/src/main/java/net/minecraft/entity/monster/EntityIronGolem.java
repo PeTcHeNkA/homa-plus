@@ -94,9 +94,9 @@ public class EntityIronGolem extends EntityGolem {
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
         AbstractAttributeMap map = this.getAttributeMap();
-        map.getAttributeInstance(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(100.0);
-        map.getAttributeInstance(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.25);
-        map.getAttributeInstance(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(1.0);
+        map.get(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(100.0);
+        map.get(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.25);
+        map.get(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(1.0);
     }
 
 

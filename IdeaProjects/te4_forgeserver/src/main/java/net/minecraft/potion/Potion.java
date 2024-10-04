@@ -196,9 +196,9 @@ public class Potion extends IForgeRegistryEntry.Impl<Potion> {
 
     public void removeAttributesModifiersFromEntity(final EntityLivingBase entityLivingBaseIn, final AbstractAttributeMap attributeMapIn, final int amplifier) {
         for (final Map.Entry<IAttribute, AttributeModifier> entry : this.attributeModifierMap.entrySet()) {
-            final IAttributeInstance iattributeinstance = attributeMapIn.getAttributeInstance((IAttribute)entry.getKey());
+            final IAttributeInstance iattributeinstance = attributeMapIn.get(entry.getKey());
             if (iattributeinstance != null) {
-                iattributeinstance.removeModifier((AttributeModifier)entry.getValue());
+                iattributeinstance.removeModifier(entry.getValue());
             }
         }
     }
@@ -212,7 +212,7 @@ public class Potion extends IForgeRegistryEntry.Impl<Potion> {
 
     public void applyAttributesModifiersToEntity(final EntityLivingBase entityLivingBaseIn, final AbstractAttributeMap attributeMapIn, final int amplifier) {
         for (final Map.Entry<IAttribute, AttributeModifier> entry : this.attributeModifierMap.entrySet()) {
-            final IAttributeInstance iattributeinstance = attributeMapIn.getAttributeInstance((IAttribute)entry.getKey());
+            final IAttributeInstance iattributeinstance = attributeMapIn.get(entry.getKey());
             if (iattributeinstance != null) {
                 final AttributeModifier attributemodifier = entry.getValue();
                 iattributeinstance.removeModifier(attributemodifier);

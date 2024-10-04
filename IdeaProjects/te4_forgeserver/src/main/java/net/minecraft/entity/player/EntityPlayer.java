@@ -183,7 +183,7 @@ public abstract class EntityPlayer extends EntityLivingBase {
         super.applyEntityAttributes();
         AbstractAttributeMap map = getAttributeMap();
         map.registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(1.0D);
-        map.getAttributeInstance(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.10000000149011612D);
+        map.get(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.10000000149011612D);
         map.registerAttribute(SharedMonsterAttributes.ATTACK_SPEED);
         map.registerAttribute(SharedMonsterAttributes.LUCK);
         map.registerAttribute(REACH_DISTANCE);

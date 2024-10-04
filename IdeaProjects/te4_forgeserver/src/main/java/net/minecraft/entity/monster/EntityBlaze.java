@@ -76,9 +76,9 @@ public class EntityBlaze extends EntityMob {
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
         AbstractAttributeMap map = getAttributeMap();
-        map.getAttributeInstance(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(6.0D);
-        map.getAttributeInstance(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.23000000417232513D);
-        map.getAttributeInstance(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(48.0D);
+        map.get(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(6.0D);
+        map.get(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.23000000417232513D);
+        map.get(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(48.0D);
     }
 
 

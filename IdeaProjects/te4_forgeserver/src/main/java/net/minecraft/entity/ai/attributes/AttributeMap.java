@@ -12,7 +12,7 @@ public class AttributeMap extends AbstractAttributeMap {
 
     @Override
     public ModifiableAttributeInstance getAttributeInstance(IAttribute attribute) {
-        return (ModifiableAttributeInstance)super.getAttributeInstance(attribute);
+        return (ModifiableAttributeInstance)super.get(attribute);
     }
 
 
