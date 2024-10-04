@@ -245,28 +245,30 @@ public abstract class PathNavigate {
 
     protected void pathFollow() {
         Vec3d vec3d = this.getEntityPosition();
-        int i = this.currentPath.getCurrentPathLength();
+        Path currentPath;
+        int i = (currentPath = this.currentPath).getCurrentPathLength();
 
-        for (int j = this.currentPath.getCurrentPathIndex(); j < this.currentPath.getCurrentPathLength(); ++j) {
-            if ((double)this.currentPath.getPathPointFromIndex(j).y != Math.floor(vec3d.y)) {
+        for (int j = currentPath.getCurrentPathIndex(); j < currentPath.getCurrentPathLength(); ++j) {
+            if (currentPath.getPathPointFromIndex(j).y != MathHelper.floor(vec3d.y)) {
                 i = j;
                 break;
             }
         }
+        EntityLiving entity = this.entity;
 
-        this.maxDistanceToWaypoint = this.entity.width > 0.75F ? this.entity.width / 2.0F : 0.75F - this.entity.width / 2.0F;
-        PathPoint point = this.currentPath.getCurrentPoint();
+        this.maxDistanceToWaypoint = entity.width > 0.75F ? entity.width / 2.0F : 0.75F - entity.width / 2.0F;
+        PathPoint point = currentPath.getCurrentPoint();
 
-        if (MathHelper.abs((float)(this.entity.posX - (point.x + 0.5D))) < this.maxDistanceToWaypoint && MathHelper.abs((float)(this.entity.posZ - (point.z + 0.5D))) < this.maxDistanceToWaypoint && Math.abs(this.entity.posY - point.y) < 1.0D) {
-            this.currentPath.setCurrentPathIndex(this.currentPath.getCurrentPathIndex() + 1);
+        if (MathHelper.abs((float)(entity.posX - (point.x + 0.5D))) < this.maxDistanceToWaypoint && MathHelper.abs((float)(entity.posZ - (point.z + 0.5D))) < this.maxDistanceToWaypoint && Math.abs(entity.posY - point.y) < 1.0D) {
+            currentPath.setCurrentPathIndex(currentPath.getCurrentPathIndex() + 1);
         }
 
-        int k = MathHelper.ceil(this.entity.width);
-        int l = MathHelper.ceil(this.entity.height);
+        int k = MathHelper.ceil(entity.width);
+        int l = MathHelper.ceil(entity.height);
 
-        for (int j1 = i - 1; j1 >= this.currentPath.getCurrentPathIndex(); --j1) {
-            if (this.isDirectPathBetweenPoints(vec3d, this.currentPath.getVectorFromIndex(this.entity, j1), k, l, k)) {
-                this.currentPath.setCurrentPathIndex(j1);
+        for (int j1 = i - 1; j1 >= currentPath.getCurrentPathIndex(); --j1) {
+            if (this.isDirectPathBetweenPoints(vec3d, currentPath.getVectorFromIndex(entity, j1), k, l, k)) {
+                currentPath.setCurrentPathIndex(j1);
                 break;
             }
         }

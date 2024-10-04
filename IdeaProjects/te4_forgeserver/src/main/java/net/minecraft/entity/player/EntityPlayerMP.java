@@ -346,9 +346,9 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
     public void onUpdateEntity() {
         try {
             super.onUpdate();
-
-            for (int i = 0; i < this.inventory.getSizeInventory(); ++i) {
-                ItemStack itemstack = this.inventory.getStackInSlot(i);
+            InventoryPlayer inventory = this.inventory;
+            for (int i = 0; i < inventory.getSizeInventory(); ++i) {
+                ItemStack itemstack = inventory.getStackInSlot(i);
 
                 if (!itemstack.isEmpty() && itemstack.getItem().isMap()) {
                     Packet<?> packet = ((ItemMapBase)itemstack.getItem()).createMapDataPacket(itemstack, this.world, this);

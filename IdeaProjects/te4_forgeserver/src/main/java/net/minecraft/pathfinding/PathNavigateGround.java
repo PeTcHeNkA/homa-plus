@@ -26,29 +26,32 @@ public class PathNavigateGround extends PathNavigate {
 
     @Override
     protected PathFinder getPathFinder() {
-        this.nodeProcessor = new WalkNodeProcessor(entity.world);
-        this.nodeProcessor.setCanEnterDoors(true);
-        return new PathFinder(this.nodeProcessor);
+        NodeProcessor proc = this.nodeProcessor = new WalkNodeProcessor(entity.world);
+        proc.setCanEnterDoors(true);
+        return new PathFinder(proc);
     }
 
 
     @Override
     protected boolean canNavigate() {
-        return this.entity.onGround || this.getCanSwim() && this.isInLiquid() || this.entity.isRiding();
+        Entity entity;
+        return (entity = this.entity).onGround || this.getCanSwim() && this.isInLiquid() || entity.isRiding();
     }
 
 
     @Override
     protected Vec3d getEntityPosition() {
-        return new Vec3d(this.entity.posX, this.getPathablePosY(), this.entity.posZ);
+        Entity entity;
+        return new Vec3d((entity = this.entity).posX, this.getPathablePosY(), entity.posZ);
     }
 
 
     @Override
     protected void updateEntityPos() {
-        lastPosX = this.entity.posX;
+        Entity entity;
+        lastPosX = (entity = this.entity).posX;
         lastPosY = this.getPathablePosY();
-        lastPosZ = this.entity.posZ;
+        lastPosZ = entity.posZ;
     }
 
 
@@ -121,17 +124,24 @@ public class PathNavigateGround extends PathNavigate {
         if (this.shouldAvoidSun) {
             Entity entity = this.entity;
             World world = entity.world;
-            if (world.canSeeSky(
-                    MathHelper.floor(entity.posX),
-                    (int)(entity.getEntityBoundingBox().minY + 0.5D),
-                    MathHelper.floor(entity.posZ)
-            )) return;
-            PathPoint pathpoint;
-            for (int i = 0; i < this.currentPath.getCurrentPathLength(); ++i) {
-                pathpoint = this.currentPath.getPathPointFromIndex(i);
 
-                if (world.canSeeSky(pathpoint.x, pathpoint.y, pathpoint.z)) {
-                    this.currentPath.setCurrentPathLength(i - 1);
+            int prevCX, prevCZ, bx = MathHelper.floor(entity.posX), bz = MathHelper.floor(entity.posZ);
+            Chunk chunk = world.getChunk(prevCX = bx >>4, prevCZ = bx >> 4);
+
+            if (chunk.canSeeSky(bx, (int)(entity.getEntityBoundingBox().minY + 0.5D), bz)) return;
+            PathPoint pathpoint;
+            Path currentPath = this.currentPath;
+
+            for (int i = 0; i < currentPath.getCurrentPathLength(); ++i) {
+                pathpoint = currentPath.getPathPointFromIndex(i);
+                bx = pathpoint.x; bz = pathpoint.z;
+                int cx = bx >> 4, cz = bz >> 4;
+                if(prevCX != cx || cz != prevCZ){
+                    chunk = world.getChunk(prevCX = cx, prevCZ = cz);
+                }
+
+                if (chunk.canSeeSky(bx, pathpoint.y, bz)) {
+                    currentPath.setCurrentPathLength(i - 1);
                     return;
                 }
             }
@@ -150,7 +160,7 @@ public class PathNavigateGround extends PathNavigate {
         int i = currentPath.getCurrentPathLength();
 
         for (int j = currentPath.getCurrentPathIndex(); j < currentPath.getCurrentPathLength(); ++j) {
-            if ((double)currentPath.getPathPointFromIndex(j).y != Math.floor(vY)) {
+            if (currentPath.getPathPointFromIndex(j).y != MathHelper.floor(vY)) {
                 i = j;
                 break;
             }
@@ -159,8 +169,8 @@ public class PathNavigateGround extends PathNavigate {
         this.maxDistanceToWaypoint = entity.width > 0.75F ? entity.width / 2.0F : 0.75F - entity.width / 2.0F;
         PathPoint point = currentPath.getCurrentPoint();
 
-        if (MathHelper.abs((float)(vX - (point.x + 0.5D))) < this.maxDistanceToWaypoint && MathHelper.abs((float)(vZ - (point.z + 0.5D))) < this.maxDistanceToWaypoint && Math.abs(this.entity.posY - point.y) < 1.0D) {
-            this.currentPath.setCurrentPathIndex(this.currentPath.getCurrentPathIndex() + 1);
+        if (MathHelper.abs((float)(vX - (point.x + 0.5D))) < this.maxDistanceToWaypoint && MathHelper.abs((float)(vZ - (point.z + 0.5D))) < this.maxDistanceToWaypoint && Math.abs(entity.posY - point.y) < 1.0D) {
+            currentPath.setCurrentPathIndex(currentPath.getCurrentPathIndex() + 1);
         }
 
         int k = MathHelper.ceil(entity.width);
@@ -253,10 +263,10 @@ public class PathNavigateGround extends PathNavigate {
 
 
     private boolean isSafeToStandAt(IBlockEAccess access, PntMatrix.Chunked chunked, int x, int y, int z, int sizeX, int sizeY, int sizeZ, double vecX, double vecZ, double param, double param2) {
-        int dX = x - sizeX / 2;
-        int dZ = z - sizeZ / 2;
+        int dX = x - (sizeX >> 1);
+        int dZ = z - (sizeZ >> 1);
 
-        if (!this.isPositionClear(access, dX, y, dZ, sizeX, sizeY, sizeZ, vecX, vecZ, param, param2)) {
+        if (!isPositionClear(access, dX, y, dZ, sizeX, sizeY, sizeZ, vecX, vecZ, param, param2)) {
             return false;
         } else {
             PathNodeType type;
@@ -296,11 +306,10 @@ public class PathNavigateGround extends PathNavigate {
     }
 
 
-    private boolean isPositionClear(IBlockAccess access, int x, int y, int z, int sizeX, int sizeY, int sizeZ, double vecX, double vecZ, double p1, double p2) {
-        int fx = x + sizeX -1, fy = y + sizeY - 1, fz = z + sizeZ - 1;
+    private static boolean isPositionClear(IBlockEAccess access, int x, int y, int z, int sizeX, int sizeY, int sizeZ, double vecX, double vecZ, double p1, double p2) {
         //todo move to pool
         BlockPos.MutableBlockPos pos = access.getWorld().localTempPos2;
-        for (;x<fx;++x)
+        for (int fx = x + sizeX -1, fy = y + sizeY - 1, fz = z + sizeZ - 1;x<fx;++x)
             for (;z<fz;++z)
                 for (;y<fy;++y){
                     pos.setPosB(x, y, z);

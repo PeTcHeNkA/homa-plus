@@ -1,10 +1,7 @@
 package plus.fserver.server;
 
-import net.minecraft.network.play.server.SPacketChunkData;
-import net.minecraftforge.common.ForgeModContainer;
+import net.minecraft.network.NetHandlerPlayServer;
 import plus.fserver.api.ElcaServerUtils;
-import plus.fserver.api.inject.Field;
-import plus.fserver.api.inject.LoadInjector;
 import plus.fserver.server.zstd.Native;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.entity.EntityTracker;
@@ -210,9 +207,9 @@ public final class AsyWorldTickerV2{
                 for (int i = 0, s = players.size(); i < s; i++){
                     player = players.get(i);
                     if(player instanceof EntityPlayerMP) {
-                        EntityPlayerMP mp = (EntityPlayerMP) player;
-                        mp.connection.onTickWorld();
-                        mp.connection.netManager.sendPacketE(packet);
+                        NetHandlerPlayServer conn = ((EntityPlayerMP) player).connection;
+                        conn.netManager.addToQueueN(packet);
+                        conn.onTickWorld();
                     }
                 }
             } else {
