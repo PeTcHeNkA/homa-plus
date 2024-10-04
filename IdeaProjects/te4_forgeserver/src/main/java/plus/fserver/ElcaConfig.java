@@ -36,7 +36,7 @@ public class ElcaConfig {
     public static int RECHECK_SPAWNER_RATE       = 80;
     public static int CHECK_TO_UNLOAD_RATE       = 600;
     public static int SAVE_WORLD_RATE            = 600 * 20;
-    public static int NAVIGATE_CACHE_CLEAN_RATE  = 200;
+    public static int NAVIGATE_CACHE_CLEAN_RATE  = 300;
     public static int STD_UPDATE_NAVIGATION_RATE = 20;
     public static int MAX_UPDATE_NAVIGATION_RATE = 40;
     public static int NAVIGATE_RESET_RATE        = NAVIGATE_CACHE_CLEAN_RATE * 50;
@@ -56,7 +56,7 @@ public class ElcaConfig {
     public static int MAX_PISTON_POWER           = 12;
     public static int MIN_CHANGED_BLOCKS_BUF     = 24;
     public static int RESET_LOW_LEVEL_MOBS       = 200;
-    public static int MAX_WORLD_SPAWNER_RANGE    = 7;
+    public static int MAX_WORLD_SPAWNER_RANGE    = 6;
     public static int BALANCE_BLOCK_TICK         = 3;
     public static int BALANCE_BLOCK_CRITICAL     = 7;
 
@@ -87,6 +87,7 @@ public class ElcaConfig {
     //public static boolean FAST_ENTITY_EQUALS          = true;
     public static boolean ENABLE_LEGACY_PING_HANDLER  = false;
     public static boolean ENABLE_DEFAULT_JOIN_MESSAGE = true;
+    public static boolean USE_ASYNC_TRACKER_DEFAULT   = false;
     //public static boolean ENABLE_DATA_FIXER          = false;
 
 
@@ -136,7 +137,8 @@ public class ElcaConfig {
 
 
     public static void init(TsonMap map){
-        NATIVES                    = dir(map.getOrDefaultStr("elca-natives", "elca_natives"));
+        if(NATIVES == null)
+            NATIVES                = dir(map.getOrDefaultStr("elca-natives", "elca_natives"));
 
         map.ifContainsMap("vars", ElcaConfig::readVars);
 
@@ -194,8 +196,10 @@ public class ElcaConfig {
 
         PCM_MAX_LOAD_PER_TICK      = calc(map, "pcm-max-load-per-tick"       , PCM_MAX_LOAD_PER_TICK      );
         PCM_MAX_SEND_PER_TICK      = calc(map, "pcm-max-send-per-tick"       , PCM_MAX_SEND_PER_TICK      );
+        USE_ASYNC_TRACKER_DEFAULT  = calc(map, "use-async-tracker-def"       , USE_ASYNC_TRACKER_DEFAULT  );
 
         if(INIT_PALETTE_LINEAR_BITS > 4 || INIT_PALETTE_LINEAR_BITS < 2){
+            INIT_PALETTE_LINEAR_BITS = 4;
             throw new Error("Linear palette bits should be in 2, 3 or 4");
         }
     }

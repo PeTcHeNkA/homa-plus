@@ -41,6 +41,7 @@ import plus.fserver.utls.EntityLodFunc;
 import plus.fserver.utls.collections.ArrayListE6;
 import plus.fserver.utls.collections.ArrayListEV;
 import plus.tson.TsonFile;
+import plus.tson.TsonMap;
 import plus.tson.utl.ByteStrBuilder;
 import plus.tson.utl.Te4HashSet;
 
@@ -51,6 +52,8 @@ import java.net.SocketAddress;
 import java.text.DecimalFormat;
 import java.util.*;
 
+import static net.minecraft.command.CommandBase.getListOfStringsMatchingLastWord;
+
 
 public class ElcaCommands extends ServerCommand {
     private static final String primary  = "&b";
@@ -60,8 +63,34 @@ public class ElcaCommands extends ServerCommand {
     private static final String normal   = "&a";
 
     private final List<String> completions = ImmutableList.copyOf(
-        new String[]{"version", "info", "tps", "mobs", "spawn", "hotpoints", "send"}
+        new String[]{"version", "info", "tps", "mobs", "spawn", "hotpoints", "send", "setvar"}
     );
+    private final List<String> allVars = ImmutableList.copyOf(new String[]{
+            "time-packet-rate"            , "mean-balance-mob"            ,
+            "chunk-tick-radius-m"         , "goal-tick-rate"              ,
+            "chunk-tick-radius-s"         , "recheck-spawner-rate"        ,
+            "balance-block-tick"          , "recheck-chunks-spawner-rate" ,
+            "balance-block-critical"      , "check-to-unload-rate"        ,
+            "mean-balance-block"          , "save-world-rate"             ,
+            "navigation-cache-clean-rate" , "max-entity-collisions"       ,
+            "std-update-navigation-rate"  , "max-entity-collisions-move"  ,
+            "max-update-navigation-rate"  , "min-changed-blocks-buf"      ,
+            "navigate-reset-rate"         , "reset-low-level-mobs"        ,
+            "network-compression-lvl"     , "max-world-spawner-range"     ,
+            "max-sponge-power"            , "slow-temp-check"             ,
+            "max-piston-power"            , "slow-wander"                 ,
+            "beacon-tick-rate"            , "disable-session-lock"        ,
+            "immediate-update-limit"      , "ignore-errors"               ,
+            "slow-swim-ai"                , "remove-error-entities"       ,
+            "overworld-async-population"  , "max-connections-time"        ,
+            "skip-check-network"          , "init-palette-linear-bits"    ,
+            "print-case-stop"             , "cache-chunk-data"            ,
+            "endable-def-join-msg"        , "pcm-max-load-per-tick"       ,
+            "max-connections-per"         , "pcm-max-send-per-tick"       ,
+            "use-async-tracker-def"       ,
+    });
+
+
     private final DecimalFormat TIME_FORMATTER = new DecimalFormat("########0.00");
 
     public ElcaCommands() {
@@ -80,35 +109,64 @@ public class ElcaCommands extends ServerCommand {
         if(arg0 == null || arg0.isEmpty()){
             version(server, sender);
             return;
+        } else {
+            arg0 = arg0.toLowerCase(Locale.ROOT);
         }
-        if(arg0.equalsIgnoreCase("tps")){
-            tps(server, sender, args.length>1 && "true".equals(args[1]));return;
-        }
-        if(arg0.equalsIgnoreCase("info")){
-            info(server, sender, args);
-        }
-        if(arg0.equalsIgnoreCase("cvi")){
-            chunkViTxt(server, sender);
-        }
-        if(arg0.equalsIgnoreCase("mobs")){
-            if(args.length>1){
-                int dim = Integer.parseInt(args[1].trim());
-                mobs(server, sender, dim);
-            } else {
-                mobs(server, sender);
+        switch (arg0){
+            case "tps":{
+                tps(server, sender, args.length>1 && "true".equals(args[1]));return;
+            }
+            case "info":{
+                info(server, sender, args);return;
+            }
+            case "cvi":{
+                chunkViTxt(server, sender);return;
+            }
+            case "mobs":{
+                if(args.length>1){
+                    int dim = Integer.parseInt(args[1].trim());
+                    mobs(server, sender, dim);
+                } else {
+                    mobs(server, sender);
+                }
+                return;
+            }
+            case "soft":{
+                soft(server, sender, args);return;
+            }
+            case "spawn":{
+                spawn(sender, args);return;
+            }
+            case "hotpoints":{
+                hotPoints(server, sender, args);return;
+            }
+            case "send":{
+                send(server, sender, args);return;
+            }
+            case "setvar":{
+                setVar(server, sender, args);return;
             }
         }
-        if(arg0.equalsIgnoreCase("soft")){
-            soft(server, sender, args);
-        }
-        if(arg0.equalsIgnoreCase("spawn")){
-            spawn(sender, args);
-        }
-        if(arg0.equalsIgnoreCase("hotpoints")){
-            hotPoints(server, sender, args);
-        }
-        if(arg0.equalsIgnoreCase("send")){
-            send(server, sender, args);
+    }
+
+
+    private void setVar(MinecraftServer server, ICommandSender sender, String[] args){
+        if(args.length < 3){
+            reply(sender, "&cUsage: &e/setvar [var] [value]");
+        } else {
+            String var = args[1];
+            String val = args[2];
+
+            if(!allVars.contains(var)){
+                reply(server, "&eVar [&b%s&e] is unknown, maybe error?", var);
+            }
+
+            TsonMap map = new TsonMap();
+            map.put(var, val);
+
+            ElcaConfig.init(map);
+
+            reply(sender, "&eVar [&b%s&e] assigned [&b%s&e]", var, val);
         }
     }
 
@@ -502,6 +560,11 @@ public class ElcaCommands extends ServerCommand {
 
     @Override
     public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
+        return getListOfStringsMatchingLastWord(args, getTabCompletionsRaw(server, sender, args, targetPos));
+    }
+
+
+    private List<String> getTabCompletionsRaw(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
         if(args.length == 2){
             switch (args[0]){
                 case "send":{
@@ -517,6 +580,8 @@ public class ElcaCommands extends ServerCommand {
                     );
                 case "info":
                     return Collections.singletonList("track");
+                case "setvar":
+                    return allVars;
             }
         }
         if(args.length < 2) return completions;
