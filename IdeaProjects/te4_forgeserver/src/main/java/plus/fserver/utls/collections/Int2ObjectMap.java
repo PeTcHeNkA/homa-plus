@@ -995,12 +995,12 @@ public class Int2ObjectMap<V> extends AbstractInt2ObjectMap<V> implements java.i
 	 */
 	@SuppressWarnings("unchecked")
 	protected void rehash(final int newN) {
-		final int key[] = this.key;
-		final V value[] = this.value;
+		final int[] key = this.key;
+		final V[] value = this.value;
 		final int mask = newN - 1; // Note that this is used by the hashing
 									// macro
-		final int newKey[] = new int[newN + 1];
-		final V newValue[] = (V[]) new Object[newN + 1];
+		final int[] newKey = new int[newN + 1];
+		final V[] newValue = newArray(newN + 1);
 		int i = n, pos;
 		for (int j = realSize(); j-- != 0;) {
 			while (((key[--i]) == (0)))

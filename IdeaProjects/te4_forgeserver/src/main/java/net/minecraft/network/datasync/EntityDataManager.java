@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.annotation.Nullable;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.Entity;
@@ -215,9 +214,8 @@ public class EntityDataManager extends Int2ObjectMap<EntityDataManager.DataEntry
             ReentrantReadWriteLock.ReadLock rloc = this.lock.readLock();
             rloc.lock();
 
-            DataEntry<?> dataentry;
-            for (Object o : value) {
-                if (o != null && (dataentry = (DataEntry<?>) o).isDirty()) {
+            for (DataEntry<?> dataentry : value) {
+                if (dataentry != null && dataentry.isDirty()) {
                     dataentry.setDirty(false);
                     if (list == null) {
                         list = new ArrayListE6<>();
@@ -235,8 +233,8 @@ public class EntityDataManager extends Int2ObjectMap<EntityDataManager.DataEntry
     public void writeEntries(PacketBuffer buf) throws IOException {
         ReentrantReadWriteLock.ReadLock rLoc = this.lock.readLock();
         rLoc.lock();
-        for (Object o : value) {
-            if(o != null) writeEntry(buf, (DataEntry<?>) o);
+        for (DataEntry<?> o : value) {
+            if(o != null) writeEntry(buf, o);
         }
         rLoc.unlock();
         buf.writeByte(255);
@@ -325,8 +323,8 @@ public class EntityDataManager extends Int2ObjectMap<EntityDataManager.DataEntry
         this.dirty = false;
         ReentrantReadWriteLock.ReadLock rLock = this.lock.readLock();
         rLock.lock();
-        for (Object o : value) {
-            if(o != null) ((DataEntry<?>) o).setDirty(false);
+        for (DataEntry<?> o : value) {
+            if(o != null) o.setDirty(false);
         }
         rLock.unlock();
     }
