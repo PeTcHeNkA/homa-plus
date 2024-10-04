@@ -1,5 +1,6 @@
 package net.minecraft.entity.passive;
 
+import java.util.Random;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.block.Block;
@@ -53,10 +54,11 @@ public abstract class EntityAnimal extends EntityAgeable implements IAnimals {
             --this.inLove;
 
             if (this.inLove % 10 == 0) {
-                double d0 = this.rand.nextGaussian() * 0.02D;
-                double d1 = this.rand.nextGaussian() * 0.02D;
-                double d2 = this.rand.nextGaussian() * 0.02D;
-                this.world.spawnParticle(EnumParticleTypes.HEART, this.posX + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, this.posY + 0.5D + (double)(this.rand.nextFloat() * this.height), this.posZ + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, d0, d1, d2);
+                Random rand = this.rand;
+                double d0 = rand.nextGaussian() * 0.02D;
+                double d1 = rand.nextGaussian() * 0.02D;
+                double d2 = rand.nextGaussian() * 0.02D;
+                this.world.spawnParticle(EnumParticleTypes.HEART, this.posX + (double)(rand.nextFloat() * this.width * 2.0F) - (double)this.width, this.posY + 0.5D + (double)(rand.nextFloat() * this.height), this.posZ + (double)(rand.nextFloat() * this.width * 2.0F) - (double)this.width, d0, d1, d2);
             }
         }
     }

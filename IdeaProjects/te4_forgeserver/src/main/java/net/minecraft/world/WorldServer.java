@@ -496,9 +496,9 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
                 Entity entity = raw[cursor];
 //                if((entity = raw[cursor]) == null)
 //                    continue;
-                Entity ridding = entity.getRidingEntity();
+                Entity ridding;
 
-                if (ridding != null) {
+                if ((ridding = entity.getRidingEntity()) != null) {
                     if (!ridding.isDead && ridding.isPassenger(entity))
                         continue;
                     entity.dismountRidingEntity();

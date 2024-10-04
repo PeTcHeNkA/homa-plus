@@ -98,7 +98,9 @@ public abstract class EntityLivingBase extends Entity {
     private AbstractAttributeMap attributeMap;
     private final CombatTracker combatTracker = new CombatTracker(this);
     private PotionMap activePotionsMap;
-    private final FixedItemList equipInv = new FixedItemList(6);
+
+    private FixedItemList equipInv;// = new FixedItemList(6);
+
     public boolean isSwingInProgress;
     public EnumHand swingingHand;
     public int swingProgressInt;
@@ -1633,14 +1635,25 @@ public abstract class EntityLivingBase extends Entity {
                 if (  arrowHitTimer <= 0) setArrowCountInEntity(count - 1);
             }
 
-            ItemStack[] env = this.equipInv.raw();
-
-            updateSlot(EntityEquipmentSlot.MAINHAND, env[0]);
-            updateSlot(EntityEquipmentSlot.OFFHAND , env[1]);
-            updateSlot(EntityEquipmentSlot.FEET    , env[2]);
-            updateSlot(EntityEquipmentSlot.LEGS    , env[3]);
-            updateSlot(EntityEquipmentSlot.CHEST   , env[4]);
-            updateSlot(EntityEquipmentSlot.HEAD    , env[5]);
+            //eq =  = new FixedItemList(6);
+            FixedItemList equip = this.equipInv;
+            if(equip != null) {
+                ItemStack[] env = equip.raw();
+                updateSlot(EntityEquipmentSlot.MAINHAND, env[0]);
+                updateSlot(EntityEquipmentSlot.OFFHAND , env[1]);
+                updateSlot(EntityEquipmentSlot.FEET    , env[2]);
+                updateSlot(EntityEquipmentSlot.LEGS    , env[3]);
+                updateSlot(EntityEquipmentSlot.CHEST   , env[4]);
+                updateSlot(EntityEquipmentSlot.HEAD    , env[5]);
+            } else {
+                ItemStack empty = ItemStack.EMPTY;
+                updateSlot(EntityEquipmentSlot.MAINHAND, empty);
+                updateSlot(EntityEquipmentSlot.OFFHAND , empty);
+                updateSlot(EntityEquipmentSlot.FEET    , empty);
+                updateSlot(EntityEquipmentSlot.LEGS    , empty);
+                updateSlot(EntityEquipmentSlot.CHEST   , empty);
+                updateSlot(EntityEquipmentSlot.HEAD    , empty);
+            }
 
             if ((this.ticksExisted & 31) == 0) this.getCombatTracker().reset();
 
@@ -1705,13 +1718,15 @@ public abstract class EntityLivingBase extends Entity {
             if (!other.isEmpty())
                 this.getAttributeMap().applyAttributeModifiers(other.getAttributeModifiers(slot));
 
+            FixedItemList equipInv = this.equipInv;
+            if(equipInv == null) equipInv = this.equipInv = new FixedItemList(6);
 
             switch (slot.getSlotType()) {
                 case HAND:
-                    this.equipInv.fSet(slot.getIndex(), other.isEmpty() ? ItemStack.EMPTY : other.copy());
+                    equipInv.fSet(slot.getIndex(), other.isEmpty() ? ItemStack.EMPTY : other.copy());
                     break;
                 case ARMOR:
-                    this.equipInv.fSet(slot.getIndex()+2, other.isEmpty() ? ItemStack.EMPTY : other.copy());
+                    equipInv.fSet(slot.getIndex()+2, other.isEmpty() ? ItemStack.EMPTY : other.copy());
             }
         }
     }

@@ -106,7 +106,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
     private static int nextEntityID;
     private int entityId;
     public boolean preventEntitySpawning;
-    private final List<Entity> riddenByEntities;
+    private List<Entity> riddenByEntities;
     protected byte rideCooldown; //todo check mini error
     private Entity ridingEntity;
     public boolean forceSpawn;
@@ -206,8 +206,6 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
 
     public Entity(World worldIn) {
-
-        this.riddenByEntities = new ArrayList<>();
         //use zero AABB is safe
         this.boundingBox = ZERO_AABB;
         this.width = 0.6F;
@@ -2127,8 +2125,10 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
 
     public void removePassengers() {
-        for (int i = this.riddenByEntities.size() - 1; i >= 0; --i) {
-            this.riddenByEntities.get(i).dismountRidingEntity();
+        List<Entity> list;
+        if((list = this.riddenByEntities) == null)return;
+        for (int i = list.size() - 1; i >= 0; --i) {
+            list.get(i).dismountRidingEntity();
         }
     }
 
@@ -2147,10 +2147,13 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         if (passenger.getRidingEntity() != this) {
             throw new IllegalStateException("Use x.startRiding(y), not y.addPassenger(x)");
         } else {
+            List<Entity> list;
+            if((list = this.riddenByEntities) == null)
+                list = this.riddenByEntities = new ArrayList<>(3);
             if ((!this.world.isRemote || SERVER_COMPILE) && passenger instanceof EntityPlayer && !(this.getControllingPassenger() instanceof EntityPlayer)) {
-                this.riddenByEntities.add(0, passenger);
+                list.add(0, passenger);
             } else {
-                this.riddenByEntities.add(passenger);
+                list.add(passenger);
             }
         }
     }
@@ -2160,7 +2163,9 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         if (passenger.getRidingEntity() == this) {
             throw new IllegalStateException("Use x.stopRiding(y), not y.removePassenger(x)");
         } else {
-            this.riddenByEntities.remove(passenger);
+            List<Entity> list;
+            if((list = this.riddenByEntities) == null)return;
+            list.remove(passenger);
             passenger.rideCooldown = 60;
         }
     }
@@ -2269,8 +2274,8 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
 
     public boolean isBeingRidden() {
-        return !this.riddenByEntities.isEmpty();
-        //return !this.getPassengers().isEmpty();
+        List<Entity> arr = this.riddenByEntities;
+        return arr != null && !arr.isEmpty();
     }
 
 
@@ -3299,18 +3304,22 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
     public List<Entity> getPassengers() {
         List<Entity> list;
-        if((list = riddenByEntities).isEmpty())return Collections.emptyList();
+        if((list = riddenByEntities) == null || list.isEmpty())return Collections.emptyList();
         return Lists.newArrayList(list);
     }
 
 
     public List<Entity> getPassengersRaw(){
-        return riddenByEntities;
+        List<Entity> list;
+        if((list = this.riddenByEntities) == null)return Collections.emptyList();
+        return list;
     }
 
 
     public boolean isPassenger(Entity entityIn) {
-        for (Entity entity : riddenByEntities)
+        List<Entity> list;
+        if((list = this.riddenByEntities) == null)return false;
+        for (Entity entity : list)
             if (entity.equals(entityIn)) return true;
         return false;
     }
