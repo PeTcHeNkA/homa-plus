@@ -2037,7 +2037,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     public boolean checkNoEntityCollision(AxisAlignedBB bb, @Nullable Entity entityIn) {
-        List<Entity> list = this.getEntitiesWithinAABBExcludingEntity(null, bb);
+        List<Entity> list = this.getEntitiesInAABBexcluding(null, bb, EntitySelectors.NOT_SPECTATING);
         for (int j2 = 0; j2 < list.size(); ++j2) {
             Entity entity4 = list.get(j2);
 

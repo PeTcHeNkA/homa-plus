@@ -721,9 +721,11 @@ public abstract class EntityLiving extends EntityLivingBase {
 
 
     public boolean isNotColliding() {
-        return !this.world.containsAnyLiquid(this.getEntityBoundingBox()) &&
-                this.world.getCollisionBoxesLimitedC(this, this.getEntityBoundingBox(), 1).isEmptyC()
-                && this.world.checkNoEntityCollision(this.getEntityBoundingBox(), this);
+        World world;
+        AxisAlignedBB box;
+        return !(world = this.world).containsAnyLiquid(box = this.getEntityBoundingBox()) &&
+                world.getCollisionBoxesLimitedC(this, box, 1).isEmptyC()
+                && world.checkNoEntityCollision(box, this);
     }
 
 
