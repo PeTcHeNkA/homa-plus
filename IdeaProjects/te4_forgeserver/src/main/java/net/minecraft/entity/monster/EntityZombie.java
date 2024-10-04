@@ -103,9 +103,9 @@ public class EntityZombie extends EntityMob {
     @Override
     protected void entityInit() {
         EntityDataManager manager = getDataManager();
-        manager.register(IS_CHILD, Boolean.FALSE);
-        manager.register(VILLAGER_TYPE, 0);
-        manager.register(ARMS_RAISED, Boolean.FALSE);
+        manager.registerU(IS_CHILD, Boolean.FALSE);
+        manager.registerU(VILLAGER_TYPE, 0);
+        manager.registerU(ARMS_RAISED, Boolean.FALSE);
         super.entityInit();
     }
 

@@ -200,7 +200,7 @@ public abstract class EntityLiving extends EntityLivingBase {
 
 
     protected void entityInit() {
-        this.dataManager.register(AI_FLAGS, (byte) 0);
+        this.dataManager.registerU(AI_FLAGS, (byte) 0);
         super.entityInit();
     }
 

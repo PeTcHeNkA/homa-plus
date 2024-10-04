@@ -76,7 +76,7 @@ public class EntityWitch extends EntityMob implements IRangedAttackMob {
 
     @Override
     protected void entityInit() {
-        this.getDataManager().register(IS_DRINKING, Boolean.FALSE);
+        this.getDataManager().registerU(IS_DRINKING, Boolean.FALSE);
         super.entityInit();
     }
 

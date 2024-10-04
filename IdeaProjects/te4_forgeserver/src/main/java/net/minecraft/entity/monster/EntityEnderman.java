@@ -121,8 +121,8 @@ public class EntityEnderman extends EntityMob {
 
     @Override
     protected void entityInit() {
-        this.dataManager.register(CARRIED_BLOCK, Optional.absent());
-        this.dataManager.register(SCREAMING, Boolean.FALSE);
+        this.dataManager.registerU(CARRIED_BLOCK, Optional.absent());
+        this.dataManager.registerU(SCREAMING, Boolean.FALSE);
         super.entityInit();
     }
 

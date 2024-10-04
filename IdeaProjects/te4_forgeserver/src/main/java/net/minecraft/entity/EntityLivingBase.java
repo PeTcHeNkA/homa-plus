@@ -186,11 +186,11 @@ public abstract class EntityLivingBase extends Entity {
     protected void entityInit() {
         EntityDataManager manager = this.dataManager;
 
-        manager.register(HAND_STATES, (byte) 0);
-        manager.register(POTION_EFFECTS, 0);
-        manager.register(HIDE_PARTICLES, Boolean.FALSE);
-        manager.register(ARROW_COUNT_IN_ENTITY, 0);
-        manager.register(HEALTH, 1.0F);
+        manager.registerU(HAND_STATES, (byte) 0);
+        manager.registerU(POTION_EFFECTS, 0);
+        manager.registerU(HIDE_PARTICLES, Boolean.FALSE);
+        manager.registerU(ARROW_COUNT_IN_ENTITY, 0);
+        manager.registerU(HEALTH, 1.0F);
     }
 
 

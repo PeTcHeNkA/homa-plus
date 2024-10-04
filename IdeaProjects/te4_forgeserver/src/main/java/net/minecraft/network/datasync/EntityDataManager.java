@@ -95,6 +95,11 @@ public class EntityDataManager extends Int2ObjectMap<EntityDataManager.DataEntry
     }
 
 
+    public <T> void registerU(DataParameter<T> key, T value) {
+        super.put(key.getId(), new DataEntry<T>(key, value));
+    }
+
+
     public <T> DataEntry<T> registerV(DataParameter<T> key, T value) {
         int i = key.getId();
         if (i > 254) {

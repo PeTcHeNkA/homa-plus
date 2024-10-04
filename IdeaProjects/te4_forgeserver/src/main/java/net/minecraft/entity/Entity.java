@@ -240,12 +240,12 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         if(ElcaCV.DEBUG_NO_SERVER)return;
 
         EntityDataManager manager = this.dataManager = new EntityDataManager(this);
-        manager.register(FLAGS, (byte) 0);
-        manager.register(AIR, 300);
-        manager.register(CUSTOM_NAME_VISIBLE, Boolean.FALSE);
-        manager.register(CUSTOM_NAME, "");
-        manager.register(SILENT, Boolean.FALSE);
-        manager.register(NO_GRAVITY, Boolean.FALSE);
+        manager.registerU(FLAGS, (byte) 0);
+        manager.registerU(AIR, 300);
+        manager.registerU(CUSTOM_NAME_VISIBLE, Boolean.FALSE);
+        manager.registerU(CUSTOM_NAME, "");
+        manager.registerU(SILENT, Boolean.FALSE);
+        manager.registerU(NO_GRAVITY, Boolean.FALSE);
 
         this.entityInit();
         manager.trim();

@@ -100,9 +100,9 @@ public class EntityCreeper extends EntityMob {
     @Override
     protected void entityInit() {
         EntityDataManager manager = getDataManager();
-        manager.register(STATE, -1);
-        manager.register(POWERED, Boolean.FALSE);
-        manager.register(IGNITED, Boolean.FALSE);
+        manager.registerU(STATE, -1);
+        manager.registerU(POWERED, Boolean.FALSE);
+        manager.registerU(IGNITED, Boolean.FALSE);
         super.entityInit();
     }
 

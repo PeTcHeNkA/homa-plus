@@ -42,7 +42,7 @@ public class EntityBat extends EntityAmbientCreature {
 
     @Override
     protected void entityInit() {
-        this.dataManager.register(HANGING, (byte) 0);
+        this.dataManager.registerU(HANGING, (byte) 0);
         super.entityInit();
     }
 

@@ -199,12 +199,12 @@ public abstract class EntityPlayer extends EntityLivingBase {
     @Override
     protected void entityInit() {
         EntityDataManager manager = this.dataManager;
-        manager.register(ABSORPTION, 0.0F);
-        manager.register(PLAYER_SCORE, 0);
-        manager.register(PLAYER_MODEL_FLAG, (byte) 0);
-        manager.register(MAIN_HAND, (byte) 1);
-        manager.register(LEFT_SHOULDER_ENTITY, new NBTTagCompound());
-        manager.register(RIGHT_SHOULDER_ENTITY, new NBTTagCompound());
+        manager.registerU(ABSORPTION, 0.0F);
+        manager.registerU(PLAYER_SCORE, 0);
+        manager.registerU(PLAYER_MODEL_FLAG, (byte) 0);
+        manager.registerU(MAIN_HAND, (byte) 1);
+        manager.registerU(LEFT_SHOULDER_ENTITY, new NBTTagCompound());
+        manager.registerU(RIGHT_SHOULDER_ENTITY, new NBTTagCompound());
         super.entityInit();
     }
 

@@ -87,7 +87,7 @@ public abstract class AbstractSkeleton extends EntityMob implements IRangedAttac
 
     @Override
     protected void entityInit() {
-        this.dataManager.register(SWINGING_ARMS, Boolean.FALSE);
+        this.dataManager.registerU(SWINGING_ARMS, Boolean.FALSE);
         super.entityInit();
     }
 

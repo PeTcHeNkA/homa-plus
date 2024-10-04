@@ -84,7 +84,7 @@ public class EntityBlaze extends EntityMob {
 
     @Override
     protected void entityInit() {
-        this.dataManager.register(ON_FIRE, (byte) 0);
+        this.dataManager.registerU(ON_FIRE, (byte) 0);
         super.entityInit();
     }
 

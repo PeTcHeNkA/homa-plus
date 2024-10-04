@@ -99,8 +99,8 @@ public class EntityGuardian extends EntityMob {
 
     @Override
     protected void entityInit() {
-        this.dataManager.register(MOVING, Boolean.FALSE);
-        this.dataManager.register(TARGET_ENTITY, 0);
+        this.dataManager.registerU(MOVING, Boolean.FALSE);
+        this.dataManager.registerU(TARGET_ENTITY, 0);
         super.entityInit();
     }
 
