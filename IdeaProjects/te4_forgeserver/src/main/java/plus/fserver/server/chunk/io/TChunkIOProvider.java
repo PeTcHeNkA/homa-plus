@@ -38,14 +38,16 @@ public class TChunkIOProvider extends TChunkTask {
             Chunk chunk = this.chunk;
             if (chunk != null) {
                 TQueuedChunk chunkInfo = this.chunkInfo;
-                this.loader.loadEntities(world, this.nbt.getCompoundTag(SStrings.CL_LEVEL), chunk);
+                WorldServer world;
+                this.loader.loadEntities((world = this.world), this.nbt.getCompoundTag(SStrings.CL_LEVEL), chunk);
 
                 MinecraftForge.EVENT_BUS.postF(new ChunkDataEvent.Load(chunk, this.nbt));
 
-                chunk.setLastSaveTime(provider.world.getTotalWorldTime());
-                this.provider.chunkGenerator.recreateStructures(chunk, chunkInfo.x, chunkInfo.z);
+                chunk.setLastSaveTime(world.getTotalWorldTime());
+                ChunkProviderServer provider;
+                (provider = this.provider).chunkGenerator.recreateStructures(chunk, chunkInfo.x, chunkInfo.z);
 
-                world.getChunkProvider().onComplete(this);
+                provider.onComplete(this);
             }
             this.runCallbacks();
         } catch (Throwable throwable){

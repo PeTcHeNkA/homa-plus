@@ -96,7 +96,7 @@ public abstract class EntityLiving extends EntityLivingBase {
     public EntityLiving(World worldIn) {
         super(worldIn);
         this.tasks = new EntityAITasks(worldIn);
-        this.targetTasks = new EntityAITasks(world);
+        this.targetTasks = new EntityAITasks(worldIn);
         this.lookHelper = new EntityLookHelper(this);
         this.moveHelper = new EntityMoveHelper(this);
         this.jumpHelper = new EntityJumpHelper(this);

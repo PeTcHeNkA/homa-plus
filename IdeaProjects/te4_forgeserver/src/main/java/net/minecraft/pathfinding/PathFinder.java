@@ -8,9 +8,8 @@ import net.minecraft.world.IBlockAccess;
 
 
 public class PathFinder {
-    private final PathHeap path = new PathHeap();
-    //private final Set<PathPoint> closedSet = Sets.newHashSet();
-    private final PathPoint[] pathOptions = new PathPoint[32];
+    private PathHeap path;
+    private PathPoint[] pathOptions;
     private final NodeProcessor nodeProcessor;
 
     public PathFinder(NodeProcessor processor) {
@@ -32,7 +31,8 @@ public class PathFinder {
 
     @Nullable
     private Path findPath(IBlockAccess access, EntityLiving entitylivingIn, double x, double y, double z, float maxDistance) {
-        this.path.clearPath();
+        PathHeap heap;
+        if((heap = this.path) != null)heap.clearPath();
         NodeProcessor proc;
         (proc = nodeProcessor).init(access, entitylivingIn);
         Path path = this.findPath(
@@ -51,13 +51,17 @@ public class PathFinder {
         from.distanceToNext = from.distanceManhattan(to);
         from.distanceToTarget = from.distanceToNext;
         PathHeap path;
-        (path = this.path).clearPath();
+        if((path = this.path) != null)path.clearPath();
+        else path = this.path = new PathHeap();
         path.addPointV(from);
 
         PathPoint pathpoint = from, cur;
         int limit = 0;
 
-        final PathPoint[] options = this.pathOptions;
+        PathPoint[] options;
+        if((options = this.pathOptions) == null)
+            options = this.pathOptions = new PathPoint[32];
+
         final NodeProcessor proc = this.nodeProcessor;
 
         while (++limit < 200 && !path.isPathEmpty()) {
