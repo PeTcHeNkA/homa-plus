@@ -78,9 +78,9 @@ import plus.fserver.api.MeanTicker;
 import plus.fserver.api.ElcaWorldServer;
 import plus.fserver.ElcaCV;
 import plus.fserver.entity.EntityCollider;
+import plus.fserver.entity.NavChunkLSECache;
 import plus.fserver.server.chunk.io.TChunkTask;
 import plus.fserver.server.chunk.io.TQueuedChunk;
-import plus.fserver.server.elca.ChunkLSECache;
 import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.collections.ChunkIteratorPro;
 import plus.fserver.utls.collections.EntityIDHashSplitedList;
@@ -126,7 +126,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
     private final ConcurrentHashMap<TQueuedChunk, TChunkTask> _chunkTasks = new ConcurrentHashMap<>();
     private final ConcurrentLinkedQueue<Runnable> _syncTasks = new ConcurrentLinkedQueue<>();
 
-    public final ChunkLSECache navChunkCache;
+    public final NavChunkLSECache navChunkCache;
     private NavUpdateTask navTasks;
     //public final ConcurrentHashMap<Entity, PathFinder.PathGenTask> navTasks = new ConcurrentHashMap<>();
 
@@ -150,7 +150,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         initUnimportant();
         this.playerChunkMap = new PlayerChunkMap(this);
 
-        navChunkCache = new ChunkLSECache(chunkProviderServer, 0,0);
+        navChunkCache = new NavChunkLSECache(chunkProviderServer, 0,0);
 
         if(ElcaConfig.ASYNC_PATHFINDING_DEFAULT){
             setAsyncNavigation(true);
@@ -158,21 +158,46 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
     }
 
 
-    class NavUpdateTask extends ConcurrentLinkedQueue<PathFinder.PathGenTask> implements Runnable{
+    final class NavUpdateTask extends ConcurrentLinkedQueue<PathFinder.PathGenTask> implements Runnable{
         private volatile boolean isActive = false;
-        protected void reRunIfNeed(){
+        private final NavChunkLSECache cache = new NavChunkLSECache(chunkProviderServer, 0, 0);
+        private byte cleanFlags = 0;
+
+        void reRunIfNeed(){
             if(isActive)return;
             if (!super.isEmpty()) {
                 isActive = true;
                 server.ticker().runAsync(this);
+            } else {
+                isActive = true;
+                recheckCleanFlags();
+                isActive = false;
             }
+        }
+
+
+        void shouldClean(boolean all){
+            if(all)cleanFlags = 2;
+            else cleanFlags = 1;
+        }
+
+
+        void recheckCleanFlags(){
+            int flags = this.cleanFlags;
+            if(flags != 0) {
+                navCache.clean(flags == 2);
+            }
+            cleanFlags = 0;
         }
 
 
         @Override
         public void run() {
             try {
-                runTasks(new ChunkLSECache(chunkProviderServer, 0, 0));
+                NavChunkLSECache cache;
+                runTasks(cache = this.cache);
+                cache.cleanAll();
+                recheckCleanFlags();
             } catch (Exception e) {
                 server.ticker().onError(WorldServer.this, e);
             } finally {
@@ -180,12 +205,14 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
             }
         }
 
-        void runTasks(ChunkLSECache cache){
+
+        void runTasks(NavChunkLSECache cache){
             PathFinder.PathGenTask task1 = super.poll();
             while (task1 != null) {
                 task1.complete(cache);
                 task1 = this.poll();
             }
+            cache.rawData = null;
         }
     }
 
@@ -208,7 +235,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         } else {
             NavUpdateTask nav;
             if((nav = this.navTasks) != null){
-                ChunkLSECache cache;
+                NavChunkLSECache cache;
                 nav.runTasks(cache = navChunkCache);
                 cache.cleanAll();
             }
@@ -1430,7 +1457,12 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
                     prevWorldTotalTime % spawnOnSetTickRate == 0L);
         }
         if((timerClean++%ElcaConfig.NAVIGATE_CACHE_CLEAN_RATE)==0){
-            navCache.clean(timerClean%ElcaConfig.NAVIGATE_RESET_RATE ==0);
+            boolean all = timerClean % ElcaConfig.NAVIGATE_RESET_RATE == 0;
+            if(navTasks != null){
+                navTasks.shouldClean(all);
+            } else {
+                navCache.clean(all);
+            }
         }
 
         this.chunkProvider.tick();
@@ -1499,7 +1531,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         playerChunkMap.tick();
 
         if(ElcaConfig.VILLAGE_TICK_RATE!=-1){
-            if(prevWorldTotalTime % ElcaConfig.VILLAGE_TICK_RATE==0) {
+            if(prevWorldTotalTime % ElcaConfig.VILLAGE_TICK_RATE== 0) {
                 this.villageCollection.tick();
                 VillageSiege vsl = villageSiege;
                 if(vsl != null) vsl.tick();
@@ -1846,7 +1878,11 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
 
 
     public void cleanCache(){
-        navCache.clean(true);
+        if(navTasks != null){
+            navTasks.shouldClean(true);
+        } else {
+            navCache.clean(true);
+        }
         chunkProviderServer.chunkGenerator.cleanupCache();
         provider.getBiomeProvider().cleanupCache();
         clearEvents();

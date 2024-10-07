@@ -16,7 +16,7 @@ public class PathNavigateSwimmer extends PathNavigate {
 
     @Override
     protected PathFinder getPathFinder() {
-        return new PathFinder(new SwimNodeProcessor(entity.world));
+        return new PathFinder(new SwimNodeProcessor());
     }
 
 

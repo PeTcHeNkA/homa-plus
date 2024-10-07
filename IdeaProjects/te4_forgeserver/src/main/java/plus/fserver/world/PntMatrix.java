@@ -175,6 +175,7 @@ public class PntMatrix extends Long2ObjectOpenHashMap<PntMatrix.Chunked> {
     }
 
 
+    //should be always sync
     public Chunked getChunked(int x, int z){
         Chunked last;
         if((last = this.last).x == (x>>=4) && last.z == (z>>=4))return last;

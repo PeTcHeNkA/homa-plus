@@ -8,9 +8,8 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
-import plus.fserver.server.elca.ChunkLSECache;
+import plus.fserver.entity.NavChunkLSECache;
 import plus.fserver.world.NavigationCache;
 import plus.fserver.world.PntMatrix;
 import plus.tson.utl.Te4HashSet;
@@ -18,9 +17,6 @@ import plus.tson.utl.Te4HashSet;
 
 public class FlyingNodeProcessor extends WalkNodeProcessor {
     public FlyingNodeProcessor(){}
-    public FlyingNodeProcessor(World world) {
-        super(world);
-    }
 
     public void init(EntityLiving mob) {
         super.init(mob);
@@ -42,8 +38,9 @@ public class FlyingNodeProcessor extends WalkNodeProcessor {
 
 
     @Override
-    public PathPoint getStart(ChunkLSECache access) {
+    public PathPoint getStart(NavChunkLSECache access) {
         int i;
+        BlockPos.MutableBlockPos pooledPos = access.pooledPos;
 
         if (this.getCanSwim() && this.entity.isInWater()) {
             i = (int)this.entity.getEntityBoundingBox().minY;
@@ -90,13 +87,13 @@ public class FlyingNodeProcessor extends WalkNodeProcessor {
 
 
     @Override
-    public PathPoint getPathPointToCoords(ChunkLSECache access, double x, double y, double z) {
+    public PathPoint getPathPointToCoords(NavChunkLSECache access, double x, double y, double z) {
         return super.openPoint(access, MathHelper.floor(x), MathHelper.floor(y), MathHelper.floor(z));
     }
 
 
     @Override
-    public int findPathOptions(ChunkLSECache access, PathPoint[] pathOptions, PathPoint cur, PathPoint target, float maxDistance) {
+    public int findPathOptions(NavChunkLSECache access, PathPoint[] pathOptions, PathPoint cur, PathPoint target, float maxDistance) {
         int i = 0;
         PathPoint pathpoint  = this.openPoint(access, cur.x, cur.y, cur.z + 1);
         PathPoint pathpoint1 = this.openPoint(access, cur.x - 1, cur.y, cur.z);
@@ -227,7 +224,7 @@ public class FlyingNodeProcessor extends WalkNodeProcessor {
 
 
     @Nullable
-    protected PathPoint openPoint(ChunkLSECache access, int x, int y, int z) {
+    protected PathPoint openPoint(NavChunkLSECache access, int x, int y, int z) {
         PathPoint pathpoint = null;
         PathNodeType pathnodetype = this.getPathNodeType(access, this.entity, x, y, z);
         float f = this.entity.getPathPriority(pathnodetype);
@@ -245,24 +242,15 @@ public class FlyingNodeProcessor extends WalkNodeProcessor {
     }
 
 
-    //private static final ThreadLocal<PathNodeType.Set> localSet = ThreadLocal.withInitial(PathNodeType.Set::new);
-
     @Override
-    public PathNodeType getPathNodeType(ChunkLSECache access, int x, int y, int z, EntityLiving entity, int xSize, int ySize, int zSize, boolean canBreakDoorsIn, boolean canEnterDoorsIn) {
-        PathNodeType.Set enumset = localSet.get();
-        enumset.clear();
-        //        PathNodeType.Set enumset;
-//        if(matrix != null){
-//            enumset = matrix.localSet();
-//        } else {
-//            enumset = new PathNodeType.Set();
-//        }
+    public PathNodeType getPathNodeType(NavChunkLSECache access, int x, int y, int z, EntityLiving entity, int xSize, int ySize, int zSize, boolean canBreakDoorsIn, boolean canEnterDoorsIn) {
+        PathNodeType.Set enumset = access.localSet();
 
         PathNodeType pathnodetype = PathNodeType.BLOCKED;
         BlockPos blockpos = new BlockPos(entity);
-        this.currentEntity = entity;
+        access.rawData = entity;
         pathnodetype = this.getPathNodeType(access, x, y, z, xSize, ySize, zSize, canBreakDoorsIn, canEnterDoorsIn, enumset, pathnodetype, blockpos);
-        this.currentEntity = null;
+        access.rawData = null;
 
         if (enumset.contains(PathNodeType.FENCE)) {
             return PathNodeType.FENCE;
@@ -292,7 +280,7 @@ public class FlyingNodeProcessor extends WalkNodeProcessor {
 
 
     @Override
-    public PathNodeType getPathNodeType(ChunkLSECache access, int x, int y, int z) {
+    public PathNodeType getPathNodeType(NavChunkLSECache access, int x, int y, int z) {
         IBlockState state = access.getBlockState(x, y, z);
         PathNodeType pathnodetype = this.getPathNodeTypeRaw(access, state);
 
@@ -316,12 +304,12 @@ public class FlyingNodeProcessor extends WalkNodeProcessor {
     }
 
 
-    private PathNodeType getPathNodeType(ChunkLSECache access, EntityLiving entity, BlockPos pos) {
+    private PathNodeType getPathNodeType(NavChunkLSECache access, EntityLiving entity, BlockPos pos) {
         return this.getPathNodeType(access, entity, pos.getX(), pos.getY(), pos.getZ());
     }
 
 
-    private PathNodeType getPathNodeType(ChunkLSECache access, EntityLiving entity, int x, int y, int z) {
+    private PathNodeType getPathNodeType(NavChunkLSECache access, EntityLiving entity, int x, int y, int z) {
         return this.getPathNodeType(access, x, y, z, entity, this.entitySizeX, this.entitySizeY, this.entitySizeZ, this.getCanOpenDoors(), this.getCanEnterDoors());
     }
 }

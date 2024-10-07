@@ -15,7 +15,7 @@ public class PathNavigateFlying extends PathNavigate {
 
     @Override
     protected PathFinder getPathFinder() {
-        this.nodeProcessor = new FlyingNodeProcessor(entity.world);
+        this.nodeProcessor = new FlyingNodeProcessor();
         this.nodeProcessor.setCanEnterDoors(true);
         return new PathFinder(this.nodeProcessor);
     }

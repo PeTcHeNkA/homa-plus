@@ -8,12 +8,11 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import plus.fserver.api.IBlockEAccess;
-import plus.fserver.server.elca.ChunkLSECache;
+import plus.fserver.entity.NavChunkLSECache;
 import plus.fserver.world.PntMatrix;
 
 
@@ -27,7 +26,7 @@ public class PathNavigateGround extends PathNavigate {
 
     @Override
     protected PathFinder getPathFinder() {
-        NodeProcessor proc = this.nodeProcessor = new WalkNodeProcessor(entity.world);
+        NodeProcessor proc = this.nodeProcessor = new WalkNodeProcessor();
         proc.setCanEnterDoors(true);
         return new PathFinder(proc);
     }
@@ -213,7 +212,7 @@ public class PathNavigateGround extends PathNavigate {
             d1 = d1 * d2;
 
             //todo maybe non-threadsafe
-            ChunkLSECache access = ((WorldServer)entity.world).navChunkCache;
+            NavChunkLSECache access = ((WorldServer)entity.world).navChunkCache;
             PntMatrix matrix = ((WalkNodeProcessor)nodeProcessor).matrix;
             //todo maybe this equal "if false"
             if(matrix == null){
@@ -263,7 +262,7 @@ public class PathNavigateGround extends PathNavigate {
     }
 
 
-    private boolean isSafeToStandAt(ChunkLSECache access, PntMatrix.Chunked chunked, int x, int y, int z, int sizeX, int sizeY, int sizeZ, double vecX, double vecZ, double param, double param2) {
+    private boolean isSafeToStandAt(NavChunkLSECache access, PntMatrix.Chunked chunked, int x, int y, int z, int sizeX, int sizeY, int sizeZ, double vecX, double vecZ, double param, double param2) {
         int dX = x - (sizeX >> 1);
         int dZ = z - (sizeZ >> 1);
 

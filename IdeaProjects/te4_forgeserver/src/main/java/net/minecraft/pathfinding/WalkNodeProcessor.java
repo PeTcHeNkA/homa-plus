@@ -15,25 +15,17 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.IBlockAccess;
-import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
-import plus.fserver.server.elca.ChunkLSECache;
+import plus.fserver.entity.NavChunkLSECache;
 import plus.fserver.world.PntMatrix;
 import plus.tson.utl.Te4HashSet;
 
 
 public class WalkNodeProcessor extends NodeProcessor {
     protected float avoidsWater;
-    protected EntityLiving currentEntity;
     protected PntMatrix matrix;
 
     public WalkNodeProcessor(){}
-
-
-    public WalkNodeProcessor(World world){
-        super(world);
-    }
 
 
     public void init(EntityLiving mob) {
@@ -56,10 +48,10 @@ public class WalkNodeProcessor extends NodeProcessor {
 
 
     @Override
-    public PathPoint getStart(ChunkLSECache access) {
+    public PathPoint getStart(NavChunkLSECache access) {
         int yFactor;
         EntityLiving entity = this.entity;
-        BlockPos.MutableBlockPos pooledPos = this.pooledPos;
+        BlockPos.MutableBlockPos pooledPos = access.pooledPos;
 
         if (this.getCanSwim() && entity.isInWater()) {
             yFactor = (int)entity.getEntityBoundingBox().minY;
@@ -120,7 +112,7 @@ public class WalkNodeProcessor extends NodeProcessor {
     }
 
 
-    private boolean needOpen(ChunkLSECache access, PntMatrix.Chunked chunked, BlockPos pos) {
+    private boolean needOpen(NavChunkLSECache access, PntMatrix.Chunked chunked, BlockPos pos) {
         PathNodeType type;
         if ((type = chunked.getType(pos.getX(), pos.getY(), pos.getZ())) == null) {
             type = this.getPathNodeType(access, this.entity, pos);
@@ -131,13 +123,13 @@ public class WalkNodeProcessor extends NodeProcessor {
 
 
     @Override
-    public PathPoint getPathPointToCoords(ChunkLSECache access, double x, double y, double z) {
+    public PathPoint getPathPointToCoords(NavChunkLSECache access, double x, double y, double z) {
         return this.openPoint(access, MathHelper.floor(x), MathHelper.floor(y), MathHelper.floor(z));
     }
 
 
     @Override
-    public int findPathOptions(ChunkLSECache access, PathPoint[] pathOptions, PathPoint cur, PathPoint target, float maxDistance) {
+    public int findPathOptions(NavChunkLSECache access, PathPoint[] pathOptions, PathPoint cur, PathPoint target, float maxDistance) {
         int i = 0;
         int stepH = 0;
 
@@ -155,7 +147,7 @@ public class WalkNodeProcessor extends NodeProcessor {
 
 
         BlockPos.MutableBlockPos pooledPos;
-        (pooledPos = this.pooledPos).setPosB(cur.x, cur.y-1, cur.z);
+        (pooledPos = access.pooledPos).setPosB(cur.x, cur.y-1, cur.z);
 
         double curY = (double)cur.y - (1.0D - access.getBlockState(pooledPos).getBoundingBox(access, pooledPos).maxY);
         PathPoint pathpoint =  this.getSafePoint(access, chunked, cur.x, cur.y, cur.z + 1, stepH, curY, EnumFacing.SOUTH);
@@ -224,12 +216,12 @@ public class WalkNodeProcessor extends NodeProcessor {
 
 
     @Nullable
-    private PathPoint getSafePoint(ChunkLSECache access, PntMatrix.Chunked chunked, final int x, int y, final int z, final int stepH, final double curY, final EnumFacing facing) {
+    private PathPoint getSafePoint(NavChunkLSECache access, PntMatrix.Chunked chunked, final int x, int y, final int z, final int stepH, final double curY, final EnumFacing facing) {
         PathPoint pathpoint = null;
 
         double num1 = (double)y - (1.0D -
                 access.getBlockState(x, y-1, z).getBoundingBox(
-                        access, pooledPos.setPos(x, y-1, z)).maxY
+                        access, access.pooledPos.setPos(x, y-1, z)).maxY
         );
 
         if (num1 - curY > 1.125D) return null;
@@ -275,7 +267,7 @@ public class WalkNodeProcessor extends NodeProcessor {
 
                         box.expandTo(0.0D,
                                 access.getBlockState(x, y, z)
-                                        .getBoundingBox(access, pooledPos.setPos(x, y, z)).maxY - 0.002D,
+                                        .getBoundingBox(access, access.pooledPos.setPos(x, y, z)).maxY - 0.002D,
                                 0.0D, box);
 
                         if (entity.world.collidesWithAnyBlock(box)) pathpoint = null;
@@ -337,21 +329,15 @@ public class WalkNodeProcessor extends NodeProcessor {
     }
 
 
-    static final ThreadLocal<PathNodeType.Set> localSet = ThreadLocal.withInitial(PathNodeType.Set::new);
 
     @Override
-    public PathNodeType getPathNodeType(ChunkLSECache access, int x, int y, int z, EntityLiving entity, int xSize, int ySize, int zSize, boolean canBreakDoorsIn, boolean canEnterDoorsIn) {
-        PathNodeType.Set enumset = localSet.get();
-        enumset.clear();
-        //if(matrix != null){
-            //enumset = matrix.localSet();
-        //} else {
-            //enumset = new PathNodeType.Set();
-        //}
+    public PathNodeType getPathNodeType(NavChunkLSECache access, int x, int y, int z, EntityLiving entity, int xSize, int ySize, int zSize, boolean canBreakDoorsIn, boolean canEnterDoorsIn) {
+        PathNodeType.Set enumset = access.localSet();
+
         PathNodeType pathnodetype = PathNodeType.BLOCKED;
-        this.currentEntity = entity;
+        access.rawData = entity;
         pathnodetype = this.getPathNodeType(access, x, y, z, xSize, ySize, zSize, canBreakDoorsIn, canEnterDoorsIn, enumset, pathnodetype, entity.world.localTempPos3.setPos(entity));
-        this.currentEntity = null;
+        access.rawData = null;
 
         if (enumset.contains(PathNodeType.FENCE)) {
             return PathNodeType.FENCE;
@@ -375,7 +361,7 @@ public class WalkNodeProcessor extends NodeProcessor {
     }
 
 
-    public PathNodeType getPathNodeType(final ChunkLSECache access, int x, int y, int z, int xSize, int ySize, int zSize, boolean canOpenDoorsIn, boolean canEnterDoorsIn, PathNodeType.Set types, PathNodeType type, BlockPos pos) {
+    public PathNodeType getPathNodeType(final NavChunkLSECache access, int x, int y, int z, int xSize, int ySize, int zSize, boolean canOpenDoorsIn, boolean canEnterDoorsIn, PathNodeType.Set types, PathNodeType type, BlockPos pos) {
         PathNodeType nodeType;
         int stepX = xSize>1?2:1;
         int stepZ = zSize>1?2:1;
@@ -400,23 +386,23 @@ public class WalkNodeProcessor extends NodeProcessor {
     }
 
 
-    private PathNodeType getPathNodeType(ChunkLSECache access, EntityLiving entity, BlockPos pos) {
+    private PathNodeType getPathNodeType(final NavChunkLSECache access, EntityLiving entity, BlockPos pos) {
         return this.getPathNodeType(access, entity, pos.getX(), pos.getY(), pos.getZ());
     }
 
 
-    private PathNodeType getPathNodeType(ChunkLSECache access, EntityLiving entity, int x, int y, int z) {
+    private PathNodeType getPathNodeType(final NavChunkLSECache access, EntityLiving entity, int x, int y, int z) {
         return this.getPathNodeType(access, x, y, z, entity, this.entitySizeX & 255, this.entitySizeY & 255, this.entitySizeZ & 255, this.getCanOpenDoors(), this.getCanEnterDoors());
     }
 
 
     @Override
-    public PathNodeType getPathNodeType(final ChunkLSECache access, int x, int y, int z) {
+    public PathNodeType getPathNodeType(final NavChunkLSECache access, int x, int y, int z) {
         IBlockState state = access.getBlockState(x, y, z);
-        PathNodeType raw = this.getPathNodeTypeRaw(access, state);
+        PathNodeType raw = getPathNodeTypeRaw(access, state);
         if (raw == PathNodeType.OPEN && y >= 1) {
             state = access.getBlockState(x, y - 1, z);
-            PathNodeType raw2 = this.getPathNodeTypeRaw(access, state);
+            PathNodeType raw2 = getPathNodeTypeRaw(access, state);
             raw = raw2 != PathNodeType.WALKABLE && raw2 != PathNodeType.OPEN && raw2 != PathNodeType.WATER && raw2 != PathNodeType.LAVA ? PathNodeType.WALKABLE : PathNodeType.OPEN;
 
             if (raw2 == PathNodeType.DAMAGE_FIRE || state.getBlock() == Blocks.MAGMA) raw = PathNodeType.DAMAGE_FIRE;
@@ -427,17 +413,17 @@ public class WalkNodeProcessor extends NodeProcessor {
     }
 
 
-    public PathNodeType checkNeighborBlocks(IBlockAccess access, int x, int y, int z, PathNodeType nodeType) {
+    public PathNodeType checkNeighborBlocks(NavChunkLSECache access, int x, int y, int z, PathNodeType nodeType) {
         if (nodeType == PathNodeType.WALKABLE) {
             IBlockState state;
             Block block;
             PathNodeType type;
-            final BlockPos.MutableBlockPos pooledPos = this.pooledPos;
+            final BlockPos.MutableBlockPos pooledPos = access.pooledPos;
             for (int i = -1; i <= 1; ++i) {
                 for (int j = -1; j <= 1; ++j) {
                     if (i != 0 || j != 0) {
                         state = access.getBlockState(pooledPos.setPos(i + x, y, j + z));
-                        type = (block = state.getBlock()).getAiPathNodeType(state, access, pooledPos, this.currentEntity);
+                        type = (block = state.getBlock()).getAiPathNodeType(state, access, pooledPos, (EntityLiving)access.rawData);
                         if (block == Blocks.CACTUS || type == PathNodeType.DAMAGE_CACTUS)  nodeType = PathNodeType.DANGER_CACTUS;
                         else if (block == Blocks.FIRE || type == PathNodeType.DAMAGE_FIRE) nodeType = PathNodeType.DANGER_FIRE;
                         else if (type == PathNodeType.DAMAGE_OTHER)                        nodeType = PathNodeType.DANGER_OTHER;
@@ -449,9 +435,9 @@ public class WalkNodeProcessor extends NodeProcessor {
     }
 
 
-    protected PathNodeType getPathNodeTypeRaw(IBlockAccess access, IBlockState state) {
+    protected static PathNodeType getPathNodeTypeRaw(NavChunkLSECache access, IBlockState state) {
         Block block = state.getBlock();
-        PathNodeType type = block.getAiPathNodeType(state, access, pooledPos, this.currentEntity);
+        PathNodeType type = block.getAiPathNodeType(state, access, access.pooledPos, (EntityLiving)access.rawData);
         if (type != null) return type;
         Material material = state.getMaterial();
 
@@ -485,7 +471,7 @@ public class WalkNodeProcessor extends NodeProcessor {
                 } else if (material == Material.LAVA) {
                     return PathNodeType.LAVA;
                 } else {
-                    return block.isPassable(access, pooledPos) ? PathNodeType.OPEN : PathNodeType.BLOCKED;
+                    return block.isPassable(access, access.pooledPos) ? PathNodeType.OPEN : PathNodeType.BLOCKED;
                 }
             } else {
                 return PathNodeType.FENCE;

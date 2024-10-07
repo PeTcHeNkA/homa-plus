@@ -1,19 +1,12 @@
 package net.minecraft.pathfinding;
 
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.IBlockAccess;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
-import plus.fserver.api.IBlockEAccess;
-import plus.fserver.server.elca.ChunkLSECache;
+import plus.fserver.entity.NavChunkLSECache;
 import plus.fserver.utls.collections.PointHashMap;
 
 
 public abstract class NodeProcessor extends PointHashMap{
-    protected final BlockPos.MutableBlockPos pooledPos;
-    //protected ChunkLSECache blockaccess;
     protected EntityLiving entity;
     protected byte entitySizeX;
     protected byte entitySizeY;
@@ -22,19 +15,7 @@ public abstract class NodeProcessor extends PointHashMap{
     protected boolean canOpenDoors;
     protected boolean canSwim;
 
-    public NodeProcessor(){
-        pooledPos = new BlockPos.MutableBlockPos();
-    }
-
-
-    public NodeProcessor(IBlockAccess sourceIn){
-        World world = sourceIn.getWorld();
-        if(world != null && !world.isRemote){
-            pooledPos = ((WorldServer)world).navPooledPos;
-        } else {
-            pooledPos = new BlockPos.MutableBlockPos();
-        }
-    }
+    public NodeProcessor(){}
 
 
     public void init(EntityLiving mob) {
@@ -51,7 +32,7 @@ public abstract class NodeProcessor extends PointHashMap{
     }
 
 
-    protected PathPoint openPoint(ChunkLSECache access, int x, int y, int z) {
+    protected PathPoint openPoint(NavChunkLSECache access, int x, int y, int z) {
         int hash;
         PathPoint point;
         if ((point = super.lookup(
@@ -68,19 +49,19 @@ public abstract class NodeProcessor extends PointHashMap{
     }
 
 
-    public abstract PathPoint getStart(ChunkLSECache access);
+    public abstract PathPoint getStart(NavChunkLSECache access);
 
 
-    public abstract PathPoint getPathPointToCoords(ChunkLSECache access, double x, double y, double z);
+    public abstract PathPoint getPathPointToCoords(NavChunkLSECache access, double x, double y, double z);
 
 
-    public abstract int findPathOptions(ChunkLSECache access, PathPoint[] pathOptions, PathPoint currentPoint, PathPoint targetPoint, float maxDistance);
+    public abstract int findPathOptions(NavChunkLSECache access, PathPoint[] pathOptions, PathPoint currentPoint, PathPoint targetPoint, float maxDistance);
 
 
-    public abstract PathNodeType getPathNodeType(ChunkLSECache access, int x, int y, int z, EntityLiving entitylivingIn, int xSize, int ySize, int zSize, boolean canBreakDoorsIn, boolean canEnterDoorsIn);
+    public abstract PathNodeType getPathNodeType(NavChunkLSECache access, int x, int y, int z, EntityLiving entitylivingIn, int xSize, int ySize, int zSize, boolean canBreakDoorsIn, boolean canEnterDoorsIn);
 
 
-    public abstract PathNodeType getPathNodeType(ChunkLSECache access, int x, int y, int z);
+    public abstract PathNodeType getPathNodeType(NavChunkLSECache access, int x, int y, int z);
 
 
     public void setCanEnterDoors(boolean canEnterDoorsIn) {

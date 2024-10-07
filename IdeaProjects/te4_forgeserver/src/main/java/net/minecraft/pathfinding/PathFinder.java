@@ -5,7 +5,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
-import plus.fserver.server.elca.ChunkLSECache;
+import plus.fserver.entity.NavChunkLSECache;
 import java.util.function.Consumer;
 
 
@@ -21,7 +21,7 @@ public class PathFinder {
 
 
     @Nullable
-    public Path findPath(ChunkLSECache cache, EntityLiving entity, Entity target, float maxDistance) {
+    public Path findPath(NavChunkLSECache cache, EntityLiving entity, Entity target, float maxDistance) {
         return this.findPath(cache, entity, target.posX, target.getEntityBoundingBox().minY, target.posZ, maxDistance);
     }
 
@@ -35,7 +35,7 @@ public class PathFinder {
 
 
     @Nullable
-    public Path findPath(ChunkLSECache cache, EntityLiving entitylivingIn, BlockPos targetPos, float maxDistance) {
+    public Path findPath(NavChunkLSECache cache, EntityLiving entitylivingIn, BlockPos targetPos, float maxDistance) {
         return this.findPath(cache, entitylivingIn, 0.5d+targetPos.getX(), 0.5d+targetPos.getY(), 0.5d+targetPos.getZ(), maxDistance);
     }
 
@@ -49,7 +49,7 @@ public class PathFinder {
 
 
     @Nullable
-    private Path findPath(ChunkLSECache access, EntityLiving entity, double x, double y, double z, float maxDistance) {
+    private Path findPath(NavChunkLSECache access, EntityLiving entity, double x, double y, double z, float maxDistance) {
         if(calculating)return null;
         Path path = null;
         try {
@@ -88,7 +88,7 @@ public class PathFinder {
         }
 
 
-        public void complete(ChunkLSECache access){
+        public void complete(NavChunkLSECache access){
             Path path = findPath(access, entitylivingIn, x, y, z, maxDistance);
             callBack.accept(path);
         }
@@ -96,7 +96,7 @@ public class PathFinder {
 
 
     @Nullable
-    private Path findPath(ChunkLSECache access, PathPoint from, PathPoint to, float maxDistance) {
+    private Path findPath(NavChunkLSECache access, PathPoint from, PathPoint to, float maxDistance) {
         from.totalPathDistance = 0.0F;
         from.distanceToNext = from.distanceManhattan(to);
         from.distanceToTarget = from.distanceToNext;

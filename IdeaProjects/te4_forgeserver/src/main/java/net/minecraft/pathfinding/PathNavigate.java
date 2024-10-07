@@ -1,7 +1,6 @@
 package net.minecraft.pathfinding;
 
 import javax.annotation.Nullable;
-
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -15,10 +14,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import plus.fserver.ElcaCV;
 import plus.fserver.api.IBlockEAccess;
-import plus.fserver.server.elca.ChunkLSECache;
 import plus.fserver.utls.math.MathUtls;
-
-import java.util.function.Consumer;
 
 
 public abstract class PathNavigate {

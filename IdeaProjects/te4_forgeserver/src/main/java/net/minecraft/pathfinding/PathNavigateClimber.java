@@ -10,48 +10,65 @@ import net.minecraft.world.World;
 public class PathNavigateClimber extends PathNavigateGround {
     private BlockPos targetPosition;
 
-    public PathNavigateClimber(EntityLiving p_i45874_1_, World p_i45874_2_) {
-        super(p_i45874_1_, p_i45874_2_);
+    public PathNavigateClimber(EntityLiving living, World world) {
+        super(living, world);
     }
 
 
-    public Path getPathToPos(BlockPos p_179680_1_) {
-        this.targetPosition = p_179680_1_;
-        return super.getPathToPos(p_179680_1_);
+    @Override
+    public Path getPathToPos(BlockPos pos) {
+        this.targetPosition = pos;
+        return super.getPathToPos(pos);
     }
 
 
-    public Path getPathToEntityLiving(Entity p_75494_1_) {
-        this.targetPosition = new BlockPos(p_75494_1_);
-        return super.getPathToEntityLiving(p_75494_1_);
+    @Override
+    public Path getPathToEntityLiving(Entity entity) {
+        this.targetPosition = new BlockPos(entity);
+        return super.getPathToEntityLiving(entity);
     }
 
 
-    public boolean tryMoveToEntityLiving(Entity p_75497_1_, double p_75497_2_) {
-        Path lvt_4_1_ = this.getPathToEntityLiving(p_75497_1_);
-        if (lvt_4_1_ != null) {
-            return this.setPath(lvt_4_1_, p_75497_2_);
+    @Override
+    public boolean tryMoveToEntityLiving(Entity entity, double speed) {
+        Path path = this.getPathToEntityLiving(entity);
+        if (path != null) {
+            return this.setPath(path, speed);
         } else {
-            this.targetPosition = new BlockPos(p_75497_1_);
-            this.speed = p_75497_2_;
+            BlockPos tp = this.targetPosition;
+            if(tp != null){
+                BlockPos.unsafeEdit(tp,
+                        MathHelper.floor(entity.posX),
+                        MathHelper.floor(entity.posY),
+                        MathHelper.floor(entity.posZ)
+                );
+            } else {
+                this.targetPosition = new BlockPos(entity);
+            }
+            this.speed = speed;
             return true;
         }
     }
 
 
+    @Override
     public void onUpdateNavigation() {
         if (!this.noPath()) {
             super.onUpdateNavigation();
         } else {
-            if (this.targetPosition != null) {
-                double lvt_1_1_ = this.entity.width * this.entity.width;
-                if (!(this.entity.getDistanceSqToCenter(this.targetPosition) < lvt_1_1_) && (!(this.entity.posY > (double)this.targetPosition.getY()) || !(this.entity.getDistanceSqToCenter(new BlockPos(this.targetPosition.getX(), MathHelper.floor(this.entity.posY), this.targetPosition.getZ())) < lvt_1_1_))) {
-                    this.entity.getMoveHelper().setMoveTo(this.targetPosition.getX(), this.targetPosition.getY(), (double)this.targetPosition.getZ(), this.speed);
+            BlockPos targetPosition;
+            if ((targetPosition = this.targetPosition) != null) {
+                EntityLiving entity = this.entity;
+
+                double widthSq = entity.width * entity.width;
+                if (!(entity.getDistanceSqToCenter(targetPosition) < widthSq) && (!(entity.posY > (double)targetPosition.getY()) ||
+                        !(entity.getDistanceSqToCenter(new BlockPos(targetPosition.getX(), MathHelper.floor(entity.posY), targetPosition.getZ())) < widthSq))) {
+
+                    entity.getMoveHelper().setMoveTo(targetPosition.getX(), targetPosition.getY(), targetPosition.getZ(), this.speed);
                 } else {
                     this.targetPosition = null;
                 }
             }
-
         }
     }
 }
