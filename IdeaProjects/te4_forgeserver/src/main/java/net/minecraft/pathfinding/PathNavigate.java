@@ -12,10 +12,13 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import plus.fserver.ElcaCV;
 import plus.fserver.api.IBlockEAccess;
-import plus.fserver.server.elca.ChunkLCache;
+import plus.fserver.server.elca.ChunkLSECache;
 import plus.fserver.utls.math.MathUtls;
+
+import java.util.function.Consumer;
 
 
 public abstract class PathNavigate {
@@ -82,9 +85,11 @@ public abstract class PathNavigate {
 
     @Nullable
     public final Path getPathToXYZ(double x, double y, double z) {
+        Path path;
+        if((path = this.currentPath) == Path.WAITING)return null;
         if (!this.canNavigate()) return null;
-        else if (this.currentPath != null && !this.currentPath.isFinished() && targetPos != null && isNear(targetPos, x, y, z))
-            return this.currentPath;
+        else if (path != null && !path.isFinished() && targetPos != null && isNear(targetPos, x, y, z))
+            return path;
         else {
             BlockPos targetPos;
             if((targetPos = this.targetPos) == null) {
@@ -92,25 +97,37 @@ public abstract class PathNavigate {
             } else {
                 BlockPos.unsafeEdit(targetPos, MathHelper.floor(x), MathHelper.floor(y), MathHelper.floor(z));
             }
-            EntityLiving entity;
-            ChunkLCache bigLocalCache = (entity = this.entity).world.bigLocalCache;
-            bigLocalCache.init(entity);
-            return this.pathFinder.findPath(bigLocalCache, entity, targetPos, this.getPathSearchRange());
+
+            WorldServer world;
+            if((world = (WorldServer)entity.world).useAsyncNavigation()) {
+                this.currentPath = Path.WAITING;
+                this.pathFinder.findPath(entity, targetPos, this.getPathSearchRange(), path1 -> currentPath = path1);
+                return null;
+            } else {
+                return pathFinder.findPath(world.navChunkCache, entity, targetPos, this.getPathSearchRange());
+            }
         }
     }
 
 
     @Nullable
     public Path getPathToPos(BlockPos pos) {
+        Path path;
+        if((path = this.currentPath) == Path.WAITING)return null;
         if (!this.canNavigate()) return null;
-        else if (this.currentPath != null && !this.currentPath.isFinished() && targetPos != null && isNear(pos, targetPos))
-            return this.currentPath;
+        else if (path != null && !path.isFinished() && targetPos != null && isNear(pos, targetPos))
+            return path;
         else {
             this.targetPos = pos;
-            EntityLiving entity;
-            ChunkLCache bigLocalCache = (entity = this.entity).world.bigLocalCache;
-            bigLocalCache.init(entity);
-            return this.pathFinder.findPath(bigLocalCache, entity, pos, this.getPathSearchRange());
+
+            WorldServer world;
+            if((world = (WorldServer)entity.world).useAsyncNavigation()) {
+                this.currentPath = Path.WAITING;
+                this.pathFinder.findPath(entity, pos, this.getPathSearchRange(), path1 -> currentPath = path1);
+                return null;
+            } else {
+                return this.pathFinder.findPath(world.navChunkCache, entity, pos, this.getPathSearchRange());
+            }
         }
     }
 
@@ -133,13 +150,13 @@ public abstract class PathNavigate {
 
     @Nullable
     public Path getPathToEntityLiving(Entity entityIn) {
+        Path path;
+        if((path = this.currentPath) == Path.WAITING)return null;
         if (!this.canNavigate()) return null;
         else {
-            if (this.currentPath != null && !this.currentPath.isFinished() && isNear(targetPos, entityIn.posX, entityIn.posY, entityIn.posZ)) return this.currentPath;
+            if (path != null && !path.isFinished() && isNear(targetPos, entityIn.posX, entityIn.posY, entityIn.posZ)) return this.currentPath;
             else {
-                EntityLiving entity;
-                ChunkLCache bigLocalCache = (entity = this.entity).world.bigLocalCache;
-                bigLocalCache.init(entity);
+                EntityLiving entity = this.entity;
                 BlockPos targetPos;
                 if((targetPos = this.targetPos) == null) {
                     this.targetPos = new BlockPos(entityIn);
@@ -151,7 +168,15 @@ public abstract class PathNavigate {
                             MathHelper.floor(entity.posZ)
                     );
                 }
-                return this.pathFinder.findPath(bigLocalCache, entity, entityIn, this.getPathSearchRange());
+
+                WorldServer world;
+                if((world = (WorldServer)entity.world).useAsyncNavigation()) {
+                    this.currentPath = Path.WAITING;
+                    this.pathFinder.findPath(entity, entityIn, this.getPathSearchRange(), path1 -> currentPath = path1);
+                    return null;
+                } else {
+                    return this.pathFinder.findPath(world.navChunkCache, entity, entityIn, this.getPathSearchRange());
+                }
             }
         }
     }
@@ -190,7 +215,9 @@ public abstract class PathNavigate {
 
     @Nullable
     public Path getPath() {
-        return this.currentPath;
+        Path path;
+        if((path = this.currentPath) == Path.WAITING)return null;
+        return path;
     }
 
 

@@ -479,8 +479,8 @@ public class Int2ObjectMap<V> extends AbstractInt2ObjectMap<V> implements java.i
 	}
 
 	public boolean containsValue(final Object v) {
-		final V value[] = this.value;
-		final int key[] = this.key;
+		final V[] value = this.value;
+		final int[] key = this.key;
 		if (containsNullKey && ((value[n]) == null ? (v) == null : (value[n]).equals(v))) return true;
 		for (int i = n; i-- != 0;)
 			if (!((key[i]) == (0)) && ((value[i]) == null ? (v) == null : (value[i]).equals(v))) return true;

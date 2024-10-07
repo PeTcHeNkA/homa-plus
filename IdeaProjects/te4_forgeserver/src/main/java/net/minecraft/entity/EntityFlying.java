@@ -24,14 +24,14 @@ public abstract class EntityFlying extends EntityLiving {
     public void travel(final float strafe, final float vertical, final float forward) {
         if (this.isInWater()) {
             this.moveRelative(strafe, vertical, forward, 0.02f);
-            this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ, () -> {
+            this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ, () -> {//thread-safe
                 this.motionX *= 0.800000011920929;
                 this.motionY *= 0.800000011920929;
                 this.motionZ *= 0.800000011920929;
             });
         } else if (this.isInLava()) {
             this.moveRelative(strafe, vertical, forward, 0.02f);
-            this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ, () -> {
+            this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ, () -> {//thread-safe
                 this.motionX *= 0.5;
                 this.motionY *= 0.5;
                 this.motionZ *= 0.5;
@@ -54,7 +54,7 @@ public abstract class EntityFlying extends EntityLiving {
                 f = underState2.getBlock().getSlipperiness(underState2, world.access(), underPos2, this) * 0.91f;
             }
             float finalF = f;
-            this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ, () -> {
+            this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ, () -> {//thread-safe
                 this.motionX *= finalF;
                 this.motionY *= finalF;
                 this.motionZ *= finalF;

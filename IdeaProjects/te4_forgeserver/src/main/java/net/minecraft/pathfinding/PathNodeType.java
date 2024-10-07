@@ -72,6 +72,7 @@ public enum PathNodeType {
             return ((items >> type.id) & 1) == 1;
         }
 
+
         @NotNull
         @Override
         public Iterator<PathNodeType> iterator() {

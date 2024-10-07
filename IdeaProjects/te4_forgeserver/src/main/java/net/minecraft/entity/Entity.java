@@ -940,7 +940,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
     }
 
 
-    public void completeMove(AABBList boxes, double x, double y, double z){
+    public void completeMove(ChunkSelector selector, BlockPos.MutableBlockPos mut, AxisAlignedBB tempAABB, AABBList boxes, double x, double y, double z){
         World world = this.world;
         final int bSize = boxes.sizeC();
         final AxisAlignedBB[] rawBoxes = boxes.raw();
@@ -979,11 +979,9 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
             flag = true;
         }
 
-        AxisAlignedBB prev = world.commonWorldEntityAABB;
-        prev.initSafe(
-                axisalignedbb.minX, axisalignedbb.minY, axisalignedbb.minZ,
-                axisalignedbb.maxX, axisalignedbb.maxY, axisalignedbb.maxZ
-        );
+        double prevMinX = axisalignedbb.minX, prevMinY = axisalignedbb.minY, prevMinZ = axisalignedbb.minZ,
+               prevMaxX = axisalignedbb.maxX, prevMaxY = axisalignedbb.maxY, prevMaxZ = axisalignedbb.maxZ;
+
         if(flag) {
             axisalignedbb.offsetMut(x, y, z);
         }
@@ -1000,7 +998,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
             y = this.stepHeight;
 
             final AxisAlignedBB aab2 = this.getEntityBoundingBox();
-            aab2.expandTo(dx1, 0.0D, dz1, axisalignedbb = world.commonWorldEntityAABB2);
+            aab2.expandTo(dx1, 0.0D, dz1, axisalignedbb = tempAABB);
             double d8 = y;
             temp = 0;
 
@@ -1062,8 +1060,8 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
                 z = dz2;
 
                 this.getEntityBoundingBox().initSafe(
-                        prev.minX, prev.minY, prev.minZ,
-                        prev.maxX, prev.maxY, prev.maxZ
+                        prevMinX, prevMinY, prevMinZ,
+                        prevMaxX, prevMaxY, prevMaxZ
                 );
             } else {
                 this.getEntityBoundingBox().offsetMut(0.0D, y, 0.0D);
@@ -1074,22 +1072,21 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         this.onGround = (this.collidedVertically = dy1 != y) && dy1 < 0.0D;
         this.collided = (this.collidedHorizontally = dx1 != x || dz1 != z) || this.collidedVertically;
 
-        BlockPos.MutableBlockPos pos;
-        IBlockState state = world.localSelector.getState(
-                pos = world.localTempPos.setPos(this.posX, this.posY - 0.20000000298023224D, this.posZ)
+        IBlockState state = selector.getState(
+                mut.setPos(this.posX, this.posY - 0.20000000298023224D, this.posZ)
         );
 
         if (state.getMaterial() == Material.AIR) {
-            IBlockState state1 = world.localSelector.getBlockState(pos.getX(), pos.getY()-1, pos.getZ());
+            IBlockState state1 = selector.getBlockState(mut.getX(), mut.getY()-1, mut.getZ());
             Block block1 = state1.getBlock();
 
             if (block1 instanceof BlockFence || block1 instanceof BlockWall || block1 instanceof BlockFenceGate) {
                 state = state1;
-                pos.setY(pos.getY()-1);
+                mut.setY(mut.getY()-1);
             }
         }
 
-        this.updateFallState(y, this.onGround, state, pos);
+        this.updateFallState(y, this.onGround, state, mut);
 
         if (dx1 != x) this.motionX = 0.0D;
         if (dz1 != z) this.motionZ = 0.0D;
@@ -1103,7 +1100,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
             dy2 = block == Blocks.LADDER ? this.posY - dy0 : 0;
             dz2 = this.posZ - dz0;
 
-            if (this.onGround) block.onEntityWalk(world, pos, this);
+            if (this.onGround) block.onEntityWalk(world, mut, this);
 
 
             this.distanceWalkedModified = (float)((double)this.distanceWalkedModified + (double)MathHelper.sqrt(dx2 * dx2 + dz2 * dz2) * 0.6D);
@@ -1120,7 +1117,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
                     if (f1 > 1.0F) f1 = 1.0F;
 
                     this.playSound(entity1.getSwimSound(), f1, 1.0F + (this.rand.nextFloat() - this.rand.nextFloat()) * 0.4F);
-                } else this.playStepSound(pos, block);
+                } else this.playStepSound(mut, block);
 
             } else if (this.distanceWalkedOnStepModified > this.nextFlap && this.makeFlySound() && state.getMaterial() == Material.AIR)
                 this.nextFlap = this.playFlySound(this.distanceWalkedOnStepModified);
@@ -1138,7 +1135,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
         this.getEntityBoundingBox().growTo(-0.001D,-0.001D,-0.001D, axisalignedbb = world.commonWorldEntityAABB);
 
-        if (world.isFlammableWithin(axisalignedbb)) {
+        if (World.isFlammableWithin(selector, mut, axisalignedbb)) {
             this.dealFireDamage(1);
             if (!flag) {
                 ++this.fire;

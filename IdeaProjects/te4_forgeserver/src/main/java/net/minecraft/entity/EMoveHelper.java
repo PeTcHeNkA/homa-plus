@@ -10,6 +10,7 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.ChunkProviderServer;
 import plus.fserver.ElcaConfig;
+import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.collections.AABBList;
 import plus.tson.utl.Te4HashSet;
 import java.util.Arrays;
@@ -110,13 +111,13 @@ public class EMoveHelper {
     }
 
 
-    public static class MoveTask extends AABBList{
+    public static final class MoveTask extends AABBList{
         final AxisAlignedBB moveBox = new AxisAlignedBB(0,0,0,0,0,0);
         Entity entity;
         double x, y, z;
         Runnable future;
 
-        public MoveTask init(Entity entity, Runnable future, double x, double y, double z){
+        MoveTask init(Entity entity, Runnable future, double x, double y, double z){
             this.entity = entity;
             super.fclear();
             this.x = x; this.y = y; this.z = z;
@@ -125,29 +126,37 @@ public class EMoveHelper {
         }
 
 
-        public void addBox(AxisAlignedBB box){
-            AxisAlignedBB prev = getSafe(size);
+        void addBox(AxisAlignedBB box){
+            int size;
+            AxisAlignedBB[] data;
+            AxisAlignedBB prev;
+            if((size = this.size) >= (data = this.data).length)
+                prev = null;
+            else
+                prev = data[size];
+
             if(prev == null) {
                 prev = new AxisAlignedBB(
                         box.minX, box.minY, box.minZ,
                         box.maxX, box.maxY, box.maxZ
                 );
-                super.addF(prev);
+                if(data.length<=size)data = this.data = newArrayAuto();
+                data[this.size++] = prev;
             } else {
                 prev.init(
                         box.minX, box.minY, box.minZ,
                         box.maxX, box.maxY, box.maxZ
                 );
-                ++size;
+                ++this.size;
             }
         }
 
 
-        public void complete(){
+        void complete(ChunkSelector selector, BlockPos.MutableBlockPos mut, AxisAlignedBB tempAABB){
             Entity entity = this.entity;
             WorldServer world;
-            (world =((WorldServer)entity.world)).getCollisionBoxesFalse(entity, moveBox, this);
-            entity.completeMove(this, x, y, z);
+            (world =((WorldServer)entity.world)).getCollisionBoxesFast(selector, mut, entity, moveBox, this);
+            entity.completeMove(selector, mut, tempAABB, this, x, y, z);
             Runnable future;
             if((future = this.future) != null){
                 if(future == COMMON_FUTURE)entity.completeCommon();
@@ -165,13 +174,8 @@ public class EMoveHelper {
 
     public static class ComboCollideTask extends BlockPos.MutableBlockPos{
         private final Te4HashSet<BlockPos.MutableBlockPos> allUpdate = new Te4HashSet<>();
-        private final WorldServer world;
         private BlockPos.MutableBlockPos[] temp = new MutableBlockPos[12];
         private int tempSize = 0;
-
-        public ComboCollideTask(WorldServer world) {
-            this.world = world;
-        }
 
         public void add(Entity entity){
             setPosB(entity.chunkCoordX, entity.chunkCoordY, entity.chunkCoordZ);
@@ -188,18 +192,21 @@ public class EMoveHelper {
         }
 
 
-        public void complete(){
+        public void complete(ChunkSelector selector, BlockPos.MutableBlockPos mut, AxisAlignedBB tempAABB){
             if(allUpdate.isEmpty())return;
-            ChunkProviderServer server = world.chunkProviderServer;
+            ChunkProviderServer provider = selector.provider();
 
             BlockPos.MutableBlockPos[] temp = this.temp;
             int tempSize = this.tempSize;
 
             for (BlockPos.MutableBlockPos pos: allUpdate){
-                Chunk chunk = server.getLoadedChunk(pos.getX(), pos.getZ());
+                Chunk chunk = provider.getLoadedChunk(pos.getX(), pos.getZ());
                 if(chunk != null) {
                     ClassInheritanceMultiMap<Entity> list = chunk.getEntityLists()[pos.getY()];
-                    if(list != null) completeMoveTasks(list);
+                    if(list != null) {
+                        selector.setChunk(chunk);
+                        completeMoveTasks(selector, mut, tempAABB, list);
+                    }
                 }
                 if(tempSize == temp.length){
                     BlockPos.MutableBlockPos[] newTemp = new MutableBlockPos[temp.length+4];
@@ -213,10 +220,12 @@ public class EMoveHelper {
         }
 
 
-        private static void completeMoveTasks(ClassInheritanceMultiMap<Entity> list) {
+        private static void completeMoveTasks(ChunkSelector selector, BlockPos.MutableBlockPos mut, AxisAlignedBB tempAABB, ClassInheritanceMultiMap<Entity> list) {
             int size;
             if ((size = list.sizeC()) < 2) return;
             Entity[] arr = list.raw();
+
+            //AxisAlignedBB tempAABB = this.tempAABB;
             //fix out of index exception when list modified in other thread
             size = Math.min(size, arr.length-1);
             for (int i = 0; i < size; i++) {
@@ -252,7 +261,7 @@ public class EMoveHelper {
                         }
                     }
                 }
-                curTask.complete();
+                curTask.complete(selector, mut, tempAABB);
             }
         }
     }

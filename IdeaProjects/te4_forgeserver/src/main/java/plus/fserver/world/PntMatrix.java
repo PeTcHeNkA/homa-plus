@@ -1,28 +1,25 @@
 package plus.fserver.world;
 
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.pathfinding.PathNodeType;
-import plus.fserver.utls.collections.FlatMap;
+import net.minecraft.util.math.ChunkPos;
 import java.util.Arrays;
 import static net.minecraft.pathfinding.PathNodeType.TYPES;
 
 
-public class PntMatrix extends FlatMap<PntMatrix.Chunked> {
+public class PntMatrix extends Long2ObjectOpenHashMap<PntMatrix.Chunked> {
     private Chunked last = new Chunked(null, Integer.MIN_VALUE, Integer.MIN_VALUE);
-    private final PathNodeType.Set localSet;
+    //private final PathNodeType.Set localSet;
 
-    public PntMatrix(int size, PathNodeType.Set localSet){
+    public PntMatrix(int size){
         super(size);
-        this.localSet = localSet;
-    }
-
-
-    public PntMatrix(PathNodeType.Set localSet){
-        this(64, localSet);
+        //this.localSet = localSet;
     }
 
 
     public PntMatrix(){
-        this(new PathNodeType.Set());
+        this(64);
+        //this(new PathNodeType.Set());
     }
 
 
@@ -168,7 +165,7 @@ public class PntMatrix extends FlatMap<PntMatrix.Chunked> {
 
 
     public void clean(){
-        forEach(Chunked::clean);
+        for (Chunked chunked : values()) chunked.clean();
     }
 
 
@@ -179,21 +176,23 @@ public class PntMatrix extends FlatMap<PntMatrix.Chunked> {
 
 
     public Chunked getChunked(int x, int z){
-        if(last.x == (x>>=4) && last.z == (z>>=4))return last;
-        return last = getChunked0(x, z);
+        Chunked last;
+        if((last = this.last).x == (x>>=4) && last.z == (z>>=4))return last;
+        return this.last = getChunked0(x, z);
     }
 
 
     Chunked getChunked0(int x, int z){
-        Chunked res = super.get(x, z);
-        if(res == null)super.put(x, z, res = new Chunked(this, x, z));
+        long key;
+        Chunked res = super.get(key = ChunkPos.asLong(x, z));
+        if(res == null)super.put(key, res = new Chunked(this, x, z));
         return res;
     }
-
-
-    public PathNodeType.Set localSet(){
-        PathNodeType.Set set = localSet;
-        set.clear();
-        return set;
-    }
+//
+//
+//    public PathNodeType.Set localSet(){
+//        PathNodeType.Set set = localSet;
+//        set.clear();
+//        return set;
+//    }
 }

@@ -88,6 +88,8 @@ public class ElcaConfig {
     public static boolean ENABLE_LEGACY_PING_HANDLER  = false;
     public static boolean ENABLE_DEFAULT_JOIN_MESSAGE = true;
     public static boolean USE_ASYNC_TRACKER_DEFAULT   = false;
+    public static boolean ASYNC_PATHFINDING_DEFAULT   = false;
+    public static boolean ASYNC_PATHFINDING_AUTO      = true;
     //public static boolean ENABLE_DATA_FIXER          = false;
 
 

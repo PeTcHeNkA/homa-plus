@@ -9,6 +9,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 
 public class Path {
+    public static final Path WAITING = new Path(new PathPoint[0]);
+
     private final PathPoint[] points;
     private PathPoint[] openSet = new PathPoint[0];
     private PathPoint[] closedSet = new PathPoint[0];

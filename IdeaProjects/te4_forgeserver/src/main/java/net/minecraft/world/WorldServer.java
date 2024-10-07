@@ -30,6 +30,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.*;
+import net.minecraft.pathfinding.PathFinder;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.scoreboard.ScoreboardSaveData;
 import net.minecraft.scoreboard.ServerScoreboard;
@@ -79,8 +80,8 @@ import plus.fserver.ElcaCV;
 import plus.fserver.entity.EntityCollider;
 import plus.fserver.server.chunk.io.TChunkTask;
 import plus.fserver.server.chunk.io.TQueuedChunk;
+import plus.fserver.server.elca.ChunkLSECache;
 import plus.fserver.server.elca.ChunkSelector;
-import plus.fserver.utls.collections.ChunkIterator;
 import plus.fserver.utls.collections.ChunkIteratorPro;
 import plus.fserver.utls.collections.EntityIDHashSplitedList;
 import plus.fserver.utls.collections.EntityRemSwapList;
@@ -125,6 +126,10 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
     private final ConcurrentHashMap<TQueuedChunk, TChunkTask> _chunkTasks = new ConcurrentHashMap<>();
     private final ConcurrentLinkedQueue<Runnable> _syncTasks = new ConcurrentLinkedQueue<>();
 
+    public final ChunkLSECache navChunkCache;
+    private NavUpdateTask navTasks;
+    //public final ConcurrentHashMap<Entity, PathFinder.PathGenTask> navTasks = new ConcurrentHashMap<>();
+
     public WorldServer(MinecraftServer server, ISaveHandler saveHandlerIn, WorldInfo info, int dimensionId, Profiler profilerIn) {
         super(server, saveHandlerIn, info, DimensionManager.createProviderFor(dimensionId), profilerIn, false);
         if(ElcaCV.DEBUG_NO_SERVER){
@@ -144,6 +149,71 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
 
         initUnimportant();
         this.playerChunkMap = new PlayerChunkMap(this);
+
+        navChunkCache = new ChunkLSECache(chunkProviderServer, 0,0);
+
+        if(ElcaConfig.ASYNC_PATHFINDING_DEFAULT){
+            setAsyncNavigation(true);
+        }
+    }
+
+
+    class NavUpdateTask extends ConcurrentLinkedQueue<PathFinder.PathGenTask> implements Runnable{
+        private volatile boolean isActive = false;
+        protected void reRunIfNeed(){
+            if(isActive)return;
+            if (!super.isEmpty()) {
+                isActive = true;
+                server.ticker().runAsync(this);
+            }
+        }
+
+
+        @Override
+        public void run() {
+            try {
+                runTasks(new ChunkLSECache(chunkProviderServer, 0, 0));
+            } catch (Exception e) {
+                server.ticker().onError(WorldServer.this, e);
+            } finally {
+                isActive = false;
+            }
+        }
+
+        void runTasks(ChunkLSECache cache){
+            PathFinder.PathGenTask task1 = super.poll();
+            while (task1 != null) {
+                task1.complete(cache);
+                task1 = this.poll();
+            }
+        }
+    }
+
+
+    public void addPathGenTask(PathFinder.PathGenTask task){
+        ConcurrentLinkedQueue<PathFinder.PathGenTask> navTasks = this.navTasks;
+        if(navTasks != null) navTasks.add(task);
+        else task.complete(navChunkCache);
+    }
+
+
+    public boolean useAsyncNavigation(){
+        return this.navTasks != null;
+    }
+
+
+    public void setAsyncNavigation(boolean b){
+        if(b){
+            if(this.navTasks == null) navTasks = new NavUpdateTask();
+        } else {
+            NavUpdateTask nav;
+            if((nav = this.navTasks) != null){
+                ChunkLSECache cache;
+                nav.runTasks(cache = navChunkCache);
+                cache.cleanAll();
+            }
+            this.navTasks = null;
+        }
     }
 
 
@@ -447,6 +517,13 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         }
         this.provider.onWorldUpdateEntities();
         super.updateEntities();
+
+        navChunkCache.cleanAll();
+
+        NavUpdateTask navTasks1 = this.navTasks;
+        if(navTasks != null) {
+            navTasks1.reRunIfNeed();
+        }
     }
 
 
@@ -472,7 +549,15 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
 
                 if (entity.addedToChunk) {
                     Chunk chunk = cps.getLoadedChunk(entity.chunkCoordX, entity.chunkCoordZ);
-                    if(chunk != null) chunk.removeEntity(entity);
+                    if(chunk != null) {
+                        if(ElcaCV.ENABLE_CHUNK_ADD_LOCKS){
+                            synchronized (chunk){
+                                chunk.removeEntity(entity); //sync
+                            }
+                        } else {
+                            chunk.removeEntity(entity); //def
+                        }
+                    }
                 }
                 onEntityRemoved(entity);
             }
@@ -510,7 +595,15 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
                 if (entity.isDead) {
                     if (entity.addedToChunk) {
                         Chunk chunk = cps.getLoadedChunk(entity.chunkCoordX, entity.chunkCoordZ);
-                        if(chunk != null) chunk.removeEntity(entity);
+                        if(chunk != null) {
+                            if(ElcaCV.ENABLE_CHUNK_ADD_LOCKS){
+                                synchronized (chunk){
+                                    chunk.removeEntity(entity); //sync
+                                }
+                            } else {
+                                chunk.removeEntity(entity); //def
+                            }
+                        }
                     }
                     list.removeSwap(cursor--);
                     --size;
@@ -518,10 +611,28 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
                 }
             }
         }
-        try {
-            collideTask.complete();
-        } catch (Exception e){
-            server.ticker().onError(this, e);
+        if(ElcaCV.USE_UNSAFE_ASYNC_MOVE){
+            EMoveHelper.ComboCollideTask task = collideTask;
+            this.collideTask = new EMoveHelper.ComboCollideTask();
+
+            server.ticker().runAsync(() -> {
+                try {
+                    ChunkSelector selector = new ChunkSelector(WorldServer.this);
+                    BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+                    AxisAlignedBB aabb = new AxisAlignedBB(0,0,0,0,0,0);
+
+                    task.complete(selector, mut, aabb);
+                } catch (Exception e){
+                    server.ticker().onError(WorldServer.this, e);
+                }
+            });
+        } else {
+            try {
+                //is thread-safe?
+                collideTask.complete(localSelector, tempPooledLocalPos, commonWorldEntityAABB);
+            } catch (Exception e){
+                server.ticker().onError(this, e);
+            }
         }
     }
 
@@ -622,7 +733,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
             else if(!entity.updateBlocked) entity.onUpdate();
 
         } catch (Throwable exception){
-            server.ticker().onError(this, onEntityError(entity, exception));
+            server.ticker().onError(this, exception);
         }
 
         if (MathUtls.isInvalidDouble(entity.posX))          entity.posX          = entity.lastTickPosX     ;
@@ -648,20 +759,41 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         int cZpos = MathHelper.floor(entity.posZ * 0.0625);
 
         if (!entity.addedToChunk || entity.chunkCoordX != cXpos || entity.chunkCoordY != cYpos || entity.chunkCoordZ != cZpos) {
+            //todo add locks here
+
             if(onUpdateChunkSection(entity, cXpos, cYpos, cZpos)) {
                 ChunkProviderServer cps = chunkProviderServer;
                 Chunk chunk;
                 if (entity.addedToChunk) {
                     chunk = cps.getLoadedChunk(entity.chunkCoordX, entity.chunkCoordZ);
-                    if (chunk != null) chunk.removeEntityAtIndex(entity, entity.chunkCoordY);
+                    if (chunk != null) {
+                        if(ElcaCV.ENABLE_CHUNK_ADD_LOCKS) {
+                            synchronized (chunk) {
+                                chunk.removeEntityAtIndex(entity, entity.chunkCoordY); //sync
+                            }
+                        } else {
+                            chunk.removeEntityAtIndex(entity, entity.chunkCoordY); //def
+                        }
+                    }
                 }
                 chunk = cps.getLoadedChunk(cXpos, cZpos);
 
                 if (!entity.setPositionNonDirty() && chunk == null) {
                     entity.addedToChunk = false;
                 } else {
-                    if (chunk == null) chunk = cps.provideChunk(cXpos, cZpos);
-                    chunk.addEntity(entity);
+                    if (chunk == null) {
+                        entity.addedToChunk = false;
+                        cps.loadChunk(cXpos, cZpos, chunk1 -> chunk1.addEntity(entity));
+                        addSyncTask(() -> cps.provideChunk(cXpos, cZpos));
+                    } else {
+                        if(ElcaCV.ENABLE_CHUNK_ADD_LOCKS){
+                            synchronized (chunk){
+                                chunk.addEntity(entity);
+                            }
+                        } else {
+                            chunk.addEntity(entity);
+                        }
+                    }
                 }
             } else {
                 return;
@@ -807,7 +939,52 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
 
     @Override
     public boolean spawnEntity(Entity entityIn) {
-        return this.canAddEntity(entityIn) ? super.spawnEntity(entityIn) : false;
+        if(this.canAddEntity(entityIn))
+            return spawnEntityServer(entityIn);
+        return false;
+    }
+
+
+    private boolean spawnEntityServer(Entity entityIn) {
+        // do not drop any items while restoring blocksnapshots. Prevents dupes
+        if ((entityIn == null || (entityIn instanceof net.minecraft.entity.item.EntityItem && this.restoringBlockSnapshots))) return false;
+
+        int chunkX = MathHelper.floor(entityIn.posX / 16.0D);
+        int chunkZ = MathHelper.floor(entityIn.posZ / 16.0D);
+        boolean force = entityIn.forceSpawn;
+        boolean isPlayer = entityIn instanceof EntityPlayer;
+
+        ChunkProviderServer cps = chunkProviderServer;
+        Chunk chunk = cps.getLoadedChunk(chunkZ, chunkZ);
+
+        if (!(force || isPlayer) && chunk == null) {
+            return false;
+        } else {
+            if (isPlayer) {
+                EntityPlayer entityplayer = (EntityPlayer)entityIn;
+                this.playerEntities.add(entityplayer);
+                this.playersModified = true;
+                this.updateAllPlayersSleepingFlag();
+            }
+
+            if (MinecraftForge.EVENT_BUS.post(new EntityJoinWorldEvent(entityIn, this)) && !force) return false;
+            if(chunk == null){
+                chunk = cps.provideChunk(chunkX, chunkZ);
+                chunk.addEntity(entityIn);
+            } else {
+                if(ElcaCV.ENABLE_CHUNK_ADD_LOCKS){
+                    synchronized (chunk){
+                        chunk.addEntity(entityIn);
+                    }
+                } else {
+                    chunk.addEntity(entityIn);
+                }
+            }
+
+            this.realEntityList.addF(entityIn);
+            this.onEntityAdded(entityIn);
+            return true;
+        }
     }
 
 
@@ -1468,7 +1645,15 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
                 int j = entity.chunkCoordX, k = entity.chunkCoordZ;
                 if (entity.addedToChunk){
                     Chunk chunk = chunkProviderServer.getLoadedChunk(j, k);
-                    if(chunk != null)chunk.removeEntity(entity);
+                    if(chunk != null){
+                        if(ElcaCV.ENABLE_CHUNK_ADD_LOCKS){
+                            synchronized (chunk){
+                                chunk.removeEntity(entity); //sync
+                            }
+                        } else {
+                            chunk.removeEntity(entity); //def
+                        }
+                    }
                 }
 
                 this.realEntityList.removeRefSwap(entity);
@@ -1667,23 +1852,41 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         clearEvents();
     }
 
-    public EMoveHelper.ComboCollideTask collideTask = new EMoveHelper.ComboCollideTask(this);
+    public EMoveHelper.ComboCollideTask collideTask = new EMoveHelper.ComboCollideTask();
 
     private EMoveHelper.MoveTask[] allTasks = new EMoveHelper.MoveTask[128];
     private int realSize = 0;
     
     public EMoveHelper.MoveTask allocMoveTask(){
-        if(realSize == 0)return new EMoveHelper.MoveTask();
-        else return allTasks[--realSize];
+        if(ElcaCV.USE_UNSAFE_ASYNC_MOVE) {
+            if (realSize == 0) return new EMoveHelper.MoveTask();
+            else return allTasks[--realSize];
+        } else {
+            if (realSize == 0) return new EMoveHelper.MoveTask();
+            else return allTasks[--realSize];
+        }
     }
     
     public void freeMoveTask(EMoveHelper.MoveTask task){
-        if(allTasks.length == realSize){
-            EMoveHelper.MoveTask[] newTasks = new EMoveHelper.MoveTask[allTasks.length+128];
-            System.arraycopy(allTasks, 0, newTasks, 0, allTasks.length);
-            allTasks = newTasks;
+        if(ElcaCV.USE_UNSAFE_ASYNC_MOVE){
+            synchronized (this){
+                EMoveHelper.MoveTask[] allTasks;
+                if((allTasks = this.allTasks).length == realSize){
+                    EMoveHelper.MoveTask[] newTasks = new EMoveHelper.MoveTask[allTasks.length+128];
+                    System.arraycopy(allTasks, 0, newTasks, 0, allTasks.length);
+                    allTasks = this.allTasks = newTasks;
+                }
+                allTasks[realSize++] = task;
+            }
+        } else {
+            EMoveHelper.MoveTask[] allTasks;
+            if((allTasks = this.allTasks).length == realSize){
+                EMoveHelper.MoveTask[] newTasks = new EMoveHelper.MoveTask[allTasks.length+128];
+                System.arraycopy(allTasks, 0, newTasks, 0, allTasks.length);
+                allTasks = this.allTasks = newTasks;
+            }
+            allTasks[realSize++] = task;
         }
-        allTasks[realSize++] = task;
     }
 
     private RecipeItemHelper recipeItemHelper = null;

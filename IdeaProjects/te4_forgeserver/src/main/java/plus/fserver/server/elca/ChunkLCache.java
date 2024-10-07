@@ -192,17 +192,19 @@ public class ChunkLCache implements IBlockEAccess {
 
 
     public final Chunk getChunk(){
-        if(chunk == null) {
+        Chunk chunk;
+        if((chunk = this.chunk) == null) {
             chunk = world.getChunk(x, z);
-            if(chunk == null)chunk = EmptyChunk.INSTANCE;
+            if(chunk == null)chunk = this.chunk = EmptyChunk.INSTANCE;
         }
         return chunk;
     }
 
 
     public final Chunk getLoadedChunk(){
-        if(chunk == null) {
-            chunk = world.getChunkProvider().getLoadedChunk(x, z);
+        Chunk chunk;
+        if((chunk = this.chunk) == null) {
+            chunk = this.chunk = world.getChunkProvider().getLoadedChunk(x, z);
             return chunk;
         }
         return chunk;
@@ -299,11 +301,12 @@ public class ChunkLCache implements IBlockEAccess {
         Chunk chunk = getExecutor(pos.getX()>>4, pos.getZ()>>4).getChunk();
 
         IBlockState oldState = chunk.getBlockStateUnchecked(pos.getX(), pos.getY(), pos.getZ());
-        int oldLight = oldState.getLightValue(world, pos);
-        int oldOpacity = oldState.getLightOpacity(world, pos);
 
-        if (newState.getLightOpacity(world, pos) != oldOpacity ||
-                newState.getLightValue(world, pos) != oldLight) {
+        int oldLight = oldState.getLightValue(this, pos);
+        int oldOpacity = oldState.getLightOpacity(this, pos);
+
+        if (newState.getLightOpacity(this, pos) != oldOpacity ||
+                newState.getLightValue(this, pos) != oldLight) {
             chunk.setBlockState(pos, newState);
             world.checkLight(pos);
         } else {

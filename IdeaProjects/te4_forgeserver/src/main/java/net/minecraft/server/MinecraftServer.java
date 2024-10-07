@@ -89,6 +89,7 @@ import plus.fserver.api.BiomeIndexes;
 import plus.fserver.api.ServerCommand;
 import plus.fserver.server.AsyWorldTickerV2;
 import plus.fserver.server.ElcaCommands;
+import plus.fserver.utls.math.FastRandom;
 
 
 public abstract class MinecraftServer implements ICommandSender, Runnable, IThreadListener, ISnooperInfo{
@@ -102,7 +103,7 @@ public abstract class MinecraftServer implements ICommandSender, Runnable, IThre
     public final Profiler profiler = new Profiler();
     private final NetworkSystem networkSystem;
     private final ServerStatusResponse statusResponse = new ServerStatusResponse();
-    private final Random random = new Random();
+    private final Random random = FastRandom.INST;
     private final DataFixer dataFixer;
     @SideOnly(Side.SERVER)
     private String hostname;

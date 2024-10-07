@@ -197,9 +197,11 @@ public final class AsyWorldTickerV2{
 
         long curNanoTime = System.nanoTime();
         try {
+            int counter = inf.tickCounter;
+
             worldserver.tickSyncTasks();
             List<EntityPlayer> players = worldserver.playerEntities;
-            if (inf.tickCounter % ElcaConfig.TIME_PACKET_RATE == 0) {
+            if (tickCounter % ElcaConfig.TIME_PACKET_RATE == 0) {
                 SPacketTimeUpdate packet = new SPacketTimeUpdate(
                         worldserver.getTotalWorldTime(), worldserver.getWorldTime(),
                         worldserver.getGameRules().doDaylightCycle.getBoolean());
@@ -222,7 +224,7 @@ public final class AsyWorldTickerV2{
                     }
                 }
             }
-            if(inf.tickCounter % 200 == 0){
+            if(tickCounter % 200 == 0){
                 worldserver.getChunkProvider().chunkGenerator.cleanupCache();
                 worldserver.provider.getBiomeProvider().cleanupCache();
             }
@@ -279,10 +281,21 @@ public final class AsyWorldTickerV2{
                 }
             }
 
+            if(ElcaConfig.ASYNC_PATHFINDING_AUTO) {
+                if((counter & 7) == 0) {
+                    boolean cur = worldserver.useAsyncNavigation();
+                    if (worldserver.meanTickTime() > ElcaConfig.MEAN_BALANCE_MOB) {
+                        if (!cur) worldserver.setAsyncNavigation(true);
+                    } else {
+                        if (cur) worldserver.setAsyncNavigation(false);
+                    }
+                }
+            }
+
             long spend = System.nanoTime() - curNanoTime;
             long[] times = server.worldTickTimes.get(inf.id);
 
-            int counter = inf.tickCounter;
+
             if(counter < 0)counter = 0;
             times[counter % 100] = spend;
             worldserver.setMeanTT(mean(times, counter));
@@ -336,8 +349,9 @@ public final class AsyWorldTickerV2{
             LOGGER.error("-------- CRITICAL SERVER ERROR ------------");
             if(exception instanceof ReportedException){
                 CrashReport report = ((ReportedException)exception).getCrashReport();
-                LOGGER.error("", report.getCrashCause());
-                LOGGER.error("", exception);
+                StringBuilder builder = new StringBuilder("\n");
+                report.getSectionsInStringBuilder(builder);
+                LOGGER.error(builder.toString());
             } else {
                 LOGGER.error("", exception);
             }

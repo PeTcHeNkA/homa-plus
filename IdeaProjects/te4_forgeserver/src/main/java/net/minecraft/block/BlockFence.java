@@ -41,6 +41,9 @@ public class BlockFence extends Block {
     public static final AxisAlignedBB NORTH_AABB = new AxisAlignedBB(0.375D, 0.0D, 0.0D, 0.625D, 1.5D, 0.375D);
     public static final AxisAlignedBB EAST_AABB = new AxisAlignedBB(0.625D, 0.0D, 0.375D, 1.0D, 1.5D, 0.625D);
 
+    public static final AxisAlignedBB NORTH_SOUTH_AABB = new AxisAlignedBB(0.375D, 0.0D, 0.0D, 0.625D, 1.5D, 1.0D);
+    public static final AxisAlignedBB WEST_EAST_AABB = new AxisAlignedBB(0, 0.0D, 0.375D, 1.0D, 1.5D, 0.625D);
+
     public BlockFence(Material materialIn, MapColor mapColorIn) {
         super(materialIn, mapColorIn);
         this.setDefaultState(this.blockState.getBaseState()
@@ -81,21 +84,39 @@ public class BlockFence extends Block {
 
     @Override
     public void addCollisionBoxToListF(IBlockState state, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, AABBList collidingBoxes) {
-        state = getActualState(state, access, pos);
+        final BlockPos.MutableBlockPos mut = access.getWorld().localTempPos3;
 
-        addCollisionBoxToListFx(pos, entityBox, collidingBoxes, PILLAR_AABB);
+        boolean flag1, flag2, addCenter = true;
+        flag1 = canFenceConnectTo(access, pos, mut, EnumFacing.NORTH);
+        flag2 = canFenceConnectTo(access, pos, mut, EnumFacing.SOUTH);
 
-        if (state.getValue(NORTH))
-            addCollisionBoxToListFx(pos, entityBox, collidingBoxes, NORTH_AABB);
-
-        if (state.getValue(EAST))
-            addCollisionBoxToListFx(pos, entityBox, collidingBoxes, EAST_AABB);
-
-        if (state.getValue(SOUTH))
+        if (flag1){
+            if(flag2){
+                addCollisionBoxToListFx(pos, entityBox, collidingBoxes, NORTH_SOUTH_AABB);
+                addCenter = false;
+            } else {
+                addCollisionBoxToListFx(pos, entityBox, collidingBoxes, NORTH_AABB);
+            }
+        } else if (flag2) {
             addCollisionBoxToListFx(pos, entityBox, collidingBoxes, SOUTH_AABB);
+        }
 
-        if (state.getValue(WEST))
+        flag1 = canFenceConnectTo(access, pos, mut, EnumFacing.EAST);
+        flag2 = canFenceConnectTo(access, pos, mut, EnumFacing.WEST);
+
+        if(flag1){
+            if(flag2){
+                addCollisionBoxToListFx(pos, entityBox, collidingBoxes, WEST_EAST_AABB);
+            } else {
+                addCollisionBoxToListFx(pos, entityBox, collidingBoxes, EAST_AABB);
+            }
+        } else if(flag2){
             addCollisionBoxToListFx(pos, entityBox, collidingBoxes, WEST_AABB);
+        }
+
+        if(addCenter){
+            addCollisionBoxToListFx(pos, entityBox, collidingBoxes, PILLAR_AABB);
+        }
     }
 
 

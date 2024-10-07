@@ -6,6 +6,8 @@ import net.minecraft.pathfinding.NodeProcessor;
 import net.minecraft.pathfinding.PathNavigate;
 import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.WorldServer;
+import plus.fserver.server.elca.ChunkLSECache;
 
 
 public class EntityMoveHelper {
@@ -84,7 +86,10 @@ public class EntityMoveHelper {
             PathNavigate navigator = entity.getNavigator();
             if (navigator != null) {
                 NodeProcessor processor = navigator.getNodeProcessor();
-                if (processor != null && processor.getPathNodeType(entity.world.access(), MathHelper.floor(entity.posX + (double)lvt_8_1_), MathHelper.floor(entity.posY), MathHelper.floor(entity.posZ + (double)deg0)) != PathNodeType.WALKABLE) {
+
+                ChunkLSECache access = ((WorldServer)entity.world).navChunkCache;
+
+                if (processor != null && processor.getPathNodeType(access, MathHelper.floor(entity.posX + (double)lvt_8_1_), MathHelper.floor(entity.posY), MathHelper.floor(entity.posZ + (double)deg0)) != PathNodeType.WALKABLE) {
                     this.moveForward = 1.0F;
                     this.moveStrafe = 0.0F;
                     curSpeed = moveSpeed;

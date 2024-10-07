@@ -13,6 +13,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import plus.fserver.api.IBlockEAccess;
+import plus.fserver.server.elca.ChunkLSECache;
 import plus.fserver.world.PntMatrix;
 
 
@@ -212,7 +213,7 @@ public class PathNavigateGround extends PathNavigate {
             d1 = d1 * d2;
 
             //todo maybe non-threadsafe
-            IBlockEAccess access = entity.world.access();
+            ChunkLSECache access = ((WorldServer)entity.world).navChunkCache;
             PntMatrix matrix = ((WalkNodeProcessor)nodeProcessor).matrix;
             //todo maybe this equal "if false"
             if(matrix == null){
@@ -262,7 +263,7 @@ public class PathNavigateGround extends PathNavigate {
     }
 
 
-    private boolean isSafeToStandAt(IBlockEAccess access, PntMatrix.Chunked chunked, int x, int y, int z, int sizeX, int sizeY, int sizeZ, double vecX, double vecZ, double param, double param2) {
+    private boolean isSafeToStandAt(ChunkLSECache access, PntMatrix.Chunked chunked, int x, int y, int z, int sizeX, int sizeY, int sizeZ, double vecX, double vecZ, double param, double param2) {
         int dX = x - (sizeX >> 1);
         int dZ = z - (sizeZ >> 1);
 

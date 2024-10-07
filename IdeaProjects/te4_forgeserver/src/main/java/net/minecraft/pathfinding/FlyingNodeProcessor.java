@@ -8,10 +8,9 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
-import plus.fserver.api.IBlockEAccess;
+import plus.fserver.server.elca.ChunkLSECache;
 import plus.fserver.world.NavigationCache;
 import plus.fserver.world.PntMatrix;
 import plus.tson.utl.Te4HashSet;
@@ -23,15 +22,15 @@ public class FlyingNodeProcessor extends WalkNodeProcessor {
         super(world);
     }
 
-    public void init(IBlockAccess access, EntityLiving mob) {
-        super.init(access, mob);
+    public void init(EntityLiving mob) {
+        super.init(mob);
         this.avoidsWater = mob.getPathPriority(PathNodeType.WATER);
     }
 
 
     @Override
     protected PntMatrix getBy(EntityLiving mob) {
-        return ((WorldServer)blockaccess.getWorld()).navCache.getBy(NavigationCache.FLY_ID);
+        return ((WorldServer)mob.world).navCache.getBy(NavigationCache.FLY_ID);
     }
 
 
@@ -43,14 +42,14 @@ public class FlyingNodeProcessor extends WalkNodeProcessor {
 
 
     @Override
-    public PathPoint getStart() {
+    public PathPoint getStart(ChunkLSECache access) {
         int i;
 
         if (this.getCanSwim() && this.entity.isInWater()) {
             i = (int)this.entity.getEntityBoundingBox().minY;
             pooledPos.setPos(MathHelper.floor(this.entity.posX), i, MathHelper.floor(this.entity.posZ));
 
-            for (Block block = this.blockaccess.getBlockState(pooledPos).getBlock(); block == Blocks.FLOWING_WATER || block == Blocks.WATER; block = this.blockaccess.getBlockState(pooledPos).getBlock()) {
+            for (Block block = access.getBlockState(pooledPos).getBlock(); block == Blocks.FLOWING_WATER || block == Blocks.WATER; block = access.getBlockState(pooledPos).getBlock()) {
                 ++i;
                 pooledPos.setPos(MathHelper.floor(this.entity.posX), i, MathHelper.floor(this.entity.posZ));
             }
@@ -63,7 +62,7 @@ public class FlyingNodeProcessor extends WalkNodeProcessor {
 
         PathNodeType type0 = chunked.getCur(pooledPos.getX(), i, pooledPos.getZ());
         if(type0==null) {
-            type0 = this.getPathNodeType(this.entity, pooledPos.getX(), i, pooledPos.getZ());
+            type0 = this.getPathNodeType(access, this.entity, pooledPos.getX(), i, pooledPos.getZ());
             chunked.setCur(pooledPos.getX(), i, pooledPos.getZ(), type0);
         }
 
@@ -78,33 +77,33 @@ public class FlyingNodeProcessor extends WalkNodeProcessor {
             for (BlockPos blockpos : set) {
                 type = chunked.getType(blockpos.getX(), blockpos.getY(), blockpos.getZ());
                 if(type==null) {
-                    type = this.getPathNodeType(this.entity, blockpos);
+                    type = this.getPathNodeType(access, this.entity, blockpos);
                     chunked.setType(blockpos.getX(), blockpos.getY(), blockpos.getZ(), type);
                 }
                 if (this.entity.getPathPriority(type) >= 0.0F) {
-                    return super.openPoint(blockpos.getX(), blockpos.getY(), blockpos.getZ());
+                    return super.openPoint(access, blockpos.getX(), blockpos.getY(), blockpos.getZ());
                 }
             }
         }
-        return super.openPoint(pooledPos.getX(), i, pooledPos.getZ());
+        return super.openPoint(access, pooledPos.getX(), i, pooledPos.getZ());
     }
 
 
     @Override
-    public PathPoint getPathPointToCoords(double x, double y, double z) {
-        return super.openPoint(MathHelper.floor(x), MathHelper.floor(y), MathHelper.floor(z));
+    public PathPoint getPathPointToCoords(ChunkLSECache access, double x, double y, double z) {
+        return super.openPoint(access, MathHelper.floor(x), MathHelper.floor(y), MathHelper.floor(z));
     }
 
 
     @Override
-    public int findPathOptions(PathPoint[] pathOptions, PathPoint cur, PathPoint target, float maxDistance) {
+    public int findPathOptions(ChunkLSECache access, PathPoint[] pathOptions, PathPoint cur, PathPoint target, float maxDistance) {
         int i = 0;
-        PathPoint pathpoint = this.openPoint(cur.x, cur.y, cur.z + 1);
-        PathPoint pathpoint1 = this.openPoint(cur.x - 1, cur.y, cur.z);
-        PathPoint pathpoint2 = this.openPoint(cur.x + 1, cur.y, cur.z);
-        PathPoint pathpoint3 = this.openPoint(cur.x, cur.y, cur.z - 1);
-        PathPoint pathpoint4 = this.openPoint(cur.x, cur.y + 1, cur.z);
-        PathPoint pathpoint5 = this.openPoint(cur.x, cur.y - 1, cur.z);
+        PathPoint pathpoint  = this.openPoint(access, cur.x, cur.y, cur.z + 1);
+        PathPoint pathpoint1 = this.openPoint(access, cur.x - 1, cur.y, cur.z);
+        PathPoint pathpoint2 = this.openPoint(access, cur.x + 1, cur.y, cur.z);
+        PathPoint pathpoint3 = this.openPoint(access, cur.x, cur.y, cur.z - 1);
+        PathPoint pathpoint4 = this.openPoint(access, cur.x, cur.y + 1, cur.z);
+        PathPoint pathpoint5 = this.openPoint(access, cur.x, cur.y - 1, cur.z);
 
         float maxDistanceSq = maxDistance * maxDistance;
 
@@ -140,84 +139,84 @@ public class FlyingNodeProcessor extends WalkNodeProcessor {
         boolean flag5 = pathpoint5 == null || pathpoint5.costMalus != 0.0F;
 
         if (flag && flag3) {
-            PathPoint pathpoint6 = this.openPoint(cur.x - 1, cur.y, cur.z - 1);
+            PathPoint pathpoint6 = this.openPoint(access, cur.x - 1, cur.y, cur.z - 1);
 
             if (pathpoint6 != null && !pathpoint6.visited && pathpoint6.distanceToSquaredInt(target) < maxDistanceSq) {
                 pathOptions[i++] = pathpoint6;
             }
         }
         if (flag && flag2) {
-            PathPoint pathpoint7 = this.openPoint(cur.x + 1, cur.y, cur.z - 1);
+            PathPoint pathpoint7 = this.openPoint(access, cur.x + 1, cur.y, cur.z - 1);
 
             if (pathpoint7 != null && !pathpoint7.visited && pathpoint7.distanceToSquaredInt(target) < maxDistanceSq) {
                 pathOptions[i++] = pathpoint7;
             }
         }
         if (flag1 && flag3) {
-            PathPoint pathpoint8 = this.openPoint(cur.x - 1, cur.y, cur.z + 1);
+            PathPoint pathpoint8 = this.openPoint(access, cur.x - 1, cur.y, cur.z + 1);
 
             if (pathpoint8 != null && !pathpoint8.visited && pathpoint8.distanceToSquaredInt(target) < maxDistanceSq) {
                 pathOptions[i++] = pathpoint8;
             }
         }
         if (flag1 && flag2) {
-            PathPoint pathpoint9 = this.openPoint(cur.x + 1, cur.y, cur.z + 1);
+            PathPoint pathpoint9 = this.openPoint(access, cur.x + 1, cur.y, cur.z + 1);
 
             if (pathpoint9 != null && !pathpoint9.visited && pathpoint9.distanceToSquaredInt(target) < maxDistanceSq) {
                 pathOptions[i++] = pathpoint9;
             }
         }
         if (flag && flag4) {
-            PathPoint pathpoint10 = this.openPoint(cur.x, cur.y + 1, cur.z - 1);
+            PathPoint pathpoint10 = this.openPoint(access, cur.x, cur.y + 1, cur.z - 1);
 
             if (pathpoint10 != null && !pathpoint10.visited && pathpoint10.distanceToSquaredInt(target) < maxDistanceSq) {
                 pathOptions[i++] = pathpoint10;
             }
         }
         if (flag1 && flag4) {
-            PathPoint pathpoint11 = this.openPoint(cur.x, cur.y + 1, cur.z + 1);
+            PathPoint pathpoint11 = this.openPoint(access, cur.x, cur.y + 1, cur.z + 1);
 
             if (pathpoint11 != null && !pathpoint11.visited && pathpoint11.distanceToSquaredInt(target) < maxDistanceSq) {
                 pathOptions[i++] = pathpoint11;
             }
         }
         if (flag2 && flag4) {
-            PathPoint pathpoint12 = this.openPoint(cur.x + 1, cur.y + 1, cur.z);
+            PathPoint pathpoint12 = this.openPoint(access, cur.x + 1, cur.y + 1, cur.z);
 
             if (pathpoint12 != null && !pathpoint12.visited && pathpoint12.distanceToSquaredInt(target) < maxDistanceSq) {
                 pathOptions[i++] = pathpoint12;
             }
         }
         if (flag3 && flag4) {
-            PathPoint pathpoint13 = this.openPoint(cur.x - 1, cur.y + 1, cur.z);
+            PathPoint pathpoint13 = this.openPoint(access, cur.x - 1, cur.y + 1, cur.z);
 
             if (pathpoint13 != null && !pathpoint13.visited && pathpoint13.distanceToSquaredInt(target) < maxDistanceSq) {
                 pathOptions[i++] = pathpoint13;
             }
         }
         if (flag && flag5) {
-            PathPoint pathpoint14 = this.openPoint(cur.x, cur.y - 1, cur.z - 1);
+            PathPoint pathpoint14 = this.openPoint(access, cur.x, cur.y - 1, cur.z - 1);
 
             if (pathpoint14 != null && !pathpoint14.visited && pathpoint14.distanceToSquaredInt(target) < maxDistanceSq) {
                 pathOptions[i++] = pathpoint14;
             }
         }
         if (flag1 && flag5) {
-            PathPoint pathpoint15 = this.openPoint(cur.x, cur.y - 1, cur.z + 1);
+            PathPoint pathpoint15 = this.openPoint(access, cur.x, cur.y - 1, cur.z + 1);
 
             if (pathpoint15 != null && !pathpoint15.visited && pathpoint15.distanceToSquaredInt(target) < maxDistanceSq) {
                 pathOptions[i++] = pathpoint15;
             }
         }
         if (flag2 && flag5) {
-            PathPoint pathpoint16 = this.openPoint(cur.x + 1, cur.y - 1, cur.z);
+            PathPoint pathpoint16 = this.openPoint(access, cur.x + 1, cur.y - 1, cur.z);
 
             if (pathpoint16 != null && !pathpoint16.visited && pathpoint16.distanceToSquaredInt(target) < maxDistanceSq) {
                 pathOptions[i++] = pathpoint16;
             }
         }
         if (flag3 && flag5) {
-            PathPoint pathpoint17 = this.openPoint(cur.x - 1, cur.y - 1, cur.z);
+            PathPoint pathpoint17 = this.openPoint(access, cur.x - 1, cur.y - 1, cur.z);
 
             if (pathpoint17 != null && !pathpoint17.visited && pathpoint17.distanceToSquaredInt(target) < maxDistanceSq) {
                 pathOptions[i++] = pathpoint17;
@@ -228,13 +227,13 @@ public class FlyingNodeProcessor extends WalkNodeProcessor {
 
 
     @Nullable
-    protected PathPoint openPoint(int x, int y, int z) {
+    protected PathPoint openPoint(ChunkLSECache access, int x, int y, int z) {
         PathPoint pathpoint = null;
-        PathNodeType pathnodetype = this.getPathNodeType(this.entity, x, y, z);
+        PathNodeType pathnodetype = this.getPathNodeType(access, this.entity, x, y, z);
         float f = this.entity.getPathPriority(pathnodetype);
 
         if (f >= 0.0F) {
-            pathpoint = super.openPoint(x, y, z);
+            pathpoint = super.openPoint(access, x, y, z);
             pathpoint.nodeType = pathnodetype;
             pathpoint.costMalus = Math.max(pathpoint.costMalus, f);
 
@@ -246,20 +245,23 @@ public class FlyingNodeProcessor extends WalkNodeProcessor {
     }
 
 
+    //private static final ThreadLocal<PathNodeType.Set> localSet = ThreadLocal.withInitial(PathNodeType.Set::new);
+
     @Override
-    public PathNodeType getPathNodeType(IBlockEAccess blockaccessIn, int x, int y, int z, EntityLiving entity, int xSize, int ySize, int zSize, boolean canBreakDoorsIn, boolean canEnterDoorsIn) {
-        PathNodeType.Set enumset;
-        if(matrix != null){
-            enumset = matrix.localSet();
-        } else {
-            enumset = new PathNodeType.Set();
-        }
-        //EnumSet<PathNodeType> enumset = EnumSet.noneOf(PathNodeType.class);
+    public PathNodeType getPathNodeType(ChunkLSECache access, int x, int y, int z, EntityLiving entity, int xSize, int ySize, int zSize, boolean canBreakDoorsIn, boolean canEnterDoorsIn) {
+        PathNodeType.Set enumset = localSet.get();
+        enumset.clear();
+        //        PathNodeType.Set enumset;
+//        if(matrix != null){
+//            enumset = matrix.localSet();
+//        } else {
+//            enumset = new PathNodeType.Set();
+//        }
 
         PathNodeType pathnodetype = PathNodeType.BLOCKED;
         BlockPos blockpos = new BlockPos(entity);
         this.currentEntity = entity;
-        pathnodetype = this.getPathNodeType(blockaccessIn, x, y, z, xSize, ySize, zSize, canBreakDoorsIn, canEnterDoorsIn, enumset, pathnodetype, blockpos);
+        pathnodetype = this.getPathNodeType(access, x, y, z, xSize, ySize, zSize, canBreakDoorsIn, canEnterDoorsIn, enumset, pathnodetype, blockpos);
         this.currentEntity = null;
 
         if (enumset.contains(PathNodeType.FENCE)) {
@@ -290,7 +292,7 @@ public class FlyingNodeProcessor extends WalkNodeProcessor {
 
 
     @Override
-    public PathNodeType getPathNodeType(IBlockEAccess access, int x, int y, int z) {
+    public PathNodeType getPathNodeType(ChunkLSECache access, int x, int y, int z) {
         IBlockState state = access.getBlockState(x, y, z);
         PathNodeType pathnodetype = this.getPathNodeTypeRaw(access, state);
 
@@ -314,12 +316,12 @@ public class FlyingNodeProcessor extends WalkNodeProcessor {
     }
 
 
-    private PathNodeType getPathNodeType(EntityLiving entity, BlockPos pos) {
-        return this.getPathNodeType(entity, pos.getX(), pos.getY(), pos.getZ());
+    private PathNodeType getPathNodeType(ChunkLSECache access, EntityLiving entity, BlockPos pos) {
+        return this.getPathNodeType(access, entity, pos.getX(), pos.getY(), pos.getZ());
     }
 
 
-    private PathNodeType getPathNodeType(EntityLiving entity, int x, int y, int z) {
-        return this.getPathNodeType(this.blockaccess, x, y, z, entity, this.entitySizeX, this.entitySizeY, this.entitySizeZ, this.getCanOpenDoors(), this.getCanEnterDoors());
+    private PathNodeType getPathNodeType(ChunkLSECache access, EntityLiving entity, int x, int y, int z) {
+        return this.getPathNodeType(access, x, y, z, entity, this.entitySizeX, this.entitySizeY, this.entitySizeZ, this.getCanOpenDoors(), this.getCanEnterDoors());
     }
 }

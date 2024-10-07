@@ -4,13 +4,16 @@ import javax.annotation.Nullable;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.WorldServer;
+import plus.fserver.server.elca.ChunkLSECache;
+import java.util.function.Consumer;
 
 
 public class PathFinder {
     private PathHeap path;
     private PathPoint[] pathOptions;
     private final NodeProcessor nodeProcessor;
+    private volatile boolean calculating = false;
 
     public PathFinder(NodeProcessor processor) {
         this.nodeProcessor = processor;
@@ -18,35 +21,82 @@ public class PathFinder {
 
 
     @Nullable
-    public Path findPath(IBlockAccess worldIn, EntityLiving entitylivingIn, Entity targetEntity, float maxDistance) {
-        return this.findPath(worldIn, entitylivingIn, targetEntity.posX, targetEntity.getEntityBoundingBox().minY, targetEntity.posZ, maxDistance);
+    public Path findPath(ChunkLSECache cache, EntityLiving entity, Entity target, float maxDistance) {
+        return this.findPath(cache, entity, target.posX, target.getEntityBoundingBox().minY, target.posZ, maxDistance);
+    }
+
+
+    public void findPath(EntityLiving entity, Entity target, float maxDistance, Consumer<Path> callBack) {
+        if(calculating)return;
+        ((WorldServer)entity.world).addPathGenTask(new PathGenTask(
+                entity, target.posX, target.getEntityBoundingBox().minY, target.posZ, maxDistance, callBack
+        ));
     }
 
 
     @Nullable
-    public Path findPath(IBlockAccess worldIn, EntityLiving entitylivingIn, BlockPos targetPos, float maxDistance) {
-        return this.findPath(worldIn, entitylivingIn, 0.5d+targetPos.getX(), 0.5d+targetPos.getY(), 0.5d+targetPos.getZ(), maxDistance);
+    public Path findPath(ChunkLSECache cache, EntityLiving entitylivingIn, BlockPos targetPos, float maxDistance) {
+        return this.findPath(cache, entitylivingIn, 0.5d+targetPos.getX(), 0.5d+targetPos.getY(), 0.5d+targetPos.getZ(), maxDistance);
+    }
+
+
+    public void findPath(EntityLiving entity, BlockPos target, float maxDistance, Consumer<Path> callBack) {
+        if(calculating)return;
+        ((WorldServer)entity.world).addPathGenTask(new PathGenTask(
+                entity,0.5d+target.getX(), 0.5d+target.getY(), 0.5d+target.getZ(), maxDistance, callBack
+        ));
     }
 
 
     @Nullable
-    private Path findPath(IBlockAccess access, EntityLiving entitylivingIn, double x, double y, double z, float maxDistance) {
-        PathHeap heap;
-        if((heap = this.path) != null)heap.clearPath();
-        NodeProcessor proc;
-        (proc = nodeProcessor).init(access, entitylivingIn);
-        Path path = this.findPath(
-                proc.getStart(),
-                proc.getPathPointToCoords(x, y, z),
-                maxDistance
-        );
-        proc.postProcess();
+    private Path findPath(ChunkLSECache access, EntityLiving entity, double x, double y, double z, float maxDistance) {
+        if(calculating)return null;
+        Path path = null;
+        try {
+            calculating = true;
+            NodeProcessor proc;
+            access.init(entity);
+
+            (proc = nodeProcessor).init(entity);
+            path = this.findPath(
+                    access,
+                    proc.getStart(access),
+                    proc.getPathPointToCoords(access, x, y, z),
+                    maxDistance
+            );
+            proc.postProcess();
+        } finally {
+            calculating = false;
+        }
         return path;
     }
 
 
+    public class PathGenTask{
+        final EntityLiving entitylivingIn;
+        final double x, y, z;
+        final float maxDistance;
+        final Consumer<Path> callBack;
+
+        public PathGenTask(EntityLiving entitylivingIn, double x, double y, double z, float maxDistance, Consumer<Path> callBack) {
+            this.entitylivingIn = entitylivingIn;
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.maxDistance = maxDistance;
+            this.callBack = callBack;
+        }
+
+
+        public void complete(ChunkLSECache access){
+            Path path = findPath(access, entitylivingIn, x, y, z, maxDistance);
+            callBack.accept(path);
+        }
+    }
+
+
     @Nullable
-    private Path findPath(PathPoint from, PathPoint to, float maxDistance) {
+    private Path findPath(ChunkLSECache access, PathPoint from, PathPoint to, float maxDistance) {
         from.totalPathDistance = 0.0F;
         from.distanceToNext = from.distanceManhattan(to);
         from.distanceToTarget = from.distanceToNext;
@@ -75,7 +125,7 @@ public class PathFinder {
 
             cur.visited = true;
 
-            for (int k = 0, count = proc.findPathOptions(options, cur, to, maxDistance); k < count; ++k) {
+            for (int k = 0, count = proc.findPathOptions(access, options, cur, to, maxDistance); k < count; ++k) {
                 PathPoint point = options[k];
                 float f = cur.distanceManhattan(point);
                 point.distanceFromOrigin = cur.distanceFromOrigin + f;

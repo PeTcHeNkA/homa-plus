@@ -40,6 +40,7 @@ import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
+import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
 import net.minecraft.world.storage.ISaveHandler;
@@ -68,6 +69,7 @@ import plus.fserver.api.IBlockEAccess;
 import plus.fserver.ElcaCV;
 import plus.fserver.api.Keep;
 import plus.fserver.server.elca.ChunkLCache;
+import plus.fserver.server.elca.ChunkLSECache;
 import plus.fserver.utls.math.MathUtls;
 import plus.fserver.entity.CollisionPredicate;
 import plus.fserver.server.elca.AABKey;
@@ -206,7 +208,6 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         }
         localSelector = initSelector();
         effectiveAcces = this;
-
         //locals = ElcaServerUtls.createLocals(this);
     }
 
@@ -1461,11 +1462,27 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             this.updateAllPlayersSleepingFlag();
         }
 
-        int i = entityIn.chunkCoordX;
-        int j = entityIn.chunkCoordZ;
+        int chunkX = entityIn.chunkCoordX;
+        int chunkZ = entityIn.chunkCoordZ;
 
-        if (entityIn.addedToChunk && this.isChunkLoaded(i, j, true)) {
-            this.getChunk(i, j).removeEntity(entityIn);
+        ChunkProviderServer cps = chunkProviderServer;
+        if(cps == null) {
+            if (entityIn.addedToChunk && this.isChunkLoaded(chunkX, chunkZ, true)) {
+                this.getChunk(chunkX, chunkZ).removeEntity(entityIn); //client
+            }
+        } else {
+            if (entityIn.addedToChunk) {
+                Chunk chunk = cps.getLoadedChunk(chunkX, chunkZ);
+                if(chunk != null){
+                    if(ElcaCV.ENABLE_CHUNK_ADD_LOCKS){
+                        synchronized (chunk){
+                            chunk.removeEntity(entityIn); //sync
+                        }
+                    } else {
+                        chunk.removeEntity(entityIn); //def
+                    }
+                }
+            }
         }
 
         this.realEntityList.removeRefSwap(entityIn);
@@ -1505,20 +1522,20 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
-    public boolean isInsideWorldBorder(Entity entityToCheck) {
+    public boolean isInsideWorldBorder(Entity entity) {
         double d0, d1, d2, d3;
-        if (entityToCheck.isOutsideBorder()) {
+        if (entity.isOutsideBorder()) {
             d0 = worldBMinx +1;
             d1 = worldBMinz +1;
-            d2 = worldBMinx -1;
-            d3 = worldBMinx -1;
+            d2 = worldBMaxx -1;
+            d3 = worldBMaxz -1;
         } else {
             d0 = worldBMinx -1;
-            d1 = worldBMinx -1;
+            d1 = worldBMinz -1;
             d2 = worldBMaxx +1;
             d3 = worldBMaxz +1;
         }
-        return entityToCheck.posX > d0 && entityToCheck.posX < d2 && entityToCheck.posZ > d1 && entityToCheck.posZ < d3;
+        return entity.posX > d0 && entity.posX < d2 && entity.posZ > d1 && entity.posZ < d3;
     }
 
 
@@ -1774,7 +1791,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
                     int i2 = entity.chunkCoordZ;
 
                     if (entity.addedToChunk && this.isChunkLoaded(l1, i2, true)) {
-                        this.getChunk(l1, i2).removeEntity(entity);
+                        this.getChunk(l1, i2).removeEntity(entity); //client
                     }
                     list.removeSwap(cursor--);
                     this.onEntityRemoved(entity);
@@ -1811,7 +1828,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             int cZ = entity.chunkCoordZ;
 
             if (entity.addedToChunk && this.isChunkLoaded(cX, cZ, true)) {
-                this.getChunk(cX, cZ).removeEntity(entity);
+                this.getChunk(cX, cZ).removeEntity(entity); //client
             }
             onEntityRemoved(entity);
         }
@@ -2009,7 +2026,8 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
         if (!entityIn.addedToChunk || entityIn.chunkCoordX != i3 || entityIn.chunkCoordY != j3 || entityIn.chunkCoordZ != k3) {
             if (entityIn.addedToChunk && this.isChunkLoaded(entityIn.chunkCoordX, entityIn.chunkCoordZ, true)) {
-                this.getChunk(entityIn.chunkCoordX, entityIn.chunkCoordZ).removeEntityAtIndex(entityIn, entityIn.chunkCoordY);
+                this.getChunk(entityIn.chunkCoordX, entityIn.chunkCoordZ)
+                        .removeEntityAtIndex(entityIn, entityIn.chunkCoordY); //client
             }
 
             if (!entityIn.setPositionNonDirty() && !this.isChunkLoaded(i3, k3, true)) {
@@ -3458,8 +3476,9 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public int countEntities(EnumCreatureType type, boolean forSpawnCount) {
         int count = 0;
         for (EntityRemSwapList.E15<Entity> list: realEntityList.getRaw()) {
+            Entity[] raw = list.raw();
             for (int cursor = 0, s = list.sizeC(); cursor < s; ++cursor) {
-                if(list.getC(cursor).isCreatureType(type, forSpawnCount))
+                if(raw[cursor].isCreatureType(type, forSpawnCount))
                     ++count;
             }
         }
@@ -4235,8 +4254,9 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         if((yPos = MathHelper.floor(bb.minY)) < 0 || (maxY = MathHelper.ceil(bb.maxY)) > 255)return false;
         int xPos, maxX, zPos, maxZ;
 
-        if (this.isAreaLoaded0((xPos = MathHelper.floor(bb.minX)), (zPos = MathHelper.floor(bb.minZ)), (maxX = MathHelper.ceil(bb.maxX)),
-                (maxZ = MathHelper.ceil(bb.maxZ)))) {
+        if (this.isAreaLoaded0(
+                (xPos = MathHelper.floor(bb.minX)), (zPos = MathHelper.floor(bb.minZ)),
+                (maxX = MathHelper.ceil(bb.maxX)), (maxZ = MathHelper.ceil(bb.maxZ)))) {
             final ChunkSelector access = localSelector;
             final BlockPos.MutableBlockPos mut = tempPooledLocalPos;
             for (Block block; xPos < maxX; ++xPos)
@@ -4249,6 +4269,30 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
                             return true;
                     }
         }
+        return false;
+    }
+
+
+    @Keep
+    public static boolean isFlammableWithin(ChunkSelector access, BlockPos.MutableBlockPos mut, AxisAlignedBB bb) {
+        int yPos, maxY;
+        if ((yPos = MathHelper.floor(bb.minY)) < 0 || (maxY = MathHelper.ceil(bb.maxY)) > 255) return false;
+        int xPos = MathHelper.floor(bb.minX), maxX = MathHelper.ceil(bb.maxX),
+            zPos = MathHelper.floor(bb.minZ), maxZ = MathHelper.ceil(bb.maxZ);
+
+        for (Block block; xPos < maxX; ++xPos)
+            for (; zPos < maxZ; ++zPos) {
+                Chunk chunk = access.getLoadedE(xPos >> 4, zPos >> 4);
+                if (chunk == null) return false;
+                for (; yPos < maxY; ++yPos) {
+                    block = chunk.getBlockStateUnchecked(xPos, yPos, zPos).getBlock();
+                    if (block == Blocks.FIRE || block == Blocks.FLOWING_LAVA || block == Blocks.LAVA)
+                        return true;
+                    else if (block.isBurning(access, mut.setPos(xPos, yPos, zPos)))
+                        return true;
+                }
+            }
+
         return false;
     }
 
@@ -4273,6 +4317,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             for (final BlockPos.MutableBlockPos pos = tempPooledLocalPos; xPos < maxX; ++xPos) {
                 for (; zPos < maxZ; ++zPos) {
                     Chunk chunk = access.getChunkE(xPos>>4,zPos>>4);
+                    if(chunk == null)return false;
                     for (; yPos < maxY; ++yPos) {
                         block = (state = chunk.getBlockStateUnchecked(xPos, yPos, zPos)).getBlock();
 
@@ -4330,23 +4375,70 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             for (int zPos = minZ; zPos < maxZ; ++zPos) {
                 final boolean flag3 = zPos == minZ || zPos == maxZ - 1;
 
-                if ((!flag2 || !flag3) && (chunk = selector.getLoadedE(xPos >> 4, zPos >> 4)) != null)
+                if ((!flag2 || !flag3) && (chunk = selector.getLoadedE(xPos >> 4, zPos >> 4)) != null) {
+                    ExtendedBlockStorage[] arrs = chunk.getBlockStorageArray();
                     for (int yPos = minY; yPos < maxY; ++yPos)
                         if (!flag2 && !flag3 || yPos != maxY - 1) {
-
+                            mut.setPosB(xPos, yPos, zPos);
                             if (flag1) {
-                                chunk.getBlockStateUnchecked(xPos, yPos, zPos)
-                                        .addCollisionBoxToListF(selector, mut.setPos(xPos, yPos, zPos), aabb, outList);
+                                Chunk.getBlockStateUncheckedST(arrs, xPos, yPos, zPos)
+                                        .addCollisionBoxToListF(selector, mut, aabb, outList);
                             } else {
-                                if(isInWorldBorder(xPos, zPos)){
-                                    chunk.getBlockStateUnchecked(xPos, yPos, zPos)
-                                            .addCollisionBoxToListF(selector, mut.setPos(xPos, yPos, zPos), aabb, outList);
+                                if (isInWorldBorder(xPos, zPos)) {
+                                    Chunk.getBlockStateUncheckedST(arrs, xPos, yPos, zPos)
+                                            .addCollisionBoxToListF(selector, mut, aabb, outList);
                                 } else {
                                     BlockIDIndexes.STONE_STATE
-                                            .addCollisionBoxToListF(selector, mut.setPos(xPos, yPos, zPos), aabb, outList);
+                                            .addCollisionBoxToListF(selector, mut, aabb, outList);
                                 }
                             }
                         }
+                }
+            }
+        }
+    }
+
+
+    //is thread-safe
+    @Keep
+    public void getCollisionBoxesFast(ChunkSelector selector, BlockPos.MutableBlockPos mut, Entity entityIn, AxisAlignedBB aabb, AABBList outList) {
+        int minX = MathHelper.floor(aabb.minX) - 1;
+        int maxX = MathHelper.ceil(aabb.maxX) + 1;
+        int minY = MathHelper.floor(aabb.minY) - 1;
+        if (minY < 0)minY = 0;
+        int maxY = MathHelper.ceil(aabb.maxY) + 1;
+        if (maxY > 255)maxY = 255;
+        int minZ = MathHelper.floor(aabb.minZ) - 1;
+        int maxZ = MathHelper.ceil(aabb.maxZ) + 1;
+
+        boolean flag1 = entityIn == null || isInsideWorldBorder(entityIn);
+
+        Chunk chunk;
+
+        for (int xPos = minX; xPos < maxX; ++xPos) {
+            final boolean flag2 = xPos == minX || xPos == maxX - 1;
+            for (int zPos = minZ; zPos < maxZ; ++zPos) {
+                final boolean flag3 = zPos == minZ || zPos == maxZ - 1;
+
+                if ((!flag2 || !flag3) && (chunk = selector.getLoadedE(xPos >> 4, zPos >> 4)) != null) {
+                    ExtendedBlockStorage[] arrs = chunk.getBlockStorageArray();
+                    for (int yPos = minY; yPos < maxY; ++yPos)
+                        if (!flag2 && !flag3 || yPos != maxY - 1) {
+                            mut.setPosB(xPos, yPos, zPos);
+                            if (flag1) {
+                                Chunk.getBlockStateUncheckedST(arrs, xPos, yPos, zPos)
+                                        .addCollisionBoxToListF(selector, mut, aabb, outList);
+                            } else {
+                                if (isInWorldBorder(xPos, zPos)) {
+                                    Chunk.getBlockStateUncheckedST(arrs, xPos, yPos, zPos)
+                                            .addCollisionBoxToListF(selector, mut, aabb, outList);
+                                } else {
+                                    BlockIDIndexes.STONE_STATE
+                                            .addCollisionBoxToListF(selector, mut, aabb, outList);
+                                }
+                            }
+                        }
+                }
             }
         }
     }

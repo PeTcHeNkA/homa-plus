@@ -95,10 +95,12 @@ public class BlockGrass extends BlockFx implements IGrowable {
     public void updateTick(final World world, final BlockPos pos, IBlockState state, final Random rand) {
         if (!world.isRemote) {
             ChunkSelector selector = world.localSelector;
-            if (selector.isAreaLoaded3(pos.getX(), pos.getX())) {
-                int num = world.getLight(pos.getX(), pos.getY() + 1, pos.getZ(), true);
+            final int posX, posZ;
+            if (selector.isAreaLoaded3(posX = pos.getX(), posZ = pos.getX())) {
+                final int posY;
+                int num = world.getLight(posX, (posY = pos.getY()) + 1, posZ, true);
 
-                final BlockPos up = world.localTempPos.setPos(pos.getX(), pos.getY() + 1, pos.getZ());
+                final BlockPos up = world.localTempPos.setPos(posX, posY + 1, posZ);
 
                 if (num < 4 && selector.getState(up).getLightOpacity(world, up) > 2) {
                     selector.setBlockState(pos, Blocks.DIRT.getDefaultState(), 2);
@@ -109,9 +111,9 @@ public class BlockGrass extends BlockFx implements IGrowable {
                     for (int i = 0; i < 4; ++i) {
                         num = rand.nextInt();
                         blockPos.setPosB(
-                                pos.getX() + (( num       & 3) % 3) - 1,
-                                pos.getY() + (((num >> 4) & 7) % 5) - 3,
-                                pos.getZ() + (((num >> 2) & 3) % 3) - 1
+                                posX + (( num       & 3) % 3) - 1,
+                                posY + (((num >> 4) & 7) % 5) - 3,
+                                posZ + (((num >> 2) & 3) % 3) - 1
                         );
                         if (blockPos.getY() < 0 || blockPos.getY() > 255) return;
                         Chunk chunk = cache.getExecutor(blockPos.getX() >> 4, blockPos.getZ() >> 4).getLoadedChunk();

@@ -12,7 +12,7 @@ public class NavigationCache {
     private final PathNodeType.Set localSet = new PathNodeType.Set();
     private Map<Class<? extends EntityLiving>, Integer> keys = ImmutableMap.of();
     private Map<Integer, Field> cache = ImmutableMap.of();
-    private final Field root = new Field(new PntMatrix(localSet));
+    private final Field root = new Field(new PntMatrix());
     private final ArrayList<Field> allFields = new ArrayList<>();
     public static final int FLY_ID   = 1001;
     public static final int WATER_ID = 1002;
@@ -57,7 +57,7 @@ public class NavigationCache {
 
     public PntMatrix getBy(EntityLiving entity){
         Field field = getFieldBy(entity.getClass());
-        return field.matrix==null?field.matrix = new PntMatrix(localSet): field.matrix;
+        return field.matrix==null?field.matrix = new PntMatrix(): field.matrix;
     }
 
 
@@ -69,13 +69,13 @@ public class NavigationCache {
             cache = ImmutableMap.copyOf(map);
             allFields.add(field);
         }
-        return field.matrix==null?field.matrix = new PntMatrix(localSet): field.matrix;
+        return field.matrix==null?field.matrix = new PntMatrix(): field.matrix;
     }
 
 
     public PntMatrix getBy(Class<? extends EntityLiving> clazz){
         Field field = getFieldBy(clazz);
-        return field.matrix==null?field.matrix = new PntMatrix(localSet): field.matrix;
+        return field.matrix==null?field.matrix = new PntMatrix(): field.matrix;
     }
 
 

@@ -7,12 +7,13 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import plus.fserver.api.IBlockEAccess;
+import plus.fserver.server.elca.ChunkLSECache;
 import plus.fserver.utls.collections.PointHashMap;
 
 
 public abstract class NodeProcessor extends PointHashMap{
     protected final BlockPos.MutableBlockPos pooledPos;
-    protected IBlockEAccess blockaccess;
+    //protected ChunkLSECache blockaccess;
     protected EntityLiving entity;
     protected byte entitySizeX;
     protected byte entitySizeY;
@@ -36,8 +37,7 @@ public abstract class NodeProcessor extends PointHashMap{
     }
 
 
-    public void init(IBlockAccess sourceIn, EntityLiving mob) {
-        this.blockaccess = (IBlockEAccess) sourceIn;
+    public void init(EntityLiving mob) {
         this.entity = mob;
         super.clearMap();
         this.entitySizeX = (byte)MathHelper.floor(mob.width  + 0.95F);
@@ -47,12 +47,11 @@ public abstract class NodeProcessor extends PointHashMap{
 
 
     public void postProcess() {
-        this.blockaccess = null;
         this.entity = null;
     }
 
 
-    protected PathPoint openPoint(int x, int y, int z) {
+    protected PathPoint openPoint(ChunkLSECache access, int x, int y, int z) {
         int hash;
         PathPoint point;
         if ((point = super.lookup(
@@ -69,19 +68,19 @@ public abstract class NodeProcessor extends PointHashMap{
     }
 
 
-    public abstract PathPoint getStart();
+    public abstract PathPoint getStart(ChunkLSECache access);
 
 
-    public abstract PathPoint getPathPointToCoords(double x, double y, double z);
+    public abstract PathPoint getPathPointToCoords(ChunkLSECache access, double x, double y, double z);
 
 
-    public abstract int findPathOptions(PathPoint[] pathOptions, PathPoint currentPoint, PathPoint targetPoint, float maxDistance);
+    public abstract int findPathOptions(ChunkLSECache access, PathPoint[] pathOptions, PathPoint currentPoint, PathPoint targetPoint, float maxDistance);
 
 
-    public abstract PathNodeType getPathNodeType(IBlockEAccess blockaccessIn, int x, int y, int z, EntityLiving entitylivingIn, int xSize, int ySize, int zSize, boolean canBreakDoorsIn, boolean canEnterDoorsIn);
+    public abstract PathNodeType getPathNodeType(ChunkLSECache access, int x, int y, int z, EntityLiving entitylivingIn, int xSize, int ySize, int zSize, boolean canBreakDoorsIn, boolean canEnterDoorsIn);
 
 
-    public abstract PathNodeType getPathNodeType(IBlockEAccess blockaccessIn, int x, int y, int z);
+    public abstract PathNodeType getPathNodeType(ChunkLSECache access, int x, int y, int z);
 
 
     public void setCanEnterDoors(boolean canEnterDoorsIn) {

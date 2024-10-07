@@ -180,7 +180,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
         ClassInheritanceMultiMap[] lists = this.entityLists = new ClassInheritanceMultiMap[16];
 
-        if(worldIn.isRemote && !SERVER_COMPILE) {
+        if(worldIn != null && worldIn.isRemote && !SERVER_COMPILE) {
             for (int i = 0; i < lists.length; ++i) {
                 lists[i] = new ClassInheritanceMultiMap<>(Entity.class);
             }
@@ -544,6 +544,13 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
     }
 
 
+    public static IBlockState getBlockStateUncheckedST(ExtendedBlockStorage[] arr, final int x, final int y, final int z){
+        ExtendedBlockStorage storage;
+        if((storage = arr[y >> 4]) == null) return BlockIDIndexes.AIR_STATE;
+        return storage.get(x & 15, y & 15, z & 15);
+    }
+
+
     @Nullable
     public IBlockState setBlockState(final BlockPos pos, final IBlockState state) {
         int px = pos.getX() & 15, py = pos.getY(), pz = pos.getZ() & 15, xzIndex = pz << 4 | px;
@@ -556,9 +563,10 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
         if (prev == state) {
             return null;
         } else {
+            World world;
             int i1 = this.heightMap[xzIndex] & 255;
             Block block = state.getBlock(), prevBlock = prev.getBlock();
-            int k1 = prev.getLightOpacity(this.world, pos); // Relocate old light value lookup here, so that it is called before TE is removed.
+            int k1 = prev.getLightOpacity(world = this.world, pos); // Relocate old light value lookup here, so that it is called before TE is removed.
             ExtendedBlockStorage storage = this.storageArrays[py >> 4];
             boolean flag = false;
 
@@ -566,24 +574,24 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
                 if (block == Blocks.AIR) {
                     return null;
                 }
-                storage = new ExtendedBlockStorage(py >> 4 << 4, this.world.provider.hasSkyLight());
+                storage = new ExtendedBlockStorage(py >> 4 << 4, world.provider.hasSkyLight());
                 this.storageArrays[py >> 4] = storage;
                 flag = py >= i1;
             }
 
             storage.set(px, py & 15, pz, state);
 
-            if (!this.world.isRemote) {
-                if (prevBlock != block) prevBlock.breakBlock(this.world, pos, prev);
+            if (!world.isRemote || SERVER_COMPILE) {
+                if (prevBlock != block) prevBlock.breakBlock(world, pos, prev);
 
                 TileEntity te = this.getTileEntity(pos, Chunk.EnumCreateEntityType.CHECK);
-                if (te != null && te.shouldRefresh(this.world, pos, prev, state))
-                    this.world.removeTileEntity(pos);
+                if (te != null && te.shouldRefresh(world, pos, prev, state))
+                    world.removeTileEntity(pos);
 
             } else if (prev.hasTile()) {
                 TileEntity te = this.getTileEntity(pos, Chunk.EnumCreateEntityType.CHECK);
-                if (te != null && te.shouldRefresh(this.world, pos, prev, state))
-                    this.world.removeTileEntity(pos);
+                if (te != null && te.shouldRefresh(world, pos, prev, state))
+                    world.removeTileEntity(pos);
             }
 
             if (storage.get(px, py & 15, pz).getBlock() != block) {
@@ -592,7 +600,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
                 if (flag) {
                     this.generateSkylightMap();
                 } else {
-                    int j1 = state.getLightOpacity(this.world, pos);
+                    int j1 = state.getLightOpacity(world, pos);
 
                     if (j1 > 0) {
                         if (py >= i1) {
@@ -608,16 +616,16 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
                 }
 
                 // If capturing blocks, only run block physics for TE's. Non-TE's are handled in ForgeHooks.onPlaceItemIntoWorld
-                if (!this.world.isRemote && prevBlock != block && (!this.world.captureBlockSnapshots || state.hasTile())) {
-                    block.onBlockAdded(this.world, pos, state);
+                if (!world.isRemote && prevBlock != block && (!world.captureBlockSnapshots || state.hasTile())) {
+                    block.onBlockAdded(world, pos, state);
                 }
 
                 if (state.hasTile()) {
                     TileEntity tileEntity = this.getTileEntity(pos, Chunk.EnumCreateEntityType.CHECK);
 
                     if (tileEntity == null) {
-                        tileEntity = block.createTileEntity(this.world, state);
-                        this.world.setTileEntity(pos, tileEntity);
+                        tileEntity = block.createTileEntity(world, state);
+                        world.setTileEntity(pos, tileEntity);
                     }
 
                     if (tileEntity != null) {
@@ -776,7 +784,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
 
     public void removeEntity(Entity entityIn) {
-        this.removeEntityAtIndex(entityIn, entityIn.chunkCoordY);
+        this.removeEntityAtIndex(entityIn, entityIn.chunkCoordY); //self
     }
 
 
