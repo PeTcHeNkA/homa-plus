@@ -46,8 +46,8 @@ public abstract class StructureComponent {
         nbttagcompound.setString("id", MapGenStructureIO.getStructureComponentName(this));
         nbttagcompound.setTag("BB", this.boundingBox.toNBTTagIntArray());
         EnumFacing enumfacing = this.getCoordBaseMode();
-        nbttagcompound.setInteger("O", enumfacing == null ? -1 : enumfacing.getHorizontalIndex());
-        nbttagcompound.setInteger("GD", this.componentType);
+        nbttagcompound.setIntegerU("O", enumfacing == null ? -1 : enumfacing.getHorizontalIndex());
+        nbttagcompound.setIntegerU("GD", this.componentType);
         this.writeStructureToNBT(nbttagcompound);
         return nbttagcompound;
     }
@@ -284,10 +284,10 @@ public abstract class StructureComponent {
 
 
     protected int getSkyBrightness(ChunkSelector selector, int x, int y, int z, StructureBoundingBox box) {
-        BlockPos pos;
-        return !box.isVecInside(pos = new BlockPos(
-                this.getXWithOffset(x, z), this.getYWithOffset(y + 1), this.getZWithOffset(x, z))
-        ) ? EnumSkyBlock.SKY.defaultLightValue : selector.getLightFor(EnumSkyBlock.SKY, pos);
+        int bx, by, bz;
+        return !box.isVecInside(
+                bx = this.getXWithOffset(x, z), by = this.getYWithOffset(y + 1), bz = this.getZWithOffset(x, z)
+        ) ? EnumSkyBlock.SKY.defaultLightValue : selector.getLightFor(EnumSkyBlock.SKY, bx, by, bz);
     }
 
 

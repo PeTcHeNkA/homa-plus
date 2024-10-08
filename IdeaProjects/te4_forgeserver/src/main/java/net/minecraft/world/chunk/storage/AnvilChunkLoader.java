@@ -180,7 +180,7 @@ public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO {
             NBTTagCompound compound = new NBTTagCompound();
             NBTTagCompound compound1 = new NBTTagCompound();
             compound.setTag(SStrings.CL_LEVEL, compound1);
-            compound.setInteger("DataVersion", 1343);
+            compound.setTagU("DataVersion", NbtUtils.DATA_VERSION);
             FMLCommonHandler.instance().getDataFixer().writeVersionData(compound);
             this.writeChunkToNBT(chunkIn, worldIn, compound1);
             ForgeChunkManager.storeChunkNBT(chunkIn, compound1);
@@ -317,7 +317,7 @@ public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO {
         for (ExtendedBlockStorage storage : aextendedblockstorage) {
             if (storage != Chunk.NULL_BLOCK_STORAGE) {
                 NBTTagCompound tag = new NBTTagCompound();
-                tag.setByte("Y", (byte)(storage.getYLocation() >> 4 & 255));
+                tag.setByteU("Y", (byte)(storage.getYLocation() >> 4 & 255));
                 byte[] abyte = new byte[4096];
                 NibbleArray nibblearray = new NibbleArray();
                 NibbleArray nibblearray1 = storage.getDataForNBT(abyte, nibblearray);
@@ -384,10 +384,10 @@ public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO {
                 ResourceLocation resourcelocation = Block.REGISTRY.getNameForObject(nextticklistentry.getBlock());
                 nbttagcompound1.setString("i", resourcelocation == null ? "" : resourcelocation.toString());
                 nbttagcompound1.setInteger("x", nextticklistentry.position.getX());
-                nbttagcompound1.setInteger("y", nextticklistentry.position.getY());
+                nbttagcompound1.setIntegerU("y", nextticklistentry.position.getY());
                 nbttagcompound1.setInteger("z", nextticklistentry.position.getZ());
-                nbttagcompound1.setInteger("t", (int)(nextticklistentry.scheduledTime - j));
-                nbttagcompound1.setInteger("p", nextticklistentry.priority);
+                nbttagcompound1.setIntegerU("t", (int)(nextticklistentry.scheduledTime - j));
+                nbttagcompound1.setIntegerU("p", nextticklistentry.priority);
                 nbttaglist3.appendTag(nbttagcompound1);
             }
             compound.setTag(SStrings.CL_TILE_TICKS, nbttaglist3);

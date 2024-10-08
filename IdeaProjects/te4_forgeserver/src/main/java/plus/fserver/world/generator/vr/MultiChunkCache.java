@@ -49,7 +49,7 @@ public class MultiChunkCache{
             if(prevCX != lx || prevZX != lz){
                 chunk = world.getChunk(lx = prevCX, lz = prevZX);
             }
-            return chunk.getBlockState(new BlockPos(x, y, z));
+            return chunk.getBlockState(x, y, z);
         }
     }
 

@@ -67,7 +67,7 @@ public class ItemBlock extends Item {
                 final NBTTagCompound nbttagcompound3 = nbttagcompound2.copy();
                 nbttagcompound2.merge(nbttagcompound);
                 nbttagcompound2.setInteger("x", pos.getX());
-                nbttagcompound2.setInteger("y", pos.getY());
+                nbttagcompound2.setIntegerU("y", pos.getY());
                 nbttagcompound2.setInteger("z", pos.getZ());
                 if (!nbttagcompound2.equals(nbttagcompound3)) {
                     tileentity.readFromNBT(nbttagcompound2);

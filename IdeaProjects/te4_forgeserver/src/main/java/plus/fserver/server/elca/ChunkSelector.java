@@ -128,6 +128,13 @@ public final class ChunkSelector implements IBlockEAccess {
     }
 
 
+    public int getLightFor(EnumSkyBlock type, int x, int y, int z) {
+        if(y < 0 || y > 255)return type.defaultLightValue;
+        Chunk chunk1 = getLoadedE(x>>4, z>>4);
+        return chunk1 == null?type.defaultLightValue:chunk1.getLightFor(type, x, y, z);
+    }
+
+
     public IBlockState getState(BlockPos pos){
         return getChunkE(pos.getX()>>4, pos.getZ()>>4).getBlockState(pos);
     }
@@ -189,6 +196,11 @@ public final class ChunkSelector implements IBlockEAccess {
 
 
     public void setCurState(BlockPos pos, IBlockState state){
+        chunk.setBlockState(pos, state);
+    }
+
+
+    public void setCurState(BlockPos.MutableBlockPos pos, IBlockState state){
         chunk.setBlockState(pos, state);
     }
 
@@ -265,6 +277,24 @@ public final class ChunkSelector implements IBlockEAccess {
 
     @Override
     public boolean setBlockState(BlockPos pos, IBlockState newState, int flags) {
+        int px, py, pz;
+        if ((py = pos.getY()) > 255 || py < 1) return false;
+        Chunk chunk = getChunkE((px = pos.getX())>>4, (pz = pos.getZ())>>4);
+        IBlockState oldState = chunk.getBlockStateUnchecked(px, py, pz);
+
+        if (newState.getLightOpacity(this, pos) != oldState.getLightOpacity(this, pos) ||
+                newState.getLightValue(this, pos) != oldState.getLightValue(this, pos)) {
+            chunk.setBlockState(pos, newState);
+            provider.world.checkLight(pos);
+        } else {
+            chunk.setBlockStateFast(px, py, pz, oldState, newState);
+        }
+        provider.world.markAndNotifyBlock(pos, chunk, oldState, newState, flags);
+        return true;
+    }
+
+
+    public boolean setBlockState(BlockPos.MutableBlockPos pos, IBlockState newState, int flags) {
         int px, py, pz;
         if ((py = pos.getY()) > 255 || py < 1) return false;
         Chunk chunk = getChunkE((px = pos.getX())>>4, (pz = pos.getZ())>>4);

@@ -41,6 +41,7 @@ import org.apache.logging.log4j.Logger;
 import plus.fserver.ElcaConfig;
 import plus.fserver.ElcaMobs;
 import plus.fserver.server.elca.ChunkSelector;
+import plus.fserver.utls.NbtUtils;
 import plus.fserver.utls.collections.AABBList;
 import plus.fserver.utls.collections.ArrayListE6;
 import java.util.Random;
@@ -337,7 +338,12 @@ public class EntityItem extends Entity {
         nbt.setShortU("Health", (short)this.health);
         nbt.setShort("Age", (short)this.age);
         nbt.setShortU("PickupDelay", (short)this.pickupDelay);
-        nbt.setInteger("Lifespan", lifespan);
+        int lifespan = this.lifespan;
+        if(lifespan == 6000){
+            nbt.setTagU("Lifespan", NbtUtils.ITEM_DEFAULT_LIFESPAN);
+        } else {
+            nbt.setInteger("Lifespan", lifespan);
+        }
 
         if (this.getThrower() != null) {
             nbt.setString("Thrower", this.thrower);

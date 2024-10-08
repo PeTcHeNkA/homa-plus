@@ -256,8 +256,8 @@ public class EntityRabbit extends EntityAnimal {
     @Override
     public void writeEntityToNBT(NBTTagCompound nbt) {
         super.writeEntityToNBT(nbt);
-        nbt.setInteger("RabbitType", this.getRabbitType());
-        nbt.setInteger("MoreCarrotTicks", this.carrotTicks);
+        nbt.setIntegerU("RabbitType", this.getRabbitType());
+        nbt.setIntegerU("MoreCarrotTicks", this.carrotTicks);
     }
 
 

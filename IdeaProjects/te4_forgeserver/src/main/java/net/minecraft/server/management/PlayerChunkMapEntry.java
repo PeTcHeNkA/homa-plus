@@ -151,7 +151,7 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements C
         Chunk chunk;
         if ((chunk = this.chunk) == null) {
             return false;
-        } else if (!chunk.isPopulated()) {
+        } else if (!chunk.maybeSend()) {
             return false;
         } else {
             if (isEmpty()) {
@@ -161,6 +161,9 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements C
                 chunk.setSentToPlayers(true);
                 return true;
             } else try {
+                if(!chunk.isLightPopulated()){
+                    chunk.checkLight();
+                }
                 int size;
                 if((size = this.size) > 0){
                     SPacketChunkData packet = new SPacketChunkData(chunk, 65535, size==1);

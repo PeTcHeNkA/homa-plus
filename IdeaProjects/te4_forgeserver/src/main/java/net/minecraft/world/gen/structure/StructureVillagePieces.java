@@ -1279,23 +1279,23 @@ public class StructureVillagePieces {
             this.length = Math.max(p_i45562_4_.getXSize(), p_i45562_4_.getZSize());
         }
 
+
         protected void writeStructureToNBT(NBTTagCompound tagCompound) {
             super.writeStructureToNBT(tagCompound);
-            tagCompound.setInteger("Length", this.length);
+            tagCompound.setIntegerU("Length", this.length);
         }
 
-        protected void readStructureFromNBT(NBTTagCompound tagCompound, TemplateManager p_143011_2_)
-        {
+
+        protected void readStructureFromNBT(NBTTagCompound tagCompound, TemplateManager p_143011_2_) {
             super.readStructureFromNBT(tagCompound, p_143011_2_);
             this.length = tagCompound.getInteger("Length");
         }
 
-        public void buildComponent(StructureComponent componentIn, List<StructureComponent> listIn, Random rand)
-        {
+
+        public void buildComponent(StructureComponent componentIn, List<StructureComponent> listIn, Random rand) {
             boolean flag = false;
 
-            for (int i = rand.nextInt(5); i < this.length - 8; i += 2 + rand.nextInt(5))
-            {
+            for (int i = rand.nextInt(5); i < this.length - 8; i += 2 + rand.nextInt(5)) {
                 StructureComponent structurecomponent = this.getNextComponentNN((StructureVillagePieces.Start)componentIn, listIn, rand, 0, i);
 
                 if (structurecomponent != null)
@@ -1555,9 +1555,9 @@ public class StructureVillagePieces {
 
 
         protected void writeStructureToNBT(NBTTagCompound tagCompound) {
-            tagCompound.setInteger("HPos", this.averageGroundLvl);
-            tagCompound.setInteger("VCount", this.villagersSpawned);
-            tagCompound.setByte("Type", (byte)this.structureType);
+            tagCompound.setIntegerU("HPos", this.averageGroundLvl);
+            tagCompound.setIntegerU("VCount", this.villagersSpawned);
+            tagCompound.setByteU("Type", (byte)this.structureType);
             tagCompound.setBoolean("Zombie", this.isZombieInfested);
         }
 
@@ -1945,7 +1945,7 @@ public class StructureVillagePieces {
 
         protected void writeStructureToNBT(NBTTagCompound tagCompound) {
             super.writeStructureToNBT(tagCompound);
-            tagCompound.setInteger("T", this.tablePosition);
+            tagCompound.setIntegerU("T", this.tablePosition);
             tagCompound.setBoolean("C", this.isTallHouse);
         }
 

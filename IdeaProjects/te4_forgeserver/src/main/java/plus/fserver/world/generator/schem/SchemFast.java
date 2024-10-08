@@ -47,6 +47,7 @@ public class SchemFast extends Schem implements ITSchem{
             int prewReqChunkZ = Integer.MIN_VALUE;
 
             Chunk chunk = null;
+            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
 
             for(Stolb stolb:stolbs){
 				int bx = stolb.x - senX + x;
@@ -62,7 +63,8 @@ public class SchemFast extends Schem implements ITSchem{
                 for(StolbInfo inf:stolb.blocks){
                     int by = y + inf.y;
                     if(by<255 && by>0){
-                        chunk.setBlockState(new BlockPos(bx, by, bz), inf.state);
+                        mut.setPosB(bx, by, bz);
+                        chunk.setBlockState(mut, inf.state);
                     }
                 }
             }

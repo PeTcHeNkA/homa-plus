@@ -419,15 +419,15 @@ public abstract class EntityArrow extends Entity implements IProjectile {
     @Override
     public void writeEntityToNBT(final NBTTagCompound compound) {
         compound.setInteger("xTile", this.xTile);
-        compound.setInteger("yTile", this.yTile);
+        compound.setIntegerU("yTile", this.yTile);
         compound.setInteger("zTile", this.zTile);
-        compound.setShort("life", (short)this.ticksInGround);
+        compound.setShortU("life", (short)this.ticksInGround);
         final ResourceLocation resourcelocation = Block.REGISTRY.getNameForObject(this.inTile);
         compound.setString("inTile", (resourcelocation == null) ? "" : resourcelocation.toString());
-        compound.setByte("inData", (byte)this.inData);
-        compound.setByte("shake", (byte)this.arrowShake);
-        compound.setByte("inGround", (byte)(this.inGround ? 1 : 0));
-        compound.setByte("pickup", (byte)this.pickupStatus.ordinal());
+        compound.setByteU("inData", (byte)this.inData);
+        compound.setByteU("shake", (byte)this.arrowShake);
+        compound.setByteU("inGround", (byte)(this.inGround ? 1 : 0));
+        compound.setByteU("pickup", (byte)this.pickupStatus.ordinal());
         compound.setDouble("damage", this.damage);
         compound.setBoolean("crit", this.getIsCritical());
     }

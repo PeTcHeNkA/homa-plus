@@ -257,12 +257,12 @@ public abstract class EntityThrowable extends Entity implements IProjectile {
     @Override
     public void writeEntityToNBT(final NBTTagCompound compound) {
         compound.setInteger("xTile", this.xTile);
-        compound.setInteger("yTile", this.yTile);
+        compound.setIntegerU("yTile", this.yTile);
         compound.setInteger("zTile", this.zTile);
         final ResourceLocation resourcelocation = Block.REGISTRY.getNameForObject(this.inTile);
         compound.setString("inTile", (resourcelocation == null) ? "" : resourcelocation.toString());
-        compound.setByte("shake", (byte)this.throwableShake);
-        compound.setByte("inGround", (byte)(this.inGround ? 1 : 0));
+        compound.setByteU("shake", (byte)this.throwableShake);
+        compound.setByteU("inGround", (byte)(this.inGround ? 1 : 0));
         if ((this.throwerName == null || this.throwerName.isEmpty()) && this.thrower instanceof EntityPlayer) {
             this.throwerName = this.thrower.getName();
         }

@@ -1,17 +1,15 @@
 package plus.fserver.utls.collections;
 
-import io.netty.util.internal.shaded.org.jctools.queues.ConcurrentCircularArrayQueue;
-
-import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class PooledLongQueue {
     private static final int CACHED_QUEUE_SEGMENTS_COUNT = 4096;
     private static final int QUEUE_SEGMENT_SIZE = 1024;
     private final Pool pool;
-    private Segment cur;
-    private Segment last;
+    Segment cur;
+    Segment last;
     private int size;
     private volatile boolean empty;
     
@@ -36,20 +34,25 @@ public class PooledLongQueue {
             final Segment segment = this.pool.acquire();
             this.last = segment;
             this.cur = segment;
-        }
-        if (this.last.index == 1024) {
-            final Segment ret = this.last.next = this.last.pool.acquire();
-            ret.longArray[ret.index++] = val;
-            this.last = ret;
+            segment.index = 1;
+            segment.longArray[0] = val;
         } else {
-            this.last.longArray[this.last.index++] = val;
+            Segment last;
+            if ((last = this.last).index == 1024) {
+                final Segment ret = last.next = last.pool.acquire();
+                ret.index = 1;
+                ret.longArray[0] = val;
+                this.last = ret;
+            } else {
+                last.longArray[last.index++] = val;
+            }
         }
         ++this.size;
     }
 
 
     public LongQueueIterator iterator() {
-        return new LongQueueIterator(this.cur);
+        return new LongQueueIterator(this);
     }
 
 
@@ -66,17 +69,37 @@ public class PooledLongQueue {
     }
 
 
-    public class LongQueueIterator {
-        private Segment cur;
-        private long[] curArray;
-        private int index;
-        private int capacity;
+    public static class LongQueueIterator {
+        PooledLongQueue parent;
+        Segment cur;
+        long[] curArray;
+        int index;
+        int capacity;
+
+        public LongQueueIterator(){}
         
-        private LongQueueIterator(final Segment cur) {
+        LongQueueIterator(final PooledLongQueue parent) {
+            final Segment cur = parent.cur;
+            this.parent = parent;
             this.cur = cur;
             if (this.cur != null) {
                 this.curArray = cur.longArray;
                 this.capacity = cur.index;
+            }
+        }
+
+
+        public void init(final PooledLongQueue parent){
+            final Segment cur = parent.cur;
+            this.parent = parent;
+            this.index = 0;
+            this.cur = cur;
+            if (cur != null) {
+                this.curArray = cur.longArray;
+                this.capacity = cur.index;
+            } else {
+                this.curArray = null;
+                this.capacity = 0;
             }
         }
 
@@ -90,8 +113,8 @@ public class PooledLongQueue {
             final long ret = this.curArray[this.index++];
             if (this.index == this.capacity) {
                 this.index = 0;
-                this.cur = this.cur.next;
-                if (this.cur != null) {
+                Segment cur = this.cur = this.cur.next;
+                if (cur != null) {
                     this.curArray = this.cur.longArray;
                     this.capacity = this.cur.index;
                 }
@@ -101,50 +124,52 @@ public class PooledLongQueue {
 
 
         public void finish() {
-            PooledLongQueue.this.clear();
+            this.curArray = null;
+            if(parent != null) parent.clear();
+            this.parent = null;
         }
     }
 
 
     public static class Pool extends ConcurrentLinkedDeque<Segment>{
-        //private final Deque<Segment> segmentPool;
-        
-        public Pool() {
-            //this.segmentPool = new ConcurrentLinkedDeque<>();
-            //this.segmentPool = new ArrayDeque<>();
-        }
+        private final AtomicInteger size = new AtomicInteger();
+        public Pool() {}
 
-
-        private Segment acquire() {
+        Segment acquire() {
             Segment segment = pollFirst();
             if (segment == null) {
                 return new Segment(this);
+            } else {
+                size.decrementAndGet();
             }
             return segment;
         }
 
 
-        private void release(final Segment segment) {
-            if (super.size() < CACHED_QUEUE_SEGMENTS_COUNT) {
+        void release(final Segment segment) {
+            AtomicInteger s;
+            if ((s = size).get() < CACHED_QUEUE_SEGMENTS_COUNT) {
                 super.push(segment);
+                s.incrementAndGet();
             }
         }
     }
 
 
-    private static class Segment {
+    static final class Segment {
         private final long[] longArray;
         private int index;
         private Segment next;
         private final Pool pool;
         
-        private Segment(final Pool pool) {
+        Segment(final Pool pool) {
             this.longArray = new long[QUEUE_SEGMENT_SIZE];
             this.index = 0;
             this.pool = pool;
         }
-        
-        private void release() {
+
+
+        void release() {
             this.index = 0;
             this.next = null;
             this.pool.release(this);

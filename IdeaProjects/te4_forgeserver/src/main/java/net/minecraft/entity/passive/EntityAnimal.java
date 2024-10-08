@@ -83,7 +83,7 @@ public abstract class EntityAnimal extends EntityAgeable implements IAnimals {
     @Override
     public void writeEntityToNBT(NBTTagCompound compound) {
         super.writeEntityToNBT(compound);
-        compound.setInteger("InLove", this.inLove);
+        compound.setIntegerU("InLove", this.inLove);
 
         if (this.playerInLove != null)
             compound.setUniqueId("LoveCause", this.playerInLove);

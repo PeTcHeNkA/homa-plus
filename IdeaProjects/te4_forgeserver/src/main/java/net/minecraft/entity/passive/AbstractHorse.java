@@ -765,7 +765,7 @@ public abstract class AbstractHorse extends EntityAnimal implements IInventoryCh
         super.writeEntityToNBT(compound);
         compound.setBoolean("EatingHaystack", this.isEatingHaystack());
         compound.setBoolean("Bred", this.isBreeding());
-        compound.setInteger("Temper", this.getTemper());
+        compound.setIntegerU("Temper", this.getTemper());
         compound.setBoolean("Tame", this.isTame());
         if (this.getOwnerUniqueId() != null) {
             compound.setString("OwnerUUID", this.getOwnerUniqueId().toString());

@@ -113,7 +113,7 @@ public class EntityOcelot extends EntityTameable {
     @Override
     public void writeEntityToNBT(final NBTTagCompound compound) {
         super.writeEntityToNBT(compound);
-        compound.setInteger("CatType", this.getTameSkin());
+        compound.setIntegerU("CatType", this.getTameSkin());
     }
 
 

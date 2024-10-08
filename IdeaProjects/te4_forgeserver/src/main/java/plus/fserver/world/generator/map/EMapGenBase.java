@@ -21,10 +21,12 @@ public class EMapGenBase {
         long l1 = rand.nextLong();
         long l2 = rand.nextLong();
 
+        Random subRand = new Random();
+
         for(int num3 = num1 - range; num3 <= num1 + range; ++num3) {
             for(int i = num2 - range; i <= num2 + range; ++i) {
                 rand.setSeed(((long)num3 * l1) ^ ((long)i * l2) ^ world.getSeed());
-                this.recursiveGenerate(world, session, num3, i, num1, num2, primer);
+                this.recursiveGenerate(world, session, subRand, num3, i, num1, num2, primer);
             }
         }
     }
@@ -40,5 +42,5 @@ public class EMapGenBase {
     }
 
 
-    protected void recursiveGenerate(World world, GenSession session, int num1, int num2, int num3, int num4, ChunkPrimer primer) {}
+    protected void recursiveGenerate(World world, GenSession session, Random subRand, int num1, int num2, int num3, int num4, ChunkPrimer primer) {}
 }

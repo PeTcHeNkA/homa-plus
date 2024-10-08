@@ -54,7 +54,7 @@ public class TileEntityHopper extends TileEntityLockableLoot implements IHopper,
         if (!this.checkLootAndWrite(compound)) {
             ItemStackHelper.saveAllItems(compound, this.inventory);
         }
-        compound.setInteger("TransferCooldown", this.transferCooldown);
+        compound.setIntegerU("TransferCooldown", this.transferCooldown);
         if (this.hasCustomName()) {
             compound.setString("CustomName", this.customName);
         }

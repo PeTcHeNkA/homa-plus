@@ -1752,9 +1752,9 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
             tag.setShortU(SStrings.Fire,            this.fire);
             tag.setShortU(SStrings.Air, (short)     this.getAir());
             tag.setBoolean(SStrings.OnGround,       this.onGround);
-            tag.setInteger(SStrings.Dimension,      this.dimension);
+            tag.setIntegerU(SStrings.Dimension,      this.dimension);
             tag.setBoolean(SStrings.Invulnerable,   this.invulnerable);
-            tag.setInteger(SStrings.PortalCooldown, this.timeUntilPortal);
+            tag.setIntegerU(SStrings.PortalCooldown, this.timeUntilPortal);
             tag.setUniqueId(SStrings.UUID,          this.getUniqueID());
 
             if (this.hasCustomName()) {

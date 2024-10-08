@@ -11,6 +11,7 @@ import plus.fserver.world.generator.vr.MultiChunkCache;
 import plus.fserver.utls.math.FastRandom;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Random;
 
 
 public class SchemFrame implements ITSchem{
@@ -58,6 +59,9 @@ public class SchemFrame implements ITSchem{
             int prewReqChunkZ = Integer.MIN_VALUE;
 
             Chunk chunk = null;
+            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+            IBlockState[] states = this.states;
+            Random rand = world.rand;
 
             for(Stolb stolb:stolbs){
                 int bx = stolb.x + x;
@@ -73,7 +77,8 @@ public class SchemFrame implements ITSchem{
                 for(int ys0 :stolb.ys){
                     int by = y + ys0;
                     if(by<255 && by>0){
-                        chunk.setBlockState(new BlockPos(bx, by, bz), states[world.rand.nextInt(states.length)]);
+                        mut.setPosB(bx, by, bz);
+                        chunk.setBlockState(mut, states[rand.nextInt(states.length)]);
                     }
                 }
             }

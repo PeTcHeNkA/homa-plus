@@ -12,7 +12,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import plus.fserver.utls.collections.PooledLongQueue;
-
 import java.util.concurrent.locks.ReentrantLock;
 
 
@@ -32,7 +31,7 @@ public class LightingEngine implements ILightingEngine {
     private long curData;
     private boolean isNeighborDataValid;
     private final NeighborInfo[] neighborInfos;
-    private PooledLongQueue.LongQueueIterator queueIt;
+    private final PooledLongQueue.LongQueueIterator queueIt = new PooledLongQueue.LongQueueIterator();
     private final ReentrantLock lock = new ReentrantLock();
     private PooledLongQueue swap;
 
@@ -104,14 +103,29 @@ public class LightingEngine implements ILightingEngine {
         if (this.updating || this.world.isRemote && !this.isCallingFromMainThread()) {
             return;
         }
-        final PooledLongQueue queue = this.queuedLightUpdates[lightType.ordinal()];
+        PooledLongQueue[] updates;
+        final PooledLongQueue queue = (updates = this.queuedLightUpdates)[lightType.ordinal()];
         if (queue.isEmpty()) return;
-        if(lock.tryLock()) {
+        ReentrantLock lock;
+        if((lock = this.lock).tryLock()) {
+            updates[lightType.ordinal()] = swap;
             try {
                 this.processLightUpdatesForTypeInner(lightType, queue);
+            } catch (Exception e) {
+                onError(e);
             } finally {
+                swap = queue;
                 lock.unlock();
             }
+        }
+    }
+
+
+    private void onError(Exception e){
+        if(!world.isRemote){
+            world.getMinecraftServer().ticker().onError((WorldServer) world, e);
+        } else {
+            throw new RuntimeException(e);
         }
     }
 
@@ -128,14 +142,18 @@ public class LightingEngine implements ILightingEngine {
         if (this.updating || this.world.isRemote && !this.isCallingFromMainThread()) {
             return;
         }
-        final PooledLongQueue queue = this.queuedLightUpdates[lightType.ordinal()];
+        PooledLongQueue[] updates;
+        final PooledLongQueue queue = (updates = this.queuedLightUpdates)[lightType.ordinal()];
         if (queue.isEmpty()) return;
+        ReentrantLock lock;
+        (lock = this.lock).lock();
+        updates[lightType.ordinal()] = swap;
         try {
-            lock.lock();
-            this.queuedLightUpdates[lightType.ordinal()] = swap;
             this.processLightUpdatesForTypeInner(lightType, queue);
-            swap = queue;
+        } catch (Exception e) {
+            onError(e);
         } finally {
+            swap = queue;
             lock.unlock();
         }
     }
@@ -147,24 +165,31 @@ public class LightingEngine implements ILightingEngine {
     }
 
 
+    private void initIter(PooledLongQueue queue){
+        this.queueIt.init(queue);
+    }
+
+
     private void processLightUpdatesForTypeInner(final EnumSkyBlock lightType, final PooledLongQueue queue) {
         this.curChunkIdentifier = -1L;
-        this.queueIt = queue.iterator();
+        initIter(queue);
 
         BlockPos.MutableBlockPos curPos = this.curPos;
 
+        PooledLongQueue initialBrightenings = this.initialBrightenings;
+        PooledLongQueue initialDarkenings = this.initialDarkenings;
         while (this.nextItem()) {
             if (this.curChunk == null) continue;
             final int oldLight = this.getCursorCachedLight(lightType),
                     newLight = this.calculateNewLightFromCursor(curPos, lightType);
             if (oldLight < newLight)
-                this.initialBrightenings.add((long)newLight << 60 | this.curData);
+                initialBrightenings.add((long)newLight << 60 | this.curData);
             else {
                 if (oldLight <= newLight) continue;
-                this.initialDarkenings.add(this.curData);
+                initialDarkenings.add(this.curData);
             }
         }
-        this.queueIt = this.initialBrightenings.iterator();
+        initIter(initialBrightenings);
 
         while (this.nextItem()) {
             final int newLight2 = (int)(this.curData >> 60 & 0xFL);
@@ -173,7 +198,7 @@ public class LightingEngine implements ILightingEngine {
             }
         }
 
-        this.queueIt = this.initialDarkenings.iterator();
+        initIter(initialDarkenings);
         while (this.nextItem()) {
             final int oldLight = this.getCursorCachedLight(lightType);
             if (oldLight != 0) {
@@ -181,8 +206,10 @@ public class LightingEngine implements ILightingEngine {
             }
         }
 
+        PooledLongQueue[] queuedDarkenings = this.queuedDarkenings;
+        PooledLongQueue[] queuedBrightenings = this.queuedBrightenings;
         for (int curLight = 15; curLight >= 0; --curLight) {
-            this.queueIt = this.queuedDarkenings[curLight].iterator();
+            initIter(queuedDarkenings[curLight]);
             while (this.nextItem()) {
                 if (this.getCursorCachedLight(lightType) >= curLight) continue;
                 final IBlockState state = posToState(curPos, this.curChunk);
@@ -200,7 +227,7 @@ public class LightingEngine implements ILightingEngine {
                         final Chunk nChunk = info.chunk;
                         if (nChunk != null) {
                             final int nLight = info.light;
-                            if (nLight != 0) {
+                            if (nLight > 0) { //fixed `-1` value
                                 final BlockPos.MutableBlockPos nPos = info.pos;
                                 if (curLight - this.getPosOpacity(nPos, posToState(nPos, info.section)) >= nLight) {
                                     this.enqueueDarkening(nPos, info.key, nLight, nChunk, lightType);
@@ -217,7 +244,7 @@ public class LightingEngine implements ILightingEngine {
                     this.enqueueBrighteningFromCursor(curLight, lightType);
                 }
             }
-            this.queueIt = this.queuedBrightenings[curLight].iterator();
+            initIter(queuedBrightenings[curLight]);
             while (this.nextItem()) {
                 final int oldLight2 = this.getCursorCachedLight(lightType);
                 if (oldLight2 == curLight) {
@@ -366,17 +393,18 @@ public class LightingEngine implements ILightingEngine {
 
 
     private boolean nextItem() {
-        if (!this.queueIt.hasNext()) {
-            this.queueIt.finish();
-            this.queueIt = null;
+        PooledLongQueue.LongQueueIterator queueIt;
+        if (!(queueIt = this.queueIt).hasNext()) {
+            queueIt.finish();
             return false;
         }
-        this.curData = this.queueIt.next();
+        long curData = this.curData = queueIt.next();
+        BlockPos.MutableBlockPos curPos;
         this.isNeighborDataValid = false;
-        decodeWorldCoord(this.curPos, this.curData);
-        final long chunkIdentifier = this.curData & 0xFFFFFC3FFFFF0L;
+        decodeWorldCoord(curPos = this.curPos, curData);
+        final long chunkIdentifier = curData & 0xFFFFFC3FFFFF0L;
         if (this.curChunkIdentifier != chunkIdentifier) {
-            this.curChunk = this.getChunk(this.curPos);
+            this.curChunk = this.getChunk(curPos);
             this.curChunkIdentifier = chunkIdentifier;
         }
         return true;

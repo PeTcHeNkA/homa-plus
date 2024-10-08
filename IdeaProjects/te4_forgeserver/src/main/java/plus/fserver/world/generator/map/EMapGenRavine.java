@@ -11,11 +11,12 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.ChunkPrimer;
 import plus.fserver.world.generator.GenSession;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicReference;
 
 
 public class EMapGenRavine extends EMapGenBase{
     protected static final IBlockState FLOWING_LAVA = Blocks.FLOWING_LAVA.getDefaultState();
-    private final float[] rs = new float[1024];
+    private static final AtomicReference<float[]> atRs = new AtomicReference<>(null);
 
     protected void addTunnel(GenSession session, long seed, int num1, int num2, ChunkPrimer primer,
                              double p_180707_6_, double p_180707_8_, double p_180707_10_,
@@ -26,6 +27,16 @@ public class EMapGenRavine extends EMapGenBase{
         double d1 = num2 * 16 + 8;
         float f = 0.0F;
         float f1 = 0.0F;
+
+        AtomicReference<float[]> at0;
+        float[] floats = (at0 = atRs).get();
+        if(floats != null) {
+            if (!at0.compareAndSet(floats, null)) {
+                floats = new float[256];
+            }
+        } else {
+            floats = new float[256];
+        }
 
         if (p_180707_16_ <= 0) {
             int i = this.range * 16 - 16;
@@ -41,12 +52,12 @@ public class EMapGenRavine extends EMapGenBase{
 
         float f2 = 1.0F;
 
-        for (int j = 0; j < 256; ++j) {
-            if (j == 0 || random.nextInt(3) == 0) {
+        for (int cursor = 0; cursor < 256; ++cursor) {
+            if (cursor == 0 || random.nextInt(3) == 0) {
                 f2 = 1.0F + random.nextFloat() * random.nextFloat();
             }
 
-            this.rs[j] = f2 * f2;
+            floats[cursor] = f2 * f2;
         }
 
         for (; p_180707_15_ < p_180707_16_; ++p_180707_15_) {
@@ -77,8 +88,7 @@ public class EMapGenRavine extends EMapGenBase{
                     return;
                 }
 
-                if (p_180707_6_ >= d0 - 16.0D - d9 * 2.0D && p_180707_10_ >= d1 - 16.0D - d9 * 2.0D && p_180707_6_ <= d0 + 16.0D + d9 * 2.0D && p_180707_10_ <= d1 + 16.0D + d9 * 2.0D)
-                {
+                if (p_180707_6_ >= d0 - 16.0D - d9 * 2.0D && p_180707_10_ >= d1 - 16.0D - d9 * 2.0D && p_180707_6_ <= d0 + 16.0D + d9 * 2.0D && p_180707_10_ <= d1 + 16.0D + d9 * 2.0D) {
                     int k2 = MathHelper.floor(p_180707_6_ - d9) - num1 * 16 - 1;
                     int k = MathHelper.floor(p_180707_6_ + d9) - num1 * 16 + 1;
                     int l2 = MathHelper.floor(p_180707_8_ - d2) - 1;
@@ -86,29 +96,12 @@ public class EMapGenRavine extends EMapGenBase{
                     int i3 = MathHelper.floor(p_180707_10_ - d9) - num2 * 16 - 1;
                     int i1 = MathHelper.floor(p_180707_10_ + d9) - num2 * 16 + 1;
 
-                    if (k2 < 0) {
-                        k2 = 0;
-                    }
-
-                    if (k > 16) {
-                        k = 16;
-                    }
-
-                    if (l2 < 1) {
-                        l2 = 1;
-                    }
-
-                    if (l > 248) {
-                        l = 248;
-                    }
-
-                    if (i3 < 0) {
-                        i3 = 0;
-                    }
-
-                    if (i1 > 16) {
-                        i1 = 16;
-                    }
+                    if (k2 < 0) k2 = 0;
+                    if (k > 16) k = 16;
+                    if (l2 < 1) l2 = 1;
+                    if (l > 248) l = 248;
+                    if (i3 < 0) i3 = 0;
+                    if (i1 > 16) i1 = 16;
 
                     boolean flag2 = false;
 
@@ -116,13 +109,11 @@ public class EMapGenRavine extends EMapGenBase{
                         for (int k1 = i3; !flag2 && k1 < i1; ++k1) {
                             for (int l1 = l + 1; !flag2 && l1 >= l2 - 1; --l1) {
                                 if (l1 >= 0 && l1 < 256) {
-                                    if (isOceanBlock(primer, j1, l1, k1, num1, num2))
-                                    {
+                                    if (isOceanBlock(primer, j1, l1, k1)) {
                                         flag2 = true;
                                     }
 
-                                    if (l1 != l2 - 1 && j1 != k2 && j1 != k - 1 && k1 != i3 && k1 != i1 - 1)
-                                    {
+                                    if (l1 != l2 - 1 && j1 != k2 && j1 != k - 1 && k1 != i3 && k1 != i1 - 1) {
                                         l1 = l2;
                                     }
                                 }
@@ -130,72 +121,69 @@ public class EMapGenRavine extends EMapGenBase{
                         }
                     }
 
-                    if (!flag2)
-                    {
-                        for (int j3 = k2; j3 < k; ++j3)
-                        {
+                    if (!flag2) {
+                        for (int j3 = k2; j3 < k; ++j3) {
                             double d10 = ((double)(j3 + num1 * 16) + 0.5D - p_180707_6_) / d9;
 
-                            for (int i2 = i3; i2 < i1; ++i2)
-                            {
+                            for (int i2 = i3; i2 < i1; ++i2) {
                                 double d7 = ((double)(i2 + num2 * 16) + 0.5D - p_180707_10_) / d9;
                                 boolean flag = false;
 
-                                if (d10 * d10 + d7 * d7 < 1.0D)
-                                {
-                                    for (int j2 = l; j2 > l2; --j2)
-                                    {
-                                        double d8 = ((double)(j2 - 1) + 0.5D - p_180707_8_) / d2;
+                                if (d10 * d10 + d7 * d7 < 1.0D) {
+                                    for (int cursor = l; cursor > l2; --cursor) {
+                                        double d8 = ((double)(cursor - 1) + 0.5D - p_180707_8_) / d2;
 
-                                        if ((d10 * d10 + d7 * d7) * (double)this.rs[j2 - 1] + d8 * d8 / 6.0D < 1.0D)
-                                        {
-                                            if (isTopBlock(primer, session, j3, j2, i2))
-                                            {
+                                        float cur;
+                                        if(cursor >= 256)cur = 0;
+                                        else cur = floats[cursor - 1];
+
+                                        if ((d10 * d10 + d7 * d7) * (double)floats[cursor - 1] + d8 * d8 / 6.0D < 1.0D) {
+                                            if (isTopBlock(primer, session, j3, cursor, i2)) {
                                                 flag = true;
                                             }
 
-                                            digBlock(primer,session, j3, j2, i2, flag);
+                                            digBlock(primer,session, j3, cursor, i2, flag);
                                         }
                                     }
                                 }
                             }
                         }
-
-                        if (flag1)
-                        {
+                        if (flag1) {
                             break;
                         }
                     }
                 }
             }
         }
+        at0.set(floats);
     }
 
 
     @Override
-    protected void recursiveGenerate(World worldIn, GenSession session, int chunkX, int chunkZ, int originalX, int originalZ, ChunkPrimer chunkPrimerIn) {
-        if (session.rand.nextInt(50) == 0) {
-            double d0 = chunkX * 16 + session.rand.nextInt(16);
-            double d1 = session.rand.nextInt(session.rand.nextInt(40) + 8) + 20;
-            double d2 = chunkZ * 16 + session.rand.nextInt(16);
+    protected void recursiveGenerate(World worldIn, GenSession session, Random subRand, int chunkX, int chunkZ, int originalX, int originalZ, ChunkPrimer chunkPrimerIn) {
+        Random rand = session.rand;
+        if (rand.nextInt(50) == 0) {
+            double d0 = chunkX * 16 + rand.nextInt(16);
+            double d1 = rand.nextInt(rand.nextInt(40) + 8) + 20;
+            double d2 = chunkZ * 16 + rand.nextInt(16);
 
             for (int j = 0; j < 1; ++j) {
-                float f = session.rand.nextFloat() * ((float)Math.PI * 2F);
-                float f1 = (session.rand.nextFloat() - 0.5F) * 2.0F / 8.0F;
-                float f2 = (session.rand.nextFloat() * 2.0F + session.rand.nextFloat()) * 2.0F;
-                this.addTunnel(session, session.rand.nextLong(), originalX, originalZ, chunkPrimerIn, d0, d1, d2, f2, f, f1, 0, 0, 3.0D);
+                float f = rand.nextFloat() * ((float)Math.PI * 2F);
+                float f1 = (rand.nextFloat() - 0.5F) * 2.0F / 8.0F;
+                float f2 = (rand.nextFloat() * 2.0F + rand.nextFloat()) * 2.0F;
+                this.addTunnel(session, rand.nextLong(), originalX, originalZ, chunkPrimerIn, d0, d1, d2, f2, f, f1, 0, 0, 3.0D);
             }
         }
     }
 
 
-    protected boolean isOceanBlock(ChunkPrimer data, int x, int y, int z, int chunkX, int chunkZ) {
+    protected static boolean isOceanBlock(ChunkPrimer data, int x, int y, int z) {
         Block block = data.getBlockState(x, y, z).getBlock();
-        return block== Blocks.FLOWING_WATER || block == Blocks.WATER;
+        return block == Blocks.FLOWING_WATER || block == Blocks.WATER;
     }
 
 
-    private boolean isExceptionBiome(net.minecraft.world.biome.Biome biome) {
+    private static boolean isExceptionBiome(net.minecraft.world.biome.Biome biome) {
         if (biome == Biomes.BEACH) return true;
         if (biome == Biomes.DESERT) return true;
         if (biome == Biomes.MUSHROOM_ISLAND) return true;
@@ -203,14 +191,14 @@ public class EMapGenRavine extends EMapGenBase{
     }
 
 
-    private boolean isTopBlock(ChunkPrimer data, GenSession session, int x, int y, int z) {
+    private static boolean isTopBlock(ChunkPrimer data, GenSession session, int x, int y, int z) {
         Biome biome = session.biomesForGeneration[x + z * 16];
         IBlockState state = data.getBlockState(x, y, z);
         return (isExceptionBiome(biome) ? state.getBlock() == Blocks.GRASS : state == biome.topBlock);
     }
 
 
-    protected void digBlock(ChunkPrimer data, GenSession session, int x, int y, int z, boolean foundTop) {
+    protected static void digBlock(ChunkPrimer data, GenSession session, int x, int y, int z, boolean foundTop) {
         Biome biome = session.biomesForGeneration[x + z * 16];
 
         IBlockState state = data.getBlockState(x, y, z);

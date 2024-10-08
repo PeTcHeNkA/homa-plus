@@ -12,6 +12,7 @@ public class NbtUtils {
     public static final NBTTagByte     BYTE_TRUE;
     public static final NBTTagByte     BYTE_FALSE;
     public static final NBTTagInt      DATA_VERSION = new NBTTagInt(1343);
+    public static final NBTTagInt      ITEM_DEFAULT_LIFESPAN = new NBTTagInt(6000);
 
     public static NBTTagByte create(byte b){
         if(b < 0)return TAG_BYTES_N[-b];

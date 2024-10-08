@@ -25,8 +25,13 @@ public class NBTTagCompound extends NBTBase {
 
     @Override
     void write(DataOutput output) throws IOException {
-        for (Map.Entry<String, NBTBase> node : tagMap.entrySet())
-            writeEntry(node.getKey(), node.getValue(), output);
+        tagMap.forEach((s, base) -> {
+            try {
+                writeEntry(s, base, output);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
         output.writeByte(0);
     }
 
@@ -43,6 +48,7 @@ public class NBTTagCompound extends NBTBase {
             while ((b0 = readType(input, sizeTracker)) != 0) {
                 String s = readKey(input);
                 sizeTracker.read(224 + 16L * s.length());
+                //NBTBase nbtbase = createAndRead(b0, input, depth+1, sizeTracker);
                 NBTBase nbtbase = readNBT(b0, s, input, depth + 1, sizeTracker);
 
                 if (this.tagMap.put(s, nbtbase) != null) {
@@ -455,11 +461,12 @@ public class NBTTagCompound extends NBTBase {
 
     static NBTBase readNBT(byte id, String key, DataInput input, int depth, NBTSizeTracker tracker) throws IOException {
         tracker.read(32); //Forge: 4 extra bytes for the object allocation.
-        NBTBase nbtbase = NBTBase.create(id);
+        //NBTBase nbtbase = NBTBase.create(id);
 
         try {
-            nbtbase.read(input, depth, tracker);
-            return nbtbase;
+            return createAndRead(id, input, depth, tracker);
+            //nbtbase.read(input, depth, tracker);
+            //return nbtbase;
         }
         catch (IOException ioexception) {
             CrashReport crashreport = CrashReport.makeCrashReport(ioexception, "Loading NBT data");

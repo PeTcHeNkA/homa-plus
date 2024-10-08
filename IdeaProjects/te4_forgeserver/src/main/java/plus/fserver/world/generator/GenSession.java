@@ -1,9 +1,10 @@
 package plus.fserver.world.generator;
 
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.chunk.ChunkPrimer;
 import plus.fserver.world.generator.biome.EIntCache;
-import plus.fserver.world.generator.biome.layers.EGenLayer;
 import java.util.Random;
 
 
@@ -17,6 +18,8 @@ public class GenSession extends EIntCache{
     public Biome[] biomesForGeneration;
     public float[] biomeWeights;
     public final Random rand;
+    public ChunkPrimer primer;
+    public final BlockPos.MutableBlockPos pooledPos = new BlockPos.MutableBlockPos();
 
     public GenSession(){
         this(1001);
@@ -33,5 +36,15 @@ public class GenSession extends EIntCache{
                 this.biomeWeights[i + 2 + (j + 2) * 5] = f;
             }
         }
+    }
+
+
+    public ChunkPrimer primer(){
+        ChunkPrimer primer = this.primer;
+        if(primer != null){
+            primer.clear();
+            return primer;
+        }
+        return this.primer = new ChunkPrimer();
     }
 }

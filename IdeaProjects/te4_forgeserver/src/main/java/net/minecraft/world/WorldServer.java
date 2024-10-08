@@ -558,7 +558,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         EntityCollider collider = this.collider;
         collider.begin(getGameRules().maxEntityCramming.getInt());
         for (Chunk chunk: chunkProviderServer.forChunks(ElcaConfig.CHUNK_TICK_RADIUS_1)){
-            collider.collideAll(chunk);
+            if(chunk.maybeSend()) collider.collideAll(chunk);
         }
         collider.complete();
     }
@@ -1756,12 +1756,17 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
 
             for (ChunkIteratorPro iter = cps.forChunks(radius); iter.hasNext();){
                 selector.setChunk(chunk = iter.next());
-                collider.collideAll(chunk);
 
                 int startCX = chunk.x << 4;
                 int startCZ = chunk.z << 4;
                 chunk.enqueueRelightChecks();
-                chunk.onTick(skipRecheck);
+                if(chunk.isPopulated()){
+                    chunk.onTick(skipRecheck);
+                } else {
+                    chunk.onTick(false);
+                    continue;
+                }
+                collider.collideAll(chunk);
 
                 if (raining && thundering && provider.canDoLightning(chunk) && rand.nextInt(lightChance) == 0) {
                     updateLCG = updateLCG * 3 + 1013904223;

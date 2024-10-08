@@ -55,6 +55,8 @@ public class SchemInchunk extends Schem{
             if((summ = x+ (senX<<1)) > 15) x = 15-summ + x;
             if((summ = z+ (senZ<<1)) > 15) z = 15-summ + z;
 
+            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+
             for(Stolb stolb:stolbs){
                 int bx = stolb.x + x;
                 int bz = stolb.z + z;
@@ -62,7 +64,8 @@ public class SchemInchunk extends Schem{
                 for(StolbInfo inf:stolb.blocks){
                     int by = y + inf.y;
                     if(by<255 && by>0){
-                        chunk.setBlockState(new BlockPos(bx, by, bz), inf.state);
+                        mut.setPosB(bx, by, bz);
+                        chunk.setBlockState(mut, inf.state);
                     }
                 }
             }

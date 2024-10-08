@@ -764,8 +764,8 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
             IBlockState iblockstate = this.getDisplayTile();
             ResourceLocation resourcelocation = Block.REGISTRY.getNameForObject(iblockstate.getBlock());
             nbt.setString("DisplayTile", resourcelocation == null ? "" : resourcelocation.toString());
-            nbt.setInteger("DisplayData", iblockstate.getBlock().getMetaFromState(iblockstate));
-            nbt.setInteger("DisplayOffset", this.getDisplayTileOffset());
+            nbt.setIntegerU("DisplayData", iblockstate.getBlock().getMetaFromState(iblockstate));
+            nbt.setIntegerU("DisplayOffset", this.getDisplayTileOffset());
         }
     }
 

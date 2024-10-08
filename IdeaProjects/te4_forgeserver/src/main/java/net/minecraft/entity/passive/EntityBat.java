@@ -235,7 +235,7 @@ public class EntityBat extends EntityAmbientCreature {
     @Override
     public void writeEntityToNBT(NBTTagCompound nbt) {
         super.writeEntityToNBT(nbt);
-        nbt.setByte("BatFlags", this.dataManager.get(HANGING));
+        nbt.setByteU("BatFlags", this.dataManager.get(HANGING));
     }
 
 

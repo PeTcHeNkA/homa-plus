@@ -875,13 +875,13 @@ public abstract class EntityPlayer extends EntityLivingBase {
         nbt.setFloat("XpP", this.experience);
         nbt.setIntegerU("XpLevel", this.experienceLevel);
         nbt.setIntegerU("XpTotal", this.experienceTotal);
-        nbt.setInteger("XpSeed", this.xpSeed);
-        nbt.setInteger("Score", this.getScore());
+        nbt.setIntegerU("XpSeed", this.xpSeed);
+        nbt.setIntegerU("Score", this.getScore());
         net.minecraftforge.fml.common.FMLCommonHandler.instance().getDataFixer().writeVersionData(nbt); //Moved down so it doesn't keep missing every MC update.
 
         if (this.spawnPos != null) {
             nbt.setInteger("SpawnX", this.spawnPos.getX());
-            nbt.setInteger("SpawnY", this.spawnPos.getY());
+            nbt.setIntegerU("SpawnY", this.spawnPos.getY());
             nbt.setInteger("SpawnZ", this.spawnPos.getZ());
             nbt.setBoolean("SpawnForced", this.spawnForced);
         }
@@ -893,9 +893,9 @@ public abstract class EntityPlayer extends EntityLivingBase {
             Boolean forced = spawnForcedMap.get(entry.getKey());
             if (forced == null) forced = false;
             NBTTagCompound spawndata = new NBTTagCompound();
-            spawndata.setInteger("Dim", entry.getKey());
+            spawndata.setIntegerU("Dim", entry.getKey());
             spawndata.setInteger("SpawnX", spawn.getX());
-            spawndata.setInteger("SpawnY", spawn.getY());
+            spawndata.setIntegerU("SpawnY", spawn.getY());
             spawndata.setInteger("SpawnZ", spawn.getZ());
             spawndata.setBoolean("SpawnForced", forced);
             spawnlist.appendTag(spawndata);
@@ -904,7 +904,7 @@ public abstract class EntityPlayer extends EntityLivingBase {
 
         nbt.setBoolean("HasSpawnDimensionSet", this.hasSpawnDimension());
         if (this.hasSpawnDimension())
-            nbt.setInteger("SpawnDimension", this.getSpawnDimension());
+            nbt.setIntegerU("SpawnDimension", this.getSpawnDimension());
 
         this.foodStats.writeNBT(nbt);
         this.capabilities.writeCapabilitiesToNBT(nbt);

@@ -177,6 +177,16 @@ public class ChunkGeneratorHell implements IChunkGenerator {
         public double[] adouble = new double[0];
         public final Random rand = new Random();
         public Biome[] biomes;
+        public ChunkPrimer primer;
+
+        public ChunkPrimer primer(){
+            ChunkPrimer primer = this.primer;
+            if(primer != null){
+                primer.clear();
+                return primer;
+            }
+            return this.primer = new ChunkPrimer();
+        }
     }
 
 
@@ -339,7 +349,7 @@ public class ChunkGeneratorHell implements IChunkGenerator {
         GenSession session = makeGenSession();
         session.rand.setSeed((long)x * 341873128712L + (long)z * 132897987541L);
 
-        ChunkPrimer chunkprimer = new ChunkPrimer();
+        ChunkPrimer chunkprimer = session.primer();
         this.prepareHeights(session, x, z, chunkprimer);
         this.buildSurfaces(session, x, z, chunkprimer);
 

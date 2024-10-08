@@ -424,7 +424,7 @@ public abstract class EntityLiving extends EntityLivingBase {
             } else if (this.leashHolder instanceof EntityHanging) {
                 BlockPos blockpos = ((EntityHanging)this.leashHolder).getHangingPosition();
                 tag.setInteger(SStrings.X, blockpos.getX());
-                tag.setInteger(SStrings.Y, blockpos.getY());
+                tag.setIntegerU(SStrings.Y, blockpos.getY());
                 tag.setInteger(SStrings.Z, blockpos.getZ());
             }
 

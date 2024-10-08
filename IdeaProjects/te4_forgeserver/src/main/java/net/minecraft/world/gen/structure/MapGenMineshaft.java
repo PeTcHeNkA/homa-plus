@@ -78,7 +78,9 @@ public class MapGenMineshaft extends MapGenStructure {
         MESA;
 
         public static MapGenMineshaft.Type byId(int id) {
-            return id >= 0 && id < values().length ? values()[id] : NORMAL;
+            return id >= 0 && id < typeValues.length ? typeValues[id] : NORMAL;
         }
     }
+
+    private static final Type[] typeValues = Type.values();
 }

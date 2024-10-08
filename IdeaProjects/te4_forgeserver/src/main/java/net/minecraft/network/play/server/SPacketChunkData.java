@@ -71,6 +71,11 @@ public class SPacketChunkData extends SNodePacketPlayBase {
     }
 
 
+    public static void freeMemory(){
+        for (Node node:temp)node.temp = null;
+    }
+
+
     private static byte[] alloc(int minSize) {
         Node[] nodes = temp;
         for (int i = cursor, s = nodes.length; i < s; i++){

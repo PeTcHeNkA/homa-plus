@@ -90,6 +90,21 @@ public class EIntCache implements IIntCache {
     }
 
 
+    public int selectRandom(int num1, int num2, int num3, int num4) {
+        switch (this.nextInt(4)){
+            case 0:return num1;
+            case 1:return num2;
+            case 3:return num3;
+            default:return num4;
+        }
+    }
+
+
+    public int selectRandomNum(int[] nums) {
+        return nums[this.nextInt(nums.length)];
+    }
+
+
     public int selectModeOrRandom(int num1, int num2, int num3, int num4) {
         if (num2 == num3 && num3 == num4) {
             return num2;

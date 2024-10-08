@@ -287,9 +287,9 @@ public class Template {
                 if (access.setBlockState(pos, state, num) && info.tileentityData != null) {
                     tile = access.getTileEntity(pos);
                     if (tile != null) {
-                        info.tileentityData.setInteger("x", pos.getX());
-                        info.tileentityData.setInteger("y", pos.getY());
-                        info.tileentityData.setInteger("z", pos.getZ());
+                        info.tileentityData.setIntegerU("x", pos.getX());
+                        info.tileentityData.setIntegerU("y", pos.getY());
+                        info.tileentityData.setIntegerU("z", pos.getZ());
                         tile.readFromNBT(info.tileentityData);
                         tile.mirror(stn.getMirror());
                         tile.rotate(stn.getRotation());

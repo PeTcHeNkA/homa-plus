@@ -150,9 +150,9 @@ public class SchemSmartUpper extends SchemSmart{
                             blockPos.setY(inf.y+y);
                             TileEntity tileEntity = world.getTileEntity(blockPos);
                             if (tileEntity != null) {
-                                inf.tileEntityData.setInteger("x", blockPos.getX());
-                                inf.tileEntityData.setInteger("y", blockPos.getY());
-                                inf.tileEntityData.setInteger("z", blockPos.getZ());
+                                inf.tileEntityData.setIntegerU("x", blockPos.getX());
+                                inf.tileEntityData.setIntegerU("y", blockPos.getY());
+                                inf.tileEntityData.setIntegerU("z", blockPos.getZ());
                                 tileEntity.readFromNBT(inf.tileEntityData);
                                 tileEntity.mirror(mirror);
                                 tileEntity.rotate(rotation);

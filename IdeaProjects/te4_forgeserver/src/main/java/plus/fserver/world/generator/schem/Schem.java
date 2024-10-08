@@ -11,6 +11,7 @@ import net.minecraft.util.BlockIDIndexes;
 import net.minecraft.util.ObjectIntIdentityMap;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import plus.fserver.utls.NbtUtils;
 import plus.fserver.world.generator.struct.IStruct;
 import plus.fserver.world.generator.struct.Structure;
 import plus.tson.TsonMap;
@@ -119,7 +120,7 @@ public abstract class Schem implements ITSchem{
             FileInputStream stream = new FileInputStream(file1);
             NBTTagCompound nbt = CompressedStreamTools.readCompressed(stream);
             if (!nbt.hasKey("DataVersion", 99)) {
-                nbt.setInteger("DataVersion", 500);
+                nbt.setTagU("DataVersion", NbtUtils.DATA_VERSION);
             }
             ITSchem template;
             switch (type){

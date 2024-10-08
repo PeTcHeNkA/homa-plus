@@ -139,7 +139,7 @@ public class PlayerChunkMap extends Long2ObjectOpenHashMap<PlayerChunkMapEntry> 
             int count = ElcaConfig.PCM_MAX_SEND_PER_TICK;
             Iterator<PlayerChunkMapEntry> itr = pendingSendToPlayers.iterator();
 
-            //баг - чанк не населяется из-за Н-ной ошибки -> он остается здесь навечно
+            //баг - свет у чанка не населяется из-за н-ной ошибки -> он остается здесь навечно
             while (itr.hasNext()) {
                 if (itr.next().sendToPlayers(this)) {
                     itr.remove();

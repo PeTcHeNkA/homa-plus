@@ -486,7 +486,7 @@ public class InventoryPlayer implements IInventory {
             item = this.mainInventory.get(i);
             if (!item.isEmpty()) {
                 tag = new NBTTagCompound();
-                tag.setByte("Slot", (byte)i);
+                tag.setByteU("Slot", (byte)i);
                 item.writeToNBT(tag);
                 list.appendTag(tag);
             }

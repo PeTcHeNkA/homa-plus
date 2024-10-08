@@ -6,7 +6,6 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Biomes;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
@@ -214,15 +213,13 @@ public class EMapGenCaves extends EMapGenBase {
 
 
     @Override
-    protected void recursiveGenerate(World world, GenSession session, int num1, int num2, int num3, int num4, ChunkPrimer primer) {
+    protected void recursiveGenerate(World world, GenSession session, Random subRand, int num1, int num2, int num3, int num4, ChunkPrimer primer) {
         Random rand = session.rand;
         int i = rand.nextInt(rand.nextInt(rand.nextInt(15) + 1) + 1);
 
         if (rand.nextInt(7) != 0) {
             i = 0;
         }
-
-        Random subRand = new Random();
 
         for (int j = 0; j < i; ++j) {
             double d0 = num1 * 16 + rand.nextInt(16);

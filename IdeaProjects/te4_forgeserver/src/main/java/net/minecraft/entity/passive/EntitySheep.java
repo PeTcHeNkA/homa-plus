@@ -209,7 +209,7 @@ public class EntitySheep extends EntityAnimal implements IShearable {
     public void writeEntityToNBT(NBTTagCompound nbt) {
         super.writeEntityToNBT(nbt);
         nbt.setBoolean("Sheared", this.getSheared());
-        nbt.setByte("Color", (byte)this.getFleeceColor().getMetadata());
+        nbt.setByteU("Color", (byte)this.getFleeceColor().getMetadata());
     }
 
 

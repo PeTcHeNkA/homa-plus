@@ -387,7 +387,7 @@ public abstract class EntityLivingBase extends Entity {
     @Override
     public void writeEntityToNBT(NBTTagCompound nbt) {
         nbt.setFloat(SStrings.Health, this.getHealth());
-        nbt.setShort(SStrings.HurtTime, (short)this.hurtTime);
+        nbt.setShortU(SStrings.HurtTime, (short)this.hurtTime);
         nbt.setInteger(SStrings.HurtByTimestamp, this.revengeTimer);
         nbt.setShort(SStrings.DeathTime, (short)this.deathTime);
         nbt.setFloat(SStrings.AbsorptionAmount, this.getAbsorptionAmount());

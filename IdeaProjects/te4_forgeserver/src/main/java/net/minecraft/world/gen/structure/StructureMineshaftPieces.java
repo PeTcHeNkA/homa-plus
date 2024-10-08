@@ -96,7 +96,7 @@ public class StructureMineshaftPieces {
             tag.setBoolean("hr", this.hasRails);
             tag.setBoolean("sc", this.hasSpiders);
             tag.setBoolean("hps", this.spawnerPlaced);
-            tag.setInteger("Num", this.sectionCount);
+            tag.setIntegerU("Num", this.sectionCount);
         }
 
 
@@ -387,7 +387,7 @@ public class StructureMineshaftPieces {
         protected void writeStructureToNBT(NBTTagCompound tagCompound) {
             super.writeStructureToNBT(tagCompound);
             tagCompound.setBoolean("tf", this.isMultipleFloors);
-            tagCompound.setInteger("D", this.corridorDirection.getHorizontalIndex());
+            tagCompound.setIntegerU("D", this.corridorDirection.getHorizontalIndex());
         }
 
 
@@ -553,7 +553,7 @@ public class StructureMineshaftPieces {
 
         @Override
         protected void writeStructureToNBT(NBTTagCompound tagCompound) {
-            tagCompound.setInteger("MST", this.mineShaftType.ordinal());
+            tagCompound.setIntegerU("MST", this.mineShaftType.ordinal());
         }
 
 

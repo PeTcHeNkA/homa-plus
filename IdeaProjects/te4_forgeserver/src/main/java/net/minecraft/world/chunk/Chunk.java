@@ -107,15 +107,16 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
     @Keep
     private final FastBuffer<BlockPos> tileEntityPosQueue;
     @Keep
-    public byte state = 0;
-    //00    (0)  = default
-    //01    (1)  = tracked
-    //10    (2)  = requested
-    //100   (4)  = should tick
-    //1000  (8)  = now sawing
-    //10000 (16) = sent to players
-
     public PlayerChunkMapEntry chunkMapEntry;
+    @Keep
+    public byte state = 0;
+    //00     (0)  = default
+    //01     (1)  = tracked
+    //10     (2)  = requested
+    //100    (4)  = should tick
+    //1000   (8)  = now sawing
+    //10000  (16) = sent to players
+    //100000 (32) = now populating
 
     public boolean isNotUnloadQueued(){
         return (state & 1) == 1;
@@ -161,6 +162,13 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
         if(b) state |= 16;
         else state &= ~16;
     }
+//    public boolean isNowPopulating(){
+//        return (state & 32) == 32;
+//    }
+//    public void setNowPopulating(boolean b){
+//        if(b) state |= 32;
+//        else state &= ~32;
+//    }
 
     public Chunk(World worldIn, int x, int z) {
         this.storageArrays = new ExtendedBlockStorage[STORAGES_COUNT];
@@ -281,6 +289,11 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
 
     public void generateSkylightMap() {
+        generateSkylightMap(new BlockPos.MutableBlockPos());
+    }
+
+
+    public void generateSkylightMap(BlockPos.MutableBlockPos mut) {
         int i = this.getTopFilledSegment();
         int min = this.heightMapMinimum = Integer.MAX_VALUE;
 
@@ -290,38 +303,42 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
         boolean hasSkyLight = world.provider.hasSkyLight();
         ExtendedBlockStorage[] storageArrays = this.storageArrays;
 
+        int shiftX = this.x << 4, shiftZ = this.z << 4;
+
         for (int xPos = 0; xPos < 16; ++xPos) {
             for (int zPos = 0; zPos < 16; ++zPos) {
                 precipitationHeightMap[xPos + (zPos << 4)] = -999;
-                for (int l = i + 16; l > 0; --l) {
-                    if (this.getBlockLightOpacity(xPos, l - 1, zPos) != 0) {
-                        heightMap[zPos << 4 | xPos] = (byte) l;
-                        if (l < min) {
-                            this.heightMapMinimum = min = l;
+                for (int curY = i + 16; curY > 0; --curY) {
+                    mut.setPosB(shiftX + xPos, curY - 1, shiftZ + zPos);
+                    if (this.getBlockLightOpacity(mut) != 0) {
+                        heightMap[zPos << 4 | xPos] = (byte) curY;
+                        if (curY < min) {
+                            this.heightMapMinimum = min = curY;
                         }
                         break;
                     }
                 }
 
                 if (hasSkyLight) {
-                    int k1 = 15, i1 = i + 16 - 1;
+                    int k1 = 15, curY = i + 16 - 1;
                     while (true) {
-                        int j1 = this.getBlockLightOpacity(xPos, i1, zPos);
+                        mut.setPosB(shiftX + xPos, curY, shiftZ + zPos);
+                        int j1 = this.getBlockLightOpacity(mut);
 
                         if (j1 == 0 && k1 != 15) {
                             j1 = 1;
                         }
                         k1 -= j1;
                         if (k1 > 0) {
-                            ExtendedBlockStorage storage = storageArrays[i1 >> 4];
+                            ExtendedBlockStorage storage = storageArrays[curY >> 4];
 
                             if (storage != null) {
-                                storage.setSkyLight(xPos, i1 & 15, zPos, k1);
-                                world.notifyLightSet(new BlockPos((this.x << 4) + xPos, i1, (this.z << 4) + zPos));
+                                storage.setSkyLight(xPos, curY & 15, zPos, k1);
+                                world.notifyLightSet(mut);
                             }
                         }
-                        --i1;
-                        if (i1 <= 0 || k1 <= 0) break;
+                        --curY;
+                        if (curY <= 0 || k1 <= 0) break;
                     }
                 }
             }
@@ -492,18 +509,23 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
     private void relightBlock(final int x, final int y, final int z) {
         byte[] heightMap;
-        int j;
-        final int i = j = ((heightMap = this.heightMap)[z << 4 | x] & 0xFF);
+        int cy;
+        final int i = cy = ((heightMap = this.heightMap)[z << 4 | x] & 0xFF);
         if (y > i) {
-            j = y;
+            cy = y;
         }
-        while (j > 0 && this.getBlockLightOpacity(x, j - 1, z) == 0) {
-            --j;
+        if(cy > 0) {
+            int shiftX = this.x << 4, shiftZ = this.z << 4;
+            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos(shiftX + x, cy - 1, shiftZ + z);
+            while (cy > 0 && this.getBlockLightOpacity(mut) == 0) {
+                --cy;
+                mut.setY(cy-1);
+            }
         }
-        if (j != i) {
-            heightMap[z << 4 | x] = (byte) j;
+        if (cy != i) {
+            heightMap[z << 4 | x] = (byte) cy;
             if (this.world.provider.hasSkyLight()) {
-                LightingHooks.relightSkylightColumn(this.world, (Chunk)(Object)this, x, z, i, j);
+                LightingHooks.relightSkylightColumn(this.world, this, x, z, i, cy);
             }
             final int l1 = heightMap[z << 4 | x];
             if (l1 < this.heightMapMinimum) {
@@ -514,13 +536,18 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
 
     public int getBlockLightOpacity(BlockPos pos) {
-        return getBlockState(pos.getX(), pos.getY(), pos.getZ()).getLightOpacity(this.world, pos);
+        IBlockState state = this.getBlockState(pos);
+        return !loaded ? state.getLightOpacity() : state.getLightOpacity(world, pos);
     }
 
 
     private int getBlockLightOpacity(int x, int y, int z) {
-        IBlockState state = this.getBlockState(x, y, z); //Forge: Can sometimes be called before we are added to the global world list. So use the less accurate one during that. It'll be recalculated later
-        return !loaded ? state.getLightOpacity() : state.getLightOpacity(world, new BlockPos(this.x << 4 | x & 15, y, this.z << 4 | z & 15));
+        IBlockState state = this.getBlockState(x, y, z);
+        //Forge: Can sometimes be called before we are added to the global world list.
+        // So use the less accurate one during that. It'll be recalculated later
+        return !loaded ? state.getLightOpacity() : state.getLightOpacity(world,
+                new BlockPos(this.x << 4 | x & 15, y, this.z << 4 | z & 15)
+        );
     }
 
 
@@ -640,6 +667,96 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
     }
 
 
+    @Nullable
+    public IBlockState setBlockState(final BlockPos.MutableBlockPos pos, final IBlockState state) {
+        int px = pos.getX() & 15, py = pos.getY(), pz = pos.getZ() & 15, xzIndex = pz << 4 | px;
+
+        if (py >= this.precipitationHeightMap[xzIndex] - 1) {
+            this.precipitationHeightMap[xzIndex] = -999;
+        }
+        IBlockState prev = this.getBlockState(pos);
+
+        if (prev == state) {
+            return null;
+        } else {
+            World world;
+            int i1 = this.heightMap[xzIndex] & 255;
+            Block block = state.getBlock(), prevBlock = prev.getBlock();
+            int k1 = prev.getLightOpacity(world = this.world, pos); // Relocate old light value lookup here, so that it is called before TE is removed.
+            ExtendedBlockStorage storage = this.storageArrays[py >> 4];
+            boolean flag = false;
+
+            if (storage == null) {
+                if (block == Blocks.AIR) {
+                    return null;
+                }
+                storage = new ExtendedBlockStorage(py >> 4 << 4, world.provider.hasSkyLight());
+                this.storageArrays[py >> 4] = storage;
+                flag = py >= i1;
+            }
+
+            storage.set(px, py & 15, pz, state);
+
+            if (!world.isRemote || SERVER_COMPILE) {
+                if (prevBlock != block) prevBlock.breakBlock(world, pos, prev);
+
+                TileEntity te = this.getTileEntity(pos, Chunk.EnumCreateEntityType.CHECK);
+                if (te != null && te.shouldRefresh(world, pos, prev, state))
+                    world.removeTileEntity(pos);
+
+            } else if (prev.hasTile()) {
+                TileEntity te = this.getTileEntity(pos, Chunk.EnumCreateEntityType.CHECK);
+                if (te != null && te.shouldRefresh(world, pos, prev, state))
+                    world.removeTileEntity(pos);
+            }
+
+            if (storage.get(px, py & 15, pz).getBlock() != block) {
+                return null;
+            } else {
+                if (flag) {
+                    int px2 = pos.getX(), pz2 = pos.getZ();
+                    this.generateSkylightMap(pos);
+                    pos.setPosB(px2, py, pz2);
+                } else {
+                    int j1 = state.getLightOpacity(world, pos);
+
+                    if (j1 > 0) {
+                        if (py >= i1) {
+                            this.relightBlock(px, py + 1, pz);
+                        }
+                    } else if (py == i1 - 1) {
+                        this.relightBlock(px, py, pz);
+                    }
+
+                    if (j1 != k1 && (j1 < k1 || this.getLightFor(EnumSkyBlock.SKY, pos) > 0 || this.getLightFor(EnumSkyBlock.BLOCK, pos) > 0)) {
+                        this.propagateSkylightOcclusion(px, pz);
+                    }
+                }
+
+                // If capturing blocks, only run block physics for TE's. Non-TE's are handled in ForgeHooks.onPlaceItemIntoWorld
+                if (!world.isRemote && prevBlock != block && (!world.captureBlockSnapshots || state.hasTile())) {
+                    block.onBlockAdded(world, pos, state);
+                }
+
+                if (state.hasTile()) {
+                    TileEntity tileEntity = this.getTileEntity(pos, Chunk.EnumCreateEntityType.CHECK);
+
+                    if (tileEntity == null) {
+                        tileEntity = block.createTileEntity(world, state);
+                        world.setTileEntity(pos, tileEntity);
+                    }
+
+                    if (tileEntity != null) {
+                        tileEntity.updateContainingBlockInfo();
+                    }
+                }
+                this.dirty = true;
+                return prev;
+            }
+        }
+    }
+
+
     public void setBlockStateFast(int x, int y, int z, final IBlockState current, final IBlockState newState) {
         int i = x & 15, k = z & 15, l = k << 4 | i;
         if (y >= this.precipitationHeightMap[l] - 1) {
@@ -680,8 +797,14 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
     @Keep
     public int getLightFor(final EnumSkyBlock type, final BlockPos pos) {
         this.getLightingEngine().processLightUpdatesForType(type);
-
         return this.getCachedLightFor(type, pos);
+    }
+
+
+    @Keep
+    public int getLightFor(final EnumSkyBlock type, int x, int y, int z) {
+        this.getLightingEngine().processLightUpdatesForType(type);
+        return this.getCachedLightFor(type, x, y, z);
     }
 
 
@@ -745,6 +868,24 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
             return type.defaultLightValue;
         }
     }
+
+
+    public int getCachedLightFor(final EnumSkyBlock type, int posX, int posY, int posZ) {
+        final ExtendedBlockStorage extendedblockstorage = this.storageArrays[posY >> 4];
+        if (extendedblockstorage == null) {
+            if (this.canSeeSky(posX, posY, posZ)) return type.defaultLightValue;
+            return 0;
+        } else if (type == EnumSkyBlock.SKY) {
+            if (!this.world.provider.hasSkyLight()) return 0;
+            return extendedblockstorage.getSkyLight(posX & 0xF, posY & 0xF, posZ & 0xF);
+        } else {
+            if (type == EnumSkyBlock.BLOCK) {
+                return extendedblockstorage.getBlockLight(posX & 0xF, posY & 0xF, posZ & 0xF);
+            }
+            return type.defaultLightValue;
+        }
+    }
+
 
 
     public void addEntity(Entity entityIn) {
@@ -1123,12 +1264,14 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
                 );
             }
         } else {
+            //setNowPopulating(true);
             isTerrainPopulated = true;
             generator.populate(this.x, this.z);
             World world;
             GameRegistry.generateWorld(this.x, this.z, world = this.world, generator, world.getChunkProvider());
             this.markDirty();
             checkLight();
+            //setNowPopulating(false);
         }
     }
 
@@ -1161,6 +1304,11 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
     public boolean isPopulated() {
         return this.ticked && this.isTerrainPopulated && this.isLightPopulated;
+    }
+
+
+    public boolean maybeSend() {
+        return this.ticked && this.isTerrainPopulated;
     }
 
 
@@ -1291,6 +1439,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
         if (this.queuedLightChecks < 4096) {
             int px = this.x << 4, pz = this.z << 4, i, j, k, l;
             boolean flag;
+            ExtendedBlockStorage[] arrays = this.storageArrays;
             for (i = 0; i < 8; ++i) {
                 if (this.queuedLightChecks >= 4096) return;
                 j = this.queuedLightChecks & 15;
@@ -1299,10 +1448,10 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
                 ++this.queuedLightChecks;
 
                 for (int i1 = 0; i1 < 16; ++i1) {
-                    if(this.storageArrays[j] == null)
+                    if(arrays[j] == null)
                         flag = i1 == 0 || i1 == 15 || k == 0 || k == 15 || l == 0 || l == 15;
                     else
-                        flag = this.storageArrays[j].get(k, i1, l).getMaterial() == Material.AIR;
+                        flag = arrays[j].get(k, i1, l).getMaterial() == Material.AIR;
 
                     if(flag) {
                         int ly = (j << 4) + i1;
@@ -1358,7 +1507,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
                 }
             }
         }
-        isLightPopulated = true;
+        this.isLightPopulated = true;
     }
 
 
@@ -1399,27 +1548,27 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
         int i = this.getTopFilledSegment();
         boolean flag = false, flag1 = false;
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos((this.x << 4) + x, 0, (this.z << 4) + z);
-
-        for (int j = i + 16 - 1; j > this.world.getSeaLevel() || j > 0 && !flag1; --j) {
-            pos.setPos(pos.getX(), j, pos.getZ());
+        World world = this.world;
+        for (int curY = i + 16 - 1, seaLvl = world.getSeaLevel(); curY > seaLvl || curY > 0 && !flag1; --curY) {
+            pos.setY(curY);
             int k = this.getBlockLightOpacity(pos);
 
-            if (k == 255 && pos.getY() < this.world.getSeaLevel()) {
+            if (k == 255 && pos.getY() < seaLvl) {
                 flag1 = true;
             }
 
             if (!flag && k > 0) {
                 flag = true;
             }
-            else if (flag && k == 0 && !this.world.checkLight(pos)) {
+            else if (flag && k == 0 && !world.checkLight(pos)) {
                 return false;
             }
         }
 
-        for (int l = pos.getY(); l > 0; --l) {
-            pos.setPos(pos.getX(), l, pos.getZ());
-            if (this.getBlockState(pos).getLightValue(this.world, pos) > 0) {
-                this.world.checkLight(pos);
+        for (int curY = pos.getY(); curY > 0; --curY) {
+            pos.setY(curY);
+            if (this.getBlockState(pos).getLightValue(world, pos) > 0) {
+                world.checkLight(pos);
             }
         }
         return true;

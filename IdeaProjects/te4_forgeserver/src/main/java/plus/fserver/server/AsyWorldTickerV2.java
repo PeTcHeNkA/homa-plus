@@ -1,6 +1,7 @@
 package plus.fserver.server;
 
 import net.minecraft.network.NetHandlerPlayServer;
+import net.minecraft.network.play.server.SPacketChunkData;
 import plus.fserver.api.ElcaServerUtils;
 import plus.fserver.server.zstd.Native;
 import net.minecraft.crash.CrashReport;
@@ -303,6 +304,8 @@ public final class AsyWorldTickerV2{
         } catch (Exception | StackOverflowError exception){
             onError(worldserver, exception);
         } catch (OutOfMemoryError error){
+            System.gc();
+            SPacketChunkData.freeMemory();
             long curTime = System.currentTimeMillis();
             if(curTime - lastError < 50){
                 stopAnError(error, worldserver);
@@ -310,6 +313,7 @@ public final class AsyWorldTickerV2{
             lastError = curTime;
             worldserver.cleanCache();
             CraftingManager.clear();
+            System.gc();
         } catch (Throwable throwable){
             stopAnError(throwable, worldserver);
         } finally {

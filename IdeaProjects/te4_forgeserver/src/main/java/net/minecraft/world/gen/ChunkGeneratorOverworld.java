@@ -231,7 +231,7 @@ public class ChunkGeneratorOverworld implements IChunkGenerator {
         GenSession session = makeGenSession();
 
         session.rand.setSeed((long)x * 341873128712L + (long)z * 132897987541L);
-        ChunkPrimer chunkprimer = new ChunkPrimer();
+        ChunkPrimer chunkprimer = session.primer();
         this.setBlocksInChunk(session, x, z, chunkprimer);
 
         if(provider instanceof BiomeProviderEx){
@@ -289,9 +289,9 @@ public class ChunkGeneratorOverworld implements IChunkGenerator {
             abyte[i] = (byte)Biome.getIdForBiome(biomes[i]);
         }
 
+        chunk.generateSkylightMap(session.pooledPos);
         freeSession(session);
 
-        chunk.generateSkylightMap();
         return chunk;
     }
 
@@ -498,6 +498,7 @@ public class ChunkGeneratorOverworld implements IChunkGenerator {
             BiomeProvider bpw = lWorld.provider.getBiomeProvider();
             IBlockState prevState, newState;
             BlockPos.MutableBlockPos blockpos2 = new BlockPos.MutableBlockPos();
+            BlockPos.MutableBlockPos blockpos1 = new BlockPos.MutableBlockPos();
 
             for (int dX = 0; dX < 16; ++dX) {
                 int absX = blockpos.getX()+dX;
@@ -505,7 +506,8 @@ public class ChunkGeneratorOverworld implements IChunkGenerator {
                     int absZ = blockpos.getZ()+dZ;
 
                     Biome biome0 = chunk.getBiome(absX, absZ, bpw);
-                    BlockPos blockpos1 = chunk.getPrecipitationHeight(absX, absZ);
+                    blockpos1.setPosB(absX, chunk.getPrecipitationHeightY(absX, absZ), absZ);
+                    //BlockPos blockpos1 = chunk.getPrecipitationHeight(absX, absZ);
                     blockpos2.setPos(blockpos1.getX(), blockpos1.getY()-1, blockpos1.getZ());
 
                     if (biome0.getTemperature(blockpos2) < 0.15f && canBlockFreezeBody(chunk, blockpos2)) {
