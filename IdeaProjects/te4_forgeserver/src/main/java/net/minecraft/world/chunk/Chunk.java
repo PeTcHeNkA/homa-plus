@@ -29,6 +29,7 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
+import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.ChunkEvent;
@@ -1124,7 +1125,8 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
         } else {
             isTerrainPopulated = true;
             generator.populate(this.x, this.z);
-            GameRegistry.generateWorld(this.x, this.z, this.world, generator, this.world.getChunkProvider());
+            World world;
+            GameRegistry.generateWorld(this.x, this.z, world = this.world, generator, world.getChunkProvider());
             this.markDirty();
             checkLight();
         }
@@ -1132,6 +1134,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
 
     public void onTick(boolean skipRecheckGaps) {
+        World world = this.world;
         if (!skipRecheckGaps && this.isGapLightingUpdated && world.provider.hasSkyLight()) {
             if(SERVER_COMPILE)recheckGapsServer();
             else {
@@ -1149,8 +1152,8 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
             if (this.getTileEntity(blockpos, Chunk.EnumCreateEntityType.CHECK) == null && this.getBlockState(blockpos).hasTile()) {
                 TileEntity tile = this.createNewTileEntity(blockpos);
-                this.world.setTileEntity(blockpos, tile);
-                this.world.markBlockRangeForRenderUpdate(blockpos, blockpos);
+                world.setTileEntity(blockpos, tile);
+                world.markBlockRangeForRenderUpdate(blockpos, blockpos);
             }
         }
     }
@@ -1326,15 +1329,31 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
      */
     public void checkLight() {
         this.isTerrainPopulated = true;
+        World world = this.world;
         if (!this.isLightInitialized()) {
             LightingHooks.initChunkLighting(this, world);
         }
-        for (int x = -1; x <= 1; ++x) {
-            for (int z = -1; z <= 1; ++z) {
-                if (x != 0 || z != 0) {
-                    final Chunk nChunk = world.getChunkProvider().getLoadedChunk(this.x + x, this.z + z);
-                    if (nChunk == null || !nChunk.isLightInitialized()) {
-                        return;
+        if(!world.isRemote || SERVER_COMPILE){
+            ChunkProviderServer provider = world.chunkProviderServer;
+            int sx = this.x, sz = this.z;
+            for (int x = -1; x <= 1; ++x) {
+                for (int z = -1; z <= 1; ++z) {
+                    if (x != 0 || z != 0) {
+                        final Chunk nChunk = provider.getLoadedChunk(sx + x, sz + z);
+                        if (nChunk == null || !nChunk.isLightInitialized()) {
+                            return;
+                        }
+                    }
+                }
+            }
+        } else {
+            for (int x = -1; x <= 1; ++x) {
+                for (int z = -1; z <= 1; ++z) {
+                    if (x != 0 || z != 0) {
+                        final Chunk nChunk = world.getChunkProvider().getLoadedChunk(this.x + x, this.z + z);
+                        if (nChunk == null || !nChunk.isLightInitialized()) {
+                            return;
+                        }
                     }
                 }
             }

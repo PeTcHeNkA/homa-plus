@@ -2,6 +2,7 @@ package net.minecraft.block;
 
 import net.minecraft.block.material.*;
 import net.minecraft.block.properties.*;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.math.*;
 import net.minecraft.world.*;
 import java.util.*;
@@ -13,10 +14,10 @@ import net.minecraftforge.fml.relauncher.*;
 import net.minecraftforge.common.*;
 import net.minecraft.block.state.*;
 import plus.fserver.api.IBlockEAccess;
-import plus.fserver.block.BlockFx;
+import plus.fserver.utls.collections.AABBList;
 
 
-public class BlockReed extends BlockFx implements IPlantable {
+public class BlockReed extends Block implements IPlantable {
     public static final PropertyInteger AGE;
     protected static final AxisAlignedBB REED_AABB;
 
@@ -25,6 +26,14 @@ public class BlockReed extends BlockFx implements IPlantable {
         this.setDefaultState(this.blockState.getBaseState().withProperty(BlockReed.AGE, 0));
         this.setTickRandomly(true);
     }
+
+
+    @Override
+    public void addCollisionBoxToListF(IBlockState state, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, AABBList collidingBoxes) {}
+
+
+    @Override
+    public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes, @org.jetbrains.annotations.Nullable Entity entityIn, boolean isActualState) {}
 
 
     @Override

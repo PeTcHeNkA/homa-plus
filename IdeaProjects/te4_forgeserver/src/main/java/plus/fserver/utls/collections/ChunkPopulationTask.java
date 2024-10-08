@@ -25,9 +25,11 @@ public class ChunkPopulationTask extends ConcurrentLinkedQueue<Chunk> implements
     public void run() {
         isRunning = true;
         Chunk chunk = poll();
-        while (chunk != null) {
+        while (chunk != null) try {
             chunk.populate(provider, provider.chunkGenerator);
             chunk = poll();
+        } catch (Exception e){
+            provider.world.getMinecraftServer().ticker().onError(provider.world, e);
         }
         isRunning = false;
     }

@@ -31,6 +31,8 @@ import plus.fserver.ElcaConfig;
 import plus.fserver.server.chunk.io.TChunkExecutor;
 import plus.fserver.utls.collections.EntityList;
 
+import static net.minecraft.server.management.PlayerChunkMap.CAN_GENERATE_CHUNKS;
+
 
 public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements Consumer<Chunk> {
     public static final Comparator<PlayerChunkMapEntry> COMPARATOR = (o1, o2) -> {
@@ -124,6 +126,11 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements C
     }
 
 
+    public boolean providePlayerChunk(PlayerChunkMap map) {
+        return providePlayerChunk(map, this.hasPlayerMatching(CAN_GENERATE_CHUNKS));
+    }
+
+
     public boolean providePlayerChunk(PlayerChunkMap map, boolean canGenerate) {
         if (this.loading) return false;
         if (this.chunk != null) {
@@ -140,11 +147,11 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements C
 
 
     public boolean sendToPlayers(PlayerChunkMap map) {
-        if (this.sentToPlayers) {
-            return true;
-        } else if (this.chunk == null) {
+        if (this.sentToPlayers)return true;
+        Chunk chunk;
+        if ((chunk = this.chunk) == null) {
             return false;
-        } else if (!this.chunk.isPopulated()) {
+        } else if (!chunk.isPopulated()) {
             return false;
         } else {
             if (isEmpty()) {
@@ -154,7 +161,6 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements C
                 chunk.setSentToPlayers(true);
                 return true;
             } else try {
-                Chunk chunk = this.chunk;
                 int size;
                 if((size = this.size) > 0){
                     SPacketChunkData packet = new SPacketChunkData(chunk, 65535, size==1);

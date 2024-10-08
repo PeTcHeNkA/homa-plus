@@ -115,7 +115,7 @@ public class PlayerChunkMap extends Long2ObjectOpenHashMap<PlayerChunkMapEntry> 
                 final PlayerChunkMapEntry entry;
                 if ((entry = iterator.next()).getChunk() == null) {
 
-                    if (entry.providePlayerChunk(this, entry.hasPlayerMatching(CAN_GENERATE_CHUNKS))) {
+                    if (entry.providePlayerChunk(this)) {
                         iterator.remove();
                         super.remove(ChunkPos.asLong(entry.posX, entry.posZ));
 
