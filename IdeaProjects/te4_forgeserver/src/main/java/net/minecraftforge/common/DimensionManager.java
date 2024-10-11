@@ -335,7 +335,7 @@ public class DimensionManager {
 
 
     public static NBTTagCompound saveDimensionDataMap() {
-        NBTTagCompound dimMap = new NBTTagCompound();
+        NBTTagCompound dimMap = new NBTTagCompound(4);
         dimMap.setIntArray("UsedIDs", usedIds.toIntArray());
         return dimMap;
     }

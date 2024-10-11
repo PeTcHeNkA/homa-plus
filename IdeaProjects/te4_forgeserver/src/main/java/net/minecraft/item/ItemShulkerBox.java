@@ -30,7 +30,7 @@ public class ItemShulkerBox extends ItemBlock {
                     int nonEmpty = 0;
 
                     for (int i = 0, s = items.tagCount(); i < s; i++) {
-                        NBTTagCompound itemCopy = new NBTTagCompound();
+                        NBTTagCompound itemCopy = new NBTTagCompound(8, 1);
                         NBTTagCompound itemNbt = items.getCompoundTagAt(i);
                         copyItems.appendTag(itemCopy);
 
@@ -38,8 +38,8 @@ public class ItemShulkerBox extends ItemBlock {
                     }
 
                     if (nonEmpty != 0) {
-                        if(copy == null) copy = new NBTTagCompound();
-                        NBTTagCompound copyEntityTag = new NBTTagCompound();
+                        if(copy == null) copy = new NBTTagCompound(2,1);
+                        NBTTagCompound copyEntityTag = new NBTTagCompound(2, 1);
                         copy.setTagU("BlockEntityTag", copyEntityTag);
                         copyEntityTag.setTagU("Items", copyItems);
                     }

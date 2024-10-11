@@ -176,6 +176,11 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         }
 
 
+        void addTask(PathFinder.PathGenTask task){
+            super.add(task);
+        }
+
+
         void shouldClean(boolean all){
             if(all)cleanFlags = 2;
             else cleanFlags = 1;
@@ -218,8 +223,8 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
 
 
     public void addPathGenTask(PathFinder.PathGenTask task){
-        ConcurrentLinkedQueue<PathFinder.PathGenTask> navTasks = this.navTasks;
-        if(navTasks != null) navTasks.add(task);
+        NavUpdateTask navTasks = this.navTasks;
+        if(navTasks != null) navTasks.addTask(task);
         else task.complete(navChunkCache);
     }
 

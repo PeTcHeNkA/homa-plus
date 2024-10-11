@@ -34,6 +34,7 @@ import net.minecraftforge.event.terraingen.TerrainGen;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import plus.fserver.event.NetherGenInitEvent;
 import plus.fserver.world.generator.map.E2MapGenCavesHell;
+import plus.tson.utl.alloc.ConcurrentCasAllocator;
 
 
 public class ChunkGeneratorHell implements IChunkGenerator {
@@ -325,22 +326,18 @@ public class ChunkGeneratorHell implements IChunkGenerator {
     }
 
 
-    private final ConcurrentLinkedQueue<GenSession> sessionPool = new ConcurrentLinkedQueue<>();
+    private final ConcurrentCasAllocator sessionPool = new ConcurrentCasAllocator(8,4);
 
     private GenSession makeGenSession() {
-        GenSession session = sessionPool.poll();
-        return session==null ? new ChunkGeneratorHell.GenSession() : session;
+        Object session = sessionPool.tryAllocRaw();
+        return session==null ? new ChunkGeneratorHell.GenSession() : (GenSession) session;
     }
     private void freeSession(GenSession session) {
-        sessionPool.add(session);
+        sessionPool.freeObj(session);
     }
     @Override
     public void cleanupCache() {
-        if(sessionPool.size()==1){
-            sessionPool.clear();
-        } else {
-            while (sessionPool.size()>1) sessionPool.poll();
-        }
+        sessionPool.clear(1);
     }
 
 

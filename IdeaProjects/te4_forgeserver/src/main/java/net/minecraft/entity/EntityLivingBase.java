@@ -389,7 +389,7 @@ public abstract class EntityLivingBase extends Entity {
         nbt.setFloat(SStrings.Health, this.getHealth());
         nbt.setShortU(SStrings.HurtTime, (short)this.hurtTime);
         nbt.setInteger(SStrings.HurtByTimestamp, this.revengeTimer);
-        nbt.setShort(SStrings.DeathTime, (short)this.deathTime);
+        nbt.setShortU(SStrings.DeathTime, (short)this.deathTime);
         nbt.setFloat(SStrings.AbsorptionAmount, this.getAbsorptionAmount());
 
         for (EntityEquipmentSlot slot : EntityEquipmentSlot.VALUES) {

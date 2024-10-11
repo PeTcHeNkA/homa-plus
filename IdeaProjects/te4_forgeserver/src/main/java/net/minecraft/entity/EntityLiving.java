@@ -416,7 +416,7 @@ public abstract class EntityLiving extends EntityLivingBase {
         nbt.setBoolean(SStrings.Leashed, this.isLeashed);
 
         if (this.leashHolder != null) {
-            NBTTagCompound tag = new NBTTagCompound();
+            NBTTagCompound tag = new NBTTagCompound(8);
 
             if (this.leashHolder.isLiving()) {
                 UUID uuid = this.leashHolder.getUniqueID();

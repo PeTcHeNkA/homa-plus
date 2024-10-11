@@ -771,7 +771,7 @@ public abstract class AbstractHorse extends EntityAnimal implements IInventoryCh
             compound.setString("OwnerUUID", this.getOwnerUniqueId().toString());
         }
         if (!this.horseChest.getStackInSlot(0).isEmpty()) {
-            compound.setTag("SaddleItem", this.horseChest.getStackInSlot(0).writeToNBT(new NBTTagCompound()));
+            compound.setTag("SaddleItem", this.horseChest.getStackInSlot(0).writeToNBT(new NBTTagCompound(8)));
         }
     }
 

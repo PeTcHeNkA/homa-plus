@@ -1,7 +1,6 @@
 package plus.fserver.utls.collections;
 
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.atomic.AtomicInteger;
+import plus.tson.utl.alloc.ConcurrentCasAllocator;
 
 
 public class PooledLongQueue {
@@ -131,27 +130,22 @@ public class PooledLongQueue {
     }
 
 
-    public static class Pool extends ConcurrentLinkedDeque<Segment>{
-        private final AtomicInteger size = new AtomicInteger();
-        public Pool() {}
+    public static class Pool extends ConcurrentCasAllocator {
+        public Pool() {
+            super(64, 64);
+        }
 
         Segment acquire() {
-            Segment segment = pollFirst();
+            Object segment = tryAllocRaw();
             if (segment == null) {
                 return new Segment(this);
-            } else {
-                size.decrementAndGet();
             }
-            return segment;
+            return (Segment) segment;
         }
 
 
         void release(final Segment segment) {
-            AtomicInteger s;
-            if ((s = size).get() < CACHED_QUEUE_SEGMENTS_COUNT) {
-                super.push(segment);
-                s.incrementAndGet();
-            }
+            super.freeObj(segment);
         }
     }
 

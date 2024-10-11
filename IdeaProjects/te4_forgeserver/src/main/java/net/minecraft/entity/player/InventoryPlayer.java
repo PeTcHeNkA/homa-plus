@@ -485,7 +485,7 @@ public class InventoryPlayer implements IInventory {
         for (int i = 0; i < this.mainInventory.size(); ++i) {
             item = this.mainInventory.get(i);
             if (!item.isEmpty()) {
-                tag = new NBTTagCompound();
+                tag = new NBTTagCompound(8);
                 tag.setByteU("Slot", (byte)i);
                 item.writeToNBT(tag);
                 list.appendTag(tag);
@@ -495,8 +495,8 @@ public class InventoryPlayer implements IInventory {
         for (int i = 0; i < this.armorInventory.size(); ++i) {
             item = this.armorInventory.get(i);
             if (!item.isEmpty()) {
-                tag = new NBTTagCompound();
-                tag.setByte("Slot", (byte)(i + 100));
+                tag = new NBTTagCompound(8);
+                tag.setByteU("Slot", (byte)(i + 100));
                 item.writeToNBT(tag);
                 list.appendTag(tag);
             }
@@ -505,8 +505,8 @@ public class InventoryPlayer implements IInventory {
         for (int i = 0; i < this.offHandInventory.size(); ++i) {
             item = this.offHandInventory.get(i);
             if (!item.isEmpty()) {
-                tag = new NBTTagCompound();
-                tag.setByte("Slot", (byte)(i + 150));
+                tag = new NBTTagCompound(8);
+                tag.setByteU("Slot", (byte)(i + 150));
                 item.writeToNBT(tag);
                 list.appendTag(tag);
             }

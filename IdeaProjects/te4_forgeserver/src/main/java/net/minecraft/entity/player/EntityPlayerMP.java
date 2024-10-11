@@ -223,7 +223,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
         nbt.setBoolean("seenCredits", this.isSeenCredits());
 
         if (this.enteredNetherPosition != null) {
-            NBTTagCompound nbttagcompound = new NBTTagCompound();
+            NBTTagCompound nbttagcompound = new NBTTagCompound(4,1);
             nbttagcompound.setDouble("x", this.enteredNetherPosition.x);
             nbttagcompound.setDouble("y", this.enteredNetherPosition.y);
             nbttagcompound.setDouble("z", this.enteredNetherPosition.z);
@@ -234,7 +234,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
         Entity entity = this.getRidingEntity();
 
         if (entity != null && entity1 != this && entity1.getRecursivePassengersByType(EntityPlayerMP.class).size() == 1) {
-            NBTTagCompound nbttagcompound1 = new NBTTagCompound();
+            NBTTagCompound nbttagcompound1 = new NBTTagCompound(4);
             NBTTagCompound nbttagcompound2 = new NBTTagCompound();
             entity1.writeToNBTOptional(nbttagcompound2);
             nbttagcompound1.setUniqueId("Attach", entity.getUniqueID());

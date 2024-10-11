@@ -418,7 +418,7 @@ public final class ItemStack implements ICapabilitySerializable<NBTTagCompound> 
         if (this.stackTagCompound != null && this.stackTagCompound.hasKey(key, 10)) {
             return this.stackTagCompound.getCompoundTag(key);
         }
-        final NBTTagCompound nbttagcompound = new NBTTagCompound();
+        final NBTTagCompound nbttagcompound = new NBTTagCompound(4);
         this.setTagInfo(key, nbttagcompound);
         return nbttagcompound;
     }
@@ -671,13 +671,13 @@ public final class ItemStack implements ICapabilitySerializable<NBTTagCompound> 
 
     public void addEnchantment(final Enchantment ench, final int level) {
         if (this.stackTagCompound == null) {
-            this.setTagCompound(new NBTTagCompound());
+            this.setTagCompound(new NBTTagCompound(8));
         }
         if (!this.stackTagCompound.hasKey("ench", 9)) {
             this.stackTagCompound.setTag("ench", new NBTTagList());
         }
         final NBTTagList nbttaglist = this.stackTagCompound.getTagList("ench", 10);
-        final NBTTagCompound nbttagcompound = new NBTTagCompound();
+        final NBTTagCompound nbttagcompound = new NBTTagCompound(4);
         nbttagcompound.setShortU("id", (short)Enchantment.getEnchantmentID(ench));
         nbttagcompound.setShortU("lvl", (byte)level);
         nbttaglist.appendTag(nbttagcompound);
@@ -691,7 +691,7 @@ public final class ItemStack implements ICapabilitySerializable<NBTTagCompound> 
 
     public void setTagInfo(final String key, final NBTBase value) {
         if (this.stackTagCompound == null) {
-            this.setTagCompound(new NBTTagCompound());
+            this.setTagCompound(new NBTTagCompound(4));
         }
         this.stackTagCompound.setTag(key, value);
     }
@@ -725,7 +725,7 @@ public final class ItemStack implements ICapabilitySerializable<NBTTagCompound> 
 
     public void setRepairCost(final int cost) {
         if (!this.hasTagCompound()) {
-            this.stackTagCompound = new NBTTagCompound();
+            this.stackTagCompound = new NBTTagCompound(4);
         }
         this.stackTagCompound.setIntegerU("RepairCost", cost);
     }
@@ -753,7 +753,7 @@ public final class ItemStack implements ICapabilitySerializable<NBTTagCompound> 
 
     public void addAttributeModifier(final String attributeName, final AttributeModifier modifier, @Nullable final EntityEquipmentSlot equipmentSlot) {
         if (this.stackTagCompound == null) {
-            this.stackTagCompound = new NBTTagCompound();
+            this.stackTagCompound = new NBTTagCompound(4);
         }
         if (!this.stackTagCompound.hasKey("AttributeModifiers", 9)) {
             this.stackTagCompound.setTag("AttributeModifiers", new NBTTagList());
@@ -774,7 +774,7 @@ public final class ItemStack implements ICapabilitySerializable<NBTTagCompound> 
         }
         final ITextComponent itextcomponent = new TextComponentString("[").appendSibling(textcomponentstring).appendText("]");
         if (!this.isEmpty) {
-            final NBTTagCompound nbttagcompound = this.writeToNBT(new NBTTagCompound());
+            final NBTTagCompound nbttagcompound = this.writeToNBT(new NBTTagCompound(8));
             itextcomponent.getStyle().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new TextComponentString(nbttagcompound.toString())));
             itextcomponent.getStyle().setColor(this.getItem().getForgeRarity(this).getColor());
         }
@@ -860,7 +860,7 @@ public final class ItemStack implements ICapabilitySerializable<NBTTagCompound> 
 
     @Override
     public NBTTagCompound serializeNBT() {
-        final NBTTagCompound ret = new NBTTagCompound();
+        final NBTTagCompound ret = new NBTTagCompound(8);
         this.writeToNBT(ret);
         return ret;
     }

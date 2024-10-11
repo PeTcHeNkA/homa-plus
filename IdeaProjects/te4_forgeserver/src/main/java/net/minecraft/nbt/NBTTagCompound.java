@@ -21,7 +21,20 @@ public class NBTTagCompound extends NBTBase {
     private static final int[] emptyI = {};
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Pattern SIMPLE_VALUE = Pattern.compile("[A-Za-z0-9._+-]+");
-    private final Te4HashMap<String, NBTBase> tagMap = new Te4HashMap<>();
+    private final Te4HashMap<String, NBTBase> tagMap;
+
+    public NBTTagCompound(){
+        tagMap = new Te4HashMap<>();
+    }
+
+    public NBTTagCompound(int initSize){
+        tagMap = new Te4HashMap<>(initSize);
+    }
+
+    public NBTTagCompound(int initSize, float loadFactor){
+        tagMap = new Te4HashMap<>(initSize, loadFactor);
+    }
+
 
     @Override
     void write(DataOutput output) throws IOException {
@@ -323,13 +336,13 @@ public class NBTTagCompound extends NBTBase {
     public NBTTagCompound getCompoundTag(String key) {
         try {
             NBTBase nbtbase = this.tagMap.get(key);
-            if(nbtbase==null)return new NBTTagCompound();
+            if(nbtbase==null)return new NBTTagCompound(2, 1);
             if (nbtbase.getId() == 10) return (NBTTagCompound)nbtbase;
         }
         catch (ClassCastException classcastexception) {
             throw new ReportedException(this.createCrashReport(key, 10, classcastexception));
         }
-        return new NBTTagCompound();
+        return new NBTTagCompound(2, 1);
     }
 
 
@@ -417,9 +430,11 @@ public class NBTTagCompound extends NBTBase {
 
     @Override
     public NBTTagCompound copy() {
-        NBTTagCompound nbttagcompound = new NBTTagCompound();
-        for (Map.Entry<String, NBTBase> node: this.tagMap.entrySet())
-            nbttagcompound.tagMap.fput(node.getKey(), node.getValue().copy());
+        Te4HashMap<String, NBTBase> tagMap, target;
+        NBTTagCompound nbttagcompound = new NBTTagCompound((tagMap = this.tagMap).size());
+        target = nbttagcompound.tagMap;
+
+        tagMap.forEach((s, base) -> target.fput(s, base.copy()));
 
         return nbttagcompound;
     }

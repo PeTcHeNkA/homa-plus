@@ -42,7 +42,7 @@ public abstract class StructureComponent {
         {
             throw new RuntimeException("StructureComponent \"" + this.getClass().getName() + "\" missing ID Mapping, Modder see MapGenStructureIO");
         }
-        NBTTagCompound nbttagcompound = new NBTTagCompound();
+        NBTTagCompound nbttagcompound = new NBTTagCompound(16,1);
         nbttagcompound.setString("id", MapGenStructureIO.getStructureComponentName(this));
         nbttagcompound.setTag("BB", this.boundingBox.toNBTTagIntArray());
         EnumFacing enumfacing = this.getCoordBaseMode();

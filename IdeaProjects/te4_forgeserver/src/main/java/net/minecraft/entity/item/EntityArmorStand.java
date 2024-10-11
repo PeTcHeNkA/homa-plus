@@ -196,7 +196,7 @@ public class EntityArmorStand extends EntityLivingBase {
         super.writeEntityToNBT(compound);
         final NBTTagList nbttaglist = new NBTTagList();
         for (final ItemStack itemstack : this.armorItems) {
-            final NBTTagCompound nbttagcompound = new NBTTagCompound();
+            final NBTTagCompound nbttagcompound = new NBTTagCompound(8);
             if (!itemstack.isEmpty()) {
                 itemstack.writeToNBT(nbttagcompound);
             }
@@ -269,7 +269,7 @@ public class EntityArmorStand extends EntityLivingBase {
 
 
     private NBTTagCompound readPoseFromNBT() {
-        final NBTTagCompound nbttagcompound = new NBTTagCompound();
+        final NBTTagCompound nbttagcompound = new NBTTagCompound(8,1);
         if (!EntityArmorStand.DEFAULT_HEAD_ROTATION.equals(this.headRotation)) {
             nbttagcompound.setTag("Head", this.headRotation.writeToNBT());
         }

@@ -151,7 +151,7 @@ public class NBTTagList extends NBTBase implements java.lang.Iterable<NBTBase> {
                 return (NBTTagCompound)nbtbase;
             }
         }
-        return new NBTTagCompound();
+        return new NBTTagCompound(4);
     }
 
 

@@ -106,7 +106,7 @@ public class ForgeChunkManager {
 
         public ChunkEntry(Chunk chunk) {
             this.chunk = chunk;
-            this.nbt = new NBTTagCompound();
+            this.nbt = new NBTTagCompound(4);
         }
     }
 
@@ -230,7 +230,7 @@ public class ForgeChunkManager {
          */
         public NBTTagCompound getModData() {
             if (this.modData == null) {
-                this.modData = new NBTTagCompound();
+                this.modData = new NBTTagCompound(2, 1);
             }
             return modData;
         }

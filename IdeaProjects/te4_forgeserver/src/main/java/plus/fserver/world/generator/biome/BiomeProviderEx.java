@@ -18,11 +18,11 @@ import plus.fserver.api.BiomeIndexes;
 import plus.fserver.world.generator.GenSession;
 import plus.fserver.world.generator.biome.layers.*;
 import plus.tson.TsonMap;
+import plus.tson.utl.alloc.ConcurrentCasAllocator;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import static net.minecraft.world.gen.layer.GenLayer.getModdedBiomeSize;
 
 
@@ -30,7 +30,7 @@ public class BiomeProviderEx extends BiomeProvider{
     private final EGenLayer getBiomes;
     private final EGenLayer biomeIndex;
     private final BiomeCacheEx biomeCache = new BiomeCacheEx(this);
-    private final ConcurrentLinkedQueue<EIntCache> cache = new ConcurrentLinkedQueue<>();
+    private final ConcurrentCasAllocator cache = new ConcurrentCasAllocator(16,12);
     private final long seed;
 
     public BiomeProviderEx(World world, WorldInfo info, BiomeLib lib) {
@@ -202,14 +202,7 @@ public class BiomeProviderEx extends BiomeProvider{
 
     @Override
     public void cleanupCache() {
-        if(cache.size()==1){
-            cache.clear();
-        } else {
-            while (cache.size()>1) cache.poll();
-        }
-        synchronized (biomeCache) {
-            this.biomeCache.cleanupCache();
-        }
+        cache.clear(1);
     }
 
 
@@ -316,14 +309,14 @@ public class BiomeProviderEx extends BiomeProvider{
     @NotNull
     @Override
     public EIntCache allocCache() {
-        EIntCache session = cache.poll();
-        return session==null ? new GenSession(seed) : session;
+        Object session = cache.tryAllocRaw();
+        return session==null ? new GenSession(seed) : (EIntCache) session;
     }
 
 
     @Override
     public void freeCache(@NotNull EIntCache session) {
-        cache.add(session);
+        cache.freeObj(session);
     }
 
 

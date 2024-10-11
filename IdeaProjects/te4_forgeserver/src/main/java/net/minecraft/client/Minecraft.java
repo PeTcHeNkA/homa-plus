@@ -1851,8 +1851,8 @@ public class Minecraft implements IThreadListener, ISnooperInfo {
             return stack;
         }
         stack.setTagInfo("BlockEntityTag", nbttagcompound);
-        final NBTTagCompound nbttagcompound4 = new NBTTagCompound();
-        final NBTTagList nbttaglist = new NBTTagList();
+        final NBTTagCompound nbttagcompound4 = new NBTTagCompound(2);
+        final NBTTagList nbttaglist = new NBTTagList(1);
         nbttaglist.appendTag(new NBTTagString("(+NBT)"));
         nbttagcompound4.setTag("Lore", nbttaglist);
         stack.setTagInfo("display", nbttagcompound4);

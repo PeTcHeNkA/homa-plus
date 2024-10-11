@@ -203,8 +203,8 @@ public abstract class EntityPlayer extends EntityLivingBase {
         manager.registerU(PLAYER_SCORE, 0);
         manager.registerU(PLAYER_MODEL_FLAG, (byte) 0);
         manager.registerU(MAIN_HAND, (byte) 1);
-        manager.registerU(LEFT_SHOULDER_ENTITY, new NBTTagCompound());
-        manager.registerU(RIGHT_SHOULDER_ENTITY, new NBTTagCompound());
+        manager.registerU(LEFT_SHOULDER_ENTITY, new NBTTagCompound(2, 1));
+        manager.registerU(RIGHT_SHOULDER_ENTITY, new NBTTagCompound(2, 1));
         super.entityInit();
     }
 
@@ -892,7 +892,7 @@ public abstract class EntityPlayer extends EntityLivingBase {
             if (spawn == null) continue;
             Boolean forced = spawnForcedMap.get(entry.getKey());
             if (forced == null) forced = false;
-            NBTTagCompound spawndata = new NBTTagCompound();
+            NBTTagCompound spawndata = new NBTTagCompound(8);
             spawndata.setIntegerU("Dim", entry.getKey());
             spawndata.setInteger("SpawnX", spawn.getX());
             spawndata.setIntegerU("SpawnY", spawn.getY());
@@ -1963,9 +1963,9 @@ public abstract class EntityPlayer extends EntityLivingBase {
 
     protected void spawnShoulderEntities() {
         this.spawnShoulderEntity(this.getLeftShoulderEntity());
-        this.setLeftShoulderEntity(new NBTTagCompound());
+        this.setLeftShoulderEntity(new NBTTagCompound(4, 1));
         this.spawnShoulderEntity(this.getRightShoulderEntity());
-        this.setRightShoulderEntity(new NBTTagCompound());
+        this.setRightShoulderEntity(new NBTTagCompound(4, 1));
     }
 
 

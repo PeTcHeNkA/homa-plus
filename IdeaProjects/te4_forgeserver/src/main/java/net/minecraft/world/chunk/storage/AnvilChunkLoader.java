@@ -157,7 +157,7 @@ public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO {
     public void saveChunk(List<NextTickListEntry> pendings, World worldIn, Chunk chunkIn) throws MinecraftException {
         worldIn.checkSessionLock();
         try {
-            NBTTagCompound compound = new NBTTagCompound();
+            NBTTagCompound compound = new NBTTagCompound(8);
             NBTTagCompound compound1 = new NBTTagCompound();
             compound.setTag(SStrings.CL_LEVEL, compound1);
             compound.setTag("DataVersion", NbtUtils.DATA_VERSION);
@@ -316,7 +316,7 @@ public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO {
 
         for (ExtendedBlockStorage storage : aextendedblockstorage) {
             if (storage != Chunk.NULL_BLOCK_STORAGE) {
-                NBTTagCompound tag = new NBTTagCompound();
+                NBTTagCompound tag = new NBTTagCompound(8, 1);
                 tag.setByteU("Y", (byte)(storage.getYLocation() >> 4 & 255));
                 byte[] abyte = new byte[4096];
                 NibbleArray nibblearray = new NibbleArray();
@@ -380,7 +380,7 @@ public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO {
             long j = worldIn.getTotalWorldTime();
             NBTTagList nbttaglist3 = new NBTTagList();
             for (NextTickListEntry nextticklistentry : pendings) {
-                NBTTagCompound nbttagcompound1 = new NBTTagCompound();
+                NBTTagCompound nbttagcompound1 = new NBTTagCompound(8, 1);
                 ResourceLocation resourcelocation = Block.REGISTRY.getNameForObject(nextticklistentry.getBlock());
                 nbttagcompound1.setString("i", resourcelocation == null ? "" : resourcelocation.toString());
                 nbttagcompound1.setInteger("x", nextticklistentry.position.getX());

@@ -71,7 +71,7 @@ public class EnchantmentHelper {
 
             if (enchantment != null) {
                 int i = entry.getValue();
-                NBTTagCompound nbttagcompound = new NBTTagCompound();
+                NBTTagCompound nbttagcompound = new NBTTagCompound(4);
                 nbttagcompound.setShortU("id", (short)Enchantment.getEnchantmentID(enchantment));
                 nbttagcompound.setShortU("lvl", (short)i);
                 nbttaglist.appendTag(nbttagcompound);

@@ -507,9 +507,9 @@ public class Template {
         NBTTagCompound nbttagcompound;
         for(Iterator var4 = this.blocks.iterator(); var4.hasNext(); list1.appendTag(nbttagcompound)) {
             BlockInfo template$blockinfo = (BlockInfo)var4.next();
-            nbttagcompound = new NBTTagCompound();
+            nbttagcompound = new NBTTagCompound(4, 1);
             nbttagcompound.setTag("pos", this.writeInts(template$blockinfo.pos.getX(), template$blockinfo.pos.getY(), template$blockinfo.pos.getZ()));
-            nbttagcompound.setInteger("state", palette.idFor(template$blockinfo.blockState));
+            nbttagcompound.setIntegerU("state", palette.idFor(template$blockinfo.blockState));
             if (template$blockinfo.tileentityData != null) {
                 nbttagcompound.setTag("nbt", template$blockinfo.tileentityData);
             }
@@ -520,7 +520,7 @@ public class Template {
         NBTTagCompound nbttagcompound1;
         for(Iterator var9 = this.entities.iterator(); var9.hasNext(); list2.appendTag(nbttagcompound1)) {
             EntityInfo template$entityinfo = (EntityInfo)var9.next();
-            nbttagcompound1 = new NBTTagCompound();
+            nbttagcompound1 = new NBTTagCompound(4, 1);
             nbttagcompound1.setTag("pos", this.writeDoubles(template$entityinfo.pos.x, template$entityinfo.pos.y, template$entityinfo.pos.z));
             nbttagcompound1.setTag("blockPos", this.writeInts(template$entityinfo.blockPos.getX(), template$entityinfo.blockPos.getY(), template$entityinfo.blockPos.getZ()));
             if (template$entityinfo.entityData != null) {
@@ -533,7 +533,7 @@ public class Template {
 
         while(var12.hasNext()) {
             IBlockState iblockstate = (IBlockState)var12.next();
-            nbttaglist2.appendTag(NBTUtil.writeBlockState(new NBTTagCompound(), iblockstate));
+            nbttaglist2.appendTag(NBTUtil.writeBlockState(new NBTTagCompound(4,1), iblockstate));
         }
 
         FMLCommonHandler.instance().getDataFixer().writeVersionData(nbt);

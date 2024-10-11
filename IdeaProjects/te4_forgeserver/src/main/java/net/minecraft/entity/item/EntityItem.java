@@ -354,7 +354,7 @@ public class EntityItem extends Entity {
         }
 
         if (!this.getItem().isEmpty()) {
-            nbt.setTag("Item", this.getItem().writeToNBT(new NBTTagCompound()));
+            nbt.setTag("Item", this.getItem().writeToNBT(new NBTTagCompound(8)));
         }
     }
 

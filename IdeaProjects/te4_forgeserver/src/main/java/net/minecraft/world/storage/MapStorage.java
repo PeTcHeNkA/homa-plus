@@ -120,7 +120,7 @@ public class MapStorage {
         public void run() {
             FileOutputStream stream = null;
             try {
-                NBTTagCompound nbttagcompound = new NBTTagCompound();
+                NBTTagCompound nbttagcompound = new NBTTagCompound(2,1);
                 nbttagcompound.setTag("data", data);
                 stream = new FileOutputStream(file);
 
@@ -140,8 +140,8 @@ public class MapStorage {
     private void saveData(File file1, WorldSavedData data) {
         try {
             if (file1 != null) {
-                NBTTagCompound nbttagcompound = new NBTTagCompound();
-                nbttagcompound.setTag("data", data.writeToNBT(new NBTTagCompound()));
+                NBTTagCompound nbttagcompound = new NBTTagCompound(4);
+                nbttagcompound.setTag("data", data.writeToNBT(new NBTTagCompound(16,1)));
                 FileOutputStream fileoutputstream = new FileOutputStream(file1);
                 CompressedStreamTools.writeCompressed(nbttagcompound, fileoutputstream);
                 fileoutputstream.close();
@@ -201,10 +201,10 @@ public class MapStorage {
                 File file1 = this.saveHandler.getMapFileFromName("idcounts");
 
                 if (file1 != null) {
-                    NBTTagCompound nbttagcompound = new NBTTagCompound();
+                    NBTTagCompound nbttagcompound = new NBTTagCompound(4);
 
                     for (String s : this.idCounts.keySet()) {
-                        nbttagcompound.setShort(s, ((Short)this.idCounts.get(s)).shortValue());
+                        nbttagcompound.setShortU(s, this.idCounts.get(s).shortValue());
                     }
 
                     DataOutputStream dataoutputstream = new DataOutputStream(new FileOutputStream(file1));

@@ -97,7 +97,7 @@ public class FixedItemList implements Iterable<ItemStack>{
             ItemStack itemstack = list.get(i);
 
             if (!itemstack.isEmpty()) {
-                NBTTagCompound nbt = new NBTTagCompound();
+                NBTTagCompound nbt = new NBTTagCompound(8);
                 nbt.setByteU("Slot", (byte)i);
                 itemstack.writeToNBT(nbt);
                 nbttaglist.appendTag(nbt);

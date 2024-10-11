@@ -2,6 +2,8 @@ package net.minecraft.world;
 
 import java.util.HashMap;
 import java.util.Set;
+import java.util.function.BiConsumer;
+
 import net.minecraft.nbt.NBTTagCompound;
 
 
@@ -93,12 +95,9 @@ public class GameRules {
 
 
     public NBTTagCompound writeToNBT() {
-        NBTTagCompound nbttagcompound = new NBTTagCompound();
-
-        for (String s : this.rules.keySet()) {
-            GameRules.Value gamerules$value = this.rules.get(s);
-            nbttagcompound.setString(s, gamerules$value.getString());
-        }
+        HashMap<String, Value> rules = this.rules;
+        NBTTagCompound nbttagcompound = new NBTTagCompound(rules.size());
+        rules.forEach((s, value) -> nbttagcompound.setString(s, value.getString()));
         return nbttagcompound;
     }
 

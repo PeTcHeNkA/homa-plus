@@ -264,7 +264,7 @@ public class ScoreboardSaveData extends WorldSavedData {
         while(var3.hasNext()) {
             Score score = (Score)var3.next();
             if (score.getObjective() != null) {
-                NBTTagCompound nbt = new NBTTagCompound();
+                NBTTagCompound nbt = new NBTTagCompound(8,1);
                 nbt.setString("Name", score.getPlayerName());
                 nbt.setString("Objective", score.getObjective().getName());
                 nbt.setIntegerU("Score", score.getScorePoints());

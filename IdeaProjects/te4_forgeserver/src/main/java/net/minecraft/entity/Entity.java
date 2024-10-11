@@ -2892,7 +2892,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
 
     protected HoverEvent getHoverEvent() {
-        NBTTagCompound nbttagcompound = new NBTTagCompound();
+        NBTTagCompound nbttagcompound = new NBTTagCompound(8);
         ResourceLocation resourcelocation = EntityList.getKey(this);
         nbttagcompound.setString("id", this.getCachedUniqueIdString());
         if (resourcelocation != null) {
@@ -3077,7 +3077,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
      */
     public NBTTagCompound getEntityData() {
         if (customEntityData == null) {
-            customEntityData = new NBTTagCompound();
+            customEntityData = new NBTTagCompound(4);
         }
         return customEntityData;
     }
@@ -3222,7 +3222,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
     @Override
     public NBTTagCompound serializeNBT() {
-        NBTTagCompound ret = new NBTTagCompound();
+        NBTTagCompound ret = new NBTTagCompound(16, 1);
         ret.setString("id", this.getEntityString());
         return this.writeToNBT(ret);
     }

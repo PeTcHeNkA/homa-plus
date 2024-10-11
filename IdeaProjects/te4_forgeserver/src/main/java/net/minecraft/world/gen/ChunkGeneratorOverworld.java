@@ -2,7 +2,6 @@ package net.minecraft.world.gen;
 
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.annotation.Nullable;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFalling;
@@ -38,6 +37,8 @@ import plus.fserver.world.generator.future.WorldGenStalactite;
 import plus.fserver.world.generator.map.EMapGenBase;
 import plus.fserver.world.generator.map.EMapGenCaves;
 import plus.fserver.world.generator.map.EMapGenRavine;
+import plus.tson.utl.alloc.ConcurrentCasAllocator;
+
 import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
@@ -118,21 +119,18 @@ public class ChunkGeneratorOverworld implements IChunkGenerator {
     }
 
 
-    private final ConcurrentLinkedQueue<GenSession> sessionPool = new ConcurrentLinkedQueue<>();
+    private final ConcurrentCasAllocator sessionPool = new ConcurrentCasAllocator(8,4);
     private GenSession makeGenSession() {
-        GenSession session = sessionPool.poll();
-        return session==null ? new GenSession() : session;
+        Object session = sessionPool.tryAllocRaw();
+        return session==null ? new GenSession() : (GenSession) session;
     }
     private void freeSession(GenSession session) {
-        sessionPool.add(session);
+        sessionPool.freeObj(session);
     }
+
     @Override
     public void cleanupCache() {
-        if(sessionPool.size()==1){
-            sessionPool.clear();
-        } else {
-            while (sessionPool.size()>1) sessionPool.poll();
-        }
+        sessionPool.clear(1);
     }
 
 

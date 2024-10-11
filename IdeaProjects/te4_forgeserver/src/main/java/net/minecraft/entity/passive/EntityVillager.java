@@ -305,7 +305,7 @@ public class EntityVillager extends EntityAgeable implements INpc, IMerchant {
             ItemStack itemstack = this.villagerInventory.getStackInSlot(i);
 
             if (!itemstack.isEmpty()) {
-                nbttaglist.appendTag(itemstack.writeToNBT(new NBTTagCompound()));
+                nbttaglist.appendTag(itemstack.writeToNBT(new NBTTagCompound(8)));
             }
         }
         tag.setTag("Inventory", nbttaglist);
