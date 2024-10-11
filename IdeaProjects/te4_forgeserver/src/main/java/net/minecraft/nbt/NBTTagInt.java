@@ -31,7 +31,7 @@ public class NBTTagInt extends NBTPrimitive {
     }
 
 
-    public static NBTTagInt read(DataInput input, NBTSizeTracker tracker) throws IOException {
+    public static NBTPrimitive read(DataInput input, NBTSizeTracker tracker) throws IOException {
         tracker.read(96L);
         return NbtUtils.create(input.readInt());
     }

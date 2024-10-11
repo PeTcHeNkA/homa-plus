@@ -30,7 +30,7 @@ public class NBTTagShort extends NBTPrimitive {
     }
 
 
-    public static NBTTagShort read(DataInput input, NBTSizeTracker tracker) throws IOException {
+    public static NBTPrimitive read(DataInput input, NBTSizeTracker tracker) throws IOException {
         tracker.read(80L);
         return NbtUtils.create(input.readShort());
     }

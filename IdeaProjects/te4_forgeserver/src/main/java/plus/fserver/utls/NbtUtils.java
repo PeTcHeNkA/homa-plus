@@ -6,9 +6,7 @@ import net.minecraft.nbt.*;
 public class NbtUtils {
     private static final NBTTagByte[]  TAG_BYTES;
     private static final NBTTagByte[]  TAG_BYTES_N;
-
-    private static final NBTTagShort[] TAG_SHORTS;
-    private static final NBTTagInt[]   TAG_INTS;
+    private static final NBTPrimitive[]TAG_INTS;
     public static final NBTTagByte     BYTE_TRUE;
     public static final NBTTagByte     BYTE_FALSE;
     public static final NBTTagInt      DATA_VERSION = new NBTTagInt(1343);
@@ -19,14 +17,14 @@ public class NbtUtils {
         return TAG_BYTES[b];
     }
 
-    public static NBTTagInt create(int i){
-        if(i > 197 || i < 0)return new NBTTagInt(i);
+    public static NBTPrimitive create(int i){
+        if(i > 319 || i < 0)return new NBTTagInt(i);
         return TAG_INTS[i];
     }
 
-    public static NBTTagShort create(short s){
-        if(s > 127 || s < 0)return new NBTTagShort(s);
-        return TAG_SHORTS[s];
+    public static NBTPrimitive create(short s){
+        if(s > 319 || s < 0)return new NBTTagShort(s);
+        return TAG_INTS[s];
     }
 
 
@@ -49,14 +47,10 @@ public class NbtUtils {
             bytesN[i] = new NBTTagByte((byte) -i);
         }
 
-        NBTTagInt[] ints = TAG_INTS = new NBTTagInt[198];
+        NBTPrimitive[] ints = TAG_INTS = new NBTPrimitive[320];
         for (int i = 0; i < ints.length; i++){
-            ints[i] = new NBTTagInt(i);
-        }
-
-        NBTTagShort[] shorts = TAG_SHORTS = new NBTTagShort[128];
-        for (int i = 0; i < shorts.length; i++){
-            shorts[i] = new NBTTagShort((short) i);
+            if(i >= 127) ints[i] = new NBTTagShort((short) i);
+            else ints[i] = bytes[i];
         }
     }
 }

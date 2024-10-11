@@ -1745,16 +1745,16 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
     //todo is safe?
     public final NBTTagCompound writeToNBT(NBTTagCompound tag) {
         try {
-            tag.setTag(SStrings.Pos,                this.newDoubleNBTList(this.posX, this.posY, this.posZ));
-            tag.setTag(SStrings.Motion,             this.newDoubleNBTList(this.motionX, this.motionY, this.motionZ));
+            tag.setTag(SStrings.Pos,                newDoubleNBTListPos(this.posX, this.posY, this.posZ));
+            tag.setTag(SStrings.Motion,             newDoubleNBTListPos(this.motionX, this.motionY, this.motionZ));
             tag.setTag(SStrings.Rotation,           this.newFloatNBTList(this.rotationYaw, this.rotationPitch));
             tag.setFloat(SStrings.FallDistance,     this.fallDistance);
             tag.setShortU(SStrings.Fire,            this.fire);
             tag.setShortU(SStrings.Air, (short)     this.getAir());
             tag.setBoolean(SStrings.OnGround,       this.onGround);
-            tag.setIntegerU(SStrings.Dimension,      this.dimension);
+            tag.setIntegerU(SStrings.Dimension,     this.dimension);
             tag.setBoolean(SStrings.Invulnerable,   this.invulnerable);
-            tag.setIntegerU(SStrings.PortalCooldown, this.timeUntilPortal);
+            tag.setIntegerU(SStrings.PortalCooldown,this.timeUntilPortal);
             tag.setUniqueId(SStrings.UUID,          this.getUniqueID());
 
             if (this.hasCustomName()) {
@@ -1939,6 +1939,15 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         for (double d0 : numbers) {
             nbttaglist.appendTag(new NBTTagDouble(d0));
         }
+        return nbttaglist;
+    }
+
+
+    protected static NBTTagList newDoubleNBTListPos(double x, double y, double z) {
+        NBTTagList nbttaglist = new NBTTagList(3);
+        nbttaglist.appendTag(new NBTTagDouble(x));
+        nbttaglist.appendTag(new NBTTagDouble(y));
+        nbttaglist.appendTag(new NBTTagDouble(z));
         return nbttaglist;
     }
 
