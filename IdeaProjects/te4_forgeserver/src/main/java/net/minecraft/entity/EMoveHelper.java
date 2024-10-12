@@ -152,10 +152,9 @@ public class EMoveHelper {
         }
 
 
-        void complete(ChunkSelector selector, BlockPos.MutableBlockPos mut, AxisAlignedBB tempAABB){
-            Entity entity = this.entity;
-            WorldServer world;
-            (world =((WorldServer)entity.world)).getCollisionBoxesFast(selector, mut, entity, moveBox, this);
+        void complete(WorldServer world, ChunkSelector selector, BlockPos.MutableBlockPos mut, AxisAlignedBB tempAABB){
+            Entity entity;
+            world.getCollisionBoxesFast(selector, mut, entity = this.entity, moveBox, this);
             entity.completeMove(selector, mut, tempAABB, this, x, y, z);
             Runnable future;
             if((future = this.future) != null){
@@ -192,7 +191,7 @@ public class EMoveHelper {
         }
 
 
-        public void complete(ChunkSelector selector, BlockPos.MutableBlockPos mut, AxisAlignedBB tempAABB){
+        public void complete(WorldServer world, ChunkSelector selector, BlockPos.MutableBlockPos mut, AxisAlignedBB tempAABB){
             if(allUpdate.isEmpty())return;
             ChunkProviderServer provider = selector.provider();
 
@@ -205,7 +204,7 @@ public class EMoveHelper {
                     ClassInheritanceMultiMap<Entity> list = chunk.getEntityLists()[pos.getY()];
                     if(list != null) {
                         selector.setChunk(chunk);
-                        completeMoveTasks(selector, mut, tempAABB, list);
+                        completeMoveTasks(world, selector, mut, tempAABB, list);
                     }
                 }
                 if(tempSize == temp.length){
@@ -220,7 +219,7 @@ public class EMoveHelper {
         }
 
 
-        private static void completeMoveTasks(ChunkSelector selector, BlockPos.MutableBlockPos mut, AxisAlignedBB tempAABB, ClassInheritanceMultiMap<Entity> list) {
+        private static void completeMoveTasks(WorldServer world, ChunkSelector selector, BlockPos.MutableBlockPos mut, AxisAlignedBB tempAABB, ClassInheritanceMultiMap<Entity> list) {
             int size;
             if ((size = list.sizeC()) < 2) return;
             Entity[] arr = list.raw();
@@ -261,7 +260,7 @@ public class EMoveHelper {
                         }
                     }
                 }
-                curTask.complete(selector, mut, tempAABB);
+                curTask.complete(world, selector, mut, tempAABB);
             }
         }
     }

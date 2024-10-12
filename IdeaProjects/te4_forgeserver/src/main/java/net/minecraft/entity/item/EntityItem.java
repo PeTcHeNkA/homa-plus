@@ -38,6 +38,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import plus.fserver.ElcaCV;
 import plus.fserver.ElcaConfig;
 import plus.fserver.ElcaMobs;
 import plus.fserver.server.elca.ChunkSelector;
@@ -69,13 +70,26 @@ public class EntityItem extends Entity {
     public EntityItem(World worldIn, double x, double y, double z) {
         super(worldIn);
         this.health = 5;
-        this.hoverStart = (float)(Math.random() * Math.PI * 2.0D);
+        Random rand = this.rand;
+        this.hoverStart = (float)(rand.nextDouble() * Math.PI * 2.0D);
         this.setSize(0.25F, 0.25F);
-        this.setPosition(x, y, z);
-        this.rotationYaw = (float)(Math.random() * 360.0D);
-        this.motionX = (float)(Math.random() * 0.20000000298023224D - 0.10000000149011612D);
+        this.mutPosition(x, y, z);
+        this.rotationYaw = rand.nextFloat() * 360.0F;
+        this.motionX = rand.nextFloat() * 0.20000000298023224F - 0.10000000149011612F;
         this.motionY = 0.20000000298023224D;
-        this.motionZ = (float)(Math.random() * 0.20000000298023224D - 0.10000000149011612D);
+        this.motionZ = rand.nextFloat() * 0.20000000298023224F - 0.10000000149011612F;
+
+        if(ElcaCV.ENABLE_SPAWN_CAUSE_TRACKER){
+            if(!world.isRemote){
+                Throwable cause = new Throwable();
+                world.getMinecraftServer().ticker().runAsync(() -> {
+                    LOGGER.warn("---- ITEM SPAWN CAUSE ----");
+                    LOGGER.warn("POS: {} {} {}", x, y, z);
+                    LOGGER.warn("", cause);
+                    LOGGER.warn("----------- END ----------");
+                });
+            }
+        }
     }
 
 

@@ -11,6 +11,7 @@ import java.util.*;
 import net.minecraftforge.fml.relauncher.*;
 import net.minecraft.util.*;
 import net.minecraft.block.state.*;
+import plus.fserver.api.IBlockEAccess;
 import plus.fserver.utls.collections.AABBList;
 
 
@@ -33,21 +34,16 @@ public class BlockTorch extends Block {
     @Override
     public AxisAlignedBB getBoundingBox(final IBlockState state, final IBlockAccess source, final BlockPos pos) {
         switch (state.getValue(BlockTorch.FACING)) {
-            case EAST: {
+            case EAST:
                 return BlockTorch.TORCH_EAST_AABB;
-            }
-            case WEST: {
+            case WEST:
                 return BlockTorch.TORCH_WEST_AABB;
-            }
-            case SOUTH: {
+            case SOUTH:
                 return BlockTorch.TORCH_SOUTH_AABB;
-            }
-            case NORTH: {
+            case NORTH:
                 return BlockTorch.TORCH_NORTH_AABB;
-            }
-            default: {
+            default:
                 return BlockTorch.STANDING_AABB;
-            }
         }
     }
 
@@ -81,11 +77,15 @@ public class BlockTorch extends Block {
 
 
     @Override
+    public boolean canPlaceBlockOnSide(World worldIn, BlockPos pos, EnumFacing side) {
+        return this.canPlaceAt(worldIn, pos, side);
+    }
+
+
+    @Override
     public boolean canPlaceBlockAt(final World worldIn, final BlockPos pos) {
         for (final EnumFacing enumfacing : BlockTorch.FACING.getAllowedValues()) {
-            if (this.canPlaceAt(worldIn, pos, enumfacing)) {
-                return true;
-            }
+            if (this.canPlaceAt(worldIn, pos, enumfacing)) return true;
         }
         return false;
     }
@@ -135,7 +135,8 @@ public class BlockTorch extends Block {
         final EnumFacing enumfacing2 = enumfacing.getOpposite();
         final BlockPos blockpos = pos.offset(enumfacing2);
         boolean flag = false;
-        if (axis.isHorizontal() && world.access().getBlockState(blockpos).getBlockFaceShape(world, blockpos, enumfacing) != BlockFaceShape.SOLID) {
+        IBlockEAccess access;
+        if (axis.isHorizontal() && (access = world.access()).getBlockState(blockpos).getBlockFaceShape(access, blockpos, enumfacing) != BlockFaceShape.SOLID) {
             flag = true;
         }
         else if (axis.isVertical() && !this.canPlaceOn(world, blockpos)) {
@@ -154,9 +155,10 @@ public class BlockTorch extends Block {
         if (state.getBlock() == this && this.canPlaceAt(world, pos, state.getValue(BlockTorch.FACING))) {
             return true;
         }
-        if (world.access().getBlockState(pos).getBlock() == this) {
+        IBlockEAccess access;
+        if ((access = world.access()).getBlockState(pos).getBlock() == this) {
             this.dropBlockAsItem(world, pos, state, 0);
-            world.access().setBlockState(pos, BlockIDIndexes.AIR_STATE, 3);
+            access.setBlockState(pos, BlockIDIndexes.AIR_STATE, 3);
         }
         return false;
     }
@@ -171,12 +173,12 @@ public class BlockTorch extends Block {
 
         if (enumfacing.getAxis().isHorizontal()) {
             final EnumFacing enumfacing2 = enumfacing.getOpposite();
-            world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, d0 + 0.27 * enumfacing2.getXOffset(), d2 + 0.22, d3 + 0.27 * enumfacing2.getZOffset(), 0.0, 0.0, 0.0, new int[0]);
-            world.spawnParticle(EnumParticleTypes.FLAME, d0 + 0.27 * enumfacing2.getXOffset(), d2 + 0.22, d3 + 0.27 * enumfacing2.getZOffset(), 0.0, 0.0, 0.0, new int[0]);
+            world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, d0 + 0.27 * enumfacing2.getXOffset(), d2 + 0.22, d3 + 0.27 * enumfacing2.getZOffset(), 0.0, 0.0, 0.0);
+            world.spawnParticle(EnumParticleTypes.FLAME, d0 + 0.27 * enumfacing2.getXOffset(), d2 + 0.22, d3 + 0.27 * enumfacing2.getZOffset(), 0.0, 0.0, 0.0);
         }
         else {
-            world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, d0, d2, d3, 0.0, 0.0, 0.0, new int[0]);
-            world.spawnParticle(EnumParticleTypes.FLAME, d0, d2, d3, 0.0, 0.0, 0.0, new int[0]);
+            world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, d0, d2, d3, 0.0, 0.0, 0.0);
+            world.spawnParticle(EnumParticleTypes.FLAME, d0, d2, d3, 0.0, 0.0, 0.0);
         }
     }
 
@@ -216,6 +218,7 @@ public class BlockTorch extends Block {
     }
 
 
+    @Override
     public int getMetaFromState(final IBlockState state) {
         int i = 0;
         switch (state.getValue(BlockTorch.FACING)) {

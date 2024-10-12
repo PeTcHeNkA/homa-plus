@@ -28,6 +28,7 @@ public class ElcaCV {
     public static final boolean ENABLE_PACKET_DEBUG           = false;
     public static final boolean ENABLE_CHUNK_ADD_LOCKS        = false;
     public static final boolean USE_UNSAFE_ASYNC_MOVE         = false;
+    public static final boolean ENABLE_SPAWN_CAUSE_TRACKER    = true;
     //public static final boolean UNSAFE_FAST_BLOCK_GET         = true;
 
     static {

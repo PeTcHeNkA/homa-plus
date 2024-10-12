@@ -653,7 +653,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
                     BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
                     AxisAlignedBB aabb = new AxisAlignedBB(0,0,0,0,0,0);
 
-                    task.complete(selector, mut, aabb);
+                    task.complete(WorldServer.this, selector, mut, aabb);
                 } catch (Exception e){
                     server.ticker().onError(WorldServer.this, e);
                 }
@@ -661,7 +661,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         } else {
             try {
                 //is thread-safe?
-                collideTask.complete(localSelector, tempPooledLocalPos, commonWorldEntityAABB);
+                collideTask.complete(this, localSelector, tempPooledLocalPos, commonWorldEntityAABB);
             } catch (Exception e){
                 server.ticker().onError(this, e);
             }

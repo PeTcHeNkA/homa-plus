@@ -354,8 +354,8 @@ public class StructureMineshaftPieces {
                     this.fillWithBlocks(selector, box, maxX, maxY, z, maxX, maxY, z, planks, air, false);
                 } else {
                     this.fillWithBlocks(selector, box, x, maxY, z, maxX, maxY, z, planks, air, false);
-                    this.randomlyPlaceBlock(selector, box, rand, 0.05F, x + 1, maxY, z - 1, Blocks.TORCH.getDefaultState().withProperty(BlockTorch.FACING, EnumFacing.NORTH));
-                    this.randomlyPlaceBlock(selector, box, rand, 0.05F, x + 1, maxY, z + 1, Blocks.TORCH.getDefaultState().withProperty(BlockTorch.FACING, EnumFacing.SOUTH));
+                    this.randomlyPlaceBlockChecked(selector, box, rand, 0.05F, x + 1, maxY, z - 1, Blocks.TORCH.getDefaultState().withProperty(BlockTorch.FACING, EnumFacing.NORTH), EnumFacing.NORTH);
+                    this.randomlyPlaceBlockChecked(selector, box, rand, 0.05F, x + 1, maxY, z + 1, Blocks.TORCH.getDefaultState().withProperty(BlockTorch.FACING, EnumFacing.SOUTH), EnumFacing.SOUTH);
                 }
             }
         }

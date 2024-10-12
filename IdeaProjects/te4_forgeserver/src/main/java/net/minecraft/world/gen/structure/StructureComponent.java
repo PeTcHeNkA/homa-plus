@@ -223,11 +223,13 @@ public abstract class StructureComponent {
         );
 
         if (box.isVecInside(mut)) {
-            if (this.mirror != Mirror.NONE) {
-                state = state.withMirror(this.mirror);
+            Mirror mirror;
+            if ((mirror = this.mirror) != Mirror.NONE) {
+                state = state.withMirror(mirror);
             }
-            if (this.rotation != Rotation.NONE) {
-                state = state.withRotation(this.rotation);
+            Rotation rotation;
+            if ((rotation = this.rotation) != Rotation.NONE) {
+                state = state.withRotation(rotation);
             }
             selector.setBlockState(mut, state, 2);
         }
@@ -243,11 +245,13 @@ public abstract class StructureComponent {
         );
 
         if (box.isVecInside(blockpos)) {
-            if (this.mirror != Mirror.NONE) {
-                state = state.withMirror(this.mirror);
+            Mirror mirror;
+            if ((mirror = this.mirror) != Mirror.NONE) {
+                state = state.withMirror(mirror);
             }
-            if (this.rotation != Rotation.NONE) {
-                state = state.withRotation(this.rotation);
+            Rotation rotation;
+            if ((rotation = this.rotation) != Rotation.NONE) {
+                state = state.withRotation(rotation);
             }
             selector.setBlockState(blockpos, state);
         }
@@ -412,9 +416,42 @@ public abstract class StructureComponent {
     }
 
 
-    protected void randomlyPlaceBlock(ChunkSelector selector, StructureBoundingBox box, Random rand, float chance, int x, int y, int z, IBlockState blockstateIn) {
+    protected void setBlockStateChecked(ChunkSelector selector, IBlockState state,
+                                 int x, int y, int z, StructureBoundingBox box, EnumFacing facing) {
+        BlockPos blockpos = new BlockPos(
+                this.getXWithOffset(x, z),
+                this.getYWithOffset(y),
+                this.getZWithOffset(x, z)
+        );
+
+        if (box.isVecInside(blockpos)) {
+            Mirror mirror;
+            if ((mirror = this.mirror) != Mirror.NONE) {
+                state = state.withMirror(mirror);
+                facing = mirror.mirror(facing);
+            }
+            Rotation rotation;
+            if ((rotation = this.rotation) != Rotation.NONE) {
+                state = state.withRotation(rotation);
+                facing = rotation.rotate(facing);
+            }
+            if(state.getBlock().canPlaceBlockOnSide(selector.getWorld(), blockpos, facing)) {
+                selector.setBlockState(blockpos, state);
+            }
+        }
+    }
+
+
+    protected void randomlyPlaceBlockChecked(ChunkSelector selector, StructureBoundingBox box, Random rand, float chance, int x, int y, int z, IBlockState state, EnumFacing facing) {
         if (rand.nextFloat() < chance) {
-            this.setBlockState(selector, blockstateIn, x, y, z, box);
+            this.setBlockStateChecked(selector, state, x, y, z, box, facing);
+        }
+    }
+
+
+    protected void randomlyPlaceBlock(ChunkSelector selector, StructureBoundingBox box, Random rand, float chance, int x, int y, int z, IBlockState state) {
+        if (rand.nextFloat() < chance) {
+            this.setBlockState(selector, state, x, y, z, box);
         }
     }
 
