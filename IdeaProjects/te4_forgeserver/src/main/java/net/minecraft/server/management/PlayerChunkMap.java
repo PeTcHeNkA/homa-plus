@@ -211,7 +211,7 @@ public class PlayerChunkMap extends Long2ObjectOpenHashMap<PlayerChunkMapEntry> 
 
     public void markBlockForUpdate(BlockPos pos) {
         int px, pz;
-        PlayerChunkMapEntry entry = super.get(ChunkPos.asLong((px = pos.getX()) >> 4, (pz = pos.getZ()) >> 4));
+        PlayerChunkMapEntry entry = getEntry((px = pos.getX()) >> 4, (pz = pos.getZ()) >> 4);
         if (entry != null) entry.blockChanged(this, px & 15, pos.getY(), pz & 15);
     }
 
