@@ -101,12 +101,12 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
     private final MinecraftServer server;
     private EntityTracker entityTracker;
     private final PlayerChunkMap playerChunkMap;
-    private final Set<NextTickListEntry> pendingTickListEntriesHashSet = new Te4HashSet<>();
+    private final Set<NextTickListEntry> pendingTickListEntriesHashSet = new Te4HashSet<>(8);
     private final TreeSet<NextTickListEntry> pendingTickListEntriesTreeSet = new TreeSet<>(
             new ConcurrentSkipListSet<>()
     );
 
-    private final Te4HashMap<UUID, Entity> entitiesByUuid = new Te4HashMap<>();
+    private final Te4HashMap<UUID, Entity> entitiesByUuid = new Te4HashMap<>(16,0.85f);
     public boolean disableLevelSaving;
     private boolean allPlayersSleeping;
     private int updateEntityTick;

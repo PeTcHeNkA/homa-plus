@@ -1,10 +1,8 @@
 package net.minecraft.world.chunk;
 
 import com.google.common.base.Predicate;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+
+import java.util.*;
 import javax.annotation.Nullable;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.Block;
@@ -49,7 +47,6 @@ import plus.fserver.world.light.LightingHooks;
 import plus.fserver.world.light.WorldChunkSlice;
 import plus.fserver.world.light.ILightingEngine;
 import plus.fserver.world.light.ILightingEngineProvider;
-import plus.tson.utl.Te4HashMap;
 import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
@@ -176,7 +173,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
         short[] phMap = this.precipitationHeightMap = new short[256];
         this.updateSkylights = new short[16];
 
-        this.tileEntities = new Te4HashMap<>(8);
+        this.tileEntities = new HashMap<>(8);
         this.queuedLightChecks = 4096;
         this.tileEntityPosQueue = new FastBuffer<>();
         this.world = worldIn;

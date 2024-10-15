@@ -186,9 +186,9 @@ public class EntityTrackerEntry {
 
 
     public void updatePlayerEntity(EntityPlayerMP playerMP) {
-        if (playerMP != this.trackedEntity) {
+        Entity trackedEntity;
+        if (playerMP != (trackedEntity = this.trackedEntity)) {
             if (this.isVisibleTo(playerMP)) {
-                Entity trackedEntity = this.trackedEntity;
                 if (!this.trackingPlayers.contains(playerMP) && (this.isPlayerWatchingThisChunk(playerMP) || this.trackedEntity.forceSpawn)) {
                     this.trackingPlayers.add(playerMP);
                     Packet<?> packet = this.createSpawnPacket();
@@ -283,9 +283,9 @@ public class EntityTrackerEntry {
                     //ForgeEventFactory.onStartEntityTracking(trackedEntity, playerMP);
                 }
             } else if (this.trackingPlayers.remove(playerMP)) {
-                this.trackedEntity.removeTrackingPlayer(playerMP);
-                playerMP.removeEntity(this.trackedEntity);
-                this.trackedEntity.world.stopTrackingEvent.post(playerMP, trackedEntity);
+                trackedEntity.removeTrackingPlayer(playerMP);
+                playerMP.removeEntity(trackedEntity);
+                trackedEntity.world.stopTrackingEvent.post(playerMP, trackedEntity);
                 //ForgeEventFactory.onStopEntityTracking(trackedEntity, playerMP);
             }
         }
