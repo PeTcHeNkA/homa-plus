@@ -1,7 +1,6 @@
 package net.minecraft.block;
 
-import com.google.common.collect.Lists;
-import java.util.Queue;
+import java.util.LinkedList;
 import java.util.Random;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyBool;
@@ -10,6 +9,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.BlockIDIndexes;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.NonNullList;
@@ -31,7 +31,7 @@ public class BlockSponge extends BlockFx {
 
     protected BlockSponge() {
         super(Material.SPONGE);
-        this.setDefaultState(this.blockState.getBaseState().withProperty(WET, Boolean.valueOf(false)));
+        this.setDefaultState(this.blockState.getBaseState().withProperty(WET, Boolean.FALSE));
         this.setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
     }
 
@@ -69,54 +69,66 @@ public class BlockSponge extends BlockFx {
     }
 
     private static class BlockPosIndex extends BlockPos.MutableBlockPos{
-        private int index;
-        public BlockPosIndex(int x, int y, int z, int index) {
+        int index;
+        EnumFacing excluding;
+        public BlockPosIndex(int x, int y, int z, int index, EnumFacing excluding) {
             super(x, y, z);
+            this.index = index;
+            this.excluding = excluding;
+        }
+        void init(int x, int y, int z, int index, EnumFacing excluding){
+            super.setPosB(x,y,z);
+            this.index = index;
+            this.excluding = excluding;
         }
     }
 
 
     private boolean absorb(World world, BlockPos pos) {
-        Queue<BlockPosIndex> queue = Lists.newLinkedList();
-
-        ArrayListE10<BlockPos> list = new ArrayListE10<>();
-        queue.add(new BlockPosIndex(pos.getX(), pos.getY(), pos.getZ(), 0));
-
-        int i = ElcaConfig.MAX_SPONGE_POWER;
-
+        LinkedList<BlockPosIndex> queue = new LinkedList<>();
+        queue.add(new BlockPosIndex(pos.getX(), pos.getY(), pos.getZ(), 0, null));
+        int max = ElcaConfig.MAX_SPONGE_POWER;
         IBlockEAccess access = world.access();
+        ArrayListE10<BlockPos> updates = null;
+        //ArrayListE10<BlockPos> list = null;
 
         while (!queue.isEmpty()) {
             BlockPosIndex blockpos = queue.poll();
-            BlockPosIndex temp = new BlockPosIndex(0,0,0, blockpos.index);
+            //if(updates != null)updates.remove(blockpos);
+            int index = blockpos.index;
+            EnumFacing excluding = blockpos.excluding;
+            int px = blockpos.getX(), py = blockpos.getY(), pz = blockpos.getZ();
 
             for (EnumFacing facing : EnumFacing.VALUES) {
-                temp.setPos(
-                        blockpos.getX()+facing.getXOffset(),
-                        blockpos.getY()+facing.getYOffset(),
-                        blockpos.getZ()+facing.getZOffset()
-                );
+                if(excluding == facing)continue;
+                int x = px + facing.getXOffset();
+                int y = py + facing.getYOffset();
+                int z = pz + facing.getZOffset();
 
-                if (access.getBlockState(temp).getMaterial() == Material.WATER) {
-                    access.setBlockState(temp, Blocks.AIR.getDefaultState(), 2);
-                    list.addF(temp);
-                    --i;
+                if (access.getBlockState(x, y, z).getMaterial() == Material.WATER) {
+                    if(blockpos != null) blockpos.init(x, y, z, index, facing.getOpposite());
+                    else blockpos = new BlockPosIndex(x, y, z, index, facing.getOpposite());
 
-                    if (blockpos.index < 6) {
-                        blockpos.index += 1;
-                        queue.add(temp);
+                    access.setBlockState(blockpos, BlockIDIndexes.AIR_STATE, 2);
+                    if(updates == null) updates = new ArrayListE10<>();
+                    updates.add(blockpos);
+                    --max;
+
+                    if (index < 6) {
+                        index += 1;
+                        blockpos.index = index;
+                        queue.add(blockpos);
                     }
-                    temp = new BlockPosIndex(temp.getX(), temp.getY(), temp.getZ(), temp.index);
+                    blockpos = null;
                 }
             }
-            if (i < 0) {
-                break;
-            }
+            if (max < 0) break;
         }
-        for (BlockPos pos1 : list) {
-            world.notifyNeighborsOfStateChange(pos1, Blocks.AIR, false);
+        if(updates != null) {
+            updates.forEach(pos1 -> world.notifyNeighborsOfStateChange(pos1, Blocks.AIR, false));
+            return true;
         }
-        return i > 0;
+        return false;
     }
 
 

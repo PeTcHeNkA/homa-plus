@@ -21,6 +21,8 @@ public class SPacketMultiBlockChange extends SPacketPlayBase {
     public SPacketMultiBlockChange() {}
 
     public SPacketMultiBlockChange(int count, short[] updates, Chunk chunk) {
+        this.chunkX = chunk.x;
+        this.chunkZ = chunk.z;
         BlockUpdateData[] changedBlocks = this.changedBlocks = new BlockUpdateData[count];
 
         for(int i = 0; i < changedBlocks.length; ++i) {

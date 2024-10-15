@@ -258,7 +258,8 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements C
 
     //todo maybe use Elca cache? MC -> Netty
     public void update(PlayerChunkMap map) {
-        if (this.sentToPlayers && this.chunk != null) {
+        Chunk chunk;
+        if (this.sentToPlayers && (chunk = this.chunk) != null) {
             if (this.changes != 0) {
                 if (this.changes == 1) {
                     short cPos = this.changedBlocks[0];
@@ -276,12 +277,12 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements C
                     }
                 }
                 else if (this.changes >= ForgeModContainer.clumpingThreshold) {
-                    this.sendPacket(new SPacketChunkData(this.chunk, this.changedSectionFilter, true));
+                    this.sendPacket(new SPacketChunkData(chunk, this.changedSectionFilter, true));
                     //TODO: FDix Mojang's fuckup to modded by combining all TE data into the chunk data packet... seriously... packet size explosion!
                 } else l1:{
                     short[] changedBlocks = this.changedBlocks;
                     if(changedBlocks == null)break l1;
-                    Chunk chunk = this.chunk;
+
                     WorldServer world = map.getWorldServer();
 
                     this.sendPacket(new SPacketMultiBlockChange(this.changes, changedBlocks, chunk));
@@ -290,13 +291,14 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements C
                     //{// Forge: Send only the tile entities that are updated, Adding this brace
                     // lets us keep the indent and the patch small
                     BlockPos.MutableBlockPos pos = world.localTempPos;
+                    final int posX = this.posX, posZ = this.posZ;
 
                     for (int l = 0; l < this.changes; ++l) {
                         short cPos = changedBlocks[l];
 
-                        int cX = (cPos >> 12 & 15) + posX << 4;
+                        int cX = (cPos >> 12 & 15) + (posX << 4);
                         int cY =  cPos & 255;
-                        int cZ = (cPos >> 8 & 15) + posZ << 4;
+                        int cZ = (cPos >> 8 & 15) + (posZ << 4);
 
                         IBlockState state = chunk.getBlockStateUnchecked(cX, cY, cZ);
 
