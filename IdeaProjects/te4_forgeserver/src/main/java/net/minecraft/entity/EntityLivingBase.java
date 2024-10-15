@@ -122,8 +122,9 @@ public abstract class EntityLivingBase extends Entity {
     public int maxHurtResistantTime = 20;
     public float prevCameraPitch;
     public float cameraPitch;
-    public float randomUnused2;
-    public float randomUnused1;
+    //todo removed. is safe?
+    //public float randomUnused2;
+    //public float randomUnused1;
 
     //todo move to client
     public float renderYawOffset;
@@ -176,9 +177,9 @@ public abstract class EntityLivingBase extends Entity {
         this.setHealth(this.getMaxHealth());
         this.preventEntitySpawning = true;
         Random rand = super.rand;
-        this.randomUnused1 = (float)((rand.nextDouble() + 1.0D) * 0.009999999776482582D);
+        //this.randomUnused1 = (float)((rand.nextDouble() + 1.0D) * 0.009999999776482582D);
         this.setPosition(this.posX, this.posY, this.posZ);
-        this.randomUnused2 = rand.nextFloat() * 12398.0F;
+        //this.randomUnused2 = rand.nextFloat() * 12398.0F;
         this.rotationYaw = (float)(rand.nextDouble() * (Math.PI * 2D));
         this.rotationYawHead = this.rotationYaw;
         this.stepHeight = 0.6F;

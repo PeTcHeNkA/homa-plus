@@ -10,14 +10,13 @@ import plus.fserver.api.MeanTicker;
 import plus.fserver.entity.ai.CustomGoalTypeData;
 import plus.fserver.entity.ai.goals.CustomPriotizedSlowedGoal;
 import plus.fserver.utls.collections.ArrayListEV;
-import plus.tson.utl.Te4HashSet;
 
 
 public class EntityAITasks extends ArrayListEV<CustomPriotizedSlowedGoal>{
     private static final Logger LOGGER = LogManager.getLogger();
     public static final CustomGoalTypeData       goalData = new CustomGoalTypeData();
-    private final Set<CustomPriotizedSlowedGoal>    toAdd = new Te4HashSet<>(7),
-                                                 toRemove = new Te4HashSet<>(7);
+    private final Set<CustomPriotizedSlowedGoal>    toAdd = new HashSet<>(7),
+                                                 toRemove = new HashSet<>(7);
 
     private int runningFlags = 0, runningNoOverRuleFlags = 0;
     private int avgTickCount, pauseTicks, pauseTickDelay, counter;
