@@ -675,7 +675,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             if (onNeighborNotify(pos, this.getBlockState(pos), java.util.EnumSet.allOf(EnumFacing.class), updateObservers).isCanceled())
                 return;
         }
-        BlockPos.MutableBlockPos mut = tempPooledLocalPos;
+        BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
         final int posX, posY, posZ;
         mut.setPosB((posX = pos.getX())-1, (posY = pos.getY()), (posZ = pos.getZ()));
         this.neighborChanged(mut, blockType, pos);
