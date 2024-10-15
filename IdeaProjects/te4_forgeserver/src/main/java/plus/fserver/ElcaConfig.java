@@ -90,6 +90,7 @@ public class ElcaConfig {
     public static boolean USE_ASYNC_TRACKER_DEFAULT   = false;
     public static boolean ASYNC_PATHFINDING_DEFAULT   = false;
     public static boolean ASYNC_PATHFINDING_AUTO      = true;
+    public static boolean UNIMPORTANT_PACKET_QUEUE    = true;
     //public static boolean ENABLE_DATA_FIXER          = false;
 
 
@@ -199,6 +200,7 @@ public class ElcaConfig {
         PCM_MAX_LOAD_PER_TICK      = calc(map, "pcm-max-load-per-tick"       , PCM_MAX_LOAD_PER_TICK      );
         PCM_MAX_SEND_PER_TICK      = calc(map, "pcm-max-send-per-tick"       , PCM_MAX_SEND_PER_TICK      );
         USE_ASYNC_TRACKER_DEFAULT  = calc(map, "use-async-tracker-def"       , USE_ASYNC_TRACKER_DEFAULT  );
+        UNIMPORTANT_PACKET_QUEUE   = calc(map, "unimportant-packet-queue"    , UNIMPORTANT_PACKET_QUEUE   );
 
         if(INIT_PALETTE_LINEAR_BITS > 4 || INIT_PALETTE_LINEAR_BITS < 2){
             INIT_PALETTE_LINEAR_BITS = 4;

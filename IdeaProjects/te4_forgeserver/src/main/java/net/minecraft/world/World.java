@@ -1093,20 +1093,16 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     private final BlockPos.MutableBlockPos checkSeePos = new BlockPos.MutableBlockPos();
 
 
-    public boolean canSee(Vec3d vec31, Vec3d vec32, boolean stopOnLiquid) {
-        return canSee(isRemote?this:localSelector, vec31, vec32, stopOnLiquid);
-    }
-
-
-    public boolean canSee(IBlockEAccess selector, Vec3d vec31, Vec3d vec32, boolean stopOnLiquid) {
-        if (!Double.isNaN(vec31.x) && !Double.isNaN(vec31.y) && !Double.isNaN(vec31.z)) {
-            if (!Double.isNaN(vec32.x) && !Double.isNaN(vec32.y) && !Double.isNaN(vec32.z)) {
-                int sX   = MathHelper.floor(vec32.x);
-                int sY   = MathHelper.floor(vec32.y);
-                int sZ   = MathHelper.floor(vec32.z);
-                int xPos = MathHelper.floor(vec31.x);
-                int yPos = MathHelper.floor(vec31.y);
-                int zPos = MathHelper.floor(vec31.z);
+    public boolean canSee(IBlockEAccess selector, double v1x, double v1y, double v1z, double v2x, double v2y, double v2z, boolean stopOnLiquid) {
+        if (!Double.isNaN(v1x) && !Double.isNaN(v1y) && !Double.isNaN(v1z)) {
+            if (!Double.isNaN(v2x) && !Double.isNaN(v2y) && !Double.isNaN(v2z)) {
+                Vec3d vec32 = null;
+                int sX   = MathHelper.floor(v2x);
+                int sY   = MathHelper.floor(v2y);
+                int sZ   = MathHelper.floor(v2z);
+                int xPos = MathHelper.floor(v1x);
+                int yPos = MathHelper.floor(v1y);
+                int zPos = MathHelper.floor(v1z);
 
                 Chunk chunk = getChunk(xPos>>4, zPos>>4);
                 IBlockState state = chunk.getBlockState(xPos, yPos, zPos);
@@ -1116,7 +1112,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
                 int k1 = 200;
 
                 double num1 = 0, num2 = 0, num3 = 0, num4, num5, num6, num7, num8, num9;
-                double vecX = vec31.x, vecY = vec31.y, vecZ = vec31.z;
+                double vecX = v1x, vecY = v1y, vecZ = v1z;
 
                 BlockPos.MutableBlockPos blockPos = checkSeePos;
 
@@ -1124,9 +1120,9 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
                     if (Double.isNaN(vecX) || Double.isNaN(vecY) || Double.isNaN(vecZ)) return false;
                     if (xPos == sX && yPos == sY && zPos == sZ) return true;
 
-                    num7 = vec32.x - vecX;
-                    num8 = vec32.y - vecY;
-                    num9 = vec32.z - vecZ;
+                    num7 = v2x - vecX;
+                    num8 = v2y - vecY;
+                    num9 = v2z - vecZ;
 
                     if (sX > xPos) {
                         num1 = xPos + 1d;
@@ -1182,6 +1178,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
                     if (state != BlockIDIndexes.AIR_STATE && (state.isFullBlock() || state.getMaterial() == Material.PORTAL)) {
                         Block block;
                         if ((block = state.getBlock()).canCollideCheck(state, stopOnLiquid)) {
+                            if(vec32 == null)vec32 = new Vec3d(v2x, v2y, v2z);
                             blockPos.setPosB(xPos, yPos, zPos);
                             boolean rtxResult = block.hasCollisionRayTrace(state, this, blockPos, new Vec3d(vecX, vecY, vecZ), vec32);
                             if (rtxResult) return false;
@@ -1191,6 +1188,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
                         if(state.getCollisionBoundingBox(this, blockPos) != Block.NULL_AABB){
                             Block block;
                             if ((block = state.getBlock()).canCollideCheck(state, stopOnLiquid)) {
+                                if(vec32 == null)vec32 = new Vec3d(v2x, v2y, v2z);
                                 boolean rtxResult = block.hasCollisionRayTrace(state, this, blockPos, new Vec3d(vecX, vecY, vecZ), vec32);
                                 if (rtxResult) return false;
                             }
@@ -3857,6 +3855,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     private final BlockEvent.CropGrowEvent.Pre  cropGrowPre   = new BlockEvent.CropGrowEvent.Pre();
     private final BlockEvent.CropGrowEvent.Post croptGrowPost = new BlockEvent.CropGrowEvent.Post();
     private final PlaySoundAtEntityEvent       playSoundEvent = new PlaySoundAtEntityEvent(null,null,null,0,0);
+    private LivingSetAttackTargetEvent livingSetAttackTargetEvent;
 
     public  final EntityEvent.EnteringChunk     enteringChunk = new EntityEvent.EnteringChunk(null,0,0,0,0);
     public  final ChunkWatchEvent             chunkWatchEvent = new ChunkWatchEvent.Watch().forBus(MinecraftForge.EVENT_BUS);
@@ -3881,7 +3880,21 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         mobGriefingEvent.setEntity(null);
         entityCP.reset();
         if(poledSlice != null) poledSlice.reset();
+        if(livingSetAttackTargetEvent != null){
+            livingSetAttackTargetEvent.init(null,null);
+        }
         bigLocalCache.cleanAll();
+    }
+
+
+    public void onLivingSetAttackTarget(EntityLivingBase entity, EntityLivingBase target){
+        LivingSetAttackTargetEvent event = livingSetAttackTargetEvent;
+        if(event == null){
+            event = livingSetAttackTargetEvent = new LivingSetAttackTargetEvent(entity,target);
+        } else {
+            event.init(entity, target);
+        }
+        MinecraftForge.EVENT_BUS.postF(event);
     }
 
 

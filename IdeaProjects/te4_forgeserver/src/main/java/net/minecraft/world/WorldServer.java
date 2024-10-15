@@ -126,6 +126,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
     private final ConcurrentHashMap<TQueuedChunk, TChunkTask> _chunkTasks = new ConcurrentHashMap<>();
     private final ConcurrentLinkedQueue<Runnable> _syncTasks = new ConcurrentLinkedQueue<>();
 
+    public EMoveHelper.ComboCollideTask collideTask = new EMoveHelper.ComboCollideTask();
     public final NavChunkLSECache navChunkCache;
     private NavUpdateTask navTasks;
     //public final ConcurrentHashMap<Entity, PathFinder.PathGenTask> navTasks = new ConcurrentHashMap<>();
@@ -644,24 +645,30 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
             }
         }
         if(ElcaCV.USE_UNSAFE_ASYNC_MOVE){
-            EMoveHelper.ComboCollideTask task = collideTask;
-            this.collideTask = new EMoveHelper.ComboCollideTask();
+            EMoveHelper.ComboCollideTask task = this.collideTask;
+            EMoveHelper.ComboCollideTask swap = null;
+            if(swap == null){
+                swap = new EMoveHelper.ComboCollideTask();
+            }
+            this.collideTask = swap;
+            //this.collideTempTask = null;
 
             server.ticker().runAsync(() -> {
                 try {
                     ChunkSelector selector = new ChunkSelector(WorldServer.this);
-                    BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
                     AxisAlignedBB aabb = new AxisAlignedBB(0,0,0,0,0,0);
 
-                    task.complete(WorldServer.this, selector, mut, aabb);
+                    task.complete(WorldServer.this, selector, aabb);
                 } catch (Exception e){
                     server.ticker().onError(WorldServer.this, e);
+                } finally {
+                    //this.collideTempTask = task;
                 }
             });
         } else {
             try {
                 //is thread-safe?
-                collideTask.complete(this, localSelector, tempPooledLocalPos, commonWorldEntityAABB);
+                collideTask.complete(this, localSelector, commonWorldEntityAABB);
             } catch (Exception e){
                 server.ticker().onError(this, e);
             }
@@ -1898,42 +1905,6 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         clearEvents();
     }
 
-    public EMoveHelper.ComboCollideTask collideTask = new EMoveHelper.ComboCollideTask();
-
-    private EMoveHelper.MoveTask[] allTasks = new EMoveHelper.MoveTask[128];
-    private int realSize = 0;
-    
-    public EMoveHelper.MoveTask allocMoveTask(){
-        if(ElcaCV.USE_UNSAFE_ASYNC_MOVE) {
-            if (realSize == 0) return new EMoveHelper.MoveTask();
-            else return allTasks[--realSize];
-        } else {
-            if (realSize == 0) return new EMoveHelper.MoveTask();
-            else return allTasks[--realSize];
-        }
-    }
-    
-    public void freeMoveTask(EMoveHelper.MoveTask task){
-        if(ElcaCV.USE_UNSAFE_ASYNC_MOVE){
-            synchronized (this){
-                EMoveHelper.MoveTask[] allTasks;
-                if((allTasks = this.allTasks).length == realSize){
-                    EMoveHelper.MoveTask[] newTasks = new EMoveHelper.MoveTask[allTasks.length+128];
-                    System.arraycopy(allTasks, 0, newTasks, 0, allTasks.length);
-                    allTasks = this.allTasks = newTasks;
-                }
-                allTasks[realSize++] = task;
-            }
-        } else {
-            EMoveHelper.MoveTask[] allTasks;
-            if((allTasks = this.allTasks).length == realSize){
-                EMoveHelper.MoveTask[] newTasks = new EMoveHelper.MoveTask[allTasks.length+128];
-                System.arraycopy(allTasks, 0, newTasks, 0, allTasks.length);
-                allTasks = this.allTasks = newTasks;
-            }
-            allTasks[realSize++] = task;
-        }
-    }
 
     private RecipeItemHelper recipeItemHelper = null;
     public RecipeItemHelper getRecipeItemHelper(){

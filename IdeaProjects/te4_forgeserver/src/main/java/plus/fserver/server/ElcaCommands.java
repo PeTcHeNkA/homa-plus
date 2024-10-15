@@ -87,7 +87,7 @@ public class ElcaCommands extends ServerCommand {
             "print-case-stop"             , "cache-chunk-data"            ,
             "endable-def-join-msg"        , "pcm-max-load-per-tick"       ,
             "max-connections-per"         , "pcm-max-send-per-tick"       ,
-            "use-async-tracker-def"       ,
+            "use-async-tracker-def"       , "unimportant-packet-queue"    ,
     });
 
 

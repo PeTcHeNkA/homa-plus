@@ -76,6 +76,7 @@ import org.apache.logging.log4j.Logger;
 import plus.fserver.ElcaConfig;
 import plus.fserver.api.IBlockEAccess;
 import plus.fserver.server.SStrings;
+import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.collections.FixedItemList;
 import plus.fserver.utls.collections.PotionMap;
 import plus.fserver.utls.math.MathUtls;
@@ -1921,10 +1922,14 @@ public abstract class EntityLivingBase extends Entity {
 
 
     public boolean canEntityBeSeen(Entity entityIn) {
-        return this.world.canSee(
-                new Vec3d(this.posX, this.posY + (double)this.getEyeHeight(), this.posZ),
-                new Vec3d(entityIn.posX, entityIn.posY + (double)entityIn.getEyeHeight(), entityIn.posZ),
-                false);
+        World world;
+        ChunkSelector selector = (world = this.world).localSelector;
+        return world.canSee(
+                selector == null?world:selector,
+                this.posX    , this.posY     + (double)this.getEyeHeight()    , this.posZ,
+                entityIn.posX, entityIn.posY + (double)entityIn.getEyeHeight(), entityIn.posZ,
+                false
+        );
     }
 
 

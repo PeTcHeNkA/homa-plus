@@ -45,6 +45,7 @@ import plus.fserver.api.Keep;
 import plus.fserver.server.network.IPacketNodeQueue;
 import plus.fserver.server.network.NativeCompressionDecoder;
 import plus.fserver.server.network.NativeCompressionEncoder;
+import plus.fserver.utls.collections.UnimportantConcurrentQueue;
 
 
 public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
@@ -75,7 +76,8 @@ public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>> {
     };
 
     private final EnumPacketDirection direction;
-    private final ConcurrentLinkedQueue<IPacketNodeQueue> outboundPacketsQueue = new ConcurrentLinkedQueue<>();
+    private final Queue<IPacketNodeQueue> outboundPacketsQueue = ElcaConfig.UNIMPORTANT_PACKET_QUEUE?
+            new UnimportantConcurrentQueue<>(24,Integer.MAX_VALUE):new ConcurrentLinkedQueue<>();
     private Channel channel;
     private SocketAddress socketAddress;
     private INetHandler packetListener;
