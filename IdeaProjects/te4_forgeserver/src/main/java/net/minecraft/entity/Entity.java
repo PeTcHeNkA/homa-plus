@@ -612,6 +612,16 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
     }
 
 
+    public void moveNow(MoverType type, double x, double y, double z) {
+        if (this.noClip) {
+            getEntityBoundingBox().offsetMut(x, y, z);
+            this.resetPositionToBB();
+        } else {
+            move(type, x, y, z);
+        }
+    }
+
+
     protected void updateLimbSwing(){}
     protected void onClientAttack(){}
 

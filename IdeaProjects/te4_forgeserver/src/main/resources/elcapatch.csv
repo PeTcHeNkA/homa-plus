@@ -271,6 +271,7 @@ net.minecraft.enchantment.EnchantmentHelper
 net.minecraft.entity.ai.attributes.AbstractAttributeMap
 net.minecraft.entity.ai.attributes.AttributeMap
 net.minecraft.entity.ai.attributes.ModifiableAttributeInstance
+net.minecraft.entity.ai.EntityAIAttackMelee
 net.minecraft.entity.ai.EntityAIAvoidEntity$1
 net.minecraft.entity.ai.EntityAIAvoidEntity$AvoidSelector
 net.minecraft.entity.ai.EntityAIAvoidEntity
@@ -566,9 +567,11 @@ net.minecraft.network.status.server.SPacketPong
 net.minecraft.pathfinding.FlyingNodeProcessor, false, false
 net.minecraft.pathfinding.NodeProcessor, false, false
 net.minecraft.pathfinding.Path, false, false
+net.minecraft.pathfinding.PathFinder$PathGenTask, false, false
 net.minecraft.pathfinding.PathFinder, false, false
 net.minecraft.pathfinding.PathHeap, false, false
 net.minecraft.pathfinding.PathNavigate, false, false
+net.minecraft.pathfinding.PathNavigateClimber, false, false
 net.minecraft.pathfinding.PathNavigateFlying, false, false
 net.minecraft.pathfinding.PathNavigateGround, false, false
 net.minecraft.pathfinding.PathNavigateSwimmer, false, false
@@ -835,6 +838,7 @@ net.minecraft.world.WorldProvider
 net.minecraft.world.WorldProviderHell$1
 net.minecraft.world.WorldProviderHell
 net.minecraft.world.WorldServer$1
+net.minecraft.world.WorldServer$NavUpdateTask
 net.minecraft.world.WorldServer$ServerBlockEventList
 net.minecraft.world.WorldServer
 net.minecraft.world.WorldType
@@ -870,6 +874,7 @@ net.minecraftforge.event.entity.living.LivingEvent, true
 net.minecraftforge.event.entity.living.LivingHurtEvent, true
 net.minecraftforge.event.entity.living.LivingPackSizeEvent$EventProxy, true
 net.minecraftforge.event.entity.living.LivingPackSizeEvent, true
+net.minecraftforge.event.entity.living.LivingSetAttackTargetEvent, true
 net.minecraftforge.event.entity.living.LivingSpawnEvent$AllowDespawn, true
 net.minecraftforge.event.entity.living.LivingSpawnEvent$CheckSpawn, true
 net.minecraftforge.event.entity.living.LivingSpawnEvent$SpecialSpawn, true
