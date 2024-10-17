@@ -174,6 +174,49 @@ public abstract class StructureComponent {
     }
 
 
+    protected static int getYWithOffsetS(@Nullable EnumFacing coordBase, StructureBoundingBox box, int y) {
+        return coordBase == null ? y : y + box.minY;
+    }
+
+
+    protected static int getXWithOffsetS(@Nullable EnumFacing coordBase, StructureBoundingBox box,  int x, int z) {
+        if (coordBase == null) {
+            return x;
+        } else {
+            switch (coordBase) {
+                case NORTH:
+                case SOUTH:
+                    return box.minX + x;
+                case WEST:
+                    return box.maxX - z;
+                case EAST:
+                    return box.minX + z;
+                default:
+                    return x;
+            }
+        }
+    }
+
+
+    protected static int getZWithOffsetS(@Nullable EnumFacing coordBase, StructureBoundingBox box, int x, int z) {
+        if (coordBase == null) {
+            return z;
+        } else {
+            switch (coordBase) {
+                case NORTH:
+                    return box.maxZ - z;
+                case SOUTH:
+                    return box.minZ + z;
+                case WEST:
+                case EAST:
+                    return box.minZ + x;
+                default:
+                    return z;
+            }
+        }
+    }
+
+
     protected int getZWithOffset(int x, int z) {
         EnumFacing facing = this.getCoordBaseMode();
         if (facing == null) {
@@ -229,6 +272,32 @@ public abstract class StructureComponent {
             }
             Rotation rotation;
             if ((rotation = this.rotation) != Rotation.NONE) {
+                state = state.withRotation(rotation);
+            }
+            selector.setBlockState(mut, state, 2);
+        }
+    }
+
+
+    protected static void setBlockStateMS(BlockPos.MutableBlockPos mut, ChunkSelector selector, IBlockState state,
+                                  int x, int y, int z, StructureBoundingBox box, @Nullable EnumFacing coordBase, StructureBoundingBox sBox, Mirror mirror, Rotation rotation) {
+
+        //EnumFacing coordBase = this.getCoordBaseMode();
+        //StructureBoundingBox sBox = this.boundingBox;
+        //Mirror mirror = this.mirror;
+        //Rotation rotation = this.rotation;
+
+        mut.setPosB(
+                getXWithOffsetS(coordBase, sBox, x, z),
+                getYWithOffsetS(coordBase, sBox, y),
+                getZWithOffsetS(coordBase, sBox, x, z)
+        );
+
+        if (box.isVecInside(mut)) {
+            if (mirror != Mirror.NONE) {
+                state = state.withMirror(mirror);
+            }
+            if (rotation != Rotation.NONE) {
                 state = state.withRotation(rotation);
             }
             selector.setBlockState(mut, state, 2);
@@ -323,16 +392,32 @@ public abstract class StructureComponent {
                                   IBlockState bound, IBlockState inside,
                                   boolean existingOnly) {
 
-        BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+        fillWithBlocks(new BlockPos.MutableBlockPos(), selector,
+                box, xMin, yMin, zMin, xMax, yMax, zMax,
+                bound, inside, existingOnly
+        );
+    }
+
+
+    protected void fillWithBlocks(BlockPos.MutableBlockPos mut, ChunkSelector selector, StructureBoundingBox box,
+                                  int xMin, int yMin, int zMin, int xMax, int yMax, int zMax,
+                                  IBlockState bound, IBlockState inside,
+                                  boolean existingOnly) {
+
+        EnumFacing coordBase = this.getCoordBaseMode();
+        StructureBoundingBox sBox = this.boundingBox;
+        Mirror mirror = this.mirror;
+        Rotation rotation = this.rotation;
+
         for (int x = xMin; x <= xMax; ++x) {
             for (int z = zMin; z <= zMax; ++z) {
                 for (int y = yMin; y <= yMax; ++y) {
                     if (!existingOnly || this.getBlockStateFromPos(selector, x, y, z, box)
                             .getMaterial() != Material.AIR) {
                         if (y != yMin && y != yMax && x != xMin && x != xMax && z != zMin && z != zMax) {
-                            this.setBlockStateM(mut, selector, inside, x, y, z, box);
+                            setBlockStateMS(mut, selector, inside, x, y, z, box, coordBase, sBox, mirror, rotation);
                         } else {
-                            this.setBlockStateM(mut, selector, bound, x, y, z, box);
+                            setBlockStateMS(mut, selector, bound, x, y, z, box, coordBase, sBox, mirror, rotation);
                         }
                     }
                 }
@@ -345,14 +430,29 @@ public abstract class StructureComponent {
                                   int xMin, int yMin, int zMin, int xMax, int yMax, int zMax,
                                   IBlockState fill,
                                   boolean existingOnly) {
+        fillWithBlocks(new BlockPos.MutableBlockPos(), selector, box,
+                xMin, yMin, zMin, xMax, yMax, zMax, fill, existingOnly
+        );
+    }
 
-        BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+
+    protected void fillWithBlocks(BlockPos.MutableBlockPos mut, ChunkSelector selector, StructureBoundingBox box,
+                                  int xMin, int yMin, int zMin, int xMax, int yMax, int zMax,
+                                  IBlockState fill,
+                                  boolean existingOnly) {
+
+        //BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+        EnumFacing coordBase = this.getCoordBaseMode();
+        StructureBoundingBox sBox = this.boundingBox;
+        Mirror mirror = this.mirror;
+        Rotation rotation = this.rotation;
+
         for (int x = xMin; x <= xMax; ++x) {
             for (int z = zMin; z <= zMax; ++z) {
                 for (int y = yMin; y <= yMax; ++y) {
                     if (!existingOnly || this.getBlockStateFromPos(selector, x, y, z, box)
                             .getMaterial() != Material.AIR) {
-                        this.setBlockStateM(mut, selector, fill, x, y, z, box);
+                        setBlockStateMS(mut, selector, fill, x, y, z, box, coordBase, sBox, mirror, rotation);
                     }
                 }
             }
@@ -452,6 +552,13 @@ public abstract class StructureComponent {
     protected void randomlyPlaceBlock(ChunkSelector selector, StructureBoundingBox box, Random rand, float chance, int x, int y, int z, IBlockState state) {
         if (rand.nextFloat() < chance) {
             this.setBlockState(selector, state, x, y, z, box);
+        }
+    }
+
+
+    protected void randomlyPlaceBlockM(BlockPos.MutableBlockPos mut, ChunkSelector selector, StructureBoundingBox box, Random rand, float chance, int x, int y, int z, IBlockState state) {
+        if (rand.nextFloat() < chance) {
+            this.setBlockStateM(mut, selector, state, x, y, z, box);
         }
     }
 
@@ -608,9 +715,10 @@ public abstract class StructureComponent {
     }
 
 
-    protected void generateDoor(ChunkSelector selector, StructureBoundingBox sbb, Random rand, int x, int y, int z, EnumFacing facing, BlockDoor door) {
-        this.setBlockState(selector, door.getDefaultState().withProperty(BlockDoor.FACING, facing), x, y, z, sbb);
-        this.setBlockState(selector, door.getDefaultState().withProperty(BlockDoor.FACING, facing).withProperty(BlockDoor.HALF, BlockDoor.EnumDoorHalf.UPPER), x, y + 1, z, sbb);
+    protected void generateDoor(ChunkSelector selector, StructureBoundingBox sbb, int x, int y, int z, EnumFacing facing, BlockDoor door) {
+        BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+        this.setBlockStateM(mut, selector, door.getDefaultState().withProperty(BlockDoor.FACING, facing), x, y, z, sbb);
+        this.setBlockStateM(mut, selector, door.getDefaultState().withProperty(BlockDoor.FACING, facing).withProperty(BlockDoor.HALF, BlockDoor.EnumDoorHalf.UPPER), x, y + 1, z, sbb);
     }
 
 

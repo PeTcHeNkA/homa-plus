@@ -191,10 +191,13 @@ public class LightingEngine implements ILightingEngine {
         }
         initIter(initialBrightenings);
 
+        PooledLongQueue[] queuedDarkenings = this.queuedDarkenings;
+        PooledLongQueue[] queuedBrightenings = this.queuedBrightenings;
+
         while (this.nextItem()) {
             final int newLight2 = (int)(this.curData >> 60 & 0xFL);
             if (newLight2 > this.getCursorCachedLight(lightType)) {
-                this.enqueueBrightening(curPos, this.curData & 0xFFFFFFFFFFFFFFFL, newLight2, this.curChunk, lightType);
+                enqueueBrightening(queuedBrightenings, curPos, this.curData & 0xFFFFFFFFFFFFFFFL, newLight2, this.curChunk, lightType);
             }
         }
 
@@ -202,12 +205,11 @@ public class LightingEngine implements ILightingEngine {
         while (this.nextItem()) {
             final int oldLight = this.getCursorCachedLight(lightType);
             if (oldLight != 0) {
-                this.enqueueDarkening(curPos, this.curData, oldLight, this.curChunk, lightType);
+                enqueueDarkening(queuedDarkenings, curPos, this.curData, oldLight, this.curChunk, lightType);
             }
         }
 
-        PooledLongQueue[] queuedDarkenings = this.queuedDarkenings;
-        PooledLongQueue[] queuedBrightenings = this.queuedBrightenings;
+        World world = this.world;
         for (int curLight = 15; curLight >= 0; --curLight) {
             initIter(queuedDarkenings[curLight]);
             while (this.nextItem()) {
@@ -218,7 +220,7 @@ public class LightingEngine implements ILightingEngine {
                 if (luminosity >= 14) {
                     opacity = 1;
                 } else {
-                    opacity = this.getPosOpacity(curPos, state);
+                    opacity = getPosOpacity(world, curPos, state);
                 }
                 if (this.calculateNewLightFromCursor(luminosity, opacity, lightType) < curLight) {
                     int newLight3 = luminosity;
@@ -228,9 +230,9 @@ public class LightingEngine implements ILightingEngine {
                         if (nChunk != null) {
                             final int nLight = info.light;
                             if (nLight > 0) { //fixed `-1` value
-                                final BlockPos.MutableBlockPos nPos = info.pos;
-                                if (curLight - this.getPosOpacity(nPos, posToState(nPos, info.section)) >= nLight) {
-                                    this.enqueueDarkening(nPos, info.key, nLight, nChunk, lightType);
+                                //final BlockPos.MutableBlockPos nPos = info.pos;
+                                if (curLight - getPosOpacity(world, info, posToState(info, info.section)) >= nLight) {
+                                    enqueueDarkening(queuedDarkenings, info, info.key, nLight, nChunk, lightType);
                                 }
                                 else {
                                     newLight3 = Math.max(newLight3, nLight - opacity);
@@ -248,7 +250,7 @@ public class LightingEngine implements ILightingEngine {
             while (this.nextItem()) {
                 final int oldLight2 = this.getCursorCachedLight(lightType);
                 if (oldLight2 == curLight) {
-                    this.world.notifyLightSet(curPos);
+                    world.notifyLightSet(curPos);
                     if (curLight <= 1) {
                         continue;
                     }
@@ -274,15 +276,16 @@ public class LightingEngine implements ILightingEngine {
                 info.chunk = null;
                 info.section = null;
             } else {
-                final BlockPos.MutableBlockPos nPos = decodeWorldCoord(info.pos, key);
+                decodeWorldCoord(info, key);
+
                 Chunk nChunk;
                 if ((key & 0xFFFFFC3FFFFF0L) == this.curChunkIdentifier)
                     info.chunk = nChunk = this.curChunk;
                 else
-                    info.chunk = nChunk = this.getChunk(nPos);
+                    info.chunk = nChunk = this.getChunk(info);
                 if (nChunk != null) {
-                    final ExtendedBlockStorage nSection = nChunk.getBlockStorageArray()[nPos.getY() >> 4];
-                    info.light = getCachedLightFor(nChunk, nSection, nPos, lightType);
+                    final ExtendedBlockStorage nSection = nChunk.getBlockStorageArray()[info.getY() >> 4];
+                    info.light = getCachedLightFor(nChunk, nSection, info, lightType);
                     info.section = nSection;
                 }
             }
@@ -312,7 +315,7 @@ public class LightingEngine implements ILightingEngine {
         final int luminosity;
         return this.calculateNewLightFromCursor(
                 luminosity = getCursorLuminosity(chunk, pos, state, lightType),
-                (luminosity >= 14)?1:this.getPosOpacity(pos, state),
+                (luminosity >= 14)?1: getPosOpacity(this.world, pos, state),
                 lightType
         );
     }
@@ -348,33 +351,33 @@ public class LightingEngine implements ILightingEngine {
         for (final NeighborInfo info : this.neighborInfos) {
             final Chunk nChunk = info.chunk;
             if (nChunk != null) {
-                final int newLight = curLight - this.getPosOpacity(info.pos, posToState(info.pos, info.section));
+                final int newLight = curLight - getPosOpacity(this.world, info, posToState(info, info.section));
                 if (newLight > info.light)
-                    this.enqueueBrightening(info.pos, info.key, newLight, nChunk, lightType);
+                    enqueueBrightening(this.queuedBrightenings, info, info.key, newLight, nChunk, lightType);
             }
         }
     }
 
 
     private void enqueueBrighteningFromCursor(final int newLight, final EnumSkyBlock lightType) {
-        this.enqueueBrightening(this.curPos, this.curData, newLight, this.curChunk, lightType);
+        enqueueBrightening(this.queuedBrightenings, this.curPos, this.curData, newLight, this.curChunk, lightType);
     }
 
 
-    private void enqueueBrightening(final BlockPos pos, final long longPos, final int newLight, final Chunk chunk, final EnumSkyBlock lightType) {
-        this.queuedBrightenings[newLight].add(longPos);
+    private static void enqueueBrightening(final PooledLongQueue[] queuedBrightenings, final BlockPos pos, final long longPos, final int newLight, final Chunk chunk, final EnumSkyBlock lightType) {
+        queuedBrightenings[newLight].add(longPos);
         chunk.setLightFor(lightType, pos, newLight);
     }
 
 
-    private void enqueueDarkening(final BlockPos pos, final long longPos, final int oldLight, final Chunk chunk, final EnumSkyBlock lightType) {
-        this.queuedDarkenings[oldLight].add(longPos);
+    private static void enqueueDarkening(final PooledLongQueue[] queuedDarkenings, final BlockPos pos, final long longPos, final int oldLight, final Chunk chunk, final EnumSkyBlock lightType) {
+        queuedDarkenings[oldLight].add(longPos);
         chunk.setLightFor(lightType, pos, 0);
     }
 
 
-    private static BlockPos.MutableBlockPos decodeWorldCoord(final BlockPos.MutableBlockPos pos, final long longPos) {
-        return pos.setPos(
+    private static void decodeWorldCoord(final BlockPos.MutableBlockPos pos, final long longPos) {
+        pos.setPosB(
                 (int)(longPos >> 26 & 0x3FFFFFFL) - 33554432,
                     (int)(longPos >> 52 & 0xFFL),
                 (int)(longPos & 0x3FFFFFFL) - 33554432
@@ -425,10 +428,9 @@ public class LightingEngine implements ILightingEngine {
     }
 
 
-    private int getPosOpacity(final BlockPos pos, final IBlockState state) {
-        int opacity = state.getLightOpacity(this.world, pos);
+    private static int getPosOpacity(final IBlockAccess access, final BlockPos pos, final IBlockState state) {
+        int opacity = state.getLightOpacity(access, pos);
         return opacity < 2 ? 1 : opacity > 15 ? 15 : opacity;
-        //return MathHelper.clamp(state.getLightOpacity(this.world, pos), 1, 15);
     }
 
 
@@ -437,12 +439,12 @@ public class LightingEngine implements ILightingEngine {
     }
 
 
-    private IBlockState posToState(final BlockPos pos, final Chunk chunk) {
+    private static IBlockState posToState(final BlockPos pos, final Chunk chunk) {
         return posToState(pos, chunk.getBlockStorageArray()[pos.getY() >> 4]);
     }
 
 
-    private IBlockState posToState(final BlockPos pos, final ExtendedBlockStorage section) {
+    private static IBlockState posToState(final BlockPos pos, final ExtendedBlockStorage section) {
         if (section != Chunk.NULL_BLOCK_STORAGE)
             return section.get(pos.getX() & 0xF, pos.getY() & 0xF, pos.getZ() & 0xF);
         return BlockIDIndexes.AIR_STATE;
@@ -458,15 +460,12 @@ public class LightingEngine implements ILightingEngine {
     }
 
 
-    private static class NeighborInfo {
+    private static final class NeighborInfo extends BlockPos.MutableBlockPos{
         Chunk chunk;
         ExtendedBlockStorage section;
         int light;
         long key;
-        final BlockPos.MutableBlockPos pos;
         
-        private NeighborInfo() {
-            this.pos = new BlockPos.MutableBlockPos();
-        }
+        NeighborInfo() {}
     }
 }

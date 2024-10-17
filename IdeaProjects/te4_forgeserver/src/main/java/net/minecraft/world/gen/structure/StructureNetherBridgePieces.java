@@ -117,26 +117,27 @@ public class StructureNetherBridgePieces {
             final IBlockState bricks = Blocks.NETHER_BRICK.getDefaultState();
             final IBlockState fence  = Blocks.NETHER_BRICK_FENCE.getDefaultState();
             final IBlockState air    = BlockIDIndexes.AIR_STATE;
+            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
 
-            this.fillWithBlocks(selector, box, 0, 0, 0, 8, 1, 8, bricks        , false);
-            this.fillWithBlocks(selector, box, 0, 2, 0, 8, 5, 8, air           , false);
-            this.fillWithBlocks(selector, box, 0, 6, 0, 8, 6, 5, bricks        , false);
-            this.fillWithBlocks(selector, box, 0, 2, 0, 2, 5, 0, bricks        , false);
-            this.fillWithBlocks(selector, box, 6, 2, 0, 8, 5, 0, bricks        , false);
-            this.fillWithBlocks(selector, box, 1, 3, 0, 1, 4, 0, fence         , false);
-            this.fillWithBlocks(selector, box, 7, 3, 0, 7, 4, 0, fence         , false);
-            this.fillWithBlocks(selector, box, 0, 2, 4, 8, 2, 8, bricks        , false);
-            this.fillWithBlocks(selector, box, 1, 1, 4, 2, 2, 4, air           , false);
-            this.fillWithBlocks(selector, box, 6, 1, 4, 7, 2, 4, air           , false);
-            this.fillWithBlocks(selector, box, 0, 3, 8, 8, 3, 8, fence         , false);
-            this.fillWithBlocks(selector, box, 0, 3, 6, 0, 3, 7, fence         , false);
-            this.fillWithBlocks(selector, box, 8, 3, 6, 8, 3, 7, fence         , false);
-            this.fillWithBlocks(selector, box, 0, 3, 4, 0, 5, 5, bricks        , false);
-            this.fillWithBlocks(selector, box, 8, 3, 4, 8, 5, 5, bricks        , false);
-            this.fillWithBlocks(selector, box, 1, 3, 5, 2, 5, 5, bricks        , false);
-            this.fillWithBlocks(selector, box, 6, 3, 5, 7, 5, 5, bricks        , false);
-            this.fillWithBlocks(selector, box, 1, 4, 5, 1, 5, 5, fence         , false);
-            this.fillWithBlocks(selector, box, 7, 4, 5, 7, 5, 5, fence         , false);
+            this.fillWithBlocks(mut, selector, box, 0, 0, 0, 8, 1, 8, bricks        , false);
+            this.fillWithBlocks(mut, selector, box, 0, 2, 0, 8, 5, 8, air           , false);
+            this.fillWithBlocks(mut, selector, box, 0, 6, 0, 8, 6, 5, bricks        , false);
+            this.fillWithBlocks(mut, selector, box, 0, 2, 0, 2, 5, 0, bricks        , false);
+            this.fillWithBlocks(mut, selector, box, 6, 2, 0, 8, 5, 0, bricks        , false);
+            this.fillWithBlocks(mut, selector, box, 1, 3, 0, 1, 4, 0, fence         , false);
+            this.fillWithBlocks(mut, selector, box, 7, 3, 0, 7, 4, 0, fence         , false);
+            this.fillWithBlocks(mut, selector, box, 0, 2, 4, 8, 2, 8, bricks        , false);
+            this.fillWithBlocks(mut, selector, box, 1, 1, 4, 2, 2, 4, air           , false);
+            this.fillWithBlocks(mut, selector, box, 6, 1, 4, 7, 2, 4, air           , false);
+            this.fillWithBlocks(mut, selector, box, 0, 3, 8, 8, 3, 8, fence         , false);
+            this.fillWithBlocks(mut, selector, box, 0, 3, 6, 0, 3, 7, fence         , false);
+            this.fillWithBlocks(mut, selector, box, 8, 3, 6, 8, 3, 7, fence         , false);
+            this.fillWithBlocks(mut, selector, box, 0, 3, 4, 0, 5, 5, bricks        , false);
+            this.fillWithBlocks(mut, selector, box, 8, 3, 4, 8, 5, 5, bricks        , false);
+            this.fillWithBlocks(mut, selector, box, 1, 3, 5, 2, 5, 5, bricks        , false);
+            this.fillWithBlocks(mut, selector, box, 6, 3, 5, 7, 5, 5, bricks        , false);
+            this.fillWithBlocks(mut, selector, box, 1, 4, 5, 1, 5, 5, fence         , false);
+            this.fillWithBlocks(mut, selector, box, 7, 4, 5, 7, 5, 5, fence         , false);
 
             for(int z = 0; z <= 5; ++z) {
                 for(int x = 0; x <= 8; ++x) {
@@ -172,6 +173,7 @@ public class StructureNetherBridgePieces {
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
             ChunkSelector selector = new ChunkSelector(world);
+            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
 
             final IBlockState stairs = Blocks.NETHER_BRICK_STAIRS.getDefaultState().withProperty(BlockStairs.FACING, EnumFacing.SOUTH);
             final IBlockState bricks = Blocks.NETHER_BRICK.getDefaultState();
@@ -182,21 +184,21 @@ public class StructureNetherBridgePieces {
                 int yMin = Math.max(1, 7 - zPos);
                 int yMax = Math.min(Math.max(yMin + 5, 14 - zPos), 13);
 
-                this.fillWithBlocks(selector, box, 0, 0, zPos, 4, yMin, zPos, bricks, false);
-                this.fillWithBlocks(selector, box, 1, yMin + 1, zPos, 3, yMax - 1, zPos, air, false);
+                this.fillWithBlocks(mut, selector, box, 0, 0, zPos, 4, yMin, zPos, bricks, false);
+                this.fillWithBlocks(mut, selector, box, 1, yMin + 1, zPos, 3, yMax - 1, zPos, air, false);
                 if (zPos <= 6) {
-                    this.setBlockState(selector, stairs, 1, yMin + 1, zPos, box);
-                    this.setBlockState(selector, stairs, 2, yMin + 1, zPos, box);
-                    this.setBlockState(selector, stairs, 3, yMin + 1, zPos, box);
+                    this.setBlockStateM(mut, selector, stairs, 1, yMin + 1, zPos, box);
+                    this.setBlockStateM(mut, selector, stairs, 2, yMin + 1, zPos, box);
+                    this.setBlockStateM(mut, selector, stairs, 3, yMin + 1, zPos, box);
                 }
 
-                this.fillWithBlocks(selector, box, 0, yMax, zPos, 4, yMax, zPos, bricks, false);
-                this.fillWithBlocks(selector, box, 0, yMin + 1, zPos, 0, yMax - 1, zPos, bricks, false);
-                this.fillWithBlocks(selector, box, 4, yMin + 1, zPos, 4, yMax - 1, zPos, bricks, false);
+                this.fillWithBlocks(mut, selector, box, 0, yMax, zPos, 4, yMax, zPos, bricks, false);
+                this.fillWithBlocks(mut, selector, box, 0, yMin + 1, zPos, 0, yMax - 1, zPos, bricks, false);
+                this.fillWithBlocks(mut, selector, box, 4, yMin + 1, zPos, 4, yMax - 1, zPos, bricks, false);
 
                 if ((zPos & 1) == 0) {
-                    this.fillWithBlocks(selector, box, 0, yMin + 2, zPos, 0, yMin + 3, zPos, fence, false);
-                    this.fillWithBlocks(selector, box, 4, yMin + 2, zPos, 4, yMin + 3, zPos, fence, false);
+                    this.fillWithBlocks(mut, selector, box, 0, yMin + 2, zPos, 0, yMin + 3, zPos, fence, false);
+                    this.fillWithBlocks(mut, selector, box, 4, yMin + 2, zPos, 4, yMin + 3, zPos, fence, false);
                 }
 
                 for(int x = 0; x <= 4; ++x) {
@@ -251,23 +253,24 @@ public class StructureNetherBridgePieces {
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
             ChunkSelector selector = new ChunkSelector(world);
+            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
 
-            this.fillWithBlocks(selector, box, 0, 0, 0, 4, 1, 4, Blocks.NETHER_BRICK.getDefaultState()                                             , false);
-            this.fillWithBlocks(selector, box, 0, 2, 0, 4, 5, 4, BlockIDIndexes.AIR_STATE                                                          , false);
-            this.fillWithBlocks(selector, box, 4, 2, 0, 4, 5, 4, Blocks.NETHER_BRICK.getDefaultState()                                             , false);
-            this.fillWithBlocks(selector, box, 4, 3, 1, 4, 4, 1, Blocks.NETHER_BRICK_FENCE.getDefaultState()                                       , false);
-            this.fillWithBlocks(selector, box, 4, 3, 3, 4, 4, 3, Blocks.NETHER_BRICK_FENCE.getDefaultState()                                       , false);
-            this.fillWithBlocks(selector, box, 0, 2, 0, 0, 5, 0, Blocks.NETHER_BRICK.getDefaultState()                                             , false);
-            this.fillWithBlocks(selector, box, 0, 2, 4, 3, 5, 4, Blocks.NETHER_BRICK.getDefaultState()                                             , false);
-            this.fillWithBlocks(selector, box, 1, 3, 4, 1, 4, 4, Blocks.NETHER_BRICK_FENCE.getDefaultState(), Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 3, 3, 4, 3, 4, 4, Blocks.NETHER_BRICK_FENCE.getDefaultState(), Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 0, 0, 0, 4, 1, 4, Blocks.NETHER_BRICK.getDefaultState()                                             , false);
+            this.fillWithBlocks(mut, selector, box, 0, 2, 0, 4, 5, 4, BlockIDIndexes.AIR_STATE                                                          , false);
+            this.fillWithBlocks(mut, selector, box, 4, 2, 0, 4, 5, 4, Blocks.NETHER_BRICK.getDefaultState()                                             , false);
+            this.fillWithBlocks(mut, selector, box, 4, 3, 1, 4, 4, 1, Blocks.NETHER_BRICK_FENCE.getDefaultState()                                       , false);
+            this.fillWithBlocks(mut, selector, box, 4, 3, 3, 4, 4, 3, Blocks.NETHER_BRICK_FENCE.getDefaultState()                                       , false);
+            this.fillWithBlocks(mut, selector, box, 0, 2, 0, 0, 5, 0, Blocks.NETHER_BRICK.getDefaultState()                                             , false);
+            this.fillWithBlocks(mut, selector, box, 0, 2, 4, 3, 5, 4, Blocks.NETHER_BRICK.getDefaultState()                                             , false);
+            this.fillWithBlocks(mut, selector, box, 1, 3, 4, 1, 4, 4, Blocks.NETHER_BRICK_FENCE.getDefaultState(), Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 3, 3, 4, 3, 4, 4, Blocks.NETHER_BRICK_FENCE.getDefaultState(), Blocks.NETHER_BRICK.getDefaultState(), false);
 
             if (this.chest && box.isVecInside(new BlockPos(this.getXWithOffset(3, 3), this.getYWithOffset(2), this.getZWithOffset(3, 3)))) {
                 this.chest = false;
                 this.generateChest(world, box, rand, 3, 2, 3, LootTableList.CHESTS_NETHER_BRIDGE);
             }
 
-            this.fillWithBlocks(selector, box, 0, 6, 0, 4, 6, 4, Blocks.NETHER_BRICK.getDefaultState(), Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 0, 6, 0, 4, 6, 4, Blocks.NETHER_BRICK.getDefaultState(), Blocks.NETHER_BRICK.getDefaultState(), false);
 
             for(int x = 0; x <= 4; ++x) {
                 for(int z = 0; z <= 4; ++z) {
@@ -320,23 +323,24 @@ public class StructureNetherBridgePieces {
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
             ChunkSelector selector = new ChunkSelector(world);
+            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
 
-            this.fillWithBlocks(selector, box, 0, 0, 0, 4, 1, 4, Blocks.NETHER_BRICK.getDefaultState()                                             , false);
-            this.fillWithBlocks(selector, box, 0, 2, 0, 4, 5, 4, Blocks.AIR.getDefaultState()                                                      , false);
-            this.fillWithBlocks(selector, box, 0, 2, 0, 0, 5, 4, Blocks.NETHER_BRICK.getDefaultState()                                             , false);
-            this.fillWithBlocks(selector, box, 0, 3, 1, 0, 4, 1, Blocks.NETHER_BRICK_FENCE.getDefaultState()                                       , false);
-            this.fillWithBlocks(selector, box, 0, 3, 3, 0, 4, 3, Blocks.NETHER_BRICK_FENCE.getDefaultState()                                       , false);
-            this.fillWithBlocks(selector, box, 4, 2, 0, 4, 5, 0, Blocks.NETHER_BRICK.getDefaultState()                                             , false);
-            this.fillWithBlocks(selector, box, 1, 2, 4, 4, 5, 4, Blocks.NETHER_BRICK.getDefaultState()                                             , false);
-            this.fillWithBlocks(selector, box, 1, 3, 4, 1, 4, 4, Blocks.NETHER_BRICK_FENCE.getDefaultState(), Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 3, 3, 4, 3, 4, 4, Blocks.NETHER_BRICK_FENCE.getDefaultState(), Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 0, 0, 0, 4, 1, 4, Blocks.NETHER_BRICK.getDefaultState()                                             , false);
+            this.fillWithBlocks(mut, selector, box, 0, 2, 0, 4, 5, 4, Blocks.AIR.getDefaultState()                                                      , false);
+            this.fillWithBlocks(mut, selector, box, 0, 2, 0, 0, 5, 4, Blocks.NETHER_BRICK.getDefaultState()                                             , false);
+            this.fillWithBlocks(mut, selector, box, 0, 3, 1, 0, 4, 1, Blocks.NETHER_BRICK_FENCE.getDefaultState()                                       , false);
+            this.fillWithBlocks(mut, selector, box, 0, 3, 3, 0, 4, 3, Blocks.NETHER_BRICK_FENCE.getDefaultState()                                       , false);
+            this.fillWithBlocks(mut, selector, box, 4, 2, 0, 4, 5, 0, Blocks.NETHER_BRICK.getDefaultState()                                             , false);
+            this.fillWithBlocks(mut, selector, box, 1, 2, 4, 4, 5, 4, Blocks.NETHER_BRICK.getDefaultState()                                             , false);
+            this.fillWithBlocks(mut, selector, box, 1, 3, 4, 1, 4, 4, Blocks.NETHER_BRICK_FENCE.getDefaultState(), Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 3, 3, 4, 3, 4, 4, Blocks.NETHER_BRICK_FENCE.getDefaultState(), Blocks.NETHER_BRICK.getDefaultState(), false);
 
             if (this.chest && box.isVecInside(new BlockPos(this.getXWithOffset(1, 3), this.getYWithOffset(2), this.getZWithOffset(1, 3)))) {
                 this.chest = false;
                 this.generateChest(world, box, rand, 1, 2, 3, LootTableList.CHESTS_NETHER_BRIDGE);
             }
 
-            this.fillWithBlocks(selector, box, 0, 6, 0, 4, 6, 4, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 0, 6, 0, 4, 6, 4, Blocks.NETHER_BRICK.getDefaultState(), false);
 
             for(int x = 0; x <= 4; ++x) {
                 for(int z = 0; z <= 4; ++z) {
@@ -375,14 +379,15 @@ public class StructureNetherBridgePieces {
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
             ChunkSelector selector = new ChunkSelector(world);
+            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
 
-            this.fillWithBlocks(selector, box, 0, 0, 0, 4, 1, 4, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 0, 2, 0, 4, 5, 4, BlockIDIndexes.AIR_STATE             , false);
-            this.fillWithBlocks(selector, box, 0, 2, 0, 0, 5, 0, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 4, 2, 0, 4, 5, 0, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 0, 2, 4, 0, 5, 4, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 4, 2, 4, 4, 5, 4, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 0, 6, 0, 4, 6, 4, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 0, 0, 0, 4, 1, 4, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 0, 2, 0, 4, 5, 4, BlockIDIndexes.AIR_STATE             , false);
+            this.fillWithBlocks(mut, selector, box, 0, 2, 0, 0, 5, 0, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 4, 2, 0, 4, 5, 0, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 0, 2, 4, 0, 5, 4, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 4, 2, 4, 4, 5, 4, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 0, 6, 0, 4, 6, 4, Blocks.NETHER_BRICK.getDefaultState(), false);
 
             for(int x = 0; x <= 4; ++x) {
                 for(int z = 0; z <= 4; ++z) {
@@ -419,16 +424,17 @@ public class StructureNetherBridgePieces {
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
             ChunkSelector selector = new ChunkSelector(world);
+            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
 
-            this.fillWithBlocks(selector, box, 0, 0, 0, 4, 1, 4, Blocks.NETHER_BRICK.getDefaultState()      , false);
-            this.fillWithBlocks(selector, box, 0, 2, 0, 4, 5, 4, BlockIDIndexes.AIR_STATE                   , false);
-            this.fillWithBlocks(selector, box, 0, 2, 0, 0, 5, 4, Blocks.NETHER_BRICK.getDefaultState()      , false);
-            this.fillWithBlocks(selector, box, 4, 2, 0, 4, 5, 4, Blocks.NETHER_BRICK.getDefaultState()      , false);
-            this.fillWithBlocks(selector, box, 0, 3, 1, 0, 4, 1, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 0, 3, 3, 0, 4, 3, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 4, 3, 1, 4, 4, 1, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 4, 3, 3, 4, 4, 3, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 0, 6, 0, 4, 6, 4, Blocks.NETHER_BRICK.getDefaultState()      , false);
+            this.fillWithBlocks(mut, selector, box, 0, 0, 0, 4, 1, 4, Blocks.NETHER_BRICK.getDefaultState()      , false);
+            this.fillWithBlocks(mut, selector, box, 0, 2, 0, 4, 5, 4, BlockIDIndexes.AIR_STATE                   , false);
+            this.fillWithBlocks(mut, selector, box, 0, 2, 0, 0, 5, 4, Blocks.NETHER_BRICK.getDefaultState()      , false);
+            this.fillWithBlocks(mut, selector, box, 4, 2, 0, 4, 5, 4, Blocks.NETHER_BRICK.getDefaultState()      , false);
+            this.fillWithBlocks(mut, selector, box, 0, 3, 1, 0, 4, 1, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 0, 3, 3, 0, 4, 3, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 4, 3, 1, 4, 4, 1, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 4, 3, 3, 4, 4, 3, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 0, 6, 0, 4, 6, 4, Blocks.NETHER_BRICK.getDefaultState()      , false);
 
             for(int x = 0; x <= 4; ++x) {
                 for(int z = 0; z <= 4; ++z) {
@@ -465,27 +471,26 @@ public class StructureNetherBridgePieces {
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
             ChunkSelector selector = new ChunkSelector(world);
-
-            this.fillWithBlocks(selector, box, 0 , 3 , 0 , 12, 4 , 12, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 0 , 5 , 0 , 12, 13, 12, BlockIDIndexes.AIR_STATE             , false);
-            this.fillWithBlocks(selector, box, 0 , 5 , 0 , 1 , 12, 12, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 11, 5 , 0 , 12, 12, 12, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 2 , 5 , 11, 4 , 12, 12, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 8 , 5 , 11, 10, 12, 12, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 5 , 9 , 11, 7 , 12, 12, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 2 , 5 , 0 , 4 , 12, 1 , Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 8 , 5 , 0 , 10, 12, 1 , Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 5 , 9 , 0 , 7 , 12, 1 , Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 2 , 11, 2 , 10, 12, 10, Blocks.NETHER_BRICK.getDefaultState(), false);
-
             BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+
+            this.fillWithBlocks(mut, selector, box, 0 , 3 , 0 , 12, 4 , 12, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 0 , 5 , 0 , 12, 13, 12, BlockIDIndexes.AIR_STATE             , false);
+            this.fillWithBlocks(mut, selector, box, 0 , 5 , 0 , 1 , 12, 12, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 11, 5 , 0 , 12, 12, 12, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 2 , 5 , 11, 4 , 12, 12, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 8 , 5 , 11, 10, 12, 12, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 5 , 9 , 11, 7 , 12, 12, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 2 , 5 , 0 , 4 , 12, 1 , Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 8 , 5 , 0 , 10, 12, 1 , Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 5 , 9 , 0 , 7 , 12, 1 , Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 2 , 11, 2 , 10, 12, 10, Blocks.NETHER_BRICK.getDefaultState(), false);
 
             int xMin;
             for(xMin = 1; xMin <= 11; xMin += 2) {
-                this.fillWithBlocks(selector, box,     xMin, 10, 0 ,     xMin, 11, 0 , Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
-                this.fillWithBlocks(selector, box,     xMin, 10, 12,     xMin, 11, 12, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
-                this.fillWithBlocks(selector, box, 0 , 10 ,    xMin, 0 , 11,     xMin, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
-                this.fillWithBlocks(selector, box, 12, 10 ,    xMin, 12, 11,     xMin, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
+                this.fillWithBlocks(mut, selector, box,     xMin, 10, 0 ,     xMin, 11, 0 , Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
+                this.fillWithBlocks(mut, selector, box,     xMin, 10, 12,     xMin, 11, 12, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
+                this.fillWithBlocks(mut, selector, box, 0 , 10 ,    xMin, 0 , 11,     xMin, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
+                this.fillWithBlocks(mut, selector, box, 12, 10 ,    xMin, 12, 11,     xMin, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
 
                 this.setBlockStateM(mut, selector, Blocks.NETHER_BRICK.getDefaultState(), xMin, 13, 0, box);
                 this.setBlockStateM(mut, selector, Blocks.NETHER_BRICK.getDefaultState(), xMin, 13, 12, box);
@@ -503,8 +508,8 @@ public class StructureNetherBridgePieces {
             this.setBlockStateM(mut, selector, Blocks.NETHER_BRICK_FENCE.getDefaultState(), 12, 13, 0, box);
 
             for(xMin = 3; xMin <= 9; xMin += 2) {
-                this.fillWithBlocks(selector, box, 1, 7, xMin, 1, 8, xMin, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
-                this.fillWithBlocks(selector, box, 11, 7, xMin, 11, 8, xMin, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
+                this.fillWithBlocks(mut, selector, box, 1, 7, xMin, 1, 8, xMin, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
+                this.fillWithBlocks(mut, selector, box, 11, 7, xMin, 11, 8, xMin, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
             }
 
             IBlockState stairs = Blocks.NETHER_BRICK_STAIRS.getDefaultState().withProperty(BlockStairs.FACING, EnumFacing.NORTH);
@@ -519,13 +524,13 @@ public class StructureNetherBridgePieces {
                 }
 
                 if (z >= 5 && z <= 8) {
-                    this.fillWithBlocks(selector, box, 5, 5, z, 7, y + 4, z, Blocks.NETHER_BRICK.getDefaultState(), false);
+                    this.fillWithBlocks(mut, selector, box, 5, 5, z, 7, y + 4, z, Blocks.NETHER_BRICK.getDefaultState(), false);
                 } else if (z >= 9 && z <= 10) {
-                    this.fillWithBlocks(selector, box, 5, 8, z, 7, y + 4, z, Blocks.NETHER_BRICK.getDefaultState(), false);
+                    this.fillWithBlocks(mut, selector, box, 5, 8, z, 7, y + 4, z, Blocks.NETHER_BRICK.getDefaultState(), false);
                 }
 
                 if (y >= 1) {
-                    this.fillWithBlocks(selector, box, 5, 6 + y, z, 7, 9 + y, z, BlockIDIndexes.AIR_STATE, false);
+                    this.fillWithBlocks(mut, selector, box, 5, 6 + y, z, 7, 9 + y, z, BlockIDIndexes.AIR_STATE, false);
                 }
             }
 
@@ -533,15 +538,15 @@ public class StructureNetherBridgePieces {
                 this.setBlockStateM(mut, selector, stairs, y, 12, 11, box);
             }
 
-            this.fillWithBlocks(selector, box, 5 , 6 , 7 , 5 , 7 , 7 , Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 7 , 6 , 7 , 7 , 7 , 7 , Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 5 , 13, 12, 7 , 13, 12, BlockIDIndexes.AIR_STATE                   , false);
-            this.fillWithBlocks(selector, box, 2 , 5 , 2 , 3 , 5 , 3 , Blocks.NETHER_BRICK.getDefaultState()      , false);
-            this.fillWithBlocks(selector, box, 2 , 5 , 9 , 3 , 5 , 10, Blocks.NETHER_BRICK.getDefaultState()      , false);
-            this.fillWithBlocks(selector, box, 2 , 5 , 4 , 2 , 5 , 8 , Blocks.NETHER_BRICK.getDefaultState()      , false);
-            this.fillWithBlocks(selector, box, 9 , 5 , 2 , 10, 5 , 3 , Blocks.NETHER_BRICK.getDefaultState()      , false);
-            this.fillWithBlocks(selector, box, 9 , 5 , 9 , 10, 5 , 10, Blocks.NETHER_BRICK.getDefaultState()      , false);
-            this.fillWithBlocks(selector, box, 10, 5 , 4 , 10, 5 , 8 , Blocks.NETHER_BRICK.getDefaultState()      , false);
+            this.fillWithBlocks(mut, selector, box, 5 , 6 , 7 , 5 , 7 , 7 , Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 7 , 6 , 7 , 7 , 7 , 7 , Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 5 , 13, 12, 7 , 13, 12, BlockIDIndexes.AIR_STATE                   , false);
+            this.fillWithBlocks(mut, selector, box, 2 , 5 , 2 , 3 , 5 , 3 , Blocks.NETHER_BRICK.getDefaultState()      , false);
+            this.fillWithBlocks(mut, selector, box, 2 , 5 , 9 , 3 , 5 , 10, Blocks.NETHER_BRICK.getDefaultState()      , false);
+            this.fillWithBlocks(mut, selector, box, 2 , 5 , 4 , 2 , 5 , 8 , Blocks.NETHER_BRICK.getDefaultState()      , false);
+            this.fillWithBlocks(mut, selector, box, 9 , 5 , 2 , 10, 5 , 3 , Blocks.NETHER_BRICK.getDefaultState()      , false);
+            this.fillWithBlocks(mut, selector, box, 9 , 5 , 9 , 10, 5 , 10, Blocks.NETHER_BRICK.getDefaultState()      , false);
+            this.fillWithBlocks(mut, selector, box, 10, 5 , 4 , 10, 5 , 8 , Blocks.NETHER_BRICK.getDefaultState()      , false);
 
             IBlockState stairs2 = stairs.withProperty(BlockStairs.FACING, EnumFacing.EAST);
             IBlockState stairs3 = stairs.withProperty(BlockStairs.FACING, EnumFacing.WEST);
@@ -555,16 +560,16 @@ public class StructureNetherBridgePieces {
             this.setBlockStateM(mut, selector, stairs2, 8, 5, 9, box);
             this.setBlockStateM(mut, selector, stairs2, 8, 5, 10, box);
 
-            this.fillWithBlocks(selector, box, 3, 4, 4, 4 , 4, 8 , Blocks.SOUL_SAND.getDefaultState()   , false);
-            this.fillWithBlocks(selector, box, 8, 4, 4, 9 , 4, 8 , Blocks.SOUL_SAND.getDefaultState()   , false);
-            this.fillWithBlocks(selector, box, 3, 5, 4, 4 , 5, 8 , Blocks.NETHER_WART.getDefaultState() , false);
-            this.fillWithBlocks(selector, box, 8, 5, 4, 9 , 5, 8 , Blocks.NETHER_WART.getDefaultState() , false);
-            this.fillWithBlocks(selector, box, 4, 2, 0, 8 , 2, 12, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 0, 2, 4, 12, 2, 8 , Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 4, 0, 0, 8 , 1, 3 , Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 4, 0, 9, 8 , 1, 12, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 0, 0, 4, 3 , 1, 8 , Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 9, 0, 4, 12, 1, 8 , Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 3, 4, 4, 4 , 4, 8 , Blocks.SOUL_SAND.getDefaultState()   , false);
+            this.fillWithBlocks(mut, selector, box, 8, 4, 4, 9 , 4, 8 , Blocks.SOUL_SAND.getDefaultState()   , false);
+            this.fillWithBlocks(mut, selector, box, 3, 5, 4, 4 , 5, 8 , Blocks.NETHER_WART.getDefaultState() , false);
+            this.fillWithBlocks(mut, selector, box, 8, 5, 4, 9 , 5, 8 , Blocks.NETHER_WART.getDefaultState() , false);
+            this.fillWithBlocks(mut, selector, box, 4, 2, 0, 8 , 2, 12, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 0, 2, 4, 12, 2, 8 , Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 4, 0, 0, 8 , 1, 3 , Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 4, 0, 9, 8 , 1, 12, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 0, 0, 4, 3 , 1, 8 , Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 9, 0, 4, 12, 1, 8 , Blocks.NETHER_BRICK.getDefaultState(), false);
 
             int z;
             for(x = 4; x <= 8; ++x) {
@@ -610,28 +615,27 @@ public class StructureNetherBridgePieces {
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
             ChunkSelector selector = new ChunkSelector(world);
-
-            this.fillWithBlocks(selector, box, 0 , 3 , 0 , 12, 4 , 12, Blocks.NETHER_BRICK.getDefaultState()      , false);
-            this.fillWithBlocks(selector, box, 0 , 5 , 0 , 12, 13, 12, BlockIDIndexes.AIR_STATE                   , false);
-            this.fillWithBlocks(selector, box, 0 , 5 , 0 , 1 , 12, 12, Blocks.NETHER_BRICK.getDefaultState()      , false);
-            this.fillWithBlocks(selector, box, 11, 5 , 0 , 12, 12, 12, Blocks.NETHER_BRICK.getDefaultState()      , false);
-            this.fillWithBlocks(selector, box, 2 , 5 , 11, 4 , 12, 12, Blocks.NETHER_BRICK.getDefaultState()      , false);
-            this.fillWithBlocks(selector, box, 8 , 5 , 11, 10, 12, 12, Blocks.NETHER_BRICK.getDefaultState()      , false);
-            this.fillWithBlocks(selector, box, 5 , 9 , 11, 7 , 12, 12, Blocks.NETHER_BRICK.getDefaultState()      , false);
-            this.fillWithBlocks(selector, box, 2 , 5 , 0 , 4 , 12, 1 , Blocks.NETHER_BRICK.getDefaultState()      , false);
-            this.fillWithBlocks(selector, box, 8 , 5 , 0 , 10, 12, 1 , Blocks.NETHER_BRICK.getDefaultState()      , false);
-            this.fillWithBlocks(selector, box, 5 , 9 , 0 , 7 , 12, 1 , Blocks.NETHER_BRICK.getDefaultState()      , false);
-            this.fillWithBlocks(selector, box, 2 , 11, 2 , 10, 12, 10, Blocks.NETHER_BRICK.getDefaultState()      , false);
-            this.fillWithBlocks(selector, box, 5 , 8 , 0 , 7 , 8 , 0 , Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
-
             BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+
+            this.fillWithBlocks(mut, selector, box, 0 , 3 , 0 , 12, 4 , 12, Blocks.NETHER_BRICK.getDefaultState()      , false);
+            this.fillWithBlocks(mut, selector, box, 0 , 5 , 0 , 12, 13, 12, BlockIDIndexes.AIR_STATE                   , false);
+            this.fillWithBlocks(mut, selector, box, 0 , 5 , 0 , 1 , 12, 12, Blocks.NETHER_BRICK.getDefaultState()      , false);
+            this.fillWithBlocks(mut, selector, box, 11, 5 , 0 , 12, 12, 12, Blocks.NETHER_BRICK.getDefaultState()      , false);
+            this.fillWithBlocks(mut, selector, box, 2 , 5 , 11, 4 , 12, 12, Blocks.NETHER_BRICK.getDefaultState()      , false);
+            this.fillWithBlocks(mut, selector, box, 8 , 5 , 11, 10, 12, 12, Blocks.NETHER_BRICK.getDefaultState()      , false);
+            this.fillWithBlocks(mut, selector, box, 5 , 9 , 11, 7 , 12, 12, Blocks.NETHER_BRICK.getDefaultState()      , false);
+            this.fillWithBlocks(mut, selector, box, 2 , 5 , 0 , 4 , 12, 1 , Blocks.NETHER_BRICK.getDefaultState()      , false);
+            this.fillWithBlocks(mut, selector, box, 8 , 5 , 0 , 10, 12, 1 , Blocks.NETHER_BRICK.getDefaultState()      , false);
+            this.fillWithBlocks(mut, selector, box, 5 , 9 , 0 , 7 , 12, 1 , Blocks.NETHER_BRICK.getDefaultState()      , false);
+            this.fillWithBlocks(mut, selector, box, 2 , 11, 2 , 10, 12, 10, Blocks.NETHER_BRICK.getDefaultState()      , false);
+            this.fillWithBlocks(mut, selector, box, 5 , 8 , 0 , 7 , 8 , 0 , Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
 
             int x;
             for(x = 1; x <= 11; x += 2) {
-                this.fillWithBlocks(selector, box, x, 10, 0, x, 11, 0, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
-                this.fillWithBlocks(selector, box, x, 10, 12, x, 11, 12, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
-                this.fillWithBlocks(selector, box, 0, 10, x, 0, 11, x, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
-                this.fillWithBlocks(selector, box, 12, 10, x, 12, 11, x, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
+                this.fillWithBlocks(mut, selector, box, x, 10, 0, x, 11, 0, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
+                this.fillWithBlocks(mut, selector, box, x, 10, 12, x, 11, 12, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
+                this.fillWithBlocks(mut, selector, box, 0, 10, x, 0, 11, x, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
+                this.fillWithBlocks(mut, selector, box, 12, 10, x, 12, 11, x, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
 
                 this.setBlockStateM(mut, selector, Blocks.NETHER_BRICK.getDefaultState(), x, 13, 0, box);
                 this.setBlockStateM(mut, selector, Blocks.NETHER_BRICK.getDefaultState(), x, 13, 12, box);
@@ -649,16 +653,16 @@ public class StructureNetherBridgePieces {
             this.setBlockStateM(mut, selector, Blocks.NETHER_BRICK_FENCE.getDefaultState(), 12, 13, 0, box);
 
             for(x = 3; x <= 9; x += 2) {
-                this.fillWithBlocks(selector, box, 1, 7, x, 1, 8, x, Blocks.NETHER_BRICK_FENCE.getDefaultState(), Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
-                this.fillWithBlocks(selector, box, 11, 7, x, 11, 8, x, Blocks.NETHER_BRICK_FENCE.getDefaultState(), Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
+                this.fillWithBlocks(mut, selector, box, 1, 7, x, 1, 8, x, Blocks.NETHER_BRICK_FENCE.getDefaultState(), Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
+                this.fillWithBlocks(mut, selector, box, 11, 7, x, 11, 8, x, Blocks.NETHER_BRICK_FENCE.getDefaultState(), Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
             }
 
-            this.fillWithBlocks(selector, box, 4, 2, 0, 8, 2, 12, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 0, 2, 4, 12, 2, 8, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 4, 0, 0, 8, 1, 3, Blocks.NETHER_BRICK.getDefaultState() , false);
-            this.fillWithBlocks(selector, box, 4, 0, 9, 8, 1, 12, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 0, 0, 4, 3, 1, 8, Blocks.NETHER_BRICK.getDefaultState() , false);
-            this.fillWithBlocks(selector, box, 9, 0, 4, 12, 1, 8, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 4, 2, 0, 8, 2, 12, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 0, 2, 4, 12, 2, 8, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 4, 0, 0, 8, 1, 3, Blocks.NETHER_BRICK.getDefaultState() , false);
+            this.fillWithBlocks(mut, selector, box, 4, 0, 9, 8, 1, 12, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 0, 0, 4, 3, 1, 8, Blocks.NETHER_BRICK.getDefaultState() , false);
+            this.fillWithBlocks(mut, selector, box, 9, 0, 4, 12, 1, 8, Blocks.NETHER_BRICK.getDefaultState(), false);
 
             int z;
             for(x = 4; x <= 8; ++x) {
@@ -675,8 +679,8 @@ public class StructureNetherBridgePieces {
                 }
             }
 
-            this.fillWithBlocks(selector, box, 5, 5, 5, 7, 5, 7, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 6, 1, 6, 6, 4, 6, BlockIDIndexes.AIR_STATE, false);
+            this.fillWithBlocks(mut, selector, box, 5, 5, 5, 7, 5, 7, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 6, 1, 6, 6, 4, 6, BlockIDIndexes.AIR_STATE, false);
             this.setBlockStateM(mut, selector, Blocks.NETHER_BRICK.getDefaultState(), 6, 0, 6, box);
 
             IBlockState lava = Blocks.FLOWING_LAVA.getDefaultState();
@@ -723,27 +727,28 @@ public class StructureNetherBridgePieces {
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
             ChunkSelector selector = new ChunkSelector(world);
+            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
 
-            this.fillWithBlocks(selector, box, 0, 2, 0, 6, 7, 7, BlockIDIndexes.AIR_STATE             , false);
-            this.fillWithBlocks(selector, box, 1, 0, 0, 5, 1, 7, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 1, 2, 1, 5, 2, 7, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 1, 3, 2, 5, 3, 7, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 1, 4, 3, 5, 4, 7, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 1, 2, 0, 1, 4, 2, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 5, 2, 0, 5, 4, 2, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 1, 5, 2, 1, 5, 3, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 5, 5, 2, 5, 5, 3, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 0, 5, 3, 0, 5, 8, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 6, 5, 3, 6, 5, 8, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 1, 5, 8, 5, 5, 8, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 0, 2, 0, 6, 7, 7, BlockIDIndexes.AIR_STATE             , false);
+            this.fillWithBlocks(mut, selector, box, 1, 0, 0, 5, 1, 7, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 1, 2, 1, 5, 2, 7, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 1, 3, 2, 5, 3, 7, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 1, 4, 3, 5, 4, 7, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 1, 2, 0, 1, 4, 2, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 5, 2, 0, 5, 4, 2, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 1, 5, 2, 1, 5, 3, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 5, 5, 2, 5, 5, 3, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 0, 5, 3, 0, 5, 8, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 6, 5, 3, 6, 5, 8, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 1, 5, 8, 5, 5, 8, Blocks.NETHER_BRICK.getDefaultState(), false);
 
-            this.setBlockState(selector, Blocks.NETHER_BRICK_FENCE.getDefaultState(), 1, 6, 3, box);
-            this.setBlockState(selector, Blocks.NETHER_BRICK_FENCE.getDefaultState(), 5, 6, 3, box);
+            this.setBlockStateM(mut, selector, Blocks.NETHER_BRICK_FENCE.getDefaultState(), 1, 6, 3, box);
+            this.setBlockStateM(mut, selector, Blocks.NETHER_BRICK_FENCE.getDefaultState(), 5, 6, 3, box);
 
-            this.fillWithBlocks(selector, box, 0, 6, 3, 0, 6, 8, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 6, 6, 3, 6, 6, 8, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 1, 6, 8, 5, 7, 8, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 2, 8, 8, 4, 8, 8, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 0, 6, 3, 0, 6, 8, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 6, 6, 3, 6, 6, 8, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 1, 6, 8, 5, 7, 8, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 2, 8, 8, 4, 8, 8, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
 
             if (!this.hasSpawner) {
                 BlockPos pos = new BlockPos(this.getXWithOffset(3, 5), this.getYWithOffset(5), this.getZWithOffset(3, 5));
@@ -791,28 +796,29 @@ public class StructureNetherBridgePieces {
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
             ChunkSelector selector = new ChunkSelector(world);
+            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
 
-            this.fillWithBlocks(selector, box, 0, 0, 0, 6, 1, 6, Blocks.NETHER_BRICK.getDefaultState()      , false);
-            this.fillWithBlocks(selector, box, 0, 2, 0, 6, 10, 6, BlockIDIndexes.AIR_STATE                  , false);
-            this.fillWithBlocks(selector, box, 0, 2, 0, 1, 8, 0, Blocks.NETHER_BRICK.getDefaultState()      , false);
-            this.fillWithBlocks(selector, box, 5, 2, 0, 6, 8, 0, Blocks.NETHER_BRICK.getDefaultState()      , false);
-            this.fillWithBlocks(selector, box, 0, 2, 1, 0, 8, 6, Blocks.NETHER_BRICK.getDefaultState()      , false);
-            this.fillWithBlocks(selector, box, 6, 2, 1, 6, 8, 6, Blocks.NETHER_BRICK.getDefaultState()      , false);
-            this.fillWithBlocks(selector, box, 1, 2, 6, 5, 8, 6, Blocks.NETHER_BRICK.getDefaultState()      , false);
-            this.fillWithBlocks(selector, box, 0, 3, 2, 0, 5, 4, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 6, 3, 2, 6, 5, 2, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 6, 3, 4, 6, 5, 4, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 0, 0, 0, 6, 1, 6, Blocks.NETHER_BRICK.getDefaultState()      , false);
+            this.fillWithBlocks(mut, selector, box, 0, 2, 0, 6, 10, 6, BlockIDIndexes.AIR_STATE                  , false);
+            this.fillWithBlocks(mut, selector, box, 0, 2, 0, 1, 8, 0, Blocks.NETHER_BRICK.getDefaultState()      , false);
+            this.fillWithBlocks(mut, selector, box, 5, 2, 0, 6, 8, 0, Blocks.NETHER_BRICK.getDefaultState()      , false);
+            this.fillWithBlocks(mut, selector, box, 0, 2, 1, 0, 8, 6, Blocks.NETHER_BRICK.getDefaultState()      , false);
+            this.fillWithBlocks(mut, selector, box, 6, 2, 1, 6, 8, 6, Blocks.NETHER_BRICK.getDefaultState()      , false);
+            this.fillWithBlocks(mut, selector, box, 1, 2, 6, 5, 8, 6, Blocks.NETHER_BRICK.getDefaultState()      , false);
+            this.fillWithBlocks(mut, selector, box, 0, 3, 2, 0, 5, 4, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 6, 3, 2, 6, 5, 2, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 6, 3, 4, 6, 5, 4, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
 
-            this.setBlockState(selector, Blocks.NETHER_BRICK.getDefaultState(), 5, 2, 5, box);
+            this.setBlockStateM(mut, selector, Blocks.NETHER_BRICK.getDefaultState(), 5, 2, 5, box);
 
-            this.fillWithBlocks(selector, box, 4, 2, 5, 4, 3, 5, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 3, 2, 5, 3, 4, 5, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 2, 2, 5, 2, 5, 5, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 1, 2, 5, 1, 6, 5, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 1, 7, 1, 5, 7, 4, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 6, 8, 2, 6, 8, 4, BlockIDIndexes.AIR_STATE             , false);
-            this.fillWithBlocks(selector, box, 2, 6, 0, 4, 8, 0, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 2, 5, 0, 4, 5, 0, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 4, 2, 5, 4, 3, 5, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 3, 2, 5, 3, 4, 5, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 2, 2, 5, 2, 5, 5, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 1, 2, 5, 1, 6, 5, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 1, 7, 1, 5, 7, 4, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 6, 8, 2, 6, 8, 4, BlockIDIndexes.AIR_STATE             , false);
+            this.fillWithBlocks(mut, selector, box, 2, 6, 0, 4, 8, 0, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 2, 5, 0, 4, 5, 0, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
 
             for(int x = 0; x <= 6; ++x) {
                 for(int z = 0; z <= 6; ++z) {
@@ -851,25 +857,26 @@ public class StructureNetherBridgePieces {
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
             ChunkSelector selector = new ChunkSelector(world);
+            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
 
-            this.fillWithBlocks(selector, box, 0, 0, 0, 6, 1, 6, Blocks.NETHER_BRICK.getDefaultState()      , false);
-            this.fillWithBlocks(selector, box, 0, 2, 0, 6, 7, 6, BlockIDIndexes.AIR_STATE                   , false);
-            this.fillWithBlocks(selector, box, 0, 2, 0, 1, 6, 0, Blocks.NETHER_BRICK.getDefaultState()      , false);
-            this.fillWithBlocks(selector, box, 0, 2, 6, 1, 6, 6, Blocks.NETHER_BRICK.getDefaultState()      , false);
-            this.fillWithBlocks(selector, box, 5, 2, 0, 6, 6, 0, Blocks.NETHER_BRICK.getDefaultState()      , false);
-            this.fillWithBlocks(selector, box, 5, 2, 6, 6, 6, 6, Blocks.NETHER_BRICK.getDefaultState()      , false);
-            this.fillWithBlocks(selector, box, 0, 2, 0, 0, 6, 1, Blocks.NETHER_BRICK.getDefaultState()      , false);
-            this.fillWithBlocks(selector, box, 0, 2, 5, 0, 6, 6, Blocks.NETHER_BRICK.getDefaultState()      , false);
-            this.fillWithBlocks(selector, box, 6, 2, 0, 6, 6, 1, Blocks.NETHER_BRICK.getDefaultState()      , false);
-            this.fillWithBlocks(selector, box, 6, 2, 5, 6, 6, 6, Blocks.NETHER_BRICK.getDefaultState()      , false);
-            this.fillWithBlocks(selector, box, 2, 6, 0, 4, 6, 0, Blocks.NETHER_BRICK.getDefaultState()      , false);
-            this.fillWithBlocks(selector, box, 2, 5, 0, 4, 5, 0, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 2, 6, 6, 4, 6, 6, Blocks.NETHER_BRICK.getDefaultState()      , false);
-            this.fillWithBlocks(selector, box, 2, 5, 6, 4, 5, 6, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 0, 6, 2, 0, 6, 4, Blocks.NETHER_BRICK.getDefaultState()      , false);
-            this.fillWithBlocks(selector, box, 0, 5, 2, 0, 5, 4, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 6, 6, 2, 6, 6, 4, Blocks.NETHER_BRICK.getDefaultState()      , false);
-            this.fillWithBlocks(selector, box, 6, 5, 2, 6, 5, 4, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 0, 0, 0, 6, 1, 6, Blocks.NETHER_BRICK.getDefaultState()      , false);
+            this.fillWithBlocks(mut, selector, box, 0, 2, 0, 6, 7, 6, BlockIDIndexes.AIR_STATE                   , false);
+            this.fillWithBlocks(mut, selector, box, 0, 2, 0, 1, 6, 0, Blocks.NETHER_BRICK.getDefaultState()      , false);
+            this.fillWithBlocks(mut, selector, box, 0, 2, 6, 1, 6, 6, Blocks.NETHER_BRICK.getDefaultState()      , false);
+            this.fillWithBlocks(mut, selector, box, 5, 2, 0, 6, 6, 0, Blocks.NETHER_BRICK.getDefaultState()      , false);
+            this.fillWithBlocks(mut, selector, box, 5, 2, 6, 6, 6, 6, Blocks.NETHER_BRICK.getDefaultState()      , false);
+            this.fillWithBlocks(mut, selector, box, 0, 2, 0, 0, 6, 1, Blocks.NETHER_BRICK.getDefaultState()      , false);
+            this.fillWithBlocks(mut, selector, box, 0, 2, 5, 0, 6, 6, Blocks.NETHER_BRICK.getDefaultState()      , false);
+            this.fillWithBlocks(mut, selector, box, 6, 2, 0, 6, 6, 1, Blocks.NETHER_BRICK.getDefaultState()      , false);
+            this.fillWithBlocks(mut, selector, box, 6, 2, 5, 6, 6, 6, Blocks.NETHER_BRICK.getDefaultState()      , false);
+            this.fillWithBlocks(mut, selector, box, 2, 6, 0, 4, 6, 0, Blocks.NETHER_BRICK.getDefaultState()      , false);
+            this.fillWithBlocks(mut, selector, box, 2, 5, 0, 4, 5, 0, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 2, 6, 6, 4, 6, 6, Blocks.NETHER_BRICK.getDefaultState()      , false);
+            this.fillWithBlocks(mut, selector, box, 2, 5, 6, 4, 5, 6, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 0, 6, 2, 0, 6, 4, Blocks.NETHER_BRICK.getDefaultState()      , false);
+            this.fillWithBlocks(mut, selector, box, 0, 5, 2, 0, 5, 4, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 6, 6, 2, 6, 6, 4, Blocks.NETHER_BRICK.getDefaultState()      , false);
+            this.fillWithBlocks(mut, selector, box, 6, 5, 2, 6, 5, 4, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
 
             for(int x = 0; x <= 6; ++x) {
                 for(int z = 0; z <= 6; ++z) {
@@ -918,23 +925,24 @@ public class StructureNetherBridgePieces {
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
             ChunkSelector selector = new ChunkSelector(world);
+            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
 
-            this.fillWithBlocks(selector, box, 7 , 3, 0 , 11, 4, 18, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 0 , 3, 7 , 18, 4, 11, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 8 , 5, 0 , 10, 7, 18, BlockIDIndexes.AIR_STATE             , false);
-            this.fillWithBlocks(selector, box, 0 , 5, 8 , 18, 7, 10, BlockIDIndexes.AIR_STATE             , false);
-            this.fillWithBlocks(selector, box, 7 , 5, 0 , 7 , 5, 7 , Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 7 , 5, 11, 7 , 5, 18, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 11, 5, 0 , 11, 5, 7 , Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 11, 5, 11, 11, 5, 18, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 0 , 5, 7 , 7 , 5, 7 , Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 11, 5, 7 , 18, 5, 7 , Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 0 , 5, 11, 7 , 5, 11, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 11, 5, 11, 18, 5, 11, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 7 , 2, 0 , 11, 2, 5 , Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 7 , 2, 13, 11, 2, 18, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 7 , 0, 0 , 11, 1, 3 , Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 7 , 0, 15, 11, 1, 18, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 7 , 3, 0 , 11, 4, 18, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 0 , 3, 7 , 18, 4, 11, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 8 , 5, 0 , 10, 7, 18, BlockIDIndexes.AIR_STATE             , false);
+            this.fillWithBlocks(mut, selector, box, 0 , 5, 8 , 18, 7, 10, BlockIDIndexes.AIR_STATE             , false);
+            this.fillWithBlocks(mut, selector, box, 7 , 5, 0 , 7 , 5, 7 , Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 7 , 5, 11, 7 , 5, 18, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 11, 5, 0 , 11, 5, 7 , Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 11, 5, 11, 11, 5, 18, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 0 , 5, 7 , 7 , 5, 7 , Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 11, 5, 7 , 18, 5, 7 , Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 0 , 5, 11, 7 , 5, 11, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 11, 5, 11, 18, 5, 11, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 7 , 2, 0 , 11, 2, 5 , Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 7 , 2, 13, 11, 2, 18, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 7 , 0, 0 , 11, 1, 3 , Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 7 , 0, 15, 11, 1, 18, Blocks.NETHER_BRICK.getDefaultState(), false);
 
             int x;
             int z;
@@ -945,10 +953,10 @@ public class StructureNetherBridgePieces {
                 }
             }
 
-            this.fillWithBlocks(selector, box, 0 , 2, 7, 5 , 2, 11, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 13, 2, 7, 18, 2, 11, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 0 , 0, 7, 3 , 1, 11, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 15, 0, 7, 18, 1, 11, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 0 , 2, 7, 5 , 2, 11, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 13, 2, 7, 18, 2, 11, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 0 , 0, 7, 3 , 1, 11, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 15, 0, 7, 18, 1, 11, Blocks.NETHER_BRICK.getDefaultState(), false);
 
             for(x = 0; x <= 2; ++x) {
                 for(z = 7; z <= 11; ++z) {
@@ -996,6 +1004,7 @@ public class StructureNetherBridgePieces {
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
             ChunkSelector selector = new ChunkSelector(world);
+            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
             Random cRand = new Random(this.fillSeed);
 
             int xPos;
@@ -1004,24 +1013,24 @@ public class StructureNetherBridgePieces {
             for(xPos = 0; xPos <= 4; ++xPos) {
                 for(yPos = 3; yPos <= 4; ++yPos) {
                     zPos = cRand.nextInt(8);
-                    this.fillWithBlocks(selector, box, xPos, yPos, 0, xPos, yPos, zPos, Blocks.NETHER_BRICK.getDefaultState(), false);
+                    this.fillWithBlocks(mut, selector, box, xPos, yPos, 0, xPos, yPos, zPos, Blocks.NETHER_BRICK.getDefaultState(), false);
                 }
             }
 
             xPos = cRand.nextInt(8);
-            this.fillWithBlocks(selector, box, 0, 5, 0, 0, 5, xPos, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 0, 5, 0, 0, 5, xPos, Blocks.NETHER_BRICK.getDefaultState(), false);
             xPos = cRand.nextInt(8);
-            this.fillWithBlocks(selector, box, 4, 5, 0, 4, 5, xPos, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 4, 5, 0, 4, 5, xPos, Blocks.NETHER_BRICK.getDefaultState(), false);
 
             for(xPos = 0; xPos <= 4; ++xPos) {
                 yPos = cRand.nextInt(5);
-                this.fillWithBlocks(selector, box, xPos, 2, 0, xPos, 2, yPos, Blocks.NETHER_BRICK.getDefaultState(), false);
+                this.fillWithBlocks(mut, selector, box, xPos, 2, 0, xPos, 2, yPos, Blocks.NETHER_BRICK.getDefaultState(), false);
             }
 
             for(xPos = 0; xPos <= 4; ++xPos) {
                 for(yPos = 0; yPos <= 1; ++yPos) {
                     zPos = cRand.nextInt(3);
-                    this.fillWithBlocks(selector, box, xPos, yPos, 0, xPos, yPos, zPos, Blocks.NETHER_BRICK.getDefaultState(), false);
+                    this.fillWithBlocks(mut, selector, box, xPos, yPos, 0, xPos, yPos, zPos, Blocks.NETHER_BRICK.getDefaultState(), false);
                 }
             }
             return true;
@@ -1053,15 +1062,16 @@ public class StructureNetherBridgePieces {
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
             ChunkSelector selector = new ChunkSelector(world);
+            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
 
-            this.fillWithBlocks(selector, box, 0, 3, 0 , 4, 4, 18, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 1, 5, 0 , 3, 7, 18, BlockIDIndexes.AIR_STATE             , false);
-            this.fillWithBlocks(selector, box, 0, 5, 0 , 0, 5, 18, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 4, 5, 0 , 4, 5, 18, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 0, 2, 0 , 4, 2, 5 , Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 0, 2, 13, 4, 2, 18, Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 0, 0, 0 , 4, 1, 3 , Blocks.NETHER_BRICK.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 0, 0, 15, 4, 1, 18, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 0, 3, 0 , 4, 4, 18, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 1, 5, 0 , 3, 7, 18, BlockIDIndexes.AIR_STATE             , false);
+            this.fillWithBlocks(mut, selector, box, 0, 5, 0 , 0, 5, 18, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 4, 5, 0 , 4, 5, 18, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 0, 2, 0 , 4, 2, 5 , Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 0, 2, 13, 4, 2, 18, Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 0, 0, 0 , 4, 1, 3 , Blocks.NETHER_BRICK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 0, 0, 15, 4, 1, 18, Blocks.NETHER_BRICK.getDefaultState(), false);
 
             for(int x = 0; x <= 4; ++x) {
                 for(int z = 0; z <= 2; ++z) {
@@ -1070,14 +1080,14 @@ public class StructureNetherBridgePieces {
                 }
             }
 
-            this.fillWithBlocks(selector, box, 0, 1, 1 , 0, 4, 1 , Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 0, 3, 4 , 0, 4, 4 , Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 0, 3, 14, 0, 4, 14, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 0, 1, 17, 0, 4, 17, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 4, 1, 1 , 4, 4, 1 , Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 4, 3, 4 , 4, 4, 4 , Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 4, 3, 14, 4, 4, 14, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
-            this.fillWithBlocks(selector, box, 4, 1, 17, 4, 4, 17, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 0, 1, 1 , 0, 4, 1 , Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 0, 3, 4 , 0, 4, 4 , Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 0, 3, 14, 0, 4, 14, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 0, 1, 17, 0, 4, 17, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 4, 1, 1 , 4, 4, 1 , Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 4, 3, 4 , 4, 4, 4 , Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 4, 3, 14, 4, 4, 14, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 4, 1, 17, 4, 4, 17, Blocks.NETHER_BRICK_FENCE.getDefaultState(), false);
             return true;
         }
     }

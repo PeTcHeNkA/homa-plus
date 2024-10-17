@@ -4,11 +4,10 @@ import plus.tson.utl.alloc.ConcurrentCasAllocator;
 
 
 public class PooledLongQueue {
-    private static final int CACHED_QUEUE_SEGMENTS_COUNT = 4096;
+    //private static final int CACHED_QUEUE_SEGMENTS_COUNT = 4096;
     private static final int QUEUE_SEGMENT_SIZE = 1024;
     private final Pool pool;
-    Segment cur;
-    Segment last;
+    Segment cur, last;
     private int size;
     private volatile boolean empty;
     
@@ -55,7 +54,7 @@ public class PooledLongQueue {
     }
 
 
-    private synchronized void clear() {
+    synchronized void clear() {
         Segment next;
         for (Segment segment = this.cur; segment != null; segment = next) {
             next = segment.next;
@@ -114,8 +113,8 @@ public class PooledLongQueue {
                 this.index = 0;
                 Segment cur = this.cur = this.cur.next;
                 if (cur != null) {
-                    this.curArray = this.cur.longArray;
-                    this.capacity = this.cur.index;
+                    this.curArray = cur.longArray;
+                    this.capacity = cur.index;
                 }
             }
             return ret;
@@ -124,8 +123,11 @@ public class PooledLongQueue {
 
         public void finish() {
             this.curArray = null;
-            if(parent != null) parent.clear();
-            this.parent = null;
+            PooledLongQueue parent;
+            if((parent = this.parent) != null) {
+                parent.clear();
+                this.parent = null;
+            }
         }
     }
 

@@ -229,46 +229,47 @@ public class StructureOceanMonumentPieces {
 
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
             ChunkSelector selector = new ChunkSelector(world);
+            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
 
-            this.fillWithBlocks(selector, box, 2 , -1, 2 , 11, -1, 11, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 0 , -1, 0 , 1 , -1, 11, ROUGH_PRISMARINE , false);
-            this.fillWithBlocks(selector, box, 12, -1, 0 , 13, -1, 11, ROUGH_PRISMARINE , false);
-            this.fillWithBlocks(selector, box, 2 , -1, 0 , 11, -1, 1 , ROUGH_PRISMARINE , false);
-            this.fillWithBlocks(selector, box, 2 , -1, 12, 11, -1, 13, ROUGH_PRISMARINE , false);
-            this.fillWithBlocks(selector, box, 0 ,  0, 0 , 0 ,  0, 13, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 13,  0, 0 , 13,  0, 13, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 1 ,  0, 0 , 12,  0, 0 , BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 1 ,  0, 13, 12,  0, 13, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 2 , -1, 2 , 11, -1, 11, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 0 , -1, 0 , 1 , -1, 11, ROUGH_PRISMARINE , false);
+            this.fillWithBlocks(mut, selector, box, 12, -1, 0 , 13, -1, 11, ROUGH_PRISMARINE , false);
+            this.fillWithBlocks(mut, selector, box, 2 , -1, 0 , 11, -1, 1 , ROUGH_PRISMARINE , false);
+            this.fillWithBlocks(mut, selector, box, 2 , -1, 12, 11, -1, 13, ROUGH_PRISMARINE , false);
+            this.fillWithBlocks(mut, selector, box, 0 ,  0, 0 , 0 ,  0, 13, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 13,  0, 0 , 13,  0, 13, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 1 ,  0, 0 , 12,  0, 0 , BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 1 ,  0, 13, 12,  0, 13, BRICKS_PRISMARINE, false);
 
             for(int i = 2; i <= 11; i += 3) {
-                this.setBlockState(selector, SEA_LANTERN, 0, 0, i, box);
-                this.setBlockState(selector, SEA_LANTERN, 13, 0, i, box);
-                this.setBlockState(selector, SEA_LANTERN, i, 0, 0, box);
+                this.setBlockStateM(mut, selector, SEA_LANTERN, 0, 0, i, box);
+                this.setBlockStateM(mut, selector, SEA_LANTERN, 13, 0, i, box);
+                this.setBlockStateM(mut, selector, SEA_LANTERN, i, 0, 0, box);
             }
 
-            this.fillWithBlocks(selector, box, 2, 0, 3, 4, 0, 9 , BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 9, 0, 3, 11, 0, 9, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 4, 0, 9, 9, 0, 11, BRICKS_PRISMARINE, false);
-            this.setBlockState(selector, BRICKS_PRISMARINE, 5, 0, 8, box);
-            this.setBlockState(selector, BRICKS_PRISMARINE, 8, 0, 8, box);
-            this.setBlockState(selector, BRICKS_PRISMARINE, 10, 0, 10, box);
-            this.setBlockState(selector, BRICKS_PRISMARINE, 3, 0, 10, box);
-            this.fillWithBlocks(selector, box, 3, 0, 3, 3, 0, 7  , DARK_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 10, 0, 3, 10, 0, 7, DARK_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 6, 0, 10, 7, 0, 10, DARK_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 2, 0, 3, 4, 0, 9 , BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 9, 0, 3, 11, 0, 9, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 4, 0, 9, 9, 0, 11, BRICKS_PRISMARINE, false);
+            this.setBlockStateM(mut, selector, BRICKS_PRISMARINE, 5, 0, 8, box);
+            this.setBlockStateM(mut, selector, BRICKS_PRISMARINE, 8, 0, 8, box);
+            this.setBlockStateM(mut, selector, BRICKS_PRISMARINE, 10, 0, 10, box);
+            this.setBlockStateM(mut, selector, BRICKS_PRISMARINE, 3, 0, 10, box);
+            this.fillWithBlocks(mut, selector, box, 3, 0, 3, 3, 0, 7  , DARK_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 10, 0, 3, 10, 0, 7, DARK_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 6, 0, 10, 7, 0, 10, DARK_PRISMARINE, false);
 
             int xMin = 3;
 
             for(int i = 0; i < 2; ++i) {
                 for(int zMin = 2; zMin <= 8; zMin += 3) {
-                    this.fillWithBlocks(selector, box, xMin, 0, zMin, xMin, 2, zMin, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, xMin, 0, zMin, xMin, 2, zMin, BRICKS_PRISMARINE, false);
                 }
                 xMin = 10;
             }
 
-            this.fillWithBlocks(selector, box, 5, 0, 10, 5, 2, 10, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 8, 0, 10, 8, 2, 10, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 6, -1, 7, 7, -1, 8, DARK_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 5, 0, 10, 5, 2, 10, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 8, 0, 10, 8, 2, 10, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 6, -1, 7, 7, -1, 8, DARK_PRISMARINE, false);
             this.generateWaterBox(selector, box, 6, -1, 3, 7, -1, 4, false);
             this.spawnElder(world, box, 6, 1, 6);
             return true;
@@ -291,62 +292,61 @@ public class StructureOceanMonumentPieces {
             ChunkSelector selector = new ChunkSelector(world);
 
             if (this.mainDesign == 0) {
+                BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
                 int i;
                 for(i = 0; i < 4; ++i) {
-                    this.fillWithBlocks(selector, box, 10 - i, 3 - i, 20 - i, 12 + i, 3 - i, 20, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 10 - i, 3 - i, 20 - i, 12 + i, 3 - i, 20, BRICKS_PRISMARINE, false);
                 }
 
-                this.fillWithBlocks(selector, box, 7 , 0, 6 , 15, 0, 16, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 6 , 0, 6 , 6 , 3, 20, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 16, 0, 6 , 16, 3, 20, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 7 , 1, 7 , 7 , 1, 20, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 15, 1, 7 , 15, 1, 20, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 7 , 1, 6 , 9 , 3, 6 , BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 13, 1, 6 , 15, 3, 6 , BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 8 , 1, 7 , 9 , 1, 7 , BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 13, 1, 7 , 14, 1, 7 , BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 9 , 0, 5 , 13, 0, 5 , BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 10, 0, 7 , 12, 0, 7 , DARK_PRISMARINE  , false);
-                this.fillWithBlocks(selector, box, 8 , 0, 10, 8 , 0, 12, DARK_PRISMARINE  , false);
-                this.fillWithBlocks(selector, box, 14, 0, 10, 14, 0, 12, DARK_PRISMARINE  , false);
+                this.fillWithBlocks(mut, selector, box, 7 , 0, 6 , 15, 0, 16, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 6 , 0, 6 , 6 , 3, 20, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 16, 0, 6 , 16, 3, 20, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 7 , 1, 7 , 7 , 1, 20, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 15, 1, 7 , 15, 1, 20, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 7 , 1, 6 , 9 , 3, 6 , BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 13, 1, 6 , 15, 3, 6 , BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 8 , 1, 7 , 9 , 1, 7 , BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 13, 1, 7 , 14, 1, 7 , BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 9 , 0, 5 , 13, 0, 5 , BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 10, 0, 7 , 12, 0, 7 , DARK_PRISMARINE  , false);
+                this.fillWithBlocks(mut, selector, box, 8 , 0, 10, 8 , 0, 12, DARK_PRISMARINE  , false);
+                this.fillWithBlocks(mut, selector, box, 14, 0, 10, 14, 0, 12, DARK_PRISMARINE  , false);
 
                 for(i = 18; i >= 7; i -= 3) {
-                    this.setBlockState(selector, SEA_LANTERN, 6, 3, i, box);
-                    this.setBlockState(selector, SEA_LANTERN, 16, 3, i, box);
+                    this.setBlockStateM(mut, selector, SEA_LANTERN, 6, 3, i, box);
+                    this.setBlockStateM(mut, selector, SEA_LANTERN, 16, 3, i, box);
                 }
 
-                this.setBlockState(selector, SEA_LANTERN, 10, 0, 10, box);
-                this.setBlockState(selector, SEA_LANTERN, 12, 0, 10, box);
-                this.setBlockState(selector, SEA_LANTERN, 10, 0, 12, box);
-                this.setBlockState(selector, SEA_LANTERN, 12, 0, 12, box);
-                this.setBlockState(selector, SEA_LANTERN, 8, 3, 6, box);
-                this.setBlockState(selector, SEA_LANTERN, 14, 3, 6, box);
-                this.setBlockState(selector, BRICKS_PRISMARINE, 4, 2, 4, box);
-                this.setBlockState(selector, SEA_LANTERN, 4, 1, 4, box);
-                this.setBlockState(selector, BRICKS_PRISMARINE, 4, 0, 4, box);
-                this.setBlockState(selector, BRICKS_PRISMARINE, 18, 2, 4, box);
-                this.setBlockState(selector, SEA_LANTERN, 18, 1, 4, box);
-                this.setBlockState(selector, BRICKS_PRISMARINE, 18, 0, 4, box);
-                this.setBlockState(selector, BRICKS_PRISMARINE, 4, 2, 18, box);
-                this.setBlockState(selector, SEA_LANTERN, 4, 1, 18, box);
-                this.setBlockState(selector, BRICKS_PRISMARINE, 4, 0, 18, box);
-                this.setBlockState(selector, BRICKS_PRISMARINE, 18, 2, 18, box);
-                this.setBlockState(selector, SEA_LANTERN, 18, 1, 18, box);
-                this.setBlockState(selector, BRICKS_PRISMARINE, 18, 0, 18, box);
-                this.setBlockState(selector, BRICKS_PRISMARINE, 9, 7, 20, box);
-                this.setBlockState(selector, BRICKS_PRISMARINE, 13, 7, 20, box);
-                this.fillWithBlocks(selector, box, 6, 0, 21, 7, 4, 21, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 15, 0, 21, 16, 4, 21, BRICKS_PRISMARINE, false);
+                this.setBlockStateM(mut, selector, SEA_LANTERN, 10, 0, 10, box);
+                this.setBlockStateM(mut, selector, SEA_LANTERN, 12, 0, 10, box);
+                this.setBlockStateM(mut, selector, SEA_LANTERN, 10, 0, 12, box);
+                this.setBlockStateM(mut, selector, SEA_LANTERN, 12, 0, 12, box);
+                this.setBlockStateM(mut, selector, SEA_LANTERN, 8, 3, 6, box);
+                this.setBlockStateM(mut, selector, SEA_LANTERN, 14, 3, 6, box);
+                this.setBlockStateM(mut, selector, BRICKS_PRISMARINE, 4, 2, 4, box);
+                this.setBlockStateM(mut, selector, SEA_LANTERN, 4, 1, 4, box);
+                this.setBlockStateM(mut, selector, BRICKS_PRISMARINE, 4, 0, 4, box);
+                this.setBlockStateM(mut, selector, BRICKS_PRISMARINE, 18, 2, 4, box);
+                this.setBlockStateM(mut, selector, SEA_LANTERN, 18, 1, 4, box);
+                this.setBlockStateM(mut, selector, BRICKS_PRISMARINE, 18, 0, 4, box);
+                this.setBlockStateM(mut, selector, BRICKS_PRISMARINE, 4, 2, 18, box);
+                this.setBlockStateM(mut, selector, SEA_LANTERN, 4, 1, 18, box);
+                this.setBlockStateM(mut, selector, BRICKS_PRISMARINE, 4, 0, 18, box);
+                this.setBlockStateM(mut, selector, BRICKS_PRISMARINE, 18, 2, 18, box);
+                this.setBlockStateM(mut, selector, SEA_LANTERN, 18, 1, 18, box);
+                this.setBlockStateM(mut, selector, BRICKS_PRISMARINE, 18, 0, 18, box);
+                this.setBlockStateM(mut, selector, BRICKS_PRISMARINE, 9, 7, 20, box);
+                this.setBlockStateM(mut, selector, BRICKS_PRISMARINE, 13, 7, 20, box);
+                this.fillWithBlocks(mut, selector, box, 6, 0, 21, 7, 4, 21, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 15, 0, 21, 16, 4, 21, BRICKS_PRISMARINE, false);
                 this.spawnElder(world, box, 11, 2, 16);
             } else if (this.mainDesign == 1) {
-                this.fillWithBlocks(selector, box, 9, 3, 18, 13, 3, 20, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 9, 0, 18, 9, 2, 18, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 13, 0, 18, 13, 2, 18, BRICKS_PRISMARINE, false);
-                int dx = 9;
-//                int lvt_5_1_ = true;
-//                int lvt_6_1_ = true;
-
                 BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+
+                this.fillWithBlocks(mut, selector, box, 9, 3, 18, 13, 3, 20, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 9, 0, 18, 9, 2, 18, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 13, 0, 18, 13, 2, 18, BRICKS_PRISMARINE, false);
+                int dx = 9;
 
                 int i;
                 for(i = 0; i < 2; ++i) {
@@ -356,12 +356,12 @@ public class StructureOceanMonumentPieces {
                     dx = 13;
                 }
 
-                this.fillWithBlocks(selector, box, 7, 3, 7, 15, 3, 14, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 7, 3, 7, 15, 3, 14, BRICKS_PRISMARINE, false);
                 dx = 10;
 
                 for(i = 0; i < 2; ++i) {
-                    this.fillWithBlocks(selector, box, dx, 0, 10, dx, 6, 10, BRICKS_PRISMARINE, false);
-                    this.fillWithBlocks(selector, box, dx, 0, 12, dx, 6, 12, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, dx, 0, 10, dx, 6, 10, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, dx, 0, 12, dx, 6, 12, BRICKS_PRISMARINE, false);
 
                     this.setBlockStateM(mut, selector, SEA_LANTERN, dx, 0, 10, box);
                     this.setBlockStateM(mut, selector, SEA_LANTERN, dx, 0, 12, box);
@@ -373,13 +373,13 @@ public class StructureOceanMonumentPieces {
                 dx = 8;
 
                 for(i = 0; i < 2; ++i) {
-                    this.fillWithBlocks(selector, box, dx, 0, 7, dx, 2, 7, BRICKS_PRISMARINE, false);
-                    this.fillWithBlocks(selector, box, dx, 0, 14, dx, 2, 14, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, dx, 0, 7, dx, 2, 7, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, dx, 0, 14, dx, 2, 14, BRICKS_PRISMARINE, false);
                     dx = 14;
                 }
 
-                this.fillWithBlocks(selector, box, 8, 3, 8, 8, 3, 13, DARK_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 14, 3, 8, 14, 3, 13, DARK_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 8, 3, 8, 8, 3, 13, DARK_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 14, 3, 8, 14, 3, 13, DARK_PRISMARINE, false);
 
                 this.spawnElder(world, box, 11, 5, 13);
             }
@@ -398,14 +398,15 @@ public class StructureOceanMonumentPieces {
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
             ChunkSelector selector = new ChunkSelector(world);
+            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
 
             this.generateBoxOnFillOnly(selector, box, 1, 8, 0, 14, 8, 14, ROUGH_PRISMARINE);
             //int lvt_4_1_ = true;
             IBlockState state = BRICKS_PRISMARINE;
-            this.fillWithBlocks(selector, box, 0 , 7, 0 , 0 , 7, 15, state, false);
-            this.fillWithBlocks(selector, box, 15, 7, 0 , 15, 7, 15, state, false);
-            this.fillWithBlocks(selector, box, 1 , 7, 0 , 15, 7, 0 , state, false);
-            this.fillWithBlocks(selector, box, 1 , 7, 15, 14, 7, 15, state, false);
+            this.fillWithBlocks(mut, selector, box, 0 , 7, 0 , 0 , 7, 15, state, false);
+            this.fillWithBlocks(mut, selector, box, 15, 7, 0 , 15, 7, 15, state, false);
+            this.fillWithBlocks(mut, selector, box, 1 , 7, 0 , 15, 7, 0 , state, false);
+            this.fillWithBlocks(mut, selector, box, 1 , 7, 15, 14, 7, 15, state, false);
 
             int yMin;
             for(yMin = 1; yMin <= 6; ++yMin) {
@@ -415,55 +416,55 @@ public class StructureOceanMonumentPieces {
                 }
 
                 for(int xMin = 0; xMin <= 15; xMin += 15) {
-                    this.fillWithBlocks(selector, box, xMin, yMin, 0 , xMin, yMin, 1 , state, false);
-                    this.fillWithBlocks(selector, box, xMin, yMin, 6 , xMin, yMin, 9 , state, false);
-                    this.fillWithBlocks(selector, box, xMin, yMin, 14, xMin, yMin, 15, state, false);
+                    this.fillWithBlocks(mut, selector, box, xMin, yMin, 0 , xMin, yMin, 1 , state, false);
+                    this.fillWithBlocks(mut, selector, box, xMin, yMin, 6 , xMin, yMin, 9 , state, false);
+                    this.fillWithBlocks(mut, selector, box, xMin, yMin, 14, xMin, yMin, 15, state, false);
                 }
 
-                this.fillWithBlocks(selector, box, 1 , yMin, 0 , 1 , yMin, 0 , state, false);
-                this.fillWithBlocks(selector, box, 6 , yMin, 0 , 9 , yMin, 0 , state, false);
-                this.fillWithBlocks(selector, box, 14, yMin, 0 , 14, yMin, 0 , state, false);
-                this.fillWithBlocks(selector, box, 1 , yMin, 15, 14, yMin, 15, state, false);
+                this.fillWithBlocks(mut, selector, box, 1 , yMin, 0 , 1 , yMin, 0 , state, false);
+                this.fillWithBlocks(mut, selector, box, 6 , yMin, 0 , 9 , yMin, 0 , state, false);
+                this.fillWithBlocks(mut, selector, box, 14, yMin, 0 , 14, yMin, 0 , state, false);
+                this.fillWithBlocks(mut, selector, box, 1 , yMin, 15, 14, yMin, 15, state, false);
             }
 
-            this.fillWithBlocks(selector, box, 6, 3, 6, 9, 6, 9, DARK_PRISMARINE                    , false);
-            this.fillWithBlocks(selector, box, 7, 4, 7, 8, 5, 8, Blocks.GOLD_BLOCK.getDefaultState(), false);
+            this.fillWithBlocks(mut, selector, box, 6, 3, 6, 9, 6, 9, DARK_PRISMARINE                    , false);
+            this.fillWithBlocks(mut, selector, box, 7, 4, 7, 8, 5, 8, Blocks.GOLD_BLOCK.getDefaultState(), false);
 
             for(yMin = 3; yMin <= 6; yMin += 3) {
                 for(int xMin = 6; xMin <= 9; xMin += 3) {
-                    this.setBlockState(selector, SEA_LANTERN, xMin, yMin, 6, box);
-                    this.setBlockState(selector, SEA_LANTERN, xMin, yMin, 9, box);
+                    this.setBlockStateM(mut, selector, SEA_LANTERN, xMin, yMin, 6, box);
+                    this.setBlockStateM(mut, selector, SEA_LANTERN, xMin, yMin, 9, box);
                 }
             }
 
-            this.fillWithBlocks(selector, box, 5 , 1, 6 , 5 , 2, 6 , BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 5 , 1, 9 , 5 , 2, 9 , BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 10, 1, 6 , 10, 2, 6 , BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 10, 1, 9 , 10, 2, 9 , BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 6 , 1, 5 , 6 , 2, 5 , BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 9 , 1, 5 , 9 , 2, 5 , BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 6 , 1, 10, 6 , 2, 10, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 9 , 1, 10, 9 , 2, 10, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 5 , 2, 5 , 5 , 6, 5 , BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 5 , 2, 10, 5 , 6, 10, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 10, 2, 5 , 10, 6, 5 , BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 10, 2, 10, 10, 6, 10, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 5 , 7, 1 , 5 , 7, 6 , BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 10, 7, 1 , 10, 7, 6 , BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 5 , 7, 9 , 5 , 7, 14, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 10, 7, 9 , 10, 7, 14, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 1 , 7, 5 , 6 , 7, 5 , BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 1 , 7, 10, 6 , 7, 10, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 9 , 7, 5 , 14, 7, 5 , BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 9 , 7, 10, 14, 7, 10, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 2 , 1, 2 , 2 , 1, 3 , BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 3 , 1, 2 , 3 , 1, 2 , BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 13, 1, 2 , 13, 1, 3 , BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 12, 1, 2 , 12, 1, 2 , BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 2 , 1, 12, 2 , 1, 13, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 3 , 1, 13, 3 , 1, 13, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 13, 1, 12, 13, 1, 13, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 12, 1, 13, 12, 1, 13, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 5 , 1, 6 , 5 , 2, 6 , BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 5 , 1, 9 , 5 , 2, 9 , BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 10, 1, 6 , 10, 2, 6 , BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 10, 1, 9 , 10, 2, 9 , BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 6 , 1, 5 , 6 , 2, 5 , BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 9 , 1, 5 , 9 , 2, 5 , BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 6 , 1, 10, 6 , 2, 10, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 9 , 1, 10, 9 , 2, 10, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 5 , 2, 5 , 5 , 6, 5 , BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 5 , 2, 10, 5 , 6, 10, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 10, 2, 5 , 10, 6, 5 , BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 10, 2, 10, 10, 6, 10, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 5 , 7, 1 , 5 , 7, 6 , BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 10, 7, 1 , 10, 7, 6 , BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 5 , 7, 9 , 5 , 7, 14, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 10, 7, 9 , 10, 7, 14, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 1 , 7, 5 , 6 , 7, 5 , BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 1 , 7, 10, 6 , 7, 10, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 9 , 7, 5 , 14, 7, 5 , BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 9 , 7, 10, 14, 7, 10, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 2 , 1, 2 , 2 , 1, 3 , BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 3 , 1, 2 , 3 , 1, 2 , BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 13, 1, 2 , 13, 1, 3 , BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 12, 1, 2 , 12, 1, 2 , BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 2 , 1, 12, 2 , 1, 13, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 3 , 1, 13, 3 , 1, 13, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 13, 1, 12, 13, 1, 13, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 12, 1, 13, 12, 1, 13, BRICKS_PRISMARINE, false);
             return true;
         }
     }
@@ -479,14 +480,15 @@ public class StructureOceanMonumentPieces {
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
             ChunkSelector selector = new ChunkSelector(world);
+            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
 
             RoomDefinition room1 = this.roomDefinition.connections[EnumFacing.NORTH.getIndex()];
             RoomDefinition room2 = this.roomDefinition;
             RoomDefinition room3 = room1.connections[EnumFacing.UP.getIndex()];
             RoomDefinition room4 = room2.connections[EnumFacing.UP.getIndex()];
             if (this.roomDefinition.index / 25 > 0) {
-                this.generateDefaultFloor(selector, box, 0, 8, room1.hasOpening[EnumFacing.DOWN.getIndex()]);
-                this.generateDefaultFloor(selector, box, 0, 0, room2.hasOpening[EnumFacing.DOWN.getIndex()]);
+                this.generateDefaultFloor(mut, selector, box, 0, 8, room1.hasOpening[EnumFacing.DOWN.getIndex()]);
+                this.generateDefaultFloor(mut, selector, box, 0, 0, room2.hasOpening[EnumFacing.DOWN.getIndex()]);
             }
 
             if (room4.connections[EnumFacing.UP.getIndex()] == null) {
@@ -499,16 +501,17 @@ public class StructureOceanMonumentPieces {
 
             int i;
             IBlockState state;
+
             for(i = 1; i <= 7; ++i) {
                 state = BRICKS_PRISMARINE;
                 if (i == 2 || i == 6) {
                     state = ROUGH_PRISMARINE;
                 }
 
-                this.fillWithBlocks(selector, box, 0, i, 0 , 0, i, 15, state, false);
-                this.fillWithBlocks(selector, box, 7, i, 0 , 7, i, 15, state, false);
-                this.fillWithBlocks(selector, box, 1, i, 0 , 6, i, 0 , state, false);
-                this.fillWithBlocks(selector, box, 1, i, 15, 6, i, 15, state, false);
+                this.fillWithBlocks(mut, selector, box, 0, i, 0 , 0, i, 15, state, false);
+                this.fillWithBlocks(mut, selector, box, 7, i, 0 , 7, i, 15, state, false);
+                this.fillWithBlocks(mut, selector, box, 1, i, 0 , 6, i, 0 , state, false);
+                this.fillWithBlocks(mut, selector, box, 1, i, 15, 6, i, 15, state, false);
             }
 
             for(i = 1; i <= 7; ++i) {
@@ -517,7 +520,7 @@ public class StructureOceanMonumentPieces {
                     state = SEA_LANTERN;
                 }
 
-                this.fillWithBlocks(selector, box, 3, i, 7, 4, i, 8, state, false);
+                this.fillWithBlocks(mut, selector, box, 3, i, 7, 4, i, 8, state, false);
             }
 
             if (room2.hasOpening[EnumFacing.SOUTH.getIndex()]) {
@@ -550,16 +553,16 @@ public class StructureOceanMonumentPieces {
 
             if (room4.hasOpening[EnumFacing.EAST.getIndex()]) {
                 this.generateWaterBox(selector, box, 7, 5, 3, 7, 6, 4, false);
-                this.fillWithBlocks(selector, box, 5, 4, 2, 6, 4, 5, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 6, 1, 2, 6, 3, 2, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 6, 1, 5, 6, 3, 5, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 5, 4, 2, 6, 4, 5, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 6, 1, 2, 6, 3, 2, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 6, 1, 5, 6, 3, 5, BRICKS_PRISMARINE, false);
             }
 
             if (room4.hasOpening[EnumFacing.WEST.getIndex()]) {
                 this.generateWaterBox(selector, box, 0, 5, 3, 0, 6, 4, false);
-                this.fillWithBlocks(selector, box, 1, 4, 2, 2, 4, 5, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 1, 1, 2, 1, 3, 2, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 1, 1, 5, 1, 3, 5, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 1, 4, 2, 2, 4, 5, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 1, 1, 2, 1, 3, 2, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 1, 1, 5, 1, 3, 5, BRICKS_PRISMARINE, false);
             }
 
             if (room3.hasOpening[EnumFacing.NORTH.getIndex()]) {
@@ -568,16 +571,16 @@ public class StructureOceanMonumentPieces {
 
             if (room3.hasOpening[EnumFacing.WEST.getIndex()]) {
                 this.generateWaterBox(selector, box, 0, 5, 11, 0, 6, 12, false);
-                this.fillWithBlocks(selector, box, 1, 4, 10, 2, 4, 13, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 1, 1, 10, 1, 3, 10, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 1, 1, 13, 1, 3, 13, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 1, 4, 10, 2, 4, 13, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 1, 1, 10, 1, 3, 10, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 1, 1, 13, 1, 3, 13, BRICKS_PRISMARINE, false);
             }
 
             if (room3.hasOpening[EnumFacing.EAST.getIndex()]) {
                 this.generateWaterBox(selector, box, 7, 5, 11, 7, 6, 12, false);
-                this.fillWithBlocks(selector, box, 5, 4, 10, 6, 4, 13, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 6, 1, 10, 6, 3, 10, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 6, 1, 13, 6, 3, 13, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 5, 4, 10, 6, 4, 13, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 6, 1, 10, 6, 3, 10, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 6, 1, 13, 6, 3, 13, BRICKS_PRISMARINE, false);
             }
 
             return true;
@@ -594,14 +597,15 @@ public class StructureOceanMonumentPieces {
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
             ChunkSelector selector = new ChunkSelector(world);
+            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
 
             RoomDefinition room1 = this.roomDefinition.connections[EnumFacing.EAST.getIndex()];
             RoomDefinition room2 = this.roomDefinition;
             RoomDefinition room3 = room2.connections[EnumFacing.UP.getIndex()];
             RoomDefinition room4 = room1.connections[EnumFacing.UP.getIndex()];
             if (this.roomDefinition.index / 25 > 0) {
-                this.generateDefaultFloor(selector, box, 8, 0, room1.hasOpening[EnumFacing.DOWN.getIndex()]);
-                this.generateDefaultFloor(selector, box, 0, 0, room2.hasOpening[EnumFacing.DOWN.getIndex()]);
+                this.generateDefaultFloor(mut, selector, box, 8, 0, room1.hasOpening[EnumFacing.DOWN.getIndex()]);
+                this.generateDefaultFloor(mut, selector, box, 0, 0, room2.hasOpening[EnumFacing.DOWN.getIndex()]);
             }
 
             if (room3.connections[EnumFacing.UP.getIndex()] == null) {
@@ -618,35 +622,35 @@ public class StructureOceanMonumentPieces {
                     state = ROUGH_PRISMARINE;
                 }
 
-                this.fillWithBlocks(selector, box, 0 , i, 0, 0 , i, 7, state, false);
-                this.fillWithBlocks(selector, box, 15, i, 0, 15, i, 7, state, false);
-                this.fillWithBlocks(selector, box, 1 , i, 0, 15, i, 0, state, false);
-                this.fillWithBlocks(selector, box, 1 , i, 7, 14, i, 7, state, false);
+                this.fillWithBlocks(mut, selector, box, 0 , i, 0, 0 , i, 7, state, false);
+                this.fillWithBlocks(mut, selector, box, 15, i, 0, 15, i, 7, state, false);
+                this.fillWithBlocks(mut, selector, box, 1 , i, 0, 15, i, 0, state, false);
+                this.fillWithBlocks(mut, selector, box, 1 , i, 7, 14, i, 7, state, false);
             }
 
-            this.fillWithBlocks(selector, box, 2 , 1, 3, 2 , 7, 4, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 3 , 1, 2, 4 , 7, 2, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 3 , 1, 5, 4 , 7, 5, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 13, 1, 3, 13, 7, 4, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 11, 1, 2, 12, 7, 2, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 11, 1, 5, 12, 7, 5, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 5 , 1, 3, 5 , 3, 4, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 10, 1, 3, 10, 3, 4, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 5 , 7, 2, 10, 7, 5, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 5 , 5, 2, 5 , 7, 2, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 10, 5, 2, 10, 7, 2, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 5 , 5, 5, 5 , 7, 5, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 10, 5, 5, 10, 7, 5, BRICKS_PRISMARINE, false);
-            this.setBlockState(selector, BRICKS_PRISMARINE, 6, 6, 2, box);
-            this.setBlockState(selector, BRICKS_PRISMARINE, 9, 6, 2, box);
-            this.setBlockState(selector, BRICKS_PRISMARINE, 6, 6, 5, box);
-            this.setBlockState(selector, BRICKS_PRISMARINE, 9, 6, 5, box);
-            this.fillWithBlocks(selector, box, 5, 4, 3, 6 , 4, 4, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 9, 4, 3, 10, 4, 4, BRICKS_PRISMARINE, false);
-            this.setBlockState(selector, SEA_LANTERN, 5, 4, 2, box);
-            this.setBlockState(selector, SEA_LANTERN, 5, 4, 5, box);
-            this.setBlockState(selector, SEA_LANTERN, 10, 4, 2, box);
-            this.setBlockState(selector, SEA_LANTERN, 10, 4, 5, box);
+            this.fillWithBlocks(mut, selector, box, 2 , 1, 3, 2 , 7, 4, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 3 , 1, 2, 4 , 7, 2, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 3 , 1, 5, 4 , 7, 5, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 13, 1, 3, 13, 7, 4, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 11, 1, 2, 12, 7, 2, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 11, 1, 5, 12, 7, 5, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 5 , 1, 3, 5 , 3, 4, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 10, 1, 3, 10, 3, 4, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 5 , 7, 2, 10, 7, 5, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 5 , 5, 2, 5 , 7, 2, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 10, 5, 2, 10, 7, 2, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 5 , 5, 5, 5 , 7, 5, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 10, 5, 5, 10, 7, 5, BRICKS_PRISMARINE, false);
+            this.setBlockStateM(mut, selector, BRICKS_PRISMARINE, 6, 6, 2, box);
+            this.setBlockStateM(mut, selector, BRICKS_PRISMARINE, 9, 6, 2, box);
+            this.setBlockStateM(mut, selector, BRICKS_PRISMARINE, 6, 6, 5, box);
+            this.setBlockStateM(mut, selector, BRICKS_PRISMARINE, 9, 6, 5, box);
+            this.fillWithBlocks(mut, selector, box, 5, 4, 3, 6 , 4, 4, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 9, 4, 3, 10, 4, 4, BRICKS_PRISMARINE, false);
+            this.setBlockStateM(mut, selector, SEA_LANTERN, 5, 4, 2, box);
+            this.setBlockStateM(mut, selector, SEA_LANTERN, 5, 4, 5, box);
+            this.setBlockStateM(mut, selector, SEA_LANTERN, 10, 4, 2, box);
+            this.setBlockStateM(mut, selector, SEA_LANTERN, 10, 4, 5, box);
             if (room2.hasOpening[EnumFacing.SOUTH.getIndex()]) {
                 this.generateWaterBox(selector, box, 3, 1, 0, 4, 2, 0, false);
             }
@@ -708,12 +712,13 @@ public class StructureOceanMonumentPieces {
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
             ChunkSelector selector = new ChunkSelector(world);
+            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
 
             RoomDefinition room1 = this.roomDefinition.connections[EnumFacing.NORTH.getIndex()];
             RoomDefinition room2 = this.roomDefinition;
             if (this.roomDefinition.index / 25 > 0) {
-                this.generateDefaultFloor(selector, box, 0, 8, room1.hasOpening[EnumFacing.DOWN.getIndex()]);
-                this.generateDefaultFloor(selector, box, 0, 0, room2.hasOpening[EnumFacing.DOWN.getIndex()]);
+                this.generateDefaultFloor(mut, selector, box, 0, 8, room1.hasOpening[EnumFacing.DOWN.getIndex()]);
+                this.generateDefaultFloor(mut, selector, box, 0, 0, room2.hasOpening[EnumFacing.DOWN.getIndex()]);
             }
 
             if (room2.connections[EnumFacing.UP.getIndex()] == null) {
@@ -724,42 +729,42 @@ public class StructureOceanMonumentPieces {
                 this.generateBoxOnFillOnly(selector, box, 1, 4, 8, 6, 4, 14, ROUGH_PRISMARINE);
             }
 
-            this.fillWithBlocks(selector, box, 0, 3, 0 , 0, 3, 15, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 7, 3, 0 , 7, 3, 15, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 1, 3, 0 , 7, 3, 0 , BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 1, 3, 15, 6, 3, 15, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 0, 2, 0 , 0, 2, 15, ROUGH_PRISMARINE , false);
-            this.fillWithBlocks(selector, box, 7, 2, 0 , 7, 2, 15, ROUGH_PRISMARINE , false);
-            this.fillWithBlocks(selector, box, 1, 2, 0 , 7, 2, 0 , ROUGH_PRISMARINE , false);
-            this.fillWithBlocks(selector, box, 1, 2, 15, 6, 2, 15, ROUGH_PRISMARINE , false);
-            this.fillWithBlocks(selector, box, 0, 1, 0 , 0, 1, 15, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 7, 1, 0 , 7, 1, 15, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 1, 1, 0 , 7, 1, 0 , BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 1, 1, 15, 6, 1, 15, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 1, 1, 1 , 1, 1, 2 , BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 6, 1, 1 , 6, 1, 2 , BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 1, 3, 1 , 1, 3, 2 , BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 6, 3, 1 , 6, 3, 2 , BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 1, 1, 13, 1, 1, 14, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 6, 1, 13, 6, 1, 14, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 1, 3, 13, 1, 3, 14, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 6, 3, 13, 6, 3, 14, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 2, 1, 6 , 2, 3, 6 , BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 5, 1, 6 , 5, 3, 6 , BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 2, 1, 9 , 2, 3, 9 , BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 5, 1, 9 , 5, 3, 9 , BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 3, 2, 6 , 4, 2, 6 , BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 3, 2, 9 , 4, 2, 9 , BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 2, 2, 7 , 2, 2, 8 , BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 5, 2, 7 , 5, 2, 8 , BRICKS_PRISMARINE, false);
-            this.setBlockState(selector, SEA_LANTERN, 2, 2, 5, box);
-            this.setBlockState(selector, SEA_LANTERN, 5, 2, 5, box);
-            this.setBlockState(selector, SEA_LANTERN, 2, 2, 10, box);
-            this.setBlockState(selector, SEA_LANTERN, 5, 2, 10, box);
-            this.setBlockState(selector, BRICKS_PRISMARINE, 2, 3, 5, box);
-            this.setBlockState(selector, BRICKS_PRISMARINE, 5, 3, 5, box);
-            this.setBlockState(selector, BRICKS_PRISMARINE, 2, 3, 10, box);
-            this.setBlockState(selector, BRICKS_PRISMARINE, 5, 3, 10, box);
+            this.fillWithBlocks(mut, selector, box, 0, 3, 0 , 0, 3, 15, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 7, 3, 0 , 7, 3, 15, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 1, 3, 0 , 7, 3, 0 , BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 1, 3, 15, 6, 3, 15, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 0, 2, 0 , 0, 2, 15, ROUGH_PRISMARINE , false);
+            this.fillWithBlocks(mut, selector, box, 7, 2, 0 , 7, 2, 15, ROUGH_PRISMARINE , false);
+            this.fillWithBlocks(mut, selector, box, 1, 2, 0 , 7, 2, 0 , ROUGH_PRISMARINE , false);
+            this.fillWithBlocks(mut, selector, box, 1, 2, 15, 6, 2, 15, ROUGH_PRISMARINE , false);
+            this.fillWithBlocks(mut, selector, box, 0, 1, 0 , 0, 1, 15, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 7, 1, 0 , 7, 1, 15, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 1, 1, 0 , 7, 1, 0 , BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 1, 1, 15, 6, 1, 15, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 1, 1, 1 , 1, 1, 2 , BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 6, 1, 1 , 6, 1, 2 , BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 1, 3, 1 , 1, 3, 2 , BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 6, 3, 1 , 6, 3, 2 , BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 1, 1, 13, 1, 1, 14, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 6, 1, 13, 6, 1, 14, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 1, 3, 13, 1, 3, 14, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 6, 3, 13, 6, 3, 14, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 2, 1, 6 , 2, 3, 6 , BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 5, 1, 6 , 5, 3, 6 , BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 2, 1, 9 , 2, 3, 9 , BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 5, 1, 9 , 5, 3, 9 , BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 3, 2, 6 , 4, 2, 6 , BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 3, 2, 9 , 4, 2, 9 , BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 2, 2, 7 , 2, 2, 8 , BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 5, 2, 7 , 5, 2, 8 , BRICKS_PRISMARINE, false);
+            this.setBlockStateM(mut, selector, SEA_LANTERN, 2, 2, 5, box);
+            this.setBlockStateM(mut, selector, SEA_LANTERN, 5, 2, 5, box);
+            this.setBlockStateM(mut, selector, SEA_LANTERN, 2, 2, 10, box);
+            this.setBlockStateM(mut, selector, SEA_LANTERN, 5, 2, 10, box);
+            this.setBlockStateM(mut, selector, BRICKS_PRISMARINE, 2, 3, 5, box);
+            this.setBlockStateM(mut, selector, BRICKS_PRISMARINE, 5, 3, 5, box);
+            this.setBlockStateM(mut, selector, BRICKS_PRISMARINE, 2, 3, 10, box);
+            this.setBlockStateM(mut, selector, BRICKS_PRISMARINE, 5, 3, 10, box);
 
             if (room2.hasOpening[EnumFacing.SOUTH.getIndex()]) {
                 this.generateWaterBox(selector, box, 3, 1, 0, 4, 2, 0, false);
@@ -799,13 +804,14 @@ public class StructureOceanMonumentPieces {
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
             ChunkSelector selector = new ChunkSelector(world);
+            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
 
             RoomDefinition room1 = this.roomDefinition.connections[EnumFacing.EAST.getIndex()];
             RoomDefinition room2 = this.roomDefinition;
 
             if (this.roomDefinition.index / 25 > 0) {
-                this.generateDefaultFloor(selector, box, 8, 0, room1.hasOpening[EnumFacing.DOWN.getIndex()]);
-                this.generateDefaultFloor(selector, box, 0, 0, room2.hasOpening[EnumFacing.DOWN.getIndex()]);
+                this.generateDefaultFloor(mut, selector, box, 8, 0, room1.hasOpening[EnumFacing.DOWN.getIndex()]);
+                this.generateDefaultFloor(mut, selector, box, 0, 0, room2.hasOpening[EnumFacing.DOWN.getIndex()]);
             }
 
             if (room2.connections[EnumFacing.UP.getIndex()] == null) {
@@ -816,23 +822,23 @@ public class StructureOceanMonumentPieces {
                 this.generateBoxOnFillOnly(selector, box, 8, 4, 1, 14, 4, 6, ROUGH_PRISMARINE);
             }
 
-            this.fillWithBlocks(selector, box, 0 , 3, 0, 0 , 3, 7, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 15, 3, 0, 15, 3, 7, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 1 , 3, 0, 15, 3, 0, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 1 , 3, 7, 14, 3, 7, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 0 , 2, 0, 0 , 2, 7, ROUGH_PRISMARINE , false);
-            this.fillWithBlocks(selector, box, 15, 2, 0, 15, 2, 7, ROUGH_PRISMARINE , false);
-            this.fillWithBlocks(selector, box, 1 , 2, 0, 15, 2, 0, ROUGH_PRISMARINE , false);
-            this.fillWithBlocks(selector, box, 1 , 2, 7, 14, 2, 7, ROUGH_PRISMARINE , false);
-            this.fillWithBlocks(selector, box, 0 , 1, 0, 0 , 1, 7, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 15, 1, 0, 15, 1, 7, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 1 , 1, 0, 15, 1, 0, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 1 , 1, 7, 14, 1, 7, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 5 , 1, 0, 10, 1, 4, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 6 , 2, 0, 9 , 2, 3, ROUGH_PRISMARINE , false);
-            this.fillWithBlocks(selector, box, 5 , 3, 0, 10, 3, 4, BRICKS_PRISMARINE, false);
-            this.setBlockState(selector, SEA_LANTERN, 6, 2, 3, box);
-            this.setBlockState(selector, SEA_LANTERN, 9, 2, 3, box);
+            this.fillWithBlocks(mut, selector, box, 0 , 3, 0, 0 , 3, 7, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 15, 3, 0, 15, 3, 7, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 1 , 3, 0, 15, 3, 0, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 1 , 3, 7, 14, 3, 7, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 0 , 2, 0, 0 , 2, 7, ROUGH_PRISMARINE , false);
+            this.fillWithBlocks(mut, selector, box, 15, 2, 0, 15, 2, 7, ROUGH_PRISMARINE , false);
+            this.fillWithBlocks(mut, selector, box, 1 , 2, 0, 15, 2, 0, ROUGH_PRISMARINE , false);
+            this.fillWithBlocks(mut, selector, box, 1 , 2, 7, 14, 2, 7, ROUGH_PRISMARINE , false);
+            this.fillWithBlocks(mut, selector, box, 0 , 1, 0, 0 , 1, 7, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 15, 1, 0, 15, 1, 7, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 1 , 1, 0, 15, 1, 0, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 1 , 1, 7, 14, 1, 7, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 5 , 1, 0, 10, 1, 4, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 6 , 2, 0, 9 , 2, 3, ROUGH_PRISMARINE , false);
+            this.fillWithBlocks(mut, selector, box, 5 , 3, 0, 10, 3, 4, BRICKS_PRISMARINE, false);
+            this.setBlockStateM(mut, selector, SEA_LANTERN, 6, 2, 3, box);
+            this.setBlockStateM(mut, selector, SEA_LANTERN, 9, 2, 3, box);
 
             if (room2.hasOpening[EnumFacing.SOUTH.getIndex()]) {
                 this.generateWaterBox(selector, box, 3, 1, 0, 4, 2, 0, false);
@@ -872,9 +878,10 @@ public class StructureOceanMonumentPieces {
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
             ChunkSelector selector = new ChunkSelector(world);
+            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
 
             if (this.roomDefinition.index / 25 > 0) {
-                this.generateDefaultFloor(selector, box, 0, 0, this.roomDefinition.hasOpening[EnumFacing.DOWN.getIndex()]);
+                this.generateDefaultFloor(mut, selector, box, 0, 0, this.roomDefinition.hasOpening[EnumFacing.DOWN.getIndex()]);
             }
 
             RoomDefinition room = this.roomDefinition.connections[EnumFacing.UP.getIndex()];
@@ -882,62 +889,61 @@ public class StructureOceanMonumentPieces {
                 this.generateBoxOnFillOnly(selector, box, 1, 8, 1, 6, 8, 6, ROUGH_PRISMARINE);
             }
 
-            this.fillWithBlocks(selector, box, 0, 4, 0, 0, 4, 7, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 7, 4, 0, 7, 4, 7, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 1, 4, 0, 6, 4, 0, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 1, 4, 7, 6, 4, 7, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 2, 4, 1, 2, 4, 2, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 1, 4, 2, 1, 4, 2, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 5, 4, 1, 5, 4, 2, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 6, 4, 2, 6, 4, 2, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 2, 4, 5, 2, 4, 6, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 1, 4, 5, 1, 4, 5, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 5, 4, 5, 5, 4, 6, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 6, 4, 5, 6, 4, 5, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 0, 4, 0, 0, 4, 7, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 7, 4, 0, 7, 4, 7, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 1, 4, 0, 6, 4, 0, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 1, 4, 7, 6, 4, 7, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 2, 4, 1, 2, 4, 2, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 1, 4, 2, 1, 4, 2, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 5, 4, 1, 5, 4, 2, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 6, 4, 2, 6, 4, 2, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 2, 4, 5, 2, 4, 6, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 1, 4, 5, 1, 4, 5, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 5, 4, 5, 5, 4, 6, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 6, 4, 5, 6, 4, 5, BRICKS_PRISMARINE, false);
 
             RoomDefinition room2 = this.roomDefinition;
 
             for(int i = 1; i <= 5; i += 4) {
                 int zMin = 0;
                 if (room2.hasOpening[EnumFacing.SOUTH.getIndex()]) {
-                    this.fillWithBlocks(selector, box, 2, i, zMin, 2, i + 2, zMin, BRICKS_PRISMARINE, false);
-                    this.fillWithBlocks(selector, box, 5, i, zMin, 5, i + 2, zMin, BRICKS_PRISMARINE, false);
-                    this.fillWithBlocks(selector, box, 3, i + 2, zMin, 4, i + 2, zMin, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 2, i, zMin, 2, i + 2, zMin, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 5, i, zMin, 5, i + 2, zMin, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 3, i + 2, zMin, 4, i + 2, zMin, BRICKS_PRISMARINE, false);
                 } else {
-                    this.fillWithBlocks(selector, box, 0, i, zMin, 7, i + 2, zMin, BRICKS_PRISMARINE, false);
-                    this.fillWithBlocks(selector, box, 0, i + 1, zMin, 7, i + 1, zMin, ROUGH_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 0, i, zMin, 7, i + 2, zMin, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 0, i + 1, zMin, 7, i + 1, zMin, ROUGH_PRISMARINE, false);
                 }
 
                 zMin = 7;
                 if (room2.hasOpening[EnumFacing.NORTH.getIndex()]) {
-                    this.fillWithBlocks(selector, box, 2, i, zMin, 2, i + 2, zMin, BRICKS_PRISMARINE, false);
-                    this.fillWithBlocks(selector, box, 5, i, zMin, 5, i + 2, zMin, BRICKS_PRISMARINE, false);
-                    this.fillWithBlocks(selector, box, 3, i + 2, zMin, 4, i + 2, zMin, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 2, i, zMin, 2, i + 2, zMin, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 5, i, zMin, 5, i + 2, zMin, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 3, i + 2, zMin, 4, i + 2, zMin, BRICKS_PRISMARINE, false);
                 } else {
-                    this.fillWithBlocks(selector, box, 0, i, zMin, 7, i + 2, zMin, BRICKS_PRISMARINE, false);
-                    this.fillWithBlocks(selector, box, 0, i + 1, zMin, 7, i + 1, zMin, ROUGH_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 0, i, zMin, 7, i + 2, zMin, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 0, i + 1, zMin, 7, i + 1, zMin, ROUGH_PRISMARINE, false);
                 }
 
                 int xMin = 0;
                 if (room2.hasOpening[EnumFacing.WEST.getIndex()]) {
-                    this.fillWithBlocks(selector, box, xMin, i, 2, xMin, i + 2, 2, BRICKS_PRISMARINE, false);
-                    this.fillWithBlocks(selector, box, xMin, i, 5, xMin, i + 2, 5, BRICKS_PRISMARINE, false);
-                    this.fillWithBlocks(selector, box, xMin, i + 2, 3, xMin, i + 2, 4, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, xMin, i, 2, xMin, i + 2, 2, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, xMin, i, 5, xMin, i + 2, 5, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, xMin, i + 2, 3, xMin, i + 2, 4, BRICKS_PRISMARINE, false);
                 } else {
-                    this.fillWithBlocks(selector, box, xMin, i, 0, xMin, i + 2, 7, BRICKS_PRISMARINE, false);
-                    this.fillWithBlocks(selector, box, xMin, i + 1, 0, xMin, i + 1, 7, ROUGH_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, xMin, i, 0, xMin, i + 2, 7, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, xMin, i + 1, 0, xMin, i + 1, 7, ROUGH_PRISMARINE, false);
                 }
 
                 xMin = 7;
                 if (room2.hasOpening[EnumFacing.EAST.getIndex()]) {
-                    this.fillWithBlocks(selector, box, xMin, i, 2, xMin, i + 2, 2, BRICKS_PRISMARINE, false);
-                    this.fillWithBlocks(selector, box, xMin, i, 5, xMin, i + 2, 5, BRICKS_PRISMARINE, false);
-                    this.fillWithBlocks(selector, box, xMin, i + 2, 3, xMin, i + 2, 4, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, xMin, i, 2, xMin, i + 2, 2, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, xMin, i, 5, xMin, i + 2, 5, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, xMin, i + 2, 3, xMin, i + 2, 4, BRICKS_PRISMARINE, false);
                 } else {
-                    this.fillWithBlocks(selector, box, xMin, i, 0, xMin, i + 2, 7, BRICKS_PRISMARINE, false);
-                    this.fillWithBlocks(selector, box, xMin, i + 1, 0, xMin, i + 1, 7, ROUGH_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, xMin, i, 0, xMin, i + 2, 7, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, xMin, i + 1, 0, xMin, i + 1, 7, ROUGH_PRISMARINE, false);
                 }
-
                 room2 = room;
             }
             return true;
@@ -955,8 +961,10 @@ public class StructureOceanMonumentPieces {
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
             ChunkSelector selector = new ChunkSelector(world);
+            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+
             if (this.roomDefinition.index / 25 > 0) {
-                this.generateDefaultFloor(selector, box, 0, 0, this.roomDefinition.hasOpening[EnumFacing.DOWN.getIndex()]);
+                this.generateDefaultFloor(mut, selector, box, 0, 0, this.roomDefinition.hasOpening[EnumFacing.DOWN.getIndex()]);
             }
 
             if (this.roomDefinition.connections[EnumFacing.UP.getIndex()] == null) {
@@ -967,27 +975,27 @@ public class StructureOceanMonumentPieces {
                 for(int z = 1; z <= 6; ++z) {
                     if (rand.nextInt(3) != 0) {
                         int y = 2 + (rand.nextInt(4) == 0 ? 0 : 1);
-                        this.fillWithBlocks(selector, box, x, y, z, x, 3, z, Blocks.SPONGE.getStateFromMeta(1), Blocks.SPONGE.getStateFromMeta(1), false);
+                        this.fillWithBlocks(mut, selector, box, x, y, z, x, 3, z, Blocks.SPONGE.getStateFromMeta(1), Blocks.SPONGE.getStateFromMeta(1), false);
                     }
                 }
             }
 
-            this.fillWithBlocks(selector, box, 0, 1, 0, 0, 1, 7, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 7, 1, 0, 7, 1, 7, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 1, 1, 0, 6, 1, 0, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 1, 1, 7, 6, 1, 7, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 0, 2, 0, 0, 2, 7, DARK_PRISMARINE  , false);
-            this.fillWithBlocks(selector, box, 7, 2, 0, 7, 2, 7, DARK_PRISMARINE  , false);
-            this.fillWithBlocks(selector, box, 1, 2, 0, 6, 2, 0, DARK_PRISMARINE  , false);
-            this.fillWithBlocks(selector, box, 1, 2, 7, 6, 2, 7, DARK_PRISMARINE  , false);
-            this.fillWithBlocks(selector, box, 0, 3, 0, 0, 3, 7, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 7, 3, 0, 7, 3, 7, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 1, 3, 0, 6, 3, 0, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 1, 3, 7, 6, 3, 7, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 0, 1, 3, 0, 2, 4, DARK_PRISMARINE  , false);
-            this.fillWithBlocks(selector, box, 7, 1, 3, 7, 2, 4, DARK_PRISMARINE  , false);
-            this.fillWithBlocks(selector, box, 3, 1, 0, 4, 2, 0, DARK_PRISMARINE  , false);
-            this.fillWithBlocks(selector, box, 3, 1, 7, 4, 2, 7, DARK_PRISMARINE  , false);
+            this.fillWithBlocks(mut, selector, box, 0, 1, 0, 0, 1, 7, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 7, 1, 0, 7, 1, 7, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 1, 1, 0, 6, 1, 0, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 1, 1, 7, 6, 1, 7, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 0, 2, 0, 0, 2, 7, DARK_PRISMARINE  , false);
+            this.fillWithBlocks(mut, selector, box, 7, 2, 0, 7, 2, 7, DARK_PRISMARINE  , false);
+            this.fillWithBlocks(mut, selector, box, 1, 2, 0, 6, 2, 0, DARK_PRISMARINE  , false);
+            this.fillWithBlocks(mut, selector, box, 1, 2, 7, 6, 2, 7, DARK_PRISMARINE  , false);
+            this.fillWithBlocks(mut, selector, box, 0, 3, 0, 0, 3, 7, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 7, 3, 0, 7, 3, 7, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 1, 3, 0, 6, 3, 0, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 1, 3, 7, 6, 3, 7, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 0, 1, 3, 0, 2, 4, DARK_PRISMARINE  , false);
+            this.fillWithBlocks(mut, selector, box, 7, 1, 3, 7, 2, 4, DARK_PRISMARINE  , false);
+            this.fillWithBlocks(mut, selector, box, 3, 1, 0, 4, 2, 0, DARK_PRISMARINE  , false);
+            this.fillWithBlocks(mut, selector, box, 3, 1, 7, 4, 2, 7, DARK_PRISMARINE  , false);
 
             if (this.roomDefinition.hasOpening[EnumFacing.SOUTH.getIndex()]) {
                 this.generateWaterBox(selector, box, 3, 1, 0, 4, 2, 0, false);
@@ -1011,7 +1019,7 @@ public class StructureOceanMonumentPieces {
             BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
 
             if (this.roomDefinition.index / 25 > 0) {
-                this.generateDefaultFloor(selector, box, 0, 0, this.roomDefinition.hasOpening[EnumFacing.DOWN.getIndex()]);
+                this.generateDefaultFloor(mut, selector, box, 0, 0, this.roomDefinition.hasOpening[EnumFacing.DOWN.getIndex()]);
             }
 
             if (this.roomDefinition.connections[EnumFacing.UP.getIndex()] == null) {
@@ -1020,74 +1028,74 @@ public class StructureOceanMonumentPieces {
 
             boolean flag = this.mainDesign != 0 && rand.nextBoolean() && !this.roomDefinition.hasOpening[EnumFacing.DOWN.getIndex()] && !this.roomDefinition.hasOpening[EnumFacing.UP.getIndex()] && this.roomDefinition.countOpenings() > 1;
             if (this.mainDesign == 0) {
-                this.fillWithBlocks(selector, box, 0, 1, 0, 2, 1, 2, BRICKS_PRISMARINE,false);
-                this.fillWithBlocks(selector, box, 0, 3, 0, 2, 3, 2, BRICKS_PRISMARINE,false);
-                this.fillWithBlocks(selector, box, 0, 2, 0, 0, 2, 2, ROUGH_PRISMARINE ,false);
-                this.fillWithBlocks(selector, box, 1, 2, 0, 2, 2, 0, ROUGH_PRISMARINE ,false);
+                this.fillWithBlocks(mut, selector, box, 0, 1, 0, 2, 1, 2, BRICKS_PRISMARINE,false);
+                this.fillWithBlocks(mut, selector, box, 0, 3, 0, 2, 3, 2, BRICKS_PRISMARINE,false);
+                this.fillWithBlocks(mut, selector, box, 0, 2, 0, 0, 2, 2, ROUGH_PRISMARINE ,false);
+                this.fillWithBlocks(mut, selector, box, 1, 2, 0, 2, 2, 0, ROUGH_PRISMARINE ,false);
                 this.setBlockStateM(mut, selector, SEA_LANTERN, 1, 2, 1, box);
-                this.fillWithBlocks(selector, box, 5, 1, 0, 7, 1, 2, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 5, 3, 0, 7, 3, 2, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 7, 2, 0, 7, 2, 2, ROUGH_PRISMARINE , false);
-                this.fillWithBlocks(selector, box, 5, 2, 0, 6, 2, 0, ROUGH_PRISMARINE , false);
+                this.fillWithBlocks(mut, selector, box, 5, 1, 0, 7, 1, 2, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 5, 3, 0, 7, 3, 2, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 7, 2, 0, 7, 2, 2, ROUGH_PRISMARINE , false);
+                this.fillWithBlocks(mut, selector, box, 5, 2, 0, 6, 2, 0, ROUGH_PRISMARINE , false);
                 this.setBlockStateM(mut, selector, SEA_LANTERN, 6, 2, 1, box);
-                this.fillWithBlocks(selector, box, 0, 1, 5, 2, 1, 7, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 0, 3, 5, 2, 3, 7, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 0, 2, 5, 0, 2, 7, ROUGH_PRISMARINE , false);
-                this.fillWithBlocks(selector, box, 1, 2, 7, 2, 2, 7, ROUGH_PRISMARINE , false);
+                this.fillWithBlocks(mut, selector, box, 0, 1, 5, 2, 1, 7, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 0, 3, 5, 2, 3, 7, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 0, 2, 5, 0, 2, 7, ROUGH_PRISMARINE , false);
+                this.fillWithBlocks(mut, selector, box, 1, 2, 7, 2, 2, 7, ROUGH_PRISMARINE , false);
                 this.setBlockStateM(mut, selector, SEA_LANTERN, 1, 2, 6, box);
-                this.fillWithBlocks(selector, box, 5, 1, 5, 7, 1, 7, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 5, 3, 5, 7, 3, 7, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 7, 2, 5, 7, 2, 7, ROUGH_PRISMARINE , false);
-                this.fillWithBlocks(selector, box, 5, 2, 7, 6, 2, 7, ROUGH_PRISMARINE , false);
+                this.fillWithBlocks(mut, selector, box, 5, 1, 5, 7, 1, 7, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 5, 3, 5, 7, 3, 7, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 7, 2, 5, 7, 2, 7, ROUGH_PRISMARINE , false);
+                this.fillWithBlocks(mut, selector, box, 5, 2, 7, 6, 2, 7, ROUGH_PRISMARINE , false);
                 this.setBlockStateM(mut, selector, SEA_LANTERN, 6, 2, 6, box);
                 if (this.roomDefinition.hasOpening[EnumFacing.SOUTH.getIndex()]) {
-                    this.fillWithBlocks(selector, box, 3, 3, 0, 4, 3, 0, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 3, 3, 0, 4, 3, 0, BRICKS_PRISMARINE, false);
                 } else {
-                    this.fillWithBlocks(selector, box, 3, 3, 0, 4, 3, 1, BRICKS_PRISMARINE,false);
-                    this.fillWithBlocks(selector, box, 3, 2, 0, 4, 2, 0, ROUGH_PRISMARINE ,false);
-                    this.fillWithBlocks(selector, box, 3, 1, 0, 4, 1, 1, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 3, 3, 0, 4, 3, 1, BRICKS_PRISMARINE,false);
+                    this.fillWithBlocks(mut, selector, box, 3, 2, 0, 4, 2, 0, ROUGH_PRISMARINE ,false);
+                    this.fillWithBlocks(mut, selector, box, 3, 1, 0, 4, 1, 1, BRICKS_PRISMARINE, false);
                 }
 
                 if (this.roomDefinition.hasOpening[EnumFacing.NORTH.getIndex()]) {
-                    this.fillWithBlocks(selector, box, 3, 3, 7, 4, 3, 7, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 3, 3, 7, 4, 3, 7, BRICKS_PRISMARINE, false);
                 } else {
-                    this.fillWithBlocks(selector, box, 3, 3, 6, 4, 3, 7, BRICKS_PRISMARINE, false);
-                    this.fillWithBlocks(selector, box, 3, 2, 7, 4, 2, 7, ROUGH_PRISMARINE, false);
-                    this.fillWithBlocks(selector, box, 3, 1, 6, 4, 1, 7, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 3, 3, 6, 4, 3, 7, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 3, 2, 7, 4, 2, 7, ROUGH_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 3, 1, 6, 4, 1, 7, BRICKS_PRISMARINE, false);
                 }
 
                 if (this.roomDefinition.hasOpening[EnumFacing.WEST.getIndex()]) {
-                    this.fillWithBlocks(selector, box, 0, 3, 3, 0, 3, 4, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 0, 3, 3, 0, 3, 4, BRICKS_PRISMARINE, false);
                 } else {
-                    this.fillWithBlocks(selector, box, 0, 3, 3, 1, 3, 4, BRICKS_PRISMARINE, false);
-                    this.fillWithBlocks(selector, box, 0, 2, 3, 0, 2, 4, ROUGH_PRISMARINE, false);
-                    this.fillWithBlocks(selector, box, 0, 1, 3, 1, 1, 4, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 0, 3, 3, 1, 3, 4, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 0, 2, 3, 0, 2, 4, ROUGH_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 0, 1, 3, 1, 1, 4, BRICKS_PRISMARINE, false);
                 }
 
                 if (this.roomDefinition.hasOpening[EnumFacing.EAST.getIndex()]) {
-                    this.fillWithBlocks(selector, box, 7, 3, 3, 7, 3, 4, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 7, 3, 3, 7, 3, 4, BRICKS_PRISMARINE, false);
                 } else {
-                    this.fillWithBlocks(selector, box, 6, 3, 3, 7, 3, 4, BRICKS_PRISMARINE, false);
-                    this.fillWithBlocks(selector, box, 7, 2, 3, 7, 2, 4, ROUGH_PRISMARINE, false);
-                    this.fillWithBlocks(selector, box, 6, 1, 3, 7, 1, 4, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 6, 3, 3, 7, 3, 4, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 7, 2, 3, 7, 2, 4, ROUGH_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 6, 1, 3, 7, 1, 4, BRICKS_PRISMARINE, false);
                 }
             } else if (this.mainDesign == 1) {
-                this.fillWithBlocks(selector, box, 2, 1, 2, 2, 3, 2, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 2, 1, 5, 2, 3, 5, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 5, 1, 5, 5, 3, 5, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 5, 1, 2, 5, 3, 2, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 2, 1, 2, 2, 3, 2, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 2, 1, 5, 2, 3, 5, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 5, 1, 5, 5, 3, 5, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 5, 1, 2, 5, 3, 2, BRICKS_PRISMARINE, false);
                 this.setBlockStateM(mut, selector, SEA_LANTERN, 2, 2, 2, box);
                 this.setBlockStateM(mut, selector, SEA_LANTERN, 2, 2, 5, box);
                 this.setBlockStateM(mut, selector, SEA_LANTERN, 5, 2, 5, box);
                 this.setBlockStateM(mut, selector, SEA_LANTERN, 5, 2, 2, box);
-                this.fillWithBlocks(selector, box, 0, 1, 0, 1, 3, 0, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 0, 1, 1, 0, 3, 1, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 0, 1, 7, 1, 3, 7, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 0, 1, 6, 0, 3, 6, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 6, 1, 7, 7, 3, 7, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 7, 1, 6, 7, 3, 6, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 6, 1, 0, 7, 3, 0, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 7, 1, 1, 7, 3, 1, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 0, 1, 0, 1, 3, 0, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 0, 1, 1, 0, 3, 1, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 0, 1, 7, 1, 3, 7, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 0, 1, 6, 0, 3, 6, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 6, 1, 7, 7, 3, 7, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 7, 1, 6, 7, 3, 6, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 6, 1, 0, 7, 3, 0, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 7, 1, 1, 7, 3, 1, BRICKS_PRISMARINE, false);
                 this.setBlockStateM(mut, selector, ROUGH_PRISMARINE, 1, 2, 0, box);
                 this.setBlockStateM(mut, selector, ROUGH_PRISMARINE, 0, 2, 1, box);
                 this.setBlockStateM(mut, selector, ROUGH_PRISMARINE, 1, 2, 7, box);
@@ -1098,45 +1106,45 @@ public class StructureOceanMonumentPieces {
                 this.setBlockStateM(mut, selector, ROUGH_PRISMARINE, 7, 2, 1, box);
 
                 if (!this.roomDefinition.hasOpening[EnumFacing.SOUTH.getIndex()]) {
-                    this.fillWithBlocks(selector, box, 1, 3, 0, 6, 3, 0, BRICKS_PRISMARINE, false);
-                    this.fillWithBlocks(selector, box, 1, 2, 0, 6, 2, 0, ROUGH_PRISMARINE , false);
-                    this.fillWithBlocks(selector, box, 1, 1, 0, 6, 1, 0, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 1, 3, 0, 6, 3, 0, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 1, 2, 0, 6, 2, 0, ROUGH_PRISMARINE , false);
+                    this.fillWithBlocks(mut, selector, box, 1, 1, 0, 6, 1, 0, BRICKS_PRISMARINE, false);
                 }
 
                 if (!this.roomDefinition.hasOpening[EnumFacing.NORTH.getIndex()]) {
-                    this.fillWithBlocks(selector, box, 1, 3, 7, 6, 3, 7, BRICKS_PRISMARINE, false);
-                    this.fillWithBlocks(selector, box, 1, 2, 7, 6, 2, 7, ROUGH_PRISMARINE , false);
-                    this.fillWithBlocks(selector, box, 1, 1, 7, 6, 1, 7, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 1, 3, 7, 6, 3, 7, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 1, 2, 7, 6, 2, 7, ROUGH_PRISMARINE , false);
+                    this.fillWithBlocks(mut, selector, box, 1, 1, 7, 6, 1, 7, BRICKS_PRISMARINE, false);
                 }
 
                 if (!this.roomDefinition.hasOpening[EnumFacing.WEST.getIndex()]) {
-                    this.fillWithBlocks(selector, box, 0, 3, 1, 0, 3, 6, BRICKS_PRISMARINE, false);
-                    this.fillWithBlocks(selector, box, 0, 2, 1, 0, 2, 6, ROUGH_PRISMARINE , false);
-                    this.fillWithBlocks(selector, box, 0, 1, 1, 0, 1, 6, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 0, 3, 1, 0, 3, 6, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 0, 2, 1, 0, 2, 6, ROUGH_PRISMARINE , false);
+                    this.fillWithBlocks(mut, selector, box, 0, 1, 1, 0, 1, 6, BRICKS_PRISMARINE, false);
                 }
 
                 if (!this.roomDefinition.hasOpening[EnumFacing.EAST.getIndex()]) {
-                    this.fillWithBlocks(selector, box, 7, 3, 1, 7, 3, 6, BRICKS_PRISMARINE, false);
-                    this.fillWithBlocks(selector, box, 7, 2, 1, 7, 2, 6, ROUGH_PRISMARINE , false);
-                    this.fillWithBlocks(selector, box, 7, 1, 1, 7, 1, 6, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 7, 3, 1, 7, 3, 6, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 7, 2, 1, 7, 2, 6, ROUGH_PRISMARINE , false);
+                    this.fillWithBlocks(mut, selector, box, 7, 1, 1, 7, 1, 6, BRICKS_PRISMARINE, false);
                 }
             } else if (this.mainDesign == 2) {
-                this.fillWithBlocks(selector, box, 0, 1, 0, 0, 1, 7, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 7, 1, 0, 7, 1, 7, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 1, 1, 0, 6, 1, 0, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 1, 1, 7, 6, 1, 7, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 0, 2, 0, 0, 2, 7, DARK_PRISMARINE  , false);
-                this.fillWithBlocks(selector, box, 7, 2, 0, 7, 2, 7, DARK_PRISMARINE  , false);
-                this.fillWithBlocks(selector, box, 1, 2, 0, 6, 2, 0, DARK_PRISMARINE  , false);
-                this.fillWithBlocks(selector, box, 1, 2, 7, 6, 2, 7, DARK_PRISMARINE  , false);
-                this.fillWithBlocks(selector, box, 0, 3, 0, 0, 3, 7, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 7, 3, 0, 7, 3, 7, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 1, 3, 0, 6, 3, 0, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 1, 3, 7, 6, 3, 7, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 0, 1, 3, 0, 2, 4, DARK_PRISMARINE  , false);
-                this.fillWithBlocks(selector, box, 7, 1, 3, 7, 2, 4, DARK_PRISMARINE  , false);
-                this.fillWithBlocks(selector, box, 3, 1, 0, 4, 2, 0, DARK_PRISMARINE  , false);
-                this.fillWithBlocks(selector, box, 3, 1, 7, 4, 2, 7, DARK_PRISMARINE  , false);
+                this.fillWithBlocks(mut, selector, box, 0, 1, 0, 0, 1, 7, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 7, 1, 0, 7, 1, 7, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 1, 1, 0, 6, 1, 0, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 1, 1, 7, 6, 1, 7, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 0, 2, 0, 0, 2, 7, DARK_PRISMARINE  , false);
+                this.fillWithBlocks(mut, selector, box, 7, 2, 0, 7, 2, 7, DARK_PRISMARINE  , false);
+                this.fillWithBlocks(mut, selector, box, 1, 2, 0, 6, 2, 0, DARK_PRISMARINE  , false);
+                this.fillWithBlocks(mut, selector, box, 1, 2, 7, 6, 2, 7, DARK_PRISMARINE  , false);
+                this.fillWithBlocks(mut, selector, box, 0, 3, 0, 0, 3, 7, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 7, 3, 0, 7, 3, 7, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 1, 3, 0, 6, 3, 0, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 1, 3, 7, 6, 3, 7, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 0, 1, 3, 0, 2, 4, DARK_PRISMARINE  , false);
+                this.fillWithBlocks(mut, selector, box, 7, 1, 3, 7, 2, 4, DARK_PRISMARINE  , false);
+                this.fillWithBlocks(mut, selector, box, 3, 1, 0, 4, 2, 0, DARK_PRISMARINE  , false);
+                this.fillWithBlocks(mut, selector, box, 3, 1, 7, 4, 2, 7, DARK_PRISMARINE  , false);
 
                 if (this.roomDefinition.hasOpening[EnumFacing.SOUTH.getIndex()]) {
                     this.generateWaterBox(selector, box, 3, 1, 0, 4, 2, 0, false);
@@ -1156,9 +1164,9 @@ public class StructureOceanMonumentPieces {
             }
 
             if (flag) {
-                this.fillWithBlocks(selector, box, 3, 1, 3, 4, 1, 4, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 3, 2, 3, 4, 2, 4, ROUGH_PRISMARINE , false);
-                this.fillWithBlocks(selector, box, 3, 3, 3, 4, 3, 4, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 3, 1, 3, 4, 1, 4, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 3, 2, 3, 4, 2, 4, ROUGH_PRISMARINE , false);
+                this.fillWithBlocks(mut, selector, box, 3, 3, 3, 4, 3, 4, BRICKS_PRISMARINE, false);
             }
             return true;
         }
@@ -1174,16 +1182,17 @@ public class StructureOceanMonumentPieces {
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
             ChunkSelector selector = new ChunkSelector(world);
+            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
 
-            this.fillWithBlocks(selector, box, 0, 3, 0, 2, 3, 7, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 5, 3, 0, 7, 3, 7, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 0, 2, 0, 1, 2, 7, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 6, 2, 0, 7, 2, 7, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 0, 1, 0, 0, 1, 7, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 7, 1, 0, 7, 1, 7, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 0, 1, 7, 7, 3, 7, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 1, 1, 0, 2, 3, 0, BRICKS_PRISMARINE, false);
-            this.fillWithBlocks(selector, box, 5, 1, 0, 6, 3, 0, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 0, 3, 0, 2, 3, 7, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 5, 3, 0, 7, 3, 7, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 0, 2, 0, 1, 2, 7, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 6, 2, 0, 7, 2, 7, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 0, 1, 0, 0, 1, 7, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 7, 1, 0, 7, 1, 7, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 0, 1, 7, 7, 3, 7, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 1, 1, 0, 2, 3, 0, BRICKS_PRISMARINE, false);
+            this.fillWithBlocks(mut, selector, box, 5, 1, 0, 6, 3, 0, BRICKS_PRISMARINE, false);
 
             if (this.roomDefinition.hasOpening[EnumFacing.NORTH.getIndex()]) {
                 this.generateWaterBox(selector, box, 3, 1, 7, 4, 2, 7, false);
@@ -1274,7 +1283,8 @@ public class StructureOceanMonumentPieces {
             }
         }
 
-        private List<RoomDefinition> generateRoomGraph(Random p_175836_1_) {
+
+        private List<RoomDefinition> generateRoomGraph(Random random) {
             RoomDefinition[] lvt_2_1_ = new RoomDefinition[75];
 
             int lvt_3_4_;
@@ -1351,7 +1361,7 @@ public class StructureOceanMonumentPieces {
             lvt_4_5_.claimed = true;
             lvt_5_5_.claimed = true;
             this.sourceRoom.isSource = true;
-            this.coreRoom = lvt_2_1_[getRoomIndex(p_175836_1_.nextInt(4), 0, 2)];
+            this.coreRoom = lvt_2_1_[getRoomIndex(random.nextInt(4), 0, 2)];
             this.coreRoom.claimed = true;
             this.coreRoom.connections[EnumFacing.EAST.getIndex()].claimed = true;
             this.coreRoom.connections[EnumFacing.NORTH.getIndex()].claimed = true;
@@ -1373,7 +1383,7 @@ public class StructureOceanMonumentPieces {
             }
 
             lvt_3_5_.updateOpenings();
-            Collections.shuffle(lvt_6_5_, p_175836_1_);
+            Collections.shuffle(lvt_6_5_, random);
             int lvt_7_1_ = 1;
             Iterator var22 = lvt_6_5_.iterator();
 
@@ -1391,7 +1401,7 @@ public class StructureOceanMonumentPieces {
                             }
 
                             ++lvt_11_1_;
-                            lvt_12_2_ = p_175836_1_.nextInt(6);
+                            lvt_12_2_ = random.nextInt(6);
                         } while(!lvt_9_1_.hasOpening[lvt_12_2_]);
 
                         lvt_13_1_ = EnumFacing.byIndex(lvt_12_2_).getOpposite().getIndex();
@@ -1413,19 +1423,22 @@ public class StructureOceanMonumentPieces {
             return lvt_6_5_;
         }
 
+
+        @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
             ChunkSelector selector = new ChunkSelector(world);
+            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
 
             int lvl = Math.max(world.getSeaLevel(), 64) - this.boundingBox.minY;
             this.generateWaterBox(selector, box, 0, 0, 0, 58, lvl, 58, false);
 
-            this.generateWing(false, 0, selector, rand, box);
-            this.generateWing(true, 33, selector, rand, box);
+            this.generateWing(mut,false, 0, selector, rand, box);
+            this.generateWing(mut,true, 33, selector, rand, box);
 
             this.generateEntranceArchs(selector, rand, box);
-            this.generateEntranceWall(selector, box);
-            this.generateRoofPiece(selector, box);
-            this.generateLowerWall(selector, box);
+            this.generateEntranceWall(mut, selector, box);
+            this.generateRoofPiece(mut, selector, box);
+            this.generateLowerWall(mut, selector, box);
             this.generateMiddleWall(selector, rand, box);
             this.generateUpperWall(selector, box);
 
@@ -1449,7 +1462,7 @@ public class StructureOceanMonumentPieces {
 
                         for(int dx = 0; dx < 4; ++dx) {
                             for(int dz = 0; dz < 4; ++dz) {
-                                this.setBlockState(selector, BRICKS_PRISMARINE, ox + dx, 0, oz + dz, box);
+                                this.setBlockStateM(mut, selector, BRICKS_PRISMARINE, ox + dx, 0, oz + dz, box);
                                 this.replaceAirAndLiquidDownwards(selector, BRICKS_PRISMARINE, ox + dx, -1, oz + dz, box);
                             }
                         }
@@ -1479,28 +1492,27 @@ public class StructureOceanMonumentPieces {
         }
 
 
-        private void generateWing(boolean b, int xMin, ChunkSelector selector, Random rand, StructureBoundingBox box) {
+        private void generateWing(BlockPos.MutableBlockPos mut, boolean b, int xMin, ChunkSelector selector, Random rand, StructureBoundingBox box) {
             //int lvt_6_1_ = true;
+
             if (this.doesChunkIntersect(box, xMin, 0, xMin + 23, 20)) {
-                this.fillWithBlocks(selector, box, xMin + 0, 0, 0, xMin + 24, 0, 20, ROUGH_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, xMin + 0, 0, 0, xMin + 24, 0, 20, ROUGH_PRISMARINE, false);
                 this.generateWaterBox(selector, box, xMin + 0, 1, 0, xMin + 24, 10, 20, false);
 
                 int dx1;
                 for(dx1 = 0; dx1 < 4; ++dx1) {
-                    this.fillWithBlocks(selector, box, xMin + dx1     , dx1 + 1, dx1          , xMin + dx1      , dx1 + 1, 20     , BRICKS_PRISMARINE, false);
-                    this.fillWithBlocks(selector, box, xMin + dx1 + 7 , dx1 + 5, dx1 + 7 , xMin + dx1 + 7  , dx1 + 5, 20     , BRICKS_PRISMARINE, false);
-                    this.fillWithBlocks(selector, box, xMin + 17 - dx1, dx1 + 5, dx1 + 7 , xMin + 17 - dx1 , dx1 + 5, 20     , BRICKS_PRISMARINE, false);
-                    this.fillWithBlocks(selector, box, xMin + 24 - dx1, dx1 + 1, dx1          , xMin + 24 - dx1 , dx1 + 1, 20     , BRICKS_PRISMARINE, false);
-                    this.fillWithBlocks(selector, box, xMin + dx1 + 1 , dx1 + 1, dx1          , xMin + 23 - dx1 , dx1 + 1,      dx1     , BRICKS_PRISMARINE, false);
-                    this.fillWithBlocks(selector, box, xMin + dx1 + 8 , dx1 + 5, dx1 + 7 , xMin + 16 - dx1 , dx1 + 5, dx1 + 7, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, xMin + dx1     , dx1 + 1, dx1          , xMin + dx1      , dx1 + 1, 20     , BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, xMin + dx1 + 7 , dx1 + 5, dx1 + 7 , xMin + dx1 + 7  , dx1 + 5, 20     , BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, xMin + 17 - dx1, dx1 + 5, dx1 + 7 , xMin + 17 - dx1 , dx1 + 5, 20     , BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, xMin + 24 - dx1, dx1 + 1, dx1          , xMin + 24 - dx1 , dx1 + 1, 20     , BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, xMin + dx1 + 1 , dx1 + 1, dx1          , xMin + 23 - dx1 , dx1 + 1,      dx1     , BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, xMin + dx1 + 8 , dx1 + 5, dx1 + 7 , xMin + 16 - dx1 , dx1 + 5, dx1 + 7, BRICKS_PRISMARINE, false);
                 }
 
-                this.fillWithBlocks(selector, box, xMin + 4, 4, 4, xMin + 6, 4, 20, ROUGH_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, xMin + 7, 4, 4, xMin + 17, 4, 6, ROUGH_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, xMin + 18, 4, 4, xMin + 20, 4, 20, ROUGH_PRISMARINE,false);
-                this.fillWithBlocks(selector, box, xMin + 11, 8, 11, xMin + 13, 8, 20, ROUGH_PRISMARINE, false);
-
-                BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+                this.fillWithBlocks(mut, selector, box, xMin + 4, 4, 4, xMin + 6, 4, 20, ROUGH_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, xMin + 7, 4, 4, xMin + 17, 4, 6, ROUGH_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, xMin + 18, 4, 4, xMin + 20, 4, 20, ROUGH_PRISMARINE,false);
+                this.fillWithBlocks(mut, selector, box, xMin + 11, 8, 11, xMin + 13, 8, 20, ROUGH_PRISMARINE, false);
 
                 this.setBlockStateM(mut, selector, DOT_DECO_DATA, xMin + 12, 9, 12, box);
                 this.setBlockStateM(mut, selector, DOT_DECO_DATA, xMin + 12, 9, 15, box);
@@ -1523,8 +1535,8 @@ public class StructureOceanMonumentPieces {
                 }
 
                 this.setBlockStateM(mut, selector, DOT_DECO_DATA, dx2, 5, 5, box);
-                this.fillWithBlocks(selector, box, xMin + 11, 1, 12, xMin + 13, 7, 12, ROUGH_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, xMin + 12, 1, 11, xMin + 12, 7, 13, ROUGH_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, xMin + 11, 1, 12, xMin + 13, 7, 12, ROUGH_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, xMin + 12, 1, 11, xMin + 12, 7, 13, ROUGH_PRISMARINE, false);
             }
         }
 
@@ -1536,40 +1548,38 @@ public class StructureOceanMonumentPieces {
                 BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
 
                 for(int i = 0; i < 4; ++i) {
-                    this.fillWithBlocks(selector, box, 24, 2, 5 + i * 4, 24, 4, 5 + i * 4, BRICKS_PRISMARINE, false);
-                    this.fillWithBlocks(selector, box, 22, 4, 5 + i * 4, 23, 4, 5 + i * 4, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 24, 2, 5 + i * 4, 24, 4, 5 + i * 4, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 22, 4, 5 + i * 4, 23, 4, 5 + i * 4, BRICKS_PRISMARINE, false);
                     this.setBlockStateM(mut, selector, BRICKS_PRISMARINE, 25, 5, 5 + i * 4, box);
                     this.setBlockStateM(mut, selector, BRICKS_PRISMARINE, 26, 6, 5 + i * 4, box);
                     this.setBlockStateM(mut, selector, SEA_LANTERN, 26, 5, 5 + i * 4, box);
-                    this.fillWithBlocks(selector, box, 33, 2, 5 + i * 4, 33, 4, 5 + i * 4, BRICKS_PRISMARINE, false);
-                    this.fillWithBlocks(selector, box, 34, 4, 5 + i * 4, 35, 4, 5 + i * 4, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 33, 2, 5 + i * 4, 33, 4, 5 + i * 4, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 34, 4, 5 + i * 4, 35, 4, 5 + i * 4, BRICKS_PRISMARINE, false);
                     this.setBlockStateM(mut, selector, BRICKS_PRISMARINE, 32, 5, 5 + i * 4, box);
                     this.setBlockStateM(mut, selector, BRICKS_PRISMARINE, 31, 6, 5 + i * 4, box);
                     this.setBlockStateM(mut, selector, SEA_LANTERN, 31, 5, 5 + i * 4, box);
-                    this.fillWithBlocks(selector, box, 27, 6, 5 + i * 4, 30, 6, 5 + i * 4, ROUGH_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 27, 6, 5 + i * 4, 30, 6, 5 + i * 4, ROUGH_PRISMARINE, false);
                 }
             }
         }
 
 
-        private void generateEntranceWall(ChunkSelector selector, StructureBoundingBox box) {
+        private void generateEntranceWall(BlockPos.MutableBlockPos mut, ChunkSelector selector, StructureBoundingBox box) {
             if (this.doesChunkIntersect(box, 15, 20, 42, 21)) {
-                this.fillWithBlocks(selector, box, 15, 0, 21, 42, 0, 21, ROUGH_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 15, 0, 21, 42, 0, 21, ROUGH_PRISMARINE, false);
                 this.generateWaterBox(selector, box, 26, 1, 21, 31, 3, 21, false);
-                this.fillWithBlocks(selector, box, 21, 12, 21, 36, 12, 21, ROUGH_PRISMARINE , false);
-                this.fillWithBlocks(selector, box, 17, 11, 21, 40, 11, 21, ROUGH_PRISMARINE , false);
-                this.fillWithBlocks(selector, box, 16, 10, 21, 41, 10, 21, ROUGH_PRISMARINE , false);
-                this.fillWithBlocks(selector, box, 15, 7 , 21, 42, 9 , 21, ROUGH_PRISMARINE , false);
-                this.fillWithBlocks(selector, box, 16, 6 , 21, 41, 6 , 21, ROUGH_PRISMARINE , false);
-                this.fillWithBlocks(selector, box, 17, 5 , 21, 40, 5 , 21, ROUGH_PRISMARINE , false);
-                this.fillWithBlocks(selector, box, 21, 4 , 21, 36, 4 , 21, ROUGH_PRISMARINE , false);
-                this.fillWithBlocks(selector, box, 22, 3 , 21, 26, 3 , 21, ROUGH_PRISMARINE , false);
-                this.fillWithBlocks(selector, box, 31, 3 , 21, 35, 3 , 21, ROUGH_PRISMARINE , false);
-                this.fillWithBlocks(selector, box, 23, 2 , 21, 25, 2 , 21, ROUGH_PRISMARINE , false);
-                this.fillWithBlocks(selector, box, 32, 2 , 21, 34, 2 , 21, ROUGH_PRISMARINE , false);
-                this.fillWithBlocks(selector, box, 28, 4 , 20, 29, 4 , 21, BRICKS_PRISMARINE, false);
-
-                BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+                this.fillWithBlocks(mut, selector, box, 21, 12, 21, 36, 12, 21, ROUGH_PRISMARINE , false);
+                this.fillWithBlocks(mut, selector, box, 17, 11, 21, 40, 11, 21, ROUGH_PRISMARINE , false);
+                this.fillWithBlocks(mut, selector, box, 16, 10, 21, 41, 10, 21, ROUGH_PRISMARINE , false);
+                this.fillWithBlocks(mut, selector, box, 15, 7 , 21, 42, 9 , 21, ROUGH_PRISMARINE , false);
+                this.fillWithBlocks(mut, selector, box, 16, 6 , 21, 41, 6 , 21, ROUGH_PRISMARINE , false);
+                this.fillWithBlocks(mut, selector, box, 17, 5 , 21, 40, 5 , 21, ROUGH_PRISMARINE , false);
+                this.fillWithBlocks(mut, selector, box, 21, 4 , 21, 36, 4 , 21, ROUGH_PRISMARINE , false);
+                this.fillWithBlocks(mut, selector, box, 22, 3 , 21, 26, 3 , 21, ROUGH_PRISMARINE , false);
+                this.fillWithBlocks(mut, selector, box, 31, 3 , 21, 35, 3 , 21, ROUGH_PRISMARINE , false);
+                this.fillWithBlocks(mut, selector, box, 23, 2 , 21, 25, 2 , 21, ROUGH_PRISMARINE , false);
+                this.fillWithBlocks(mut, selector, box, 32, 2 , 21, 34, 2 , 21, ROUGH_PRISMARINE , false);
+                this.fillWithBlocks(mut, selector, box, 28, 4 , 20, 29, 4 , 21, BRICKS_PRISMARINE, false);
 
                 this.setBlockStateM(mut, selector, BRICKS_PRISMARINE, 27, 3, 21, box);
                 this.setBlockStateM(mut, selector, BRICKS_PRISMARINE, 30, 3, 21, box);
@@ -1616,25 +1626,23 @@ public class StructureOceanMonumentPieces {
         }
 
 
-        private void generateRoofPiece(ChunkSelector selector, StructureBoundingBox box) {
+        private void generateRoofPiece(BlockPos.MutableBlockPos mut, ChunkSelector selector, StructureBoundingBox box) {
             if (this.doesChunkIntersect(box, 21, 21, 36, 36)) {
-                this.fillWithBlocks(selector, box, 21, 0, 22, 36, 0, 36, ROUGH_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 21, 0, 22, 36, 0, 36, ROUGH_PRISMARINE, false);
                 this.generateWaterBox(selector, box, 21, 1, 22, 36, 23, 36, false);
 
                 for(int dx = 0; dx < 4; ++dx) {
-                    this.fillWithBlocks(selector, box, 21 + dx, 13 + dx, 21 + dx, 36 - dx, 13 + dx, 21 + dx, BRICKS_PRISMARINE, false);
-                    this.fillWithBlocks(selector, box, 21 + dx, 13 + dx, 36 - dx, 36 - dx, 13 + dx, 36 - dx, BRICKS_PRISMARINE, false);
-                    this.fillWithBlocks(selector, box, 21 + dx, 13 + dx, 22 + dx, 21 + dx, 13 + dx, 35 - dx, BRICKS_PRISMARINE, false);
-                    this.fillWithBlocks(selector, box, 36 - dx, 13 + dx, 22 + dx, 36 - dx, 13 + dx, 35 - dx, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 21 + dx, 13 + dx, 21 + dx, 36 - dx, 13 + dx, 21 + dx, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 21 + dx, 13 + dx, 36 - dx, 36 - dx, 13 + dx, 36 - dx, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 21 + dx, 13 + dx, 22 + dx, 21 + dx, 13 + dx, 35 - dx, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 36 - dx, 13 + dx, 22 + dx, 36 - dx, 13 + dx, 35 - dx, BRICKS_PRISMARINE, false);
                 }
 
-                this.fillWithBlocks(selector, box, 25, 16, 25, 32, 16, 32, ROUGH_PRISMARINE , false);
-                this.fillWithBlocks(selector, box, 25, 17, 25, 25, 19, 25, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 32, 17, 25, 32, 19, 25, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 25, 17, 32, 25, 19, 32, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 32, 17, 32, 32, 19, 32, BRICKS_PRISMARINE, false);
-
-                BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+                this.fillWithBlocks(mut, selector, box, 25, 16, 25, 32, 16, 32, ROUGH_PRISMARINE , false);
+                this.fillWithBlocks(mut, selector, box, 25, 17, 25, 25, 19, 25, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 32, 17, 25, 32, 19, 25, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 25, 17, 32, 25, 19, 32, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 32, 17, 32, 32, 19, 32, BRICKS_PRISMARINE, false);
 
                 this.setBlockStateM(mut, selector, BRICKS_PRISMARINE, 26, 20, 26, box);
                 this.setBlockStateM(mut, selector, BRICKS_PRISMARINE, 27, 21, 27, box);
@@ -1649,24 +1657,23 @@ public class StructureOceanMonumentPieces {
                 this.setBlockStateM(mut, selector, BRICKS_PRISMARINE, 30, 21, 27, box);
                 this.setBlockStateM(mut, selector, SEA_LANTERN, 30, 20, 27, box);
 
-                this.fillWithBlocks(selector, box, 28, 21, 27, 29, 21, 27, ROUGH_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 27, 21, 28, 27, 21, 29, ROUGH_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 28, 21, 30, 29, 21, 30, ROUGH_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 30, 21, 28, 30, 21, 29, ROUGH_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 28, 21, 27, 29, 21, 27, ROUGH_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 27, 21, 28, 27, 21, 29, ROUGH_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 28, 21, 30, 29, 21, 30, ROUGH_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 30, 21, 28, 30, 21, 29, ROUGH_PRISMARINE, false);
             }
         }
 
 
-        private void generateLowerWall(ChunkSelector selector, StructureBoundingBox box) {
-            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+        private void generateLowerWall(BlockPos.MutableBlockPos mut, ChunkSelector selector, StructureBoundingBox box) {
             int i;
             if (this.doesChunkIntersect(box, 0, 21, 6, 58)) {
-                this.fillWithBlocks(selector, box, 0, 0, 21, 6, 0, 57, ROUGH_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 0, 0, 21, 6, 0, 57, ROUGH_PRISMARINE, false);
                 this.generateWaterBox(selector, box, 0, 1, 21, 6, 7, 57, false);
-                this.fillWithBlocks(selector, box, 4, 4, 21, 6, 4, 53, ROUGH_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 4, 4, 21, 6, 4, 53, ROUGH_PRISMARINE, false);
 
                 for(i = 0; i < 4; ++i) {
-                    this.fillWithBlocks(selector, box, i, i + 1, 21, i, i + 1, 57 - i, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, i, i + 1, 21, i, i + 1, 57 - i, BRICKS_PRISMARINE, false);
                 }
 
                 for(i = 23; i < 53; i += 3) {
@@ -1676,20 +1683,20 @@ public class StructureOceanMonumentPieces {
                 this.setBlockStateM(mut, selector, DOT_DECO_DATA, 5, 5, 52, box);
 
                 for(i = 0; i < 4; ++i) {
-                    this.fillWithBlocks(selector, box, i, i + 1, 21, i, i + 1, 57 - i, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, i, i + 1, 21, i, i + 1, 57 - i, BRICKS_PRISMARINE, false);
                 }
 
-                this.fillWithBlocks(selector, box, 4, 1, 52, 6, 3, 52, ROUGH_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 5, 1, 51, 5, 3, 53, ROUGH_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 4, 1, 52, 6, 3, 52, ROUGH_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 5, 1, 51, 5, 3, 53, ROUGH_PRISMARINE, false);
             }
 
             if (this.doesChunkIntersect(box, 51, 21, 58, 58)) {
-                this.fillWithBlocks(selector, box, 51, 0, 21, 57, 0, 57, ROUGH_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 51, 0, 21, 57, 0, 57, ROUGH_PRISMARINE, false);
                 this.generateWaterBox(selector, box, 51, 1, 21, 57, 7, 57, false);
-                this.fillWithBlocks(selector, box, 51, 4, 21, 53, 4, 53, ROUGH_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 51, 4, 21, 53, 4, 53, ROUGH_PRISMARINE, false);
 
                 for(i = 0; i < 4; ++i) {
-                    this.fillWithBlocks(selector, box, 57 - i, i + 1, 21, 57 - i, i + 1, 57 - i, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 57 - i, i + 1, 21, 57 - i, i + 1, 57 - i, BRICKS_PRISMARINE, false);
                 }
 
                 for(i = 23; i < 53; i += 3) {
@@ -1697,16 +1704,16 @@ public class StructureOceanMonumentPieces {
                 }
 
                 this.setBlockStateM(mut, selector, DOT_DECO_DATA, 52, 5, 52, box);
-                this.fillWithBlocks(selector, box, 51, 1, 52, 53, 3, 52, ROUGH_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 52, 1, 51, 52, 3, 53, ROUGH_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 51, 1, 52, 53, 3, 52, ROUGH_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 52, 1, 51, 52, 3, 53, ROUGH_PRISMARINE, false);
             }
 
             if (this.doesChunkIntersect(box, 0, 51, 57, 57)) {
-                this.fillWithBlocks(selector, box, 7, 0, 51, 50, 0, 57, ROUGH_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 7, 0, 51, 50, 0, 57, ROUGH_PRISMARINE, false);
                 this.generateWaterBox(selector, box, 7, 1, 51, 50, 10, 57, false);
 
                 for(i = 0; i < 4; ++i) {
-                    this.fillWithBlocks(selector, box, i + 1, i + 1, 57 - i, 56 - i, i + 1, 57 - i, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, i + 1, i + 1, 57 - i, 56 - i, i + 1, 57 - i, BRICKS_PRISMARINE, false);
                 }
             }
         }
@@ -1716,12 +1723,12 @@ public class StructureOceanMonumentPieces {
             int z;
             BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
             if (this.doesChunkIntersect(box, 7, 21, 13, 50)) {
-                this.fillWithBlocks(selector, box, 7, 0, 21, 13, 0, 50, ROUGH_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 7, 0, 21, 13, 0, 50, ROUGH_PRISMARINE, false);
                 this.generateWaterBox(selector, box, 7, 1, 21, 13, 10, 50, false);
-                this.fillWithBlocks(selector, box, 11, 8, 21, 13, 8, 53, ROUGH_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 11, 8, 21, 13, 8, 53, ROUGH_PRISMARINE, false);
 
                 for(z = 0; z < 4; ++z) {
-                    this.fillWithBlocks(selector, box, z + 7, z + 5, 21, z + 7, z + 5, 54, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, z + 7, z + 5, 21, z + 7, z + 5, 54, BRICKS_PRISMARINE, false);
                 }
 
                 for(z = 21; z <= 45; z += 3) {
@@ -1730,12 +1737,12 @@ public class StructureOceanMonumentPieces {
             }
 
             if (this.doesChunkIntersect(box, 44, 21, 50, 54)) {
-                this.fillWithBlocks(selector, box, 44, 0, 21, 50, 0, 50, ROUGH_PRISMARINE, false);
+                this.fillWithBlocks(mut ,selector, box, 44, 0, 21, 50, 0, 50, ROUGH_PRISMARINE, false);
                 this.generateWaterBox(selector, box, 44, 1, 21, 50, 10, 50, false);
-                this.fillWithBlocks(selector, box, 44, 8, 21, 46, 8, 53, ROUGH_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 44, 8, 21, 46, 8, 53, ROUGH_PRISMARINE, false);
 
                 for(z = 0; z < 4; ++z) {
-                    this.fillWithBlocks(selector, box, 50 - z, z + 5, 21, 50 - z, z + 5, 54, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 50 - z, z + 5, 21, 50 - z, z + 5, 54, BRICKS_PRISMARINE, false);
                 }
 
                 for(z = 21; z <= 45; z += 3) {
@@ -1744,7 +1751,7 @@ public class StructureOceanMonumentPieces {
             }
 
             if (this.doesChunkIntersect(box, 8, 44, 49, 54)) {
-                this.fillWithBlocks(selector, box, 14, 0, 44, 43, 0, 50, ROUGH_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 14, 0, 44, 43, 0, 50, ROUGH_PRISMARINE, false);
                 this.generateWaterBox(selector, box, 14, 1, 44, 43, 10, 50, false);
 
                 for(z = 12; z <= 45; z += 3) {
@@ -1765,11 +1772,11 @@ public class StructureOceanMonumentPieces {
                 }
 
                 for(z = 0; z < 3; ++z) {
-                    this.fillWithBlocks(selector, box, 8 + z, 5 + z, 54, 49 - z, 5 + z, 54, ROUGH_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 8 + z, 5 + z, 54, 49 - z, 5 + z, 54, ROUGH_PRISMARINE, false);
                 }
 
-                this.fillWithBlocks(selector, box, 11, 8, 54, 46, 8, 54, BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 14, 8, 44, 43, 8, 53, ROUGH_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 11, 8, 54, 46, 8, 54, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 14, 8, 44, 43, 8, 53, ROUGH_PRISMARINE, false);
             }
         }
 
@@ -1778,13 +1785,13 @@ public class StructureOceanMonumentPieces {
             int dz;
             BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
             if (this.doesChunkIntersect(box, 14, 21, 20, 43)) {
-                this.fillWithBlocks(selector, box, 14, 0, 21, 20, 0, 43, ROUGH_PRISMARINE, false);
+                this.fillWithBlocks(mut ,selector, box, 14, 0, 21, 20, 0, 43, ROUGH_PRISMARINE, false);
                 this.generateWaterBox(selector, box, 14, 1, 22, 20, 14, 43, false);
-                this.fillWithBlocks(selector, box, 18, 12, 22, 20, 12, 39, ROUGH_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 18, 12, 21, 20, 12, 21, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 18, 12, 22, 20, 12, 39, ROUGH_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 18, 12, 21, 20, 12, 21, BRICKS_PRISMARINE, false);
 
                 for(dz = 0; dz < 4; ++dz) {
-                    this.fillWithBlocks(selector, box, dz + 14, dz + 9, 21, dz + 14, dz + 9, 43 - dz, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, dz + 14, dz + 9, 21, dz + 14, dz + 9, 43 - dz, BRICKS_PRISMARINE, false);
                 }
 
                 for(dz = 23; dz <= 39; dz += 3) {
@@ -1793,13 +1800,13 @@ public class StructureOceanMonumentPieces {
             }
 
             if (this.doesChunkIntersect(box, 37, 21, 43, 43)) {
-                this.fillWithBlocks(selector, box, 37, 0, 21, 43, 0, 43, ROUGH_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 37, 0, 21, 43, 0, 43, ROUGH_PRISMARINE, false);
                 this.generateWaterBox(selector, box, 37, 1, 22, 43, 14, 43, false);
-                this.fillWithBlocks(selector, box, 37, 12, 22, 39, 12, 39, ROUGH_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, 37, 12, 21, 39, 12, 21, BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 37, 12, 22, 39, 12, 39, ROUGH_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 37, 12, 21, 39, 12, 21, BRICKS_PRISMARINE, false);
 
                 for(dz = 0; dz < 4; ++dz) {
-                    this.fillWithBlocks(selector, box, 43 - dz, dz + 9, 21, 43 - dz, dz + 9, 43 - dz, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 43 - dz, dz + 9, 21, 43 - dz, dz + 9, 43 - dz, BRICKS_PRISMARINE, false);
                 }
 
                 for(dz = 23; dz <= 39; dz += 3) {
@@ -1808,16 +1815,16 @@ public class StructureOceanMonumentPieces {
             }
 
             if (this.doesChunkIntersect(box, 15, 37, 42, 43)) {
-                this.fillWithBlocks(selector, box, 21, 0, 37, 36, 0, 43, ROUGH_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 21, 0, 37, 36, 0, 43, ROUGH_PRISMARINE, false);
                 this.generateWaterBox(selector, box, 21, 1, 37, 36, 14, 43, false);
-                this.fillWithBlocks(selector, box, 21, 12, 37, 36, 12, 39, ROUGH_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, 21, 12, 37, 36, 12, 39, ROUGH_PRISMARINE, false);
 
                 for(dz = 0; dz < 4; ++dz) {
-                    this.fillWithBlocks(selector, box, 15 + dz, dz + 9, 43 - dz, 42 - dz, dz + 9, 43 - dz, BRICKS_PRISMARINE, false);
+                    this.fillWithBlocks(mut, selector, box, 15 + dz, dz + 9, 43 - dz, 42 - dz, dz + 9, 43 - dz, BRICKS_PRISMARINE, false);
                 }
 
                 for(dz = 21; dz <= 36; dz += 3) {
-                    this.setBlockState(selector, DOT_DECO_DATA, dz, 13, 38, box);
+                    this.setBlockStateM(mut, selector, DOT_DECO_DATA, dz, 13, 38, box);
                 }
             }
         }
@@ -1929,24 +1936,24 @@ public class StructureOceanMonumentPieces {
         }
 
 
-        protected void generateDefaultFloor(ChunkSelector selector, StructureBoundingBox box, int xMin, int zMin, boolean b) {
+        protected void generateDefaultFloor(BlockPos.MutableBlockPos mut, ChunkSelector selector, StructureBoundingBox box, int xMin, int zMin, boolean b) {
             if (b) {
-                this.fillWithBlocks(selector, box, xMin + 0, 0, zMin + 0, xMin + 2    , 0, zMin + 8 - 1, ROUGH_PRISMARINE , false);
-                this.fillWithBlocks(selector, box, xMin + 5, 0, zMin + 0, xMin + 8 - 1, 0, zMin + 8 - 1, ROUGH_PRISMARINE , false);
-                this.fillWithBlocks(selector, box, xMin + 3, 0, zMin + 0, xMin + 4    , 0, zMin + 2    , ROUGH_PRISMARINE , false);
-                this.fillWithBlocks(selector, box, xMin + 3, 0, zMin + 5, xMin + 4    , 0, zMin + 8 - 1, ROUGH_PRISMARINE , false);
-                this.fillWithBlocks(selector, box, xMin + 3, 0, zMin + 2, xMin + 4    , 0, zMin + 2    , BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, xMin + 3, 0, zMin + 5, xMin + 4    , 0, zMin + 5    , BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, xMin + 2, 0, zMin + 3, xMin + 2    , 0, zMin + 4    , BRICKS_PRISMARINE, false);
-                this.fillWithBlocks(selector, box, xMin + 5, 0, zMin + 3, xMin + 5    , 0, zMin + 4    , BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, xMin + 0, 0, zMin + 0, xMin + 2    , 0, zMin + 8 - 1, ROUGH_PRISMARINE , false);
+                this.fillWithBlocks(mut, selector, box, xMin + 5, 0, zMin + 0, xMin + 8 - 1, 0, zMin + 8 - 1, ROUGH_PRISMARINE , false);
+                this.fillWithBlocks(mut, selector, box, xMin + 3, 0, zMin + 0, xMin + 4    , 0, zMin + 2    , ROUGH_PRISMARINE , false);
+                this.fillWithBlocks(mut, selector, box, xMin + 3, 0, zMin + 5, xMin + 4    , 0, zMin + 8 - 1, ROUGH_PRISMARINE , false);
+                this.fillWithBlocks(mut, selector, box, xMin + 3, 0, zMin + 2, xMin + 4    , 0, zMin + 2    , BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, xMin + 3, 0, zMin + 5, xMin + 4    , 0, zMin + 5    , BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, xMin + 2, 0, zMin + 3, xMin + 2    , 0, zMin + 4    , BRICKS_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, xMin + 5, 0, zMin + 3, xMin + 5    , 0, zMin + 4    , BRICKS_PRISMARINE, false);
             } else {
-                this.fillWithBlocks(selector, box, xMin + 0, 0, zMin + 0, xMin + 8 - 1, 0, zMin + 8 - 1, ROUGH_PRISMARINE, false);
+                this.fillWithBlocks(mut, selector, box, xMin + 0, 0, zMin + 0, xMin + 8 - 1, 0, zMin + 8 - 1, ROUGH_PRISMARINE, false);
             }
         }
 
 
         protected void generateDefaultFloor(World world, StructureBoundingBox box, int xMin, int zMin, boolean b) {
-            generateDefaultFloor(new ChunkSelector(world), box, xMin, zMin, b);
+            generateDefaultFloor(new BlockPos.MutableBlockPos(), new ChunkSelector(world), box, xMin, zMin, b);
         }
 
 

@@ -73,10 +73,12 @@ public class BlockSponge extends BlockFx {
     private static class BlockPosIndex extends BlockPos.MutableBlockPos{
         int index;
         EnumFacing excluding;
-        public BlockPosIndex(int x, int y, int z, int index, EnumFacing excluding) {
+        EnumFacing excluding2;
+        public BlockPosIndex(int x, int y, int z, int index, EnumFacing excluding, EnumFacing excluding2) {
             super(x, y, z);
             this.index = index;
             this.excluding = excluding;
+            this.excluding2 = excluding2;
         }
         void init(int x, int y, int z, int index, EnumFacing excluding){
             super.setPosB(x,y,z);
@@ -88,7 +90,7 @@ public class BlockSponge extends BlockFx {
 
     private boolean absorb(World world, BlockPos pos) {
         LinkedList<BlockPosIndex> queue = new LinkedList<>();
-        queue.add(new BlockPosIndex(pos.getX(), pos.getY(), pos.getZ(), 0, null));
+        queue.add(new BlockPosIndex(pos.getX(), pos.getY(), pos.getZ(), 0, null,null));
         int max = ElcaConfig.MAX_SPONGE_POWER, maxRad = ElcaConfig.MAX_SPONGE_RADIUS;
         IBlockEAccess access = world.access();
         ArrayListE10<BlockPosIndex> updates = null;
@@ -99,11 +101,12 @@ public class BlockSponge extends BlockFx {
             //if(updates != null)updates.remove(blockpos);
             int index = blockpos.index;
             EnumFacing excluding = blockpos.excluding;
+            EnumFacing excluding2 = blockpos.excluding2;
             int px = blockpos.getX(), py = blockpos.getY(), pz = blockpos.getZ();
             int count = 0;
 
             for (EnumFacing facing : EnumFacing.VALUES) {
-                if(excluding == facing)continue;
+                if(excluding == facing || excluding2 == facing)continue;
                 int x, y, z;
 
                 IBlockState state = access.getBlockState(
@@ -115,7 +118,7 @@ public class BlockSponge extends BlockFx {
                     ++count;
                 } else if (state.getMaterial() == Material.WATER) {
                     ++count;
-                    BlockPosIndex blockpos1 = new BlockPosIndex(x, y, z, index, facing.getOpposite());
+                    BlockPosIndex blockpos1 = new BlockPosIndex(x, y, z, index, facing.getOpposite(), excluding);
 
                     access.setBlockState(blockpos1, BlockIDIndexes.AIR_STATE, 2);
                     if(updates == null) updates = new ArrayListE10<>();
