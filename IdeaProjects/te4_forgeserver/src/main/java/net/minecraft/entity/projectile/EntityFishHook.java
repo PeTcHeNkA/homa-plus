@@ -98,7 +98,7 @@ public class EntityFishHook extends Entity {
 
     @Override
     protected void entityInit() {
-        this.getDataManager().register(EntityFishHook.DATA_HOOKED_ENTITY, 0);
+        this.getDataManager().registerU(EntityFishHook.DATA_HOOKED_ENTITY, 0);
     }
 
 

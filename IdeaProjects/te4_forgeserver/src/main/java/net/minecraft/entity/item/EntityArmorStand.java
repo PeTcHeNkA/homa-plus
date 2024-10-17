@@ -99,13 +99,13 @@ public class EntityArmorStand extends EntityLivingBase {
         super.entityInit();
         EntityDataManager dataManager = this.dataManager;
 
-        dataManager.register(EntityArmorStand.STATUS, (byte)0);
-        dataManager.register(EntityArmorStand.HEAD_ROTATION, EntityArmorStand.DEFAULT_HEAD_ROTATION);
-        dataManager.register(EntityArmorStand.BODY_ROTATION, EntityArmorStand.DEFAULT_BODY_ROTATION);
-        dataManager.register(EntityArmorStand.LEFT_ARM_ROTATION, EntityArmorStand.DEFAULT_LEFTARM_ROTATION);
-        dataManager.register(EntityArmorStand.RIGHT_ARM_ROTATION, EntityArmorStand.DEFAULT_RIGHTARM_ROTATION);
-        dataManager.register(EntityArmorStand.LEFT_LEG_ROTATION, EntityArmorStand.DEFAULT_LEFTLEG_ROTATION);
-        dataManager.register(EntityArmorStand.RIGHT_LEG_ROTATION, EntityArmorStand.DEFAULT_RIGHTLEG_ROTATION);
+        dataManager.registerU(EntityArmorStand.STATUS, (byte)0);
+        dataManager.registerU(EntityArmorStand.HEAD_ROTATION, EntityArmorStand.DEFAULT_HEAD_ROTATION);
+        dataManager.registerU(EntityArmorStand.BODY_ROTATION, EntityArmorStand.DEFAULT_BODY_ROTATION);
+        dataManager.registerU(EntityArmorStand.LEFT_ARM_ROTATION, EntityArmorStand.DEFAULT_LEFTARM_ROTATION);
+        dataManager.registerU(EntityArmorStand.RIGHT_ARM_ROTATION, EntityArmorStand.DEFAULT_RIGHTARM_ROTATION);
+        dataManager.registerU(EntityArmorStand.LEFT_LEG_ROTATION, EntityArmorStand.DEFAULT_LEFTLEG_ROTATION);
+        dataManager.registerU(EntityArmorStand.RIGHT_LEG_ROTATION, EntityArmorStand.DEFAULT_RIGHTLEG_ROTATION);
     }
 
 

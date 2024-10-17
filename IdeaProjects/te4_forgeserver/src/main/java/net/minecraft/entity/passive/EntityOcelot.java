@@ -61,7 +61,7 @@ public class EntityOcelot extends EntityTameable {
     @Override
     protected void entityInit() {
         super.entityInit();
-        this.dataManager.register(EntityOcelot.OCELOT_VARIANT, 0);
+        this.dataManager.registerU(EntityOcelot.OCELOT_VARIANT, 0);
     }
 
 

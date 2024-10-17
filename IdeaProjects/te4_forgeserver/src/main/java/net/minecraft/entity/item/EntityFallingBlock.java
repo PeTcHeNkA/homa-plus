@@ -99,7 +99,7 @@ public class EntityFallingBlock extends Entity {
 
     @Override
     protected void entityInit() {
-        this.dataManager.register(ORIGIN, BlockPos.ORIGIN);
+        this.dataManager.registerU(ORIGIN, BlockPos.ORIGIN);
     }
 
 

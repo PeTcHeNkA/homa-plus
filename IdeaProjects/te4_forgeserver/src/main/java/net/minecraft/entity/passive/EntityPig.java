@@ -91,8 +91,8 @@ public class EntityPig extends EntityAnimal {
 
     protected void entityInit() {
         super.entityInit();
-        this.dataManager.register(EntityPig.SADDLED, false);
-        this.dataManager.register(EntityPig.BOOST_TIME, 0);
+        this.dataManager.registerU(EntityPig.SADDLED, false);
+        this.dataManager.registerU(EntityPig.BOOST_TIME, 0);
     }
 
     public static void registerFixesPig(final DataFixer fixer) {

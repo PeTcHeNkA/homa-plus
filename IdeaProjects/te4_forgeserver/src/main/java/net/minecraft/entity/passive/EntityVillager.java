@@ -254,7 +254,7 @@ public class EntityVillager extends EntityAgeable implements INpc, IMerchant {
 
     @Override
     protected void entityInit() {
-        this.dataManager.register(PROFESSION, 0);
+        this.dataManager.registerU(PROFESSION, 0);
         super.entityInit();
     }
 

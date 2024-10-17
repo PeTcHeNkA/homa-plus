@@ -86,7 +86,7 @@ public abstract class EntityArrow extends Entity implements IProjectile {
 
     @Override
     protected void entityInit() {
-        this.dataManager.register(EntityArrow.CRITICAL, (byte)0);
+        this.dataManager.registerU(EntityArrow.CRITICAL, (byte)0);
     }
 
 

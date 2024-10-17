@@ -141,7 +141,7 @@ public class EntityRabbit extends EntityAnimal {
     @Override
     protected void entityInit() {
         super.entityInit();
-        this.dataManager.register(RABBIT_TYPE, 0);
+        this.dataManager.registerU(RABBIT_TYPE, 0);
     }
 
 

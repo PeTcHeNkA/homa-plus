@@ -84,8 +84,8 @@ public abstract class AbstractHorse extends EntityAnimal implements IInventoryCh
     @Override
     protected void entityInit() {
         super.entityInit();
-        this.dataManager.register(AbstractHorse.STATUS, (byte)0);
-        this.dataManager.register(AbstractHorse.OWNER_UNIQUE_ID, Optional.absent());
+        this.dataManager.registerU(AbstractHorse.STATUS, (byte)0);
+        this.dataManager.registerU(AbstractHorse.OWNER_UNIQUE_ID, Optional.absent());
     }
 
     protected boolean getHorseWatchableBoolean(final int p_110233_1_) {

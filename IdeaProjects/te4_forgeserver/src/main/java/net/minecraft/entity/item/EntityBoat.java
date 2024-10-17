@@ -96,13 +96,13 @@ public class EntityBoat extends Entity {
     @Override
     protected void entityInit() {
         EntityDataManager manager = this.dataManager;
-        manager.register(TIME_SINCE_HIT, 0);
-        manager.register(FORWARD_DIRECTION, 1);
-        manager.register(DAMAGE_TAKEN, 0.0F);
-        manager.register(BOAT_TYPE, Type.OAK.ordinal());
+        manager.registerU(TIME_SINCE_HIT, 0);
+        manager.registerU(FORWARD_DIRECTION, 1);
+        manager.registerU(DAMAGE_TAKEN, 0.0F);
+        manager.registerU(BOAT_TYPE, Type.OAK.ordinal());
 
         for (DataParameter<Boolean> dataparameter : DATA_ID_PADDLE) {
-            manager.register(dataparameter, Boolean.FALSE);
+            manager.registerU(dataparameter, Boolean.FALSE);
         }
     }
 

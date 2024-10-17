@@ -67,7 +67,7 @@ public class EntityIronGolem extends EntityGolem {
     @Override
     protected void entityInit() {
         super.entityInit();
-        this.dataManager.register(EntityIronGolem.PLAYER_CREATED, (byte)0);
+        this.dataManager.registerU(EntityIronGolem.PLAYER_CREATED, (byte)0);
     }
 
 

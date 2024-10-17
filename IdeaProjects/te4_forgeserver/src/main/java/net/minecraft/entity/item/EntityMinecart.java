@@ -118,12 +118,13 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
 
     @Override
     protected void entityInit() {
-        this.dataManager.register(ROLLING_AMPLITUDE, 0);
-        this.dataManager.register(ROLLING_DIRECTION, 1);
-        this.dataManager.register(DAMAGE, 0.0F);
-        this.dataManager.register(DISPLAY_TILE, 0);
-        this.dataManager.register(DISPLAY_TILE_OFFSET, 6);
-        this.dataManager.register(SHOW_BLOCK, Boolean.FALSE);
+        EntityDataManager dataManager = this.dataManager;
+        dataManager.registerU(ROLLING_AMPLITUDE, 0);
+        dataManager.registerU(ROLLING_DIRECTION, 1);
+        dataManager.registerU(DAMAGE, 0.0F);
+        dataManager.registerU(DISPLAY_TILE, 0);
+        dataManager.registerU(DISPLAY_TILE_OFFSET, 6);
+        dataManager.registerU(SHOW_BLOCK, Boolean.FALSE);
     }
 
 

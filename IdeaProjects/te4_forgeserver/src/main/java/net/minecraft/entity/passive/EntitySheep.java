@@ -113,7 +113,7 @@ public class EntitySheep extends EntityAnimal implements IShearable {
     @Override
     protected void entityInit() {
         super.entityInit();
-        this.dataManager.register(DYE_COLOR, (byte)0);
+        this.dataManager.registerU(DYE_COLOR, (byte)0);
     }
 
 
