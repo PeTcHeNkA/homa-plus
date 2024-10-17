@@ -2,6 +2,8 @@ package net.minecraft.block;
 
 import java.util.LinkedList;
 import java.util.Random;
+import java.util.function.Consumer;
+
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.state.BlockStateContainer;
@@ -87,9 +89,9 @@ public class BlockSponge extends BlockFx {
     private boolean absorb(World world, BlockPos pos) {
         LinkedList<BlockPosIndex> queue = new LinkedList<>();
         queue.add(new BlockPosIndex(pos.getX(), pos.getY(), pos.getZ(), 0, null));
-        int max = ElcaConfig.MAX_SPONGE_POWER;
+        int max = ElcaConfig.MAX_SPONGE_POWER, maxRad = ElcaConfig.MAX_SPONGE_RADIUS;
         IBlockEAccess access = world.access();
-        ArrayListE10<BlockPos> updates = null;
+        ArrayListE10<BlockPosIndex> updates = null;
         //ArrayListE10<BlockPos> list = null;
 
         while (!queue.isEmpty()) {
@@ -98,34 +100,42 @@ public class BlockSponge extends BlockFx {
             int index = blockpos.index;
             EnumFacing excluding = blockpos.excluding;
             int px = blockpos.getX(), py = blockpos.getY(), pz = blockpos.getZ();
+            int count = 0;
 
             for (EnumFacing facing : EnumFacing.VALUES) {
                 if(excluding == facing)continue;
-                int x = px + facing.getXOffset();
-                int y = py + facing.getYOffset();
-                int z = pz + facing.getZOffset();
+                int x, y, z;
 
-                if (access.getBlockState(x, y, z).getMaterial() == Material.WATER) {
-                    if(blockpos != null) blockpos.init(x, y, z, index, facing.getOpposite());
-                    else blockpos = new BlockPosIndex(x, y, z, index, facing.getOpposite());
+                IBlockState state = access.getBlockState(
+                        x = px + facing.getXOffset(),
+                        y = py + facing.getYOffset(),
+                        z = pz + facing.getZOffset()
+                );
+                if(state == BlockIDIndexes.AIR_STATE){
+                    ++count;
+                } else if (state.getMaterial() == Material.WATER) {
+                    ++count;
+                    BlockPosIndex blockpos1 = new BlockPosIndex(x, y, z, index, facing.getOpposite());
 
-                    access.setBlockState(blockpos, BlockIDIndexes.AIR_STATE, 2);
+                    access.setBlockState(blockpos1, BlockIDIndexes.AIR_STATE, 2);
                     if(updates == null) updates = new ArrayListE10<>();
-                    updates.add(blockpos);
+                    updates.add(blockpos1);
                     --max;
 
-                    if (index < 6) {
+                    if (index < maxRad) {
                         index += 1;
-                        blockpos.index = index;
-                        queue.add(blockpos);
+                        blockpos1.index = index;
+                        queue.add(blockpos1);
                     }
-                    blockpos = null;
                 }
             }
+            if(count == 0 || count == 6)blockpos.index = -1;
             if (max < 0) break;
         }
         if(updates != null) {
-            updates.forEach(pos1 -> world.notifyNeighborsOfStateChange(pos1, Blocks.AIR, false));
+            updates.forEach(pos1 -> {
+                if(pos1.index != -1)world.notifyNeighborsOfStateChange(pos1, Blocks.AIR, false);
+            });
             return true;
         }
         return false;

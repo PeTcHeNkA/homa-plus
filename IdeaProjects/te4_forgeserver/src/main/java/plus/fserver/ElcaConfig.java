@@ -53,6 +53,7 @@ public class ElcaConfig {
     public static int MAX_ENTITY_COLLISIONS      = 3;
     public static int MAX_ENTITY_COLLISIONS_MOVE = 1;
     public static int MAX_SPONGE_POWER           = 64;
+    public static int MAX_SPONGE_RADIUS          = 6;
     public static int MAX_PISTON_POWER           = 12;
     public static int MIN_CHANGED_BLOCKS_BUF     = 24;
     public static int RESET_LOW_LEVEL_MOBS       = 200;
@@ -174,6 +175,7 @@ public class ElcaConfig {
         MAX_WORLD_SPAWNER_RANGE    = calc(map, "max-world-spawner-range"     , MAX_WORLD_SPAWNER_RANGE    );
 
         MAX_SPONGE_POWER           = calc(map, "max-sponge-power"            , MAX_SPONGE_POWER           );
+        MAX_SPONGE_RADIUS          = calc(map, "max-sponge-radius"           , MAX_SPONGE_RADIUS          );
         MAX_PISTON_POWER           = calc(map, "max-piston-power"            , MAX_PISTON_POWER           );
         BEACON_TICK_RATE           = calc(map, "beacon-tick-rate"            , BEACON_TICK_RATE           );
         IMMEDIATE_UPDATE_LIMIT     = calc(map, "immediate-update-limit"      , IMMEDIATE_UPDATE_LIMIT     );

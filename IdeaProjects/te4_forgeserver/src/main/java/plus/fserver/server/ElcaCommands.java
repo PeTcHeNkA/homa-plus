@@ -88,6 +88,7 @@ public class ElcaCommands extends ServerCommand {
             "endable-def-join-msg"        , "pcm-max-load-per-tick"       ,
             "max-connections-per"         , "pcm-max-send-per-tick"       ,
             "use-async-tracker-def"       , "unimportant-packet-queue"    ,
+            "max-sponge-radius"           ,
     });
 
 
