@@ -351,7 +351,7 @@ public class NBTTagCompound extends NBTBase {
             NBTBase nbtbase = this.tagMap.get(key);
             if(nbtbase==null)return null;
             if (nbtbase.getId() == 9) {
-                NBTTagList nbttaglist = (NBTTagList)this.tagMap.get(key);
+                NBTTagList nbttaglist = (NBTTagList)nbtbase;
 
                 if (!nbttaglist.isEmpty() && nbttaglist.getTagType() != type) {
                     return null;
@@ -371,7 +371,7 @@ public class NBTTagCompound extends NBTBase {
             NBTBase nbtbase = this.tagMap.get(key);
             if(nbtbase==null)return new NBTTagList();
             if (nbtbase.getId() == 9) {
-                NBTTagList nbttaglist = (NBTTagList)this.tagMap.get(key);
+                NBTTagList nbttaglist = (NBTTagList)nbtbase;
 
                 if (!nbttaglist.isEmpty() && nbttaglist.getTagType() != type) {
                     return new NBTTagList();

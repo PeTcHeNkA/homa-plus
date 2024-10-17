@@ -1757,7 +1757,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         try {
             tag.setTag(SStrings.Pos,                newDoubleNBTListPos(this.posX, this.posY, this.posZ));
             tag.setTag(SStrings.Motion,             newDoubleNBTListPos(this.motionX, this.motionY, this.motionZ));
-            tag.setTag(SStrings.Rotation,           this.newFloatNBTList(this.rotationYaw, this.rotationPitch));
+            tag.setTag(SStrings.Rotation,           newFloatNBTListVec(this.rotationYaw, this.rotationPitch));
             tag.setFloat(SStrings.FallDistance,     this.fallDistance);
             tag.setShortU(SStrings.Fire,            this.fire);
             tag.setShortU(SStrings.Air, (short)     this.getAir());
@@ -1967,6 +1967,14 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
         for (float f : numbers) {
             nbttaglist.appendTag(new NBTTagFloat(f));
         }
+        return nbttaglist;
+    }
+
+
+    protected static NBTTagList newFloatNBTListVec(float yaw, float pith) {
+        NBTTagList nbttaglist = new NBTTagList(2);
+        nbttaglist.appendTag(new NBTTagFloat(yaw));
+        nbttaglist.appendTag(new NBTTagFloat(pith));
         return nbttaglist;
     }
 
