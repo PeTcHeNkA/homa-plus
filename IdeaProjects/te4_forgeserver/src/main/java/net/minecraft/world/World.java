@@ -631,8 +631,9 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     public void notifyBlockUpdate(BlockPos pos, IBlockState oldState, IBlockState newState, int flags) {
-        for (int i = 0; i < this.eventListeners.size(); ++i)
-            this.eventListeners.get(i).notifyBlockUpdate(this, pos, oldState, newState, flags);
+        List<IWorldEventListener> listeners = this.eventListeners;
+        for (int i = 0, s = listeners.size(); i < s; ++i)
+            listeners.get(i).notifyBlockUpdate(this, pos, oldState, newState, flags);
     }
 
 
@@ -663,8 +664,9 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     public void markBlockRangeForRenderUpdate(int x1, int y1, int z1, int x2, int y2, int z2) {
-        for (int i = 0; i < this.eventListeners.size(); ++i) {
-            ((IWorldEventListener)this.eventListeners.get(i)).markBlockRangeForRenderUpdate(x1, y1, z1, x2, y2, z2);
+        List<IWorldEventListener> listeners = this.eventListeners;
+        for (int i = 0, s = listeners.size(); i < s; ++i) {
+            listeners.get(i).markBlockRangeForRenderUpdate(x1, y1, z1, x2, y2, z2);
         }
     }
 
@@ -1349,8 +1351,10 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         category = event.getCategory();
         volume = event.getVolume();
         pitch = event.getPitch();
-        for (int i = 0; i < this.eventListeners.size(); ++i) {
-            ((IWorldEventListener)this.eventListeners.get(i)).playSoundToAllNearExcept(player, soundIn, category, x, y, z, volume, pitch);
+
+        List<IWorldEventListener> listeners = this.eventListeners;
+        for (int i = 0, s = listeners.size(); i < s; ++i) {
+            listeners.get(i).playSoundToAllNearExcept(player, soundIn, category, x, y, z, volume, pitch);
         }
     }
 
@@ -1359,8 +1363,9 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     public void playRecord(BlockPos blockPositionIn, @Nullable SoundEvent soundEventIn) {
-        for (int i = 0; i < this.eventListeners.size(); ++i) {
-            ((IWorldEventListener)this.eventListeners.get(i)).playRecord(soundEventIn, blockPositionIn);
+        List<IWorldEventListener> listeners = this.eventListeners;
+        for (int i = 0, s = listeners.size(); i < s; ++i) {
+            listeners.get(i).playRecord(soundEventIn, blockPositionIn);
         }
     }
 
@@ -1371,8 +1376,9 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     public void spawnAlwaysVisibleParticle(int id, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed, int... parameters) {
-        for (int i = 0; i < this.eventListeners.size(); ++i) {
-            ((IWorldEventListener)this.eventListeners.get(i)).spawnParticle(id, false, true, x, y, z, xSpeed, ySpeed, zSpeed, parameters);
+        List<IWorldEventListener> listeners = this.eventListeners;
+        for (int i = 0, s = listeners.size(); i < s; ++i) {
+            listeners.get(i).spawnParticle(id, false, true, x, y, z, xSpeed, ySpeed, zSpeed, parameters);
         }
     }
 
@@ -1384,8 +1390,9 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     private void spawnParticle(int particleID, boolean ignoreRange, double xCood, double yCoord, double zCoord, double xSpeed, double ySpeed, double zSpeed, int... parameters) {
-        for (int i = 0; i < this.eventListeners.size(); ++i) {
-            ((IWorldEventListener)this.eventListeners.get(i)).spawnParticle(particleID, ignoreRange, xCood, yCoord, zCoord, xSpeed, ySpeed, zSpeed, parameters);
+        List<IWorldEventListener> listeners = this.eventListeners;
+        for (int i = 0, s = listeners.size(); i < s; ++i) {
+            listeners.get(i).spawnParticle(particleID, ignoreRange, xCood, yCoord, zCoord, xSpeed, ySpeed, zSpeed, parameters);
         }
     }
 
@@ -1430,16 +1437,18 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     public void onEntityAdded(Entity entityIn) {
-        for (int i = 0; i < this.eventListeners.size(); ++i) {
-            ((IWorldEventListener)this.eventListeners.get(i)).onEntityAdded(entityIn);
+        List<IWorldEventListener> listeners = this.eventListeners;
+        for (int i = 0, s = listeners.size(); i < s; ++i) {
+            listeners.get(i).onEntityAdded(entityIn);
         }
         entityIn.onAddedToWorld();
     }
 
 
     public void onEntityRemoved(Entity entityIn) {
-        for (int i = 0; i < this.eventListeners.size(); ++i) {
-            ((IWorldEventListener)this.eventListeners.get(i)).onEntityRemoved(entityIn);
+        List<IWorldEventListener> listeners = this.eventListeners;
+        for (int i = 0, s = listeners.size(); i < s; ++i) {
+            listeners.get(i).onEntityRemoved(entityIn);
         }
         entityIn.onRemovedFromWorld();
     }
@@ -3239,8 +3248,9 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     public void playBroadcastSound(int id, BlockPos pos, int data) {
-        for (int j2 = 0; j2 < this.eventListeners.size(); ++j2) {
-            ((IWorldEventListener)this.eventListeners.get(j2)).broadcastSound(id, pos, data);
+        List<IWorldEventListener> listeners = this.eventListeners;
+        for (int i = 0, s = listeners.size(); i < s; ++i) {
+            listeners.get(i).broadcastSound(id, pos, data);
         }
     }
 
@@ -3252,8 +3262,9 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
     public void playEvent(@Nullable EntityPlayer player, int type, BlockPos pos, int data) {
         try {
-            for (int j2 = 0; j2 < this.eventListeners.size(); ++j2) {
-                ((IWorldEventListener)this.eventListeners.get(j2)).playEvent(player, type, pos, data);
+            List<IWorldEventListener> listeners = this.eventListeners;
+            for (int i = 0, s = listeners.size(); i < s; ++i) {
+                listeners.get(i).playEvent(player, type, pos, data);
             }
         } catch (Throwable throwable3) {
             CrashReport crashreport3 = CrashReport.makeCrashReport(throwable3, "Playing level event");
@@ -3319,8 +3330,9 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     public void sendBlockBreakProgress(int breakerId, BlockPos pos, int progress) {
-        for (int j2 = 0; j2 < this.eventListeners.size(); ++j2) {
-            IWorldEventListener listener = this.eventListeners.get(j2);
+        List<IWorldEventListener> listeners = this.eventListeners;
+        for (int i = 0, s = listeners.size(); i < s; ++i) {
+            IWorldEventListener listener = listeners.get(i);
             listener.sendBlockBreakProgress(breakerId, pos, progress);
         }
     }
