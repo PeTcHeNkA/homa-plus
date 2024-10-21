@@ -7,7 +7,6 @@
   "plugin": "plus.fserver.plugin.MixinConfig",
   "target": "@env(DEFAULT)",
   "mixins": [
-    "exp.RegionFilePatch",
     "expmem.ItemStackPatch",
     "pf.EntityXPOrbPatch",
     "pf.GameDataPatch"

@@ -50,8 +50,7 @@ public final class AsyWorldTickerV2{
         this.server = server;
         this.ignoreErrors = ElcaConfig.IGNORE_ERRORS;
         service = ElcaServerUtils.getPool(server);
-        //service = new AsyPoolTickerExecutor(ElcaConfig.ASY_THREAD_POOL_SIZE, this);
-        EnumConnectionState.optimizeAccess();
+        service.execute(() -> EnumConnectionState.optimizeAccess());
 
         if(useSync) {
             netFuture = service.scheduleAtFixedRate(new NetworkTicker(), 0, ElcaConfig.NETWORK_TICK_RATE, TimeUnit.MILLISECONDS);

@@ -26,7 +26,7 @@ public class SPacketEnableCompression implements Packet<INetHandlerLoginClient> 
     }
 
 
-    @Override
+    @Deprecated
     public void writePacketData(PacketBuffer buf) throws IOException {
         buf.writeVarInt(this.compressionThreshold);
     }

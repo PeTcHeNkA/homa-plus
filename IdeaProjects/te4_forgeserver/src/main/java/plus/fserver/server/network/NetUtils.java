@@ -168,6 +168,33 @@ public class NetUtils {
     }
 
 
+    public static int readVarInt(byte b1, byte b2, byte b3) {
+        int i = 0;
+
+        byte b0 = b1;
+        i |= (b0 & 0x7F);
+
+        if ((b0 & 0x80) != 0x80) {
+            return i;
+        }
+
+        b0 = b2;
+        i |= (b0 & 0x7F) << 7;
+
+        if ((b0 & 0x80) != 0x80) {
+            return i;
+        }
+
+        b0 = b3;
+        i |= (b0 & 0x7F) << 14;
+
+        if ((b0 & 0x80) != 0x80) {
+            return i;
+        }
+        throw new RuntimeException("VarInt too big");
+    }
+
+
     public static long readVarLong(ByteBuf buf) {
         long i = 0L;
         int j = 0;

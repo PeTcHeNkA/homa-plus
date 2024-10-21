@@ -1,7 +1,6 @@
 package plus.fserver.utls.collections;
 
 import net.minecraft.util.math.MathHelper;
-import org.apache.commons.lang3.Validate;
 import plus.fserver.ElcaCV;
 
 
@@ -14,10 +13,7 @@ public class BitArrayMut {
     public BitArrayMut(){}
 
     public BitArrayMut(int bitsPerEntryIn, int arraySizeIn) {
-        this.arraySize = arraySizeIn;
-        this.bitsPerEntry = bitsPerEntryIn;
-        this.maxEntryValue = (1L << bitsPerEntryIn) - 1L;
-        this.longArray = new long[MathHelper.roundUp(arraySizeIn * bitsPerEntryIn, 64) / 64];
+        init(bitsPerEntryIn, arraySizeIn);
     }
 
 

@@ -14,27 +14,46 @@ public class NettyVarint21FrameDecoder extends ByteToMessageDecoder {
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf buf, List<Object> msg) throws Exception {
         buf.markReaderIndex();
-        byte[] bytes = new byte[3];
 
-        for(int i = 0; i < bytes.length; ++i) {
-            if (!buf.isReadable()) {
-                buf.resetReaderIndex();
-                return;
-            }
-
-            bytes[i] = buf.readByte();
-            if (bytes[i] >= 0) {
-                int size = NetUtils.readVarInt(bytes);
-                if (buf.readableBytes() < size) {
-                    buf.resetReaderIndex();
-                    return;
-                }
-
-                msg.add(buf.readBytes(size));
-                return;
-            }
+        byte b1, b2, b3;
+        if (!buf.isReadable()) {
+            buf.resetReaderIndex();
+            return;
+        }
+        b1 = buf.readByte();
+        if(b1 >= 0){
+            encodeMsg(buf, msg, NetUtils.readVarInt(b1, (byte) 0, (byte) 0));
+            return;
         }
 
+        if (!buf.isReadable()) {
+            buf.resetReaderIndex();
+            return;
+        }
+        b2 = buf.readByte();
+        if(b2 >= 0){
+            encodeMsg(buf, msg, NetUtils.readVarInt(b1, b2, (byte) 0));
+            return;
+        }
+
+        if (!buf.isReadable()) {
+            buf.resetReaderIndex();
+            return;
+        }
+        b3 = buf.readByte();
+        if(b3 >= 0){
+            encodeMsg(buf, msg, NetUtils.readVarInt(b1, b2, b3));
+            return;
+        }
         throw new CorruptedFrameException("length wider than 21-bit");
+    }
+
+
+    private static void encodeMsg(ByteBuf buf, List<Object> msg, int size){
+        if (buf.readableBytes() < size) {
+            buf.resetReaderIndex();
+            return;
+        }
+        msg.add(buf.readBytes(size));
     }
 }

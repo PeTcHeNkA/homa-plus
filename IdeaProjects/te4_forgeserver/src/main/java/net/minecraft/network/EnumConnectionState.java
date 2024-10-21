@@ -365,12 +365,15 @@ public enum EnumConnectionState {
     }
 
 
-    public static void optimizeAccess(){
+    public static synchronized void optimizeAccess(){
         for (EnumConnectionState state:values()){
             state.constructMap[0].trim();
             state.constructMap[1].trim();
         }
     }
+
+
+    public static synchronized void await(){}
 
 
     static {

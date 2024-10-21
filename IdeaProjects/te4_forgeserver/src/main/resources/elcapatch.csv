@@ -1,3 +1,5 @@
+net.minecraft.advancements.AdvancementManager$1
+net.minecraft.advancements.AdvancementManager
 net.minecraft.advancements.AdvancementProgress$Serializer
 net.minecraft.advancements.AdvancementProgress
 net.minecraft.advancements.critereon.BredAnimalsTrigger$Instance, false, false
@@ -593,6 +595,11 @@ net.minecraft.server.management.PlayerChunkMapEntry
 net.minecraft.server.management.PlayerInteractionManager
 net.minecraft.server.management.PlayerList$1
 net.minecraft.server.management.PlayerList
+net.minecraft.server.management.PlayerProfileCache$1
+net.minecraft.server.management.PlayerProfileCache$2
+net.minecraft.server.management.PlayerProfileCache$ProfileEntry
+net.minecraft.server.management.PlayerProfileCache$Serializer
+net.minecraft.server.management.PlayerProfileCache
 net.minecraft.server.MinecraftServer$1
 net.minecraft.server.MinecraftServer$2
 net.minecraft.server.MinecraftServer
@@ -675,9 +682,10 @@ net.minecraft.world.chunk.ChunkPrimer
 net.minecraft.world.chunk.IBlockStatePalette
 net.minecraft.world.chunk.storage.AnvilChunkLoader$1
 net.minecraft.world.chunk.storage.AnvilChunkLoader
-net.minecraft.world.chunk.storage.ChunkBuffer
 net.minecraft.world.chunk.storage.ExtendedBlockStorage
 net.minecraft.world.chunk.storage.IChunkLoader
+net.minecraft.world.chunk.storage.RegionFile$ChunkBuffer
+net.minecraft.world.chunk.storage.RegionFile
 net.minecraft.world.DimensionType
 net.minecraft.world.Explosion
 net.minecraft.world.GameRules$Value

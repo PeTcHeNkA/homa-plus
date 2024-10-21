@@ -50,6 +50,7 @@ import org.apache.logging.log4j.Logger;
 import plus.fserver.ElcaConfig;
 import plus.fserver.api.Keep;
 import plus.fserver.plugin.SSPatchLoader;
+import plus.fserver.server.AsyWorldTickerV2;
 
 
 @Keep
@@ -460,6 +461,18 @@ public class DedicatedServer extends MinecraftServer implements IServer {
 
 
     public void setGuiEnabled() {
+        //maybe null?
+        AsyWorldTickerV2 ticker = ticker();
+        if(ticker != null){
+            ticker.runAsync(this::createServerGuiSync);
+        } else {
+            createServerGuiSync();
+        }
+    }
+
+
+    private synchronized void createServerGuiSync(){
+        if(guiIsEnabled)return;
         MinecraftServerGui.createServerGui(this);
         this.guiIsEnabled = true;
     }

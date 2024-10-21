@@ -45,6 +45,7 @@ import net.minecraft.crash.CrashReport;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Bootstrap;
+import net.minecraft.network.EnumConnectionState;
 import net.minecraft.network.NetworkSystem;
 import net.minecraft.network.ServerStatusResponse;
 import net.minecraft.profiler.ISnooperInfo;
@@ -178,6 +179,7 @@ public abstract class MinecraftServer implements ICommandSender, Runnable, IThre
         this.commandManager = this.createCommandManager();
         this.anvilConverterForAnvilFile = new AnvilSaveConverter(anvilFileIn, dataFixerIn);
         this.dataFixer = dataFixerIn;
+        EnumConnectionState.await();
     }
 
 
@@ -1054,12 +1056,12 @@ public abstract class MinecraftServer implements ICommandSender, Runnable, IThre
     public static void main(String[] p_main_0_) {
         //Forge: Copied from DedicatedServer.init as to run as early as possible, Old code left in place intentionally.
         //Done in good faith with permission: https://github.com/MinecraftForge/MinecraftForge/issues/3659#issuecomment-390467028
-        ServerEula eula = new ServerEula(new File("eula.txt"));
-        if (!eula.hasAcceptedEULA()) {
-            LOGGER.info("You need to agree to the EULA in order to run the server. Go to eula.txt for more info.");
-            eula.createEULAFile();
-            return;
-        }
+//        ServerEula eula = new ServerEula(new File("eula.txt"));
+//        if (!eula.hasAcceptedEULA()) {
+//            LOGGER.info("You need to agree to the EULA in order to run the server. Go to eula.txt for more info.");
+//            eula.createEULAFile();
+//            return;
+//        }
 
         Bootstrap.register();
 
@@ -1107,6 +1109,7 @@ public abstract class MinecraftServer implements ICommandSender, Runnable, IThre
                 }
             }
             YggdrasilAuthenticationService yggdrasilauthenticationservice = new YggdrasilAuthenticationService(Proxy.NO_PROXY, UUID.randomUUID().toString());
+
             MinecraftSessionService minecraftsessionservice = yggdrasilauthenticationservice.createMinecraftSessionService();
             GameProfileRepository gameprofilerepository = yggdrasilauthenticationservice.createProfileRepository();
             PlayerProfileCache playerprofilecache = new PlayerProfileCache(gameprofilerepository, new File(s1, USER_CACHE_FILE.getName()));
