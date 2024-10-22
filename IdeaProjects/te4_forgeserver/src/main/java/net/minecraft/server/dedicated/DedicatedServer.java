@@ -27,7 +27,6 @@ import net.minecraft.network.rcon.RConThreadMain;
 import net.minecraft.network.rcon.RConThreadQuery;
 import net.minecraft.profiler.Snooper;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.ServerEula;
 import net.minecraft.server.gui.MinecraftServerGui;
 import net.minecraft.server.management.PlayerProfileCache;
 import net.minecraft.server.management.PreYggdrasilConverter;
@@ -64,7 +63,6 @@ public class DedicatedServer extends MinecraftServer implements IServer {
     private final RConConsoleSource rconConsoleSource = new RConConsoleSource(this);
     private RConThreadMain rconThread;
     private PropertyManager settings;
-    private ServerEula eula;
     private boolean canSpawnStructures;
     private GameType gameType;
     private boolean guiIsEnabled;
@@ -75,6 +73,13 @@ public class DedicatedServer extends MinecraftServer implements IServer {
     public DedicatedServer(File anvilFileIn, DataFixer dataFixerIn, YggdrasilAuthenticationService authServiceIn, MinecraftSessionService sessionServiceIn, GameProfileRepository profileRepoIn, PlayerProfileCache profileCacheIn) {
         super(anvilFileIn, Proxy.NO_PROXY, dataFixerIn, authServiceIn, sessionServiceIn, profileRepoIn, profileCacheIn);
         SSPatchLoader.printLogo();
+    }
+
+
+    @Override
+    protected void preInit() {
+        super.preInit();
+        this.settings = new PropertyManager(new File("server.properties"));
     }
 
 
@@ -106,172 +111,152 @@ public class DedicatedServer extends MinecraftServer implements IServer {
         net.minecraftforge.fml.common.FMLCommonHandler.instance().onServerStart(this);
 
         LOGGER.info("Loading properties");
-        this.settings = new PropertyManager(new File("server.properties"));
-        this.eula = new ServerEula(new File("eula.txt"));
+        PropertyManager settings = this.settings;
 
-        if (!this.eula.hasAcceptedEULA()) {
-            LOGGER.info("You need to agree to the EULA in order to run the server. Go to eula.txt for more info.");
-            this.eula.createEULAFile();
+        if (this.isSinglePlayer()) {
+            this.setHostname("127.0.0.1");
+        } else {
+            this.setOnlineMode(settings.getBooleanProperty("online-mode", true));
+            this.setPreventProxyConnections(settings.getBooleanProperty("prevent-proxy-connections", false));
+            this.setHostname(settings.getStringProperty("server-ip", ""));
+        }
+
+        this.setCanSpawnAnimals(settings.getBooleanProperty("spawn-animals", true));
+        this.setCanSpawnNPCs(settings.getBooleanProperty("spawn-npcs", true));
+        this.setAllowPvp(settings.getBooleanProperty("pvp", true));
+        this.setAllowFlight(settings.getBooleanProperty("allow-flight", false));
+        this.setResourcePack(settings.getStringProperty("resource-pack", ""), this.loadResourcePackSHA());
+        this.setMOTD(settings.getStringProperty("motd", "A Minecraft Server"));
+        this.setForceGamemode(settings.getBooleanProperty("force-gamemode", false));
+        this.setPlayerIdleTimeout(settings.getIntProperty("player-idle-timeout", 0));
+
+        if (settings.getIntProperty("difficulty", 1) < 0) {
+            settings.setProperty("difficulty", 0);
+        }
+        else if (settings.getIntProperty("difficulty", 1) > 3) {
+            settings.setProperty("difficulty", 3);
+        }
+
+        this.canSpawnStructures = settings.getBooleanProperty("generate-structures", true);
+        int i = settings.getIntProperty("gamemode", GameType.SURVIVAL.getID());
+        this.gameType = WorldSettings.getGameTypeById(i);
+        LOGGER.info("Default game type: {}", this.gameType);
+        InetAddress inetaddress = null;
+
+        if (!this.getServerHostname().isEmpty()) {
+            inetaddress = InetAddress.getByName(this.getServerHostname());
+        }
+
+        if (this.getServerPort() < 0) {
+            this.setServerPort(settings.getIntProperty("server-port", 25565));
+        }
+
+        LOGGER.info("Generating keypair");
+        this.setKeyPair(CryptManager.generateKeyPair());
+        LOGGER.info("Starting Minecraft server on {}:{}", this.getServerHostname().isEmpty() ? "*" : this.getServerHostname(), Integer.valueOf(this.getServerPort()));
+
+        try {
+            this.getNetworkSystem().addEndpoint(inetaddress, this.getServerPort());
+        } catch (IOException ioexception) {
+            LOGGER.warn("**** FAILED TO BIND TO PORT!");
+            LOGGER.warn("The exception was: {}", (Object)ioexception.toString());
+            LOGGER.warn("Perhaps a server is already running on that port?");
+            return false;
+        }
+
+        if (!this.isServerInOnlineMode()) {
+            LOGGER.warn("**** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!");
+            LOGGER.warn("The server will make no attempt to authenticate usernames. Beware.");
+            LOGGER.warn("While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose.");
+            LOGGER.warn("To change this, set \"online-mode\" to \"true\" in the server.properties file.");
+        }
+
+        if (this.convertFiles()) {
+            this.getPlayerProfileCache().save();
+        }
+
+        if (!PreYggdrasilConverter.tryConvert(settings)) {
             return false;
         } else {
-            if (this.isSinglePlayer()) {
-                this.setHostname("127.0.0.1");
-            } else {
-                this.setOnlineMode(this.settings.getBooleanProperty("online-mode", true));
-                this.setPreventProxyConnections(this.settings.getBooleanProperty("prevent-proxy-connections", false));
-                this.setHostname(this.settings.getStringProperty("server-ip", ""));
+            net.minecraftforge.fml.common.FMLCommonHandler.instance().onServerStarted();
+            this.setPlayerList(new DedicatedPlayerList(this));
+            long j = System.nanoTime();
+
+            if (this.getFolderName() == null) {
+                this.setFolderName(settings.getStringProperty("level-name", "world"));
             }
 
-            this.setCanSpawnAnimals(this.settings.getBooleanProperty("spawn-animals", true));
-            this.setCanSpawnNPCs(this.settings.getBooleanProperty("spawn-npcs", true));
-            this.setAllowPvp(this.settings.getBooleanProperty("pvp", true));
-            this.setAllowFlight(this.settings.getBooleanProperty("allow-flight", false));
-            this.setResourcePack(this.settings.getStringProperty("resource-pack", ""), this.loadResourcePackSHA());
-            this.setMOTD(this.settings.getStringProperty("motd", "A Minecraft Server"));
-            this.setForceGamemode(this.settings.getBooleanProperty("force-gamemode", false));
-            this.setPlayerIdleTimeout(this.settings.getIntProperty("player-idle-timeout", 0));
+            String s  = settings.getStringProperty("level-seed", "");
+            String s1 = settings.getStringProperty("level-type", "DEFAULT");
+            String s2 = settings.getStringProperty("generator-settings", "");
+            long k = (new Random()).nextLong();
 
-            if (this.settings.getIntProperty("difficulty", 1) < 0) {
-                this.settings.setProperty("difficulty", 0);
-            }
-            else if (this.settings.getIntProperty("difficulty", 1) > 3) {
-                this.settings.setProperty("difficulty", 3);
-            }
+            if (!s.isEmpty()) {
+                try {
+                    long l = Long.parseLong(s);
 
-            this.canSpawnStructures = this.settings.getBooleanProperty("generate-structures", true);
-            int i = this.settings.getIntProperty("gamemode", GameType.SURVIVAL.getID());
-            this.gameType = WorldSettings.getGameTypeById(i);
-            LOGGER.info("Default game type: {}", (Object)this.gameType);
-            InetAddress inetaddress = null;
-
-            if (!this.getServerHostname().isEmpty()) {
-                inetaddress = InetAddress.getByName(this.getServerHostname());
-            }
-
-            if (this.getServerPort() < 0) {
-                this.setServerPort(this.settings.getIntProperty("server-port", 25565));
-            }
-
-            LOGGER.info("Generating keypair");
-            this.setKeyPair(CryptManager.generateKeyPair());
-            LOGGER.info("Starting Minecraft server on {}:{}", this.getServerHostname().isEmpty() ? "*" : this.getServerHostname(), Integer.valueOf(this.getServerPort()));
-
-            try {
-                this.getNetworkSystem().addEndpoint(inetaddress, this.getServerPort());
-            } catch (IOException ioexception) {
-                LOGGER.warn("**** FAILED TO BIND TO PORT!");
-                LOGGER.warn("The exception was: {}", (Object)ioexception.toString());
-                LOGGER.warn("Perhaps a server is already running on that port?");
-                return false;
-            }
-
-            if (!this.isServerInOnlineMode()) {
-                LOGGER.warn("**** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!");
-                LOGGER.warn("The server will make no attempt to authenticate usernames. Beware.");
-                LOGGER.warn("While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose.");
-                LOGGER.warn("To change this, set \"online-mode\" to \"true\" in the server.properties file.");
-            }
-
-            if (this.convertFiles()) {
-                this.getPlayerProfileCache().save();
-            }
-
-            if (!PreYggdrasilConverter.tryConvert(this.settings)) {
-                return false;
-            } else {
-                net.minecraftforge.fml.common.FMLCommonHandler.instance().onServerStarted();
-                this.setPlayerList(new DedicatedPlayerList(this));
-                long j = System.nanoTime();
-
-                if (this.getFolderName() == null) {
-                    this.setFolderName(this.settings.getStringProperty("level-name", "world"));
-                }
-
-                String s = this.settings.getStringProperty("level-seed", "");
-                String s1 = this.settings.getStringProperty("level-type", "DEFAULT");
-                String s2 = this.settings.getStringProperty("generator-settings", "");
-                long k = (new Random()).nextLong();
-
-                if (!s.isEmpty()) {
-                    try {
-                        long l = Long.parseLong(s);
-
-                        if (l != 0L) {
-                            k = l;
-                        }
-                    } catch (NumberFormatException var16) {
-                        k = (long)s.hashCode();
+                    if (l != 0L) {
+                        k = l;
                     }
+                } catch (NumberFormatException var16) {
+                    k = (long)s.hashCode();
                 }
-
-                WorldType worldtype = WorldType.byName(s1);
-
-                if (worldtype == null) {
-                    worldtype = WorldType.DEFAULT;
-                }
-
-                this.isCommandBlockEnabled();
-                this.getOpPermissionLevel();
-                this.isSnooperEnabled();
-                this.getNetworkCompressionThreshold();
-                this.setBuildLimit(this.settings.getIntProperty("max-build-height", 256));
-                this.setBuildLimit((this.getBuildLimit() + 8) / 16 * 16);
-                this.setBuildLimit(MathHelper.clamp(this.getBuildLimit(), 64, 256));
-                this.settings.setProperty("max-build-height", Integer.valueOf(this.getBuildLimit()));
-                TileEntitySkull.setProfileCache(this.getPlayerProfileCache());
-                TileEntitySkull.setSessionService(this.getMinecraftSessionService());
-                PlayerProfileCache.setOnlineMode(this.isServerInOnlineMode());
-                if (!net.minecraftforge.fml.common.FMLCommonHandler.instance().handleServerAboutToStart(this)) return false;
-                LOGGER.info("Preparing level \"{}\"", (Object)this.getFolderName());
-                this.loadAllWorlds(this.getFolderName(), this.getFolderName(), k, worldtype, s2);
-                long i1 = System.nanoTime() - j;
-                String s3 = String.format("%.3fs", (double)i1 / 1.0E9D);
-                LOGGER.info("Done ({})! For help, type \"help\" or \"?\"", (Object)s3);
-                this.currentTime = getCurrentTimeMillis();
-
-                if (this.settings.hasProperty("announce-player-achievements")) {
-                    this.worlds[0].getGameRules().setOrCreateGameRule("announceAdvancements", this.settings.getBooleanProperty("announce-player-achievements", true) ? "true" : "false");
-                    this.settings.removeProperty("announce-player-achievements");
-                    this.settings.saveProperties();
-                }
-
-                if (this.settings.getBooleanProperty("enable-query", false)) {
-                    LOGGER.info("Starting GS4 status listener");
-                    this.rconQueryThread = new RConThreadQuery(this);
-                    this.rconQueryThread.startThread();
-                }
-
-                if (this.settings.getBooleanProperty("enable-rcon", false)) {
-                    LOGGER.info("Starting remote control listener");
-                    this.rconThread = new RConThreadMain(this);
-                    this.rconThread.startThread();
-                }
-
-//                if (this.getMaxTickTime() > 0L)
-//                {
-//                    Thread thread1 = new Thread(new ServerHangWatchdog(this));
-//                    thread1.setName("Server Watchdog");
-//                    thread1.setDaemon(true);
-//                    thread1.start();
-//                }
-
-                Items.AIR.getSubItems(CreativeTabs.SEARCH, NonNullList.create());
-                return net.minecraftforge.fml.common.FMLCommonHandler.instance().handleServerStarting(this);
             }
+
+            WorldType worldtype = WorldType.byName(s1);
+
+            if (worldtype == null) {
+                worldtype = WorldType.DEFAULT;
+            }
+
+            this.isCommandBlockEnabled();
+            this.getOpPermissionLevel();
+            this.isSnooperEnabled();
+            this.getNetworkCompressionThreshold();
+            this.setBuildLimit(settings.getIntProperty("max-build-height", 256));
+            this.setBuildLimit((this.getBuildLimit() + 8) / 16 * 16);
+            this.setBuildLimit(MathHelper.clamp(this.getBuildLimit(), 64, 256));
+            settings.setProperty("max-build-height", Integer.valueOf(this.getBuildLimit()));
+            TileEntitySkull.setProfileCache(this.getPlayerProfileCache());
+            TileEntitySkull.setSessionService(this.getMinecraftSessionService());
+            PlayerProfileCache.setOnlineMode(this.isServerInOnlineMode());
+            if (!net.minecraftforge.fml.common.FMLCommonHandler.instance().handleServerAboutToStart(this)) return false;
+            LOGGER.info("Preparing level \"{}\"", (Object)this.getFolderName());
+            this.loadAllWorlds(this.getFolderName(), this.getFolderName(), k, worldtype, s2);
+            long i1 = System.nanoTime() - j;
+            String s3 = String.format("%.3fs", (double)i1 / 1.0E9D);
+            LOGGER.info("Done ({})! For help, type \"help\" or \"?\"", (Object)s3);
+            this.currentTime = getCurrentTimeMillis();
+
+            if (settings.hasProperty("announce-player-achievements")) {
+                this.worlds[0].getGameRules().setOrCreateGameRule("announceAdvancements", settings.getBooleanProperty("announce-player-achievements", true) ? "true" : "false");
+                settings.removeProperty("announce-player-achievements");
+                settings.saveProperties();
+            }
+
+            if (settings.getBooleanProperty("enable-query", false)) {
+                LOGGER.info("Starting GS4 status listener");
+                this.rconQueryThread = new RConThreadQuery(this);
+                this.rconQueryThread.startThread();
+            }
+
+            if (settings.getBooleanProperty("enable-rcon", false)) {
+                LOGGER.info("Starting remote control listener");
+                this.rconThread = new RConThreadMain(this);
+                this.rconThread.startThread();
+            }
+
+            Items.AIR.getSubItems(CreativeTabs.SEARCH, NonNullList.create());
+            return net.minecraftforge.fml.common.FMLCommonHandler.instance().handleServerStarting(this);
         }
     }
 
 
-    public String loadResourcePackSHA()
-    {
-        if (this.settings.hasProperty("resource-pack-hash"))
-        {
-            if (this.settings.hasProperty("resource-pack-sha1"))
-            {
+    public String loadResourcePackSHA() {
+        if (this.settings.hasProperty("resource-pack-hash")) {
+            if (this.settings.hasProperty("resource-pack-sha1")) {
                 LOGGER.warn("resource-pack-hash is deprecated and found along side resource-pack-sha1. resource-pack-hash will be ignored.");
-            }
-            else
-            {
+            } else {
                 LOGGER.warn("resource-pack-hash is deprecated. Please use resource-pack-sha1 instead.");
                 this.settings.getStringProperty("resource-pack-sha1", this.settings.getStringProperty("resource-pack-hash", ""));
                 this.settings.removeProperty("resource-pack-hash");
@@ -280,16 +265,13 @@ public class DedicatedServer extends MinecraftServer implements IServer {
 
         String s = this.settings.getStringProperty("resource-pack-sha1", "");
 
-        if (!s.isEmpty() && !RESOURCE_PACK_SHA1_PATTERN.matcher(s).matches())
-        {
+        if (!s.isEmpty() && !RESOURCE_PACK_SHA1_PATTERN.matcher(s).matches()) {
             LOGGER.warn("Invalid sha1 for ressource-pack-sha1");
         }
 
-        if (!this.settings.getStringProperty("resource-pack", "").isEmpty() && s.isEmpty())
-        {
+        if (!this.settings.getStringProperty("resource-pack", "").isEmpty() && s.isEmpty()) {
             LOGGER.warn("You specified a resource pack without providing a sha1 hash. Pack will be updated on the client only if you change the name of the pack.");
         }
-
         return s;
     }
 
@@ -302,15 +284,13 @@ public class DedicatedServer extends MinecraftServer implements IServer {
 
 
     @Override
-    public boolean canStructuresSpawn()
-    {
+    public boolean canStructuresSpawn() {
         return this.canSpawnStructures;
     }
 
 
     @Override
-    public GameType getGameType()
-    {
+    public GameType getGameType() {
         return this.gameType;
     }
 

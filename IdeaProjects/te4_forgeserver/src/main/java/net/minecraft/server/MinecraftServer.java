@@ -88,6 +88,7 @@ import org.jetbrains.annotations.NotNull;
 import plus.fserver.ElcaConfig;
 import plus.fserver.api.BiomeIndexes;
 import plus.fserver.api.ServerCommand;
+import plus.fserver.plugin.AsmTrimmer;
 import plus.fserver.server.AsyWorldTickerV2;
 import plus.fserver.server.ElcaCommands;
 import plus.fserver.utls.math.FastRandom;
@@ -1054,16 +1055,6 @@ public abstract class MinecraftServer implements ICommandSender, Runnable, IThre
 
     @SideOnly(Side.SERVER)
     public static void main(String[] p_main_0_) {
-        //Forge: Copied from DedicatedServer.init as to run as early as possible, Old code left in place intentionally.
-        //Done in good faith with permission: https://github.com/MinecraftForge/MinecraftForge/issues/3659#issuecomment-390467028
-//        ServerEula eula = new ServerEula(new File("eula.txt"));
-//        if (!eula.hasAcceptedEULA()) {
-//            LOGGER.info("You need to agree to the EULA in order to run the server. Go to eula.txt for more info.");
-//            eula.createEULAFile();
-//            return;
-//        }
-
-        Bootstrap.register();
 
         try {
             boolean flag = true;
@@ -1113,6 +1104,9 @@ public abstract class MinecraftServer implements ICommandSender, Runnable, IThre
             MinecraftSessionService minecraftsessionservice = yggdrasilauthenticationservice.createMinecraftSessionService();
             GameProfileRepository gameprofilerepository = yggdrasilauthenticationservice.createProfileRepository();
             PlayerProfileCache playerprofilecache = new PlayerProfileCache(gameprofilerepository, new File(s1, USER_CACHE_FILE.getName()));
+
+            Bootstrap.register();
+
             final DedicatedServer dedicatedserver = new DedicatedServer(new File(s1), DataFixesManager.createFixer(), yggdrasilauthenticationservice, minecraftsessionservice, gameprofilerepository, playerprofilecache);
 
             if (s != null) {
@@ -1148,8 +1142,7 @@ public abstract class MinecraftServer implements ICommandSender, Runnable, IThre
                 });
             }
         }
-        catch (Exception exception)
-        {
+        catch (Exception exception) {
             LOGGER.fatal("Failed to start the minecraft server", exception);
         }
     }
@@ -1333,6 +1326,14 @@ public abstract class MinecraftServer implements ICommandSender, Runnable, IThre
                 this.statusResponse.setServerDescription(new TextComponentString(this.motd));
                 this.statusResponse.setVersion(new ServerStatusResponse.Version("1.12.2", 340));
                 this.applyServerIconToResponse(this.statusResponse);
+
+                if(ElcaConfig.ENABLE_ASM_TRIMMER) {
+                    try {
+                        AsmTrimmer.runFixes();
+                    } catch (Throwable e) {
+                        LOGGER.warn("Asm trimmer has errors", e);
+                    }
+                }
 
                 while (this.serverRunning) {
                     long k = getCurrentTimeMillis();

@@ -2285,8 +2285,7 @@ public class Block extends net.minecraftforge.registries.IForgeRegistryEntry.Imp
 
     /* ========================================= FORGE END ======================================*/
 
-    public static void registerBlocks()
-    {
+    public static void registerBlocks() {
         //ignore fs
         registerBlock(0, AIR_ID, (new BlockAir()).setTranslationKey("air"));
         //used fs
