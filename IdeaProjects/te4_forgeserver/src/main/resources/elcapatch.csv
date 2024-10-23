@@ -1,3 +1,5 @@
+net.minecraft.advancements.Advancement$Builder
+net.minecraft.advancements.Advancement
 net.minecraft.advancements.AdvancementManager$1
 net.minecraft.advancements.AdvancementManager
 net.minecraft.advancements.AdvancementProgress$Serializer
@@ -610,8 +612,14 @@ net.minecraft.server.network.NetHandlerLoginServer$LoginState
 net.minecraft.server.network.NetHandlerLoginServer
 net.minecraft.server.network.NetHandlerStatusServer
 net.minecraft.server.ServerEula
+net.minecraft.stats.StatBase$1
+net.minecraft.stats.StatBase$2
+net.minecraft.stats.StatBase$3
+net.minecraft.stats.StatBase$4
+net.minecraft.stats.StatBase
 net.minecraft.stats.StatisticsManager
 net.minecraft.stats.StatisticsManagerServer
+net.minecraft.stats.StatList
 net.minecraft.tileentity.TileEntityBeacon$BeamSegment
 net.minecraft.tileentity.TileEntityBeacon
 net.minecraft.tileentity.TileEntityBed
@@ -648,6 +656,8 @@ net.minecraft.util.math.BlockPos$PooledMutableBlockPos$1, false, false
 net.minecraft.util.math.BlockPos$PooledMutableBlockPos, false, false
 net.minecraft.util.math.BlockPos, false, false
 net.minecraft.util.math.Vec3i, false, false
+net.minecraft.util.ResourceLocation$Serializer, false, false
+net.minecraft.util.ResourceLocation, false, false
 net.minecraft.util.ServerRecipeBookHelper, false, false
 net.minecraft.util.SubList, false, false
 net.minecraft.util.SublistEV1, false, false

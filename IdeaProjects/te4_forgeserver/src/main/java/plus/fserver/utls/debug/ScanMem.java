@@ -1,6 +1,5 @@
 package plus.fserver.utls.debug;
 
-import io.netty.util.internal.shaded.org.jctools.util.UnsafeAccess;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import plus.fserver.utls.collections.ArrayListEV;

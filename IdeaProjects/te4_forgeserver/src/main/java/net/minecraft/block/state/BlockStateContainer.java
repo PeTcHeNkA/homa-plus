@@ -2,21 +2,9 @@ package net.minecraft.block.state;
 
 import com.google.common.base.Function;
 import com.google.common.base.MoreObjects;
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSortedMap;
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Table;
-import com.google.common.collect.UnmodifiableIterator;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import com.google.common.collect.*;
+
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
@@ -54,7 +42,7 @@ public class BlockStateContainer {
         }
     };
     private final Block block;
-    private final ImmutableSortedMap < String, IProperty<? >> properties;
+    private final ImmutableSortedMap<String, IProperty<?>> properties;
     private final ImmutableList<IBlockState> validStates;
 
     public BlockStateContainer(Block blockIn, IProperty<?>... properties) {
@@ -69,18 +57,22 @@ public class BlockStateContainer {
 
     protected BlockStateContainer(Block blockIn, IProperty<?>[] properties, ImmutableMap<net.minecraftforge.common.property.IUnlistedProperty<?>, java.util.Optional<?>> unlistedProperties) {
         this.block = blockIn;
-        Map < String, IProperty<? >> map = Maps.newHashMap();
 
-        for (IProperty<?> property : properties) {
-            validateProperty(blockIn, property);
-            map.put(property.getName(), property);
+        if(properties.length != 0) {
+            Map<String, IProperty<?>> map = new HashMap<>(properties.length);
+            for (IProperty<?> property : properties) {
+                validateProperty(blockIn, property);
+                map.put(property.getName(), property);
+            }
+            this.properties = ImmutableSortedMap.copyOf(map);
+        } else {
+            this.properties = ImmutableSortedMap.of();
         }
-        this.properties = ImmutableSortedMap.copyOf(map);
-        Map < Map < IProperty<?>, Comparable<? >> , BlockStateContainer.StateImplementation > map2 = Maps. < Map < IProperty<?>, Comparable<? >> , BlockStateContainer.StateImplementation > newLinkedHashMap();
+        Map<Map<IProperty<?>, Comparable<?>> , BlockStateContainer.StateImplementation> map2 = Maps.newLinkedHashMap();
         List<BlockStateContainer.StateImplementation> list1 = Lists.newArrayList();
 
         for (List < Comparable<? >> list : Cartesian.cartesianProduct(this.getAllowedValues())) {
-            Map < IProperty<?>, Comparable<? >> map1 = MapPopulator.createMap(this.properties.values(), list);
+            Map<IProperty<?>, Comparable<?>> map1 = MapPopulator.createMap(this.properties.values(), list);
             BlockStateContainer.StateImplementation state = createState(blockIn, ImmutableMap.copyOf(map1), unlistedProperties);
             map2.put(map1, state);
             list1.add(state);
@@ -91,6 +83,14 @@ public class BlockStateContainer {
         }
 
         this.validStates = ImmutableList.copyOf(list1);
+
+        if(list1.size() > 1){
+            ImmutableTrimmer trimmer = new ImmutableTrimmer();
+            for (BlockStateContainer.StateImplementation state : list1) {
+                trimmer.tryTrim(state.properties);
+                trimmer.tryTrim(state.propertyValueTable);
+            }
+        }
     }
 
 
@@ -164,8 +164,8 @@ public class BlockStateContainer {
      */
     public static class StateImplementation extends BlockStateBase {
         private final Block block;
-        private final ImmutableMap   < IProperty<?>, Comparable<? >> properties;
-        protected     ImmutableTable < IProperty<?>, Comparable<?>, IBlockState > propertyValueTable;
+        private final ImmutableMap   <IProperty<?>, Comparable<?>> properties;
+        protected     ImmutableTable <IProperty<?>, Comparable<?>, IBlockState> propertyValueTable;
         private final boolean isNormalCube;
         private final boolean canProvidePower;
         private final boolean isFullCube;

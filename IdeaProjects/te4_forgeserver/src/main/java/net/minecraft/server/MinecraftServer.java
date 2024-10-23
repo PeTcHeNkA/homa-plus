@@ -1055,8 +1055,17 @@ public abstract class MinecraftServer implements ICommandSender, Runnable, IThre
 
     @SideOnly(Side.SERVER)
     public static void main(String[] p_main_0_) {
-
+        String delay = System.getProperty("elca.startdelay");
+        //delay = "40000";
         try {
+            if(delay != null){
+                int del = Integer.parseInt(delay);
+                if(del > 0){
+                    LOGGER.warn("DELAY BEFORE START: "+del);
+                    Thread.sleep(del);
+                    LOGGER.warn("CONTINUE STARTING");
+                }
+            }
             boolean flag = true;
             String s = null;
             String s1 = ".";
@@ -1329,7 +1338,9 @@ public abstract class MinecraftServer implements ICommandSender, Runnable, IThre
 
                 if(ElcaConfig.ENABLE_ASM_TRIMMER) {
                     try {
-                        AsmTrimmer.runFixes();
+                        int amount = AsmTrimmer.runFixes();
+                        System.gc();
+                        LOGGER.info("Saved {} bytes", amount);
                     } catch (Throwable e) {
                         LOGGER.warn("Asm trimmer has errors", e);
                     }
