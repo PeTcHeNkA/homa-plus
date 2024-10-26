@@ -48,6 +48,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import plus.fserver.ElcaConfig;
 import plus.fserver.api.Keep;
+import plus.fserver.plugin.AsmTrimmer;
 import plus.fserver.plugin.SSPatchLoader;
 import plus.fserver.server.AsyWorldTickerV2;
 

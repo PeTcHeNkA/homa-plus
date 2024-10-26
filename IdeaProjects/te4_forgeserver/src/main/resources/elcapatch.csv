@@ -28,6 +28,7 @@ net.minecraft.advancements.critereon.EffectsChangedTrigger, false, false
 net.minecraft.advancements.critereon.EnchantedItemTrigger$Instance, false, false
 net.minecraft.advancements.critereon.EnchantedItemTrigger$Listeners, false, false
 net.minecraft.advancements.critereon.EnchantedItemTrigger, false, false
+net.minecraft.advancements.critereon.EnchantmentPredicate, false, false
 net.minecraft.advancements.critereon.EnterBlockTrigger$Instance, false, false
 net.minecraft.advancements.critereon.EnterBlockTrigger$Listeners, false, false
 net.minecraft.advancements.critereon.EnterBlockTrigger, false, false
@@ -40,12 +41,14 @@ net.minecraft.advancements.critereon.InventoryChangeTrigger, false, false
 net.minecraft.advancements.critereon.ItemDurabilityTrigger$Instance, false, false
 net.minecraft.advancements.critereon.ItemDurabilityTrigger$Listeners, false, false
 net.minecraft.advancements.critereon.ItemDurabilityTrigger, false, false
+net.minecraft.advancements.critereon.ItemPredicate, false, false
 net.minecraft.advancements.critereon.KilledTrigger$Instance, false, false
 net.minecraft.advancements.critereon.KilledTrigger$Listeners, false, false
 net.minecraft.advancements.critereon.KilledTrigger, false, false
 net.minecraft.advancements.critereon.LevitationTrigger$Instance, false, false
 net.minecraft.advancements.critereon.LevitationTrigger$Listeners, false, false
 net.minecraft.advancements.critereon.LevitationTrigger, false, false
+net.minecraft.advancements.critereon.MinMaxBounds, false, false
 net.minecraft.advancements.critereon.NetherTravelTrigger$Instance, false, false
 net.minecraft.advancements.critereon.NetherTravelTrigger$Listeners, false, false
 net.minecraft.advancements.critereon.NetherTravelTrigger, false, false
@@ -266,6 +269,7 @@ net.minecraft.client.multiplayer.WorldClient$3
 net.minecraft.client.multiplayer.WorldClient$4
 net.minecraft.client.multiplayer.WorldClient$5
 net.minecraft.client.multiplayer.WorldClient
+net.minecraft.command.CommandHandler, false, false
 net.minecraft.command.CommandResultStats$1, false, false
 net.minecraft.command.CommandResultStats$Type, false, false
 net.minecraft.command.CommandResultStats, false, false
@@ -308,6 +312,8 @@ net.minecraft.entity.Entity$6
 net.minecraft.entity.Entity
 net.minecraft.entity.EntityCreature
 net.minecraft.entity.EntityFlying
+net.minecraft.entity.EntityList$EntityEggInfo
+net.minecraft.entity.EntityList
 net.minecraft.entity.EntityLiving$1
 net.minecraft.entity.EntityLiving$SpawnPlacementType
 net.minecraft.entity.EntityLiving
@@ -617,6 +623,7 @@ net.minecraft.stats.StatBase$2
 net.minecraft.stats.StatBase$3
 net.minecraft.stats.StatBase$4
 net.minecraft.stats.StatBase
+net.minecraft.stats.StatCrafting
 net.minecraft.stats.StatisticsManager
 net.minecraft.stats.StatisticsManagerServer
 net.minecraft.stats.StatList
@@ -661,6 +668,8 @@ net.minecraft.util.ResourceLocation, false, false
 net.minecraft.util.ServerRecipeBookHelper, false, false
 net.minecraft.util.SubList, false, false
 net.minecraft.util.SublistEV1, false, false
+net.minecraft.village.Village$VillageAggressor
+net.minecraft.village.Village
 net.minecraft.village.VillageCollection
 net.minecraft.world.biome.Biome$1
 net.minecraft.world.biome.Biome$BiomeProperties
@@ -932,4 +941,7 @@ net.minecraftforge.fml.common.eventhandler.Event$Result, true
 net.minecraftforge.fml.common.eventhandler.Event, true
 net.minecraftforge.fml.common.eventhandler.EventBus, true
 net.minecraftforge.fml.common.registry.EntityEntry, true
-net.minecraftforge.registries.ForgeRegistryHook, true
+net.minecraftforge.registries.ForgeRegistry$1, true
+net.minecraftforge.registries.ForgeRegistry$OverrideOwner, true
+net.minecraftforge.registries.ForgeRegistry$Snapshot, true
+net.minecraftforge.registries.ForgeRegistry, true

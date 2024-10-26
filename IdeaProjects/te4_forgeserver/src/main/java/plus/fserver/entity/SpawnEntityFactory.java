@@ -28,34 +28,7 @@ public class SpawnEntityFactory {
     private static final Map<ClassLoader, MethodHandles.Lookup> altLookups = new Reference2ReferenceArrayMap<>();
     public static final IntObjectHashMap<Function<World, ? extends Entity>> cache = new IntObjectHashMap<>();
 
-    private static void init(){
-        //item
-        add(EntityBoat.class     , EntityBoat     ::new);
-        add(EntityItem.class     , EntityItem     ::new);
-        add(EntityTNTPrimed.class, EntityTNTPrimed::new);
-
-        //monster
-        add(EntityBlaze.class    , EntityBlaze    ::new);
-        add(EntityCreeper.class  , EntityCreeper  ::new);
-        add(EntityEnderman.class , EntityEnderman ::new);
-        add(EntityGuardian.class , EntityGuardian ::new);
-        add(EntitySpider.class   , EntitySpider   ::new);
-        add(EntityWitch.class    , EntityWitch    ::new);
-        add(EntityZombie.class   , EntityZombie   ::new);
-
-        //passive
-        add(EntityBat.class      , EntityBat      ::new);
-        add(EntitySheep.class    , EntitySheep    ::new);
-        add(EntitySquid.class    , EntitySquid    ::new);
-        add(EntityVillager.class , EntityVillager ::new);
-        add(EntityCow.class      , EntityCow      ::new);
-        add(EntityChicken.class  , EntityChicken  ::new);
-        add(EntityPig.class      , EntityPig      ::new);
-        add(EntityWolf.class     , EntityWolf     ::new);
-    }
-
-
-    private static void add(Class<? extends Entity> cls, Function<World, ? extends Entity> func){
+    public static void registerCtor(Class<? extends Entity> cls, Function<World, ? extends Entity> func){
         cache.put(cls.hashCode(), func);
     }
 

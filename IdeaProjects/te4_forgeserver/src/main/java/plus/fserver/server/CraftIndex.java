@@ -11,7 +11,7 @@ public class CraftIndex {
     private final int hash;
 
     public CraftIndex(InventoryCrafting inv){
-        items = new Item[inv.getSizeInventory()];
+        Item[] items = this.items = new Item[inv.getSizeInventory()];
         int hash = 0;
         Item item;
         for (int i=0;i<items.length;i++){

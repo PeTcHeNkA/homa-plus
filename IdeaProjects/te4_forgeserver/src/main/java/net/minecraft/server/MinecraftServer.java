@@ -1054,7 +1054,7 @@ public abstract class MinecraftServer implements ICommandSender, Runnable, IThre
 
 
     @SideOnly(Side.SERVER)
-    public static void main(String[] p_main_0_) {
+    public static void main(String[] args) {
         String delay = System.getProperty("elca.startdelay");
         //delay = "40000";
         try {
@@ -1074,9 +1074,9 @@ public abstract class MinecraftServer implements ICommandSender, Runnable, IThre
             boolean flag2 = false;
             int l = -1;
 
-            for (int i1 = 0; i1 < p_main_0_.length; ++i1) {
-                String s3 = p_main_0_[i1];
-                String s4 = i1 == p_main_0_.length - 1 ? null : p_main_0_[i1 + 1];
+            for (int i1 = 0; i1 < args.length; ++i1) {
+                String s3 = args[i1];
+                String s4 = i1 == args.length - 1 ? null : args[i1 + 1];
                 boolean flag3 = false;
 
                 if (!"nogui".equals(s3) && !"--nogui".equals(s3)) {

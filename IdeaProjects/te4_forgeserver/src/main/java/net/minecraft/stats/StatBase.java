@@ -31,13 +31,10 @@ public class StatBase {
     public static IStatType distanceStatType;
     public static IStatType divideByTen;
 
-    public StatBase(String p_i45307_1_, ITextComponent statName, IStatType p_i45307_3_) {
-        this.statId = p_i45307_1_;
-
-        setStatName(statName);
-        //this.statName = statName;
-
-        this.formatter = p_i45307_3_;
+    public StatBase(String id, ITextComponent display, IStatType type) {
+        this.statId = id;
+        setStatName(display);
+        this.formatter = type;
         this.objectiveCriteria = new ScoreCriteriaStat(this);
         IScoreCriteria.INSTANCES.put(this.objectiveCriteria.getName(), this.objectiveCriteria);
     }

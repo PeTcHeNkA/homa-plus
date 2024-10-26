@@ -541,7 +541,7 @@ public abstract class Biome extends IForgeRegistryEntry.Impl<Biome> {
     public static void registerBiome(int id, String name, Biome b) {
         REGISTRY.register(id, new ResourceLocation(name), b);
         if (b.isMutation()) {
-            MUTATION_TO_BASE_ID_MAP.put(b, getIdForBiome((Biome)REGISTRY.getObject(new ResourceLocation(b.baseBiomeRegName))));
+            MUTATION_TO_BASE_ID_MAP.put(b, getIdForBiome(REGISTRY.getObject(new ResourceLocation(b.baseBiomeRegName))));
         }
     }
 
@@ -555,7 +555,7 @@ public abstract class Biome extends IForgeRegistryEntry.Impl<Biome> {
         SANDSTONE = Blocks.SANDSTONE.getDefaultState();
         ICE = Blocks.ICE.getDefaultState();
         WATER = Blocks.WATER.getDefaultState();
-        MUTATION_TO_BASE_ID_MAP = new ObjectIntIdentityMap();
+        MUTATION_TO_BASE_ID_MAP = new ObjectIntIdentityMap<>(256);
         TEMPERATURE_NOISE = new NoiseGeneratorPerlin(new Random(1234L), 1);
         GRASS_COLOR_NOISE = new NoiseGeneratorPerlin(new Random(2345L), 1);
         DOUBLE_PLANT_GENERATOR = new WorldGenDoublePlant();

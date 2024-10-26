@@ -45,21 +45,21 @@ public class NetworkSystem {
     @Keep
     public static final LazyLoadBase<NioEventLoopGroup> SERVER_NIO_EVENTLOOP = new LazyLoadBase<NioEventLoopGroup>() {
         protected NioEventLoopGroup load() {
-            return new NioEventLoopGroup(0, (new ThreadFactoryBuilder()).setNameFormat("Elca Server #%d").setDaemon(true).setThreadFactory(net.minecraftforge.fml.common.thread.SidedThreadGroups.SERVER).build());
+            return new NioEventLoopGroup(ElcaConfig.ASY_THREAD_POOL_SIZE, (new ThreadFactoryBuilder()).setNameFormat("Elca Server #%d").setDaemon(true).setThreadFactory(net.minecraftforge.fml.common.thread.SidedThreadGroups.SERVER).build());
         }
     };
 
     @Keep
     public static final LazyLoadBase<EpollEventLoopGroup> SERVER_EPOLL_EVENTLOOP = new LazyLoadBase<EpollEventLoopGroup>() {
         protected EpollEventLoopGroup load() {
-            return new EpollEventLoopGroup(0, (new ThreadFactoryBuilder()).setNameFormat("Elca Epoll Server #%d").setDaemon(true).setThreadFactory(net.minecraftforge.fml.common.thread.SidedThreadGroups.SERVER).build());
+            return new EpollEventLoopGroup(ElcaConfig.ASY_THREAD_POOL_SIZE, (new ThreadFactoryBuilder()).setNameFormat("Elca Epoll Server #%d").setDaemon(true).setThreadFactory(net.minecraftforge.fml.common.thread.SidedThreadGroups.SERVER).build());
         }
     };
 
     @Keep
     public static final LazyLoadBase<LocalEventLoopGroup> SERVER_LOCAL_EVENTLOOP = new LazyLoadBase<LocalEventLoopGroup>() {
         protected LocalEventLoopGroup load() {
-            return new LocalEventLoopGroup(0, (new ThreadFactoryBuilder()).setNameFormat("Netty Local Server IO #%d").setDaemon(true).setThreadFactory(net.minecraftforge.fml.common.thread.SidedThreadGroups.CLIENT).build());
+            return new LocalEventLoopGroup(ElcaConfig.ASY_THREAD_POOL_SIZE, (new ThreadFactoryBuilder()).setNameFormat("Netty Local Server IO #%d").setDaemon(true).setThreadFactory(net.minecraftforge.fml.common.thread.SidedThreadGroups.CLIENT).build());
         }
     };
 

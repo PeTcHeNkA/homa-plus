@@ -115,7 +115,7 @@ public class CraftingManager {
                             try
                             {
                                 bufferedreader = Files.newBufferedReader(path1);
-                                register(s, parseRecipeJson((JsonObject)JsonUtils.fromJson(gson, bufferedreader, JsonObject.class)));
+                                register(s, parseRecipeJson(JsonUtils.fromJson(gson, bufferedreader, JsonObject.class)));
                             }
                             catch (JsonParseException jsonparseexception)
                             {

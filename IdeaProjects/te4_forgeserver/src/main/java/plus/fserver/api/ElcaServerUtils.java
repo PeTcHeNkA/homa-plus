@@ -15,7 +15,6 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraftforge.fml.common.network.handshake.NetworkDispatcher;
 import net.minecraftforge.registries.ForgeRegistry;
-import net.minecraftforge.registries.ForgeRegistryHook;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import plus.fserver.ElcaCV2;
 import plus.fserver.api.inject.FieldAccessor;
@@ -115,6 +114,6 @@ public final class ElcaServerUtils {
 
 
     public static <V extends IForgeRegistryEntry<V>> void unsafeRegister(ForgeRegistry<V> registry, int id, V obj) {
-        ForgeRegistryHook.register(registry, id, obj);
+        registry.addU(id, obj);
     }
 }

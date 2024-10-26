@@ -45,7 +45,7 @@ public class ElcaConfig {
     public static int NETWORK_TICK_RATE          = 25; //50 default,
     public static int BEACON_TICK_RATE           = 85;
     public static int IMMEDIATE_UPDATE_LIMIT     = 24;
-    //public static int ASY_THREAD_POOL_SIZE       = Runtime.getRuntime().availableProcessors();
+    public static int ASY_THREAD_POOL_SIZE       = Runtime.getRuntime().availableProcessors();
     //public static int ENTITY_TRACKER_UPDATE_RATE = 4;
 
 
@@ -205,10 +205,17 @@ public class ElcaConfig {
         USE_ASYNC_TRACKER_DEFAULT  = calc(map, "use-async-tracker-def"       , USE_ASYNC_TRACKER_DEFAULT  );
         UNIMPORTANT_PACKET_QUEUE   = calc(map, "unimportant-packet-queue"    , UNIMPORTANT_PACKET_QUEUE   );
         ENABLE_ASM_TRIMMER         = calc(map, "enable-asm-trimmer"          , ENABLE_ASM_TRIMMER         );
+        ASY_THREAD_POOL_SIZE       = calc(map, "thread-pool-size"            , ASY_THREAD_POOL_SIZE       );
 
         if(INIT_PALETTE_LINEAR_BITS > 4 || INIT_PALETTE_LINEAR_BITS < 2){
             INIT_PALETTE_LINEAR_BITS = 4;
             throw new Error("Linear palette bits should be in 2, 3 or 4");
+        }
+
+        if(ASY_THREAD_POOL_SIZE >= Runtime.getRuntime().availableProcessors() * 6){
+            int newPoolSize = Runtime.getRuntime().availableProcessors() * 6;
+            System.err.println(ASY_THREAD_POOL_SIZE+" is so much! Pool size trimmed to "+newPoolSize);
+            ASY_THREAD_POOL_SIZE = newPoolSize;
         }
     }
 }

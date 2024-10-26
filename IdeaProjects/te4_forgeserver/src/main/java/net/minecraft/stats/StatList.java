@@ -17,7 +17,7 @@ import plus.tson.utl.Te4HashSet;
 
 
 public class StatList {
-    private static final boolean needInit = FMLLaunchHandler.side() == Side.CLIENT;
+    private static final boolean client = FMLLaunchHandler.side() == Side.CLIENT;
     protected static final Map<String, StatBase> ID_TO_STAT_MAP;
     public static final List<StatBase> ALL_STATS;
     public static final List<StatBase> BASIC_STATS;
@@ -198,14 +198,14 @@ public class StatList {
 
 
     private static ITextComponent translation(String key, Item item){
-        if(needInit)
+        if(client)
             return new TextComponentTranslation(key, new ItemStack(item).getTextComponent());
         return StatBase.EMPTY;
     }
 
 
     private static ITextComponent translation(String key){
-        if(needInit)
+        if(client)
             return new TextComponentTranslation(key);
         return StatBase.EMPTY;
     }
