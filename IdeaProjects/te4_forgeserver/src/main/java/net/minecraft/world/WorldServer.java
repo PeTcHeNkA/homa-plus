@@ -997,7 +997,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         boolean isPlayer = entityIn instanceof EntityPlayer;
 
         ChunkProviderServer cps = chunkProviderServer;
-        Chunk chunk = cps.getLoadedChunk(chunkZ, chunkZ);
+        Chunk chunk = cps.getLoadedChunk(chunkX, chunkZ);
 
         if (!(force || isPlayer) && chunk == null) {
             return false;
