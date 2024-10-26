@@ -1,10 +1,8 @@
 package net.minecraft.network;
 
 import java.util.IdentityHashMap;
-import java.util.Map;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
-import com.google.common.collect.Maps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.network.handshake.client.C00Handshake;
 import net.minecraft.network.login.client.CPacketEncryptionResponse;
@@ -303,7 +301,7 @@ public enum EnumConnectionState {
 
     protected EnumConnectionState registerPacket(EnumPacketDirection direction, Class<? extends Packet<? >> packetClass) {
         Int2ObjectOpenHashMap<Supplier<Packet<?>>> conMap = constructMap[direction.id];
-        IdentityHashMap<Class, Integer> clazzMap = clazzMaps[direction.id];
+        IdentityHashMap<Class, Integer> clazzMap          = clazzMaps[direction.id];
 
         if (clazzMap.containsKey(packetClass)) {
             String s = direction + " packet " + packetClass + " is already known to ID " + clazzMap.get(packetClass);
@@ -312,7 +310,7 @@ public enum EnumConnectionState {
         } else {
             Supplier<? extends Packet<?>> con = Reflector.compileCtor(packetClass);
 
-            int id = clazzMap.size();
+            int id = conMap.size();
             conMap  .put(id, (Supplier<Packet<?>>) con);
             clazzMap.put(packetClass, id);
             return this;

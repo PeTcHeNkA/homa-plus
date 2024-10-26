@@ -51,7 +51,7 @@ public class SElcaPacketDestroyEntities extends SPacketPlayBase {
     public void writePacketData(int id, ByteBuf buf) throws IOException {
         NetUtils.writeVarInt(buf, id);
 
-        int len = 1;
+        int len = 0;
         Int1LinkedList.Node node = this.nodes, temp = node;
 
         while (temp != null){
@@ -70,7 +70,7 @@ public class SElcaPacketDestroyEntities extends SPacketPlayBase {
 
     @Override
     public void processPacket(INetHandlerPlayClient client) {
-        int i = 1;
+        int i = 0;
         Int1LinkedList.Node node = this.nodes, temp = node;
 
         while (temp != null){
