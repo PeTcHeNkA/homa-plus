@@ -12,15 +12,14 @@ import org.apache.commons.io.*;
 import java.nio.file.*;
 import java.net.*;
 import java.io.*;
-import org.apache.logging.log4j.*;
 import java.lang.reflect.*;
 import net.minecraft.util.text.*;
 import net.minecraft.util.*;
 import com.google.gson.*;
+import static net.minecraft.server.MinecraftServer.LOGGER;
 
 
 public class AdvancementManager {
-    private static final Logger LOGGER;
     public static final Gson GSON;
     private static final AdvancementList ADVANCEMENT_LIST;
     private static boolean needInit = true;
@@ -106,18 +105,18 @@ public class AdvancementManager {
                 try {
                     final Advancement.Builder advancement$builder = JsonUtils.gsonDeserialize(AdvancementManager.GSON, FileUtils.readFileToString(file1, StandardCharsets.UTF_8), Advancement.Builder.class);
                     if (advancement$builder == null) {
-                        AdvancementManager.LOGGER.error("Couldn't load custom advancement " + resourcelocation + " from " + file1 + " as it's empty or null");
+                        LOGGER.error("Couldn't load custom advancement " + resourcelocation + " from " + file1 + " as it's empty or null");
                     }
                     else {
                         map.put(resourcelocation, advancement$builder);
                     }
                 }
                 catch (IllegalArgumentException | JsonParseException ex2) {
-                    AdvancementManager.LOGGER.error("Parsing error loading custom advancement {}", resourcelocation, ex2);
+                    LOGGER.error("Parsing error loading custom advancement {}", resourcelocation, ex2);
                     this.hasErrored = true;
                 }
                 catch (IOException ioexception) {
-                    AdvancementManager.LOGGER.error("Couldn't read custom advancement {} from {}", resourcelocation, file1, ioexception);
+                    LOGGER.error("Couldn't read custom advancement {} from {}", resourcelocation, file1, ioexception);
                     this.hasErrored = true;
                 }
             }
@@ -137,7 +136,7 @@ public class AdvancementManager {
                 }
                 else {
                     if (!"jar".equals(uri.getScheme())) {
-                        AdvancementManager.LOGGER.error("Unsupported scheme " + uri + " trying to list all built-in advancements (NYI?)");
+                        LOGGER.error("Unsupported scheme " + uri + " trying to list all built-in advancements (NYI?)");
                         this.hasErrored = true;
                         return;
                     }
@@ -162,30 +161,30 @@ public class AdvancementManager {
                             map.put(resourcelocation, advancement$builder);
                         }
                         catch (JsonParseException jsonparseexception) {
-                            AdvancementManager.LOGGER.error("Parsing error loading built-in advancement " + resourcelocation, (Throwable)jsonparseexception);
+                            LOGGER.error("Parsing error loading built-in advancement " + resourcelocation, (Throwable)jsonparseexception);
                             this.hasErrored = true;
                         }
                         catch (IOException ioexception) {
-                            AdvancementManager.LOGGER.error("Couldn't read advancement " + resourcelocation + " from " + path2, (Throwable)ioexception);
+                            LOGGER.error("Couldn't read advancement " + resourcelocation + " from " + path2, (Throwable)ioexception);
                             this.hasErrored = true;
                         }
                         finally {
-                            IOUtils.closeQuietly((Reader)bufferedreader);
+                            IOUtils.closeQuietly(bufferedreader);
                         }
                     }
                 }
                 return;
             }
-            AdvancementManager.LOGGER.error("Couldn't find .mcassetsroot");
+            LOGGER.error("Couldn't find .mcassetsroot");
             this.hasErrored = true;
         }
         catch (IOException ex) {}
         catch (URISyntaxException urisyntaxexception) {
-            AdvancementManager.LOGGER.error("Couldn't get a list of all built-in advancement files", (Throwable)urisyntaxexception);
+            LOGGER.error("Couldn't get a list of all built-in advancement files", urisyntaxexception);
             this.hasErrored = true;
         }
         finally {
-            IOUtils.closeQuietly((Closeable)filesystem);
+            IOUtils.closeQuietly(filesystem);
         }
     }
 
@@ -195,17 +194,17 @@ public class AdvancementManager {
     }
 
     public Iterable<Advancement> getAdvancements() {
-        return (Iterable<Advancement>)AdvancementManager.ADVANCEMENT_LIST.getAdvancements();
+        return AdvancementManager.ADVANCEMENT_LIST.getAdvancements();
     }
 
+
     static {
-        LOGGER = LogManager.getLogger();
-        GSON = new GsonBuilder().registerTypeHierarchyAdapter((Class)Advancement.Builder.class, (Object)new JsonDeserializer<Advancement.Builder>() {
+        GSON = new GsonBuilder().registerTypeHierarchyAdapter(Advancement.Builder.class, new JsonDeserializer<Advancement.Builder>() {
             public Advancement.Builder deserialize(final JsonElement p_deserialize_1_, final Type p_deserialize_2_, final JsonDeserializationContext p_deserialize_3_) throws JsonParseException {
                 final JsonObject jsonobject = JsonUtils.getJsonObject(p_deserialize_1_, "advancement");
                 return Advancement.Builder.deserialize(jsonobject, p_deserialize_3_);
             }
-        }).registerTypeAdapter((Type)AdvancementRewards.class, (Object)new AdvancementRewards.Deserializer()).registerTypeHierarchyAdapter((Class)ITextComponent.class, (Object)new ITextComponent.Serializer()).registerTypeHierarchyAdapter((Class)Style.class, (Object)new Style.Serializer()).registerTypeAdapterFactory((TypeAdapterFactory)new EnumTypeAdapterFactory()).create();
+        }).registerTypeAdapter(AdvancementRewards.class, new AdvancementRewards.Deserializer()).registerTypeHierarchyAdapter((Class)ITextComponent.class, (Object)new ITextComponent.Serializer()).registerTypeHierarchyAdapter((Class)Style.class, (Object)new Style.Serializer()).registerTypeAdapterFactory((TypeAdapterFactory)new EnumTypeAdapterFactory()).create();
         ADVANCEMENT_LIST = new AdvancementList();
     }
 }

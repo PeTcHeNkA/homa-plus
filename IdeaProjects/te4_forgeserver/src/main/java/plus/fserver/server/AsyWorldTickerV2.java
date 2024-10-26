@@ -19,15 +19,14 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import plus.fserver.ElcaConfig;
 import java.util.List;
 import java.util.concurrent.*;
+import static net.minecraft.server.MinecraftServer.LOGGER;
 
 
 public final class AsyWorldTickerV2{
     private static final boolean useSync = false;
-    private static final Logger LOGGER = LogManager.getLogger();
     public final ScheduledExecutorService service;
     private final ConcurrentHashMap<Integer, WorldInfo> infs = new ConcurrentHashMap<>();
     private final MinecraftServer server;

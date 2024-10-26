@@ -9,8 +9,6 @@ import javax.annotation.Nullable;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.util.ReportedException;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import plus.fserver.ElcaCV;
 import plus.fserver.utls.NbtUtils;
 import plus.tson.utl.Te4HashMap;
@@ -19,7 +17,6 @@ import plus.tson.utl.Te4HashMap;
 public class NBTTagCompound extends NBTBase {
     static final byte[] empty = {};
     private static final int[] emptyI = {};
-    private static final Logger LOGGER = LogManager.getLogger();
     private static final Pattern SIMPLE_VALUE = Pattern.compile("[A-Za-z0-9._+-]+");
     private final Te4HashMap<String, NBTBase> tagMap;
 

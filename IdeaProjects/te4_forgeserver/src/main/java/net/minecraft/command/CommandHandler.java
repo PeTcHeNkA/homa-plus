@@ -10,13 +10,11 @@ import net.minecraft.util.math.*;
 import javax.annotation.*;
 import com.google.common.collect.*;
 import java.util.*;
-import org.apache.logging.log4j.*;
 import plus.tson.utl.Te4HashMap;
 import plus.tson.utl.Te4HashSet;
 
 
 public abstract class CommandHandler implements ICommandManager {
-    private static final Logger LOGGER;
     private final Map<String, ICommand> commandMap;
     private final Set<ICommand> commandSet;
 
@@ -112,7 +110,7 @@ public abstract class CommandHandler implements ICommandManager {
             final TextComponentTranslation msg = new TextComponentTranslation("commands.generic.exception", new Object[0]);
             msg.getStyle().setColor(TextFormatting.RED);
             sender.sendMessage(msg);
-            CommandHandler.LOGGER.warn("Couldn't process command: " + input, throwable);
+            MinecraftServer.LOGGER.warn("Couldn't process command: " + input, throwable);
         }
         return false;
     }
@@ -190,10 +188,5 @@ public abstract class CommandHandler implements ICommandManager {
             }
         }
         return -1;
-    }
-
-
-    static {
-        LOGGER = LogManager.getLogger();
     }
 }

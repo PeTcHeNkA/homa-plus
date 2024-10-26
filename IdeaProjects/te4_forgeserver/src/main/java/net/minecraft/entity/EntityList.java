@@ -17,17 +17,16 @@ import net.minecraft.entity.monster.*;
 import net.minecraft.entity.projectile.*;
 import net.minecraft.entity.passive.*;
 import net.minecraft.entity.item.*;
-import org.apache.logging.log4j.*;
 import com.google.common.collect.*;
 import net.minecraft.stats.*;
 import plus.fserver.entity.SpawnEntityFactory;
 import plus.tson.utl.Te4HashSet;
+import static net.minecraft.server.MinecraftServer.LOGGER;
 
 
 public class EntityList {
     public static final ResourceLocation LIGHTNING_BOLT;
     private static final ResourceLocation PLAYER;
-    private static final Logger LOGGER;
     public static final Map<ResourceLocation, EntityEggInfo> ENTITY_EGGS;
     private static final Set<ResourceLocation> EXTRA_NAMES;
 
@@ -97,8 +96,7 @@ public class EntityList {
                 return entry.newInstance(worldIn);
             }
             return SpawnEntityFactory.make(clazz).apply(worldIn);
-        }
-        catch (Exception exception) {
+        } catch (Exception exception) {
             exception.printStackTrace();
             return null;
         }
@@ -112,18 +110,20 @@ public class EntityList {
         return (entry == null) ? null : entry.newInstance(worldIn);
     }
 
+
     @Nullable
     public static Entity createEntityByIDFromName(final ResourceLocation name, final World worldIn) {
         final EntityEntry entry = ForgeRegistries.ENTITIES.getValue(name);
         return (entry == null) ? null : entry.newInstance(worldIn);
     }
 
+
     @Nullable
     public static Entity createEntityFromNBT(final NBTTagCompound nbt, final World worldIn) {
         final ResourceLocation resourcelocation = new ResourceLocation(nbt.getString("id"));
         Entity entity = createEntityByIDFromName(resourcelocation, worldIn);
         if (entity == null) {
-            EntityList.LOGGER.warn("Skipping Entity with id {}", (Object)resourcelocation);
+            LOGGER.warn("Skipping Entity with id {}", resourcelocation);
         }
         else {
             try {
@@ -137,8 +137,9 @@ public class EntityList {
         return entity;
     }
 
+
     public static Set<ResourceLocation> getEntityNameList() {
-        return (Set<ResourceLocation>)Sets.union((Set)ForgeRegistries.ENTITIES.getKeys(), (Set)EntityList.EXTRA_NAMES);
+        return Sets.union(ForgeRegistries.ENTITIES.getKeys(), EntityList.EXTRA_NAMES);
     }
 
     public static boolean isMatchingName(final Entity entityIn, final ResourceLocation entityName) {
@@ -333,7 +334,6 @@ public class EntityList {
     static {
         LIGHTNING_BOLT = new ResourceLocation("lightning_bolt");
         PLAYER = new ResourceLocation("player");
-        LOGGER = LogManager.getLogger();
         ENTITY_EGGS = Maps.newLinkedHashMap();
         EXTRA_NAMES = new Te4HashSet<>();
     }

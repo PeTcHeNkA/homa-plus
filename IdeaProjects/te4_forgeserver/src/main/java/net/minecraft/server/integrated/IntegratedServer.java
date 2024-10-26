@@ -42,7 +42,6 @@ import plus.fserver.plugin.SSPatchLoader;
 
 @SideOnly(Side.CLIENT)
 public class IntegratedServer extends MinecraftServer {
-    private static final Logger LOGGER = LogManager.getLogger();
     private final Minecraft mc;
     private final WorldSettings worldSettings;
     private boolean isGamePaused;

@@ -25,12 +25,9 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.AdvancementEvent;
 import net.minecraftforge.fml.common.eventhandler.Event;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 
 public class PlayerAdvancements {
-    private static final Logger LOGGER = LogManager.getLogger();
     private static final Gson GSON = (new GsonBuilder()).registerTypeAdapter(AdvancementProgress.class, new AdvancementProgress.Serializer()).registerTypeAdapter(ResourceLocation.class, new ResourceLocation.Serializer()).setPrettyPrinting().create();
     private static final TypeToken<Map<ResourceLocation, AdvancementProgress>> MAP_TOKEN = new TypeToken<Map<ResourceLocation, AdvancementProgress>>() {};
     private final MinecraftServer server;
@@ -128,15 +125,15 @@ public class PlayerAdvancements {
                     Advancement advancement = this.server.getAdvancementManager().getAdvancement(entry.getKey());
 
                     if (advancement == null) {
-                        LOGGER.warn("Ignored advancement '" + entry.getKey() + "' in progress file " + this.progressFile + " - it doesn't exist anymore?");
+                        MinecraftServer.LOGGER.warn("Ignored advancement '" + entry.getKey() + "' in progress file " + this.progressFile + " - it doesn't exist anymore?");
                     } else {
                         this.startProgress(advancement, entry.getValue());
                     }
                 }
             } catch (JsonParseException jsonparseexception) {
-                LOGGER.error("Couldn't parse player advancements in " + this.progressFile, jsonparseexception);
+                MinecraftServer.LOGGER.error("Couldn't parse player advancements in " + this.progressFile, jsonparseexception);
             } catch (IOException ioexception) {
-                LOGGER.error("Couldn't access player advancements in " + this.progressFile, ioexception);
+                MinecraftServer.LOGGER.error("Couldn't access player advancements in " + this.progressFile, ioexception);
             }
         }
         this.checkForAutomaticTriggers();
@@ -171,7 +168,7 @@ public class PlayerAdvancements {
         try {
             Files.write(GSON.toJson(map), this.progressFile, StandardCharsets.UTF_8);
         } catch (IOException ioexception) {
-            LOGGER.error("Couldn't save player advancements to " + this.progressFile, ioexception);
+            MinecraftServer.LOGGER.error("Couldn't save player advancements to " + this.progressFile, ioexception);
         }
     }
 

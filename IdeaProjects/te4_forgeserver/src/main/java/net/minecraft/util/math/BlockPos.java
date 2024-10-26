@@ -15,7 +15,6 @@ import plus.fserver.utls.collections.SelfIterableAbs;
 
 @Immutable
 public class BlockPos extends Vec3i {
-    private static final Logger LOGGER = LogManager.getLogger();
     public static final BlockPos ORIGIN = new BlockPos(0, 0, 0);
     private static final int NUM_X_BITS = 1 + MathHelper.log2(MathHelper.smallestEncompassingPowerOfTwo(30000000));
     private static final int NUM_Z_BITS = NUM_X_BITS;

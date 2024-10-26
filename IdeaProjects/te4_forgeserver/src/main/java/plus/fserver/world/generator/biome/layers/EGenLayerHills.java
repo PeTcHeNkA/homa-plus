@@ -2,14 +2,12 @@ package plus.fserver.world.generator.biome.layers;
 
 import net.minecraft.init.Biomes;
 import net.minecraft.world.biome.Biome;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import plus.fserver.api.BiomeIndexes;
 import plus.fserver.world.generator.biome.EIntCache;
+import static net.minecraft.server.MinecraftServer.LOGGER;
 
 
 public class EGenLayerHills extends EGenLayer {
-    private static final Logger LOGGER = LogManager.getLogger();
     private final EGenLayer riverLayer;
 
     public EGenLayerHills(long seed, EGenLayer parent, EGenLayer rivGen) {
@@ -27,12 +25,12 @@ public class EGenLayerHills extends EGenLayer {
 
         for(int i = 0; i < areaHeight; ++i) {
             for(int j = 0; j < areaWidth; ++j) {
-                cache.initChunkSeed(this, (long)(j + areaX), (long)(i + areaY));
+                cache.initChunkSeed(this, j + areaX, i + areaY);
                 int biomeId    = ints[j + 1 + (i + 1) * (areaWidth + 2)];
                 int biomeId2   = ints1[j + 1 + (i + 1) * (areaWidth + 2)];
                 boolean flag = (biomeId2 - 2) % 29 == 0;
                 if (biomeId > 255) {
-                    LOGGER.debug("old! {}", biomeId);
+                    LOGGER.debug("Invalid biome id! {}", biomeId);
                 }
 
                 Biome biome = BiomeIndexes.get(biomeId);

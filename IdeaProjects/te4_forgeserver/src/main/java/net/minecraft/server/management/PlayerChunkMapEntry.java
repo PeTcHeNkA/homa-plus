@@ -24,13 +24,10 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.ForgeModContainer;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import plus.fserver.ElcaCV;
 import plus.fserver.ElcaConfig;
 import plus.fserver.server.chunk.io.TChunkExecutor;
 import plus.fserver.utls.collections.EntityList;
-
 import static net.minecraft.server.management.PlayerChunkMap.CAN_GENERATE_CHUNKS;
 
 
@@ -43,7 +40,6 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements C
         return 0;
     };
 
-    private static final Logger LOGGER = LogManager.getLogger();
     public final int posX, posZ;
     private short[] changedBlocks = null;
     @Nullable

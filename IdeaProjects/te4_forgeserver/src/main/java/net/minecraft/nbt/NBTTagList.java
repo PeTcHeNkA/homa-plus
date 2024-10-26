@@ -4,14 +4,13 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Objects;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import plus.fserver.utls.collections.ArrayListE6;
+import static net.minecraft.server.MinecraftServer.LOGGER;
 
 
 public class NBTTagList extends NBTBase implements java.lang.Iterable<NBTBase> {
     private static final int[] EMPTY = new int[0];
-    private static final Logger LOGGER = LogManager.getLogger();
+
     private ArrayListE6<NBTBase> tagList;
     private byte tagType = 0;
 

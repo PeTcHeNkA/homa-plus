@@ -59,6 +59,7 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.event.world.ChunkWatchEvent;
 import net.minecraftforge.event.world.GetCollisionBoxesEvent;
+import net.minecraftforge.fml.common.FMLLog;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -300,7 +301,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             int recStartId, nextId;
 
             if(maxRangeIndex == -1){
-                LogManager.getLogger().error("Cant found free ranges for entity ID. Please restart server");
+                FMLLog.log.error("Cant found free ranges for entity ID. Please restart server");
                 realEntityList.addAll(toRecreateId);
                 break l1;
             } else {
@@ -328,7 +329,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
                     recStartId = nextId;
                     nextId += recMin;
                 } else {
-                    LogManager.getLogger().error("Cant found free ranges for entity ID. Please restart server");
+                    FMLLog.log.error("Cant found free ranges for entity ID. Please restart server");
                     realEntityList.addAll(toRecreateId);
                     break l1;
                 }

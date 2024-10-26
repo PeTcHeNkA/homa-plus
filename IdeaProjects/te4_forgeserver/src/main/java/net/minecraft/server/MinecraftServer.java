@@ -95,7 +95,7 @@ import plus.fserver.utls.math.FastRandom;
 
 
 public abstract class MinecraftServer implements ICommandSender, Runnable, IThreadListener, ISnooperInfo{
-    private static final Logger LOGGER = LogManager.getLogger();
+    public static final Logger LOGGER = LogManager.getLogger();
     public static final File USER_CACHE_FILE = new File("usercache.json");
     private final ISaveFormat anvilConverterForAnvilFile;
     private final Snooper usageSnooper = new Snooper("server", this, getCurrentTimeMillis());
