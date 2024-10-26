@@ -164,11 +164,11 @@ sourceSets {
     }
 }
 
-//jar.finalizedBy('proguard')
+jar.finalizedBy('proguard')
 
 tasks.register('proguard', ProGuardTask) {
 
-    configuration file('proguard.pro')
+    configuration file('proguard2.pro')
 
     def proName = name + "-" + version
 

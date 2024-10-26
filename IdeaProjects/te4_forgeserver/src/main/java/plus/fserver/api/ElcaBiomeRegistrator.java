@@ -1,5 +1,6 @@
 package plus.fserver.api;
 
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.registries.ForgeRegistry;
@@ -8,6 +9,7 @@ import java.util.ArrayList;
 
 
 public final class ElcaBiomeRegistrator {
+    private static ElcaBiomeRegistrator INST = new ElcaBiomeRegistrator();
     private final ArrayList<Tuple<Biome, Integer>> biomes = new ArrayList<>();
 
     private ElcaBiomeRegistrator(){}
@@ -26,7 +28,7 @@ public final class ElcaBiomeRegistrator {
 
     public static void registerAll(RegistryEvent.Register<Biome> e){
         if(INST == null){
-            System.out.println("This biomes lib is ready registered!");
+            MinecraftServer.LOGGER.warn("Elca biomes lib is ready registered!");
             return;
         }
         ArrayList<Tuple<Biome, Integer>> biomes = INST.biomes;
@@ -35,9 +37,6 @@ public final class ElcaBiomeRegistrator {
         for(Tuple<Biome, Integer> pair:biomes){
             ElcaServerUtils.unsafeRegister(registry, pair.B, pair.A);
         }
-        System.out.println("PATCHED BIOMES LOADED");
+        MinecraftServer.LOGGER.info("Elca patched biomes loaded");
     }
-
-
-    private static ElcaBiomeRegistrator INST = new ElcaBiomeRegistrator();
 }
