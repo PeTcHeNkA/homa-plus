@@ -462,17 +462,19 @@ public class Village implements ICapabilitySerializable<NBTTagCompound> {
             nbttaglist.appendTag(nbttagcompound);
         }
         nbt.setTag("Doors", nbttaglist);
-        final NBTTagList nbttaglist2 = new NBTTagList();
-        for (final UUID s : this.playerReputation.keySet()) {
-            final NBTTagCompound inf = new NBTTagCompound(4,1);
-            try {
-                inf.setString("UUID", s.toString());
-                inf.setIntegerU("S", this.playerReputation.get(s));
-                nbttaglist2.appendTag(inf);
+        if(playerReputation != null) {
+            final NBTTagList nbttaglist2 = new NBTTagList();
+            for (final UUID s : this.playerReputation.keySet()) {
+                final NBTTagCompound inf = new NBTTagCompound(4, 1);
+                try {
+                    inf.setString("UUID", s.toString());
+                    inf.setIntegerU("S", this.playerReputation.get(s));
+                    nbttaglist2.appendTag(inf);
+                } catch (RuntimeException ex) {
+                }
             }
-            catch (RuntimeException ex) {}
+            nbt.setTag("Players", nbttaglist2);
         }
-        nbt.setTag("Players", nbttaglist2);
         if (this.capabilities != null) {
             nbt.setTag("ForgeCaps", this.capabilities.serializeNBT());
         }
