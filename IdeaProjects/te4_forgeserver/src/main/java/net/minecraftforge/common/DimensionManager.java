@@ -156,6 +156,11 @@ public class DimensionManager {
     }
 
 
+    public static Int2ObjectMap<WorldServer> worlds(){
+        return worlds;
+    }
+
+
     public static Integer[] getIDs() {
         return worlds.keySet().toArray(new Integer[0]); // Only loaded dims, since usually used to cycle through loaded worlds
     }

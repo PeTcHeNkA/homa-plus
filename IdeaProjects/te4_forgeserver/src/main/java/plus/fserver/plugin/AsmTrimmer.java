@@ -1,14 +1,12 @@
 package plus.fserver.plugin;
 
 import net.minecraft.launchwrapper.Launch;
+import net.minecraft.launchwrapper.LaunchClassLoader;
 import net.minecraft.stats.StatList;
 import plus.fserver.server.Reflector;
 import plus.fserver.utls.collections.IdentityTe4HashSet;
 import java.security.*;
-import java.util.ConcurrentModificationException;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import static plus.tson.utl.uns.UnsafeUtils.UNSAFE;
@@ -22,9 +20,11 @@ public class AsmTrimmer {
         long off        = offset(SecureClassLoader.class,"pdcache");
         long nameOff    = offset(Permission.class,"name");
         long classesOff = offset(ClassLoader.class, "classes");
+        long resCacheOff= offset(LaunchClassLoader.class, "resourceCache");
 
-        AtomicInteger num = new AtomicInteger();
-        SecureClassLoader loader = Launch.classLoader;
+        final AtomicInteger num = new AtomicInteger();
+        final SecureClassLoader loader = Launch.classLoader;
+
         loaders.add(loader);
         runFixes(loader, off, nameOff, num, loaders);
 
@@ -37,6 +37,9 @@ public class AsmTrimmer {
             });
         }catch (ConcurrentModificationException ignored){}
         cleanReflectCache(Class.class);
+
+        Map<String, byte[]> prev = (Map<String, byte[]>)UNSAFE.getAndSetObject(loader, resCacheOff, Collections.synchronizedMap(new WeakHashMap<>()));
+        prev.forEach((s, bytes) -> num.addAndGet(s.length() + 16 + bytes.length));
 
         return num.get() + StatList.trimSize();
     }

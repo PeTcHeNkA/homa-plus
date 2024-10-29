@@ -1,5 +1,7 @@
 package plus.fserver.server;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.play.server.SPacketChunkData;
 import plus.fserver.api.ElcaServerUtils;
@@ -98,11 +100,16 @@ public final class AsyWorldTickerV2{
 
 
     public void tick() throws Throwable {
-        Integer[] ids = DimensionManager.getIDs(this.tickCounter++ % 300 == 0);
-        for(int id:ids){
-            WorldInfo result = infs.get(id);
+        ObjectIterator<Int2ObjectMap.Entry<WorldServer>> iter = DimensionManager.worlds().int2ObjectEntrySet().iterator();
+        ConcurrentHashMap<Integer, WorldInfo> infs = this.infs;
+
+        while (iter.hasNext()){
+            Int2ObjectMap.Entry<WorldServer> entry = iter.next();
+            if(entry == null)continue;
+            int id;
+            WorldInfo result = infs.get(id = entry.getIntKey());
             if(result == null){
-                WorldServer worldServer = DimensionManager.getWorld(id);
+                WorldServer worldServer = entry.getValue();
                 if(worldServer != null) {
                     result = new WorldInfo(id);
                     infs.put(id, result);

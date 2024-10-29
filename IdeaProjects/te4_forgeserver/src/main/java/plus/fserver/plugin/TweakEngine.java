@@ -22,10 +22,10 @@ public class TweakEngine implements IClassTransformer, Set<String> {
     private final IClassTransformer sideTransformer;
 
     private static class TweakInfo{
-        private boolean useSideTransformer;
-        private boolean useSafeMode;
+        final boolean useSideTransformer;
+        final boolean useSafeMode;
 
-        public TweakInfo(boolean useSafeMode, boolean useSideTransformer){
+        TweakInfo(boolean useSafeMode, boolean useSideTransformer){
             this.useSafeMode = useSafeMode;
             this.useSideTransformer = useSideTransformer;
         }
