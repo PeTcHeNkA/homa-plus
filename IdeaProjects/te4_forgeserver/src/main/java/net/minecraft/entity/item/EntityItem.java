@@ -34,6 +34,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.event.ForgeEventFactory;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
@@ -237,7 +238,7 @@ public class EntityItem extends Entity {
 
     private void searchForOtherItemsNearby() {
         final ItemStack stack = this.getItem();
-        if(stack.getCount() >= stack.getMaxStackSize())return;
+        if (stack.getCount() >= stack.getMaxStackSize()) return;
         AxisAlignedBB aabb;
         this.getEntityBoundingBox().growTo(0.73D, 0.0D, 0.73D, aabb = world.commonWorldEntityAABB);
 
@@ -401,27 +402,26 @@ public class EntityItem extends Entity {
 
 
     @Override
-    public void onCollideWithPlayer(EntityPlayer entityIn) {
+    public void onCollideWithPlayer(final EntityPlayer entityIn) {
         if (!this.world.isRemote) {
             if (this.pickupDelay > 0) return;
-            ItemStack itemstack = this.getItem();
-            Item item = itemstack.getItem();
-            int i = itemstack.getCount();
+            final ItemStack itemstack = this.getItem();
+            final Item item = itemstack.getItem();
+            final int count = itemstack.getCount();
 
-            int hook = ForgeEventFactory.onItemPickup(this, entityIn);
+            final int hook = ForgeEventFactory.onItemPickup(this, entityIn);
             if (hook < 0) return;
-            ItemStack clone = itemstack.copy();
+            final ItemStack clone = itemstack.copy();
 
-            if (this.pickupDelay <= 0 && (this.owner == null || lifespan - this.age <= 200 || this.owner.equals(entityIn.getName())) && (hook == 1 || i <= 0 || entityIn.inventory.addItemStackToInventory(itemstack) || clone.getCount() > this.getItem().getCount())) {
+            if (this.pickupDelay <= 0 && (this.owner == null || this.lifespan - this.age <= 200 || this.owner.equals(entityIn.getName())) && (hook == 1 || count <= 0 || entityIn.inventory.addItemStackToInventory(itemstack) || clone.getCount() > this.getItem().getCount())) {
                 clone.setCount(clone.getCount() - this.getItem().getCount());
-                net.minecraftforge.fml.common.FMLCommonHandler.instance().firePlayerItemPickupEvent(entityIn, this, clone);
-
+                FMLCommonHandler.instance().firePlayerItemPickupEvent(entityIn, this, clone);
                 if (itemstack.isEmpty()) {
-                    entityIn.onItemPickup(this, i);
+                    entityIn.onItemPickup(this, count);
                     this.setDead();
-                    itemstack.setCount(i);
+                    itemstack.setCount(count);
                 }
-                entityIn.addStat(StatList.getObjectsPickedUpStats(item), i);
+                entityIn.addStat(StatList.getObjectsPickedUpStats(item), count);
             }
         }
     }
@@ -437,17 +437,6 @@ public class EntityItem extends Entity {
     public boolean canBeAttackedWithItem() {
         return false;
     }
-//
-//
-//    @Nullable
-//    public Entity changeDimension(int dimensionIn, ITeleporter teleporter) {
-//        Entity entity = super.changeDimension(dimensionIn, teleporter);
-//
-//        if (!this.world.isRemote && entity instanceof EntityItem) {
-//            ((EntityItem)entity).searchForOtherItemsNearby();
-//        }
-//        return entity;
-//    }
 
 
     public ItemStack getItem() {

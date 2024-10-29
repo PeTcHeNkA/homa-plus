@@ -1716,15 +1716,15 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
 
     public boolean writeToNBTAtomically(NBTTagCompound compound) {
-        String s = this.getEntityString();
-
-        if (!this.isDead && s != null) {
-            compound.setString("id", s);
-            this.writeToNBT(compound);
-            return true;
-        } else {
-            return false;
+        if (!this.isDead) {
+            String s = this.getEntityString();
+            if(s != null) {
+                compound.setString("id", s);
+                this.writeToNBT(compound);
+                return true;
+            }
         }
+        return false;
     }
 
 

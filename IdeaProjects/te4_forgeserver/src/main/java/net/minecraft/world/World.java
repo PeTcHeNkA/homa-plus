@@ -4579,8 +4579,8 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
         Chunk chunk;
 
-        for (int xPos = MathHelper.floor(aabb.minX - MAX_ENTITY_RADIUS)>>4; xPos < maxX; ++xPos)
-            for (int zPos = minZ; zPos < maxZ; ++zPos)
+        for (int xPos = MathHelper.floor(aabb.minX - MAX_ENTITY_RADIUS)>>4; xPos <= maxX; ++xPos)
+            for (int zPos = minZ; zPos <= maxZ; ++zPos)
                 if ((chunk = chunkProviderServer.getLoadedChunk(xPos, zPos)) != null)
                     chunk.getEntitiesOfTypeWithinAABB(clazz, aabb, list, filter);
     }
