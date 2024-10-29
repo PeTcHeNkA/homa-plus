@@ -4,10 +4,12 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
 import plus.fserver.ElcaCV2;
+import plus.fserver.api.Keep;
 import java.util.*;
 import java.util.function.Consumer;
 
 
+@Keep
 public class AABBList implements List<AxisAlignedBB> {
     public static final AxisAlignedBB[] EMPTY_ARR = {};
     private static final Itr EMPTY_ITR = new Itr(EMPTY_ARR, 0);

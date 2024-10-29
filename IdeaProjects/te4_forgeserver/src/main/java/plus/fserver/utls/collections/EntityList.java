@@ -2,10 +2,12 @@ package plus.fserver.utls.collections;
 
 import net.minecraft.entity.Entity;
 import org.jetbrains.annotations.NotNull;
+import plus.fserver.api.Keep;
 import java.util.*;
 import java.util.function.Consumer;
 
 
+@Keep
 public class EntityList<T extends Entity> implements List<T> {
     public static final Entity[] EMPTY_ARR = {};
     private static final Itr EMPTY_ITR = new Itr<>(EMPTY_ARR, 0);

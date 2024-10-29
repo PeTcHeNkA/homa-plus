@@ -3,10 +3,13 @@ package plus.fserver.utls.collections;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ClassInheritanceMultiMap;
 import net.minecraft.world.chunk.Chunk;
+import plus.fserver.api.Keep;
+
 import java.util.Iterator;
 import java.util.function.Consumer;
 
 
+@Keep
 public class EntityChunkIter implements Iterable<Entity>, Iterator<Entity> {
     private final ClassInheritanceMultiMap<Entity>[] lists;
     private EntityList<Entity> list;

@@ -125,19 +125,19 @@ public final class AsyWorldTickerV2{
 
     private final class WorldInfo{
         final int id;
-        public int checkToUnload;
-        public int save;
+        int checkToUnload;
+        int save;
         int tickCounter = 0;
         //private long lastTicked;
-        private ScheduledFuture<?> future;
-        private ScheduledFuture<?> light;
-        private ScheduledFuture<?> tracker;
+        ScheduledFuture<?> future;
+        ScheduledFuture<?> light;
+        ScheduledFuture<?> tracker;
 
-        private WorldInfo(int id) {
+        WorldInfo(int id) {
             this.id = id;
             if(!useSync) active();
         }
-        public void active(){
+        void active(){
             future = service.scheduleAtFixedRate(
                     () -> tickWorld(WorldInfo.this), 25, 50, TimeUnit.MILLISECONDS
             );
@@ -147,7 +147,7 @@ public final class AsyWorldTickerV2{
         }
 
 
-        public void stop(){
+        void stop(){
             if(tickCounter == -1)return;
             LogManager.getLogger("ELCA").info("Stop ticking world #"+id);
             tickCounter = -1;
@@ -173,7 +173,7 @@ public final class AsyWorldTickerV2{
     }
 
 
-    private void updateLight(WorldInfo inf){
+    void updateLight(WorldInfo inf){
         if(!enabled){
             inf.stop();
             return;
@@ -187,7 +187,7 @@ public final class AsyWorldTickerV2{
     }
 
 
-    private void tickWorld(WorldInfo inf){
+    void tickWorld(WorldInfo inf){
         if(!enabled){
             inf.stop();
             return;

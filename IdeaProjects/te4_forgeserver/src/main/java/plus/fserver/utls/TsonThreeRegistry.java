@@ -5,6 +5,7 @@ import net.minecraft.block.*;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.gen.feature.*;
+import plus.fserver.api.Keep;
 import plus.fserver.world.generator.three.*;
 import plus.tson.TsonList;
 import plus.tson.TsonMap;
@@ -13,6 +14,7 @@ import java.util.Random;
 import static plus.tson.ext.TsonNumUtils.*;
 
 
+@Keep
 public class TsonThreeRegistry {
     public static final IBlockState JUNGLE_LOG   = Blocks.LOG.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.JUNGLE);
     public static final IBlockState JUNGLE_LEAF  = Blocks.LEAVES.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.FALSE);

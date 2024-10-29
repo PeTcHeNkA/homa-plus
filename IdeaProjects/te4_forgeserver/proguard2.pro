@@ -26,5 +26,6 @@
   public *;
 }
 
+-repackageclasses plus.fserver.pro
 -keepattributes *Annotation*
 -ignorewarnings

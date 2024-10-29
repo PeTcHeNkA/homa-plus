@@ -1,10 +1,12 @@
 package plus.fserver.utls;
 
 import plus.fserver.ElcaMobs;
+import plus.fserver.api.Keep;
 import plus.tson.TsonObj;
 import static plus.tson.ext.TsonAccessUtils.*;
 
 
+@Keep
 public final class EntityLodFunc {
     public static final int NEAR_MASK = 0;
     public static final int LOW1_MASK = 1;
