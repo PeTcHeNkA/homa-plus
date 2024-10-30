@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.play.server.SPacketChunkData;
+import plus.fserver.ElcaCV;
 import plus.fserver.api.ElcaServerUtils;
 import plus.fserver.server.zstd.Native;
 import net.minecraft.crash.CrashReport;
@@ -198,6 +199,9 @@ public final class AsyWorldTickerV2{
             return;
         }
         worldserver.setCurThread();
+        if(ElcaCV.DEBUG_ASYNC_ERRORS) {
+            plus.fserver.utls.debug.MutDetectPos.lock(worldserver);
+        }
         //System.out.println("Next tick: "+(System.currentTimeMillis()-inf.lastTicked) );
         ++inf.tickCounter;
 
@@ -323,6 +327,7 @@ public final class AsyWorldTickerV2{
             stopAnError(throwable, worldserver);
         } finally {
             worldserver.freeCurThread();
+
         }
     }
 

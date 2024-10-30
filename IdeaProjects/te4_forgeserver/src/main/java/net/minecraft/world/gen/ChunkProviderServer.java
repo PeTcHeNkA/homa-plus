@@ -25,6 +25,7 @@ import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.fml.common.FMLLog;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import plus.fserver.ElcaCV;
 import plus.fserver.ElcaConfig;
 import plus.fserver.api.Keep;
 import plus.fserver.server.chunk.io.TChunkExecutor;
@@ -93,11 +94,17 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
 
 
     public void putChunk(long key, Chunk chunk){
+        if(ElcaCV.DEBUG_ASYNC_ERRORS) {
+            if (!world.isCurThread()) throw new RuntimeException();
+        }
         super.put(key, chunk);
     }
 
 
     public void removeChunk(long key){
+        if(ElcaCV.DEBUG_ASYNC_ERRORS) {
+            if (!world.isCurThread()) throw new RuntimeException();
+        }
         super.remove(key);
     }
 

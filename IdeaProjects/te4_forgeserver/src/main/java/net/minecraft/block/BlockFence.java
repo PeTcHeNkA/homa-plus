@@ -207,7 +207,7 @@ public class BlockFence extends Block {
 
     @Override
     public IBlockState getActualState(IBlockState state, IBlockAccess access, BlockPos pos) {
-        final BlockPos.MutableBlockPos mut = access.getWorld().localTempPos3;
+        final BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
         return state.withProperty(NORTH, canFenceConnectTo(access, pos, mut, EnumFacing.NORTH))
                     .withProperty(EAST,  canFenceConnectTo(access, pos, mut, EnumFacing.EAST))
                     .withProperty(SOUTH, canFenceConnectTo(access, pos, mut, EnumFacing.SOUTH))

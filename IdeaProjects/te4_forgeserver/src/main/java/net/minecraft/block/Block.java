@@ -51,6 +51,7 @@ import net.minecraftforge.common.EnumPlantType;
 import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.fserver.api.IBlockEAccess;
 import plus.fserver.block.BlockFx;
 import plus.fserver.utls.collections.AABBList;
 
@@ -644,20 +645,25 @@ public class Block extends net.minecraftforge.registries.IForgeRegistryEntry.Imp
 
 
     @SideOnly(Side.CLIENT)
-    public BlockRenderLayer getRenderLayer()
-    {
+    public BlockRenderLayer getRenderLayer() {
         return BlockRenderLayer.SOLID;
     }
 
-    public boolean canPlaceBlockOnSide(World worldIn, BlockPos pos, EnumFacing side)
-    {
+
+    public boolean canPlaceBlockOnSide(World worldIn, BlockPos pos, EnumFacing side) {
         return this.canPlaceBlockAt(worldIn, pos);
     }
 
-    public boolean canPlaceBlockAt(World worldIn, BlockPos pos)
-    {
+
+    public boolean canPlaceBlockAt(World worldIn, BlockPos pos) {
         return worldIn.getBlockState(pos).getBlock().isReplaceable(worldIn, pos);
     }
+
+
+    public boolean canPlaceBlockAtAsy(IBlockEAccess access, BlockPos pos) {
+        return access.getBlockState(pos).getBlock().isReplaceable(access, pos);
+    }
+
 
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ)
     {
@@ -1637,7 +1643,12 @@ public class Block extends net.minecraftforge.registries.IForgeRegistryEntry.Imp
      * @return True to allow the plant to be planted/stay.
      */
     public boolean canSustainPlant(IBlockState state, IBlockAccess access, BlockPos pos, EnumFacing direction, IPlantable plantable) {
-        BlockPos temp = access.getWorld().localTempPos2.setPos(
+        return canSustainPlantSafe(state, access, pos, direction, plantable, new BlockPos.MutableBlockPos());
+    }
+
+
+    public boolean canSustainPlantSafe(IBlockState state, IBlockAccess access, BlockPos pos, EnumFacing direction, IPlantable plantable, BlockPos.MutableBlockPos mut) {
+        BlockPos temp = mut.setPos(
                 pos.getX()+direction.getXOffset(),
                 pos.getY()+direction.getYOffset(),
                 pos.getZ()+direction.getZOffset()

@@ -14,6 +14,7 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.fserver.api.IBlockEAccess;
 import plus.fserver.api.Keep;
 import plus.fserver.block.BlockFx;
 import plus.fserver.server.elca.ChunkLCache;
@@ -42,15 +43,20 @@ public abstract class BlockLeaves extends BlockFx implements net.minecraftforge.
     public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
         int k = pos.getX(), l = pos.getY(), i1 = pos.getZ();
 
-        IBlockAccess access = worldIn.access();
-        BlockPos.MutableBlockPos temp = worldIn.localTempPos;
+        IBlockEAccess access = worldIn.access();
+        BlockPos.MutableBlockPos temp = null;
         if (worldIn.isAreaLoaded(k - 2, l - 2, i1 - 2, k + 2, l + 2, i1 + 2, true)) {
             int dx, dy, dz;
             for (dx = -1; dx <= 1; ++dx) {
                 for (dz = -1; dz <= 1; ++dz) {
                     for (dy = -1; dy <= 1; ++dy) {
-                        IBlockState state1 = access.getBlockState(temp.setPos(pos.getX()+dx, pos.getY()+dy, pos.getZ()+dz));
-                        if (state1.getBlock().isLeaves(state1, worldIn, temp)) state1.getBlock().beginLeavesDecay(state1, worldIn, temp);
+                        int fx = pos.getX()+dx, fy = pos.getY()+dy, fz = pos.getZ()+dz;
+                        IBlockState state1 = access.getBlockState(fx, fy, fz);
+                        if (state1.getMaterial() == Material.LEAVES) {
+                            if(temp == null)temp = new BlockPos.MutableBlockPos(fx, fy, fz);
+                            else temp.setPosB(fx, fy, fz);
+                            state1.getBlock().beginLeavesDecay(state1, worldIn, temp);
+                        }
                     }
                 }
             }

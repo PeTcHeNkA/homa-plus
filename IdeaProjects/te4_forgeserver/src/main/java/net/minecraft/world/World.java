@@ -155,9 +155,9 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     //redstone boost
     RedstoneEngine.Cache redstoneCache;
     //todo warning ensure there will be no simultaneous use
-    public final BlockPos.MutableBlockPos localTempPos  = new BlockPos.MutableBlockPos();
-    public final BlockPos.MutableBlockPos localTempPos2 = new BlockPos.MutableBlockPos();
-    public final BlockPos.MutableBlockPos localTempPos3 = new BlockPos.MutableBlockPos();
+    public final BlockPos.MutableBlockPos localTempPos ;
+    public final BlockPos.MutableBlockPos localTempPos2;
+    public final BlockPos.MutableBlockPos localTempPos3;
 
     public long tryUpdateNavigationLimit = 20L;
     public final LightingEngine lightingEngine = new LightingEngine(this);
@@ -179,6 +179,16 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
     protected World(MinecraftServer server, ISaveHandler saveHandlerIn, WorldInfo info, WorldProvider providerIn, Profiler profilerIn, boolean client) {
+        if(ElcaCV.DEBUG_ASYNC_ERRORS){
+            localTempPos  = new plus.fserver.utls.debug.MutDetectPos();
+            localTempPos2 = new plus.fserver.utls.debug.MutDetectPos();
+            localTempPos3 = new plus.fserver.utls.debug.MutDetectPos();
+        } else {
+            localTempPos  = new BlockPos.MutableBlockPos();
+            localTempPos2 = new BlockPos.MutableBlockPos();
+            localTempPos3 = new BlockPos.MutableBlockPos();
+        }
+
         this.eventListeners = Lists.newArrayList(this.pathListener);
         this.calendar = Calendar.getInstance();
         this.worldScoreboard = new Scoreboard();
@@ -4210,37 +4220,43 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         if(this.isRemote)return;
         int bX = pos.getX(), bY = pos.getY(), bZ = pos.getZ();
         if(bY>0) {
-            BlockPos.MutableBlockPos mut = tempPooledLocalPos;
+            ChunkSelector selector = this.localSelector;
+            BlockPos.MutableBlockPos mut = this.tempPooledLocalPos;
             int nX, nZ, buf;
-            Chunk chunk = localSelector.getChunk(nX = (bX+1) >>4, nZ = bZ>>4);
+            Chunk chunk = selector.getLoadedE(nX = (bX+1) >>4, nZ = bZ>>4);
+            if(chunk == null)return;
             IBlockState iblockstate;
 
             iblockstate = chunk.getBlockState(mut.setPos(bX + 1, bY, bZ));
             iblockstate.getBlock().observedNeighborChange(iblockstate, this, mut, blockType, pos);
 
             if((buf=(bX-1)>>4)!=nX){
-                chunk = getChunk(nX = buf, nZ);
+                chunk = selector.getLoadedE(nX = buf, nZ);
+                if(chunk == null)return;
             }
 
             iblockstate = chunk.getBlockState(mut.setPos(bX - 1, bY, bZ));
             iblockstate.getBlock().observedNeighborChange(iblockstate, this, mut, blockType, pos);
 
             if((buf=(bX)>>4)!=nX || (bZ+1)>>4 != nZ){
-                chunk = getChunk(nX = buf, nZ = (bZ+1)>>4);
+                chunk = selector.getLoadedE(nX = buf, nZ = (bZ+1)>>4);
+                if(chunk == null)return;
             }
 
             iblockstate = chunk.getBlockState(mut.setPos(bX, bY, bZ + 1));
             iblockstate.getBlock().observedNeighborChange(iblockstate, this, mut, blockType, pos);
 
             if((buf=(bZ-1)>>4)!=nZ){
-                chunk = getChunk(nX, nZ = buf);
+                chunk = selector.getLoadedE(nX, nZ = buf);
+                if(chunk == null)return;
             }
 
             iblockstate = chunk.getBlockState(mut.setPos(bX, bY, bZ - 1));
             iblockstate.getBlock().observedNeighborChange(iblockstate, this, mut, blockType, pos);
 
             if((buf=(bZ)>>4)!=nZ){
-                chunk = getChunk(nX, buf);
+                chunk = selector.getLoadedE(nX, buf);
+                if(chunk == null)return;
             }
 
             if(bY>1) {

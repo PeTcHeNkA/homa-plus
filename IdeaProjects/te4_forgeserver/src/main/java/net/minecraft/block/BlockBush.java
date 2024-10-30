@@ -51,9 +51,14 @@ public class BlockBush extends Block implements net.minecraftforge.common.IPlant
 
     @Override
     public boolean canPlaceBlockAt(World worldIn, BlockPos pos) {
-        IBlockEAccess access = worldIn.access();
+        return canPlaceBlockAtAsy(worldIn.access(), pos);
+    }
+
+
+    @Override
+    public boolean canPlaceBlockAtAsy(IBlockEAccess access, BlockPos pos) {
         IBlockState soil = access.getBlockState(pos.getX(), pos.getY()-1, pos.getZ());
-        return super.canPlaceBlockAt(worldIn, pos) &&
+        return super.canPlaceBlockAtAsy(access, pos) &&
                 soil.getBlock().canSustainPlant(soil, access, pos.down(), EnumFacing.UP, this);
     }
 
@@ -85,7 +90,7 @@ public class BlockBush extends Block implements net.minecraftforge.common.IPlant
 
     public boolean canBlockStay(World worldIn, BlockPos pos, IBlockState state) {
         if (state.getBlock() == this) {
-            BlockPos down = worldIn.localTempPos3.setPos(pos.getX(),pos.getY()-1, pos.getZ());
+            BlockPos down = new BlockPos(pos.getX(),pos.getY()-1, pos.getZ());
             IBlockEAccess access = worldIn.access();
             IBlockState soil = access.getBlockState(down);
             return soil.getBlock().canSustainPlant(soil, access, down, EnumFacing.UP, this);

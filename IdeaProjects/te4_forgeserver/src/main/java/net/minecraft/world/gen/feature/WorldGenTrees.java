@@ -83,7 +83,7 @@ public class WorldGenTrees extends WorldGenAbstractTree {
                 BlockPos temp;
                 IBlockState state = selector.getState(temp = position.down());
 
-                if (state.getBlock().canSustainPlant(state, worldIn, temp, EnumFacing.UP, (BlockSapling)Blocks.SAPLING)
+                if (state.getBlock().canSustainPlantSafe(state, selector, temp, EnumFacing.UP, (BlockSapling)Blocks.SAPLING, blockPos)
                         && position.getY() < worldIn.getHeight() - factor - 1) {
                     state.getBlock().onPlantGrow(state, worldIn, temp, position);
 

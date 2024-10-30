@@ -66,11 +66,16 @@ public class BlockReed extends Block implements IPlantable {
 
     @Override
     public boolean canPlaceBlockAt(final World world, final BlockPos pos) {
-        final IBlockEAccess access = world.access();
-        BlockPos temp = world.localTempPos.setPos(pos.getX(), pos.getY()-1, pos.getZ());
+        return canPlaceBlockAtAsy(world, pos);
+    }
+
+
+    @Override
+    public boolean canPlaceBlockAtAsy(final IBlockEAccess access, final BlockPos pos) {
+        BlockPos temp = new BlockPos(pos.getX(), pos.getY()-1, pos.getZ());
         final IBlockState state = access.getBlockState(temp);
         final Block block = state.getBlock();
-        if (block.canSustainPlant(state, world, temp, EnumFacing.UP, this)) {
+        if (block.canSustainPlant(state, access, temp, EnumFacing.UP, this)) {
             return true;
         }
         if (block == this) {
