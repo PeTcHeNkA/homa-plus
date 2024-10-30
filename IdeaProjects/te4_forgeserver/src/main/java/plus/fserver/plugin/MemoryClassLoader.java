@@ -1,8 +1,6 @@
 package plus.fserver.plugin;
 
-import io.netty.util.internal.shaded.org.jctools.util.UnsafeAccess;
 import sun.misc.Resource;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,64 +19,60 @@ public class MemoryClassLoader{
 
 
     static Class<?> loadUnsafe(ClassLoader loader, String name, byte[] data) throws Exception{
-        return UnsafeAccess.UNSAFE.defineClass(
-                name, data, 0, data.length, loader, null
-        );
-//
-//        Method method = URLClassLoader.class.getDeclaredMethod("defineClass",
-//                String.class, Resource.class);
-//
-//        method.setAccessible(true);
-//
-//        return (Class<?>) method.invoke(loader, name, new MemorySrc(data));
+        Method method = URLClassLoader.class.getDeclaredMethod("defineClass",
+                String.class, Resource.class);
+
+        method.setAccessible(true);
+
+        return (Class<?>) method.invoke(loader, name, new MemorySrc(data));
     }
-//
-//
-//    static class MemorySrc extends Resource{
-//        private final byte[] bytes;
-//
-//        MemorySrc(byte[] bytes) {
-//            this.bytes = bytes;
-//        }
-//        @Override
-//        public String getName() {
-//            return "";
-//        }
-//        @Override
-//        public URL getURL() {
-//            return null;
-//        }
-//        @Override
-//        public URL getCodeSourceURL() {
-//            try {
-//                return new URL("memory", "memory", 0, "memory", new URLStreamHandler() {
-//                    @Override
-//                    protected URLConnection openConnection(URL u) {
-//                        return new URLConnection(u) {
-//                            @Override
-//                            public void connect() {}
-//                            @Override
-//                            public InputStream getInputStream() throws IOException {
-//                                return MemorySrc.this.getInputStream();
-//                            }
-//                        };
-//                    }
-//                });
-//            } catch (MalformedURLException e) {
-//                throw new RuntimeException(e);
-//            }
-//        }
-//        @Override
-//        public byte[] getBytes() {
-//            return bytes;
-//        }
-//        @Override
-//        public InputStream getInputStream() {
-//            return new ByteArrayInputStream(bytes);
-//        }
-//        @Override
-//        public int getContentLength() {
-//            return bytes.length;
-//        }
-//    }
+
+
+    static class MemorySrc extends Resource{
+        private final byte[] bytes;
+
+        MemorySrc(byte[] bytes) {
+            this.bytes = bytes;
+        }
+        @Override
+        public String getName() {
+            return "";
+        }
+        @Override
+        public URL getURL() {
+            return null;
+        }
+        @Override
+        public URL getCodeSourceURL() {
+            try {
+                return new URL("memory", "memory", 0, "memory", new URLStreamHandler() {
+                    @Override
+                    protected URLConnection openConnection(URL u) {
+                        return new URLConnection(u) {
+                            @Override
+                            public void connect() {}
+                            @Override
+                            public InputStream getInputStream() throws IOException {
+                                return MemorySrc.this.getInputStream();
+                            }
+                        };
+                    }
+                });
+            } catch (MalformedURLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        @Override
+        public byte[] getBytes() {
+            return bytes;
+        }
+        @Override
+        public InputStream getInputStream() {
+            return new ByteArrayInputStream(bytes);
+        }
+        @Override
+        public int getContentLength() {
+            return bytes.length;
+        }
+    }
 }

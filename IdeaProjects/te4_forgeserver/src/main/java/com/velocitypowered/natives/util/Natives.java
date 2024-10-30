@@ -1,7 +1,6 @@
 package com.velocitypowered.natives.util;
 
 import com.google.common.collect.ImmutableList;
-import com.velocitypowered.natives.NativeSetupException;
 import com.velocitypowered.natives.compression.JavaVelocityCompressor;
 import com.velocitypowered.natives.compression.LibdeflateVelocityCompressor;
 import com.velocitypowered.natives.compression.VelocityCompressorFactory;
@@ -9,7 +8,7 @@ import com.velocitypowered.natives.encryption.JavaVelocityCipher;
 import com.velocitypowered.natives.encryption.NativeVelocityCipher;
 import com.velocitypowered.natives.encryption.VelocityCipherFactory;
 import plus.fserver.ElcaConfig;
-
+import plus.fserver.api.Keep;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,11 +17,9 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
 
+@Keep
 public class Natives {
-
-  private Natives() {
-    throw new AssertionError();
-  }
+  private Natives() {}
 
   private static Runnable copyAndLoadNative(String path) {
     return () -> {
@@ -45,13 +42,14 @@ public class Natives {
         try {
           System.load(tempFile.toAbsolutePath().toString());
         } catch (UnsatisfiedLinkError e) {
-          throw new NativeSetupException("Unable to load native " + tempFile.toAbsolutePath(), e);
+          throw new RuntimeException("Unable to load native " + tempFile.toAbsolutePath(), e);
         }
       } catch (IOException e) {
-        throw new NativeSetupException("Unable to copy natives", e);
+        throw new RuntimeException("Unable to copy natives", e);
       }
     };
   }
+
 
   private static Path createTemporaryNativeFilename(String ext) throws IOException {
       String temporaryFolderPath = System.getProperty("velocity.natives-tmpdir");

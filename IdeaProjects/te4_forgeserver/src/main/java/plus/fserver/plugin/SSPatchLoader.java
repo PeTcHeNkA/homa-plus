@@ -4,7 +4,6 @@ import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraft.launchwrapper.ITweaker;
 import net.minecraft.launchwrapper.LaunchClassLoader;
 import org.apache.logging.log4j.LogManager;
-import org.spongepowered.asm.mixin.Mixins;
 import plus.fserver.api.Keep;
 import java.io.File;
 import java.lang.reflect.Field;
@@ -71,11 +70,9 @@ public class SSPatchLoader implements ITweaker{
 
     private static void tryInstallMixins(){
         try {
-            Class.forName("org.spongepowered.asm.launch.MixinBootstrap")
-                    .getDeclaredMethod("init").invoke(null);
-
-            Mixins.addConfiguration("mixins.fserver.json");
-        } catch (Exception e) {
+            org.spongepowered.asm.launch.MixinBootstrap.init();
+            org.spongepowered.asm.mixin.Mixins.addConfiguration("mixins.fserver.json");
+        } catch (Throwable e) {
             LogManager.getLogger("ELCA").warn("Mixin System don`t loaded");
         }
     }

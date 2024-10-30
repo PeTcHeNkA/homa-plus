@@ -230,6 +230,12 @@ public class EntityDataManager extends Int2ObjectMap<EntityDataManager.DataEntry
     }
 
 
+    @Override
+    public boolean isEmpty() {
+        return size == 0;
+    }
+
+
     public void writeEntries(PacketBuffer buf) throws IOException {
         ReentrantReadWriteLock.ReadLock rLoc = this.lock.readLock();
         rLoc.lock();

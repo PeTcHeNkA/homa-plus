@@ -2,15 +2,18 @@ package com.velocitypowered.natives.compression;
 
 import static com.velocitypowered.natives.compression.CompressorUtils.ZLIB_BUFFER_SIZE;
 import static com.velocitypowered.natives.compression.CompressorUtils.ensureMaxSize;
-
 import com.google.common.base.Preconditions;
 import com.velocitypowered.natives.util.BufferPreference;
 import io.netty.buffer.ByteBuf;
+import plus.fserver.api.Keep;
+
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
+
 public class JavaVelocityCompressor implements VelocityCompressor {
+    @Keep
     public static final VelocityCompressorFactory FACTORY = JavaVelocityCompressor::new;
 
     private final Deflater deflater;

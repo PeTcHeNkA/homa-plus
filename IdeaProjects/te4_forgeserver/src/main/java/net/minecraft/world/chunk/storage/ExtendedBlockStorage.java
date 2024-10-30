@@ -6,9 +6,13 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagByteArray;
 import net.minecraft.nbt.NBTTagEmptyByteArray;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.BlockIDIndexes;
 import net.minecraft.world.chunk.BlockStateContainer;
+import net.minecraft.world.chunk.NibbleArray;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import plus.fserver.utls.collections.IntBlockIndex;
 import java.util.Arrays;
 
 
@@ -22,6 +26,11 @@ public class ExtendedBlockStorage extends BlockStateContainer{
 
     public ExtendedBlockStorage(int y, boolean storeSkylight) {
         this.yBase = y;
+    }
+
+
+    public IBlockState get(int x, int y, int z) {
+        return this.blPlt.get(super.getAt(y << 8 | z << 4 | x));
     }
 
 
@@ -82,6 +91,71 @@ public class ExtendedBlockStorage extends BlockStateContainer{
 
     public int getBlockLight(int x, int y, int z) {
         return this.getBlockFromIndex(getCoordinateIndex(x, y, z));
+    }
+
+
+    @Nullable
+    public NibbleArray getDataForNBT(byte[] blockIds, NibbleArray data) {
+        NibbleArray array = null;
+        for (int i = 0, j, x, y, z; i < 4096; ++i) {
+            x = i & 15;
+            y = i >> 8 & 15;
+            z = i >> 4 & 15;
+            if (((j = getId(i)) >> 12 & 15) != 0) {
+                if (array == null) array = new NibbleArray();
+                array.set(x, y, z, j >> 12 & 15);
+            }
+            blockIds[i] = (byte)(j >> 4 & 255);
+            data.set(x, y, z, j & 15);
+        }
+        return array;
+    }
+
+
+    public void setDataFromNBT(final byte[] blockIds, final NibbleArray data, @Nullable final NibbleArray arr) {
+        final IntBlockIndex index = BlockIDIndexes.BLOCK_INDEX;
+        if(arr == null) {
+            for (int i = 0, x, y, z; i < 4096; ++i) {
+                x = i & 15;
+                y = i >> 8 & 15;
+                z = i >> 4 & 15;
+                this.setC(i, index.get((blockIds[i] & 255) << 4 | data.get(x, y, z)));
+            }
+        } else {
+            for (int i = 0, x, y, z; i < 4096; ++i) {
+                x = i & 15;
+                y = i >> 8 & 15;
+                z = i >> 4 & 15;
+                this.setC(i, index.get(arr.get(x, y, z) << 12 | (blockIds[i] & 255) << 4 | data.get(x, y, z)));
+            }
+        }
+    }
+
+
+    public void write(PacketBuffer buf) {
+        buf.writeByte(this.bit);
+        this.blPlt.write(buf);
+        buf.writeLongArray(super.getBackingLongArray());
+    }
+
+
+    public void write(FastByteBuf buf) {
+        buf.writeByteV(this.bit);
+        this.blPlt.write(buf);
+        buf.writeLongArray(super.getBackingLongArray());
+    }
+
+
+    public int getSerializedSize() {
+        return 1
+                + this.blPlt.getSerializedSize()
+                + PacketBuffer.getVarIntSize(super.size())
+                + super.getBackingLongArray().length << 3;
+    }
+
+
+    private int getId(int index) {
+        return this.blPlt.get(super.getAt(index)).getId();
     }
 
 

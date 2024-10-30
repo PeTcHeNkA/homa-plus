@@ -1734,7 +1734,6 @@ public abstract class EntityLivingBase extends Entity {
     }
 
 
-    @SideOnly(Side.CLIENT)
     protected float updateDistance(float num0, float num2) {
         if(!world.isRemote || SERVER_COMPILE)return num2;
         float f = MathHelper.wrapDegrees(num0 - this.renderYawOffset);
