@@ -30,9 +30,11 @@ import net.minecraft.util.text.*;
 import net.minecraft.util.text.event.*;
 import net.minecraftforge.common.capabilities.*;
 import net.minecraft.world.*;
+import static plus.tson.utl.uns.UnsafeUtils.newObj;
 
 
 public final class ItemStack implements ICapabilitySerializable<NBTTagCompound> {
+    private static final CapabilityDispatcher EMPTY_CAPS = newObj(CapabilityDispatcher.class);
     public static final ItemStack EMPTY;
     public static final DecimalFormat DECIMALFORMAT;
     private int stackSize;
@@ -47,7 +49,7 @@ public final class ItemStack implements ICapabilitySerializable<NBTTagCompound> 
     private Block canPlaceOnCacheBlock;
     private boolean canPlaceOnCacheResult;
     private IRegistryDelegate<Item> delegate;
-    private CapabilityDispatcher capabilities;
+    private CapabilityDispatcher capabilities = EMPTY_CAPS;
     private NBTTagCompound capNBT;
 
     public ItemStack(final Block blockIn) {
@@ -184,11 +186,10 @@ public final class ItemStack implements ICapabilitySerializable<NBTTagCompound> 
         if (this.stackTagCompound != null) {
             nbt.setTag("tag", this.stackTagCompound);
         }
-        if (this.capabilities != null) {
-            final NBTTagCompound cnbt = this.capabilities.serializeNBT();
-            if (!cnbt.isEmpty()) {
-                nbt.setTag("ForgeCaps", cnbt);
-            }
+
+        NBTTagCompound cnbt = getCapsNbt();
+        if (cnbt != null && !cnbt.isEmpty()) {
+            nbt.setTag("ForgeCaps", cnbt);
         }
         return nbt;
     }
@@ -304,7 +305,7 @@ public final class ItemStack implements ICapabilitySerializable<NBTTagCompound> 
 
 
     public ItemStack copy() {
-        final ItemStack itemstack = new ItemStack(this.item, this.stackSize, this.itemDamage, (this.capabilities != null) ? this.capabilities.serializeNBT() : null);
+        final ItemStack itemstack = new ItemStack(this.item, this.stackSize, this.itemDamage, this.getCapsNbt());
         itemstack.setAnimationsToGo(this.getAnimationsToGo());
         if (this.stackTagCompound != null) {
             itemstack.stackTagCompound = this.stackTagCompound.copy();
@@ -315,7 +316,7 @@ public final class ItemStack implements ICapabilitySerializable<NBTTagCompound> 
 
     public ItemStack copyForPacket(){
         Item item = this.item;
-        ItemStack copy = new ItemStack(item, this.stackSize, this.itemDamage, (this.capabilities != null) ? this.capabilities.serializeNBT() : null);
+        ItemStack copy = new ItemStack(item, this.stackSize, this.itemDamage, this.getCapsNbt());
         if(item == null)return copy;
         copy.setAnimationsToGo(this.getAnimationsToGo());
         item.copyForPacket(this, copy);
@@ -832,24 +833,34 @@ public final class ItemStack implements ICapabilitySerializable<NBTTagCompound> 
         this.updateEmptyState();
     }
 
+
     public void grow(final int quantity) {
         this.setCount(this.stackSize + quantity);
     }
+
 
     public void shrink(final int quantity) {
         this.grow(-quantity);
     }
 
+
     @Override
-    public boolean hasCapability(final Capability<?> p_hasCapability_1_, @Nullable final EnumFacing p_hasCapability_2_) {
-        return !this.isEmpty && this.capabilities != null && this.capabilities.hasCapability(p_hasCapability_1_, p_hasCapability_2_);
+    public boolean hasCapability(final Capability<?> cap, @Nullable final EnumFacing facing) {
+        if(this.isEmpty)return false;
+        CapabilityDispatcher caps = this.getCaps();
+        return caps != null && caps.hasCapability(cap, facing);
     }
+
 
     @Nullable
     @Override
-    public <T> T getCapability(final Capability<T> p_getCapability_1_, @Nullable final EnumFacing p_getCapability_2_) {
-        return (this.isEmpty || this.capabilities == null) ? null : this.capabilities.getCapability(p_getCapability_1_, p_getCapability_2_);
+    public <T> T getCapability(final Capability<T> cap, @Nullable final EnumFacing facing) {
+        if(this.isEmpty)return null;
+        CapabilityDispatcher caps = this.getCaps();
+        if(caps == null)return null;
+        return caps.getCapability(cap, facing);
     }
+
 
     @Override
     public void deserializeNBT(final NBTTagCompound p_deserializeNBT_1_) {
@@ -865,29 +876,54 @@ public final class ItemStack implements ICapabilitySerializable<NBTTagCompound> 
         return ret;
     }
 
-    public boolean areCapsCompatible(final ItemStack p_areCapsCompatible_1_) {
-        if (this.capabilities == null) {
-            return p_areCapsCompatible_1_.capabilities == null || p_areCapsCompatible_1_.capabilities.areCompatible(null);
-        }
-        return this.capabilities.areCompatible(p_areCapsCompatible_1_.capabilities);
+
+    public boolean areCapsCompatible(final ItemStack other) {
+        CapabilityDispatcher selfCaps  = getCaps();
+        CapabilityDispatcher otherCaps = other.getCaps();
+        if(selfCaps == null)return otherCaps == null;
+        return selfCaps.areCompatible(otherCaps);
     }
+
 
     private void forgeInit() {
         final Item item = this.getItemRaw();
         if (item != null) {
-            this.delegate = (IRegistryDelegate<Item>)item.delegate;
-            final ICapabilityProvider provider = item.initCapabilities(this, this.capNBT);
-            this.capabilities = ForgeEventFactory.gatherCapabilities(this, provider);
-            if (this.capNBT != null && this.capabilities != null) {
-                this.capabilities.deserializeNBT(this.capNBT);
-            }
+            this.delegate = item.delegate;
         }
     }
+
+
+    @Nullable
+    private NBTTagCompound getCapsNbt(){
+        CapabilityDispatcher caps = this.capabilities;
+        if(caps == EMPTY_CAPS)return this.capNBT;
+        if(caps == null)return null;
+        return caps.serializeNBT();
+    }
+
+
+    @Nullable
+    private CapabilityDispatcher getCaps(){
+        CapabilityDispatcher caps = this.capabilities;
+        if(caps == EMPTY_CAPS) {
+            final Item item = this.getItemRaw();
+            final NBTTagCompound nbt;
+            final ICapabilityProvider provider = item.initCapabilities(this, nbt = this.capNBT);
+            caps = this.capabilities = ForgeEventFactory.gatherCapabilities(this, provider);
+            if (nbt != null && caps != null) {
+                caps.deserializeNBT(nbt);
+            }
+            this.capNBT = null;
+        }
+        return caps;
+    }
+
 
     @Nullable
     private Item getItemRaw() {
         return this.item;
     }
+
 
     public static boolean areItemStacksEqualUsingNBTShareTag(final ItemStack p_areItemStacksEqualUsingNBTShareTag_0_, final ItemStack p_areItemStacksEqualUsingNBTShareTag_1_) {
         if (p_areItemStacksEqualUsingNBTShareTag_0_.isEmpty()) {

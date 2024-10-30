@@ -13,7 +13,6 @@ import java.util.*;
 
 
 public class TweakEngine implements IClassTransformer, Set<String> {
-    private static final String URL_TWEAK_SEARCH_POINT = "plus/fserver/plugin/TweakEngine.class";
     private final ClassLoader loader = TweakEngine.class.getClassLoader();
     private final Te4HashMap<String, TweakInfo> classes = new Te4HashMap<>();
     private final Te4HashSet<String> preLoads = new Te4HashSet<>();
@@ -29,10 +28,6 @@ public class TweakEngine implements IClassTransformer, Set<String> {
             this.useSafeMode = useSafeMode;
             this.useSideTransformer = useSideTransformer;
         }
-    }
-
-    public TweakEngine(){
-        this(URL_TWEAK_SEARCH_POINT);
     }
 
 

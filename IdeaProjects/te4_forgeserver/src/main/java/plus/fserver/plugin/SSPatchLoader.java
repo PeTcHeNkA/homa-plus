@@ -5,12 +5,14 @@ import net.minecraft.launchwrapper.ITweaker;
 import net.minecraft.launchwrapper.LaunchClassLoader;
 import org.apache.logging.log4j.LogManager;
 import org.spongepowered.asm.mixin.Mixins;
+import plus.fserver.api.Keep;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.List;
 import static plus.fserver.ElcaCV.*;
 
 
+@Keep
 public class SSPatchLoader implements ITweaker{
     public static final String ELCA_RELEASE = "Elca Enterprise Edition";
     public static final String ELCA_VERSION;

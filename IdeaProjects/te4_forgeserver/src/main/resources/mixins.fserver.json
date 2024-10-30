@@ -4,10 +4,8 @@
   "compatibilityLevel": "JAVA_8",
   "package": "plus.fserver.mixins",
   "refmap": "mixins.fserver.refmap.json",
-  "plugin": "plus.fserver.plugin.MixinConfig",
   "target": "@env(DEFAULT)",
   "mixins": [
-    "expmem.ItemStackPatch",
     "pf.EntityXPOrbPatch",
     "pf.GameDataPatch"
   ]

@@ -11,7 +11,6 @@
 -keep class plus.fserver.block.** { *; }
 -keep class plus.fserver.event.** { *; }
 -keep class plus.fserver.mixins.** { *; }
--keep class plus.fserver.plugin.** { *; }
 
 -keepclasseswithmembers @plus.fserver.api.Keep class *
 -keepclassmembers @plus.fserver.api.Keep class *
@@ -26,6 +25,6 @@
   public *;
 }
 
--repackageclasses plus.fserver.pro
+-repackageclasses plus.pro
 -keepattributes *Annotation*
 -ignorewarnings

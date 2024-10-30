@@ -1,9 +1,11 @@
 package plus.fserver.plugin;
 
 import net.minecraft.launchwrapper.IClassTransformer;
+import plus.fserver.api.Keep;
 import plus.fserver.utls.CSVReader;
 
 
+@Keep
 public class SSPathTransformer extends TweakEngine implements IClassTransformer{
     private boolean shouldInit = true;
 
