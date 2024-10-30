@@ -240,9 +240,10 @@ public class EntityItem extends Entity {
         final ItemStack stack = this.getItem();
         if (stack.getCount() >= stack.getMaxStackSize()) return;
         AxisAlignedBB aabb;
-        this.getEntityBoundingBox().growTo(0.73D, 0.0D, 0.73D, aabb = world.commonWorldEntityAABB);
+        World world;
+        this.getEntityBoundingBox().growTo(0.73D, 0.0D, 0.73D, aabb = (world = this.world).commonWorldEntityAABB);
 
-        for (EntityItem entityitem : this.world.getEntitiesWithinAABB(EntityItem.class, aabb)) {
+        for (EntityItem entityitem : world.getEntitiesWithinAABB(EntityItem.class, aabb)) {
             this.combineItems(entityitem);
         }
     }
@@ -276,10 +277,12 @@ public class EntityItem extends Entity {
                     } else if (!stack.areCapsCompatible(oStack)) {
                         return false;
                     } else {
-                        oStack.grow(stack.getCount());
                         other.pickupDelay = Math.max(other.pickupDelay, this.pickupDelay);
                         other.age = Math.min(other.age, this.age);
-                        other.setItem(oStack);
+                        if(!world.isRemote || SERVER_COMPILE){
+                            oStack.grow(stack.getCount());
+                            other.setItem(oStack);
+                        }
                         this.setDead();
                         return true;
                     }

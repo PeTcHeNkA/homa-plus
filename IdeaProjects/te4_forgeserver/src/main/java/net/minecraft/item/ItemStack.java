@@ -118,7 +118,9 @@ public final class ItemStack implements ICapabilitySerializable<NBTTagCompound> 
 
 
     public boolean isEmpty() {
-        return this == ItemStack.EMPTY || this.getItemRaw() == null || this.getItemRaw() == Items.AIR || this.stackSize <= 0 || this.itemDamage < -32768 || this.itemDamage > 65535;
+        Item raw;
+        int dmg;
+        return this == ItemStack.EMPTY || (raw = this.getItemRaw()) == null || raw == Items.AIR || this.stackSize <= 0 || (dmg = this.itemDamage) < -32768 || dmg > 65535;
     }
 
 
@@ -138,7 +140,8 @@ public final class ItemStack implements ICapabilitySerializable<NBTTagCompound> 
 
 
     public Item getItem() {
-        return (this.isEmpty || this.delegate == null) ? Items.AIR : this.delegate.get();
+        IRegistryDelegate<Item> delegate;
+        return (this.isEmpty || (delegate = this.delegate) == null) ? Items.AIR : delegate.get();
     }
 
 
