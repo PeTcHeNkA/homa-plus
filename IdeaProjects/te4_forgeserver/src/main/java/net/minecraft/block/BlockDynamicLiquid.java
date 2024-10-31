@@ -12,7 +12,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.event.ForgeEventFactory;
 import plus.fserver.api.Keep;
+import plus.fserver.server.ElcaThread;
 import plus.fserver.server.elca.ChunkSelector;
+
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public class BlockDynamicLiquid extends BlockLiquid {
@@ -30,7 +33,7 @@ public class BlockDynamicLiquid extends BlockLiquid {
 
 
     @Override
-    public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand) {
+    public void updateTick(World worldIn, final BlockPos pos, IBlockState state, Random rand) {
         if (!worldIn.isAreaLoaded(pos, this.getSlopeFindDistance(worldIn))) return; // Forge: avoid loading unloaded chunks
         int level = state.getValue(LEVEL);
         int num2 = 1;
@@ -39,14 +42,29 @@ public class BlockDynamicLiquid extends BlockLiquid {
             num2 = 2;
         }
         int tickRate = this.tickRate(worldIn);
-        ChunkSelector selector = new ChunkSelector(worldIn);
+        BlockPos.MutableBlockPos mut;
+        ChunkSelector selector;
+        if(!worldIn.isRemote || SERVER_COMPILE){
+            ElcaThread.Cache cache = ElcaThread.cache();
+            selector = cache;
+            mut = cache.pos1;
+        } else {
+            selector = new ChunkSelector(worldIn);
+            mut = new BlockPos.MutableBlockPos();
+        }
 
         if (level > 0) {
             int num = -100;
             this.adjacentSourceBlocks = 0;
 
-            for (EnumFacing enumfacing : BlockIDIndexes.FACING_HORIZONTAL) {
-                num = this.checkAdjacentBlock(selector, pos.offset(enumfacing), num);
+            for (EnumFacing facing : BlockIDIndexes.FACING_HORIZONTAL) {
+                mut.setPosB(
+                        pos.getX() + facing.getXOffset(),
+                        pos.getY() + facing.getYOffset(),
+                        pos.getZ() + facing.getZOffset()
+                );
+
+                num = this.checkAdjacentBlock(selector, mut, num);
             }
 
             int i1 = num + num2;
@@ -54,8 +72,9 @@ public class BlockDynamicLiquid extends BlockLiquid {
             if (i1 >= 8 || num < 0) {
                 i1 = -1;
             }
+            mut.setPosB(pos.getX(), pos.getY()+1, pos.getZ());
 
-            int depth = this.getDepth(selector.getState(pos.up()));
+            int depth = this.getDepth(selector.getState(mut));
 
             if (depth >= 0) {
                 if (depth >= 8) {
@@ -66,7 +85,8 @@ public class BlockDynamicLiquid extends BlockLiquid {
             }
 
             if (this.adjacentSourceBlocks >= 2 && ForgeEventFactory.canCreateFluidSource(worldIn, pos, state, this.material == Material.WATER)) {
-                IBlockState iblockstate = selector.getState(pos.down());
+                mut.setPosB(pos.getX(), pos.getY()-1, pos.getZ());
+                IBlockState iblockstate = selector.getState(mut);
 
                 if (iblockstate.getMaterial().isSolid()) {
                     i1 = 0;
@@ -93,28 +113,28 @@ public class BlockDynamicLiquid extends BlockLiquid {
         } else {
             this.placeStaticBlock(selector, pos, state);
         }
-        BlockPos down = pos.down();
-        if(down.getY()<1)return;
+        mut.setPosB(pos.getX(), pos.getY()-1, pos.getZ());
+        if(mut.getY()<1)return;
 
-        IBlockState state1 = selector.getState(down);
+        IBlockState state1 = selector.getState(mut);
 
         if (this.canFlowInto(state1)) {
-            if (this.material == Material.LAVA && worldIn.getBlockState(down).getMaterial() == Material.WATER) {
+            if (this.material == Material.LAVA && worldIn.getBlockState(mut).getMaterial() == Material.WATER) {
                 selector.setBlockState(
-                        down,
-                        ForgeEventFactory.fireFluidPlaceBlockEvent(worldIn, down, pos, BlockIDIndexes.STONE_STATE)
+                        mut,
+                        ForgeEventFactory.fireFluidPlaceBlockEvent(worldIn, mut, pos, BlockIDIndexes.STONE_STATE)
                 );
-                this.triggerMixEffects(worldIn, down);
+                this.triggerMixEffects(worldIn, mut);
                 return;
             }
 
             if (level >= 8) {
-                this.tryFlowInto(selector, worldIn, down, state1, level);
+                this.tryFlowInto(selector, worldIn, mut, state1, level);
             } else {
-                this.tryFlowInto(selector, worldIn, down, state1, level + 8);
+                this.tryFlowInto(selector, worldIn, mut, state1, level + 8);
             }
         } else if (level >= 0 && (level == 0 || this.isBlocked(state1))) {
-            Set<EnumFacing> set = this.getPossibleFlowDirections(selector, pos);
+            Set<EnumFacing> set = this.getPossibleFlowDirections(selector, pos, mut);
             int k1 = level + num2;
 
             if (level >= 8) {
@@ -123,10 +143,13 @@ public class BlockDynamicLiquid extends BlockLiquid {
             if (k1 >= 8) {
                 return;
             }
-
             for (EnumFacing facing : set) {
-                this.tryFlowInto(selector, worldIn, pos.offset(facing),
-                        selector.getState(pos.offset(facing)), k1);
+                mut.setPosB(
+                        pos.getX() + facing.getXOffset(),
+                        pos.getY() + facing.getYOffset(),
+                        pos.getZ() + facing.getZOffset()
+                );
+                this.tryFlowInto(selector, worldIn, mut, selector.getState(mut), k1);
             }
         }
     }
@@ -180,19 +203,23 @@ public class BlockDynamicLiquid extends BlockLiquid {
     }
 
 
-    private Set<EnumFacing> getPossibleFlowDirections(ChunkSelector selector, BlockPos pos) {
+    private Set<EnumFacing> getPossibleFlowDirections(ChunkSelector selector, BlockPos pos, BlockPos.MutableBlockPos mut) {
         int i = 1000;
         Set<EnumFacing> set = EnumSet.noneOf(EnumFacing.class);
-        BlockPos blockpos;
         IBlockState iblockstate;
-        for (EnumFacing enumfacing : BlockIDIndexes.FACING_HORIZONTAL) {
-            blockpos = pos.offset(enumfacing);
-            iblockstate = selector.getState(blockpos);
+        for (EnumFacing facing : BlockIDIndexes.FACING_HORIZONTAL) {
+            mut.setPosB(
+                    pos.getX() + facing.getXOffset(),
+                    pos.getY() + facing.getYOffset(),
+                    pos.getZ() + facing.getZOffset()
+            );
+
+            iblockstate = selector.getState(mut);
 
             if (!this.isBlocked(iblockstate) && (iblockstate.getMaterial() != this.material || iblockstate.getValue(LEVEL) > 0)) {
                 int j;
-                if (this.isBlocked(selector.getState(blockpos.down()))) {
-                    j = this.getSlopeDistance(selector, blockpos, 1, enumfacing.getOpposite());
+                if (this.isBlocked(selector.getState(mut.down()))) {
+                    j = this.getSlopeDistance(selector, mut, 1, facing.getOpposite());
                 } else {
                     j = 0;
                 }
@@ -200,7 +227,7 @@ public class BlockDynamicLiquid extends BlockLiquid {
                     set.clear();
                 }
                 if (j <= i) {
-                    set.add(enumfacing);
+                    set.add(facing);
                     i = j;
                 }
             }
