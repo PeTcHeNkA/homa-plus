@@ -59,20 +59,19 @@ public class BlockFarmland extends BlockFx {
     @Override
     public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand) {
         int i = state.getValue(MOISTURE);
-        BlockPos.MutableBlockPos temp = worldIn.localTempPos;
+        BlockPos.MutableBlockPos temp = worldIn.localTempPos; //safe
         if (!this.hasWater(worldIn, temp)) {
             if (!worldIn.isRainingAt(temp.setPos(pos.getX(), pos.getY() + 1, pos.getZ()))) {
                 if (i > 0) {
-                    worldIn.setBlockState(pos, state.withProperty(MOISTURE, i - 1), 2);
+                    worldIn.access().setBlockState(pos, state.withProperty(MOISTURE, i - 1), 2);
                 } else if (!this.hasCrops(worldIn, pos)) {
                     turnToDirt(worldIn, pos);
                 }
             }
             return;
         }
-
         if (i < 7) {
-            worldIn.setBlockState(pos, state.withProperty(MOISTURE, 7), 2);
+            worldIn.access().setBlockState(pos, state.withProperty(MOISTURE, 7), 2);
         }
     }
 

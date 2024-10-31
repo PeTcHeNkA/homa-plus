@@ -25,6 +25,7 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.fserver.server.ElcaThread;
 import plus.fserver.utls.collections.AABBList;
 import static plus.fserver.block.BlockFs.addCollisionBoxToListFx;
 
@@ -84,7 +85,7 @@ public class BlockFence extends Block {
 
     @Override
     public void addCollisionBoxToListF(IBlockState state, IBlockAccess access, BlockPos pos, AxisAlignedBB entityBox, AABBList collidingBoxes) {
-        final BlockPos.MutableBlockPos mut = access.getWorld().localTempPos3;
+        final BlockPos.MutableBlockPos mut = access.getWorld().localTempPos3; //safe
 
         boolean flag1, flag2, addCenter = true;
         flag1 = canFenceConnectTo(access, pos, mut, EnumFacing.NORTH);
@@ -207,7 +208,7 @@ public class BlockFence extends Block {
 
     @Override
     public IBlockState getActualState(IBlockState state, IBlockAccess access, BlockPos pos) {
-        final BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+        final BlockPos.MutableBlockPos mut = ElcaThread.cache().pos1;
         return state.withProperty(NORTH, canFenceConnectTo(access, pos, mut, EnumFacing.NORTH))
                     .withProperty(EAST,  canFenceConnectTo(access, pos, mut, EnumFacing.EAST))
                     .withProperty(SOUTH, canFenceConnectTo(access, pos, mut, EnumFacing.SOUTH))
@@ -232,8 +233,7 @@ public class BlockFence extends Block {
 
     @Override
     public IBlockState withMirror(IBlockState state, Mirror mirrorIn) {
-        switch (mirrorIn)
-        {
+        switch (mirrorIn) {
             case LEFT_RIGHT:
                 return state.withProperty(NORTH, state.getValue(SOUTH)).withProperty(SOUTH, state.getValue(NORTH));
             case FRONT_BACK:

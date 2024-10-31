@@ -79,6 +79,7 @@ import plus.fserver.api.ElcaWorldServer;
 import plus.fserver.ElcaCV;
 import plus.fserver.entity.EntityCollider;
 import plus.fserver.entity.NavChunkLSECache;
+import plus.fserver.server.ElcaThread;
 import plus.fserver.server.chunk.io.TChunkTask;
 import plus.fserver.server.chunk.io.TQueuedChunk;
 import plus.fserver.server.elca.ChunkSelector;
@@ -145,7 +146,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
 
         DimensionManager.setWorld(dimensionId, this, server);
 
-        effectiveAcces = localSelector;
+        effectiveAcces = localSelector; //init
         entitySpawner = makeWorldSpawner();
 
         initUnimportant();
@@ -671,7 +672,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         } else {
             try {
                 //is thread-safe?
-                collideTask.complete(this, localSelector, commonWorldEntityAABB);
+                collideTask.complete(this, localSelector, commonWorldEntityAABB); //safe
             } catch (Exception e){
                 server.ticker().onError(this, e);
             }
@@ -1463,7 +1464,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
 
     @Override
     public void tick() {
-        localSelector.clear();
+        localSelector.clear(); //safe
         super.tick();
         long prevWorldTotalTime = this.worldInfo.getWorldTotalTime();
         if (getGameRules().doMobSpawning.getBoolean()) {
@@ -1757,7 +1758,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
             }
             ++blockUpdateFlags;
 
-            ChunkSelector selector = localSelector;
+            ChunkSelector selector = localSelector; //safe, main
             Chunk chunk;
             BlockPos.MutableBlockPos mut = localUpdateBlocks;
             BlockPos.MutableBlockPos mut2 = localUpdateBlocks2;
@@ -1891,9 +1892,19 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
     @Override
     public final boolean isSideSolid(BlockPos pos, @NotNull EnumFacing side, boolean def) {
         if (pos.getY() < 0 || pos.getY() >= 256) return def;
-        Chunk chunk = localSelector.getChunk(pos);
+        ElcaThread.Cache cache;
+        Chunk chunk = (cache = ElcaThread.cache()).getChunk(pos);
         if (chunk.isEmpty()) return def;
-        return chunk.getBlockStateUnchecked(pos.getX(), pos.getY(), pos.getZ()).isSideSolid(localSelector, pos, side);
+        return chunk.getBlockStateUnchecked(pos.getX(), pos.getY(), pos.getZ()).isSideSolid(cache, pos, side);
+    }
+
+
+
+    public static boolean isSideSolid(ElcaThread.Cache cache, BlockPos pos, @NotNull EnumFacing side, boolean def) {
+        if (pos.getY() < 0 || pos.getY() >= 256) return def;
+        Chunk chunk = cache.getChunk(pos);
+        if (chunk.isEmpty()) return def;
+        return chunk.getBlockStateUnchecked(pos.getX(), pos.getY(), pos.getZ()).isSideSolid(cache, pos, side);
     }
 
 

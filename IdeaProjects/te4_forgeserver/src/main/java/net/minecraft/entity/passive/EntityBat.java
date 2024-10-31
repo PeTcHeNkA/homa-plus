@@ -241,7 +241,7 @@ public class EntityBat extends EntityAmbientCreature {
 
     @Override
     public boolean getCanSpawnHere() {
-        BlockPos blockpos = world.localTempPos.setPos(this.posX, this.getEntityBoundingBox().minY, this.posZ);
+        BlockPos blockpos = world.localTempPos.setPos(this.posX, this.getEntityBoundingBox().minY, this.posZ); //safe
 
         if (blockpos.getY() >= this.world.getSeaLevel()) {
             return false;

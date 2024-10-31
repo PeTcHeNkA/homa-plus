@@ -224,7 +224,7 @@ public abstract class BlockRedstoneDiode extends BlockHorizontal {
 
     public void onPlayerDestroy(World worldIn, BlockPos pos, IBlockState state) {
         if (this.isRepeaterPowered) {
-            for (EnumFacing enumfacing : EnumFacing.values()) {
+            for (EnumFacing enumfacing : EnumFacing.VALUES) {
                 worldIn.notifyNeighborsOfStateChange(pos.offset(enumfacing), this, false);
             }
         }

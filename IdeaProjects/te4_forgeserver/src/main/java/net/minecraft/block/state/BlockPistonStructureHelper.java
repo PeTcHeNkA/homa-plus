@@ -94,7 +94,7 @@ public class BlockPistonStructureHelper {
                 return false;
             } else {
                 Block block = start.getBlock();
-                BlockPos.MutableBlockPos temp = world.localTempPos;
+                BlockPos.MutableBlockPos temp = world.localTempPos; //safe
 
                 EnumFacing opp = this.moveDirection.getOpposite();
 

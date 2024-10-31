@@ -143,12 +143,12 @@ public class BlockFire extends Block {
             if (!world.isAreaLoaded(pos, 2)) {
                 return;
             }
-            ChunkSelector selector = world.localSelector;
+            ChunkSelector selector = world.localSelector; //safe
             if (!this.canPlaceBlockAt(world, pos)) {
                 selector.setBlockState(pos, BlockIDIndexes.AIR_STATE, 3);
             }
 
-            BlockPos.MutableBlockPos temp = world.localTempPos.setPos(pos.getX(), pos.getY()-1, pos.getZ());
+            BlockPos.MutableBlockPos temp = world.localTempPos.setPos(pos.getX(), pos.getY()-1, pos.getZ()); //safe
 
             final Block block = selector.getState(temp).getBlock();
             final boolean flag = block.isFireSource(world, temp, EnumFacing.UP);
@@ -318,7 +318,7 @@ public class BlockFire extends Block {
     private static int getNeighborEncouragement(final ChunkSelector selector, final World world, final BlockPos pos) {
         if (!selector.isAirBlock(pos)) return 0;
         int i = 0;
-        final BlockPos.MutableBlockPos temp = world.localTempPos2;
+        final BlockPos.MutableBlockPos temp = world.localTempPos2; //safe
         for (final EnumFacing facing : EnumFacing.VALUES) {
             temp.setPosB(
                     facing.getXOffset() + pos.getX(),

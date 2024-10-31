@@ -312,7 +312,7 @@ public class EntityFishHook extends Entity {
 
     private void catchingFish(final BlockPos pos) {
         final WorldServer world = (WorldServer)this.world;
-        final ChunkSelector selector = world.localSelector;
+        final ChunkSelector selector = world.localSelector; //safe
         int i = 1;
         final BlockPos blockpos = pos.up();
         if (this.rand.nextFloat() < 0.25f && world.isRainingAt(blockpos)) {

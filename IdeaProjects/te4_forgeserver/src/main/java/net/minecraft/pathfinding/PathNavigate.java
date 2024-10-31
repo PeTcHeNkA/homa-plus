@@ -250,7 +250,7 @@ public abstract class PathNavigate {
                 double vecZ = (double)point.z + (double)((int)(entity.width + 1.0F)) * 0.5;
                 World world;
                 IBlockEAccess access;
-                BlockPos blockpos = (world = entity.world).localTempPos3.setPos(vecX, point.y-1, vecZ);
+                BlockPos blockpos = (world = entity.world).localTempPos3.setPos(vecX, point.y-1, vecZ); //safe
                 AxisAlignedBB box = (access = world.access()).getBlockState(blockpos).getBoundingBox(access, blockpos);
                 entity.getMoveHelper().setMoveTo(
                         vecX,

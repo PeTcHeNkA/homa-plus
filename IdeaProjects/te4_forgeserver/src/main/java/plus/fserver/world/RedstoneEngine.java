@@ -13,6 +13,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import plus.fserver.api.IBlockEAccess;
+import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.math.BlockPosDelta;
 import plus.tson.utl.Te4HashMap;
 import java.util.concurrent.ThreadLocalRandom;
@@ -307,8 +308,9 @@ public class RedstoneEngine {
 
 
     private void identifyNode(final World world, final UpdateNode upd1) {
+        ChunkSelector selector = world.localSelector; //safe
         final BlockPos pos = upd1.self;
-        final IBlockState oldState = world.localSelector.getState(pos);
+        final IBlockState oldState = selector.getState(pos);
         upd1.currentState = oldState;
 
         final Block block = oldState.getBlock();
@@ -316,9 +318,9 @@ public class RedstoneEngine {
             upd1.type = UpdateNode.Type.OTHER;
             return;
         }
-        if (!canPlaceBlockAt(world, world.localSelector, pos)) {
+        if (!canPlaceBlockAt(world, selector, pos)) {
             wire.dropBlockAsItem(world, pos, oldState, 0);
-            world.localSelector.setBlockState(pos, BlockIDIndexes.AIR_STATE, 3);
+            selector.setBlockState(pos, BlockIDIndexes.AIR_STATE, 3);
             upd1.type = UpdateNode.Type.OTHER;
             return;
         }
@@ -502,7 +504,7 @@ public class RedstoneEngine {
     }
 
 
-    private void breadthFirstWalk(final World worldIn) {
+    private void breadthFirstWalk(final World worldIn, ChunkSelector selector) {
         Cache cache;
         shiftQueue(cache = worldIn.getRedstoneCache());
         cache.currentWalkLayer = 1;
@@ -511,7 +513,7 @@ public class RedstoneEngine {
                 if (upd.type == UpdateNode.Type.REDSTONE) {
                     updateNode(worldIn, upd, cache.currentWalkLayer);
                 } else {
-                    worldIn.neighborChanged(upd.self, wire, upd.parent);
+                    worldIn.neighborChangedSafe(selector, upd.self, wire, upd.parent);
                 }
             }
             shiftQueue(cache);
@@ -591,7 +593,7 @@ public class RedstoneEngine {
         upd.visited = true;
         cache.put(pos, upd);
         propagateChanges(world, upd, 0);
-        breadthFirstWalk(world);
+        breadthFirstWalk(world, world.localSelector); //safe
         cache.clear();
     }
 
@@ -651,7 +653,7 @@ public class RedstoneEngine {
 
     private void editRedstoneState(WorldServer world, BlockPos pos, IBlockState newState){
         int px, pz;
-        Chunk chunk = world.localSelector.getChunkE((px = pos.getX())>>4, (pz = pos.getZ())>>4);
+        Chunk chunk = world.localSelector.getChunkE((px = pos.getX())>>4, (pz = pos.getZ())>>4);//safe
         chunk.setBlockStateFastNoTile(px, pos.getY(), pz, newState);
         world.getPlayerChunkMap().markBlockForUpdate(pos);
     }

@@ -14,11 +14,12 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import plus.fserver.api.IBlockEAccess;
 import plus.fserver.api.Keep;
 import plus.fserver.block.BlockFx;
+import plus.fserver.server.ElcaThread;
 import plus.fserver.server.elca.ChunkLCache;
 import plus.fserver.utls.collections.BlockPosQueue;
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public abstract class BlockLeaves extends BlockFx implements net.minecraftforge.common.IShearable {
@@ -41,21 +42,22 @@ public abstract class BlockLeaves extends BlockFx implements net.minecraftforge.
 
     @Override
     public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
-        int k = pos.getX(), l = pos.getY(), i1 = pos.getZ();
+        if(!worldIn.isRemote || SERVER_COMPILE) {
+            int k = pos.getX(), l = pos.getY(), i1 = pos.getZ();
+            ElcaThread.Cache cache = ElcaThread.cache();
+            BlockPos.MutableBlockPos temp = cache.pos1;
 
-        IBlockEAccess access = worldIn.access();
-        BlockPos.MutableBlockPos temp = null;
-        if (worldIn.isAreaLoaded(k - 2, l - 2, i1 - 2, k + 2, l + 2, i1 + 2, true)) {
-            int dx, dy, dz;
-            for (dx = -1; dx <= 1; ++dx) {
-                for (dz = -1; dz <= 1; ++dz) {
-                    for (dy = -1; dy <= 1; ++dy) {
-                        int fx = pos.getX()+dx, fy = pos.getY()+dy, fz = pos.getZ()+dz;
-                        IBlockState state1 = access.getBlockState(fx, fy, fz);
-                        if (state1.getMaterial() == Material.LEAVES) {
-                            if(temp == null)temp = new BlockPos.MutableBlockPos(fx, fy, fz);
-                            else temp.setPosB(fx, fy, fz);
-                            state1.getBlock().beginLeavesDecay(state1, worldIn, temp);
+            if (worldIn.isAreaLoaded(k - 2, l - 2, i1 - 2, k + 2, l + 2, i1 + 2, true)) {
+                int dx, dy, dz;
+                for (dx = -1; dx <= 1; ++dx) {
+                    for (dz = -1; dz <= 1; ++dz) {
+                        for (dy = -1; dy <= 1; ++dy) {
+                            int fx = pos.getX() + dx, fy = pos.getY() + dy, fz = pos.getZ() + dz;
+                            IBlockState state1 = cache.getBlockState(fx, fy, fz);
+                            if (state1.getMaterial() == Material.LEAVES) {
+                                temp.setPosB(fx, fy, fz);
+                                state1.getBlock().beginLeavesDecay(state1, worldIn, temp);
+                            }
                         }
                     }
                 }
@@ -69,8 +71,8 @@ public abstract class BlockLeaves extends BlockFx implements net.minecraftforge.
         if (!world.isRemote) {
             if (state.getValue(CHECK_DECAY) && state.getValue(DECAYABLE)) {
                 if (world.isAreaLoaded(pos, 6)) {
-                    ChunkLCache access = world.bigLocalCache;
-                    access.init(world.localSelector.getChunk(pos.getX(), pos.getZ()));
+                    ChunkLCache access = world.bigLocalCache; //safe
+                    access.init(world.localSelector.getChunk(pos.getX(), pos.getZ())); //safe
 
                     BlockPosQueue queue = new BlockPosQueue(pos.getX(), pos.getY(), pos.getZ());
 

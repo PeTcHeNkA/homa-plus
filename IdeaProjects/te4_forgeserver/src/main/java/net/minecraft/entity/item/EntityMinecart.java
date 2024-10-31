@@ -301,7 +301,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
             int py = MathHelper.floor(this.posY);
             int pz = MathHelper.floor(this.posZ);
 
-            ChunkSelector selector = world.localSelector;
+            ChunkSelector selector = world.localSelector; //safe
 
             IBlockState state;
             if (BlockRailBase.isRailBlock(state = selector.getState(px, py - 1, pz))) {
@@ -314,7 +314,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
             //IBlockState state = selector.getBlockState(px, py, pz);
 
             if (canUseRail() && BlockRailBase.isRailBlock(state)) {
-                this.moveAlongTrack(world.localTempPos2.setPos(px, py, pz), state);
+                this.moveAlongTrack(world.localTempPos2.setPos(px, py, pz), state); //safe
 
                 if (state.getBlock() == Blocks.ACTIVATOR_RAIL) {
                     this.onActivatorRailPass(px, py, pz, state.getValue(BlockRailPowered.POWERED));
@@ -676,7 +676,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
 
             state = this.world.getBlockState(sX, sY, sZ);
         } else {
-            ChunkSelector selector = world.localSelector;
+            ChunkSelector selector = world.localSelector; //safe
 
             if (BlockRailBase.isRailBlock(state = selector.getState(sX, sY - 1, sZ))) {
                 --sY;
@@ -687,7 +687,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
 
         if (BlockRailBase.isRailBlock(state)) {
             BlockRailBase.EnumRailDirection direction = ((BlockRailBase)state.getBlock()).getRailDirection(
-                    world, world.localTempPos.setPos(sX, sY, sZ), state, this);
+                    world, world.localTempPos.setPos(sX, sY, sZ), state, this); //safe
             int[][] aint = MATRIX[direction.getMetadata()];
             double d0 = (double)sX + 0.5D + (double)aint[0][0] * 0.5D;
             double d1 = (double)sY + 0.0625D + (double)aint[0][1] * 0.5D;

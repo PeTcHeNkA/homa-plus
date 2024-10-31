@@ -69,6 +69,7 @@ import plus.fserver.ElcaConfig;
 import plus.fserver.api.IBlockEAccess;
 import plus.fserver.ElcaCV;
 import plus.fserver.api.Keep;
+import plus.fserver.server.ElcaThread;
 import plus.fserver.server.elca.ChunkLCache;
 import plus.fserver.server.elca.ChunkLSECache;
 import plus.fserver.utls.math.MathUtls;
@@ -158,6 +159,8 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public final BlockPos.MutableBlockPos localTempPos ;
     public final BlockPos.MutableBlockPos localTempPos2;
     public final BlockPos.MutableBlockPos localTempPos3;
+    //only collisions
+    protected final BlockPos.MutableBlockPos tempPooledLocalPos = new BlockPos.MutableBlockPos();
 
     public long tryUpdateNavigationLimit = 20L;
     public final LightingEngine lightingEngine = new LightingEngine(this);
@@ -172,7 +175,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public ChunkProviderServer chunkProviderServer;
     //END UNSAFE
 
-    private Thread curThread;
+    private ElcaThread curThread;
 
     protected World(ISaveHandler saveHandlerIn, WorldInfo info, WorldProvider providerIn, Profiler profilerIn, boolean client) {
         this(null, saveHandlerIn, info, providerIn, profilerIn, client);
@@ -217,14 +220,15 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             eeCache = null;
             bbCache = null;
         }
-        localSelector = initSelector();
+        localSelector = initSelector(); //init
         effectiveAcces = this;
         //locals = ElcaServerUtls.createLocals(this);
     }
 
 
     public void setCurThread(){
-        curThread = Thread.currentThread();
+        ElcaThread curThread = this.curThread = (ElcaThread)Thread.currentThread();
+        curThread.setWorld((WorldServer)this);
     }
 
 
@@ -236,6 +240,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     public void freeCurThread(){
+        curThread.release();
         curThread = null;
     }
 
@@ -688,25 +693,26 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             if (onNeighborNotify(pos, this.getBlockState(pos), java.util.EnumSet.allOf(EnumFacing.class), updateObservers).isCanceled())
                 return;
         }
-        BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+        ElcaThread.Cache cahce = ElcaThread.cache();
+        BlockPos.MutableBlockPos mut = cahce.pos2;
         final int posX, posY, posZ;
         mut.setPosB((posX = pos.getX())-1, (posY = pos.getY()), (posZ = pos.getZ()));
-        this.neighborChanged(mut, blockType, pos);
+        this.neighborChangedSafe(cahce, mut, blockType, pos);
 
         mut.setX(posX+1);
-        this.neighborChanged(mut, blockType, pos);
+        this.neighborChangedSafe(cahce, mut, blockType, pos);
 
         mut.setPosB(posX, posY-1, posZ);
-        this.neighborChanged(mut, blockType, pos);
+        this.neighborChangedSafe(cahce, mut, blockType, pos);
 
         mut.setY(posY+1);
-        this.neighborChanged(mut, blockType, pos);
+        this.neighborChangedSafe(cahce, mut, blockType, pos);
 
         mut.setPosB(posX, posY, posZ-1);
-        this.neighborChanged(mut, blockType, pos);
+        this.neighborChangedSafe(cahce, mut, blockType, pos);
 
         mut.setZ(posZ+1);
-        this.neighborChanged(mut, blockType, pos);
+        this.neighborChangedSafe(cahce, mut, blockType, pos);
 
         if (updateObservers) {
             this.updateObservingBlocksAt(pos, blockType);
@@ -721,39 +727,40 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             if (onNeighborNotify(pos, this.getBlockState(pos), directions, false).isCanceled())
                 return;
         }
-        BlockPos.MutableBlockPos temp = new BlockPos.MutableBlockPos();
+        ElcaThread.Cache cache = ElcaThread.cache();
+        BlockPos.MutableBlockPos temp = cache.pos2;
         if (skipSide != EnumFacing.WEST) {
-            this.neighborChanged(
+            this.neighborChangedSafe(cache,
                     temp.setPos(pos.getX()-1,pos.getY(),pos.getZ()), blockType, pos
             );
         }
 
         if (skipSide != EnumFacing.EAST) {
-            this.neighborChanged(
+            this.neighborChangedSafe(cache,
                     temp.setPos(pos.getX()+1,pos.getY(),pos.getZ()), blockType, pos
             );
         }
 
         if (skipSide != EnumFacing.DOWN) {
-            this.neighborChanged(
+            this.neighborChangedSafe(cache,
                     temp.setPos(pos.getX(),pos.getY()-1,pos.getZ()), blockType, pos
             );
         }
 
         if (skipSide != EnumFacing.UP) {
-            this.neighborChanged(
+            this.neighborChangedSafe(cache,
                     temp.setPos(pos.getX(),pos.getY()+1,pos.getZ()), blockType, pos
             );
         }
 
         if (skipSide != EnumFacing.NORTH) {
-            this.neighborChanged(
+            this.neighborChangedSafe(cache,
                     temp.setPos(pos.getX(),pos.getY(),pos.getZ()-1), blockType, pos
             );
         }
 
         if (skipSide != EnumFacing.SOUTH) {
-            this.neighborChanged(
+            this.neighborChangedSafe(cache,
                     temp.setPos(pos.getX(),pos.getY(),pos.getZ()+1), blockType, pos
             );
         }
@@ -839,7 +846,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             return 0;
         } else {
             if (pos.getY() >= 256) {
-                pos = new BlockPos(pos.getX(), 255, pos.getZ());
+                pos = ElcaThread.cache().pos3.setPos(pos.getX(), 255, pos.getZ());
             }
             return this.getChunk(pos).getLightSubtracted(pos, 0);
         }
@@ -2107,7 +2114,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         if(maxY > 255)maxY = 255;
         int minZ = MathHelper.floor(bb.minZ);
         int maxZ = MathHelper.ceil(bb.maxZ);
-        ChunkSelector access = localSelector;
+        ChunkSelector access = localSelector; //safe, collisions
 
         for (int dx = minX; dx < maxX; ++dx) {
             for (int dz = minZ; dz < maxZ; ++dz) {
@@ -2132,7 +2139,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         int minZ = MathHelper.floor(bb.minZ);
         int maxZ = MathHelper.ceil(bb.maxZ);
 
-        ChunkSelector access = localSelector;
+        ChunkSelector access = localSelector; //safe, collisions
         BlockPos.MutableBlockPos pooledPos = tempPooledLocalPos;
 
         for (int dx = minX; dx < maxX; ++dx) {
@@ -2898,7 +2905,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     public int getStrongPower(final BlockPos pos) {
-        return getStrongPowerDelta(new BlockPosDelta(pos));
+        return getStrongPowerDelta(localSelector, new BlockPosDelta(pos));
     }
 
 
@@ -4053,12 +4060,12 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     //to merge ==============================================================================================================
-    protected final BlockPos.MutableBlockPos tempPooledLocalPos = new BlockPos.MutableBlockPos();
+
 
     //common
     public boolean isBlockFullCube(BlockPos pos) {
         if(pos.getY() < 0 || pos.getY() > 255)return false;
-        AxisAlignedBB axisalignedbb = localSelector.getStateUnchecked(pos.getX(), pos.getY(), pos.getZ()).getCollisionBoundingBox(this, pos);
+        AxisAlignedBB axisalignedbb = localSelector.getStateUnchecked(pos.getX(), pos.getY(), pos.getZ()).getCollisionBoundingBox(this, pos); //todo check
         return axisalignedbb != Block.NULL_AABB && axisalignedbb.getAverageEdgeLength() >= 1.0D;
     }
 
@@ -4086,18 +4093,20 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
     //redstone
     public int getRedstonePower(BlockPos pos, EnumFacing facing) {
-        IBlockState state = localSelector.getState(pos);
+        ChunkSelector selector;
+        IBlockState state = (selector = localSelector).getState(pos); //safe
         return state.getBlock().shouldCheckWeakPower(state, this, pos, facing) ?
-                getStrongPowerDelta(new BlockPosDelta(pos)) : state.getWeakPower(localSelector, pos, facing);
+                getStrongPowerDelta(selector, new BlockPosDelta(pos)) : state.getWeakPower(selector, pos, facing);
     }
 
 
     public int getStrongPower(BlockPos pos, EnumFacing direction) {
-        return localSelector.getState(pos).getStrongPower(localSelector, pos, direction);
+        ChunkSelector selector;
+        return (selector = localSelector).getState(pos).getStrongPower(selector, pos, direction); //safe
     }
 
 
-    private int getStrongPowerDelta(BlockPosDelta pos) {
+    private static int getStrongPowerDelta(ChunkSelector localSelector, BlockPosDelta pos) {
         int max = localSelector.getState(pos.dY(-1)).getStrongPower(localSelector, pos, EnumFacing.DOWN);
 
         if (max >= 15) {
@@ -4137,7 +4146,12 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     public void neighborChanged(BlockPos pos, final Block blockIn, BlockPos fromPos) {
-        localSelector.getState(pos).neighborChanged(this, pos, blockIn, fromPos);
+        ElcaThread.cache().getState(pos).neighborChanged(this, pos, blockIn, fromPos);
+    }
+
+
+    public void neighborChangedSafe(ChunkSelector selector, BlockPos pos, final Block blockIn, BlockPos fromPos) {
+        selector.getState(pos).neighborChanged(this, pos, blockIn, fromPos);
     }
 
 
@@ -4184,14 +4198,15 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
-    private final BlockPos.MutableBlockPos lightTemp = new BlockPos.MutableBlockPos();
     private int getLight0(int posX, int posY, int posZ, boolean checkNeighbors) {
-        if (checkNeighbors && localSelector.getState(posX, posY, posZ).useNeighborBrightness()) {
-            int i1 = this.getLight0U(     posX  , posY+1,     posZ  );
-            int i =  this.getLight0U(posX+1,      posY  ,     posZ  );
-            int j =  this.getLight0U(posX-1,      posY  ,     posZ  );
-            int k =  this.getLight0U(     posX  ,      posY  ,posZ+1);
-            int l =  this.getLight0U(     posX  ,      posY  ,posZ-1);
+        ElcaThread.Cache cache = ElcaThread.cache();
+        int sub = getSkylightSubtracted();
+        if (checkNeighbors && cache.getState(posX, posY, posZ).useNeighborBrightness()) {
+            int i1 = this.getLight0U(cache,      posX  , posY+1,     posZ  , sub);
+            int i =  this.getLight0U(cache, posX+1,      posY  ,     posZ  , sub);
+            int j =  this.getLight0U(cache, posX-1,      posY  ,     posZ  , sub);
+            int k =  this.getLight0U(cache,      posX  ,      posY  ,posZ+1, sub);
+            int l =  this.getLight0U(cache,      posX  ,      posY  ,posZ-1, sub);
 
             if (i > i1) i1 = i;
             if (j > i1) i1 = j;
@@ -4203,27 +4218,28 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             return 0;
         } else {
             if (posY > 255) posY = 255;
-            return localSelector.getChunk(posX, posZ).getLightSubtracted(posX, posY, posZ, getSkylightSubtracted());
+            return cache.getChunk(posX, posZ).getLightSubtracted(posX, posY, posZ, sub);
         }
     }
 
 
-    private int getLight0U(int posX, int posY, int posZ) {
+    private static int getLight0U(ChunkSelector selector, int posX, int posY, int posZ, int sub) {
         if (posY < 0) return 0;
         if (posY > 255) posY = 255;
-        return localSelector.getChunk(posX, posZ).getLightSubtracted(posX, posY, posZ, getSkylightSubtracted());
+        return selector.getChunk(posX, posZ).getLightSubtracted(posX, posY, posZ, sub);
     }
 
 
     //chunk-iter functions
     public void updateObservingBlocksAt(BlockPos pos, Block blockType) {
-        if(this.isRemote)return;
+        //if(this.isRemote)return;
         int bX = pos.getX(), bY = pos.getY(), bZ = pos.getZ();
         if(bY>0) {
-            ChunkSelector selector = this.localSelector;
-            BlockPos.MutableBlockPos mut = this.tempPooledLocalPos;
+            ElcaThread.Cache cache = ElcaThread.cache();
+            BlockPos.MutableBlockPos mut = cache.pos1;
+
             int nX, nZ, buf;
-            Chunk chunk = selector.getLoadedE(nX = (bX+1) >>4, nZ = bZ>>4);
+            Chunk chunk = cache.getLoadedE(nX = (bX+1) >>4, nZ = bZ>>4);
             if(chunk == null)return;
             IBlockState iblockstate;
 
@@ -4231,7 +4247,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             iblockstate.getBlock().observedNeighborChange(iblockstate, this, mut, blockType, pos);
 
             if((buf=(bX-1)>>4)!=nX){
-                chunk = selector.getLoadedE(nX = buf, nZ);
+                chunk = cache.getLoadedE(nX = buf, nZ);
                 if(chunk == null)return;
             }
 
@@ -4239,7 +4255,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             iblockstate.getBlock().observedNeighborChange(iblockstate, this, mut, blockType, pos);
 
             if((buf=(bX)>>4)!=nX || (bZ+1)>>4 != nZ){
-                chunk = selector.getLoadedE(nX = buf, nZ = (bZ+1)>>4);
+                chunk = cache.getLoadedE(nX = buf, nZ = (bZ+1)>>4);
                 if(chunk == null)return;
             }
 
@@ -4247,7 +4263,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             iblockstate.getBlock().observedNeighborChange(iblockstate, this, mut, blockType, pos);
 
             if((buf=(bZ-1)>>4)!=nZ){
-                chunk = selector.getLoadedE(nX, nZ = buf);
+                chunk = cache.getLoadedE(nX, nZ = buf);
                 if(chunk == null)return;
             }
 
@@ -4255,7 +4271,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             iblockstate.getBlock().observedNeighborChange(iblockstate, this, mut, blockType, pos);
 
             if((buf=(bZ)>>4)!=nZ){
-                chunk = selector.getLoadedE(nX, buf);
+                chunk = cache.getLoadedE(nX, buf);
                 if(chunk == null)return;
             }
 
@@ -4283,7 +4299,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         int maxZ = MathHelper.ceil(bb.maxZ);
 
         BlockPos.MutableBlockPos pos = tempPooledLocalPos;
-        ChunkSelector selector = localSelector;
+        ChunkSelector selector = localSelector; //safe
         IBlockState state;
         for (int xPos = MathHelper.floor(bb.minX); xPos < maxX; ++xPos)
             for (int yPos = minY; yPos < maxY; ++yPos) {
@@ -4311,7 +4327,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         if (this.isAreaLoaded0(
                 (xPos = MathHelper.floor(bb.minX)), (zPos = MathHelper.floor(bb.minZ)),
                 (maxX = MathHelper.ceil(bb.maxX)), (maxZ = MathHelper.ceil(bb.maxZ)))) {
-            final ChunkSelector access = localSelector;
+            final ChunkSelector access = localSelector; //safe
             final BlockPos.MutableBlockPos mut = tempPooledLocalPos;
             for (Block block; xPos < maxX; ++xPos)
                 for (; zPos < maxZ; ++zPos)
@@ -4366,7 +4382,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             IBlockState state;
             Block block;
             Boolean result;
-            ChunkSelector access = localSelector;
+            ChunkSelector access = localSelector; //safe
 
             for (final BlockPos.MutableBlockPos pos = tempPooledLocalPos; xPos < maxX; ++xPos) {
                 for (; zPos < maxZ; ++zPos) {
@@ -4420,7 +4436,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         int maxZ = MathHelper.ceil(aabb.maxZ) + 1;
 
         boolean flag1 = entityIn == null || isInsideWorldBorder(entityIn);
-        ChunkSelector selector = localSelector;
+        ChunkSelector selector = localSelector; //safe
         Chunk chunk;
         BlockPos.MutableBlockPos mut = tempPooledLocalPos;
 
@@ -4510,7 +4526,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
         boolean flag  = entityIn != null && entityIn.isOutsideBorder(),
                 flag1 = entityIn != null && isInsideWorldBorder(entityIn);
-        ChunkSelector selector = localSelector;
+        ChunkSelector selector = localSelector; //safe
         Chunk chunk;
 
         for (int xPos = minX; xPos < maxX; ++xPos) {
@@ -4554,7 +4570,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         boolean flag = entityIn != null && entityIn.isOutsideBorder(),
                 flag1 = entityIn != null && this.isInsideWorldBorder(entityIn),
                 flag2, flag3;
-        ChunkSelector selector = localSelector;
+        ChunkSelector selector = localSelector; //safe
         Chunk chunk;
 
         for (int xPos = minX; xPos < maxX; ++xPos)
@@ -4613,7 +4629,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
         for (int xPos = MathHelper.floor(boundingBox.minX - MAX_ENTITY_RADIUS)>>4; xPos <= k2; ++xPos)
             for (int zPos = l2; zPos <= i3; ++zPos)
-                if ((chunk = localSelector.getLoadedE(xPos, zPos)) != null)
+                if ((chunk = localSelector.getLoadedE(xPos, zPos)) != null) //safe, cpllisions
                     chunk.getEntitiesWithinAABBForEntityLimitedC(entityIn, boundingBox, list, predicate, lim);
     }
 

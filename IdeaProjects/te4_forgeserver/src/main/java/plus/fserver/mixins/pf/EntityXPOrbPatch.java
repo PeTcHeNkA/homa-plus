@@ -348,7 +348,7 @@ public abstract class EntityXPOrbPatch extends Entity {
             EnumFacing enumfacing = EnumFacing.UP;
             double d3 = Double.MAX_VALUE;
 
-            BlockPos.MutableBlockPos pos = world.localTempPos;
+            BlockPos.MutableBlockPos pos = world.localTempPos; //safe
 
             if (!world.isBlockFullCube(pos) && dX < d3) {
                 d3 = dX;

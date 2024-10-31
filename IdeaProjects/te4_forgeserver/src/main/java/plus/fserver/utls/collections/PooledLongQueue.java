@@ -26,6 +26,9 @@ public class PooledLongQueue {
     }
 
 
+    public synchronized void awaitUnlock(){}
+
+
     public synchronized void add(final long val) {
         if (this.cur == null) {
             this.empty = false;

@@ -68,7 +68,7 @@ public class WorldEntitySpawner {
     @Keep
     public static boolean canCreatureTypeSpawnBody(EntityLiving.SpawnPlacementType type, World world, BlockPos pos) {
         if(world.isRemote)return true;
-        ChunkSelector selector = world.localSelector;
+        ChunkSelector selector = world.localSelector; //safe
         Chunk chunk = selector.getLoadedE(pos.getX()>>4, pos.getZ()>>4);
         if(chunk == null)return false;
 

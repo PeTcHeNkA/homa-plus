@@ -122,7 +122,7 @@ public class EntityFallingBlock extends Entity {
             World world = this.world;
 
             if (this.fallTime++ == 0) {
-                BlockPos blockpos = world.localTempPos.setPos(this);
+                BlockPos blockpos = world.localTempPos.setPos(this); //safe
 
                 if (world.access().getBlockState(blockpos).getBlock() == block) {
                     world.access().setBlockState(blockpos, BlockIDIndexes.AIR_STATE, 3);
@@ -141,7 +141,7 @@ public class EntityFallingBlock extends Entity {
 
             if (!world.isRemote || SERVER_COMPILE) {
                 ChunkSelector access = world.localSelector;
-                BlockPos pos2 = world.localTempPos.setPos(this);
+                BlockPos pos2 = world.localTempPos.setPos(this); //safe
                 final boolean flag = this.fallTile.getBlock() == Blocks.CONCRETE_POWDER;
                 boolean flag2 = flag && access.getBlockState(pos2).getMaterial() == Material.WATER;
 
@@ -165,7 +165,7 @@ public class EntityFallingBlock extends Entity {
                 }
                 else {
                     final IBlockState iblockstate = access.getBlockState(pos2);
-                    BlockPos temp = world.localTempPos2.setPos(this.posX, this.posY - 0.009999999776482582, this.posZ);
+                    BlockPos temp = world.localTempPos2.setPos(this.posX, this.posY - 0.009999999776482582, this.posZ); //safe
                     if (access.isAirBlock(temp) && !flag2 && BlockFalling.canFallThrough(access.getBlockState(temp))) {
                         this.onGround = false;
                         return;

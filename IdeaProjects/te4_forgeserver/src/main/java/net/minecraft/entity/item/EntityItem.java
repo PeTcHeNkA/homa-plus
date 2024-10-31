@@ -30,6 +30,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.translation.I18n;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
@@ -181,7 +182,7 @@ public class EntityItem extends Entity {
             }
 
             if (((int)this.prevPosX != (int)this.posX || (int)this.prevPosY != (int)this.posY || (int)this.prevPosZ != (int)this.posZ) || updateTimer % 25 == 0) {
-                BlockPos.MutableBlockPos blockpos = world.localTempPos3;
+                BlockPos.MutableBlockPos blockpos = world.localTempPos3; //safe
                 blockpos.setPosB(this);
 
                 if (this.world.access().getBlockState(blockpos).getMaterial() == Material.LAVA) {
@@ -199,11 +200,13 @@ public class EntityItem extends Entity {
             float f = 0.98F;
 
             if (this.onGround) {
-                BlockPos underPos = world.localTempPos3.setPos(
+                World world = this.world;
+                BlockPos underPos = world.localTempPos3.setPos( //safe
                         MathHelper.floor(this.posX), MathHelper.floor(this.getEntityBoundingBox().minY) - 1, MathHelper.floor(this.posZ)
                 );
-                IBlockState underState = this.world.access().getBlockState(underPos);
-                f = underState.getBlock().getSlipperiness(underState, this.world, underPos, this) * 0.98F;
+                IBlockAccess access;
+                IBlockState underState = (access = world.access()).getBlockState(underPos);
+                f = underState.getBlock().getSlipperiness(underState, access, underPos, this) * 0.98F;
             }
 
             this.motionX *= f;
@@ -651,8 +654,8 @@ public class EntityItem extends Entity {
             double d3 = Double.MAX_VALUE;
 
             EnumFacing facing = EnumFacing.UP;
-            ChunkSelector selector = world.localSelector;
-            BlockPos.MutableBlockPos pos = world.localTempPos3.setPos(bX-1, bY, bZ);
+            ChunkSelector selector = world.localSelector; //safe
+            BlockPos.MutableBlockPos pos = world.localTempPos3.setPos(bX-1, bY, bZ); //safe
 
             if (!selector.isBlockFullCube(pos) && dX < d3) {
                 d3 = dX;

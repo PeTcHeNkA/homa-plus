@@ -48,12 +48,12 @@ public class BlockStaticLiquid extends BlockLiquid {
         if (this.material == Material.LAVA) {
             if (worldIn.getGameRules().doFireTick.getBoolean()) {
                 int i = rand.nextInt(3);
-                ChunkSelector selector = worldIn.localSelector;
+                ChunkSelector selector = worldIn.localSelector; //safe
                 if (i > 0) {
                     BlockPos blockpos = pos;
 
                     for (int j = 0; j < i; ++j) {
-                         blockpos = worldIn.localTempPos.setPos(
+                         blockpos = worldIn.localTempPos.setPos( //safe
                                 blockpos.getX()+(rand.nextInt(3) - 1),
                                 blockpos.getY()+1,
                                 blockpos.getZ()+(rand.nextInt(3) - 1)
@@ -77,7 +77,7 @@ public class BlockStaticLiquid extends BlockLiquid {
                 } else {
                     BlockPos temp;
                     for (int k = 0; k < 3; ++k) {
-                        BlockPos blockpos1 = worldIn.localTempPos.setPos(
+                        BlockPos blockpos1 = worldIn.localTempPos.setPos( //safe
                                 pos.getX()+(rand.nextInt(3) - 1),
                                 pos.getY()+1,
                                 pos.getZ()+(rand.nextInt(3) - 1)
@@ -87,7 +87,7 @@ public class BlockStaticLiquid extends BlockLiquid {
                             return;
                         }
 
-                        temp = worldIn.localTempPos2.setPos(
+                        temp = worldIn.localTempPos2.setPos( //safe
                                 blockpos1.getX(), blockpos1.getY()+1, blockpos1.getZ()
                         );
 
@@ -107,7 +107,7 @@ public class BlockStaticLiquid extends BlockLiquid {
 
 
     protected boolean isSurroundingBlockFlammable(World worldIn, ChunkSelector selector, BlockPos pos) {
-        BlockPos.MutableBlockPos temp = worldIn.localTempPos2;
+        BlockPos.MutableBlockPos temp = worldIn.localTempPos2; //safe
         for (EnumFacing enumfacing : EnumFacing.VALUES) {
             temp.setPos(
                     pos.getX()+enumfacing.getZOffset(),

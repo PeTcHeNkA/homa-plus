@@ -306,9 +306,9 @@ public class PathNavigateGround extends PathNavigate {
     }
 
 
-    private static boolean isPositionClear(IBlockEAccess access, int x, int y, int z, int sizeX, int sizeY, int sizeZ, double vecX, double vecZ, double p1, double p2) {
+    private static boolean isPositionClear(NavChunkLSECache access, int x, int y, int z, int sizeX, int sizeY, int sizeZ, double vecX, double vecZ, double p1, double p2) {
         //todo move to pool
-        BlockPos.MutableBlockPos pos = access.getWorld().localTempPos2;
+        BlockPos.MutableBlockPos pos = access.pooledPos;
         for (int fx = x + sizeX -1, fy = y + sizeY - 1, fz = z + sizeZ - 1;x<fx;++x)
             for (;z<fz;++z)
                 for (;y<fy;++y){

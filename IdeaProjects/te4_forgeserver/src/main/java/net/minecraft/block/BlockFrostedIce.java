@@ -10,6 +10,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import plus.fserver.api.IBlockEAccess;
+import plus.fserver.server.ElcaThread;
 
 
 public class BlockFrostedIce extends BlockIce {
@@ -34,7 +35,8 @@ public class BlockFrostedIce extends BlockIce {
 
     @Override
     public void updateTick(World world, BlockPos pos, IBlockState state, Random rand) {
-        if ((rand.nextInt(3) == 0 || this.countNeighbors(world, pos) < 4) && world.getLightFromNeighbors(pos) > 11 - state.getValue(AGE) - state.getLightOpacity()) {
+        if ((rand.nextInt(3) == 0 || this.countNeighbors(world.access(), world.localTempPos, pos) < 4) //safe
+                && world.getLightFromNeighbors(pos) > 11 - state.getValue(AGE) - state.getLightOpacity()) {
             this.slightlyMelt(world, pos, state, rand, true);
         } else {
             world.scheduleUpdate(pos, this, MathHelper.getInt(rand, 20, 40));
@@ -45,7 +47,8 @@ public class BlockFrostedIce extends BlockIce {
     @Override
     public void neighborChanged(IBlockState state, World world, BlockPos pos, Block block, BlockPos pos2) {
         if (block == this) {
-            int count = this.countNeighbors(world, pos);
+            ElcaThread.Cache cache = ElcaThread.cache();
+            int count = this.countNeighbors(cache, cache.pos1, pos);
             if (count < 2) {
                 this.turnIntoWater(world, pos);
             }
@@ -53,10 +56,8 @@ public class BlockFrostedIce extends BlockIce {
     }
 
 
-    private int countNeighbors(World world, BlockPos pos) {
+    private int countNeighbors(IBlockEAccess access, BlockPos.MutableBlockPos mut, BlockPos pos) {
         int count = 0;
-        IBlockEAccess access = world.access();
-        BlockPos.MutableBlockPos mut = world.localTempPos;
         for (EnumFacing facing : EnumFacing.VALUES) {
             mut.setPosB(
                     pos.getX() + facing.getXOffset(),
@@ -82,7 +83,7 @@ public class BlockFrostedIce extends BlockIce {
         } else {
             this.turnIntoWater(world, pos);
             if (flag) {
-                BlockPos.MutableBlockPos mut = world.localTempPos;
+                BlockPos.MutableBlockPos mut = world.localTempPos; //safe
                 IBlockEAccess access = world.access();
                 for (EnumFacing facing : EnumFacing.VALUES) {
                     mut.setPosB(

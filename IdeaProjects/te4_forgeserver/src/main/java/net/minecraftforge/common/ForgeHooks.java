@@ -442,7 +442,7 @@ public class ForgeHooks {
             int mZ = MathHelper.floor(bb.minZ);
             IBlockEAccess access = world.access();
             //is safe? pos = localTempPos2
-            BlockPos.MutableBlockPos mut = world.localTempPos2;
+            BlockPos.MutableBlockPos mut = world.localTempPos2; //safe
 
             for (int x2 = MathHelper.floor(bb.minX); x2 < bb.maxX; x2++) {
                 for (int z2 = mZ; z2 < bb.maxZ; z2++) {

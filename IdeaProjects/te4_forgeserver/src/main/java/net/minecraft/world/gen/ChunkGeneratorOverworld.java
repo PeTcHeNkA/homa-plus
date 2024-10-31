@@ -572,7 +572,7 @@ public class ChunkGeneratorOverworld implements IChunkGenerator {
             }
         }
         return (!world.isRemote || SERVER_COMPILE)?
-                world.localSelector.getBiome(pos).getSpawnableList(creatureType)
+                world.localSelector.getBiome(pos).getSpawnableList(creatureType) //safe
                 :
                 world.getBiome(pos).getSpawnableList(creatureType);
     }

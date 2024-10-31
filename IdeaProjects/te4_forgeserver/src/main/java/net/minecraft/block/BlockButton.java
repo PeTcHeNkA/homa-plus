@@ -76,7 +76,7 @@ public abstract class BlockButton extends BlockDirectional {
 
     @Override
     public boolean canPlaceBlockAt(final World worldIn, final BlockPos pos) {
-        for (final EnumFacing enumfacing : EnumFacing.values()) {
+        for (final EnumFacing enumfacing : EnumFacing.VALUES) {
             if (canPlaceBlock(worldIn, pos, enumfacing)) {
                 return true;
             }
@@ -116,8 +116,8 @@ public abstract class BlockButton extends BlockDirectional {
         if (this.canPlaceBlockAt(worldIn, pos)) {
             return true;
         }
-        this.dropBlockAsItem(worldIn, pos, state, 0);
-        worldIn.setBlockToAir(pos);
+        //this.dropBlockAsItem(worldIn, pos, state, 0);
+        //worldIn.setBlockToAir(pos);
         return false;
     }
 

@@ -14,6 +14,7 @@ import net.minecraftforge.fml.relauncher.*;
 import net.minecraftforge.common.*;
 import net.minecraft.block.state.*;
 import plus.fserver.api.IBlockEAccess;
+import plus.fserver.server.ElcaThread;
 import plus.fserver.utls.collections.AABBList;
 
 
@@ -52,7 +53,8 @@ public class BlockReed extends Block implements IPlantable {
                 final int j = state.getValue(BlockReed.AGE);
                 if (ForgeHooks.onCropsGrowPre(world, pos, state, true)) {
                     if (j == 15) {
-                        access.setBlockState(pos.up(), this.getDefaultState(), 3);
+                        BlockPos up = world.localTempPos2.setPos(pos.getX(), pos.getY()+1, pos.getZ());
+                        access.setBlockState(up, this.getDefaultState(), 3);
                         access.setBlockState(pos, state.withProperty(BlockReed.AGE, 0), 4);
                     } else {
                         access.setBlockState(pos, state.withProperty(BlockReed.AGE, j + 1), 4);

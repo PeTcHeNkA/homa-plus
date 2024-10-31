@@ -19,6 +19,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.api.Keep;
 import plus.fserver.block.BlockFx;
+import plus.fserver.server.ElcaThread;
 
 
 public class BlockLadder extends BlockFx {
@@ -94,7 +95,7 @@ public class BlockLadder extends BlockFx {
         if (facing.getAxis().isHorizontal() && this.canAttachTo(worldIn, pos.offset(facing.getOpposite()), facing)) {
             return this.getDefaultState().withProperty(FACING, facing);
         } else {
-            BlockPos.MutableBlockPos mutPos = worldIn.localTempPos;
+            BlockPos.MutableBlockPos mutPos = ElcaThread.cache().pos1;
             for (EnumFacing curFacing1 : EnumFacing.Plane.HORIZONTAL) {
                 EnumFacing opp = curFacing1.getOpposite();
                 mutPos.setPos(

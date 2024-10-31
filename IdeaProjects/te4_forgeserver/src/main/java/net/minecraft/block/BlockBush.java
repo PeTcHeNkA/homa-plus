@@ -15,10 +15,12 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.EnumPlantType;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.api.IBlockEAccess;
+import plus.fserver.server.ElcaThread;
 import plus.fserver.utls.collections.AABBList;
 
 
@@ -51,7 +53,7 @@ public class BlockBush extends Block implements net.minecraftforge.common.IPlant
 
     @Override
     public boolean canPlaceBlockAt(World worldIn, BlockPos pos) {
-        return canPlaceBlockAtAsy(worldIn.access(), pos);
+        return canPlaceBlockAtAsy(ElcaThread.cache(), pos);
     }
 
 
@@ -83,19 +85,21 @@ public class BlockBush extends Block implements net.minecraftforge.common.IPlant
     protected void checkAndDropBlock(World worldIn, BlockPos pos, IBlockState state) {
         if (!this.canBlockStay(worldIn, pos, state)) {
             this.dropBlockAsItem(worldIn, pos, state, 0);
-            worldIn.access().setBlockState(pos, BlockIDIndexes.AIR_STATE, 3);
+            worldIn.access().setBlockState(pos, BlockIDIndexes.AIR_STATE, 3); //safe
         }
     }
 
 
     public boolean canBlockStay(World worldIn, BlockPos pos, IBlockState state) {
+        ElcaThread.Cache cache = ElcaThread.cache();
         if (state.getBlock() == this) {
-            BlockPos down = new BlockPos(pos.getX(),pos.getY()-1, pos.getZ());
-            IBlockEAccess access = worldIn.access();
-            IBlockState soil = access.getBlockState(down);
-            return soil.getBlock().canSustainPlant(soil, access, down, EnumFacing.UP, this);
+            BlockPos down = cache.pos1.setPos(pos.getX(),pos.getY()-1, pos.getZ());
+            Chunk chunk = cache.getLoadedE(pos.getX()>>4, pos.getZ()>>4);
+            if(chunk == null)return false;
+            IBlockState soil = chunk.getBlockState(down);
+            return soil.getBlock().canSustainPlant(soil, cache, down, EnumFacing.UP, this);
         }
-        return this.canSustainBush(worldIn.access().getBlockState(pos.getX(), pos.getY()-1, pos.getZ()));
+        return this.canSustainBush(cache.getBlockState(pos.getX(), pos.getY()-1, pos.getZ()));
     }
 
 

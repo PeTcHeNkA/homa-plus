@@ -161,7 +161,7 @@ public class BlockSapling extends BlockBush implements IGrowable {
 
 
     private boolean isTwoByTwoOfType(final World world, final BlockPos p, final int x, final int z, final BlockPlanks.EnumType type) {
-        BlockPos.MutableBlockPos mut = world.localTempPos2;
+        BlockPos.MutableBlockPos mut = world.localTempPos2; //safe
         return    this.isTypeAt(world, mut.setPos(p.getX()+x  , p.getY(), p.getZ()+z  ), type)
                && this.isTypeAt(world, mut.setPos(p.getX()+x+1, p.getY(), p.getZ()+z  ), type)
                && this.isTypeAt(world, mut.setPos(p.getX()+x  , p.getY(), p.getZ()+z+1), type)

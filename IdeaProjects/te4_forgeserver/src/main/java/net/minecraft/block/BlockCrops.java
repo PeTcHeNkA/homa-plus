@@ -10,6 +10,7 @@ import net.minecraft.util.*;
 import net.minecraft.item.*;
 import net.minecraft.block.state.*;
 import plus.fserver.api.IBlockEAccess;
+import plus.fserver.server.ElcaThread;
 import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.math.FastRandom;
 
@@ -71,8 +72,8 @@ public class BlockCrops extends BlockBush implements IGrowable {
         if (world.isRemote || !world.isAreaLoaded(pos, 1)) return;
 
         if (world.getLightFromNeighbors(
-                world.localTempPos.setPos(pos.getX(), pos.getY()+1,pos.getZ())) >= 9) {
-
+                world.localTempPos.setPos(pos.getX(), pos.getY()+1,pos.getZ())) >= 9) //safe
+        {
             final int age = this.getAge(state);
             if (age < this.getMaxAge()) {
                 final float f = getGrowthChance(this, world, pos);
@@ -102,12 +103,12 @@ public class BlockCrops extends BlockBush implements IGrowable {
 
 
     protected static float getGrowthChance(final Block block, final World world, final BlockPos pos) {
-        ChunkSelector access = world.localSelector;
+        ChunkSelector access = world.localSelector; //safe
         if(access == null)return 0.01f;
 
         float f = 1.0f;
         int px = pos.getX(), py = pos.getY()-1, pz = pos.getZ();
-        BlockPos.MutableBlockPos mut = world.localTempPos;
+        BlockPos.MutableBlockPos mut = world.localTempPos; //safe
         for (int dx = -1; dx <= 1; ++dx) {
             for (int dz = -1; dz <= 1; ++dz) {
                 mut.setPosB(px + dx, py, pz + dz);

@@ -155,7 +155,7 @@ public class BlockPistonBase extends BlockDirectional {
 
 
     private boolean shouldBeExtended(World worldIn, BlockPos pos, EnumFacing facing) {
-        BlockPos.MutableBlockPos temp = worldIn.localTempPos;
+        BlockPos.MutableBlockPos temp = worldIn.localTempPos; //safe
         for (EnumFacing cur : EnumFacing.VALUES) {
             temp.setPos(
                     pos.getX()+ cur.getXOffset(),

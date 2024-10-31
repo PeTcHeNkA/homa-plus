@@ -110,6 +110,7 @@ public class LightingEngine implements ILightingEngine {
         if((lock = this.lock).tryLock()) {
             updates[lightType.ordinal()] = swap;
             try {
+                queue.awaitUnlock();
                 this.processLightUpdatesForTypeInner(lightType, queue);
             } catch (Exception e) {
                 onError(e);

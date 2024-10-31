@@ -13,6 +13,7 @@ import net.minecraft.world.gen.feature.WorldGenBigMushroom;
 import net.minecraft.world.gen.feature.WorldGenerator;
 import plus.fserver.ElcaCV;
 import plus.fserver.api.Keep;
+import plus.fserver.server.ElcaThread;
 import plus.fserver.server.elca.ChunkSelector;
 
 
@@ -84,12 +85,18 @@ public class BlockMushroom extends BlockBush implements IGrowable {
     public boolean canBlockStay(World world, BlockPos pos, IBlockState state) {
         if (pos.getY() >= 0 && pos.getY() < 256) {
             Chunk chunk;
+            IBlockAccess access;
+            BlockPos.MutableBlockPos mut = null;
             if(!world.isRemote || ElcaCV.SERVER_COMPILE){
-                chunk = world.localSelector.getChunkE(pos.getX()>>4, pos.getZ()>>4);
+                ElcaThread.Cache cache = ElcaThread.cache();
+                access = cache;
+                mut = cache.pos1;
+                chunk = cache.getChunkE(pos.getX()>>4, pos.getZ()>>4);
             } else {
+                access = world;
                 chunk = world.getChunk(pos.getX()>>4, pos.getZ()>>4);
             }
-
+            if(chunk == null)return false;
             IBlockState ground = chunk.getBlockState(pos.getX(), pos.getY()-1, pos.getZ());
 
             if (ground.getBlock() == Blocks.MYCELIUM) {
@@ -98,7 +105,13 @@ public class BlockMushroom extends BlockBush implements IGrowable {
                     && ground.getValue(BlockDirt.VARIANT) == BlockDirt.DirtType.PODZOL) {
                 return true;
             } else {
-                return chunk.getLightSubtracted(pos,0) < 13 && ground.getBlock().canSustainPlant(ground, world, pos.down(), EnumFacing.UP, this);
+                if(chunk.getLightSubtracted(pos,0) < 13){
+                    if(mut == null)mut = new BlockPos.MutableBlockPos(pos.getX(), pos.getY()-1, pos.getZ());
+                    else mut.setPosB(pos.getX(), pos.getY()-1, pos.getZ());
+                    return ground.getBlock().canSustainPlant(ground, access, mut, EnumFacing.UP, this);
+                } else {
+                    return false;
+                }
             }
         } else {
             return false;

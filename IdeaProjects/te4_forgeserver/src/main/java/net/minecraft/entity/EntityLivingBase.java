@@ -296,7 +296,7 @@ public abstract class EntityLivingBase extends Entity {
                 }
             }
             if (!this.world.isRemote || SERVER_COMPILE) {
-                BlockPos.MutableBlockPos temp = world.localTempPos2;
+                BlockPos.MutableBlockPos temp = world.localTempPos2; //safe
                 temp.setPosB(this);
 
                 if (this.prevBlockpos == null || !this.prevBlockpos.equals(temp))
@@ -992,7 +992,7 @@ public abstract class EntityLivingBase extends Entity {
             World world;
             return ForgeHooks.isLivingOnLadder(
                     (world = this.world).access().getBlockState(
-                            pos = world.localTempPos2.setPos(
+                            pos = world.localTempPos2.setPos( //safe
                                     posX, getEntityBoundingBox().minY, posZ
                             )
                     ), world, pos, this
@@ -1498,7 +1498,7 @@ public abstract class EntityLivingBase extends Entity {
                         if (this.onGround) {
                             World world;
                             IBlockEAccess access;
-                            BlockPos.MutableBlockPos blockPos = (world = this.world).localTempPos;
+                            BlockPos.MutableBlockPos blockPos = (world = this.world).localTempPos; //safe
 
                             IBlockState underState = (access = world.access()).getBlockState(blockPos.setPos(this.posX, this.getEntityBoundingBox().minY - 1.0D, this.posZ));
                             fl0 = underState.getBlock().getSlipperiness(underState, access, blockPos, this) * 0.91F;
@@ -1574,7 +1574,7 @@ public abstract class EntityLivingBase extends Entity {
     @Override
     public void completeCommon(){
         World world;
-        BlockPos.MutableBlockPos mut = (world = this.world).localTempPos;
+        BlockPos.MutableBlockPos mut = (world = this.world).localTempPos; //safe
 
         float slipperiness;
         if (this.onGround) {

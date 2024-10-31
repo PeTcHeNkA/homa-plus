@@ -37,18 +37,19 @@ public abstract class EntityFlying extends EntityLiving {
                 this.motionZ *= 0.5;
             });
         } else {
+            World world = this.world;
             float f = 0.91f;
             if (this.onGround) {
-                final BlockPos underPos = world.localTempPos.setPos(MathHelper.floor(this.posX), MathHelper.floor(this.getEntityBoundingBox().minY) - 1, MathHelper.floor(this.posZ));
-                final IBlockState underState = this.world.access().getBlockState(underPos);
+                final BlockPos underPos = world.localTempPos.setPos(MathHelper.floor(this.posX), MathHelper.floor(this.getEntityBoundingBox().minY) - 1, MathHelper.floor(this.posZ)); //safe
+                final IBlockState underState = world.access().getBlockState(underPos);
                 f = underState.getBlock().getSlipperiness(underState, world.access(), underPos, this) * 0.91f;
             }
             final float f2 = 0.16277136f / (f * f * f);
             this.moveRelative(strafe, vertical, forward, this.onGround ? (0.1f * f2) : 0.02f);
             f = 0.91f;
             if (this.onGround) {
-                final BlockPos underPos2 = world.localTempPos.setPos(MathHelper.floor(this.posX), MathHelper.floor(this.getEntityBoundingBox().minY) - 1, MathHelper.floor(this.posZ));
-                final IBlockState underState2 = this.world.access().getBlockState(
+                final BlockPos underPos2 = world.localTempPos.setPos(MathHelper.floor(this.posX), MathHelper.floor(this.getEntityBoundingBox().minY) - 1, MathHelper.floor(this.posZ)); //safe
+                final IBlockState underState2 = world.access().getBlockState(
                         underPos2
                 );
                 f = underState2.getBlock().getSlipperiness(underState2, world.access(), underPos2, this) * 0.91f;

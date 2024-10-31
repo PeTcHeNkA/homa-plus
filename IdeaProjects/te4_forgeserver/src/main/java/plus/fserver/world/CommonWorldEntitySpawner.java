@@ -102,7 +102,7 @@ public class CommonWorldEntitySpawner extends WorldEntitySpawner {
             }
 
             SpawnPos spawnPos = null;
-            ChunkSelector selector = world.localSelector;
+            ChunkSelector selector = world.localSelector; //safe
             Random rand = world.rand;
             LivingPackSizeEvent.EventProxy proxy = null;
 

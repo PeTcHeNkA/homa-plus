@@ -195,7 +195,7 @@ public abstract class BlockLiquid extends Block {
         double x = 0.0D, y = 0.0D, z = 0.0D;
 
         int i = this.getRenderedDepth(state);
-        BlockPos.MutableBlockPos blockPos = worldIn.localTempPos;
+        BlockPos.MutableBlockPos blockPos = worldIn.localTempPos; //safe
 
         for (EnumFacing facing : BlockIDIndexes.FACING_HORIZONTAL) {
             blockPos.setPos(pos).move(facing);

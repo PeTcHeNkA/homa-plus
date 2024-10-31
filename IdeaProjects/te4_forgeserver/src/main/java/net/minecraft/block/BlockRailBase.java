@@ -11,6 +11,7 @@ import net.minecraftforge.fml.relauncher.*;
 import net.minecraft.block.properties.*;
 import net.minecraft.util.*;
 import plus.fserver.api.IBlockEAccess;
+import plus.fserver.server.ElcaThread;
 import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.collections.AABBList;
 import plus.fserver.utls.collections.ArrayListE6;
@@ -101,7 +102,7 @@ public abstract class BlockRailBase extends Block {
     @Override
     public void neighborChanged(final IBlockState state, final World world, final BlockPos pos, final Block blockIn, final BlockPos fromPos) {
         if (!world.isRemote) {
-            ChunkSelector selector = world.localSelector;
+            ElcaThread.Cache selector = ElcaThread.cache();
             final IBlockState cur = selector.getBlockState(pos);
             final EnumRailDirection dir = this.getRailDirection(world, pos, (cur.getBlock() == this) ? cur : state, null);
             boolean flag = false;

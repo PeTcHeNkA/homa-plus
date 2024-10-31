@@ -538,7 +538,7 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
                 else
                     //if(packetIn.getAction() == CPacketPlayerDigging.Action.ABORT_DESTROY_BLOCK)
                     player.interactionManager.cancelDestroyingBlock();
-                if (world.localSelector.getBlockState(pos).getMaterial() != Material.AIR)
+                if (world.localSelector.getBlockState(pos).getMaterial() != Material.AIR) //safe
                     player.connection.netManager.sendPacketE(new SPacketBlockChange(world, pos));
             }
         }
@@ -1096,8 +1096,8 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
                             packet.getFacingY(), packet.getFacingZ()
                     );
 
-                    IBlockState state1 = world.localSelector.getState(blockpos);
-                    IBlockState state2 = world.localSelector.getState(blockPos2);
+                    IBlockState state1 = world.localSelector.getState(blockpos); //safe
+                    IBlockState state2 = world.localSelector.getState(blockPos2);//safe
 
                     netManager.exec(() -> {
                         netManager.sendPacketSync(new SPacketBlockChange(state1, blockpos));

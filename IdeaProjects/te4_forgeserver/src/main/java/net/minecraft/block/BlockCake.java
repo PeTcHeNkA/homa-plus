@@ -11,6 +11,7 @@ import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.stats.StatList;
+import net.minecraft.util.BlockIDIndexes;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -20,7 +21,9 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.fserver.api.IBlockEAccess;
 import plus.fserver.block.BlockFx;
+import plus.fserver.server.ElcaThread;
 
 
 public class BlockCake extends BlockFx {
@@ -82,20 +85,22 @@ public class BlockCake extends BlockFx {
 
     @Override
     public boolean canPlaceBlockAt(World world, BlockPos pos) {
-        return super.canPlaceBlockAt(world, pos) && this.canBlockStay(world, pos);
+        ElcaThread.Cache cache = ElcaThread.cache();
+        return super.canPlaceBlockAtAsy(cache, pos) && this.canBlockStay(cache, pos);
     }
 
 
     @Override
     public void neighborChanged(IBlockState state, World world, BlockPos pos, Block block, BlockPos pos1) {
-        if (!this.canBlockStay(world, pos)) {
-            world.setBlockToAir(pos);
+        ElcaThread.Cache cache = ElcaThread.cache();
+        if (!this.canBlockStay(cache, pos)) {
+            cache.setBlockState(pos, BlockIDIndexes.AIR_STATE, 3);
         }
     }
 
 
-    private boolean canBlockStay(World world, BlockPos pos) {
-        return world.access().getBlockState(pos.getX(), pos.getY()-1, pos.getZ()).getMaterial().isSolid();
+    private boolean canBlockStay(IBlockEAccess access, BlockPos pos) {
+        return access.getBlockState(pos.getX(), pos.getY()-1, pos.getZ()).getMaterial().isSolid();
     }
 
 

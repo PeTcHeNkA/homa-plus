@@ -17,14 +17,28 @@ import org.jetbrains.annotations.Nullable;
 import plus.fserver.api.IBlockEAccess;
 
 
-public final class ChunkSelector implements IBlockEAccess {
-    private final ChunkProviderServer provider;
+public class ChunkSelector implements IBlockEAccess {
+    private ChunkProviderServer provider;
     private Chunk chunk;
     private int curX, curZ;
+
+    protected ChunkSelector(){}
 
     public ChunkSelector(Chunk chunk){
         this.provider = ((WorldServer)chunk.getWorld()).getChunkProvider();
         this.chunk = chunk;curX = chunk.x;curZ = chunk.z;
+    }
+
+
+    public void define(ChunkProviderServer provider){
+        this.provider = provider;
+    }
+
+
+    public void release(){
+        this.provider = null;
+        this.chunk = null;
+        this.curX = this.curZ = Integer.MIN_VALUE;
     }
 
 

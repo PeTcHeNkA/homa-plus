@@ -286,7 +286,7 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements C
                     // data packet so we don't double send crap.
                     //{// Forge: Send only the tile entities that are updated, Adding this brace
                     // lets us keep the indent and the patch small
-                    BlockPos.MutableBlockPos pos = world.localTempPos;
+                    BlockPos.MutableBlockPos pos = world.localTempPos; //safe
                     final int posX = this.posX, posZ = this.posZ;
 
                     for (int l = 0; l < this.changes; ++l) {

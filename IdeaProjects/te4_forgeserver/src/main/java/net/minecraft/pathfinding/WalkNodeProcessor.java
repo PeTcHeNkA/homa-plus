@@ -336,7 +336,7 @@ public class WalkNodeProcessor extends NodeProcessor {
 
         PathNodeType pathnodetype = PathNodeType.BLOCKED;
         access.rawData = entity;
-        pathnodetype = this.getPathNodeType(access, x, y, z, xSize, ySize, zSize, canBreakDoorsIn, canEnterDoorsIn, enumset, pathnodetype, entity.world.localTempPos3.setPos(entity));
+        pathnodetype = this.getPathNodeType(access, x, y, z, xSize, ySize, zSize, canBreakDoorsIn, canEnterDoorsIn, enumset, pathnodetype, access.pooledPos.setPos(entity));
         access.rawData = null;
 
         if (enumset.contains(PathNodeType.FENCE)) {

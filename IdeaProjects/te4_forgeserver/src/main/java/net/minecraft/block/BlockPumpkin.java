@@ -14,6 +14,7 @@ import net.minecraft.entity.*;
 import net.minecraft.block.state.*;
 import net.minecraft.block.state.pattern.*;
 import plus.fserver.ElcaCV2;
+import plus.fserver.server.ElcaThread;
 import plus.fserver.utls.collections.AABBList;
 
 
@@ -113,7 +114,17 @@ public class BlockPumpkin extends BlockHorizontal {
 
     @Override
     public boolean canPlaceBlockAt(final World worldIn, final BlockPos pos) {
-        return worldIn.getBlockState(pos).getBlock().isReplaceable(worldIn, pos) && worldIn.isSideSolid(pos.down(), EnumFacing.UP);
+        if(worldIn.isRemote) {
+            return worldIn.getBlockState(pos).getBlock().isReplaceable(worldIn, pos) && worldIn.isSideSolid(pos.down(), EnumFacing.UP);
+        } else {
+            ElcaThread.Cache cache = ElcaThread.cache();
+            if(cache.getBlockState(pos).getBlock().isReplaceable(cache, pos)) {
+                BlockPos down = cache.pos1.setPos(pos.getX(), pos.getY()-1, pos.getZ());
+                 return WorldServer.isSideSolid(cache, down, EnumFacing.UP, false);
+            } else {
+                return false;
+            }
+        }
     }
 
 

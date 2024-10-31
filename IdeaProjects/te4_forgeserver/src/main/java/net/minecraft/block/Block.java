@@ -53,6 +53,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.api.IBlockEAccess;
 import plus.fserver.block.BlockFx;
+import plus.fserver.server.ElcaThread;
 import plus.fserver.utls.collections.AABBList;
 
 import static plus.fserver.ElcaCV.SERVER_COMPILE;
@@ -1643,7 +1644,7 @@ public class Block extends net.minecraftforge.registries.IForgeRegistryEntry.Imp
      * @return True to allow the plant to be planted/stay.
      */
     public boolean canSustainPlant(IBlockState state, IBlockAccess access, BlockPos pos, EnumFacing direction, IPlantable plantable) {
-        return canSustainPlantSafe(state, access, pos, direction, plantable, new BlockPos.MutableBlockPos());
+        return canSustainPlantSafe(state, access, pos, direction, plantable, ElcaThread.cache().pos3);
     }
 
 

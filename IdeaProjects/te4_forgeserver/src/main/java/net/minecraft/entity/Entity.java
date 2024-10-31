@@ -875,7 +875,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
         BlockPos.MutableBlockPos pos;
         IBlockState state = world.access().getBlockState(
-                pos = world.localTempPos.setPos(this.posX, this.posY - 0.20000000298023224D, this.posZ)
+                pos = world.localTempPos.setPos(this.posX, this.posY - 0.20000000298023224D, this.posZ) //safe
         );
 
         if (state.getMaterial() == Material.AIR) {
@@ -1203,7 +1203,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
         World world;
         if ((world = this.world).isAreaLoaded(pos1X, pos1Y, pos1Z, pos2X, pos2Y, pos2Z, true)) {
-            BlockPos.MutableBlockPos pos = world.localTempPos;
+            BlockPos.MutableBlockPos pos = world.localTempPos; //safe
             for (Chunk chunk = null; pos1X <= pos2X; ++pos1X)
                 for (; pos1Z <= pos2Z; ++pos1Z) {
                     if(chunk == null || chunk.x != pos1X>>4 || chunk.z != pos1Z>>4)
@@ -1398,7 +1398,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
 
     protected void createRunningParticles() {
-        BlockPos blockpos = world.localTempPos2.setPos(
+        BlockPos blockpos = world.localTempPos2.setPos( //safe
                 MathHelper.floor(this.posX),
                 MathHelper.floor(this.posY - 0.20000000298023224D),
                 MathHelper.floor(this.posZ)
@@ -1418,7 +1418,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
             BlockPos blockpos;
 
             IBlockState state = world.access().getBlockState(
-                    blockpos = world.localTempPos2.setPos(this.posX, d0, this.posZ)
+                    blockpos = world.localTempPos2.setPos(this.posX, d0, this.posZ) //safe
             );
             Boolean result = state.getBlock().isEntityInsideMaterial(world.access(), blockpos, state, this, d0, materialIn, true);
             if (result != null) return result;
@@ -1474,7 +1474,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
 
     public float getBrightness() {
-        BlockPos blockPos = world.localTempPos3.setPos(
+        BlockPos blockPos = world.localTempPos3.setPos( //safe
                 this.posX, this.posY + (double)this.getEyeHeight(), this.posZ
         );
         if (this.world.isBlockLoaded(blockPos))
@@ -2449,7 +2449,7 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
             //is safe?
             ChunkSelector selector = (ChunkSelector) world.access();
 
-            BlockPos.MutableBlockPos pos = world.localTempPos;
+            BlockPos.MutableBlockPos pos = world.localTempPos; //safe
 
             if (!selector.isBlockFullCube(pos) && dX < d3) {
                 d3 = dX;

@@ -94,20 +94,20 @@ public class BlockGrass extends BlockFx implements IGrowable {
     @Override
     public void updateTick(final World world, final BlockPos pos, IBlockState state, final Random rand) {
         if (!world.isRemote) {
-            ChunkSelector selector = world.localSelector;
+            ChunkSelector selector = world.localSelector; //safe
             final int posX, posZ;
             if (selector.isAreaLoaded3(posX = pos.getX(), posZ = pos.getX())) {
                 final int posY;
                 int num = world.getLight(posX, (posY = pos.getY()) + 1, posZ, true);
 
-                final BlockPos up = world.localTempPos.setPos(posX, posY + 1, posZ);
+                final BlockPos up = world.localTempPos.setPos(posX, posY + 1, posZ); //safe
 
                 if (num < 4 && selector.getState(up).getLightOpacity(world, up) > 2) {
                     selector.setBlockState(pos, Blocks.DIRT.getDefaultState(), 2);
                 } else if (num >= 9) {
                     ChunkLCache cache = world.bigLocalCache;
                     cache.init(selector.current());
-                    BlockPos.MutableBlockPos blockPos = world.localTempPos2;
+                    BlockPos.MutableBlockPos blockPos = world.localTempPos2; //safe
                     for (int i = 0; i < 4; ++i) {
                         num = rand.nextInt();
                         blockPos.setPosB(

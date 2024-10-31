@@ -384,8 +384,9 @@ public class EntityBoat extends Entity {
         int i1 = MathHelper.floor(axisalignedbb.minZ);
         int j1 = MathHelper.ceil(axisalignedbb.maxZ);
 
+        World world = this.world;
         IBlockEAccess access = world.access();
-        BlockPos.MutableBlockPos pos = world.localTempPos;
+        BlockPos.MutableBlockPos pos = world.localTempPos; //safe
         label108: for (int k1 = k; k1 < l; ++k1) {
             float f = 0.0F;
             int l1 = i;
@@ -407,7 +408,7 @@ public class EntityBoat extends Entity {
                     }
 
                     if (iblockstate.getMaterial() == Material.WATER) {
-                        f = Math.max(f, BlockLiquid.getBlockLiquidHeight(iblockstate, this.world, pos));
+                        f = Math.max(f, BlockLiquid.getBlockLiquidHeight(iblockstate, world, pos));
                     }
                     if (f >= 1.0F) continue label108;
                 }
@@ -430,7 +431,7 @@ public class EntityBoat extends Entity {
         List<AxisAlignedBB> list = Lists.newArrayList();
         float f = 0.0F;
         int k1 = 0;
-        BlockPos.MutableBlockPos pos = world.localTempPos;
+        BlockPos.MutableBlockPos pos = world.localTempPos; //safe
         IBlockEAccess access = world.access();
 
         for (int l1 = i; l1 < j; ++l1) {
@@ -468,7 +469,7 @@ public class EntityBoat extends Entity {
         int j1 = MathHelper.ceil(axisalignedbb.maxZ);
         boolean flag = false;
         this.waterLevel = Double.MIN_VALUE;
-        BlockPos.MutableBlockPos pos = world.localTempPos;
+        BlockPos.MutableBlockPos pos = world.localTempPos; //safe
         IBlockEAccess access = world.access();
 
         for (int k1 = i; k1 < j; ++k1) {
@@ -509,7 +510,7 @@ public class EntityBoat extends Entity {
         int i1 = MathHelper.floor(axisalignedbb.minZ);
         int j1 = MathHelper.ceil(axisalignedbb.maxZ);
         boolean flag = false;
-        BlockPos.MutableBlockPos pos = world.localTempPos;
+        BlockPos.MutableBlockPos pos = world.localTempPos; //safe
         IBlockEAccess access = world.access();
 
         for (int k1 = i; k1 < j; ++k1) {
