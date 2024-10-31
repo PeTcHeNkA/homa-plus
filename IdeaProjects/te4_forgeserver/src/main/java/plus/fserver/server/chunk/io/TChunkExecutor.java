@@ -45,7 +45,7 @@ public class TChunkExecutor {
     }
 
 
-    public static void queueChunkUnload(WorldServer world, AnvilChunkLoader loader, IChunkProvider provider, Chunk chunk) {
+    public static boolean queueChunkUnload(WorldServer world, AnvilChunkLoader loader, IChunkProvider provider, Chunk chunk) {
         TQueuedChunk key = new TQueuedChunk(chunk.x, chunk.z);
 
         TChunkTask task = world.getChunkTasks().get(key);
@@ -53,6 +53,9 @@ public class TChunkExecutor {
             task = new TChunkUnloadTask(world, key, loader, (ChunkProviderServer) provider, chunk);
             world.getChunkTasks().put(key, task);
             world.getMinecraftServer().ticker().service.execute(task);
+            return true;
+        } else {
+            return false;
         }
     }
 

@@ -20,6 +20,7 @@ public class TChunkUnloadTask extends TChunkTask{
 
         List<NextTickListEntry> pendings = null;
         try {
+            chunk.onUnload();
             pendings = chunk.getWorld().getPendingBlockUpdates(chunk, false);
         } catch (Exception e){
             e.printStackTrace();

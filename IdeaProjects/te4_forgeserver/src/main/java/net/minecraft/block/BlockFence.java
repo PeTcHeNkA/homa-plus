@@ -212,9 +212,9 @@ public class BlockFence extends Block {
     public IBlockState getActualState(IBlockState state, IBlockAccess access, BlockPos pos) {
         final BlockPos.MutableBlockPos mut;
         if(!access.getWorld().isRemote || SERVER_COMPILE){
-            mut = new BlockPos.MutableBlockPos();
-        } else {
             mut = ElcaThread.cache().pos1;
+        } else {
+            mut = new BlockPos.MutableBlockPos();
         }
         return state.withProperty(NORTH, canFenceConnectTo(access, pos, mut, EnumFacing.NORTH))
                     .withProperty(EAST,  canFenceConnectTo(access, pos, mut, EnumFacing.EAST))

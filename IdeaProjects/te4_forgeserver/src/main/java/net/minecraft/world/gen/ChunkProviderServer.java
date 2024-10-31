@@ -345,12 +345,13 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
                         long olong = iterator.next();
                         Chunk chunk = super.get(olong);
 
-                        if (chunk != null) {
+                        l1: if (chunk != null) {
                             if(chunk.maybeUnload()) {
-                                chunk.onUnload();
                                 if(asyncSaveChunks){
-                                    TChunkExecutor.queueChunkUnload((WorldServer)chunk.getWorld(), (AnvilChunkLoader)chunkLoader,this, chunk);
+                                    boolean res = TChunkExecutor.queueChunkUnload((WorldServer)chunk.getWorld(), (AnvilChunkLoader)chunkLoader,this, chunk);
+                                    if(!res)break l1;
                                 } else {
+                                    chunk.onUnload();
                                     ForgeChunkManager.putDormantChunk(olong, chunk);
                                     this.saveChunkData(chunk);
                                     this.saveChunkExtraData(chunk);
@@ -369,12 +370,13 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
                     for (long olong : droppedChunks) {
                         Chunk chunk = super.get(olong);
 
-                        if (chunk != null) {
+                        l1: if (chunk != null) {
                             if (chunk.maybeUnload()) {
-                                chunk.onUnload();
                                 if (asyncSaveChunks) {
-                                    TChunkExecutor.queueChunkUnload((WorldServer) chunk.getWorld(), (AnvilChunkLoader) chunkLoader, this, chunk);
+                                    boolean res = TChunkExecutor.queueChunkUnload((WorldServer) chunk.getWorld(), (AnvilChunkLoader) chunkLoader, this, chunk);
+                                    if(!res)break l1;
                                 } else {
+                                    chunk.onUnload();
                                     ForgeChunkManager.putDormantChunk(olong, chunk);
                                     this.saveChunkData(chunk);
                                     this.saveChunkExtraData(chunk);
@@ -406,14 +408,15 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
                             world.getMinecraftServer().ticker().onError(world, e);
                             break;
                         }
-                        if(chunk != null) {
+                        l1: if(chunk != null) {
                             if (chunk.maybeUnload()) {
                                 long olong = ChunkPos.asLong(chunk.x, chunk.z);
-                                chunk.onUnload();
 
                                 if(asyncSaveChunks){
-                                    TChunkExecutor.queueChunkUnload((WorldServer)chunk.getWorld(), (AnvilChunkLoader)chunkLoader,this, chunk);
+                                    boolean res = TChunkExecutor.queueChunkUnload((WorldServer)chunk.getWorld(), (AnvilChunkLoader)chunkLoader,this, chunk);
+                                    if(!res)break l1;
                                 } else {
+                                    chunk.onUnload();
                                     ForgeChunkManager.putDormantChunk(olong, chunk);
                                     this.saveChunkData(chunk);
                                     this.saveChunkExtraData(chunk);
