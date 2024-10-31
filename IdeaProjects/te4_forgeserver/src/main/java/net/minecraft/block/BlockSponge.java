@@ -20,11 +20,12 @@ import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.asyutl.buf.FastBuffer;
 import plus.fserver.ElcaConfig;
-import plus.fserver.api.IBlockEAccess;
 import plus.fserver.api.Keep;
 import plus.fserver.block.BlockFx;
-import plus.fserver.utls.collections.ArrayListE10;
+import plus.fserver.server.elca.ChunkSelector;
+import plus.fserver.utls.collections.ArrayListE6;
 
 
 public class BlockSponge extends BlockFx {
@@ -65,7 +66,7 @@ public class BlockSponge extends BlockFx {
 
     protected void tryAbsorb(World worldIn, BlockPos pos, IBlockState state) {
         if (!state.getValue(WET).booleanValue() && this.absorb(worldIn, pos)) {
-            worldIn.setBlockState(pos, state.withProperty(WET, Boolean.valueOf(true)), 2);
+            worldIn.setBlockState(pos, state.withProperty(WET, Boolean.TRUE), 2);
             worldIn.playEvent(2001, pos, Block.getIdFromBlock(Blocks.WATER));
         }
     }
@@ -74,27 +75,38 @@ public class BlockSponge extends BlockFx {
         int index;
         EnumFacing excluding;
         EnumFacing excluding2;
+        BlockPosIndex next;
+
         public BlockPosIndex(int x, int y, int z, int index, EnumFacing excluding, EnumFacing excluding2) {
             super(x, y, z);
             this.index = index;
             this.excluding = excluding;
             this.excluding2 = excluding2;
         }
-        void init(int x, int y, int z, int index, EnumFacing excluding){
-            super.setPosB(x,y,z);
-            this.index = index;
-            this.excluding = excluding;
+
+        void add(BlockPosIndex next){
+            next.next = this.next;
+            this.next = next;
+        }
+        void forEach(Consumer<BlockPosIndex> func){
+            BlockPosIndex next = this;
+            while (next != null){
+                func.accept(next);
+                next = next.next;
+            }
         }
     }
 
 
     private boolean absorb(World world, BlockPos pos) {
+        if(world.isRemote)return false;
         LinkedList<BlockPosIndex> queue = new LinkedList<>();
         queue.add(new BlockPosIndex(pos.getX(), pos.getY(), pos.getZ(), 0, null,null));
         int max = ElcaConfig.MAX_SPONGE_POWER, maxRad = ElcaConfig.MAX_SPONGE_RADIUS;
-        IBlockEAccess access = world.access();
-        ArrayListE10<BlockPosIndex> updates = null;
-        //ArrayListE10<BlockPos> list = null;
+        ChunkSelector access = world.localSelector;
+
+        BlockPosIndex updates = null;
+        //Updates updates = null;
 
         while (!queue.isEmpty()) {
             BlockPosIndex blockpos = queue.poll();
@@ -109,7 +121,7 @@ public class BlockSponge extends BlockFx {
                 if(excluding == facing || excluding2 == facing)continue;
                 int x, y, z;
 
-                IBlockState state = access.getBlockState(
+                IBlockState state = access.getState(
                         x = px + facing.getXOffset(),
                         y = py + facing.getYOffset(),
                         z = pz + facing.getZOffset()
@@ -121,8 +133,8 @@ public class BlockSponge extends BlockFx {
                     BlockPosIndex blockpos1 = new BlockPosIndex(x, y, z, index, facing.getOpposite(), excluding);
 
                     access.setBlockState(blockpos1, BlockIDIndexes.AIR_STATE, 2);
-                    if(updates == null) updates = new ArrayListE10<>();
-                    updates.add(blockpos1);
+                    if(updates == null) updates = blockpos1;
+                    else updates.add(blockpos1);
                     --max;
 
                     if (index < maxRad) {
