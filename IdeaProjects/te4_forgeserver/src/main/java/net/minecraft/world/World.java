@@ -63,7 +63,6 @@ import net.minecraftforge.fml.common.FMLLog;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.NotNull;
 import plus.fserver.ElcaConfig;
 import plus.fserver.api.IBlockEAccess;
@@ -71,7 +70,6 @@ import plus.fserver.ElcaCV;
 import plus.fserver.api.Keep;
 import plus.fserver.server.ElcaThread;
 import plus.fserver.server.elca.ChunkLCache;
-import plus.fserver.server.elca.ChunkLSECache;
 import plus.fserver.utls.math.MathUtls;
 import plus.fserver.entity.CollisionPredicate;
 import plus.fserver.server.elca.AABKey;
@@ -228,7 +226,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
     public void setCurThread(){
         ElcaThread curThread = this.curThread = (ElcaThread)Thread.currentThread();
-        curThread.setWorld((WorldServer)this);
+        curThread.setup(chunkProviderServer);
     }
 
 

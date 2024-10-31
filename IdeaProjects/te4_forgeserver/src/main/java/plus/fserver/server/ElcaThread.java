@@ -2,7 +2,7 @@ package plus.fserver.server;
 
 import io.netty.util.concurrent.FastThreadLocalThread;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.gen.ChunkProviderServer;
 import org.jetbrains.annotations.Nullable;
 import plus.fserver.server.elca.ChunkSelector;
 
@@ -21,8 +21,8 @@ public class ElcaThread extends FastThreadLocalThread {
     }
 
 
-    public void setWorld(WorldServer world){
-        this.cache.define(world.chunkProviderServer);
+    public void setup(ChunkProviderServer world){
+        this.cache.define(world);
     }
 
 

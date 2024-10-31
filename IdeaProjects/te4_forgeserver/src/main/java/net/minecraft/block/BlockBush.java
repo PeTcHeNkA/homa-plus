@@ -23,6 +23,8 @@ import plus.fserver.api.IBlockEAccess;
 import plus.fserver.server.ElcaThread;
 import plus.fserver.utls.collections.AABBList;
 
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
+
 
 public class BlockBush extends Block implements net.minecraftforge.common.IPlantable {
     protected static final AxisAlignedBB BUSH_AABB = new AxisAlignedBB(
@@ -53,7 +55,10 @@ public class BlockBush extends Block implements net.minecraftforge.common.IPlant
 
     @Override
     public boolean canPlaceBlockAt(World worldIn, BlockPos pos) {
-        return canPlaceBlockAtAsy(ElcaThread.cache(), pos);
+        if(!worldIn.isRemote || SERVER_COMPILE)
+            return canPlaceBlockAtAsy(ElcaThread.cache(), pos);
+        else
+            return canPlaceBlockAtAsy(worldIn, pos);
     }
 
 

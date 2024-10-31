@@ -2,6 +2,7 @@ package plus.fserver.utls.collections;
 
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.ChunkProviderServer;
+import plus.fserver.server.ElcaThread;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 
@@ -24,12 +25,19 @@ public class ChunkPopulationTask extends ConcurrentLinkedQueue<Chunk> implements
     @Override
     public void run() {
         isRunning = true;
+        ChunkProviderServer provider = this.provider;
         Chunk chunk = poll();
-        while (chunk != null) try {
-            chunk.populate(provider, provider.chunkGenerator);
-            chunk = poll();
-        } catch (Exception e){
-            provider.world.getMinecraftServer().ticker().onError(provider.world, e);
+
+        if(chunk != null) {
+            ElcaThread cur = ElcaThread.current();
+            cur.setup(provider);
+            while (chunk != null) try {
+                chunk.populate(provider, provider.chunkGenerator);
+                chunk = poll();
+            } catch (Exception e) {
+                provider.world.getMinecraftServer().ticker().onError(provider.world, e);
+            }
+            cur.release();
         }
         isRunning = false;
     }

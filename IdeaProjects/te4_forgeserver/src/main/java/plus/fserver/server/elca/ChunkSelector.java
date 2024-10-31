@@ -32,6 +32,8 @@ public class ChunkSelector implements IBlockEAccess {
 
     public void define(ChunkProviderServer provider){
         this.provider = provider;
+        this.chunk = null;
+        this.curX = this.curZ = Integer.MIN_VALUE;
     }
 
 

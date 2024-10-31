@@ -232,7 +232,7 @@ public class LightingEngine implements ILightingEngine {
                             final int nLight = info.light;
                             if (nLight > 0) { //fixed `-1` value
                                 //final BlockPos.MutableBlockPos nPos = info.pos;
-                                if (curLight - getPosOpacity(world, info, posToState(info, info.section)) >= nLight) {
+                                if (curLight - getPosOpacity(world, info, info.getState()) >= nLight) {
                                     enqueueDarkening(queuedDarkenings, info, info.key, nLight, nChunk, lightType);
                                 }
                                 else {
@@ -352,7 +352,7 @@ public class LightingEngine implements ILightingEngine {
         for (final NeighborInfo info : this.neighborInfos) {
             final Chunk nChunk = info.chunk;
             if (nChunk != null) {
-                final int newLight = curLight - getPosOpacity(this.world, info, posToState(info, info.section));
+                final int newLight = curLight - getPosOpacity(this.world, info, info.getState());
                 if (newLight > info.light)
                     enqueueBrightening(this.queuedBrightenings, info, info.key, newLight, nChunk, lightType);
             }
@@ -446,8 +446,9 @@ public class LightingEngine implements ILightingEngine {
 
 
     private static IBlockState posToState(final BlockPos pos, final ExtendedBlockStorage section) {
-        if (section != Chunk.NULL_BLOCK_STORAGE)
+        if (section != Chunk.NULL_BLOCK_STORAGE)try {
             return section.get(pos.getX() & 0xF, pos.getY() & 0xF, pos.getZ() & 0xF);
+        } catch (IndexOutOfBoundsException ignored){}
         return BlockIDIndexes.AIR_STATE;
     }
 
@@ -468,5 +469,13 @@ public class LightingEngine implements ILightingEngine {
         long key;
         
         NeighborInfo() {}
+
+        IBlockState getState() {
+            ExtendedBlockStorage section = this.section;
+            if (section != Chunk.NULL_BLOCK_STORAGE)try {
+                return section.get(this.getX() & 0xF, this.getY() & 0xF, this.getZ() & 0xF);
+            } catch (IndexOutOfBoundsException ignored){}
+            return BlockIDIndexes.AIR_STATE;
+        }
     }
 }

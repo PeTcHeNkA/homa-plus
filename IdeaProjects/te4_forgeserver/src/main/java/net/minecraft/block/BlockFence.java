@@ -27,6 +27,8 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.server.ElcaThread;
 import plus.fserver.utls.collections.AABBList;
+
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
 import static plus.fserver.block.BlockFs.addCollisionBoxToListFx;
 
 
@@ -208,7 +210,12 @@ public class BlockFence extends Block {
 
     @Override
     public IBlockState getActualState(IBlockState state, IBlockAccess access, BlockPos pos) {
-        final BlockPos.MutableBlockPos mut = ElcaThread.cache().pos1;
+        final BlockPos.MutableBlockPos mut;
+        if(!access.getWorld().isRemote || SERVER_COMPILE){
+            mut = new BlockPos.MutableBlockPos();
+        } else {
+            mut = ElcaThread.cache().pos1;
+        }
         return state.withProperty(NORTH, canFenceConnectTo(access, pos, mut, EnumFacing.NORTH))
                     .withProperty(EAST,  canFenceConnectTo(access, pos, mut, EnumFacing.EAST))
                     .withProperty(SOUTH, canFenceConnectTo(access, pos, mut, EnumFacing.SOUTH))

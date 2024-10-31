@@ -744,6 +744,7 @@ net.minecraft.world.gen.feature.WorldGenMegaJungle, false, false
 net.minecraft.world.gen.feature.WorldGenMegaPineTree, false, false
 net.minecraft.world.gen.feature.WorldGenMinable, false, false
 net.minecraft.world.gen.feature.WorldGenPumpkin, false, false
+net.minecraft.world.gen.feature.WorldGenReed, false, false
 net.minecraft.world.gen.feature.WorldGenSand, false, false
 net.minecraft.world.gen.feature.WorldGenSavannaTree, false, false
 net.minecraft.world.gen.feature.WorldGenShrub, false, false
@@ -941,6 +942,9 @@ net.minecraftforge.fml.common.eventhandler.Event$Result, true
 net.minecraftforge.fml.common.eventhandler.Event, true
 net.minecraftforge.fml.common.eventhandler.EventBus, true
 net.minecraftforge.fml.common.registry.EntityEntry, true
+net.minecraftforge.fml.common.thread.SidedThreadGroup, true
+net.minecraftforge.fml.common.thread.SidedThreadGroups$1, true
+net.minecraftforge.fml.common.thread.SidedThreadGroups, true
 net.minecraftforge.registries.ForgeRegistry$1, true
 net.minecraftforge.registries.ForgeRegistry$OverrideOwner, true
 net.minecraftforge.registries.ForgeRegistry$Snapshot, true

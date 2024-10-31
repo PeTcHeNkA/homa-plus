@@ -90,6 +90,7 @@ import net.minecraft.client.util.*;
 import net.minecraft.item.crafting.*;
 import java.util.stream.*;
 import org.apache.logging.log4j.*;
+import plus.fserver.server.ElcaThread;
 
 
 @SideOnly(Side.CLIENT)
