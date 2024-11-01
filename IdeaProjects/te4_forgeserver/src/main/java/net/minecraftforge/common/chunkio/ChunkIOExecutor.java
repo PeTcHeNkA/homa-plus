@@ -22,7 +22,7 @@ public class ChunkIOExecutor {
 
 
     public static void dropQueuedChunkLoad(World world, int x, int z, Runnable runnable) {
-        TChunkExecutor.dropQueuedChunkLoad(world, x, z, new WrappedChunkRunnable(runnable));
+        TChunkExecutor.dropQueuedChunkLoad((WorldServer) world, x, z, new WrappedChunkRunnable(runnable));
     }
 
 

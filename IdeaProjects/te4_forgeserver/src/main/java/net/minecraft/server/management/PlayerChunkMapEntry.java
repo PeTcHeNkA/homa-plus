@@ -278,10 +278,11 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements C
                 } else l1:{
                     short[] changedBlocks = this.changedBlocks;
                     if(changedBlocks == null)break l1;
+                    int changes = Math.min(changedBlocks.length, this.changes);
 
                     WorldServer world = map.getWorldServer();
 
-                    this.sendPacket(new SPacketMultiBlockChange(this.changes, changedBlocks, chunk));
+                    this.sendPacket(new SPacketMultiBlockChange(changes, changedBlocks, chunk));
                     //} Keep this in the else until we figure out a fix for mojang's derpitude on the
                     // data packet so we don't double send crap.
                     //{// Forge: Send only the tile entities that are updated, Adding this brace
@@ -289,7 +290,7 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements C
                     BlockPos.MutableBlockPos pos = world.localTempPos; //safe
                     final int posX = this.posX, posZ = this.posZ;
 
-                    for (int l = 0; l < this.changes; ++l) {
+                    for (int l = 0; l < changes; ++l) {
                         short cPos = changedBlocks[l];
 
                         int cX = (cPos >> 12 & 15) + (posX << 4);

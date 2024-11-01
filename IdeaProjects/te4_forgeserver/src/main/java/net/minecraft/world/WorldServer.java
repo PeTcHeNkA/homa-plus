@@ -1061,7 +1061,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
                         LOGGER.warn("Keeping entity {} that already exists with UUID {}", EntityList.getKey(current), uuid.toString());
                         return false;
                     }
-                    LOGGER.warn("Force-added player with duplicate UUID {}", (Object)uuid.toString());
+                    LOGGER.warn("Force-added player with duplicate UUID {}", uuid.toString());
                 }
                 this.removeEntityDangerously(current);
             }

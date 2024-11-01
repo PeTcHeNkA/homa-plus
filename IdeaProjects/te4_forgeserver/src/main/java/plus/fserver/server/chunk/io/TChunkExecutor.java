@@ -1,13 +1,11 @@
 package plus.fserver.server.chunk.io;
 
-import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraftforge.fml.common.FMLLog;
-
 import java.util.function.Consumer;
 
 
@@ -93,11 +91,10 @@ public class TChunkExecutor {
     }
 
 
-    public static void dropQueuedChunkLoad(World world, int x, int z, Consumer<Chunk> runnable) {
+    public static void dropQueuedChunkLoad(WorldServer world, int x, int z, Consumer<Chunk> runnable) {
         TQueuedChunk key = new TQueuedChunk(x, z);
 
-        WorldServer sworld = (WorldServer) world;
-        TChunkTask task = sworld.getChunkTasks().get(key);
+        TChunkTask task = world.getChunkTasks().get(key);
 
         if (task == null) {
             FMLLog.log.warn("Attempted to dequeue chunk that wasn't queued? {} @ ({}, {})",
@@ -106,13 +103,7 @@ public class TChunkExecutor {
         }
         task.removeCallback(runnable);
         if (!task.hasCallback()) {
-            task.cansel();
-            sworld.getChunkTasks().remove(key);
+            if(task.cansel()) world.getChunkTasks().remove(key);
         }
-    }
-
-
-    public static void adjustPoolSize(int players) {
-        //pool.setCorePoolSize(Math.max(BASE_THREADS, players / PLAYERS_PER_THREAD));
     }
 }

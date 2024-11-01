@@ -349,7 +349,6 @@ public abstract class PlayerList {
                 worldserver.getChunk(playerIn.chunkCoordX, playerIn.chunkCoordZ).markDirty();
             }
         }
-        TChunkExecutor.adjustPoolSize(this.getCurrentPlayerCount());
 
         worldserver.removeEntity(playerIn);
         worldserver.getPlayerChunkMap().removePlayer(playerIn);
@@ -1046,7 +1045,6 @@ public abstract class PlayerList {
                 cur.connection.netManager.sendPacketSync(packet);
                 playerIn.connection.netManager.sendPacketSync(new SPacketPlayerListItem(SPacketPlayerListItem.Action.ADD_PLAYER, cur));
             }
-            TChunkExecutor.adjustPoolSize(this.getCurrentPlayerCount());
         });
 
         WorldServer worldserver = this.server.getWorld(playerIn.dimension);

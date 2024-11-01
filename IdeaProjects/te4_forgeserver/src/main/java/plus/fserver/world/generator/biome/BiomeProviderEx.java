@@ -202,7 +202,10 @@ public class BiomeProviderEx extends BiomeProvider{
 
     @Override
     public void cleanupCache() {
-        cache.clear(1);
+        int size = cache.size();
+        if(size == 1)cache.clear(0);
+        else cache.clear(1);
+        biomeCache.cleanupCache();
     }
 
 

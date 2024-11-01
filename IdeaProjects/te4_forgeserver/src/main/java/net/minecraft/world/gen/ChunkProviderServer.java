@@ -25,7 +25,6 @@ import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.fml.common.FMLLog;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import plus.fserver.ElcaCV;
 import plus.fserver.ElcaConfig;
 import plus.fserver.api.Keep;
 import plus.fserver.server.chunk.io.TChunkExecutor;
@@ -93,19 +92,18 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
     }
 
 
-    public void putChunk(long key, Chunk chunk){
-        if(ElcaCV.DEBUG_ASYNC_ERRORS) {
-            if (!world.isCurThread()) throw new RuntimeException();
-        }
+    public synchronized void putChunk(long key, Chunk chunk){
         super.put(key, chunk);
     }
 
 
-    public void removeChunk(long key){
-        if(ElcaCV.DEBUG_ASYNC_ERRORS) {
-            if (!world.isCurThread()) throw new RuntimeException();
-        }
+    public synchronized void removeChunk(long key){
         super.remove(key);
+    }
+
+
+    private synchronized void trimToSize(){
+        super.trim();
     }
 
 
@@ -313,13 +311,12 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
 
     public void onComplete(TChunkTask task){
         Chunk chunk = task.getChunk();
-        //todo check async
         putChunk(ChunkPos.asLong(chunk.x, chunk.z), chunk);
         chunk.onLoad();
         if(this.task != null) {
-            this.task.add(task.getChunk());
+            this.task.add(chunk);
         } else {
-            task.getChunk().populate(ChunkProviderServer.this, chunkGenerator);
+            chunk.populate(ChunkProviderServer.this, chunkGenerator);
         }
     }
 
@@ -364,7 +361,7 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
                             }
                         }
                     }
-                    super.trim();
+                    trimToSize();
                 } else {
                     int i = 0;
                     for (long olong : droppedChunks) {
@@ -389,7 +386,7 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
                         }
                     }
                     droppedChunks.clear();
-                    if(i > 32)super.trim();
+                    if(i > 32) trimToSize();
                 }
             }
 
@@ -430,7 +427,7 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
                             }
                         }
                     }
-                    if(limit > 32) super.trim();
+                    if(limit > 32) trimToSize();
                     if(limit >= 100){
                         ticks = 1190;
                     } else {

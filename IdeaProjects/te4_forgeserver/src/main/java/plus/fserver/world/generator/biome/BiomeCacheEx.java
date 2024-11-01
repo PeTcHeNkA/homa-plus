@@ -1,18 +1,16 @@
 package plus.fserver.world.generator.biome;
 
 import com.google.common.collect.Lists;
-import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.biome.Biome;
-import plus.fserver.world.generator.GenSession;
 import java.util.List;
 
 
 class BiomeCacheEx {
     private final BiomeProviderEx provider;
     private long lastCleanupTime;
-    private final Long2ObjectMap<Block> cacheMap = new Long2ObjectOpenHashMap<>(4096);
+    private final Long2ObjectOpenHashMap<Block> cacheMap = new Long2ObjectOpenHashMap<>(1024);
     private final List<Block> cache = Lists.newArrayList();
 
     public BiomeCacheEx(BiomeProviderEx providerEx) {
@@ -27,8 +25,10 @@ class BiomeCacheEx {
         Block block = this.cacheMap.get(num3);
         if (block == null) {
             block = new Block(session, num, num2);
-            this.cacheMap.put(num3, block);
-            this.cache.add(block);
+            synchronized (this) {
+                this.cacheMap.put(num3, block);
+                this.cache.add(block);
+            }
         }
         block.lastAccessTime = MinecraftServer.getCurrentTimeMillis();
         return block;

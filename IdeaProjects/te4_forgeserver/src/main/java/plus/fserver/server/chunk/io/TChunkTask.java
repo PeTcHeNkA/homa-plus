@@ -69,11 +69,12 @@ public abstract class TChunkTask implements Runnable{
     }
 
 
-    public void cansel(){
-        if(finished)return;
+    public boolean cansel(){
+        if(finished)return true;
         synchronized(this) {
             finished = true;
         }
+        return true;
     }
 
 
