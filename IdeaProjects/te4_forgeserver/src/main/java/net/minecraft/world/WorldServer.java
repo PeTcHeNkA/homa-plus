@@ -662,15 +662,16 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
             //this.collideTempTask = null;
 
             server.ticker().runAsync(() -> {
+                ElcaThread.Cache cache = ElcaThread.cache();
                 try {
-                    ChunkSelector selector = new ChunkSelector(WorldServer.this);
+                    cache.define(chunkProviderServer);
                     AxisAlignedBB aabb = new AxisAlignedBB(0,0,0,0,0,0);
 
-                    task.complete(WorldServer.this, selector, aabb);
+                    task.complete(WorldServer.this, cache, aabb);
                 } catch (Exception e){
                     server.ticker().onError(WorldServer.this, e);
                 } finally {
-                    //this.collideTempTask = task;
+                    cache.release();
                 }
             });
         } else {

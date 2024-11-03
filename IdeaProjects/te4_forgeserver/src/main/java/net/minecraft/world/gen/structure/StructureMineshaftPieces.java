@@ -25,6 +25,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.template.TemplateManager;
 import net.minecraft.world.storage.loot.LootTableList;
+import plus.fserver.server.ElcaThread;
 import plus.fserver.server.elca.ChunkSelector;
 
 
@@ -257,7 +258,8 @@ public class StructureMineshaftPieces {
 
         @Override
         public boolean addComponentParts(World worldIn, Random randomIn, StructureBoundingBox box) {
-            ChunkSelector selector = new ChunkSelector(worldIn);
+            ElcaThread.Cache selector = ElcaThread.cache(worldIn);
+            //ChunkSelector selector = new ChunkSelector(worldIn);
             if (this.isLiquidInStructureBoundingBox(selector, box)) {
                 return false;
             } else {
@@ -339,7 +341,7 @@ public class StructureMineshaftPieces {
 
 
         private void placeSupport(World world, StructureBoundingBox box, int x, int y, int z, int maxY, int maxX, Random rand) {
-            placeSupport(new BlockPos.MutableBlockPos(), new ChunkSelector(world), box, x, y, z, maxY, maxX, rand);
+            placeSupport(new BlockPos.MutableBlockPos(), ElcaThread.cache(world), box, x, y, z, maxY, maxX, rand);
         }
 
 
@@ -537,7 +539,7 @@ public class StructureMineshaftPieces {
 
 
         private void placeSupportPillar(World world, StructureBoundingBox box, int x, int y, int z, int y2) {
-            placeSupportPillar(new BlockPos.MutableBlockPos(), new ChunkSelector(world), box, x, y, z, y2);
+            placeSupportPillar(new BlockPos.MutableBlockPos(), ElcaThread.cache(world), box, x, y, z, y2);
         }
     }
 
@@ -700,14 +702,14 @@ public class StructureMineshaftPieces {
 
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
-            ChunkSelector selector = new ChunkSelector(world);
+            ElcaThread.Cache selector = ElcaThread.cache(world);
             if (this.isLiquidInStructureBoundingBox(selector, box)) {
                 return false;
             } else {
-                BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+                BlockPos.MutableBlockPos mut = selector.pos3;
                 StructureBoundingBox boundingBox = this.boundingBox;
 
-                this.fillWithBlocks(mut, selector, box, boundingBox.minX, boundingBox.minY, boundingBox.minZ, boundingBox.maxX, boundingBox.minY, boundingBox.maxZ, Blocks.DIRT.getDefaultState(), Blocks.AIR.getDefaultState(), true);
+                this.fillWithBlocks(mut, selector, box, boundingBox.minX, boundingBox.minY, boundingBox.minZ, boundingBox.maxX, boundingBox.minY, boundingBox.maxZ, Blocks.DIRT.getDefaultState(), BlockIDIndexes.AIR_STATE, true);
                 this.fillWithBlocks(mut, selector, box, boundingBox.minX, boundingBox.minY + 1, boundingBox.minZ, boundingBox.maxX, Math.min(boundingBox.minY + 3, boundingBox.maxY), boundingBox.maxZ, BlockIDIndexes.AIR_STATE, false);
 
                 for (StructureBoundingBox structureboundingbox : this.connectedRooms) {
@@ -817,7 +819,7 @@ public class StructureMineshaftPieces {
 
         @Override
         public boolean addComponentParts(World world, Random random, StructureBoundingBox box) {
-            ChunkSelector selector = new ChunkSelector(world);
+            ChunkSelector selector = ElcaThread.cache(world);
             if (this.isLiquidInStructureBoundingBox(selector, box)) {
                 return false;
             } else {

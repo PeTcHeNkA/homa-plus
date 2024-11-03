@@ -257,9 +257,14 @@ public abstract class Biome extends IForgeRegistryEntry.Impl<Biome> {
 
 
     public final float getTemperature(BlockPos pos) {
-        if (pos.getY() > 64) {
-            float f = (float)(TEMPERATURE_NOISE.getValue((float)pos.getX() / 8.0F, (float)pos.getZ() / 8.0F) * 4.0);
-            return this.getDefaultTemperature() - (f + (float)pos.getY() - 64.0F) * 0.05F / 30.0F;
+        return getTemperature(pos.getX(), pos.getY(), pos.getZ());
+    }
+
+
+    public final float getTemperature(int x, int y, int z) {
+        if (y > 64) {
+            float f = (float)(TEMPERATURE_NOISE.getValue((float)x / 8.0F, (float)z / 8.0F) * 4.0);
+            return this.getDefaultTemperature() - (f + (float)y - 64.0F) * 0.05F / 30.0F;
         } else {
             return this.getDefaultTemperature();
         }
@@ -292,7 +297,6 @@ public abstract class Biome extends IForgeRegistryEntry.Impl<Biome> {
         int k = (int) (factor / 3.0 + 3.0 + rand.nextDouble() * 0.25);
         int x = bX & 15;
         int z = bZ & 15;
-        BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
 
         for (int y = 255; y >= 0; --y) {
             if (y <= 5) {
@@ -316,7 +320,7 @@ public abstract class Biome extends IForgeRegistryEntry.Impl<Biome> {
                     }
 
                     if (y < sea && (top == null || top.getMaterial() == Material.AIR)) {
-                        if (this.getTemperature(mut.setPos(bX, y, bZ)) < 0.15F) {
+                        if (this.getTemperature(bX, y, bZ) < 0.15F) {
                             top = ICE;
                         } else {
                             top = WATER;

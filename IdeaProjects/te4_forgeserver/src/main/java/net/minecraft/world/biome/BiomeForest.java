@@ -87,8 +87,9 @@ public class BiomeForest extends Biome {
 
 
     public void addMushrooms(final World world, final Random rand, final BlockPos pos) {
-        BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
-        ChunkSelector selector = new ChunkSelector(world);
+        ElcaThread.Cache selector = ElcaThread.cache(world);
+        BlockPos.MutableBlockPos mut = selector.pos3;
+
         for (int i = 0; i < 4; ++i) {
             for (int j = 0; j < 4; ++j) {
                 final int fx = i * 4 + 1 + 8 + rand.nextInt(3);

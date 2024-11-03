@@ -13,6 +13,7 @@ import net.minecraftforge.event.terraingen.*;
 import net.minecraft.world.gen.feature.*;
 import net.minecraft.init.*;
 import net.minecraft.block.*;
+import plus.fserver.server.ElcaThread;
 import plus.fserver.server.elca.ChunkSelector;
 
 
@@ -62,7 +63,7 @@ public class BiomeJungle extends Biome {
     @Override
     public void decorate(final World worldIn, final Random rand, final BlockPos pos) {
         super.decorate(worldIn, rand, pos);
-        final ChunkSelector selector = new ChunkSelector(worldIn);
+        final ChunkSelector selector = ElcaThread.cache(worldIn);
 
         final int i = rand.nextInt(16) + 8;
         final int j = rand.nextInt(16) + 8;

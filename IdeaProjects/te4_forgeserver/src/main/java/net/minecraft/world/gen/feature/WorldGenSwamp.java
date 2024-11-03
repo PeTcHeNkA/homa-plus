@@ -13,6 +13,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import plus.fserver.api.Keep;
+import plus.fserver.server.ElcaThread;
 import plus.fserver.server.elca.ChunkSelector;
 
 
@@ -28,7 +29,7 @@ public class WorldGenSwamp extends WorldGenAbstractTree {
 
     @Override
     public boolean generate(World worldIn, Random rand, BlockPos position) {
-        return generate(worldIn, new ChunkSelector(worldIn), rand, position);
+        return generate(worldIn, ElcaThread.cache(worldIn), rand, position);
     }
 
 

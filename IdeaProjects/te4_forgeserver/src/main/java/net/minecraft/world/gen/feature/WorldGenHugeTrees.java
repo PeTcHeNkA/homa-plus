@@ -9,6 +9,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import plus.fserver.api.Keep;
+import plus.fserver.server.ElcaThread;
 import plus.fserver.server.elca.ChunkSelector;
 
 
@@ -91,7 +92,7 @@ public abstract class WorldGenHugeTrees extends WorldGenAbstractTree {
 
     @Keep
     protected boolean ensureGrowable(World worldIn, Random rand, BlockPos treePos, int height) {
-        ChunkSelector selector = new ChunkSelector(worldIn);
+        ChunkSelector selector = ElcaThread.cache(worldIn);
         return this.isSpaceAt(selector, worldIn, treePos, height) &&
                 this.ensureDirtsUnderneath(selector, treePos, worldIn);
     }
@@ -106,7 +107,7 @@ public abstract class WorldGenHugeTrees extends WorldGenAbstractTree {
 
     @Keep
     public void growLeavesLayerStrict(World worldIn, BlockPos layerCenter, int width) {
-        growLeavesLayerStrict(new ChunkSelector(worldIn), layerCenter, width);
+        growLeavesLayerStrict(ElcaThread.cache(worldIn), layerCenter, width);
     }
 
 

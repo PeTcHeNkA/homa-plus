@@ -158,7 +158,7 @@ public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO, Runnable
     public void saveChunk(@Nullable List<NextTickListEntry> pendings, World worldIn, Chunk chunkIn, boolean async) throws MinecraftException {
         worldIn.checkSessionLock();
         try {
-            NBTTagCompound compound = new NBTTagCompound(8);
+            NBTTagCompound compound = new NBTTagCompound(8,1);
             NBTTagCompound compound1 = new NBTTagCompound();
             compound.setTag(SStrings.CL_LEVEL, compound1);
             compound.setTag("DataVersion", NbtUtils.DATA_VERSION);
@@ -423,9 +423,9 @@ public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO, Runnable
 
 
     private Chunk readChunkFromNBT(World worldIn, NBTTagCompound compound) {
-        int i = compound.getInteger("xPos");
-        int j = compound.getInteger("zPos");
-        Chunk chunk = new Chunk(worldIn, i, j);
+        int xPos = compound.getInteger("xPos");
+        int zPos = compound.getInteger("zPos");
+        Chunk chunk = new Chunk(worldIn, xPos, zPos);
 
         NBTBase heightMap = compound.getTag("HeightMap");
         if(heightMap instanceof NBTTagIntArrayUnsafe){

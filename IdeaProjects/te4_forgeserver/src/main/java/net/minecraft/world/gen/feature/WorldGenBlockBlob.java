@@ -7,6 +7,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import plus.fserver.api.Keep;
+import plus.fserver.server.ElcaThread;
 import plus.fserver.server.elca.ChunkSelector;
 
 
@@ -22,8 +23,9 @@ public class WorldGenBlockBlob extends WorldGenerator {
     }
 
 
-    public boolean generate(World worldIn, Random rand, BlockPos position) {
-        ChunkSelector selector = new ChunkSelector(worldIn);
+    @Override
+    public boolean generate(World world, Random rand, BlockPos position) {
+        ChunkSelector selector = ElcaThread.cache(world);
         while (true) {
             label50:{
                 if (position.getY() > 3) {

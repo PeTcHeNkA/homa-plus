@@ -17,6 +17,7 @@ import net.minecraft.util.EnumFacing.Axis;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.template.TemplateManager;
+import plus.fserver.server.ElcaThread;
 import plus.fserver.server.elca.ChunkSelector;
 
 
@@ -1972,7 +1973,7 @@ public class StructureOceanMonumentPieces {
 
 
         protected void generateBoxOnFillOnly(World world, StructureBoundingBox box, int minX, int minY, int minZ, int maxX, int maxY, int maxZ, IBlockState state) {
-            generateBoxOnFillOnly(new ChunkSelector(world), box, minX, minY, minZ, maxX, maxY, maxZ, state);
+            generateBoxOnFillOnly(ElcaThread.cache(world), box, minX, minY, minZ, maxX, maxY, maxZ, state);
         }
 
 

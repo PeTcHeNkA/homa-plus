@@ -20,7 +20,6 @@ public class ResourceLocation implements Comparable<ResourceLocation> {
     protected ResourceLocation(int unused, String... args) {
         this.namespace = StringUtils.isEmpty(args[0]) ? "minecraft" : args[0].toLowerCase(Locale.ROOT);
         this.path = args[1].toLowerCase(Locale.ROOT);
-        Validate.notNull(this.path);
     }
 
 

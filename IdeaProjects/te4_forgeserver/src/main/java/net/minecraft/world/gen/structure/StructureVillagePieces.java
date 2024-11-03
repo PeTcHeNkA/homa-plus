@@ -37,6 +37,7 @@ import net.minecraft.world.biome.BiomeSavanna;
 import net.minecraft.world.biome.BiomeTaiga;
 import net.minecraft.world.gen.structure.template.TemplateManager;
 import net.minecraft.world.storage.loot.LootTableList;
+import plus.fserver.server.ElcaThread;
 import plus.fserver.server.elca.ChunkSelector;
 
 
@@ -288,7 +289,7 @@ public class StructureVillagePieces {
                 this.boundingBox.offset(0, this.averageGroundLvl - this.boundingBox.maxY + 12 - 1, 0);
             }
 
-            ChunkSelector selector = new ChunkSelector(worldIn);
+            ChunkSelector selector = ElcaThread.cache(worldIn);
 
             IBlockState iblockstate = Blocks.COBBLESTONE.getDefaultState();
             IBlockState iblockstate1 = this.getBiomeSpecificBlockState(Blocks.STONE_STAIRS.getDefaultState().withProperty(BlockStairs.FACING, EnumFacing.NORTH));
@@ -1512,6 +1513,7 @@ public class StructureVillagePieces {
         }
 
 
+        @Override
         public boolean addComponentParts(World worldIn, Random randomIn, StructureBoundingBox box) {
             if (this.averageGroundLvl < 0) {
                 this.averageGroundLvl = this.getAverageGroundLevel(worldIn, box);
@@ -1520,8 +1522,8 @@ public class StructureVillagePieces {
                 }
                 this.boundingBox.offset(0, this.averageGroundLvl - this.boundingBox.maxY + 4 - 1, 0);
             }
-            ChunkSelector selector = new ChunkSelector(worldIn);
-            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+            ElcaThread.Cache selector = ElcaThread.cache(worldIn);
+            BlockPos.MutableBlockPos mut = selector.pos3;
             IBlockState iblockstate = this.getBiomeSpecificBlockState(Blocks.OAK_FENCE.getDefaultState());
             this.fillWithBlocks(mut, selector, box, 0, 0, 0, 2, 3, 1, BlockIDIndexes.AIR_STATE, false);
             this.setBlockStateM(mut, selector, iblockstate, 1, 0, 0, box);

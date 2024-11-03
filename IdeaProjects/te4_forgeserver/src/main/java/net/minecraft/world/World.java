@@ -845,7 +845,11 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             return 0;
         } else {
             if (pos.getY() >= 256) {
-                pos = ElcaThread.cache().pos3.setPos(pos.getX(), 255, pos.getZ());
+                int prev = pos.getY();
+                BlockPos.unsafeEditY(pos, 255);
+                int result = this.getChunk(pos).getLightSubtracted(pos, 0);
+                BlockPos.unsafeEditY(pos, prev);
+                return result;
             }
             return this.getChunk(pos).getLightSubtracted(pos, 0);
         }
@@ -2175,7 +2179,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
 
     public float getBlockDensity(Vec3d vec, AxisAlignedBB bb) {
-        IBlockEAccess selector = isRemote?this:new ChunkSelector(this);
+        IBlockEAccess selector = isRemote?this:ElcaThread.cache(this);
         return getBlockDensity(selector, vec, bb);
     }
 

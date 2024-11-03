@@ -21,6 +21,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.template.TemplateManager;
 import net.minecraft.world.storage.loot.LootTableList;
+import plus.fserver.server.ElcaThread;
 import plus.fserver.server.elca.ChunkSelector;
 
 
@@ -113,11 +114,11 @@ public class StructureNetherBridgePieces {
 
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
-            ChunkSelector selector = new ChunkSelector(world);
+            ElcaThread.Cache selector = ElcaThread.cache(world);
             final IBlockState bricks = Blocks.NETHER_BRICK.getDefaultState();
             final IBlockState fence  = Blocks.NETHER_BRICK_FENCE.getDefaultState();
             final IBlockState air    = BlockIDIndexes.AIR_STATE;
-            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+            BlockPos.MutableBlockPos mut = selector.pos3;
 
             this.fillWithBlocks(mut, selector, box, 0, 0, 0, 8, 1, 8, bricks        , false);
             this.fillWithBlocks(mut, selector, box, 0, 2, 0, 8, 5, 8, air           , false);
@@ -172,8 +173,8 @@ public class StructureNetherBridgePieces {
 
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
-            ChunkSelector selector = new ChunkSelector(world);
-            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+            ElcaThread.Cache selector = ElcaThread.cache(world);
+            BlockPos.MutableBlockPos mut = selector.pos3;
 
             final IBlockState stairs = Blocks.NETHER_BRICK_STAIRS.getDefaultState().withProperty(BlockStairs.FACING, EnumFacing.SOUTH);
             final IBlockState bricks = Blocks.NETHER_BRICK.getDefaultState();

@@ -13,6 +13,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import plus.fserver.api.Keep;
+import plus.fserver.server.ElcaThread;
 import plus.fserver.server.elca.ChunkSelector;
 
 
@@ -53,7 +54,7 @@ public class WorldGenTrees extends WorldGenAbstractTree {
         if (position.getY() >= 1 && position.getY() + factor + 1 <= worldIn.getHeight()) {
             boolean flag = true;
 
-            if(selector == null)selector = new ChunkSelector(worldIn);
+            if(selector == null)selector = ElcaThread.cache(worldIn);
             BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos();
 
             for (int j = position.getY(); j <= position.getY() + 1 + factor; ++j) {

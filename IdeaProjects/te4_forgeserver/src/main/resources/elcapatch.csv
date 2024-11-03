@@ -891,6 +891,8 @@ net.minecraftforge.common.ForgeHooks$LootTableContext, true
 net.minecraftforge.common.ForgeHooks$SeedEntry, true
 net.minecraftforge.common.ForgeHooks, true
 net.minecraftforge.common.ForgeModContainer, true
+net.minecraftforge.common.util.CompoundDataFixer$1, true
+net.minecraftforge.common.util.CompoundDataFixer, true
 net.minecraftforge.event.entity.EntityEvent$CanUpdate, true
 net.minecraftforge.event.entity.EntityEvent$EnteringChunk, true
 net.minecraftforge.event.entity.EntityEvent$EntityConstructing, true

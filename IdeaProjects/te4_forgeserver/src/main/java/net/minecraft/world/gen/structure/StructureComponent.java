@@ -17,6 +17,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.template.TemplateManager;
+import plus.fserver.server.ElcaThread;
 import plus.fserver.server.elca.ChunkSelector;
 
 
@@ -98,7 +99,7 @@ public abstract class StructureComponent {
 
 
     protected boolean isLiquidInStructureBoundingBox(World worldIn, StructureBoundingBox box) {
-        return isLiquidInStructureBoundingBox(new ChunkSelector(worldIn), box);
+        return isLiquidInStructureBoundingBox(ElcaThread.cache(worldIn), box);
     }
 
 
@@ -365,7 +366,7 @@ public abstract class StructureComponent {
 
 
     protected void fillWithAir(World worldIn, StructureBoundingBox box, int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
-        ChunkSelector selector = new ChunkSelector(worldIn);
+        ChunkSelector selector = ElcaThread.cache(worldIn);
         for (int i = minY; i <= maxY; ++i) {
             for (int j = minX; j <= maxX; ++j) {
                 for (int k = minZ; k <= maxZ; ++k) {
@@ -380,7 +381,7 @@ public abstract class StructureComponent {
                                   int xMin, int yMin, int zMin, int xMax, int yMax, int zMax,
                                   IBlockState boundaryBlockState, IBlockState insideBlockState,
                                   boolean existingOnly) {
-        fillWithBlocks(new ChunkSelector(worldIn),
+        fillWithBlocks(ElcaThread.cache(worldIn),
                 box, xMin, yMin, zMin, xMax, yMax, zMax,
                 boundaryBlockState, insideBlockState, existingOnly
         );

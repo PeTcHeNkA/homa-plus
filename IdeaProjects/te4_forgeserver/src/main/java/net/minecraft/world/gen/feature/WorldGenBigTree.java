@@ -12,6 +12,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import plus.fserver.api.Keep;
+import plus.fserver.server.ElcaThread;
 import plus.fserver.server.elca.ChunkSelector;
 
 
@@ -243,7 +244,7 @@ public class WorldGenBigTree extends WorldGenAbstractTree {
 
     @Override
     public boolean generate(World world, Random rand, BlockPos pos) {
-        return generate(world, new ChunkSelector(world), rand, pos);
+        return generate(world, ElcaThread.cache(world), rand, pos);
     }
 
 
@@ -274,7 +275,8 @@ public class WorldGenBigTree extends WorldGenAbstractTree {
             }
 
             for (WorldGenBigTree.FoliageCoordinates cord : cords) {
-                blockpos = new BlockPos(pos.getX(), cord.branchBase, pos.getZ());
+                BlockPos.unsafeEdit(blockpos, pos.getX(), cord.branchBase, pos.getZ());
+
                 if (!blockpos.equals(cord) && this.leafNodeNeedsBase(
                         session.heightLimit,
                         cord.branchBase - pos.getY())) {

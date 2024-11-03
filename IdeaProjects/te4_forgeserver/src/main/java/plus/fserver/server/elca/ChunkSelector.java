@@ -67,13 +67,7 @@ public class ChunkSelector implements IBlockEAccess {
 
 
     public ChunkSelector(World world) {
-        this.provider = ((WorldServer)world).getChunkProvider();
-        curX = curZ = Integer.MIN_VALUE;
-    }
-
-
-    public ChunkSelector(WorldServer world) {
-        this.provider = world.getChunkProvider();
+        this.provider = world.chunkProviderServer;
         curX = curZ = Integer.MIN_VALUE;
     }
 
