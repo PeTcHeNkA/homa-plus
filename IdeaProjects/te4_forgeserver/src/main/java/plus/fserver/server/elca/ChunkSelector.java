@@ -301,11 +301,13 @@ public class ChunkSelector implements IBlockEAccess {
         if (newState.getLightOpacity(this, pos) != oldState.getLightOpacity(this, pos) ||
                 newState.getLightValue(this, pos) != oldState.getLightValue(this, pos)) {
             chunk.setBlockState(pos, newState);
-            provider.world.checkLight(pos);
+            World world;
+            (world = provider.world).checkLight(pos);
+            world.markAndNotifyBlock(pos, chunk, oldState, newState, flags);
         } else {
             chunk.setBlockStateFast(px, py, pz, oldState, newState);
+            provider.world.markAndNotifyBlock(pos, chunk, oldState, newState, flags);
         }
-        provider.world.markAndNotifyBlock(pos, chunk, oldState, newState, flags);
         return true;
     }
 
@@ -398,7 +400,7 @@ public class ChunkSelector implements IBlockEAccess {
 
 
     public BlockPos getHeightMut(BlockPos pos) {
-        BlockPos.unsafeEdit(pos, pos.getX(), getHeight(pos.getX(), pos.getZ()), pos.getZ());
+        BlockPos.unsafeEditY(pos, getHeight(pos.getX(), pos.getZ()));
         return pos;
     }
 }

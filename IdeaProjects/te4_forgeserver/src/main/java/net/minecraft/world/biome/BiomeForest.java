@@ -9,6 +9,7 @@ import net.minecraftforge.event.terraingen.*;
 import net.minecraft.world.gen.feature.*;
 import net.minecraft.block.*;
 import net.minecraftforge.fml.relauncher.*;
+import plus.fserver.server.ElcaThread;
 import plus.fserver.server.elca.ChunkSelector;
 
 
@@ -113,8 +114,8 @@ public class BiomeForest extends Biome {
 
     public void addDoublePlants(final World world, final Random rand, final BlockPos pos, final int count) {
         if(count == 0)return;
-        ChunkSelector selector = new ChunkSelector(world);
-        BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+        ElcaThread.Cache selector = ElcaThread.cache(world);
+        BlockPos.MutableBlockPos mut = selector.pos3;
         BlockDoublePlant.EnumPlantType type;
         for (int i = 0; i < count; ++i) {
             final int j = rand.nextInt(3);

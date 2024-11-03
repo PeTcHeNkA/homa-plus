@@ -74,10 +74,12 @@ public class BlockReed extends Block implements IPlantable {
 
     @Override
     public boolean canPlaceBlockAtAsy(final IBlockEAccess access, final BlockPos pos) {
-        BlockPos temp = new BlockPos(pos.getX(), pos.getY()-1, pos.getZ());
-        final IBlockState state = access.getBlockState(temp);
+        int px = pos.getX(), py = pos.getY(), pz = pos.getZ();
+        final IBlockState state = access.getBlockState(px, py, pz);
         final Block block = state.getBlock();
-        if (block.canSustainPlant(state, access, temp, EnumFacing.UP, this)) {
+        BlockPos.unsafeEditY(pos, py-1);
+        if (block.canSustainPlant(state, access, pos, EnumFacing.UP, this)) {
+            BlockPos.unsafeEditY(pos, py);
             return true;
         }
         if (block == this) {
@@ -88,9 +90,9 @@ public class BlockReed extends Block implements IPlantable {
         }
         for (final EnumFacing facing : EnumFacing.Plane.HORIZONTAL) {
             final IBlockState iblockstate = access.getBlockState(
-                    temp.getX() + facing.getXOffset(),
-                    temp.getY() + facing.getYOffset(),
-                    temp.getZ() + facing.getZOffset()
+                    px + facing.getXOffset(),
+                    py + facing.getYOffset(),
+                    pz + facing.getZOffset()
             );
             if (iblockstate.getMaterial() == Material.WATER || iblockstate.getBlock() == Blocks.FROSTED_ICE) {
                 return true;

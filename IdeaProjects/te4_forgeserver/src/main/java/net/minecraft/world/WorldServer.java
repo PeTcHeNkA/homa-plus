@@ -459,7 +459,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
             return list.get(this.rand.nextInt(list.size())).getPosition();
         else {
             if (blockpos.getY() == -1) {
-                BlockPos.unsafeEdit(blockpos, blockpos.getX(), 1, blockpos.getZ());
+                BlockPos.unsafeEditY(blockpos, 1);
             }
             return blockpos;
         }
@@ -527,17 +527,21 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         if (blockIn == null) return;
         //Forge: Prevent null blocks from ticking, can happen if blocks are removed in old worlds.
         // TODO: Fix real issue causing block to be null.
-        NextTickListEntry nextticklistentry = new NextTickListEntry(pos, blockIn);
-        nextticklistentry.setPriority(priority);
+        NextTickListEntry entry = new NextTickListEntry(pos, blockIn);
+        entry.setPriority(priority);
         Material material = blockIn.getDefaultState().getMaterial();
 
         if (material != Material.AIR) {
-            nextticklistentry.setScheduledTime((long)delay + this.worldInfo.getWorldTotalTime());
+            entry.setScheduledTime((long)delay + this.worldInfo.getWorldTotalTime());
         }
+        scheduleBlockUpdate(entry);
+    }
 
-        if (!this.pendingTickListEntriesHashSet.contains(nextticklistentry)) {
-            this.pendingTickListEntriesHashSet.add(nextticklistentry);
-            this.pendingTickListEntriesTreeSet.add(nextticklistentry);
+
+    public void scheduleBlockUpdate(NextTickListEntry entry){
+        if (!this.pendingTickListEntriesHashSet.contains(entry)) {
+            this.pendingTickListEntriesHashSet.add(entry);
+            this.pendingTickListEntriesTreeSet.add(entry);
         }
     }
 
@@ -1274,7 +1278,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
 
 
     public void flush() {
-        this.saveHandler.flush();
+        flushToDisk();
     }
 
 
@@ -1604,28 +1608,30 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
                 this.pendingTickListEntriesThisTick.add(nextticklistentry);
             }
 
+            ChunkSelector selector = localSelector;
             Iterator<NextTickListEntry> iterator = this.pendingTickListEntriesThisTick.iterator();
 
             while (iterator.hasNext()) {
                 NextTickListEntry entry = iterator.next();
+                BlockPos position = entry.position;
                 iterator.remove();
 
-                if (this.isAreaLoaded(entry.position.add(0, 0, 0), entry.position.add(0, 0, 0))) {
-                    IBlockState state = this.getBlockState(entry.position);
+                if (this.isAreaLoaded(position, position)) {
+                    IBlockState state = selector.getBlockState(position);
 
                     if (state.getMaterial() != Material.AIR && Block.isEqualTo(state.getBlock(), entry.getBlock())) {
                         try {
-                            state.getBlock().updateTick(this, entry.position, state, this.rand);
+                            state.getBlock().updateTick(this, position, state, this.rand);
                         }
                         catch (Throwable throwable) {
                             CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Exception while ticking a block");
                             CrashReportCategory crashreportcategory = crashreport.makeCategory("Block being ticked");
-                            CrashReportCategory.addBlockInfo(crashreportcategory, entry.position, state);
+                            CrashReportCategory.addBlockInfo(crashreportcategory, position, state);
                             throw new ReportedException(crashreport);
                         }
                     }
                 } else {
-                    this.scheduleUpdate(entry.position, entry.getBlock(), 0);
+                    this.scheduleUpdate(position, entry.getBlock(), 0);
                 }
             }
             this.pendingTickListEntriesThisTick.clear();
@@ -1649,6 +1655,14 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
 
     public ConcurrentHashMap<TQueuedChunk, TChunkTask> getChunkTasks() {
         return _chunkTasks;
+    }
+
+
+    public void addChunkTask(TQueuedChunk key, TChunkTask task){
+        TChunkTask prev = _chunkTasks.put(key, task);
+        if(prev != null){
+            server.ticker().onError(this, new RuntimeException("Task in "+key+" replaced from ["+prev+"] to ["+task+"]"));
+        }
     }
 
 

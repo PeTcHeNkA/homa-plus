@@ -21,7 +21,7 @@ public class LightingHooks {
         final int zBase = (chunk.z << 4) + z;
         scheduleRelightChecksForColumn(world, EnumSkyBlock.SKY, xBase, zBase, yMin, yMax);
         if (sections[yMin >> 4] == Chunk.NULL_BLOCK_STORAGE && yMin > 0) {
-            world.checkLightFor(EnumSkyBlock.SKY, new BlockPos(xBase, yMin - 1, zBase));
+            world.checkLightFor(EnumSkyBlock.SKY, xBase, yMin - 1, zBase);
         }
         short emptySections = 0;
         for (int sec = yMax >> 4; sec >= yMin >> 4; --sec) {
@@ -59,10 +59,7 @@ public class LightingHooks {
 
 
     private static void scheduleRelightChecksForColumn(final World world, final EnumSkyBlock lightType, final int x, final int z, final int yMin, final int yMax) {
-        final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
-        for (int y = yMin; y <= yMax; ++y) {
-            world.checkLightFor(lightType, pos.setPos(x, y, z));
-        }
+        for (int y = yMin; y <= yMax; ++y) world.checkLightFor(lightType, x, y, z);
     }
 
 
@@ -222,9 +219,11 @@ public class LightingHooks {
                     final int yBase = j * 16;
                     for (int y = 0; y < 16; ++y)
                         for (int z = 0; z < 16; ++z)
-                            for (int x = 0; x < 16; ++x)
+                            for (int x = 0; x < 16; ++x) {
+                                pos.setPosB(xBase + x, yBase + y, zBase + z);
                                 if (storage.get(x, y, z).getLightValue(world, pos) > 0)
-                                    world.checkLightFor(EnumSkyBlock.BLOCK, pos.setPos(xBase + x, yBase + y, zBase + z));
+                                    world.checkLightFor(EnumSkyBlock.BLOCK, pos);
+                            }
                 }
             }
             if (world.provider.hasSkyLight()) {

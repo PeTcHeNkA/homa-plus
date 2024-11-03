@@ -17,7 +17,7 @@ public interface IChunkLoader {
     void saveChunk(World worldIn, Chunk chunkIn) throws MinecraftException, IOException;
 
 
-    default void saveChunk(List<NextTickListEntry> pendings, World worldIn, Chunk chunkIn) throws MinecraftException, IOException{
+    default void saveChunk(@Nullable List<NextTickListEntry> pendings, World worldIn, Chunk chunkIn, boolean async) throws MinecraftException, IOException{
         throw new UnsupportedOperationException("Implement this in your chunk loader!");
     }
 

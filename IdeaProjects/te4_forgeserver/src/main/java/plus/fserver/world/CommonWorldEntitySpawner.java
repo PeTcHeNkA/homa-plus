@@ -64,7 +64,7 @@ public class CommonWorldEntitySpawner extends WorldEntitySpawner {
                 ChunkProviderServer map = world.chunkProviderServer;
                 int range = ElcaConfig.MAX_WORLD_SPAWNER_RANGE;
 
-                for (EntityPlayer player : world.playerEntities) {
+                for (EntityPlayer player : world.curPlayerEntities) {
                     if (!player.isSpectator()) {
                         int cX = MathHelper.floor(player.posX * 0.0625); // 0.0625 = 1/16
                         int cZ = MathHelper.floor(player.posZ * 0.0625);

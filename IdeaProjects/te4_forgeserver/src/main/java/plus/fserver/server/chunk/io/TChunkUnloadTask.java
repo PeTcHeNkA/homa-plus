@@ -12,8 +12,9 @@ import java.util.List;
 
 public class TChunkUnloadTask extends TChunkTask{
     private final List<NextTickListEntry> pendings;
+    boolean async = false;
 
-    public TChunkUnloadTask(WorldServer world, TQueuedChunk key, AnvilChunkLoader loader, ChunkProviderServer provider, Chunk chunk) {
+    TChunkUnloadTask(WorldServer world, TQueuedChunk key, AnvilChunkLoader loader, ChunkProviderServer provider, Chunk chunk) {
         super(world, key, loader, provider);
         this.chunk = chunk;
         chunk.setSaveStatus(true);
@@ -21,7 +22,7 @@ public class TChunkUnloadTask extends TChunkTask{
         List<NextTickListEntry> pendings = null;
         try {
             chunk.onUnload();
-            pendings = chunk.getWorld().getPendingBlockUpdates(chunk, false);
+            pendings = chunk.getWorld().getPendingBlockUpdates(chunk, true);
         } catch (Exception e){
             e.printStackTrace();
         }
@@ -30,11 +31,19 @@ public class TChunkUnloadTask extends TChunkTask{
 
 
     @Override
+    public void await(){
+        if(finished)return;
+        async = true;
+        run();
+    }
+
+
+    @Override
     public void runTask() {
         Chunk chunk = this.chunk;
         try {
             chunk.getLightingEngine().awaitUnlock();
-            if(pendings != null) provider.saveChunkData(pendings, chunk);
+            provider.saveChunkData(pendings, chunk, async);
             provider.saveChunkExtraData(chunk);
         } finally {
             chunk.setSaveStatus(false);
@@ -51,9 +60,19 @@ public class TChunkUnloadTask extends TChunkTask{
     @Override
     public void syncCallback() {
         try {
-            Chunk chunk = this.chunk;
-            ForgeChunkManager.putDormantChunk(ChunkPos.asLong(chunk.x, chunk.z), chunk);
-            this.runCallbacks();
+            if(hasCallback()){
+                List<NextTickListEntry> pendings = this.pendings;
+                if(pendings != null) {
+                    WorldServer world = this.world;
+                    for (NextTickListEntry entry:pendings)
+                        world.scheduleBlockUpdate(entry);
+                }
+                provider.onComplete(this);
+                this.runCallbacks();
+            } else {
+                Chunk chunk = this.chunk;
+                ForgeChunkManager.putDormantChunk(ChunkPos.asLong(chunk.x, chunk.z), chunk);
+            }
         } catch (Throwable throwable){
             throwable.printStackTrace();
         }

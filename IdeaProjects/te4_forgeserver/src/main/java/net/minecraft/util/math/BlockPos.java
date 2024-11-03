@@ -33,6 +33,10 @@ public class BlockPos extends Vec3i {
         pos.editRoot(x, y, z);
     }
 
+    public static void unsafeEditY(BlockPos pos, int y){
+        pos.editRootY(y);
+    }
+
 
     public BlockPos(double x, double y, double z) {
         super(x, y, z);

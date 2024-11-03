@@ -1,9 +1,9 @@
 package net.minecraft.world.gen.feature;
 
-
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import plus.fserver.api.Keep;
+import plus.fserver.server.ElcaThread;
 import plus.fserver.server.elca.ChunkSelector;
 import java.util.Random;
 
@@ -13,7 +13,7 @@ public abstract class CWorldGenerator extends WorldGenerator{
     @Keep
     @Override
     public boolean generate(World world, Random rand, BlockPos pos) {
-        return generate(world, new ChunkSelector(world), rand, pos);
+        return generate(world, ElcaThread.cache(world), rand, pos);
     }
 
 

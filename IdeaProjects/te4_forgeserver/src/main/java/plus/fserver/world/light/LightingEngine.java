@@ -34,8 +34,9 @@ public class LightingEngine implements ILightingEngine {
     private final PooledLongQueue.LongQueueIterator queueIt = new PooledLongQueue.LongQueueIterator();
     private final ReentrantLock lock = new ReentrantLock();
     private PooledLongQueue swap;
+    private final boolean hasSkyLight;
 
-    public LightingEngine(final World world) {
+    public LightingEngine(final World world, boolean skyLight) {
         this.queuedLightUpdates = new PooledLongQueue[EnumSkyBlock.values().length];
         this.queuedDarkenings = new PooledLongQueue[16];
         this.queuedBrightenings = new PooledLongQueue[16];
@@ -60,6 +61,7 @@ public class LightingEngine implements ILightingEngine {
             this.neighborInfos[i] = new NeighborInfo();
         }
         swap = new PooledLongQueue(pool);
+        hasSkyLight = skyLight;
     }
 
 
@@ -269,10 +271,9 @@ public class LightingEngine implements ILightingEngine {
         this.isNeighborDataValid = true;
         NeighborInfo[] neighborInfos = this.neighborInfos;
         for (int i = 0; i < neighborInfos.length; ++i) {
-            final NeighborInfo neighborInfo;
-            final NeighborInfo info = neighborInfo = neighborInfos[i];
+            final NeighborInfo info = neighborInfos[i];
             final long key = this.curData + LightingEngine.neighborShifts[i];
-            neighborInfo.key = key;
+            info.key = key;
             if ((key & 0x1000000000000000L) != 0x0L) {
                 info.chunk = null;
                 info.section = null;
@@ -300,11 +301,31 @@ public class LightingEngine implements ILightingEngine {
                 return type.defaultLightValue;
             return 0;
         } else if (type == EnumSkyBlock.SKY) {
-            if (!chunk.getWorld().provider.hasSkyLight()) return 0;
+            if (!hasSkyLight) return 0;
             return storage.getSkyLight(pos.getX() & 0xF, pos.getY() & 0xF, pos.getZ() & 0xF);
         } else {
             if (type == EnumSkyBlock.BLOCK)
                 return storage.getBlockLight(pos.getX() & 0xF, pos.getY() & 0xF, pos.getZ() & 0xF);
+            return type.defaultLightValue;
+        }
+    }
+
+
+    private int getCursorCachedLight(final EnumSkyBlock type) {
+        final int y;
+        Chunk chunk;
+        BlockPos.MutableBlockPos pos;
+        final ExtendedBlockStorage storage = (chunk = this.curChunk).getBlockStorageArray()[(y = (pos = this.curPos).getY()) >> 4];
+        if (storage == null) {
+            if (chunk.canSeeSky(pos)) return type.defaultLightValue;
+            return 0;
+        } else if (type == EnumSkyBlock.SKY) {
+            if (!hasSkyLight) return 0;
+            return storage.getSkyLight(pos.getX() & 0xF, y & 0xF, pos.getZ() & 0xF);
+        } else {
+            if (type == EnumSkyBlock.BLOCK) {
+                return storage.getBlockLight(pos.getX() & 0xF, y & 0xF, pos.getZ() & 0xF);
+            }
             return type.defaultLightValue;
         }
     }
@@ -413,11 +434,11 @@ public class LightingEngine implements ILightingEngine {
         }
         return true;
     }
-
-
-    private int getCursorCachedLight(final EnumSkyBlock lightType) {
-        return this.curChunk.getCachedLightFor(lightType, this.curPos);
-    }
+//
+//
+//    private int getCursorCachedLight(final EnumSkyBlock lightType) {
+//        return this.curChunk.getCachedLightFor(lightType, this.curPos);
+//    }
 
 
     private int getCursorLuminosity(final IBlockState state, final EnumSkyBlock lightType) {

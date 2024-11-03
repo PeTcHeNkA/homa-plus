@@ -3,22 +3,17 @@ package net.minecraftforge.common;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-
 import javax.annotation.Nullable;
-
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ClassInheritanceMultiMap;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
-import net.minecraft.world.storage.ThreadedFileIOBase;
 import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
@@ -46,6 +41,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
+import plus.tson.utl.Te4HashSet;
 
 /**
  * Manages chunkloading for mods.
@@ -92,7 +88,7 @@ public class ForgeChunkManager {
 
     public static final List<String> MOD_PROP_ORDER = new ArrayList<String>(2);
 
-    private static Set<String> warnedMods = Sets.newHashSet();
+    private static Set<String> warnedMods = new Te4HashSet<>();
 
     static {
         MOD_PROP_ORDER.add("maximumTicketCount");

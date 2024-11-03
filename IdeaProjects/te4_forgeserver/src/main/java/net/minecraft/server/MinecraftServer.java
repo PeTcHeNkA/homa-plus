@@ -321,7 +321,7 @@ public abstract class MinecraftServer implements ICommandSender, Runnable, IThre
             for (WorldServer worldserver1 : this.worlds) {
                 if (worldserver1 != null) {
                     net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.world.WorldEvent.Unload(worldserver1));
-                    worldserver1.flush();
+                    worldserver1.flushToDisk();
                 }
             }
 

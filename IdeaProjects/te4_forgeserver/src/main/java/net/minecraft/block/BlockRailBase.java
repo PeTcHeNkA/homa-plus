@@ -384,7 +384,7 @@ public abstract class BlockRailBase extends Block {
             if (BlockRailBase.isRailBlock(state)) {
                 return new Rail(this.world, temp, state);
             }
-            BlockPos.unsafeEdit(temp, pos.getX(), pos.getY()-1, pos.getZ());
+            BlockPos.unsafeEditY(temp, pos.getY()-1);
 
             state = access.getBlockState(temp);
             return BlockRailBase.isRailBlock(state) ? new Rail(this.world, temp, state) : null;

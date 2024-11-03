@@ -499,12 +499,12 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
 
     public void relight(BlockPos pos){
-        relightBlock(pos.getX()&15, pos.getY(), pos.getZ()&15);
+        relightBlock(pos.getX()&15, pos.getY(), pos.getZ()&15, pos);
     }
 
 
 
-    private void relightBlock(final int x, final int y, final int z) {
+    private void relightBlock(final int x, final int y, final int z, BlockPos pos) {
         byte[] heightMap;
         int cy;
         final int i = cy = ((heightMap = this.heightMap)[z << 4 | x] & 0xFF);
@@ -512,12 +512,14 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
             cy = y;
         }
         if(cy > 0) {
+            int px = pos.getX(), py = pos.getY(), pz = pos.getZ();
             int shiftX = this.x << 4, shiftZ = this.z << 4;
-            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos(shiftX + x, cy - 1, shiftZ + z);
-            while (cy > 0 && this.getBlockLightOpacity(mut) == 0) {
+            BlockPos.unsafeEdit(pos,shiftX + x, cy - 1, shiftZ + z);
+            while (cy > 0 && this.getBlockLightOpacity(pos) == 0) {
                 --cy;
-                mut.setY(cy-1);
+                BlockPos.unsafeEditY(pos,cy-1);
             }
+            BlockPos.unsafeEdit(pos, px, py, pz);
         }
         if (cy != i) {
             heightMap[z << 4 | x] = (byte) cy;
@@ -629,10 +631,10 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
                     if (j1 > 0) {
                         if (py >= i1) {
-                            this.relightBlock(px, py + 1, pz);
+                            this.relightBlock(px, py + 1, pz, pos);
                         }
                     } else if (py == i1 - 1) {
-                        this.relightBlock(px, py, pz);
+                        this.relightBlock(px, py, pz, pos);
                     }
 
                     if (j1 != k1 && (j1 < k1 || this.getLightFor(EnumSkyBlock.SKY, pos) > 0 || this.getLightFor(EnumSkyBlock.BLOCK, pos) > 0)) {
@@ -641,7 +643,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
                 }
 
                 // If capturing blocks, only run block physics for TE's. Non-TE's are handled in ForgeHooks.onPlaceItemIntoWorld
-                if (!world.isRemote && prevBlock != block && (!world.captureBlockSnapshots || state.hasTile())) {
+                if ((!world.isRemote || SERVER_COMPILE) && prevBlock != block && (!world.captureBlockSnapshots || state.hasTile())) {
                     block.onBlockAdded(world, pos, state);
                 }
 
@@ -719,10 +721,10 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
                     if (j1 > 0) {
                         if (py >= i1) {
-                            this.relightBlock(px, py + 1, pz);
+                            this.relightBlock(px, py + 1, pz, pos);
                         }
                     } else if (py == i1 - 1) {
-                        this.relightBlock(px, py, pz);
+                        this.relightBlock(px, py, pz, pos);
                     }
 
                     if (j1 != k1 && (j1 < k1 || this.getLightFor(EnumSkyBlock.SKY, pos) > 0 || this.getLightFor(EnumSkyBlock.BLOCK, pos) > 0)) {
@@ -850,17 +852,17 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
     //phosphor lighting
     public int getCachedLightFor(final EnumSkyBlock type, final BlockPos pos) {
-        final int i = pos.getX() & 0xF, j = pos.getY(), k = pos.getZ() & 0xF;
-        final ExtendedBlockStorage extendedblockstorage = this.storageArrays[j >> 4];
-        if (extendedblockstorage == null) {
+        final int y;
+        final ExtendedBlockStorage storage = this.storageArrays[(y = pos.getY()) >> 4];
+        if (storage == null) {
             if (this.canSeeSky(pos)) return type.defaultLightValue;
             return 0;
         } else if (type == EnumSkyBlock.SKY) {
             if (!this.world.provider.hasSkyLight()) return 0;
-            return extendedblockstorage.getSkyLight(i, j & 0xF, k);
+            return storage.getSkyLight(pos.getX() & 0xF, y & 0xF, pos.getZ() & 0xF);
         } else {
             if (type == EnumSkyBlock.BLOCK) {
-                return extendedblockstorage.getBlockLight(i, j & 0xF, k);
+                return storage.getBlockLight(pos.getX() & 0xF, y & 0xF, pos.getZ() & 0xF);
             }
             return type.defaultLightValue;
         }

@@ -6,6 +6,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
 import plus.fserver.api.Keep;
 import plus.fserver.server.elca.ChunkSelector;
 
@@ -65,6 +66,7 @@ public class WorldGenMinable extends CWorldGenerator {
             if(lastY>255)lastY = 255;
             int k1 = MathHelper.floor(d8 + d10 * 0.5f);
             float d10N2 = 1/(d10 * 0.5f);
+            final IBlockState ore = this.oreBlock;
 
             for (int xPos = startX; xPos <= i1; ++xPos) {
                 float d12 = (xPos + 0.5f - d6) * d10N2;
@@ -80,10 +82,11 @@ public class WorldGenMinable extends CWorldGenerator {
                                 float d14 = (zPos + 0.5f - d8) * d10N2;
 
                                 if (fl1 + d14 * d14 < 1) {
-
-                                    IBlockState state = selector.getStateUnchecked(xPos, yPos, zPos);
-                                    if (state.getBlock().isReplaceableOreGen(state, world, mut.setPos(xPos, yPos, zPos), predicate)) {
-                                        selector.setCurStateFast(xPos, yPos, zPos, this.oreBlock);
+                                    Chunk chunk = selector.getChunkE(xPos>>4, zPos>>4);
+                                    IBlockState state = chunk.getBlockStateUnchecked(xPos, yPos, zPos);
+                                    mut.setPosB(xPos, yPos, zPos);
+                                    if (state.getBlock().isReplaceableOreGen(state, selector, mut, predicate)) {
+                                        chunk.setBlockStateFastNoTile(xPos, yPos, zPos, ore);
                                     }
                                 }
                             }

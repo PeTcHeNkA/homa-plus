@@ -42,7 +42,7 @@ public abstract class TChunkTask implements Runnable{
     }
 
 
-    public final void await(){
+    public void await(){
         if(finished)return;
         run();
     }

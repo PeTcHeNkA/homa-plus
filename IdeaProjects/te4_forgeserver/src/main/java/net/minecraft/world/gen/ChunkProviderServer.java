@@ -264,11 +264,11 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
 
 
     @Keep
-    public void saveChunkData(List<NextTickListEntry> pendings, Chunk chunk) {
+    public void saveChunkData(@Nullable List<NextTickListEntry> pendings, Chunk chunk, boolean async) {
         try {
             World world = chunk.getWorld();
             chunk.setLastSaveTime(world.getTotalWorldTime());
-            this.chunkLoader.saveChunk(pendings, world, chunk);
+            this.chunkLoader.saveChunk(pendings, world, chunk, async);
         } catch (IOException ioexception) {
             LOGGER.error("Couldn't save chunk", ioexception);
         }
@@ -280,32 +280,37 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
 
     @Keep
     public boolean saveChunks(boolean all) {
-        boolean needProcess = true;
-        int i = 0;
-        Collection<Chunk> vs = getLoadedChunks();
-        if(vs.isEmpty())return true;
-        List<Chunk> list = new ArrayList<>(vs);
+        if(canSave()) {
+            boolean needProcess = true;
+            int i = 0;
+            Collection<Chunk> vs = getLoadedChunks();
+            if (vs.isEmpty()) return true;
+            List<Chunk> list = new ArrayList<>(vs);
 
-        for (int j = 0; j < list.size(); ++j) {
-            Chunk chunk = list.get(j);
-            if (all) {
-                this.saveChunkExtraData(chunk);
-            }
-            if (chunk.needsSaving(all)) {
-                if(needProcess){
-                    chunk.getLightingEngine().processLightUpdates();
-                    needProcess = false;
+            for (int j = 0; j < list.size(); ++j) {
+                Chunk chunk = list.get(j);
+                if (all) {
+                    this.saveChunkExtraData(chunk);
                 }
-                this.saveChunkData(chunk);
-                chunk.setModified(false);
-                ++i;
+                if (chunk.needsSaving(all)) {
+                    if (needProcess) {
+                        chunk.getLightingEngine().processLightUpdates();
+                        needProcess = false;
+                    }
+                    chunk.setSaveStatus(true);
+                    this.saveChunkData(chunk);
+                    chunk.setSaveStatus(false);
+                    chunk.setModified(false);
+                    ++i;
 
-                if (i == 24 && !all) {
-                    return false;
+                    if (i == 24 && !all) {
+                        return false;
+                    }
                 }
             }
+            return true;
         }
-        return true;
+        return false;
     }
 
 
@@ -322,7 +327,7 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
 
 
     public void flushToDisk() {
-        this.chunkLoader.flush();
+        if(canSave()) this.chunkLoader.flush();
     }
 
 
@@ -330,7 +335,7 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
     @Override
     public boolean tick() {
         if(task != null) task.reRunIfNeed();
-        if (!this.world.disableLevelSaving) {
+        if (canSave()) {
             LongSet droppedChunks = this.droppedChunks;
             int size = droppedChunks.size();
 
@@ -339,7 +344,7 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
                     int i = 0;
                     for (LongIterator iterator = droppedChunks.iterator();
                          i < 100 && iterator.hasNext();) {
-                        long olong = iterator.next();
+                        long olong = iterator.nextLong();
                         Chunk chunk = super.get(olong);
 
                         l1: if (chunk != null) {

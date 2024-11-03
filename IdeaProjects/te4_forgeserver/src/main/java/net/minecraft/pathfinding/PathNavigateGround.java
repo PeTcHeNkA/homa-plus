@@ -65,16 +65,16 @@ public class PathNavigateGround extends PathNavigate {
             int lim = blockpos.getY();
 
             for (; blockpos.getY() > 0 && chunk.getBlockState(blockpos).getMaterial() == Material.AIR;
-                 BlockPos.unsafeEdit(blockpos, blockpos.getX(), blockpos.getY()-1, blockpos.getZ())) ;
+                 BlockPos.unsafeEditY(blockpos, blockpos.getY()-1)) ;
 
             if (blockpos.getY() > 0) {
-                BlockPos.unsafeEdit(blockpos, pos.getX(), pos.getY()+1, pos.getZ());
+                BlockPos.unsafeEditY(blockpos, pos.getY()+1);
                 return super.getPathToPos(blockpos);
             }
-            BlockPos.unsafeEdit(blockpos, blockpos.getX(), lim, blockpos.getZ());
+            BlockPos.unsafeEditY(blockpos, lim);
             lim = Math.min(blockpos.getY()+32, world.getHeight());
             while (blockpos.getY() < lim && chunk.getBlockState(blockpos).getMaterial() == Material.AIR){
-                BlockPos.unsafeEdit(blockpos, blockpos.getX(), blockpos.getY()+1, blockpos.getZ());
+                BlockPos.unsafeEditY(blockpos, blockpos.getY()+1);
             }
 
             pos = blockpos;

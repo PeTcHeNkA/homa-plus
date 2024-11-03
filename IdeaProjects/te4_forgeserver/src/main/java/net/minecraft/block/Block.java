@@ -895,9 +895,8 @@ public class Block extends net.minecraftforge.registries.IForgeRegistryEntry.Imp
         return 0;
     }
 
-    protected BlockStateContainer createBlockState()
-    {
-        return new BlockStateContainer(this, new IProperty[0]);
+    protected BlockStateContainer createBlockState() {
+        return new BlockStateContainer(this);
     }
 
     public BlockStateContainer getBlockState()

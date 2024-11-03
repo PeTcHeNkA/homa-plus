@@ -8,6 +8,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import plus.fserver.api.Keep;
+import plus.fserver.server.ElcaThread;
 import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.math.FastRandom;
 
@@ -24,14 +25,15 @@ public class WorldGenTallGrass extends CWorldGenerator {
 
     @Override
     public boolean generate(World worldIn, ChunkSelector selector, Random rand, BlockPos pos) {
-        BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos(pos);
+        ElcaThread.Cache cache = ElcaThread.cache(worldIn);
+        BlockPos.MutableBlockPos mut = cache.pos1.setPos(pos);
         for (IBlockState iblockstate = selector.getState(mut);
              (iblockstate.getBlock().isAir(iblockstate, worldIn, mut)
                         || iblockstate.getBlock().isLeaves(iblockstate, worldIn, mut))
                         && mut.getY() > 0; iblockstate = selector.getCurState(mut)) {
             mut.setY(mut.getY()-1);
         }
-        pos = new BlockPos(mut.getX(), mut.getY()+1, mut.getZ());
+        pos = cache.pos2.setPos(mut.getX(), mut.getY()+1, mut.getZ());
 
         for (int i = 0; i < 128; ++i) {
             FastRandom.INST.setRandom8x8x4(mut, pos);

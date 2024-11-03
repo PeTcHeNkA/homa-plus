@@ -56,15 +56,17 @@ public class BlockMagma extends BlockFx {
 
     @Override
     public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand) {
-        BlockPos blockpos = pos.up();
-        IBlockState iblockstate = worldIn.getBlockState(blockpos);
+        IBlockState iblockstate = worldIn.getBlockState(pos.getX(), pos.getY(), pos.getZ());
 
         if (iblockstate.getBlock() == Blocks.WATER || iblockstate.getBlock() == Blocks.FLOWING_WATER) {
-            worldIn.setBlockToAir(blockpos);
+            int y = pos.getY();
+            BlockPos.unsafeEditY(pos, y+1);
+            worldIn.setBlockToAir(pos);
+            BlockPos.unsafeEditY(pos, y);
             worldIn.playSound(null, pos, SoundEvents.BLOCK_FIRE_EXTINGUISH, SoundCategory.BLOCKS, 0.5F, 2.6F + (worldIn.rand.nextFloat() - worldIn.rand.nextFloat()) * 0.8F);
 
             if (!worldIn.isRemote || SERVER_COMPILE) {
-                ((WorldServer)worldIn).spawnParticle(EnumParticleTypes.SMOKE_LARGE, (double)blockpos.getX() + 0.5D, (double)blockpos.getY() + 0.25D, (double)blockpos.getZ() + 0.5D, 8, 0.5D, 0.25D, 0.5D, 0.0D);
+                ((WorldServer)worldIn).spawnParticle(EnumParticleTypes.SMOKE_LARGE, (double)pos.getX() + 0.5D, (double)pos.getY() + 1.25D, (double)pos.getZ() + 0.5D, 8, 0.5D, 0.25D, 0.5D, 0.0D);
             }
         }
     }

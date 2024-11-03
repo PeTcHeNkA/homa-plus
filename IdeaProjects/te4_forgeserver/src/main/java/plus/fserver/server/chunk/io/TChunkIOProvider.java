@@ -37,7 +37,6 @@ public class TChunkIOProvider extends TChunkTask {
         try {
             Chunk chunk = this.chunk;
             if (chunk != null) {
-                TQueuedChunk chunkInfo = this.chunkInfo;
                 WorldServer world;
                 this.loader.loadEntities((world = this.world), this.nbt.getCompoundTag(SStrings.CL_LEVEL), chunk);
 
@@ -45,7 +44,7 @@ public class TChunkIOProvider extends TChunkTask {
 
                 chunk.setLastSaveTime(world.getTotalWorldTime());
                 ChunkProviderServer provider;
-                (provider = this.provider).chunkGenerator.recreateStructures(chunk, chunkInfo.x, chunkInfo.z);
+                (provider = this.provider).chunkGenerator.recreateStructures(chunk, chunk.x, chunk.z);
 
                 provider.onComplete(this);
             }

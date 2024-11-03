@@ -14,7 +14,7 @@ public class TChunkGenProvider extends TChunkTask implements Runnable{
     @Override
     public void runTask() {
         TQueuedChunk inf = chunkInfo;
-        chunk = world().getChunkProvider().chunkGenerator.generateChunk(inf.x, inf.z);
+        chunk = world.getChunkProvider().chunkGenerator.generateChunk(inf.x, inf.z);
     }
 
 
@@ -22,7 +22,7 @@ public class TChunkGenProvider extends TChunkTask implements Runnable{
     public void syncCallback() {
         try {
             if (chunk != null) {
-                world().getChunkProvider().onComplete(this);
+                world.getChunkProvider().onComplete(this);
             }
             this.runCallbacks();
         } catch (Throwable throwable){

@@ -134,7 +134,7 @@ public class BlockDynamicLiquid extends BlockLiquid {
                 this.tryFlowInto(selector, worldIn, mut, state1, level + 8);
             }
         } else if (level >= 0 && (level == 0 || this.isBlocked(state1))) {
-            Set<EnumFacing> set = this.getPossibleFlowDirections(selector, pos, mut);
+            Set<EnumFacing> set = this.getPossibleFlowDirections(selector, pos);
             int k1 = level + num2;
 
             if (level >= 8) {
@@ -170,22 +170,24 @@ public class BlockDynamicLiquid extends BlockLiquid {
     }
 
 
-    private int getSlopeDistance(ChunkSelector selector, BlockPos pos, int distance, EnumFacing calculateFlowCost) {
+    private int getSlopeDistance(ChunkSelector selector, int pX, int pY, int pZ, int distance, EnumFacing calculateFlowCost) {
         int i = 1000;
-        BlockPos blockpos;
         IBlockState iblockstate;
-        for (EnumFacing enumfacing : BlockIDIndexes.FACING_HORIZONTAL) {
-            if (enumfacing != calculateFlowCost) {
-                blockpos = pos.offset(enumfacing);
-                iblockstate = selector.getState(blockpos);
+        for (EnumFacing facing : BlockIDIndexes.FACING_HORIZONTAL) {
+            if (facing != calculateFlowCost) {
+                int bx = pX + facing.getXOffset();
+                int by = pY + facing.getYOffset();
+                int bz = pZ + facing.getZOffset();
+
+                iblockstate = selector.getState(bx, by, bz);
 
                 if (!this.isBlocked(iblockstate) && (iblockstate.getMaterial() != this.material || iblockstate.getValue(LEVEL) > 0)) {
-                    if (!this.isBlocked(selector.getCurState(blockpos.down()))) {
+                    if (!this.isBlocked(selector.getCurState(bx, by-1, bz))) {
                         return distance;
                     }
 
                     if (distance < this.getSlopeFindDistance(selector.getWorld())) {
-                        int j = this.getSlopeDistance(selector, blockpos, distance + 1, enumfacing.getOpposite());
+                        int j = this.getSlopeDistance(selector, bx, by, bz, distance + 1, facing.getOpposite());
 
                         if (j < i) {
                             i = j;
@@ -203,23 +205,21 @@ public class BlockDynamicLiquid extends BlockLiquid {
     }
 
 
-    private Set<EnumFacing> getPossibleFlowDirections(ChunkSelector selector, BlockPos pos, BlockPos.MutableBlockPos mut) {
+    private Set<EnumFacing> getPossibleFlowDirections(ChunkSelector selector, BlockPos pos) {
         int i = 1000;
         Set<EnumFacing> set = EnumSet.noneOf(EnumFacing.class);
         IBlockState iblockstate;
         for (EnumFacing facing : BlockIDIndexes.FACING_HORIZONTAL) {
-            mut.setPosB(
-                    pos.getX() + facing.getXOffset(),
-                    pos.getY() + facing.getYOffset(),
-                    pos.getZ() + facing.getZOffset()
-            );
+            int px = pos.getX() + facing.getXOffset();
+            int py = pos.getY() + facing.getYOffset();
+            int pz = pos.getZ() + facing.getZOffset();
 
-            iblockstate = selector.getState(mut);
+            iblockstate = selector.getState(px, py, pz);
 
             if (!this.isBlocked(iblockstate) && (iblockstate.getMaterial() != this.material || iblockstate.getValue(LEVEL) > 0)) {
                 int j;
-                if (this.isBlocked(selector.getState(mut.down()))) {
-                    j = this.getSlopeDistance(selector, mut, 1, facing.getOpposite());
+                if (this.isBlocked(selector.getState(px, py-1, pz))) {
+                    j = this.getSlopeDistance(selector, px, py, pz, 1, facing.getOpposite());
                 } else {
                     j = 0;
                 }

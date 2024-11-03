@@ -701,6 +701,7 @@ net.minecraft.world.chunk.ChunkPrimer
 net.minecraft.world.chunk.IBlockStatePalette
 net.minecraft.world.chunk.storage.AnvilChunkLoader$1
 net.minecraft.world.chunk.storage.AnvilChunkLoader
+net.minecraft.world.chunk.storage.AnvilSaveHandler
 net.minecraft.world.chunk.storage.ExtendedBlockStorage
 net.minecraft.world.chunk.storage.IChunkLoader
 net.minecraft.world.chunk.storage.RegionFile$ChunkBuffer
@@ -851,6 +852,7 @@ net.minecraft.world.SpawnPos
 net.minecraft.world.storage.MapStorage$1, false, false
 net.minecraft.world.storage.MapStorage$SaveTask, false, false
 net.minecraft.world.storage.MapStorage, false, false
+net.minecraft.world.storage.ThreadedFileIOBase, false, false
 net.minecraft.world.storage.WorldSavedData, false, false
 net.minecraft.world.Teleporter$PortalPosition
 net.minecraft.world.Teleporter

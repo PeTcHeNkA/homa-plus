@@ -161,7 +161,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     protected final BlockPos.MutableBlockPos tempPooledLocalPos = new BlockPos.MutableBlockPos();
 
     public long tryUpdateNavigationLimit = 20L;
-    public final LightingEngine lightingEngine = new LightingEngine(this);
+    public final LightingEngine lightingEngine;
     public final ActionResult<?> pooledAction = new ActionResult<>(null,null);
 
     final SyncListCache.AABB bbCache;
@@ -199,6 +199,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         this.profiler = profilerIn;
         this.worldInfo = info;
         this.provider = providerIn;
+        this.lightingEngine = new LightingEngine(this, provider.hasSkyLight());
 
         if(SERVER_COMPILE){
             this.isRemote = false;
@@ -825,7 +826,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
                 BlockPos blockpos = new BlockPos(pos.getX(), this.getSeaLevel()-1, pos.getZ());
 
                 for (BlockPos blockpos1 = blockpos.down(); blockpos1.getY() > pos.getY();
-                     BlockPos.unsafeEdit(blockpos1, blockpos1.getX(), blockpos1.getY() - 1, blockpos1.getZ())) {
+                     BlockPos.unsafeEditY(blockpos1, blockpos1.getY() - 1)) {
 
                     IBlockState iblockstate = this.getBlockState(blockpos1);
 

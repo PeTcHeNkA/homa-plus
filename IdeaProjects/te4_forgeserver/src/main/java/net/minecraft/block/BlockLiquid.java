@@ -25,6 +25,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.api.IBlockEAccess;
 import plus.fserver.api.Keep;
+import plus.fserver.server.ElcaThread;
 import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.collections.AABBList;
 import plus.fserver.utls.math.Vec3dMut;
@@ -292,8 +293,8 @@ public abstract class BlockLiquid extends Block {
     }
 
 
-    public boolean checkForMixing(final World worldIn, final BlockPos pos, final IBlockState state) {
-        return checkForMixing(worldIn, new ChunkSelector(worldIn), pos, state);
+    public boolean checkForMixing(final World world, final BlockPos pos, final IBlockState state) {
+        return checkForMixing(world, ElcaThread.cache(), pos, state);
     }
 
 

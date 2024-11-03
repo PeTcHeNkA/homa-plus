@@ -8,6 +8,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.event.ForgeEventFactory;
+import plus.fserver.server.ElcaThread;
 import plus.fserver.server.elca.ChunkSelector;
 
 
@@ -25,7 +26,7 @@ public class BlockStaticLiquid extends BlockLiquid {
 
     @Override
     public void neighborChanged(IBlockState state, World world, BlockPos pos, Block blockIn, BlockPos fromPos) {
-        ChunkSelector selector = new ChunkSelector(world);
+        ChunkSelector selector = ElcaThread.cache();
         if (!this.checkForMixing(world, selector, pos, state)) {
             BlockDynamicLiquid blockdynamicliquid = getFlowingBlock(this.material);
             selector.setBlockState(pos,

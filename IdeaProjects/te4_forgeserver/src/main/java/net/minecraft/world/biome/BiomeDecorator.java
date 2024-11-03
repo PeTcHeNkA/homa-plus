@@ -10,22 +10,11 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.gen.ChunkGeneratorSettings;
-import net.minecraft.world.gen.feature.WorldGenAbstractTree;
-import net.minecraft.world.gen.feature.WorldGenBigMushroom;
-import net.minecraft.world.gen.feature.WorldGenBush;
-import net.minecraft.world.gen.feature.WorldGenCactus;
-import net.minecraft.world.gen.feature.WorldGenClay;
-import net.minecraft.world.gen.feature.WorldGenDeadBush;
-import net.minecraft.world.gen.feature.WorldGenFlowers;
-import net.minecraft.world.gen.feature.WorldGenLiquids;
-import net.minecraft.world.gen.feature.WorldGenPumpkin;
-import net.minecraft.world.gen.feature.WorldGenReed;
-import net.minecraft.world.gen.feature.WorldGenSand;
-import net.minecraft.world.gen.feature.WorldGenWaterlily;
-import net.minecraft.world.gen.feature.WorldGenerator;
+import net.minecraft.world.gen.feature.*;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.terraingen.DecorateBiomeEvent;
 import net.minecraftforge.event.terraingen.OreGenEvent;
+import plus.fserver.server.ElcaThread;
 import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.math.BlockPosDelta;
 import plus.fserver.world.generator.ChunkGenSettingsPlus;
@@ -101,7 +90,7 @@ public class BiomeDecorator {
 
         MinecraftForge.EVENT_BUS.postF(new DecorateBiomeEvent.Pre(world, rand, fPos));
 
-        ChunkSelector selector = new ChunkSelector(world);
+        ElcaThread.Cache selector = ElcaThread.cache(world);
         WorldGenerator gen = new WorldGenDeadBush();
 
         this.generateOres(selector, world, rand, chunkPos);
@@ -313,7 +302,7 @@ public class BiomeDecorator {
 
     @Deprecated
     protected void generateOres(World world, Random rand) {
-        generateOres(new ChunkSelector(world), world, rand, this.chunkPos);
+        generateOres(ElcaThread.cache(world), world, rand, this.chunkPos);
     }
 
 
@@ -352,55 +341,60 @@ public class BiomeDecorator {
     }
 
 
-    protected final void generateOres(final ChunkSelector selector, final World worldIn, final Random random, final BlockPos chunkPos) {
-        MinecraftForge.ORE_GEN_BUS.postF(new OreGenEvent.Pre(worldIn, random, chunkPos));
+    protected final void generateOres(final ElcaThread.Cache cache, final World world, final Random rand, final BlockPos pos) {
+        MinecraftForge.ORE_GEN_BUS.postF(new OreGenEvent.Pre(world, rand, pos));
 
-        ChunkGenSettingsPlus settings = ((WorldServer)worldIn).getChunkGenSettings();
+        ChunkGenSettingsPlus settings = ((WorldServer)world).getChunkGenSettings();
+        BlockPos.MutableBlockPos mut = cache.pos1;
 
-        genOre1(selector, worldIn, chunkPos, random, settings.settings.dirtCount,    settings.dirtGen,     settings.settings.dirtMinHeight,    settings.settings.dirtMaxHeight    );
-        genOre1(selector, worldIn, chunkPos, random, settings.settings.gravelCount,  settings.gravelOreGen,settings.settings.gravelMinHeight,  settings.settings.gravelMaxHeight  );
-        genOre1(selector, worldIn, chunkPos, random, settings.settings.dioriteCount, settings.dioriteGen,  settings.settings.dioriteMinHeight, settings.settings.dioriteMaxHeight );
-        genOre1(selector, worldIn, chunkPos, random, settings.settings.graniteCount, settings.graniteGen,  settings.settings.graniteMinHeight, settings.settings.graniteMaxHeight );
-        genOre1(selector, worldIn, chunkPos, random, settings.settings.andesiteCount,settings.andesiteGen, settings.settings.andesiteMinHeight,settings.settings.andesiteMaxHeight);
-        genOre1(selector, worldIn, chunkPos, random, settings.settings.coalCount,    settings.coalGen,     settings.settings.coalMinHeight,    settings.settings.coalMaxHeight    );
-        genOre1(selector, worldIn, chunkPos, random, settings.settings.ironCount,    settings.ironGen,     settings.settings.ironMinHeight,    settings.settings.ironMaxHeight    );
-        genOre1(selector, worldIn, chunkPos, random, settings.settings.goldCount,    settings.goldGen,     settings.settings.goldMinHeight,    settings.settings.goldMaxHeight    );
-        genOre1(selector, worldIn, chunkPos, random, settings.settings.redstoneCount,settings.redstoneGen, settings.settings.redstoneMinHeight,settings.settings.redstoneMaxHeight);
-        genOre1(selector, worldIn, chunkPos, random, settings.settings.diamondCount, settings.diamondGen,  settings.settings.diamondMinHeight, settings.settings.diamondMaxHeight );
-        genOre2(selector, worldIn, chunkPos, random, settings.settings.lapisCount,   settings.lapisGen,    settings.settings.lapisCenterHeight,settings.settings.lapisSpread      );
+        genOre1(cache, world, pos, rand, settings.settings.dirtCount,    settings.dirtGen,     settings.settings.dirtMinHeight,    settings.settings.dirtMaxHeight    , mut);
+        genOre1(cache, world, pos, rand, settings.settings.gravelCount,  settings.gravelOreGen,settings.settings.gravelMinHeight,  settings.settings.gravelMaxHeight  , mut);
+        genOre1(cache, world, pos, rand, settings.settings.dioriteCount, settings.dioriteGen,  settings.settings.dioriteMinHeight, settings.settings.dioriteMaxHeight , mut);
+        genOre1(cache, world, pos, rand, settings.settings.graniteCount, settings.graniteGen,  settings.settings.graniteMinHeight, settings.settings.graniteMaxHeight , mut);
+        genOre1(cache, world, pos, rand, settings.settings.andesiteCount,settings.andesiteGen, settings.settings.andesiteMinHeight,settings.settings.andesiteMaxHeight, mut);
+        genOre1(cache, world, pos, rand, settings.settings.coalCount,    settings.coalGen,     settings.settings.coalMinHeight,    settings.settings.coalMaxHeight    , mut);
+        genOre1(cache, world, pos, rand, settings.settings.ironCount,    settings.ironGen,     settings.settings.ironMinHeight,    settings.settings.ironMaxHeight    , mut);
+        genOre1(cache, world, pos, rand, settings.settings.goldCount,    settings.goldGen,     settings.settings.goldMinHeight,    settings.settings.goldMaxHeight    , mut);
+        genOre1(cache, world, pos, rand, settings.settings.redstoneCount,settings.redstoneGen, settings.settings.redstoneMinHeight,settings.settings.redstoneMaxHeight, mut);
+        genOre1(cache, world, pos, rand, settings.settings.diamondCount, settings.diamondGen,  settings.settings.diamondMinHeight, settings.settings.diamondMaxHeight , mut);
+        genOre2(cache, world, pos, rand, settings.settings.lapisCount,   settings.lapisGen,    settings.settings.lapisCenterHeight,settings.settings.lapisSpread      , mut);
 
-        MinecraftForge.ORE_GEN_BUS.postF(new OreGenEvent.Post(worldIn, random, chunkPos));
+        MinecraftForge.ORE_GEN_BUS.postF(new OreGenEvent.Post(world, rand, pos));
     }
 
 
-    protected final void genOre1(final ChunkSelector selector, final World worldIn, final BlockPos chunkPos, final Random random, int blockCount, WorldGenerator generator, int minHeight, int maxHeight) {
-        if (maxHeight < minHeight) {
-            int i = minHeight;
-            minHeight = maxHeight;
-            maxHeight = i;
-        } else if (maxHeight == minHeight) {
-            if (minHeight < 255) {
-                ++maxHeight;
+    protected static void genOre1(final ChunkSelector sel, final World world, final BlockPos pos, final Random rand, int count, WorldGenMinable gen, int minH, int maxH, BlockPos.MutableBlockPos mut) {
+        if (maxH < minH) {
+            int i = minH;
+            minH = maxH;
+            maxH = i;
+        } else if (maxH == minH) {
+            if (minH < 255) {
+                ++maxH;
             } else {
-                --minHeight;
+                --minH;
             }
         }
-        for (int i = 0; i < blockCount; ++i) {
-            int rNum = random.nextInt();
-            BlockPos blockpos = chunkPos.add(
-                    rNum & 15,
-                    random.nextInt(maxHeight - minHeight) + minHeight,
-                    (rNum >> 4) &15
+        for (int i = 0; i < count; ++i) {
+            int rNum = rand.nextInt();
+            mut.setPosB(
+                    pos.getX() + rNum & 15,
+                    pos.getY() + rand.nextInt(maxH - minH) + minH,
+                    pos.getZ() + (rNum >> 4) &15
             );
-            generator.generate(worldIn, selector, random, blockpos);
+            gen.generate(world, sel, rand, mut);
         }
     }
 
 
-    protected final void genOre2(final ChunkSelector selector, final World worldIn, final BlockPos chunkPos, final Random random, int blockCount, WorldGenerator generator, int centerHeight, int spread) {
-        for (int i = 0; i < blockCount; ++i) {
-            BlockPos blockpos = chunkPos.add(random.nextInt(16), random.nextInt(spread) + random.nextInt(spread) + centerHeight - spread, random.nextInt(16));
-            generator.generate(worldIn, selector, random, blockpos);
+    protected static void genOre2(final ChunkSelector sel, final World world, final BlockPos pos, final Random rand, int count, WorldGenMinable gen, int centerHeight, int spread, BlockPos.MutableBlockPos mut) {
+        for (int i = 0; i < count; ++i) {
+            mut.setPosB(
+                    pos.getX() + rand.nextInt(16),
+                    pos.getY() + rand.nextInt(spread) + rand.nextInt(spread) + centerHeight - spread,
+                    pos.getZ() + rand.nextInt(16)
+            );
+            gen.generate(world, sel, rand, mut);
         }
     }
 }

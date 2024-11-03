@@ -20,6 +20,7 @@ import net.minecraft.world.storage.loot.LootTableList;
 import net.minecraftforge.common.DungeonHooks;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import plus.fserver.server.ElcaThread;
 import plus.fserver.utls.math.BlockPosDelta;
 import plus.fserver.server.elca.ChunkSelector;
 
@@ -48,7 +49,7 @@ public class WorldGenDungeons extends WorldGenerator {
         int i2 = k1 + 1;
         int j2 = 0;
 
-        ChunkSelector selector = new ChunkSelector(worldIn);
+        ChunkSelector selector = ElcaThread.cache();
         BlockPosDelta delta = new BlockPosDelta(position0);
         for (int k2 = k; k2 <= l; ++k2) {
             for (int posY = -1; posY <= 4; ++posY) {
