@@ -19,6 +19,7 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 import plus.fserver.ElcaCV2;
 import plus.fserver.api.inject.FieldAccessor;
 import plus.fserver.plugin.FieldAccessGen;
+import plus.fserver.server.ElcaThread;
 import plus.fserver.utls.collections.EntityChunkIter;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
@@ -54,6 +55,12 @@ public final class ElcaServerUtils {
     public static IBlockAccess access(World world){
         if(ElcaCV2.LIBBUILD)return world;
         else return world.access();
+    }
+
+
+    public static IBlockAccess access(){
+        if(ElcaCV2.LIBBUILD)throw new UnsupportedOperationException("Use only on Elca Server!");
+        return ElcaThread.cache();
     }
 
 
