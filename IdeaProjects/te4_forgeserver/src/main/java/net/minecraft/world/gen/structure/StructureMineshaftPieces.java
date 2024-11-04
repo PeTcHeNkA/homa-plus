@@ -494,11 +494,11 @@ public class StructureMineshaftPieces {
 
         @Override
         public boolean addComponentParts(World worldIn, Random randomIn, StructureBoundingBox box) {
-            ChunkSelector selector = new ChunkSelector(worldIn);
+            ElcaThread.Cache selector = ElcaThread.cache(worldIn);
             if (this.isLiquidInStructureBoundingBox(selector, box)) {
                 return false;
             } else {
-                BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+                BlockPos.MutableBlockPos mut = selector.pos3;
                 IBlockState iblockstate = this.getPlanksBlock();
 
                 if (this.isMultipleFloors) {

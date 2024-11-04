@@ -9,6 +9,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import plus.fserver.api.Keep;
+import plus.fserver.server.ElcaThread;
 import plus.fserver.server.elca.ChunkSelector;
 
 
@@ -51,7 +52,8 @@ public class WorldGenBigMushroom extends WorldGenerator {
         boolean flag = true;
 
         if (position.getY() >= 1 && position.getY() + i + 1 < 256) {
-            if(selector == null) selector = new ChunkSelector(world);
+            if(selector == null) selector = ElcaThread.cache(world);
+            BlockPos.MutableBlockPos blockPos = null;
             for (int j = position.getY(); j <= position.getY() + 1 + i; ++j) {
                 int k = 3;
 
@@ -59,7 +61,7 @@ public class WorldGenBigMushroom extends WorldGenerator {
                     k = 0;
                 }
 
-                BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos();
+                if(blockPos == null) blockPos = new BlockPos.MutableBlockPos();
 
                 for (int l = position.getX() - k; l <= position.getX() + k && flag; ++l) {
                     for (int i1 = position.getZ() - k; i1 <= position.getZ() + k && flag; ++i1) {

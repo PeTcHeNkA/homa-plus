@@ -229,8 +229,8 @@ public class StructureOceanMonumentPieces {
         }
 
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
-            ChunkSelector selector = new ChunkSelector(world);
-            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+            ElcaThread.Cache selector = ElcaThread.cache(world);
+            BlockPos.MutableBlockPos mut = selector.pos3;
 
             this.fillWithBlocks(mut, selector, box, 2 , -1, 2 , 11, -1, 11, BRICKS_PRISMARINE, false);
             this.fillWithBlocks(mut, selector, box, 0 , -1, 0 , 1 , -1, 11, ROUGH_PRISMARINE , false);
@@ -290,10 +290,10 @@ public class StructureOceanMonumentPieces {
 
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
-            ChunkSelector selector = new ChunkSelector(world);
+            ElcaThread.Cache selector = ElcaThread.cache(world);
+            BlockPos.MutableBlockPos mut = selector.pos3;
 
             if (this.mainDesign == 0) {
-                BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
                 int i;
                 for(i = 0; i < 4; ++i) {
                     this.fillWithBlocks(mut, selector, box, 10 - i, 3 - i, 20 - i, 12 + i, 3 - i, 20, BRICKS_PRISMARINE, false);
@@ -342,7 +342,6 @@ public class StructureOceanMonumentPieces {
                 this.fillWithBlocks(mut, selector, box, 15, 0, 21, 16, 4, 21, BRICKS_PRISMARINE, false);
                 this.spawnElder(world, box, 11, 2, 16);
             } else if (this.mainDesign == 1) {
-                BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
 
                 this.fillWithBlocks(mut, selector, box, 9, 3, 18, 13, 3, 20, BRICKS_PRISMARINE, false);
                 this.fillWithBlocks(mut, selector, box, 9, 0, 18, 9, 2, 18, BRICKS_PRISMARINE, false);
@@ -398,8 +397,8 @@ public class StructureOceanMonumentPieces {
 
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
-            ChunkSelector selector = new ChunkSelector(world);
-            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+            ElcaThread.Cache selector = ElcaThread.cache(world);
+            BlockPos.MutableBlockPos mut = selector.pos3;
 
             this.generateBoxOnFillOnly(selector, box, 1, 8, 0, 14, 8, 14, ROUGH_PRISMARINE);
             //int lvt_4_1_ = true;
@@ -480,8 +479,8 @@ public class StructureOceanMonumentPieces {
 
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
-            ChunkSelector selector = new ChunkSelector(world);
-            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+            ElcaThread.Cache selector = ElcaThread.cache(world);
+            BlockPos.MutableBlockPos mut = selector.pos3;
 
             RoomDefinition room1 = this.roomDefinition.connections[EnumFacing.NORTH.getIndex()];
             RoomDefinition room2 = this.roomDefinition;
@@ -597,8 +596,8 @@ public class StructureOceanMonumentPieces {
 
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
-            ChunkSelector selector = new ChunkSelector(world);
-            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+            ElcaThread.Cache selector = ElcaThread.cache(world);
+            BlockPos.MutableBlockPos mut = selector.pos3;
 
             RoomDefinition room1 = this.roomDefinition.connections[EnumFacing.EAST.getIndex()];
             RoomDefinition room2 = this.roomDefinition;
@@ -712,8 +711,8 @@ public class StructureOceanMonumentPieces {
 
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
-            ChunkSelector selector = new ChunkSelector(world);
-            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+            ElcaThread.Cache selector = ElcaThread.cache(world);
+            BlockPos.MutableBlockPos mut = selector.pos3;
 
             RoomDefinition room1 = this.roomDefinition.connections[EnumFacing.NORTH.getIndex()];
             RoomDefinition room2 = this.roomDefinition;
@@ -804,8 +803,8 @@ public class StructureOceanMonumentPieces {
 
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
-            ChunkSelector selector = new ChunkSelector(world);
-            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+            ElcaThread.Cache selector = ElcaThread.cache(world);
+            BlockPos.MutableBlockPos mut = selector.pos3;
 
             RoomDefinition room1 = this.roomDefinition.connections[EnumFacing.EAST.getIndex()];
             RoomDefinition room2 = this.roomDefinition;
@@ -878,8 +877,8 @@ public class StructureOceanMonumentPieces {
 
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
-            ChunkSelector selector = new ChunkSelector(world);
-            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+            ElcaThread.Cache selector = ElcaThread.cache(world);
+            BlockPos.MutableBlockPos mut = selector.pos3;
 
             if (this.roomDefinition.index / 25 > 0) {
                 this.generateDefaultFloor(mut, selector, box, 0, 0, this.roomDefinition.hasOpening[EnumFacing.DOWN.getIndex()]);
@@ -961,8 +960,8 @@ public class StructureOceanMonumentPieces {
 
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
-            ChunkSelector selector = new ChunkSelector(world);
-            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+            ElcaThread.Cache selector = ElcaThread.cache(world);
+            BlockPos.MutableBlockPos mut = selector.pos3;
 
             if (this.roomDefinition.index / 25 > 0) {
                 this.generateDefaultFloor(mut, selector, box, 0, 0, this.roomDefinition.hasOpening[EnumFacing.DOWN.getIndex()]);
@@ -1016,8 +1015,8 @@ public class StructureOceanMonumentPieces {
 
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
-            ChunkSelector selector = new ChunkSelector(world);
-            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+            ElcaThread.Cache selector = ElcaThread.cache(world);
+            BlockPos.MutableBlockPos mut = selector.pos3;
 
             if (this.roomDefinition.index / 25 > 0) {
                 this.generateDefaultFloor(mut, selector, box, 0, 0, this.roomDefinition.hasOpening[EnumFacing.DOWN.getIndex()]);
@@ -1182,8 +1181,8 @@ public class StructureOceanMonumentPieces {
 
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
-            ChunkSelector selector = new ChunkSelector(world);
-            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+            ElcaThread.Cache selector = ElcaThread.cache(world);
+            BlockPos.MutableBlockPos mut = selector.pos3;
 
             this.fillWithBlocks(mut, selector, box, 0, 3, 0, 2, 3, 7, BRICKS_PRISMARINE, false);
             this.fillWithBlocks(mut, selector, box, 5, 3, 0, 7, 3, 7, BRICKS_PRISMARINE, false);
@@ -1427,8 +1426,8 @@ public class StructureOceanMonumentPieces {
 
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
-            ChunkSelector selector = new ChunkSelector(world);
-            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+            ElcaThread.Cache selector = ElcaThread.cache(world);
+            BlockPos.MutableBlockPos mut = selector.pos3;
 
             int lvl = Math.max(world.getSeaLevel(), 64) - this.boundingBox.minY;
             this.generateWaterBox(selector, box, 0, 0, 0, 58, lvl, 58, false);
@@ -1954,7 +1953,7 @@ public class StructureOceanMonumentPieces {
 
 
         protected void generateDefaultFloor(World world, StructureBoundingBox box, int xMin, int zMin, boolean b) {
-            generateDefaultFloor(new BlockPos.MutableBlockPos(), new ChunkSelector(world), box, xMin, zMin, b);
+            generateDefaultFloor(new BlockPos.MutableBlockPos(), ElcaThread.cache(world), box, xMin, zMin, b);
         }
 
 

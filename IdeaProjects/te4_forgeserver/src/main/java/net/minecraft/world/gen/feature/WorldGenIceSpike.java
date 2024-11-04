@@ -10,13 +10,12 @@ import net.minecraft.world.World;
 import plus.fserver.server.elca.ChunkSelector;
 
 
-public class WorldGenIceSpike extends WorldGenerator {
+public class WorldGenIceSpike extends CWorldGenerator {
     public WorldGenIceSpike() {}
 
 
     @Override
-    public boolean generate(World world, Random rand, BlockPos pos) {
-        ChunkSelector selector = new ChunkSelector(world);
+    public boolean generate(World world, ChunkSelector selector, Random rand, BlockPos pos) {
         while(selector.isAirBlock(pos) && pos.getY() > 2) {
             pos = pos.down();
         }

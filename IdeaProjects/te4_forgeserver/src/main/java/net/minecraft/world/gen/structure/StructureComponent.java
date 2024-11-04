@@ -575,7 +575,7 @@ public abstract class StructureComponent {
                                               int minX, int minY, int minZ, int maxX, int maxY, int maxZ,
                                               IBlockState state, boolean excludeAir) {
 
-        randomlyRareFillWithBlocks(new ChunkSelector(worldIn), box,
+        randomlyRareFillWithBlocks(ElcaThread.cache(worldIn), box,
                 minX, minY, minZ, maxX, maxY, maxZ, state, excludeAir
         );
     }
@@ -628,10 +628,10 @@ public abstract class StructureComponent {
         BlockPos blockpos = new BlockPos(this.getXWithOffset(x, z), this.getYWithOffset(y), this.getZWithOffset(x, z));
 
         if (structurebb.isVecInside(blockpos)) {
-            ChunkSelector selector = new ChunkSelector(worldIn);
+            ChunkSelector selector = ElcaThread.cache(worldIn);
             while (!selector.isAirBlock(blockpos) && blockpos.getY() < 255) {
                 selector.setBlockState(blockpos, BlockIDIndexes.AIR_STATE);
-                blockpos = blockpos.up();
+                BlockPos.unsafeEditY(blockpos, blockpos.getY()+1);
             }
         }
     }
@@ -662,12 +662,11 @@ public abstract class StructureComponent {
         int k = this.getZWithOffset(x, z);
 
         if (boundingboxIn.isVecInside(new BlockPos(i, j, k))) {
-            ChunkSelector selector = new ChunkSelector(worldIn);
-            BlockPos pos;
-            while (j > 1 && (selector.isAirBlock(pos = new BlockPos(i, j, k)) ||
-                    selector.getCurState(pos).getMaterial().isLiquid())) {
+            ElcaThread.Cache selector = ElcaThread.cache(worldIn);
+            while (j > 1 && (selector.isAirBlock(i, j, k) ||
+                    selector.getCurState(i, j, k).getMaterial().isLiquid())) {
 
-                selector.setBlockState(pos, state);
+                selector.setBlockState(i, j, k, state);
                 --j;
             }
         }

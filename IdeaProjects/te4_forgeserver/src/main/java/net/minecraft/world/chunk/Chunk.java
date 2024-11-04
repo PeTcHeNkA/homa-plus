@@ -286,11 +286,12 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
 
     public void generateSkylightMap() {
-        generateSkylightMap(new BlockPos.MutableBlockPos());
+        generateSkylightMap(new BlockPos(0,0,0));
     }
 
 
-    public void generateSkylightMap(BlockPos.MutableBlockPos mut) {
+    public void generateSkylightMap(BlockPos mut) {
+        int ix = mut.getX(), iy = mut.getY(), iz = mut.getZ();
         int i = this.getTopFilledSegment();
         int min = this.heightMapMinimum = Integer.MAX_VALUE;
 
@@ -306,7 +307,8 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
             for (int zPos = 0; zPos < 16; ++zPos) {
                 precipitationHeightMap[xPos + (zPos << 4)] = -999;
                 for (int curY = i + 16; curY > 0; --curY) {
-                    mut.setPosB(shiftX + xPos, curY - 1, shiftZ + zPos);
+                    BlockPos.unsafeEdit(mut, shiftX + xPos, curY - 1, shiftZ + zPos);
+                    //mut.setPosB(shiftX + xPos, curY - 1, shiftZ + zPos);
                     if (this.getBlockLightOpacity(mut) != 0) {
                         heightMap[zPos << 4 | xPos] = (byte) curY;
                         if (curY < min) {
@@ -319,7 +321,8 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
                 if (hasSkyLight) {
                     int k1 = 15, curY = i + 16 - 1;
                     while (true) {
-                        mut.setPosB(shiftX + xPos, curY, shiftZ + zPos);
+                        BlockPos.unsafeEdit(mut, shiftX + xPos, curY, shiftZ + zPos);
+                        //mut.setPosB(shiftX + xPos, curY, shiftZ + zPos);
                         int j1 = this.getBlockLightOpacity(mut);
 
                         if (j1 == 0 && k1 != 15) {
@@ -340,6 +343,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
                 }
             }
         }
+        BlockPos.unsafeEdit(mut, ix, iy, iz);
         this.dirty = true;
     }
 
@@ -625,7 +629,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
                 return null;
             } else {
                 if (flag) {
-                    this.generateSkylightMap();
+                    this.generateSkylightMap(pos);
                 } else {
                     int j1 = state.getLightOpacity(world, pos);
 

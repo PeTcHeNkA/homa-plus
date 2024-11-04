@@ -9,6 +9,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import plus.fserver.api.Keep;
+import plus.fserver.server.ElcaThread;
 import plus.fserver.server.elca.ChunkSelector;
 
 
@@ -51,7 +52,7 @@ public class WorldGenSavannaTree extends WorldGenAbstractTree {
 
         if (position.getY() >= 1 && position.getY() + i + 1 <= 256) {
             BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos();
-            if(selector == null)selector = new ChunkSelector(worldIn);
+            if(selector == null)selector = ElcaThread.cache(worldIn);
 
             for (int j = position.getY(); j <= position.getY() + 1 + i; ++j) {
                 int k = 1;

@@ -136,7 +136,7 @@ public abstract class WorldGenHugeTrees extends WorldGenAbstractTree {
 
     @Keep
     protected void growLeavesLayer(World worldIn, BlockPos layerCenter, int width) {
-        growLeavesLayer(new ChunkSelector(worldIn), layerCenter, width);
+        growLeavesLayer(ElcaThread.cache(worldIn), layerCenter, width);
     }
 
 

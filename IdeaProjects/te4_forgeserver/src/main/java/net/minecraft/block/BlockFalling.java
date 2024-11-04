@@ -11,6 +11,7 @@ import net.minecraft.init.*;
 import net.minecraft.util.*;
 import net.minecraftforge.fml.relauncher.*;
 import plus.fserver.api.IBlockEAccess;
+import plus.fserver.server.ElcaThread;
 
 
 public class BlockFalling extends Block {
@@ -49,21 +50,22 @@ public class BlockFalling extends Block {
 
 
     private void checkFallable(final World world, final BlockPos pos) {
-        IBlockEAccess access = world.isCurThread()?world.access():world;
-        if ((access.isAirBlock(pos.down()) || canFallThrough(access.getBlockState(pos.getX(), pos.getY()-1, pos.getZ()))) && pos.getY() >= 0) {
-            if (world.isAreaLoaded(pos.add(-32, -32, -32), pos.add(32, 32, 32))) {
+        ElcaThread.Cache access = ElcaThread.cache(world);
+        int x = pos.getX(), y = pos.getY(), z = pos.getZ();
+        if ((access.isAirBlock(x, y-1, z) || canFallThrough(access.getBlockState(x, y-1, z))) && y >= 0) {
+            if (world.isAreaLoaded(x-32,y-32,z-32, x+32,y+32,z+32,true)) {
                 if (!world.isRemote) {
-                    final EntityFallingBlock entityfallingblock = new EntityFallingBlock(world, pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, world.getBlockState(pos));
+                    final EntityFallingBlock entityfallingblock = new EntityFallingBlock(world, x + 0.5, y, z + 0.5, access.getBlockState(x,y,z));
                     this.onStartFalling(entityfallingblock);
                     world.spawnEntity(entityfallingblock);
                 }
             } else {
                 final IBlockState state = access.getBlockState(pos);
                 access.setBlockState(pos, BlockIDIndexes.AIR_STATE, 3);
-                BlockPos blockpos;
-                for (blockpos = pos.down(); (access.isAirBlock(blockpos) || canFallThrough(access.getBlockState(blockpos))) && blockpos.getY() > 0; blockpos = blockpos.down()) {}
-                if (blockpos.getY() > 0) {
-                    access.setBlockState(blockpos.up(), state, 3);
+
+                for (y -= 1;(access.isAirBlock(x,y,z) || canFallThrough(access.getState(x,y,z))) && y > 0; y-=1) {}
+                if (y > 0) {
+                    access.setBlockState(x, y+1, z, state, 3);
                 }
             }
         }

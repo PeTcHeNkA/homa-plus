@@ -11,6 +11,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import plus.fserver.api.Keep;
+import plus.fserver.server.ElcaThread;
 import plus.fserver.server.elca.ChunkSelector;
 
 
@@ -29,7 +30,7 @@ public class WorldGenMegaPineTree extends WorldGenHugeTrees {
 
     @Override
     public boolean generate(World world, Random rand, BlockPos pos) {
-        return generate(world, new ChunkSelector(world), rand, pos);
+        return generate(world, ElcaThread.cache(world), rand, pos);
     }
 
 
@@ -80,21 +81,21 @@ public class WorldGenMegaPineTree extends WorldGenHugeTrees {
 
 
     @Override
-    public void generateSaplings(World worldIn, Random random, BlockPos pos) {
-        ChunkSelector selector = new ChunkSelector(worldIn);
+    public void generateSaplings(World world, Random random, BlockPos pos) {
+        ChunkSelector selector = ElcaThread.cache(world);
         boolean notify = needNotify();
 
-        placePodzolCircle(selector, worldIn, pos.west().north(), notify);
-        placePodzolCircle(selector, worldIn, pos.east(2).north(), notify);
-        placePodzolCircle(selector, worldIn, pos.west().south(2), notify);
-        placePodzolCircle(selector, worldIn, pos.east(2).south(2), notify);
+        placePodzolCircle(selector, world, pos.west().north(), notify);
+        placePodzolCircle(selector, world, pos.east(2).north(), notify);
+        placePodzolCircle(selector, world, pos.west().south(2), notify);
+        placePodzolCircle(selector, world, pos.east(2).south(2), notify);
 
         for (int i = 0; i < 5; ++i) {
             int j = random.nextInt(64);
             int k = j % 8;
             int l = j / 8;
             if (k == 0 || k == 7 || l == 0 || l == 7) {
-                placePodzolCircle(selector, worldIn, pos.add(-3 + k, 0, -3 + l), notify);
+                placePodzolCircle(selector, world, pos.add(-3 + k, 0, -3 + l), notify);
             }
         }
     }

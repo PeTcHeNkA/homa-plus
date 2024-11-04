@@ -49,8 +49,7 @@ public class BlockDynamicLiquid extends BlockLiquid {
             selector = cache;
             mut = cache.pos1;
         } else {
-            selector = new ChunkSelector(worldIn);
-            mut = new BlockPos.MutableBlockPos();
+            return;
         }
 
         if (level > 0) {

@@ -10,6 +10,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import plus.fserver.api.Keep;
+import plus.fserver.server.ElcaThread;
 import plus.fserver.server.elca.ChunkSelector;
 
 
@@ -43,7 +44,7 @@ public class WorldGenBirchTree extends WorldGenAbstractTree {
         boolean notify = needNotify();
 
         if (position.getY() >= 1 && position.getY() + i + 1 <= 256) {
-            if(selector == null)selector = new ChunkSelector(world);
+            if(selector == null)selector = ElcaThread.cache(world);
             BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
 
             for (int j = position.getY(); j <= position.getY() + 1 + i; ++j) {

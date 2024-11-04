@@ -13,6 +13,7 @@ import net.minecraftforge.common.*;
 import net.minecraft.block.state.pattern.*;
 import net.minecraft.world.*;
 import net.minecraft.block.state.*;
+import plus.fserver.server.ElcaThread;
 import plus.fserver.server.elca.ChunkSelector;
 
 
@@ -44,7 +45,7 @@ public class BiomeHills extends Biome {
         super.decorate(worldIn, rand, pos);
         MinecraftForge.ORE_GEN_BUS.post(new OreGenEvent.Pre(worldIn, rand, pos));
         final WorldGenerator emeralds = new EmeraldGenerator();
-        ChunkSelector selector = new ChunkSelector(worldIn);
+        ChunkSelector selector = ElcaThread.cache(worldIn);
 
         if (TerrainGen.generateOre(worldIn, rand, emeralds, pos, OreGenEvent.GenerateMinable.EventType.EMERALD)) {
             emeralds.generate(worldIn, selector, rand, pos);

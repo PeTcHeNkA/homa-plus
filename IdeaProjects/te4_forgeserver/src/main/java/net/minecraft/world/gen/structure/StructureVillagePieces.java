@@ -470,8 +470,8 @@ public class StructureVillagePieces {
             }
 
             IBlockState state = this.getBiomeSpecificBlockState(Blocks.LOG.getDefaultState());
-            ChunkSelector selector = new ChunkSelector(world);
-            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+            ElcaThread.Cache selector = ElcaThread.cache(world);
+            BlockPos.MutableBlockPos mut = selector.pos3;
 
             this.fillWithBlocks(mut, selector, box, 0 , 1, 0, 12, 4, 8, BlockIDIndexes.AIR_STATE         , false);
             this.fillWithBlocks(mut, selector, box, 1 , 0, 1, 2 , 0, 7, Blocks.FARMLAND.getDefaultState(), false);
@@ -579,9 +579,9 @@ public class StructureVillagePieces {
                 this.boundingBox.offset(0, this.averageGroundLvl - this.boundingBox.maxY + 4 - 1, 0);
             }
 
-            ChunkSelector selector = new ChunkSelector(world);
+            ElcaThread.Cache selector = ElcaThread.cache(world);
             IBlockState iblockstate = this.getBiomeSpecificBlockState(Blocks.LOG.getDefaultState());
-            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+            BlockPos.MutableBlockPos mut = selector.pos3;
 
             this.fillWithBlocks(mut, selector, box, 0, 1, 0, 6, 4, 8, Blocks.AIR.getDefaultState(), false);
             this.fillWithBlocks(mut, selector, box, 1, 0, 1, 2, 0, 7, Blocks.FARMLAND.getDefaultState(), false);
@@ -642,8 +642,8 @@ public class StructureVillagePieces {
                 }
                 this.boundingBox.offset(0, this.averageGroundLvl - this.boundingBox.maxY + 7 - 1, 0);
             }
-            ChunkSelector selector = new ChunkSelector(worldIn);
-            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+            ElcaThread.Cache selector = ElcaThread.cache(worldIn);
+            BlockPos.MutableBlockPos mut = selector.pos3;
 
             IBlockState iblockstate = this.getBiomeSpecificBlockState(Blocks.COBBLESTONE.getDefaultState());
             IBlockState iblockstate1 = this.getBiomeSpecificBlockState(Blocks.OAK_STAIRS.getDefaultState().withProperty(BlockStairs.FACING, EnumFacing.NORTH));
@@ -765,8 +765,8 @@ public class StructureVillagePieces {
                 }
                 this.boundingBox.offset(0, this.averageGroundLvl - this.boundingBox.maxY + 9 - 1, 0);
             }
-            ChunkSelector selector = new ChunkSelector(worldIn);
-            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+            ElcaThread.Cache selector = ElcaThread.cache(worldIn);
+            BlockPos.MutableBlockPos mut = selector.pos3;
 
             IBlockState iblockstate  = this.getBiomeSpecificBlockState(Blocks.COBBLESTONE.getDefaultState());
             IBlockState iblockstate1 = this.getBiomeSpecificBlockState(Blocks.OAK_STAIRS.getDefaultState().withProperty(BlockStairs.FACING, EnumFacing.NORTH));
@@ -908,8 +908,8 @@ public class StructureVillagePieces {
 
                 this.boundingBox.offset(0, this.averageGroundLvl - this.boundingBox.maxY + 6 - 1, 0);
             }
-            ChunkSelector selector = new ChunkSelector(world);
-            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+            ElcaThread.Cache selector = ElcaThread.cache(world);
+            BlockPos.MutableBlockPos mut = selector.pos3;
 
             IBlockState iblockstate = Blocks.COBBLESTONE.getDefaultState();
             IBlockState iblockstate1 = this.getBiomeSpecificBlockState(Blocks.OAK_STAIRS.getDefaultState().withProperty(BlockStairs.FACING, EnumFacing.NORTH));
@@ -1012,8 +1012,8 @@ public class StructureVillagePieces {
                 }
                 this.boundingBox.offset(0, this.averageGroundLvl - this.boundingBox.maxY + 7 - 1, 0);
             }
-            ChunkSelector selector = new ChunkSelector(worldIn);
-            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+            ElcaThread.Cache selector = ElcaThread.cache(worldIn);
+            BlockPos.MutableBlockPos mut = selector.pos3;
 
             IBlockState iblockstate = this.getBiomeSpecificBlockState(Blocks.COBBLESTONE.getDefaultState());
             IBlockState iblockstate1 = this.getBiomeSpecificBlockState(Blocks.OAK_STAIRS.getDefaultState().withProperty(BlockStairs.FACING, EnumFacing.NORTH));
@@ -1180,8 +1180,8 @@ public class StructureVillagePieces {
                 }
                 this.boundingBox.offset(0, this.averageGroundLvl - this.boundingBox.maxY + 6 - 1, 0);
             }
-            ChunkSelector selector = new ChunkSelector(worldIn);
-            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+            ElcaThread.Cache selector = ElcaThread.cache(worldIn);
+            BlockPos.MutableBlockPos mut = selector.pos3;
 
             IBlockState iblockstate = this.getBiomeSpecificBlockState(Blocks.COBBLESTONE.getDefaultState());
             IBlockState iblockstate1 = this.getBiomeSpecificBlockState(Blocks.PLANKS.getDefaultState());
@@ -1374,22 +1374,24 @@ public class StructureVillagePieces {
         }
 
 
+        @Override
         public boolean addComponentParts(World worldIn, Random randomIn, StructureBoundingBox box) {
             IBlockState iblockstate = this.getBiomeSpecificBlockState(Blocks.GRASS_PATH.getDefaultState());
             IBlockState iblockstate1 = this.getBiomeSpecificBlockState(Blocks.PLANKS.getDefaultState());
             IBlockState iblockstate2 = this.getBiomeSpecificBlockState(Blocks.GRAVEL.getDefaultState());
             IBlockState iblockstate3 = this.getBiomeSpecificBlockState(Blocks.COBBLESTONE.getDefaultState());
 
-            ChunkSelector selector = new ChunkSelector(worldIn);
+            ElcaThread.Cache selector = ElcaThread.cache(worldIn);
             for (int i = this.boundingBox.minX; i <= this.boundingBox.maxX; ++i) {
                 for (int j = this.boundingBox.minZ; j <= this.boundingBox.maxZ; ++j) {
-                    BlockPos blockpos = new BlockPos(i, 64, j);
+                    BlockPos blockpos = selector.pos3.setPos(i, 64, j);
 
                     if (box.isVecInside(blockpos)) {
-                        blockpos = worldIn.getTopSolidOrLiquidBlock(blockpos).down();
+                        blockpos = worldIn.getTopSolidOrLiquidBlock(blockpos);
+                        BlockPos.unsafeEditY(blockpos, blockpos.getY()-1);
 
                         if (blockpos.getY() < worldIn.getSeaLevel()) {
-                            blockpos = new BlockPos(blockpos.getX(), worldIn.getSeaLevel() - 1, blockpos.getZ());
+                            BlockPos.unsafeEdit(blockpos, blockpos.getX(), worldIn.getSeaLevel() - 1, blockpos.getZ());
                         }
 
                         while (blockpos.getY() >= worldIn.getSeaLevel() - 1) {
@@ -1410,7 +1412,8 @@ public class StructureVillagePieces {
                                 selector.setBlockState(blockpos.down(), iblockstate3);
                                 break;
                             }
-                            blockpos = blockpos.down();
+                            BlockPos.unsafeEditY(blockpos, blockpos.getY()-1);
+                            //blockpos = blockpos.down();
                         }
                     }
                 }
@@ -1900,8 +1903,8 @@ public class StructureVillagePieces {
 
                 this.boundingBox.offset(0, this.averageGroundLvl - this.boundingBox.maxY + 3, 0);
             }
-            ChunkSelector selector = new ChunkSelector(worldIn);
-            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+            ElcaThread.Cache selector = ElcaThread.cache(worldIn);
+            BlockPos.MutableBlockPos mut = selector.pos3;
 
             IBlockState iblockstate = this.getBiomeSpecificBlockState(Blocks.COBBLESTONE.getDefaultState());
             IBlockState iblockstate1 = this.getBiomeSpecificBlockState(Blocks.OAK_FENCE.getDefaultState());
@@ -1979,8 +1982,8 @@ public class StructureVillagePieces {
                 }
                 this.boundingBox.offset(0, this.averageGroundLvl - this.boundingBox.maxY + 6 - 1, 0);
             }
-            ChunkSelector selector = new ChunkSelector(worldIn);
-            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+            ElcaThread.Cache selector = ElcaThread.cache(worldIn);
+            BlockPos.MutableBlockPos mut = selector.pos3;
 
             IBlockState iblockstate = this.getBiomeSpecificBlockState(Blocks.COBBLESTONE.getDefaultState());
             IBlockState iblockstate1 = this.getBiomeSpecificBlockState(Blocks.PLANKS.getDefaultState());

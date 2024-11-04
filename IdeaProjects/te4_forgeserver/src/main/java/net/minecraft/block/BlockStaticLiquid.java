@@ -103,7 +103,7 @@ public class BlockStaticLiquid extends BlockLiquid {
 
 
     protected boolean isSurroundingBlockFlammable(World worldIn, BlockPos pos) {
-        return isSurroundingBlockFlammable(worldIn, new ChunkSelector(worldIn), pos);
+        return isSurroundingBlockFlammable(worldIn, ElcaThread.cache(worldIn), pos);
     }
 
 

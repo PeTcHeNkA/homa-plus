@@ -1,6 +1,7 @@
 package plus.fserver.server;
 
 import io.netty.util.concurrent.FastThreadLocalThread;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.ChunkProviderServer;
@@ -19,6 +20,27 @@ public class ElcaThread extends FastThreadLocalThread {
         public final BlockPos.MutableBlockPos pos1 = new BlockPos.MutableBlockPos();
         public final BlockPos.MutableBlockPos pos2 = new BlockPos.MutableBlockPos();
         public final BlockPos.MutableBlockPos pos3 = new BlockPos.MutableBlockPos();
+
+        public boolean isAirBlock(int x, int y, int z){
+            BlockPos.MutableBlockPos pos;
+            (pos = pos3).setPosB(x, y, z);
+            IBlockState state = getChunkE(pos.getX()>>4, pos.getZ()>>4).getBlockState(pos);
+            return state.getBlock().isAir(state, this, pos);
+        }
+
+
+        public boolean setBlockState(int x, int y, int z, IBlockState newState) {
+            BlockPos.MutableBlockPos pos;
+            (pos = pos3).setPosB(x, y, z);
+            return setBlockState(pos, newState, 2);
+        }
+
+
+        public boolean setBlockState(int x, int y, int z, IBlockState newState, int flags) {
+            BlockPos.MutableBlockPos pos;
+            (pos = pos3).setPosB(x, y, z);
+            return setBlockState(pos, newState, flags);
+        }
     }
 
 

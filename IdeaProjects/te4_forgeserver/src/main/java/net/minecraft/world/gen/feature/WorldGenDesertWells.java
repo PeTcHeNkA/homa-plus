@@ -14,10 +14,11 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumFacing.Plane;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import plus.fserver.server.ElcaThread;
 import plus.fserver.server.elca.ChunkSelector;
 
 
-public class WorldGenDesertWells extends WorldGenerator {
+public class WorldGenDesertWells extends CWorldGenerator {
     private static final BlockStateMatcher IS_SAND;
     private final IBlockState sandSlab;
     private final IBlockState sandstone;
@@ -31,8 +32,7 @@ public class WorldGenDesertWells extends WorldGenerator {
 
 
     @Override
-    public boolean generate(World world, Random rand, BlockPos pos) {
-        ChunkSelector selector = new ChunkSelector(world);
+    public boolean generate(World world, ChunkSelector selector, Random rand, BlockPos pos) {
         while(selector.isAirBlock(pos) && pos.getY() > 2) {
             pos = pos.down();
         }

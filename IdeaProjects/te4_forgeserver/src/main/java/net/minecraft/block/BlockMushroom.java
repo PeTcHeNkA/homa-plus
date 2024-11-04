@@ -36,7 +36,7 @@ public class BlockMushroom extends BlockBush implements IGrowable {
     public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand) {
         if (rand.nextInt(25) == 0) {
             int i = 5;
-            ChunkSelector selector = new ChunkSelector(worldIn);
+            ChunkSelector selector = ElcaThread.cache(worldIn);
             for (BlockPos blockpos :
                     BlockPos.getAllInBoxMutable(pos.add(-4, -1, -4), pos.add(4, 1, 4))) {
                 if (selector.getState(blockpos).getBlock() == this) {

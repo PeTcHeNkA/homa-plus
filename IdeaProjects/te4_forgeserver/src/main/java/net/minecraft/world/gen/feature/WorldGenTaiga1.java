@@ -9,6 +9,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import plus.fserver.api.Keep;
+import plus.fserver.server.ElcaThread;
 import plus.fserver.server.elca.ChunkSelector;
 
 
@@ -38,7 +39,7 @@ public class WorldGenTaiga1 extends WorldGenAbstractTree {
             boolean flag = true;
 
             BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos();
-            if(selector == null)selector = new ChunkSelector(worldIn);
+            if(selector == null)selector = ElcaThread.cache(worldIn);
 
             for (int i1 = position.getY(), j1; i1 <= position.getY() + 1 + num1 && flag; ++i1) {
 

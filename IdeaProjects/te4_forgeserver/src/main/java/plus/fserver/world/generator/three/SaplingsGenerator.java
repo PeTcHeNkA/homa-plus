@@ -8,6 +8,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeModContainer;
+import plus.fserver.server.ElcaThread;
 import plus.fserver.server.elca.ChunkSelector;
 import java.util.Random;
 
@@ -27,7 +28,7 @@ public final class SaplingsGenerator {
 
 
     public void generateSaplings(World worldIn, Random random, BlockPos pos) {
-        ChunkSelector selector = new ChunkSelector(worldIn);
+        ChunkSelector selector = ElcaThread.cache(worldIn);
         this.placePodzolCircle(selector, worldIn, pos.west().north());
         this.placePodzolCircle(selector, worldIn, pos.east(2).north());
         this.placePodzolCircle(selector, worldIn, pos.west().south(2));

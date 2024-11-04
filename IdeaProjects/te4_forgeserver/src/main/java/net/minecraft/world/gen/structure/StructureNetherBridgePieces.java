@@ -253,8 +253,8 @@ public class StructureNetherBridgePieces {
 
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
-            ChunkSelector selector = new ChunkSelector(world);
-            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+            ElcaThread.Cache selector = ElcaThread.cache(world);
+            BlockPos.MutableBlockPos mut = selector.pos3;
 
             this.fillWithBlocks(mut, selector, box, 0, 0, 0, 4, 1, 4, Blocks.NETHER_BRICK.getDefaultState()                                             , false);
             this.fillWithBlocks(mut, selector, box, 0, 2, 0, 4, 5, 4, BlockIDIndexes.AIR_STATE                                                          , false);
@@ -323,8 +323,8 @@ public class StructureNetherBridgePieces {
 
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
-            ChunkSelector selector = new ChunkSelector(world);
-            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+            ElcaThread.Cache selector = ElcaThread.cache(world);
+            BlockPos.MutableBlockPos mut = selector.pos3;
 
             this.fillWithBlocks(mut, selector, box, 0, 0, 0, 4, 1, 4, Blocks.NETHER_BRICK.getDefaultState()                                             , false);
             this.fillWithBlocks(mut, selector, box, 0, 2, 0, 4, 5, 4, Blocks.AIR.getDefaultState()                                                      , false);
@@ -379,8 +379,8 @@ public class StructureNetherBridgePieces {
 
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
-            ChunkSelector selector = new ChunkSelector(world);
-            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+            ElcaThread.Cache selector = ElcaThread.cache(world);
+            BlockPos.MutableBlockPos mut = selector.pos3;
 
             this.fillWithBlocks(mut, selector, box, 0, 0, 0, 4, 1, 4, Blocks.NETHER_BRICK.getDefaultState(), false);
             this.fillWithBlocks(mut, selector, box, 0, 2, 0, 4, 5, 4, BlockIDIndexes.AIR_STATE             , false);
@@ -424,8 +424,8 @@ public class StructureNetherBridgePieces {
 
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
-            ChunkSelector selector = new ChunkSelector(world);
-            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+            ElcaThread.Cache selector = ElcaThread.cache(world);
+            BlockPos.MutableBlockPos mut = selector.pos3;
 
             this.fillWithBlocks(mut, selector, box, 0, 0, 0, 4, 1, 4, Blocks.NETHER_BRICK.getDefaultState()      , false);
             this.fillWithBlocks(mut, selector, box, 0, 2, 0, 4, 5, 4, BlockIDIndexes.AIR_STATE                   , false);
@@ -471,8 +471,8 @@ public class StructureNetherBridgePieces {
 
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
-            ChunkSelector selector = new ChunkSelector(world);
-            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+            ElcaThread.Cache selector = ElcaThread.cache(world);
+            BlockPos.MutableBlockPos mut = selector.pos3;
 
             this.fillWithBlocks(mut, selector, box, 0 , 3 , 0 , 12, 4 , 12, Blocks.NETHER_BRICK.getDefaultState(), false);
             this.fillWithBlocks(mut, selector, box, 0 , 5 , 0 , 12, 13, 12, BlockIDIndexes.AIR_STATE             , false);
@@ -615,8 +615,8 @@ public class StructureNetherBridgePieces {
 
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
-            ChunkSelector selector = new ChunkSelector(world);
-            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+            ElcaThread.Cache selector = ElcaThread.cache(world);
+            BlockPos.MutableBlockPos mut = selector.pos3;
 
             this.fillWithBlocks(mut, selector, box, 0 , 3 , 0 , 12, 4 , 12, Blocks.NETHER_BRICK.getDefaultState()      , false);
             this.fillWithBlocks(mut, selector, box, 0 , 5 , 0 , 12, 13, 12, BlockIDIndexes.AIR_STATE                   , false);
@@ -727,8 +727,8 @@ public class StructureNetherBridgePieces {
 
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
-            ChunkSelector selector = new ChunkSelector(world);
-            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+            ElcaThread.Cache selector = ElcaThread.cache(world);
+            BlockPos.MutableBlockPos mut = selector.pos3;
 
             this.fillWithBlocks(mut, selector, box, 0, 2, 0, 6, 7, 7, BlockIDIndexes.AIR_STATE             , false);
             this.fillWithBlocks(mut, selector, box, 1, 0, 0, 5, 1, 7, Blocks.NETHER_BRICK.getDefaultState(), false);
@@ -796,8 +796,8 @@ public class StructureNetherBridgePieces {
 
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
-            ChunkSelector selector = new ChunkSelector(world);
-            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+            ElcaThread.Cache selector = ElcaThread.cache(world);
+            BlockPos.MutableBlockPos mut = selector.pos3;
 
             this.fillWithBlocks(mut, selector, box, 0, 0, 0, 6, 1, 6, Blocks.NETHER_BRICK.getDefaultState()      , false);
             this.fillWithBlocks(mut, selector, box, 0, 2, 0, 6, 10, 6, BlockIDIndexes.AIR_STATE                  , false);
@@ -857,8 +857,8 @@ public class StructureNetherBridgePieces {
 
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
-            ChunkSelector selector = new ChunkSelector(world);
-            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+            ElcaThread.Cache selector = ElcaThread.cache(world);
+            BlockPos.MutableBlockPos mut = selector.pos3;
 
             this.fillWithBlocks(mut, selector, box, 0, 0, 0, 6, 1, 6, Blocks.NETHER_BRICK.getDefaultState()      , false);
             this.fillWithBlocks(mut, selector, box, 0, 2, 0, 6, 7, 6, BlockIDIndexes.AIR_STATE                   , false);
@@ -925,8 +925,8 @@ public class StructureNetherBridgePieces {
 
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
-            ChunkSelector selector = new ChunkSelector(world);
-            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+            ElcaThread.Cache selector = ElcaThread.cache(world);
+            BlockPos.MutableBlockPos mut = selector.pos3;
 
             this.fillWithBlocks(mut, selector, box, 7 , 3, 0 , 11, 4, 18, Blocks.NETHER_BRICK.getDefaultState(), false);
             this.fillWithBlocks(mut, selector, box, 0 , 3, 7 , 18, 4, 11, Blocks.NETHER_BRICK.getDefaultState(), false);
@@ -1004,8 +1004,8 @@ public class StructureNetherBridgePieces {
 
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
-            ChunkSelector selector = new ChunkSelector(world);
-            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+            ElcaThread.Cache selector = ElcaThread.cache(world);
+            BlockPos.MutableBlockPos mut = selector.pos3;
             Random cRand = new Random(this.fillSeed);
 
             int xPos;
@@ -1062,8 +1062,8 @@ public class StructureNetherBridgePieces {
 
         @Override
         public boolean addComponentParts(World world, Random rand, StructureBoundingBox box) {
-            ChunkSelector selector = new ChunkSelector(world);
-            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+            ElcaThread.Cache selector = ElcaThread.cache(world);
+            BlockPos.MutableBlockPos mut = selector.pos3;
 
             this.fillWithBlocks(mut, selector, box, 0, 3, 0 , 4, 4, 18, Blocks.NETHER_BRICK.getDefaultState(), false);
             this.fillWithBlocks(mut, selector, box, 1, 5, 0 , 3, 7, 18, BlockIDIndexes.AIR_STATE             , false);

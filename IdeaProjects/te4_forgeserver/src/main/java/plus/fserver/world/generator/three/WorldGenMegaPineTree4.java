@@ -4,6 +4,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
+import plus.fserver.server.ElcaThread;
 import plus.fserver.server.elca.ChunkSelector;
 import java.util.Random;
 
@@ -16,7 +17,7 @@ public class WorldGenMegaPineTree4 extends WorldGenHugeTreesPlus{
 
     @Override
     public boolean generate(World worldIn, Random rand, BlockPos position) {
-        return generate(worldIn, new ChunkSelector(worldIn), rand, position);
+        return generate(worldIn, ElcaThread.cache(worldIn), rand, position);
     }
 
 

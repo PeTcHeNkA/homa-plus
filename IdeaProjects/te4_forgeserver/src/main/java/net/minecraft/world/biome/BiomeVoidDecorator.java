@@ -4,7 +4,7 @@ import java.util.Random;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import plus.fserver.server.elca.ChunkSelector;
+import plus.fserver.server.ElcaThread;
 
 
 public class BiomeVoidDecorator extends BiomeDecorator {
@@ -24,8 +24,8 @@ public class BiomeVoidDecorator extends BiomeDecorator {
             BlockPos pos1 = new BlockPos(point.getX() - 16, point.getY() - 1, point.getZ() - 16);
             BlockPos pos2 = new BlockPos(point.getX() + 16, point.getY() - 1, point.getZ() + 16);
 
-            BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos(pos1);
-            ChunkSelector selector = new ChunkSelector(world);
+            ElcaThread.Cache selector = ElcaThread.cache(world);
+            BlockPos.MutableBlockPos mut = selector.pos3;
 
             for(int z = pos.getZ(); z < pos.getZ() + 16; ++z) {
                 for(int x = pos.getX(); x < pos.getX() + 16; ++x) {
