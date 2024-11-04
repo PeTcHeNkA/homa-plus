@@ -108,11 +108,7 @@ public class EntityTracker {
             });
             entityIn.addEntityCrashInfo(crashreportcategory);
 
-            try {
-                throw new ReportedException(crashreport);
-            } catch (ReportedException reportedexception) {
-                LOGGER.error("\"Silently\" catching entity tracking error.", reportedexception);
-            }
+            world.getMinecraftServer().ticker().onError(world, new ReportedException(crashreport));
         }
     }
 

@@ -100,7 +100,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
     private static final long spawnOnSetTickRate = 400L;
 
     private final MinecraftServer server;
-    private EntityTracker entityTracker;
+    protected EntityTracker entityTracker;
     private final PlayerChunkMap playerChunkMap;
     private final Set<NextTickListEntry> pendingTickListEntriesHashSet = new Te4HashSet<>(8);
     private final TreeSet<NextTickListEntry> pendingTickListEntriesTreeSet = new TreeSet<>(
@@ -150,13 +150,18 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         entitySpawner = makeWorldSpawner();
 
         initUnimportant();
-        this.playerChunkMap = new PlayerChunkMap(this);
+        this.playerChunkMap = createPCM();
 
         navChunkCache = new NavChunkLSECache(chunkProviderServer, 0,0);
 
         if(ElcaConfig.ASYNC_PATHFINDING_DEFAULT){
             setAsyncNavigation(true);
         }
+    }
+
+
+    protected PlayerChunkMap createPCM(){
+        return new PlayerChunkMap(this);
     }
 
 

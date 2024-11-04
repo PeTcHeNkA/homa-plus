@@ -346,7 +346,6 @@ public final class AsyWorldTickerV2{
                 sum += values[min++];
             }
         }
-
         return ((double) sum / 7) * 1.0E-6D;
     }
 

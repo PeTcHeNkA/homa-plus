@@ -407,6 +407,7 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
                         try {
                             chunk = iter.next();
                         } catch (NullPointerException e){
+                            WorldServer world = world(0,0);
                             world.getMinecraftServer().ticker().onError(world, e);
                             break;
                         }
@@ -447,7 +448,7 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
 
 
     public boolean canSave() {
-        return !this.world.disableLevelSaving;
+        return !this.world(0,0).disableLevelSaving;
     }
 
 

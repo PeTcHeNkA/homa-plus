@@ -1,32 +1,24 @@
 package plus.fserver.server.mergeworld;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityTracker;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldServerMulti;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.IChunkLoader;
 import net.minecraft.world.storage.ISaveHandler;
+import plus.fserver.ElcaCV;
 
 
 public abstract class WorldServerC64 extends WorldServerMulti {
-    public final MergedWorldManager.Bound bound;
-    //public int selfMinX, selfMinZ, selfMaxX, selfMaxZ;
+    private int dim;
 
-    public WorldServerC64(MergedWorldManager.Bound bound, MinecraftServer server, ISaveHandler handler, int dim, WorldServer delegate, Profiler profiler) {
+    public WorldServerC64(MinecraftServer server, ISaveHandler handler, int dim, WorldServer delegate, Profiler profiler) {
         super(server, handler, dim, delegate, profiler);
-        this.bound = bound;
-        //this.selfMinX = bound.selfMinX;
-    }
-
-
-    public boolean isSelfPos(int cx, int cz){
-        return bound.isSelfPos(cx, cz);
-//        int mask = this.mask;
-//        cx = cx & mask; cz = cz & mask;
-//        return cx >= selfMinX && cx < selfMaxX &&
-//                cz >= selfMinZ && cz < selfMaxZ;
+        this.dim = dim;
     }
 
 
@@ -41,11 +33,30 @@ public abstract class WorldServerC64 extends WorldServerMulti {
 
 
     @Override
-    protected boolean onUpdateChunkSection(Entity entityIn, int cx, int cy, int cz) {
-        if(isSelfPos(cx, cz)){
+    protected boolean onUpdateChunkSection(Entity entity, int cx, int cy, int cz) {
+        int dim = foundDimByPos(cx >> 4, cz >> 4);
+        if(dim == this.dim){
             return true;
         } else {
-            entityIn.changeDimension(foundDimByPos(cx, cz), EmptyTeleporter.INSTANCE);
+            double range = entity.elcaMinRange;
+            if(range == range){
+                entity.elcaMinRange = Double.NaN;
+                entity.changeDimension(dim, EmptyTeleporter.INSTANCE);
+                entity.elcaMinRange = range;
+
+//                if (entity.addedToChunk) {
+//                    Chunk chunk = chunkProvider.getLoadedChunk(entity.chunkCoordX, entity.chunkCoordZ);
+//                    if (chunk != null) {
+//                        if(ElcaCV.ENABLE_CHUNK_ADD_LOCKS) {
+//                            synchronized (chunk) {
+//                                chunk.removeEntityAtIndex(entity, entity.chunkCoordY); //sync
+//                            }
+//                        } else {
+//                            chunk.removeEntityAtIndex(entity, entity.chunkCoordY); //def
+//                        }
+//                    }
+//                }
+            }
             return false;
         }
     }
