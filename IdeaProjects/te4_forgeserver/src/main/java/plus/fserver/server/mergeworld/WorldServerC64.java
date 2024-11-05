@@ -22,13 +22,6 @@ public abstract class WorldServerC64 extends WorldServerMulti {
     }
 
 
-    @Override //todo
-    public IChunkProvider createChunkProvider() {
-        IChunkLoader ichunkloader = this.saveHandler.getChunkLoader(this.provider);
-        return chunkProviderServer = new MergedChunkProviderServer(this, ichunkloader, createChunkGenerator());
-    }
-
-
     protected abstract int foundDimByPos(int cx, int cz);
 
 
@@ -59,5 +52,10 @@ public abstract class WorldServerC64 extends WorldServerMulti {
             }
             return false;
         }
+    }
+
+
+    public boolean canUnload(){
+        return false;
     }
 }

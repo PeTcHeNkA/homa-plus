@@ -84,6 +84,7 @@ import plus.fserver.api.ServerCommand;
 import plus.fserver.plugin.AsmTrimmer;
 import plus.fserver.server.AsyWorldTickerV2;
 import plus.fserver.server.ElcaCommands;
+import plus.fserver.server.mergeworld.MergedWorldManager;
 import plus.fserver.utls.math.FastRandom;
 
 
@@ -1432,6 +1433,7 @@ public abstract class MinecraftServer implements ICommandSender, Runnable, IThre
 
 
     public void initialWorldChunkLoad() {
+        //new MergedWorldManager(this, 100, 116, DimensionType.OVERWORLD);
         if(1==1)return;
         int i1 = 0;
         this.setUserMessage("menu.generatingTerrain");

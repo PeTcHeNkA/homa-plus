@@ -5,6 +5,9 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.chunk.IChunkProvider;
+import net.minecraft.world.chunk.storage.IChunkLoader;
+import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.storage.ISaveHandler;
 import plus.fserver.api.WorldConstructor;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -16,10 +19,11 @@ public class MergedWorldManager {
     private final MinecraftServer server;
     private final CopyOnWriteArrayList<WorldServer> allWorlds = new CopyOnWriteArrayList<>();
     private MergedPlayerChunkMap pcm;
-    private MergedChunkProviderServer mcpr;
     private ScheduledFuture<?> pcmFuture;
+    private ScheduledFuture<?> mcpFuture;
     private final int[] id2Thread;
     private int nextId;
+    private MergedChunkProviderServer chunkProvider;
 
     public MergedWorldManager(MinecraftServer serv, int minId, int maxId, DimensionType type){
         this.server = serv;
@@ -35,6 +39,14 @@ public class MergedWorldManager {
             ++shift;
         }
         if(shift != id2Thread.length)throw new IllegalArgumentException();
+
+        chunkProvider = (MergedChunkProviderServer) serv.getWorld(minId).chunkProviderServer;
+        mcpFuture = serv.ticker().service.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                chunkProvider.realTick();
+            }
+        }, 25, 50, TimeUnit.MILLISECONDS);
     }
 
 
@@ -85,6 +97,16 @@ public class MergedWorldManager {
             public int nextEntityId() {
                 return nextMId();
             }
+
+
+            @Override
+            public IChunkProvider createChunkProvider() {
+                if(MergedWorldManager.this.chunkProvider != null)
+                    return MergedWorldManager.this.chunkProvider;
+                IChunkLoader ichunkloader = this.saveHandler.getChunkLoader(this.provider);
+                return chunkProviderServer = new MergedChunkProviderServer(this, ichunkloader, createChunkGenerator());
+            }
+
 
             @Override
             protected void createTracker() {

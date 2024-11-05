@@ -11,4 +11,15 @@ public class MergedChunkProviderServer extends ChunkProviderServer {
     public MergedChunkProviderServer(WorldServer world, IChunkLoader chunkLoader, IChunkGenerator chunkGeneratorIn) {
         super(world, chunkLoader, chunkGeneratorIn);
     }
+
+
+    @Override
+    public boolean tick() {
+        return false;
+    }
+
+
+    public boolean realTick(){
+        return super.tick();
+    }
 }

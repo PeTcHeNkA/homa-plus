@@ -171,7 +171,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
         else bits &= ~16;
     }
     public boolean shouldPCMUpdate(){
-        return (bits & 4) == 0;
+        return (bits & 4) == 4;
     }
     public void setShouldPCMUpdate(boolean b){
         if(b)bits |= 4;
