@@ -327,7 +327,6 @@ public final class AsyWorldTickerV2{
             stopAnError(throwable, worldserver);
         } finally {
             worldserver.freeCurThread();
-
         }
     }
 

@@ -89,76 +89,80 @@ public class WorldGenSavannaTree extends WorldGenAbstractTree {
                     EnumFacing enumfacing = EnumFacing.Plane.HORIZONTAL.random(rand);
                     int k2 = i - rand.nextInt(4) - 1;
                     int l2 = 3 - rand.nextInt(3);
-                    int i3 = position.getX();
-                    int j1 = position.getZ();
-                    int k1 = 0;
+                    int nX = position.getX();
+                    int nZ = position.getZ();
+                    int nY = 0;
 
                     for (int l1 = 0; l1 < i; ++l1) {
                         int i2 = position.getY() + l1;
 
                         if (l1 >= k2 && l2 > 0) {
-                            i3 += enumfacing.getXOffset();
-                            j1 += enumfacing.getZOffset();
+                            nX += enumfacing.getXOffset();
+                            nZ += enumfacing.getZOffset();
                             --l2;
                         }
 
-                        BlockPos blockpos = new BlockPos(i3, i2, j1);
-                        state = selector.getState(blockpos);
+                        blockPos.setPosB(nX, i2, nZ);
+                        //BlockPos blockPos = new BlockPos(nX, i2, nZ);
+                        state = selector.getState(blockPos);
 
-                        if (state.getBlock().isAir(state, worldIn, blockpos) || state.getBlock().isLeaves(state, worldIn, blockpos)) {
-                            setBlockAndNotifyAdequately(selector, blockpos, wood, notify);
+                        if (state.getBlock().isAir(state, worldIn, blockPos) || state.getBlock().isLeaves(state, worldIn, blockPos)) {
+                            setBlockAndNotifyAdequately(selector, blockPos, wood, notify);
 
-                            k1 = i2;
+                            nY = i2;
                         }
                     }
 
-                    BlockPos blockpos2 = new BlockPos(i3, k1, j1);
+                    blockPos.setPosB(nX, nY, nZ);
+                    //BlockPos blockPos = new BlockPos(nX, nY, nZ);
 
                     for (int j3 = -3; j3 <= 3; ++j3) {
                         for (int i4 = -3; i4 <= 3; ++i4) {
                             if (Math.abs(j3) != 3 || Math.abs(i4) != 3) {
-                                placeLeafAt(selector, worldIn, blockpos2.add(j3, 0, i4), leaves, notify);
+                                blockPos.setPosB(nX+j3, nY, nZ+i4);
+                                placeLeafAt(selector, worldIn, blockPos, leaves, notify);
                             }
                         }
                     }
 
-                    blockpos2 = blockpos2.up();
+                    blockPos.setPos(nX, nY-1, nZ);
+                    //blockPos = blockPos.up();
 
                     for (int k3 = -1; k3 <= 1; ++k3) {
                         for (int j4 = -1; j4 <= 1; ++j4) {
-                            placeLeafAt(selector, worldIn, blockpos2.add(k3, 0, j4), leaves, notify);
+                            placeLeafAt(selector, worldIn, blockPos.add(k3, 0, j4), leaves, notify);
                         }
                     }
-                    placeLeafAt(selector, worldIn, blockpos2.east(2), leaves, notify);
-                    placeLeafAt(selector, worldIn, blockpos2.west(2), leaves, notify);
-                    placeLeafAt(selector, worldIn, blockpos2.south(2), leaves, notify);
-                    placeLeafAt(selector, worldIn, blockpos2.north(2), leaves, notify);
-                    i3 = position.getX();
-                    j1 = position.getZ();
+                    placeLeafAt(selector, worldIn, blockPos.east(2), leaves, notify);
+                    placeLeafAt(selector, worldIn, blockPos.west(2), leaves, notify);
+                    placeLeafAt(selector, worldIn, blockPos.south(2), leaves, notify);
+                    placeLeafAt(selector, worldIn, blockPos.north(2), leaves, notify);
+                    nX = position.getX();
+                    nZ = position.getZ();
                     EnumFacing enumfacing1 = EnumFacing.Plane.HORIZONTAL.random(rand);
 
                     if (enumfacing1 != enumfacing) {
                         int l3 = k2 - rand.nextInt(2) - 1;
                         int k4 = 1 + rand.nextInt(3);
-                        k1 = 0;
+                        nY = 0;
 
                         for (int l4 = l3; l4 < i && k4 > 0; --k4) {
                             if (l4 >= 1) {
                                 int j2 = position.getY() + l4;
-                                i3 += enumfacing1.getXOffset();
-                                j1 += enumfacing1.getZOffset();
-                                BlockPos blockpos1 = new BlockPos(i3, j2, j1);
+                                nX += enumfacing1.getXOffset();
+                                nZ += enumfacing1.getZOffset();
+                                BlockPos blockpos1 = new BlockPos(nX, j2, nZ);
                                 state = selector.getState(blockpos1);
 
                                 if (state.getBlock().isAir(state, worldIn, blockpos1) || state.getBlock().isLeaves(state, worldIn, blockpos1)) {
                                     setBlockAndNotifyAdequately(selector, blockpos1, wood, notify);
-                                    k1 = j2;
+                                    nY = j2;
                                 }
                             }
                             ++l4;
                         }
-                        if (k1 > 0) {
-                            BlockPos blockpos3 = new BlockPos(i3, k1, j1);
+                        if (nY > 0) {
+                            BlockPos blockpos3 = new BlockPos(nX, nY, nZ);
 
                             for (int i5 = -2; i5 <= 2; ++i5) {
                                 for (int k5 = -2; k5 <= 2; ++k5) {

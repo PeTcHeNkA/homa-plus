@@ -331,11 +331,11 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
     }
 
 
-    private int ticks = 0;
+    private int ticks = 0, prev = 0;
     @Override
     public boolean tick() {
         if(task != null) task.reRunIfNeed();
-        if (canSave()) {
+        if(canSave()) {
             LongSet droppedChunks = this.droppedChunks;
             int size = droppedChunks.size();
 
@@ -368,7 +368,6 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
                     }
                     trimToSize();
                 } else {
-                    int i = 0;
                     for (long olong : droppedChunks) {
                         Chunk chunk = super.get(olong);
 
@@ -384,14 +383,12 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
                                     this.saveChunkExtraData(chunk);
                                 }
                                 removeChunk(olong);
-                                ++i;
                             } else {
                                 chunk.setRequested(false);
                             }
                         }
                     }
                     droppedChunks.clear();
-                    if(i > 32) trimToSize();
                 }
             }
 
@@ -431,13 +428,17 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
                             } else {
                                 chunk.setRequested(false);
                             }
-                        }
+                        } else limit+=30;
                     }
-                    if(limit > 32) trimToSize();
                     if(limit >= 100){
                         ticks = 1190;
                     } else {
                         ticks = 0;
+                        int prev = this.prev, curSize = this.size();
+                        if(prev - curSize > 100){
+                            this.prev = curSize;
+                            trimToSize();
+                        }
                     }
                 }
             }

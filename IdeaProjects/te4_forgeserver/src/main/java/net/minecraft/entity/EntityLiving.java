@@ -281,8 +281,9 @@ public abstract class EntityLiving extends EntityLivingBase {
 
             if ((this.ticksExisted & 7) == 7) {
                 boolean flag;
-                this.tasks.setControlFlag(3, flag = !(this.getControllingPassenger() instanceof EntityLiving));
-                this.tasks.setControlFlag(4, flag && !(this.getRidingEntity() instanceof EntityBoat));
+                EntityAITasks tasks;
+                (tasks = this.tasks).setControlFlag(3, flag = !(this.getControllingPassenger() instanceof EntityLiving));
+                tasks.setControlFlag(4, flag && !(this.getRidingEntity() instanceof EntityBoat));
             }
         }
     }

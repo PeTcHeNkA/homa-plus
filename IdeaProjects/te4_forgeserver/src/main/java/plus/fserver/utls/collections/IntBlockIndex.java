@@ -22,6 +22,11 @@ public class IntBlockIndex implements Int2ObjectFunction<IBlockState> {
     }
 
 
+    public IBlockState[] raw(){
+        return states;
+    }
+
+
     @Override
     public IBlockState put(int key, IBlockState value) {
         throw new UnsupportedOperationException();
@@ -30,7 +35,8 @@ public class IntBlockIndex implements Int2ObjectFunction<IBlockState> {
 
     @Override
     public IBlockState get(int key) {
-        if (key > states.length) return BlockIDIndexes.AIR_STATE;
+        IBlockState[] states;
+        if (key > (states = this.states).length) return BlockIDIndexes.AIR_STATE;
         return states[key];
     }
 

@@ -205,11 +205,13 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
         boolean flag = worldIn.provider.hasSkyLight(), flag2 = false;
         IBlockState state = null;
         ExtendedBlockStorage[] storageArrays = this.storageArrays;
-        for (int yPos = 0, xPos, sae, zPOs, ids, pids=-10; yPos < 256; ++yPos) {
+        char[] raw = primer.getRawData();
+        char ids, pids = (char) - 1;
+        for (int yPos = 0, xPos, sae, zPOs; yPos < 256; ++yPos) {
             ExtendedBlockStorage arr = storageArrays[sae = yPos >> 4];
             for (xPos = 0; xPos < 16; ++xPos) {
                 for (zPOs = 0; zPOs < 16; ++zPOs) {
-                    if ((ids = primer.getBlockStateId(xPos, yPos, zPOs)) != pids)
+                    if ((ids = ChunkPrimer.getRawStateId(raw, xPos, yPos, zPOs)) != pids)
                         flag2 = (state = BlockIDIndexes.BLOCK_INDEX.get(pids = ids)) != null
                                 && state.getMaterial() != Material.AIR;
 

@@ -2,88 +2,11 @@ package net.minecraft.world.chunk;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockIDIndexes;
-import org.jetbrains.annotations.Nullable;
-import plus.fserver.ElcaConfig;
-
 import java.util.Arrays;
-
-import static io.netty.util.internal.shaded.org.jctools.util.UnsafeAccess.UNSAFE;
 
 
 public class ChunkPrimer {
-    //private static final ChunkPrimer[] temp;
-    //private static final long tempShift;
-    //private static volatile int cursor = 0;
-    private char[] data;
-
-//    static {
-//        temp = new ChunkPrimer[ElcaConfig.CACHE_CHUNK_PRIMER];
-//        for (int i = 0; i < temp.length; i++){
-//            temp[i] = new ChunkPrimer(null);
-//        }
-//        try {
-//            tempShift = UNSAFE.objectFieldOffset(ChunkPrimer.class.getDeclaredField("data"));
-//        } catch (NoSuchFieldException e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
-//
-//
-//    private static char[] alloc() {
-//        ChunkPrimer[] nodes = temp;
-//        for (int i = cursor, s = nodes.length; i < s; i++){
-//            ChunkPrimer node = nodes[i];
-//            char[] result;
-//            if((result = node.tryGet()) != null){
-//                cursor = i;
-//                return result;
-//            }
-//        }
-//        for (int i = 0, s = cursor; i < s; i++){
-//            ChunkPrimer node = nodes[i];
-//            char[] result;
-//            if((result = node.tryGet()) != null){
-//                cursor = i;
-//                return result;
-//            }
-//        }
-//        return new char[65536];
-//    }
-//
-//
-//    private static void free(char[] src){
-//        ChunkPrimer[] nodes = temp;
-//        for (int i = cursor, s = nodes.length; i < s; i++) {
-//            ChunkPrimer node = nodes[i];
-//            if(node.tryFree(src)){
-//                cursor = i;
-//                return;
-//            }
-//        }
-//        for (int i = 0, s = cursor; i < s; i++) {
-//            ChunkPrimer node = nodes[i];
-//            if(node.tryFree(src)){
-//                cursor = i;
-//                return;
-//            }
-//        }
-//    }
-//
-//
-//    public static void freeMemory(){
-//        for (ChunkPrimer primer:temp) primer.data = null;
-//    }
-//
-//
-//    ChunkPrimer(char[] data){
-//        this.data = data;
-//    }
-//
-//
-//    public static ChunkPrimer create(){
-//        return new ChunkPrimer(alloc());
-//    }
-
+    private final char[] data;
 
     public ChunkPrimer() {
         this.data = new char[65536];
@@ -94,25 +17,6 @@ public class ChunkPrimer {
         Arrays.fill(data, (char) 0);
     }
 
-//
-//
-//    @Nullable
-//    private char[] tryGet(){
-//        char[] temp = this.data;
-//        if(temp == null)return null;
-//        if(UNSAFE.compareAndSwapObject(this, tempShift, temp, null)) return temp;
-//        return null;
-//    }
-//
-//
-//    private boolean tryFree(char[] src){
-//        char[] temp = this.data;
-//        if(temp == null) {
-//            return UNSAFE.compareAndSwapObject(this, tempShift, null, src);
-//        }
-//        return false;
-//    }
-
 
     public IBlockState getBlockState(int x, int y, int z) {
         IBlockState state = BlockIDIndexes.BLOCK_INDEX.get(
@@ -120,6 +24,28 @@ public class ChunkPrimer {
         );
         if(state == null)return BlockIDIndexes.AIR_STATE;
         return state;
+    }
+
+
+    public char[] getRawData(){
+        return data;
+    }
+
+
+    public static char getRawStateId(char[] data, int x, int y, int z){
+        return data[x << 12 | z << 8 | y];
+    }
+
+
+    public static IBlockState getRawState(char[] data, int x, int y, int z, IBlockState[] rawIndex){
+        int id = data[x << 12 | z << 8 | y];
+        if(id > rawIndex.length)return BlockIDIndexes.AIR_STATE;
+        return rawIndex[id];
+    }
+
+
+    public static void setRawState(char[] data, int x, int y, int z, char stateId){
+        data[x << 12 | z << 8 | y] = stateId;
     }
 
 
@@ -152,11 +78,4 @@ public class ChunkPrimer {
         }
         return low>0?low-1:0;
     }
-//
-//
-//    public void free(){
-//        char[] data;
-//        free(data = this.data);
-//        this.data = null;
-//    }
 }

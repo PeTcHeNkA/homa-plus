@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import javax.annotation.Nullable;
+
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockBush;
 import net.minecraft.block.BlockFlower;
 import net.minecraft.block.BlockSand;
@@ -31,6 +33,7 @@ import net.minecraft.entity.passive.EntityPig;
 import net.minecraft.entity.passive.EntitySheep;
 import net.minecraft.entity.passive.EntitySquid;
 import net.minecraft.init.Blocks;
+import net.minecraft.util.BlockIDIndexes;
 import net.minecraft.util.ObjectIntIdentityMap;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.WeightedRandom;
@@ -298,18 +301,27 @@ public abstract class Biome extends IForgeRegistryEntry.Impl<Biome> {
         int x = bX & 15;
         int z = bZ & 15;
 
+        char[] rawData = primer.getRawData();
+        IBlockState[] rawIndex = BlockIDIndexes.BLOCK_INDEX.raw();
+        char bedrockId = (char) BEDROCK.getId();
+
         for (int y = 255; y >= 0; --y) {
             if (y <= 5) {
                 if(y <= rand.nextInt(5)) {
-                    primer.setBlockState(z, y, x, BEDROCK);
+                    ChunkPrimer.setRawState(rawData, x, y, z, bedrockId);
                     continue;
                 }
             }
-
-            IBlockState cur = primer.getBlockState(z, y, x);
-            if (cur.getMaterial() == Material.AIR) {
+            char rawId = ChunkPrimer.getRawStateId(rawData, x, y, z);
+            if(rawId == 0 || rawId > rawIndex.length){
                 j = -1;
-            } else if (cur.getBlock() == Blocks.STONE) {
+                continue;
+            }
+            IBlockState cur = rawIndex[rawId];
+            Block block;
+            if ((block = cur.getBlock()).getMaterial(cur) == Material.AIR) {
+                j = -1;
+            } else if (block == Blocks.STONE) {
                 if (j == -1) {
                     if (k <= 0) {
                         top = AIR;

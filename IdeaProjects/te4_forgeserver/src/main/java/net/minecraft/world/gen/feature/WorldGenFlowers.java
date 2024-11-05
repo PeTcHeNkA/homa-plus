@@ -30,6 +30,12 @@ public class WorldGenFlowers extends CWorldGenerator {
 
     @Override
     public boolean generate(World world, ChunkSelector selector, Random rand, BlockPos pos) {
+        generate(selector, rand, pos, flower, state);
+        return true;
+    }
+
+
+    public void generate(ChunkSelector selector, Random rand, BlockPos pos, BlockBush flower, IBlockState state) {
         BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
         for(int num = 0; num < 64; ++num) {
             FastRandom.setRandom8x8x4(rand, mut, pos);
@@ -40,6 +46,5 @@ public class WorldGenFlowers extends CWorldGenerator {
                     selector.setCurStateFast(mut.getX(), mut.getY()+1, mut.getZ(), state);
             }
         }
-        return true;
     }
 }

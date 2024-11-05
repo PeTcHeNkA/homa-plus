@@ -2164,13 +2164,14 @@ public abstract class EntityLivingBase extends Entity {
     protected void updateActiveHand() {
         if (this.isHandActive()) {
             ItemStack itemstack = this.getHeldItem(this.getActiveHand());
-            if (net.minecraftforge.common.ForgeHooks.canContinueUsing(this.activeItemStack, itemstack)) this.activeItemStack = itemstack;
+            if (ForgeHooks.canContinueUsing(this.activeItemStack, itemstack))
+                this.activeItemStack = itemstack;
 
             if (itemstack == this.activeItemStack) {
-                if (!this.activeItemStack.isEmpty()) {
-                    activeItemStackUseCount = net.minecraftforge.event.ForgeEventFactory.onItemUseTick(this, activeItemStack, activeItemStackUseCount);
-                    if (activeItemStackUseCount > 0)
-                        activeItemStack.getItem().onUsingTick(activeItemStack, this, activeItemStackUseCount);
+                if (!itemstack.isEmpty()) {
+                    int count = this.activeItemStackUseCount = ForgeEventFactory.onItemUseTick(this, itemstack, activeItemStackUseCount);
+                    if (count > 0)
+                        activeItemStack.getItem().onUsingTick(activeItemStack, this, count);
                 }
                 if (this.getItemInUseCount() <= 25 && this.getItemInUseCount() % 4 == 0) {
                     this.updateItemUse(this.activeItemStack, 5);

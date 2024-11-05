@@ -9,6 +9,7 @@ import net.minecraft.world.chunk.ChunkPrimer;
 import plus.fserver.world.generator.struct.IStruct;
 
 
+@Deprecated
 public class MultiChunkCache{
     protected final IntObjectHashMap<ChunkPrimer> cache = new IntObjectHashMap<>();
     protected int prevCX = Integer.MIN_VALUE, prevZX = Integer.MIN_VALUE;

@@ -31,9 +31,12 @@ public class WorldGenReed extends CWorldGenerator {
 
                     int count = 2 + rand.nextInt(rand.nextInt(3) + 1);
 
-                    for(int j = 0; j < count; ++j) {
+                    for(int nY = 0; nY < count; ++nY) {
                         if (Blocks.REEDS.canPlaceBlockAtAsy(selector, mut)) {
-                            selector.setBlockState(mut.up(j), Blocks.REEDS.getDefaultState(), 2);
+                            int prev = mut.getY();
+                            mut.setY(prev+nY);
+                            selector.setBlockState(mut, Blocks.REEDS.getDefaultState(), 2);
+                            mut.setY(prev);
                         }
                     }
                 }

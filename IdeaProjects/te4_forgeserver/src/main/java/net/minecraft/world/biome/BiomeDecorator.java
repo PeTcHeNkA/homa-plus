@@ -4,6 +4,7 @@ import java.util.Random;
 import net.minecraft.block.BlockFlower;
 import net.minecraft.block.BlockFlower.EnumFlowerType;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -153,8 +154,9 @@ public class BiomeDecorator {
 
                 //todo fix async
                 if (blockflower.getDefaultState().getMaterial() != Material.AIR) {
-                    this.flowerGen.setGeneratedBlock(blockflower, flowerType);
-                    this.flowerGen.generate(world, selector, rand, blockpos1);
+                    IBlockState state = blockflower.getDefaultState().withProperty(blockflower.getTypeProperty(), flowerType);
+                    //this.flowerGen.setGeneratedBlock(blockflower, flowerType);
+                    flowerGen.generate(selector, rand, blockpos1, blockflower, state);
                 }
             }
         }

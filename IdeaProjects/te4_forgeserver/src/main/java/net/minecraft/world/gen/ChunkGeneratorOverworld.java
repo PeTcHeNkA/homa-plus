@@ -154,7 +154,9 @@ public class ChunkGeneratorOverworld implements IChunkGenerator {
         this.generateHeightmap(session, x * 4, 0, z * 4);
         double[] heightMap = session.heightMap;
         int seaLvl = this.settings.seaLevel;
-        IBlockState oceanBlock = this.oceanBlock;
+        char oceanBlock = (char) this.oceanBlock.getId();
+        char[] rawPrimerData = primer.getRawData();
+        char stoneId = (char) BlockIDIndexes.STONE_STATE.getId();
 
         for (int i = 0; i < 4; ++i) {
             int j = i * 5;
@@ -184,13 +186,13 @@ public class ChunkGeneratorOverworld implements IChunkGenerator {
 
                         for (int k2 = 0; k2 < 4; ++k2) {
                             double d16 = (d11 - d10) * 0.25D;
-                            double lvt_45_1_ = d10 - d16;
+                            double d20 = d10 - d16;
 
                             for (int l2 = 0; l2 < 4; ++l2) {
-                                if ((lvt_45_1_ += d16) > 0.0D) {
-                                    primer.setBlockState(i * 4 + k2, i2 * 8 + j2, l * 4 + l2, BlockIDIndexes.STONE_STATE);
+                                if ((d20 += d16) > 0.0D) {
+                                    ChunkPrimer.setRawState(rawPrimerData, i * 4 + k2, i2 * 8 + j2, l * 4 + l2, stoneId);
                                 } else if (i2 * 8 + j2 < seaLvl) {
-                                    primer.setBlockState(i * 4 + k2, i2 * 8 + j2, l * 4 + l2, oceanBlock);
+                                    ChunkPrimer.setRawState(rawPrimerData, i * 4 + k2, i2 * 8 + j2, l * 4 + l2, oceanBlock);
                                 }
                             }
                             d10 += d12;
