@@ -93,12 +93,20 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
 
 
     public synchronized void putChunk(long key, Chunk chunk){
-        super.put(key, chunk);
+        Chunk prev = super.put(key, chunk);
+//        if(prev != null){
+//            WorldServer world = world(0,0);
+//            world.getMinecraftServer().ticker().onError(world, new RuntimeException("Chunk ["+prev+"] replaced to ["+chunk+"]"));
+//        }
     }
 
 
     public synchronized void removeChunk(long key){
-        super.remove(key);
+        Chunk prev = super.remove(key);
+//        if(prev == null){
+//            WorldServer world = world(0,0);
+//            world.getMinecraftServer().ticker().onError(world, new RuntimeException("Try remove null chunk"));
+//        }
     }
 
 
@@ -297,10 +305,14 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
                         chunk.getLightingEngine().processLightUpdates();
                         needProcess = false;
                     }
-                    chunk.setSaveStatus(true);
-                    this.saveChunkData(chunk);
-                    chunk.setSaveStatus(false);
-                    chunk.setModified(false);
+                    if(chunk.maybeUnload()){
+                        tryUnload(ChunkPos.asLong(chunk.x, chunk.z), chunk);
+                    } else {
+                        chunk.setSaveStatus(true);
+                        this.saveChunkData(chunk);
+                        chunk.setSaveStatus(false);
+                        chunk.setModified(false);
+                    }
                     ++i;
 
                     if (i == 24 && !all) {
@@ -339,57 +351,25 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
             LongSet droppedChunks = this.droppedChunks;
             int size = droppedChunks.size();
 
-            if(size != 0){
-                if (size >= 100) {
-                    int i = 0;
-                    for (LongIterator iterator = droppedChunks.iterator();
-                         i < 100 && iterator.hasNext();) {
-                        long olong = iterator.nextLong();
-                        Chunk chunk = super.get(olong);
+            if(size != 0) {
+                int i = 0;
+                for (LongIterator iterator = droppedChunks.iterator();
+                     i < 100 && iterator.hasNext(); ) {
+                    long olong = iterator.nextLong();
+                    Chunk chunk = super.get(olong);
 
-                        l1: if (chunk != null) {
-                            if(chunk.maybeUnload()) {
-                                if(asyncSaveChunks){
-                                    boolean res = TChunkExecutor.queueChunkUnload((WorldServer)chunk.getWorld(), (AnvilChunkLoader)chunkLoader,this, chunk);
-                                    if(!res)break l1;
-                                } else {
-                                    chunk.onUnload();
-                                    ForgeChunkManager.putDormantChunk(olong, chunk);
-                                    this.saveChunkData(chunk);
-                                    this.saveChunkExtraData(chunk);
-                                }
-                                removeChunk(olong);
+                    if (chunk != null) {
+                        if (chunk.maybeUnload()) {
+                            if (tryUnload(olong, chunk)) {
                                 ++i;
                                 iterator.remove();
-                            } else {
-                                chunk.setRequested(false);
                             }
+                        } else {
+                            chunk.setRequested(false);
                         }
                     }
-                    trimToSize();
-                } else {
-                    for (long olong : droppedChunks) {
-                        Chunk chunk = super.get(olong);
-
-                        l1: if (chunk != null) {
-                            if (chunk.maybeUnload()) {
-                                if (asyncSaveChunks) {
-                                    boolean res = TChunkExecutor.queueChunkUnload((WorldServer) chunk.getWorld(), (AnvilChunkLoader) chunkLoader, this, chunk);
-                                    if(!res)break l1;
-                                } else {
-                                    chunk.onUnload();
-                                    ForgeChunkManager.putDormantChunk(olong, chunk);
-                                    this.saveChunkData(chunk);
-                                    this.saveChunkExtraData(chunk);
-                                }
-                                removeChunk(olong);
-                            } else {
-                                chunk.setRequested(false);
-                            }
-                        }
-                    }
-                    droppedChunks.clear();
                 }
+                trimToSize();
             }
 
             if (!super.isEmpty()) {
@@ -408,27 +388,17 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
                             world.getMinecraftServer().ticker().onError(world, e);
                             break;
                         }
-                        l1: if(chunk != null) {
+                        if (chunk != null) {
                             if (chunk.maybeUnload()) {
                                 long olong = ChunkPos.asLong(chunk.x, chunk.z);
-
-                                if(asyncSaveChunks){
-                                    boolean res = TChunkExecutor.queueChunkUnload((WorldServer)chunk.getWorld(), (AnvilChunkLoader)chunkLoader,this, chunk);
-                                    if(!res)break l1;
-                                } else {
-                                    chunk.onUnload();
-                                    ForgeChunkManager.putDormantChunk(olong, chunk);
-                                    this.saveChunkData(chunk);
-                                    this.saveChunkExtraData(chunk);
+                                if (tryUnload(olong, chunk)) {
+                                    iter.remove();
+                                    ++limit;
                                 }
-
-                                removeChunk(olong);
-                                iter.remove();
-                                ++limit;
                             } else {
                                 chunk.setRequested(false);
                             }
-                        } else limit+=30;
+                        } else limit += 30;
                     }
                     if(limit >= 100){
                         ticks = 1190;
@@ -445,6 +415,23 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
             this.chunkLoader.chunkTick();
         }
         return false;
+    }
+
+
+    private boolean tryUnload(long olong, Chunk chunk) {
+        if (asyncSaveChunks) {
+            boolean res = TChunkExecutor.queueChunkUnload((WorldServer) chunk.getWorld(), (AnvilChunkLoader) chunkLoader, this, chunk);
+            if(!res) return false;
+        } else {
+            chunk.onUnload();
+            if (chunk.needsSaving(true)) {
+                ForgeChunkManager.putDormantChunk(olong, chunk);
+                this.saveChunkData(chunk);
+                this.saveChunkExtraData(chunk);
+            }
+        }
+        removeChunk(olong);
+        return true;
     }
 
 

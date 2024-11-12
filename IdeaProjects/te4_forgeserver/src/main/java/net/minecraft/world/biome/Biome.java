@@ -312,12 +312,7 @@ public abstract class Biome extends IForgeRegistryEntry.Impl<Biome> {
                     continue;
                 }
             }
-            char rawId = ChunkPrimer.getRawStateId(rawData, x, y, z);
-            if(rawId == 0 || rawId > rawIndex.length){
-                j = -1;
-                continue;
-            }
-            IBlockState cur = rawIndex[rawId];
+            IBlockState cur = ChunkPrimer.getRawState(rawData, z, y, x, rawIndex);
             Block block;
             if ((block = cur.getBlock()).getMaterial(cur) == Material.AIR) {
                 j = -1;

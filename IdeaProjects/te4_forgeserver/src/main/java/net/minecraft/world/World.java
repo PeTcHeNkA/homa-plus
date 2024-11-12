@@ -1890,8 +1890,8 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             }
             if (entity.isDead) effects.remove(i--);
         }
-
-        unloadEntites();
+        if(isRemote)
+            unloadEntites();
         checkCanUpdate = false;
         this.tickPlayers();
 

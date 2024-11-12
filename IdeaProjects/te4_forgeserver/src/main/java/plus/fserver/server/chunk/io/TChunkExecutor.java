@@ -43,11 +43,17 @@ public class TChunkExecutor {
 
 
     public static boolean queueChunkUnload(WorldServer world, AnvilChunkLoader loader, ChunkProviderServer provider, Chunk chunk) {
-        if(chunk.isNowSaving())return false;
+        if(chunk.isNowSaving())
+            return false;
         TQueuedChunk key = new TQueuedChunk(chunk.x, chunk.z);
 
         TChunkTask task = world.getChunkTasks().get(key);
         if (task == null) {
+            chunk.onUnload();
+            if(!chunk.needsSaving(true)){
+                TChunkUnloadTask.onUnload(chunk);
+                return true;
+            }
             task = new TChunkUnloadTask(world, key, loader, provider, chunk);
             world.addChunkTask(key, task);
             world.getMinecraftServer().ticker().service.execute(task);

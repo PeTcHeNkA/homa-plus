@@ -22,6 +22,7 @@ public class TChunkGenProvider extends TChunkTask implements Runnable{
     public void syncCallback() {
         try {
             if (chunk != null) {
+                chunk.markDirty();
                 world.getChunkProvider().onComplete(this);
             }
             this.runCallbacks();

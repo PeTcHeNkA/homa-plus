@@ -16,12 +16,11 @@ public class TChunkUnloadTask extends TChunkTask{
 
     TChunkUnloadTask(WorldServer world, TQueuedChunk key, AnvilChunkLoader loader, ChunkProviderServer provider, Chunk chunk) {
         super(world, key, loader, provider);
-        this.chunk = chunk;
         chunk.setSaveStatus(true);
+        this.chunk = chunk;
 
         List<NextTickListEntry> pendings = null;
         try {
-            chunk.onUnload();
             pendings = chunk.getWorld().getPendingBlockUpdates(chunk, true);
         } catch (Exception e){
             e.printStackTrace();
@@ -60,6 +59,7 @@ public class TChunkUnloadTask extends TChunkTask{
     @Override
     public void syncCallback() {
         try {
+            chunk.setSaveStatus(false);
             if(hasCallback()){
                 List<NextTickListEntry> pendings = this.pendings;
                 if(pendings != null) {
@@ -70,11 +70,16 @@ public class TChunkUnloadTask extends TChunkTask{
                 provider.onComplete(this);
                 this.runCallbacks();
             } else {
-                Chunk chunk = this.chunk;
-                ForgeChunkManager.putDormantChunk(ChunkPos.asLong(chunk.x, chunk.z), chunk);
+                onUnload(chunk);
             }
         } catch (Throwable throwable){
             throwable.printStackTrace();
         }
+    }
+
+
+    public static void onUnload(Chunk chunk){
+        chunk.setModified(false);
+        ForgeChunkManager.putDormantChunk(ChunkPos.asLong(chunk.x, chunk.z), chunk);
     }
 }

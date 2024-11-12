@@ -48,6 +48,24 @@ public class ExtendedBlockStorage extends BlockStateContainer{
     }
 
 
+    public boolean setB(int x, int y, int z, IBlockState state) {
+        IBlockState prev = super.update(x, y, z, state = state.getClean());
+        if(prev == state)return false;
+
+        Block block1;
+        if ((block1 = state.getBlock()) != Blocks.AIR) {
+            ++this.blockRefCount;
+            if (block1.getTickRandomly()) ++this.tickRefCount;
+        }
+
+        if ((block1 = prev.getBlock()) != Blocks.AIR) {
+            --this.blockRefCount;
+            if (block1.getTickRandomly()) --this.tickRefCount;
+        }
+        return true;
+    }
+
+
     public boolean isEmpty() {
         return this.blockRefCount == 0;
     }

@@ -39,8 +39,9 @@ import plus.fserver.world.light.LightingHooks;
 
 public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO, Runnable {
     private static final Logger LOGGER = LogManager.getLogger();
+    //public final Set<ChunkPos> allSaves = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private final Map<ChunkPos, NBTTagCompound> chunksToSave = Maps.newConcurrentMap();
-    private final Set<ChunkPos> chunksBeingSaved = Collections.newSetFromMap(Maps.newConcurrentMap());
+    //private final Set<ChunkPos> chunksBeingSaved = Collections.newSetFromMap(Maps.newConcurrentMap());
     public final File chunkSaveLocation;
     private final DataFixer fixer;
     private boolean flushing;
@@ -183,9 +184,13 @@ public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO, Runnable
 
 
     protected void addChunkToPending(World world, ChunkPos pos, NBTTagCompound compound, boolean async) {
-        if (!this.chunksBeingSaved.contains(pos)) {
-            this.chunksToSave.put(pos, compound);
+        //if (!this.chunksBeingSaved.contains(pos)) {
+        synchronized (chunksToSave) {
+            NBTTagCompound prev = this.chunksToSave.put(pos, compound);
+            if(prev != null)
+                LOGGER.warn("Data for {} replaced!", pos);
         }
+        //}
         if(!flushing) {
             if(async) world.getMinecraftServer().ticker().runAsync(this);
             else run();
@@ -205,7 +210,7 @@ public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO, Runnable
             boolean success;
 
             try {
-                this.chunksBeingSaved.add(chunkpos);
+                //this.chunksBeingSaved.add(chunkpos);
                 NBTTagCompound nbttagcompound = chunksToSave.get(chunkpos);
 
                 if (nbttagcompound != null) {
@@ -219,7 +224,7 @@ public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO, Runnable
                 }
                 success = true;
             } finally {
-                this.chunksBeingSaved.remove(chunkpos);
+                //this.chunksBeingSaved.remove(chunkpos);
                 chunksToSave.remove(chunkpos);
             }
             return success;
@@ -231,6 +236,7 @@ public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO, Runnable
         DataOutputStream dataoutputstream = RegionFileCache.getChunkOutputStream(
                 this.chunkSaveLocation, pos.x, pos.z
         );
+        if(dataoutputstream == null)return;
         CompressedStreamTools.write(compound, dataoutputstream);
         dataoutputstream.close();
     }
@@ -250,22 +256,22 @@ public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO, Runnable
             Iterator<ChunkPos> iter = chunksToSave.keySet().iterator();
             while (iter.hasNext()) {
                 ChunkPos chunkpos = iter.next();
+                NBTTagCompound nbttagcompound = chunksToSave.get(chunkpos);
+                if(nbttagcompound == null)continue;
                 try {
-                    this.chunksBeingSaved.add(chunkpos);
-                    NBTTagCompound nbttagcompound = chunksToSave.get(chunkpos);
-
-                    if (nbttagcompound != null) {
-                        try {
-                            synchronized (nbttagcompound) {
-                                this.writeChunkData(chunkpos, nbttagcompound);
-                            }
-                        } catch (Exception exception) {
-                            LOGGER.error("Failed to save chunk", exception);
+                    try {
+                        synchronized (nbttagcompound) {
+                            this.writeChunkData(chunkpos, nbttagcompound);
                         }
+                    } catch (Exception exception) {
+                        LOGGER.error("Failed to save chunk", exception);
                     }
                 } finally {
-                    this.chunksBeingSaved.remove(chunkpos);
-                    chunksToSave.remove(chunkpos);
+                    synchronized (chunksToSave){
+                        if(chunksToSave.get(chunkpos) == nbttagcompound){
+                            chunksToSave.remove(chunkpos);
+                        }
+                    }
                 }
             }
         } finally {

@@ -62,11 +62,11 @@ public class RegionFile {
                 }
             }
             //todo maybe remove?
-            for (int k2 = 0; k2 < 1024; ++k2) {
-                //dataFile.
-                final int l2 = dataFile.readInt();
-                //this.chunkTimestamps[k2] = l2;
-            }
+//            for (int k2 = 0; k2 < 1024; ++k2) {
+//                //dataFile.
+//                final int l2 = dataFile.readInt();
+//                //this.chunkTimestamps[k2] = l2;
+//            }
         }
         catch (IOException e) {
             e.printStackTrace();
@@ -145,6 +145,7 @@ public class RegionFile {
                     MapCoder.newOStream(new ChunkBuffer(x, z))
             ));
         } catch (IOException e) {
+            e.printStackTrace();
             return null;
         }
     }

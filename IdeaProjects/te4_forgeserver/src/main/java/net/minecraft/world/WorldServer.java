@@ -1492,6 +1492,8 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         }
 
         this.chunkProvider.tick();
+        unloadEntites();
+
         int light = this.calculateSkylightSubtracted(1.0F);
 
         if (light != this.getSkylightSubtracted()) {

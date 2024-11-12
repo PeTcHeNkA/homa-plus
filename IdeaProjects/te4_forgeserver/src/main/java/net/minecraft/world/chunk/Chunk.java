@@ -612,7 +612,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
                 flag = py >= i1;
             }
 
-            storage.set(px, py & 15, pz, state);
+            storage.set(px, py & 15, pz, state); //safe
 
             if (!world.isRemote || SERVER_COMPILE) {
                 if (prevBlock != block) prevBlock.breakBlock(world, pos, prev);
@@ -700,7 +700,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
                 flag = py >= i1;
             }
 
-            storage.set(px, py & 15, pz, state);
+            storage.set(px, py & 15, pz, state); //safe
 
             if (!world.isRemote || SERVER_COMPILE) {
                 if (prevBlock != block) prevBlock.breakBlock(world, pos, prev);
@@ -773,9 +773,11 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
             storage = new ExtendedBlockStorage(y >> 4 << 4, this.world.provider.hasSkyLight());
             this.storageArrays[y >> 4] = storage;
         }
-        storage.set(i, y & 15, k, newState);
+        if(storage.setB(i, y & 15, k, newState))
+            this.dirty = true;
 
         if (current.hasTile()) {
+            this.dirty = true;
             BlockPos pos = new BlockPos(x, y, z);
             TileEntity te = this.getTileEntity(pos, Chunk.EnumCreateEntityType.CHECK);
             if (te != null && te.shouldRefresh(this.world, pos, current, newState))
@@ -792,10 +794,12 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
         ExtendedBlockStorage storage = this.storageArrays[y >> 4];
 
         if (storage == null) {
+            if(state == BlockIDIndexes.AIR_STATE)return;
             storage = new ExtendedBlockStorage(y >> 4 << 4, this.world.provider.hasSkyLight());
             this.storageArrays[y >> 4] = storage;
         }
-        storage.set(x, y & 15, z, state);
+        if(storage.setB(x, y & 15, z, state))
+            dirty = true;
     }
 
 
