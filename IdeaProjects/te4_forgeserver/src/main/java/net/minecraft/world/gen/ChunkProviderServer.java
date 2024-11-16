@@ -350,34 +350,38 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
         if(canSave()) {
             LongSet droppedChunks = this.droppedChunks;
             int size = droppedChunks.size();
+            int limit = 0;
 
             if(size != 0) {
-                int i = 0;
                 for (LongIterator iterator = droppedChunks.iterator();
-                     i < 100 && iterator.hasNext(); ) {
+                     limit < 100 && iterator.hasNext(); ) {
                     long olong = iterator.nextLong();
                     Chunk chunk = super.get(olong);
 
                     if (chunk != null) {
                         if (chunk.maybeUnload()) {
                             if (tryUnload(olong, chunk)) {
-                                ++i;
-                                iterator.remove();
+                                ++limit;
                             }
                         } else {
                             chunk.setRequested(false);
                         }
                     }
+                    iterator.remove();
                 }
                 trimToSize();
             }
 
             if (!super.isEmpty()) {
                 if(++ticks>1200){
+                    if(limit >= 100){
+                        ticks = 1190;
+                        return false;
+                    }
+
                     LongSet lc = loadingChunks;
                     if(lc != null && lc.isEmpty())loadingChunks = null;
 
-                    int limit = 0;
                     Iterator<Chunk> iter = getLoadedChunks().iterator();
                     Chunk chunk;
                     while (iter.hasNext() && limit<100){
@@ -392,7 +396,6 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
                             if (chunk.maybeUnload()) {
                                 long olong = ChunkPos.asLong(chunk.x, chunk.z);
                                 if (tryUnload(olong, chunk)) {
-                                    iter.remove();
                                     ++limit;
                                 }
                             } else {

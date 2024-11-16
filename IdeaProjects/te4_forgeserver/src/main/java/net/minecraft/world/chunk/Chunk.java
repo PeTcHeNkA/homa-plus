@@ -1213,6 +1213,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
 
     public boolean needsSaving(boolean flag) {
+        //if(1==1)return true;
         if (flag) {
             if (this.hasEntities && this.world.getTotalWorldTime() != this.lastSaveTime || this.dirty) {
                 return true;

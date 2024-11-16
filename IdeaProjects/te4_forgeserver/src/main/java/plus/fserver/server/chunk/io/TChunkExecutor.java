@@ -49,6 +49,7 @@ public class TChunkExecutor {
 
         TChunkTask task = world.getChunkTasks().get(key);
         if (task == null) {
+            chunk.setSaveStatus(true);
             chunk.onUnload();
             if(!chunk.needsSaving(true)){
                 TChunkUnloadTask.onUnload(chunk);

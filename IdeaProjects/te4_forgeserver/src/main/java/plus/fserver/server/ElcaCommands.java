@@ -63,7 +63,7 @@ public class ElcaCommands extends ServerCommand {
     private static final String normal   = "&a";
 
     private final List<String> completions = ImmutableList.copyOf(
-        new String[]{"version", "info", "tps", "mobs", "spawn", "hotpoints", "send", "setvar"}
+        new String[]{"version", "info", "tps", "mobs", "spawn", "hotpoints", "send", "setvar", "save"}
     );
     private final List<String> allVars = ImmutableList.copyOf(new String[]{
             "time-packet-rate"            , "mean-balance-mob"            ,
@@ -147,7 +147,16 @@ public class ElcaCommands extends ServerCommand {
             case "setvar":{
                 setVar(server, sender, args);return;
             }
+            case "save":{
+                save(server, sender, args);
+            }
         }
+    }
+
+
+    private void save(MinecraftServer server, ICommandSender sender, String[] args){
+        server.ticker().markNeedSave();
+        reply(sender, "&eThe time until the next save has been reset.");
     }
 
 

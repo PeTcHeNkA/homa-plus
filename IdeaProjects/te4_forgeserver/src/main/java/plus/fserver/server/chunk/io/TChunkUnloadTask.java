@@ -16,7 +16,6 @@ public class TChunkUnloadTask extends TChunkTask{
 
     TChunkUnloadTask(WorldServer world, TQueuedChunk key, AnvilChunkLoader loader, ChunkProviderServer provider, Chunk chunk) {
         super(world, key, loader, provider);
-        chunk.setSaveStatus(true);
         this.chunk = chunk;
 
         List<NextTickListEntry> pendings = null;
@@ -79,7 +78,6 @@ public class TChunkUnloadTask extends TChunkTask{
 
 
     public static void onUnload(Chunk chunk){
-        chunk.setModified(false);
         ForgeChunkManager.putDormantChunk(ChunkPos.asLong(chunk.x, chunk.z), chunk);
     }
 }

@@ -73,7 +73,7 @@ public class PlayerProfileCache {
         this.usercacheFile = file;
         GsonBuilder builder = new GsonBuilder();
         builder.registerTypeHierarchyAdapter(ProfileEntry.class, new Serializer());
-        this.gson = builder.create();
+        this.gson = builder.setLenient().create();
         this.load();
     }
 

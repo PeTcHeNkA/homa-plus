@@ -251,6 +251,7 @@ public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO, Runnable
 
     @Override
     public synchronized void flush() {
+        //if(1==1)return;
         try {
             this.flushing = true;
             Iterator<ChunkPos> iter = chunksToSave.keySet().iterator();
