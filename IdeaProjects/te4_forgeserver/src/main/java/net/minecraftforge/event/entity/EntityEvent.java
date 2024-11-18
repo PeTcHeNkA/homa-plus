@@ -10,12 +10,11 @@ import net.minecraftforge.fml.common.eventhandler.ListenerList;
 public class EntityEvent extends Event {
     private Entity entity;
 
+    public EntityEvent(){super();}
+
     public EntityEvent(Entity entity) {
         this.entity = entity;
     }
-
-
-    public EntityEvent(){}
 
 
     public Entity getEntity() {
@@ -29,6 +28,8 @@ public class EntityEvent extends Event {
 
 
     public static class EntityConstructing extends EntityEvent {
+        public EntityConstructing(){super();}
+
         public EntityConstructing(Entity entity) {
             super(entity);
         }
@@ -52,6 +53,9 @@ public class EntityEvent extends Event {
     public static class CanUpdate extends EntityEvent {
         private boolean canUpdate = false;
         private IEventListener[] listeners;
+
+        public CanUpdate(){super();}
+
         public CanUpdate(Entity entity) {
             super(entity);
         }
@@ -100,6 +104,8 @@ public class EntityEvent extends Event {
         private int newChunkZ;
         private int oldChunkX;
         private int oldChunkZ;
+
+        public EnteringChunk(){super();}
 
         public EnteringChunk(Entity entity, int newChunkX, int newChunkZ, int oldChunkX, int oldChunkZ) {
             super(entity);

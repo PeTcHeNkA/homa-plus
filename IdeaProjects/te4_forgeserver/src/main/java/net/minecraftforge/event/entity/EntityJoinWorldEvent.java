@@ -9,7 +9,7 @@ import net.minecraft.entity.*;
 public class EntityJoinWorldEvent extends EntityEvent {
     private World world;
 
-    public EntityJoinWorldEvent(){}
+    public EntityJoinWorldEvent(){super();}
 
     public EntityJoinWorldEvent(final Entity entity, final World world) {
         super(entity);

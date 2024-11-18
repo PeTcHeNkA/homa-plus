@@ -4,16 +4,20 @@
 
 package net.minecraft.world;
 
+import net.minecraft.client.gui.GuiCreateFlatWorld;
+import net.minecraft.client.gui.GuiCreateWorld;
+import net.minecraft.client.gui.GuiCustomizeWorldScreen;
 import net.minecraftforge.fml.relauncher.*;
 import net.minecraft.init.*;
 import net.minecraft.world.biome.*;
 import java.util.*;
 import net.minecraft.server.*;
-import net.minecraft.client.*;
-import net.minecraft.client.gui.*;
+
 import net.minecraft.world.gen.*;
 import net.minecraft.world.gen.layer.*;
+import plus.fserver.api.inject.VarOnly;
 import plus.fserver.world.generator.biome.BiomeProviderEx;
+
 
 public class WorldType
 {
@@ -175,13 +179,14 @@ public class WorldType
         return Math.max(0, p_getSpawnFuzz_2_.getSpawnRadius(p_getSpawnFuzz_1_));
     }
 
-    @SideOnly(Side.CLIENT)
-    public void onCustomizeButton(final Minecraft p_onCustomizeButton_1_, final GuiCreateWorld p_onCustomizeButton_2_) {
+
+    @VarOnly(var = "SIDE_SERVER")
+    public void onCustomizeButton(final net.minecraft.client.Minecraft p_onCustomizeButton_1_, final GuiCreateWorld p_onCustomizeButton_2_) {
         if (this == WorldType.FLAT) {
-            p_onCustomizeButton_1_.displayGuiScreen((GuiScreen)new GuiCreateFlatWorld(p_onCustomizeButton_2_, p_onCustomizeButton_2_.chunkProviderSettingsJson));
+            p_onCustomizeButton_1_.displayGuiScreen(new GuiCreateFlatWorld(p_onCustomizeButton_2_, p_onCustomizeButton_2_.chunkProviderSettingsJson));
         }
         else if (this == WorldType.CUSTOMIZED) {
-            p_onCustomizeButton_1_.displayGuiScreen((GuiScreen)new GuiCustomizeWorldScreen((GuiScreen)p_onCustomizeButton_2_, p_onCustomizeButton_2_.chunkProviderSettingsJson));
+            p_onCustomizeButton_1_.displayGuiScreen(new GuiCustomizeWorldScreen(p_onCustomizeButton_2_, p_onCustomizeButton_2_.chunkProviderSettingsJson));
         }
     }
 

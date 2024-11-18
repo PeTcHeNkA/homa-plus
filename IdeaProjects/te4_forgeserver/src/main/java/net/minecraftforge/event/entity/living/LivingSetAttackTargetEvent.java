@@ -7,6 +7,8 @@ import net.minecraftforge.fml.common.eventhandler.ListenerList;
 public class LivingSetAttackTargetEvent extends LivingEvent {
     private EntityLivingBase target;
 
+    public LivingSetAttackTargetEvent(){super();}
+
     public LivingSetAttackTargetEvent(final EntityLivingBase entity, final EntityLivingBase target) {
         super(entity);
         this.target = target;

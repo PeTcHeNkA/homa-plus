@@ -1,10 +1,10 @@
 package plus.fserver.plugin;
 
+import it.unimi.dsi.fastutil.objects.Object2ByteOpenHashMap;
 import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraftforge.fml.relauncher.FMLLaunchHandler;
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.NotNull;
-import plus.tson.utl.Te4HashMap;
 import plus.tson.utl.Te4HashSet;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,19 +14,41 @@ import java.util.*;
 
 public class TweakEngine implements IClassTransformer, Set<String> {
     private final ClassLoader loader = TweakEngine.class.getClassLoader();
-    private final Te4HashMap<String, TweakInfo> classes = new Te4HashMap<>();
-    private final Te4HashSet<String> preLoads = new Te4HashSet<>();
+    private final Object2ByteOpenHashMap<String> classes = new Object2ByteOpenHashMap<>();
+    {classes.defaultReturnValue(Byte.MIN_VALUE);}
+    private Te4HashSet<String> preLoads = new Te4HashSet<>(8,0.8f);
     private final String header;
     private final boolean debug = false;
     private final IClassTransformer sideTransformer;
+    private final IClassTransformer modAccesTransformer = tryFindModAccTransformer();
 
-    private static class TweakInfo{
-        final boolean useSideTransformer;
-        final boolean useSafeMode;
 
-        TweakInfo(boolean useSafeMode, boolean useSideTransformer){
-            this.useSafeMode = useSafeMode;
-            this.useSideTransformer = useSideTransformer;
+    private static boolean isUseSide(byte flags){
+        return (flags & 1) == 1;
+    }
+
+
+    private static boolean isUseSafe(byte flags){
+        return (flags & 3) == 3;
+    }
+
+
+    private static byte tweakInfo(boolean useSafeMode, boolean useSideTransformer){
+        byte flags = 0;
+        if(useSafeMode)flags |= 1;
+        if(useSafeMode)flags |= 3;
+        return flags;
+    }
+
+
+    private static IClassTransformer tryFindModAccTransformer(){
+        try {
+            //net.minecraftforge.fml.common.asm.transformers.ModAccessTransformer
+            //todo access to embedded
+            return new TweakAccessTransformer();
+        } catch (Throwable e){
+            e.printStackTrace();
+            return null;
         }
     }
 
@@ -59,7 +81,11 @@ public class TweakEngine implements IClassTransformer, Set<String> {
 
 
     protected void preLoadClasses(){
-        for (String name:preLoads)preLoad(name);
+        Te4HashSet<String> pr;
+        if((pr = preLoads) != null) {
+            for (String name : pr) preLoad(name);
+            preLoads = null;
+        }
     }
 
 
@@ -113,7 +139,7 @@ public class TweakEngine implements IClassTransformer, Set<String> {
 
     @Override
     public boolean add(String name){
-        return classes.put(name, new TweakInfo(false, true)) == null;
+        return classes.put(name, tweakInfo(false, true)) == -1;
     }
 
 
@@ -158,19 +184,25 @@ public class TweakEngine implements IClassTransformer, Set<String> {
 
 
     public void add(String name, boolean safe){
-        classes.fput(name, new TweakInfo(safe, true));
+        classes.put(name, tweakInfo(safe, true));
     }
 
 
     public void add(String name, boolean safe, boolean preLoad){
         add(name, safe);
-        if(preLoad) preLoads.add(name);
+        if(preLoad) {
+            Te4HashSet<String> pr;
+            if((pr = preLoads) != null) pr.add(name);
+        }
     }
 
 
     public void add(String name, boolean safe, boolean preLoad, boolean useTransformers){
-        classes.fput(name, new TweakInfo(safe, useTransformers));
-        if(preLoad) preLoads.add(name);
+        classes.put(name, tweakInfo(safe, useTransformers));
+        if(preLoad) {
+            Te4HashSet<String> pr;
+            if((pr = preLoads) != null) pr.add(name);
+        }
     }
 
 
@@ -179,19 +211,29 @@ public class TweakEngine implements IClassTransformer, Set<String> {
     }
 
 
-    public byte[] tweakBytesIfNeed(String name, byte[] src) {
-        TweakInfo info = classes.get(name);
-        if (info == null) {
+    public byte[] transformAccess(String s1, String s2, byte[] src){
+        IClassTransformer mat;
+        if((mat = modAccesTransformer) == null)return src;
+        return mat.transform(s1, s2, src);
+    }
+
+
+    public byte[] tweakBytesIfNeed(String raw, String name, byte[] src) {
+        byte info = classes.getByte(name);
+        if (info == Byte.MIN_VALUE) {
             return PathTransformer.transformFast(name, src);
         }
-        byte[] result = info.useSafeMode ? getSafeTweaks(name) : getFastTweak(name);
+        byte[] result = isUseSafe(info) ? getSafeTweaks(name) : getFastTweak(name);
         if(result == null){
-            if(info.useSideTransformer)
-                return PathTransformer.transformFast(name,src);
+            if(isUseSide(info))
+                return PathTransformer.transformFast(name, src);
             return src;
         } else {
-            if(sideTransformer == null || !info.useSideTransformer)return result;
-            return sideTransformer.transform(name, name, result);
+            if(sideTransformer == null || !isUseSide(info))
+                src = PathTransformer.transformFast(name, result);
+            else
+                src = sideTransformer.transform(name, name, result);
+            return transformAccess(raw, name, src);
         }
     }
 
@@ -240,18 +282,26 @@ public class TweakEngine implements IClassTransformer, Set<String> {
     protected final byte[] getSafeSrc(String name){
         Enumeration<URL> urls = urls(name);
         URL usedUrl = null;
+        URL first = null;
         while (urls.hasMoreElements()) {
             URL cur = urls.nextElement();
             String curHeader = cur.getFile().split("!")[0];
             if (header.equals(curHeader)) {
                 usedUrl = cur;
+                break;
+            } else {
+                if(first == null) first = cur;
             }
         }
         if(debug){
             System.out.println("USD URL: "+usedUrl);
         }
         if (usedUrl == null) {
-            return notFound(name);
+            if(first != null){
+                usedUrl = first;
+            } else {
+                return notFound(name);
+            }
         }
         try {
             InputStream stream = (InputStream) usedUrl.getContent();
@@ -276,6 +326,9 @@ public class TweakEngine implements IClassTransformer, Set<String> {
 
     @Override
     public byte[] transform(String name, String transformedName, byte[] basicClass) {
-        return tweakBytesIfNeed(transformedName, basicClass);
+//        if(transformedName.equals("net.minecraft.server.MinecraftServer")){
+//            System.out.println("NEN!");
+//        }
+        return tweakBytesIfNeed(name, transformedName, basicClass);
     }
 }

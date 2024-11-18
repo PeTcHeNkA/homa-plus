@@ -14,6 +14,8 @@ public class PlaySoundAtEntityEvent extends EntityEvent {
     private float newVolume;
     private float newPitch;
 
+    public PlaySoundAtEntityEvent(){super();}
+
     public PlaySoundAtEntityEvent(final Entity entity, final SoundEvent name, final SoundCategory category, final float volume, final float pitch) {
         super(entity);
         this.name = name;

@@ -11,6 +11,11 @@ public class ElcaConnectEvent extends NetHandlerLoginServer.ConnectEvent {
     private Status status;
     private Object data;
 
+    protected ElcaConnectEvent(){
+        super(null);
+    }
+
+
     public ElcaConnectEvent(NetHandlerLoginServer loginServer) {
         super(loginServer);
     }

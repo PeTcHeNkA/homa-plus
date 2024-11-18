@@ -70,7 +70,7 @@ public class ElcaMobs {
         MINECART  = new EntityLodFunc(config.get("minecart"),   24, 28);
         RABBIT    = new EntityLodFunc(config.get("rabbit"),     16, 32);
         ARMOR_ST  = new EntityLodFunc(config.get("armor_st"),   16, 24);
-        IRON_GOLEM = new EntityLodFunc(config.get("iron_golem"),22, 38);
+        IRON_GOLEM= new EntityLodFunc(config.get("iron_golem"), 22, 38);
 
         PIG       = new EntityLodFunc(config.get("pig")   , ANIMALS.near, ANIMALS.low);
         SHEEP     = new EntityLodFunc(config.get("sheep") , ANIMALS.near, ANIMALS.low);

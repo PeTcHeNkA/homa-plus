@@ -13,6 +13,8 @@ public class GetCollisionBoxesEvent extends WorldEvent {
     private AxisAlignedBB aabb;
     private List<AxisAlignedBB> collisionBoxesList;
 
+    public GetCollisionBoxesEvent(){super(null);}
+
     public GetCollisionBoxesEvent(World world, @Nullable Entity entity, AxisAlignedBB aabb, List<AxisAlignedBB> collisionBoxesList) {
         super(world);
         this.entity = entity;

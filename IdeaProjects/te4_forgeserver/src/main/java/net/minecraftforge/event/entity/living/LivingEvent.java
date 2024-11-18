@@ -11,14 +11,12 @@ import net.minecraftforge.fml.common.eventhandler.ListenerList;
 public class LivingEvent extends EntityEvent {
     EntityLivingBase entityLiving;
 
+    public LivingEvent(){super();}
+
+
     public LivingEvent(EntityLivingBase entity) {
         super(entity);
         entityLiving = entity;
-    }
-
-
-    public LivingEvent(){
-        super();
     }
 
 

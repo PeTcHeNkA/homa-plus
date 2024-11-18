@@ -31,7 +31,7 @@ public class BlockEvent extends Event {
     private BlockPos pos;
     private IBlockState state;
 
-    public BlockEvent(){}
+    public BlockEvent(){super();}
 
     public BlockEvent(World world, BlockPos pos, IBlockState state) {
         this.pos = pos;
@@ -93,6 +93,8 @@ public class BlockEvent extends Event {
         /** Reference to the Player who broke the block. If no player is available, use a EntityFakePlayer */
         private final EntityPlayer player;
         private int exp;
+
+        public BreakEvent(){super();player=null;}
 
         public BreakEvent(World world, BlockPos pos, IBlockState state, EntityPlayer player) {
             super(world, pos, state);
@@ -413,6 +415,8 @@ public class BlockEvent extends Event {
         private IBlockState newState;
         private IBlockState origState;
 
+        public FluidPlaceBlockEvent(){super();liquidPos=null;}
+
         public FluidPlaceBlockEvent(World world, BlockPos pos, BlockPos liquidPos, IBlockState state) {
             super(world, pos, state);
             this.liquidPos = liquidPos;
@@ -467,7 +471,7 @@ public class BlockEvent extends Event {
      *
      */
     public static class CropGrowEvent extends BlockEvent {
-        public CropGrowEvent(){}
+        public CropGrowEvent(){super();}
 
         public CropGrowEvent(World world, BlockPos pos, IBlockState state) {
             super(world, pos, state);
@@ -486,7 +490,7 @@ public class BlockEvent extends Event {
          */
         @HasResult
         public static class Pre extends CropGrowEvent {
-            public Pre(){}
+            public Pre(){super();}
 
             public Pre(World world, BlockPos pos, IBlockState state) {
                 super(world, pos, state);
@@ -508,7 +512,7 @@ public class BlockEvent extends Event {
 
         public static class Post extends CropGrowEvent {
             private IBlockState originalState;
-            public Post(){}
+            public Post(){super();}
 
             public Post(World world, BlockPos pos, IBlockState original, IBlockState state) {
                 super(world, pos, state);
@@ -550,9 +554,10 @@ public class BlockEvent extends Event {
      */
     @Cancelable
     public static class FarmlandTrampleEvent extends BlockEvent {
-
         private final Entity entity;
         private final float fallDistance;
+
+        public FarmlandTrampleEvent(){super();entity=null;fallDistance=0;}
 
         public FarmlandTrampleEvent(World world, BlockPos pos, IBlockState state, float fallDistance, Entity entity) {
             super(world, pos, state);
@@ -595,6 +600,8 @@ public class BlockEvent extends Event {
     @Cancelable
     public static class PortalSpawnEvent extends BlockEvent {
         private final BlockPortal.Size size;
+
+        public PortalSpawnEvent(){super();size=null;}
 
         public PortalSpawnEvent(World world, BlockPos pos, IBlockState state, BlockPortal.Size size) {
             super(world, pos, state);

@@ -48,6 +48,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import plus.fserver.ElcaConfig;
 import plus.fserver.api.Keep;
+import plus.fserver.api.inject.VarOnly;
 import plus.fserver.plugin.AsmTrimmer;
 import plus.fserver.plugin.SSPatchLoader;
 import plus.fserver.server.AsyWorldTickerV2;
@@ -200,7 +201,7 @@ public class DedicatedServer extends MinecraftServer implements IServer {
                         k = l;
                     }
                 } catch (NumberFormatException var16) {
-                    k = (long)s.hashCode();
+                    k = s.hashCode();
                 }
             }
 

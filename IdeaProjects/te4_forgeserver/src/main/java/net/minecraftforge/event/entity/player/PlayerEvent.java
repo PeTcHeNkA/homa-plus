@@ -21,7 +21,7 @@ public class PlayerEvent extends LivingEvent {
     }
 
 
-    public PlayerEvent(){}
+    public PlayerEvent(){super();}
 
 
     public EntityPlayer getEntityPlayer() {
@@ -34,13 +34,13 @@ public class PlayerEvent extends LivingEvent {
         private IBlockState state;
         private boolean success;
 
+        public HarvestCheck(){super();}
+
         public HarvestCheck(EntityPlayer player, IBlockState state, boolean success) {
             super(player);
             this.state = state;
             this.success = success;
         }
-
-        public HarvestCheck(){}
 
         public boolean post(EntityPlayer player, IBlockState state, boolean success) {
             initLiving(player);
@@ -98,9 +98,7 @@ public class PlayerEvent extends LivingEvent {
         private float newSpeed = 0.0f;
         private BlockPos pos;
 
-        public BreakSpeed(){
-            super();
-        }
+        public BreakSpeed(){super();}
 
         public BreakSpeed(EntityPlayer player, IBlockState state, float original, BlockPos pos) {
             super(player);
@@ -179,6 +177,8 @@ public class PlayerEvent extends LivingEvent {
         private final String username;
         private String displayname;
 
+        public NameFormat(){super();this.username=null;}
+
         public NameFormat(EntityPlayer player, String username) {
             super(player);
             this.username = username;
@@ -220,6 +220,8 @@ public class PlayerEvent extends LivingEvent {
         private final EntityPlayer original;
         private final boolean wasDeath;
 
+        public Clone(){this(null,null,false);}
+
         public Clone(EntityPlayer _new, EntityPlayer oldPlayer, boolean wasDeath) {
             super(_new);
             this.original = oldPlayer;
@@ -256,12 +258,12 @@ public class PlayerEvent extends LivingEvent {
         private IEventListener[] listeners;
         private Entity target;
 
+        public StartTracking(){super();}
+
         public StartTracking(EntityPlayer player, Entity target) {
             super(player);
             this.target = target;
         }
-
-        public StartTracking(){}
 
 
         public StartTracking forBus(EventBus bus){
@@ -301,12 +303,12 @@ public class PlayerEvent extends LivingEvent {
         private IEventListener[] listeners;
         private Entity target;
 
+        public StopTracking(){super();}
+
         public StopTracking(EntityPlayer player, Entity target) {
             super(player);
             this.target = target;
         }
-
-        public StopTracking(){}
 
 
         public StopTracking forBus(EventBus bus){
@@ -345,6 +347,8 @@ public class PlayerEvent extends LivingEvent {
     public static class LoadFromFile extends PlayerEvent {
         private final File playerDirectory;
         private final String playerUUID;
+
+        public LoadFromFile(){super();playerDirectory = null;playerUUID=null;}
 
         public LoadFromFile(EntityPlayer player, File originDirectory, String playerUUID) {
             super(player);
@@ -388,6 +392,8 @@ public class PlayerEvent extends LivingEvent {
         private final File playerDirectory;
         private final String playerUUID;
 
+        public SaveToFile(){super();playerDirectory = null;playerUUID=null;}
+
         public SaveToFile(EntityPlayer player, File originDirectory, String playerUUID) {
             super(player);
             this.playerDirectory = originDirectory;
@@ -428,6 +434,8 @@ public class PlayerEvent extends LivingEvent {
 
     public static class Visibility extends PlayerEvent {
         private double visibilityModifier = 1D;
+
+        public Visibility(){super();}
 
         public Visibility(EntityPlayer player) {
             super(player);

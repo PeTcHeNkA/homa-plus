@@ -11,6 +11,9 @@ public class LivingAttackEvent extends LivingEvent {
     private DamageSource source;
     private float amount;
 
+    public LivingAttackEvent(){super();}
+
+
     public LivingAttackEvent(EntityLivingBase entity, DamageSource source, float amount) {
         super(entity);
         this.source = source;

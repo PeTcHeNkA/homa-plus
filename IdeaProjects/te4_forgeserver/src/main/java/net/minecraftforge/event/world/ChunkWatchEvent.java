@@ -15,7 +15,7 @@ public class ChunkWatchEvent extends Event{
     private Chunk chunkInstance;
     private IEventListener[] listeners;
 
-    public ChunkWatchEvent(){}
+    public ChunkWatchEvent(){super();}
     public ChunkWatchEvent(EventBus bus){forBus(bus);}
 
 

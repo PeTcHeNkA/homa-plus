@@ -14,17 +14,15 @@ public class LivingSpawnEvent extends LivingEvent {
     private float y;
     private float z;
 
+    public LivingSpawnEvent(){super();}
+
+
     public LivingSpawnEvent(EntityLiving entity, World world, float x, float y, float z) {
         super(entity);
         this.world = world;
         this.x = x;
         this.y = y;
         this.z = z;
-    }
-
-
-    public LivingSpawnEvent(){
-        super(null);
     }
 
 
