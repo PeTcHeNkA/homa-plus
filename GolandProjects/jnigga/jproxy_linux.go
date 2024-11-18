@@ -1,11 +1,11 @@
 package main
 
 /*
-#cgo CFLAGS: -IC:/Users/Te4hnoPlus/GolandProjects/jnigga/lin_inc -IC:/Users/Te4hnoPlus/GolandProjects/jnigga/lin_inc/linux
+#cgo CFLAGS: -I ./lin_inc -I./lin_inc/linux
 
-#include "jni.h"
 #include <stdlib.h>
 #include <string.h>
+#include "jni.h"
 //#include <windows.h>
 
 jbyteArray NewByteArray(JNIEnv* env, jsize len) {

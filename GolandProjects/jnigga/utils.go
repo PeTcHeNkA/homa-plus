@@ -4,7 +4,6 @@ import "C"
 import (
 	"archive/zip"
 	"bytes"
-	"errors"
 	"io"
 	"main/tutil"
 	"os"
@@ -163,9 +162,11 @@ func decodeLazy(bytesSrc []byte, tcr *tutil.TCrypter) ([]byte, error) {
 	buffer := fchunk
 	hs := tutil.HashFunc(fchunk)
 	fchunk = append(hs, fchunk...)
-	fdl := len(fchunk) - 512
+	len1 := len(fchunk)
+	fdl := len1 - 512
 	if fdl < 0 {
-		return nil, errors.New("???")
+		fdl = len1
+		//return nil, errors.New("??? " + strconv.Itoa(fdl) + " ??")
 	}
 	fchunk = append(fchunk, fchunk[0:fdl]...)
 
