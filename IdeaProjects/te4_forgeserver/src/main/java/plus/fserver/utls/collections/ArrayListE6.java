@@ -113,6 +113,12 @@ public class ArrayListE6<T> implements List<T> {
     }
 
 
+    public void ensureCapacity(int minCapacity) {
+        if(minCapacity < 0)return;
+        if(minCapacity > size) data = expand(data, minCapacity);
+    }
+
+
     public void trimToSize(){
         int curSize;
         if((curSize = size) == 0){

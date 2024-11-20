@@ -333,6 +333,7 @@ net.minecraft.entity.item.EntityItem
 net.minecraft.entity.item.EntityMinecart$1
 net.minecraft.entity.item.EntityMinecart$Type
 net.minecraft.entity.item.EntityMinecart
+net.minecraft.entity.item.EntityTNTPrimed
 net.minecraft.entity.monster.AbstractSkeleton$1
 net.minecraft.entity.monster.AbstractSkeleton
 net.minecraft.entity.monster.EntityBlaze$AIFireballAttack

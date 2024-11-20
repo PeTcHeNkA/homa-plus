@@ -73,6 +73,7 @@ repositories {
     flatDir { dirs 'lib' }
     flatDir {
         dirs "C:/Users/Te4hnoPlus/IdeaProjects/REPO/"
+        dirs "C:/Users/Te4hnoPlus/IdeaProjects/te4_forgeserver/lib3/"
     }
 }
 
@@ -82,6 +83,8 @@ dependencies {
     minecraft "net.minecraftforge:forge:1.12.2-14.23.5.2859"
     implementation "org.spongepowered:mixin:0.8.3-SNAPSHOT"
     annotationProcessor 'org.spongepowered:mixin:0.8.3-SNAPSHOT:processor'
+
+    //fg.deobf("plus:nuclearcraft:0.1")
 
     implementation fileTree("lib")
 }

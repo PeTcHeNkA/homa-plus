@@ -505,27 +505,12 @@ public final class AxisAlignedBB {
 
 
     public boolean checkInterceptRT(Vec3d vecA, Vec3d vecB) {
-        Vec3d vec3d = this.collideWithXPlane(this.minX, vecA, vecB);
-        if(vec3d != null)return true;
-        Vec3d vec3d1 = this.collideWithXPlane(this.maxX, vecA, vecB);
-
-        if (vec3d1 != null) return true;
-
-        vec3d1 = this.collideWithYPlane(this.minY, vecA, vecB);
-
-        if (vec3d1 != null) return true;
-
-        vec3d1 = this.collideWithYPlane(this.maxY, vecA, vecB);
-
-        if (vec3d1 != null) return true;
-
-        vec3d1 = this.collideWithZPlane(this.minZ, vecA, vecB);
-
-        if (vec3d1 != null) return true;
-
-        vec3d1 = this.collideWithZPlane(this.maxZ, vecA, vecB);
-
-        return vec3d1 != null;
+        return  this.collideWithXPlaneB(this.minX, vecA, vecB) ||
+                this.collideWithXPlaneB(this.maxX, vecA, vecB) ||
+                this.collideWithYPlaneB(this.minY, vecA, vecB) ||
+                this.collideWithYPlaneB(this.maxY, vecA, vecB) ||
+                this.collideWithZPlaneB(this.minZ, vecA, vecB) ||
+                this.collideWithZPlaneB(this.maxZ, vecA, vecB);
     }
 
 
@@ -543,11 +528,44 @@ public final class AxisAlignedBB {
     }
 
 
+    private boolean collideWithXPlaneB(double factor, Vec3d vec1, Vec3d vec2) {
+        final double d0 = vec2.x - vec1.x;
+        final double d2 = vec2.y - vec1.y;
+        final double d3 = vec2.z - vec1.z;
+        if (d0 * d0 < 1.0000000116860974E-7) {
+            return false;
+        }
+        final double d4 = (factor - vec1.x) / d0;
+        if(d4 >= 0.0 && d4 <= 1.0){
+            return intersectsWithYZ(vec1.y + d2 * d4, vec1.z + d3 * d4);
+        } else {
+            return false;
+        }
+    }
+
+
     @Nullable
     @VisibleForTesting
     Vec3d collideWithYPlane(double factor, Vec3d vec1, Vec3d vec2) {
         Vec3d vec3d = vec1.getIntermediateWithYValue(vec2, factor);
         return vec3d != null && this.intersectsWithXZ(vec3d) ? vec3d : null;
+    }
+
+
+    private boolean collideWithYPlaneB(double factor, Vec3d vec1, Vec3d vec2) {
+        final double d0 = vec2.x - vec1.x;
+        final double d2 = vec2.y - vec1.y;
+        final double d3 = vec2.z - vec1.z;
+        if (d2 * d2 < 1.0000000116860974E-7) {
+            return false;
+        }
+        final double d4 = (factor - vec1.y) / d2;
+
+        if(d4 >= 0.0 && d4 <= 1.0){
+            return this.intersectsWithXZ(vec1.x + d0 * d4, vec1.z + d3 * d4);
+        } else {
+            return false;
+        }
     }
 
 
@@ -559,9 +577,30 @@ public final class AxisAlignedBB {
     }
 
 
+    private boolean collideWithZPlaneB(double factor, Vec3d vec1, Vec3d vec2) {
+        final double d0 = vec2.x - vec1.x;
+        final double d2 = vec2.y - vec1.y;
+        final double d3 = vec2.z - vec1.z;
+        if (d3 * d3 < 1.0000000116860974E-7) {
+            return false;
+        }
+        final double d4 = (factor - vec1.z) / d3;
+        if(d4 >= 0.0 && d4 <= 1.0){
+            return this.intersectsWithXY(vec1.x + d0 * d4, vec1.y + d2 * d4);
+        } else {
+            return false;
+        }
+    }
+
+
     @VisibleForTesting
     public boolean intersectsWithYZ(Vec3d vec) {
         return vec.y >= this.minY && vec.y <= this.maxY && vec.z >= this.minZ && vec.z <= this.maxZ;
+    }
+
+
+    private boolean intersectsWithYZ(double y, double z) {
+        return y >= this.minY && y <= this.maxY && z >= this.minZ && z <= this.maxZ;
     }
 
 
@@ -571,9 +610,19 @@ public final class AxisAlignedBB {
     }
 
 
+    private boolean intersectsWithXZ(double x, double z) {
+        return x >= this.minX && x <= this.maxX && z >= this.minZ && z <= this.maxZ;
+    }
+
+
     @VisibleForTesting
     public boolean intersectsWithXY(Vec3d vec) {
         return vec.x >= this.minX && vec.x <= this.maxX && vec.y >= this.minY && vec.y <= this.maxY;
+    }
+
+
+    public boolean intersectsWithXY(double x, double y) {
+        return x >= this.minX && x <= this.maxX && y >= this.minY && y <= this.maxY;
     }
 
 

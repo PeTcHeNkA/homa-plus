@@ -43,8 +43,11 @@ public class ChunkLCache implements IBlockEAccess {
 
 
     public void init(Entity entity){
-        int x = ((int)(entity.posX))>>4;
-        int z = ((int)(entity.posZ))>>4;
+        init(((int)(entity.posX))>>4, ((int)(entity.posZ))>>4);
+    }
+
+
+    public void init(int x, int z){
         if(x != this.x || z != this.z){
             this.chunk = null;
             this.x = x;
@@ -75,31 +78,8 @@ public class ChunkLCache implements IBlockEAccess {
 
 
     public void init(Chunk chunk){
+        init(chunk.x, chunk.z);
         this.chunk = chunk;
-        if (this.x != chunk.x || this.z != chunk.z) {
-            this.x = chunk.x;
-            this.z = chunk.z;
-            if (xAdd != null) {
-                xAdd.x = chunk.x + 1;
-                xAdd.z = chunk.z;
-                xAdd.cleanAll();
-            }
-            if (xMin != null) {
-                xMin.x = chunk.x - 1;
-                xMin.z = chunk.z;
-                xMin.cleanAll();
-            }
-            if (zAdd != null) {
-                zAdd.x = chunk.x;
-                zAdd.z = chunk.z + 1;
-                zAdd.cleanAll();
-            }
-            if (zMin != null) {
-                zMin.x = chunk.x;
-                zMin.z = chunk.z - 1;
-                zMin.cleanAll();
-            }
-        }
     }
 
 

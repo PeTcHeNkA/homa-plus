@@ -101,6 +101,7 @@ public interface IBlockProperties {
 
     AxisAlignedBB getBoundingBox(IBlockAccess blockAccess, BlockPos pos);
 
+    @Nullable
     RayTraceResult collisionRayTrace(World worldIn, BlockPos pos, Vec3d start, Vec3d end);
 
     @Deprecated // Forge: Use isSideSolid(IBlockAccess, BlockPos, EnumFacing.UP) instead
