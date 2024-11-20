@@ -13,6 +13,7 @@ import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
@@ -124,6 +125,12 @@ public class BlockBush extends Block implements net.minecraftforge.common.IPlant
     @Nullable
     public AxisAlignedBB getCollisionBoundingBox(IBlockState blockState, IBlockAccess worldIn, BlockPos pos) {
         return NULL_AABB;
+    }
+
+
+    @Override
+    public boolean hasCollisionRayTrace(IBlockState blockState, IBlockAccess access, BlockPos pos, Vec3d start, Vec3d end) {
+        return false;
     }
 
 
