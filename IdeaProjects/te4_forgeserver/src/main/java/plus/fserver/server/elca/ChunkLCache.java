@@ -150,11 +150,17 @@ public class ChunkLCache implements IBlockEAccess {
     }
 
 
-    public final ChunkLCache getOrCreateExecutor(int x, int z, int lim){
+    public final ChunkLCache getOrInitExecutor(int x, int z, int lim){
         int r1 = MathUtls.range(this.x, x);
-        if(r1 > lim || r1 < -lim)return new ChunkLCache(world, x, z);
+        if(r1 > lim || r1 < -lim){
+            init(x, z);
+            return this;
+        }
         r1 = MathUtls.range(this.z, z);
-        if(r1 > lim || r1 < -lim)return new ChunkLCache(world, x, z);
+        if(r1 > lim || r1 < -lim){
+            init(x, z);
+            return this;
+        }
         return getExecutor(x, z);
     }
 

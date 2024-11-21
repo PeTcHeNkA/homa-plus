@@ -1,13 +1,13 @@
 package net.minecraft.world;
 
 import com.google.common.collect.Maps;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import javax.annotation.Nullable;
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
-import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -31,7 +31,7 @@ import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.ElcaCV;
-import plus.fserver.server.elca.AABKey;
+import plus.fserver.ElcaConfig;
 import plus.fserver.server.elca.ChunkLCache;
 import plus.fserver.utls.collections.ArrayListE10;
 import plus.fserver.utls.math.MathUtls;
@@ -51,6 +51,7 @@ public class Explosion {
     private final Map<EntityPlayer, Vec3d> playerKnockbackMap;
     private final Vec3d position;
     private final ChunkLCache selector;
+    private boolean async = false;
 
     @SideOnly(Side.CLIENT)
     public Explosion(World worldIn, Entity entityIn, double x, double y, double z, float size, List<BlockPos> affectedPositions) {
@@ -78,7 +79,7 @@ public class Explosion {
         this.damagesTerrain = damagesTerrain;
         this.position = new Vec3d(this.x, this.y, this.z);
 
-        this.selector = world.bigLocalCache.getOrCreateExecutor(MathHelper.floor(x)>>4, MathHelper.floor(z)>>4, 6);
+        this.selector = world.bigLocalCache.getOrInitExecutor(MathHelper.floor(x)>>4, MathHelper.floor(z)>>4, 6);
     }
 
 //
@@ -220,15 +221,32 @@ public class Explosion {
         if(ElcaCV.ENABLE_EXPLOSION_EVENT)
             ForgeEventFactory.onExplosionDetonate(world, this, list, fSize);
 
-        if(list.size() < 32) {
-            pushMinEntites(list, fSize);
+        if(list.size() < ElcaConfig.ASYNC_EXPLOSION_THRESHOLD) {
+            pushMinEntites(list);
         } else {
-            pushMoreEntites(list, fSize);
+            async = true;
+            world.getMinecraftServer().ticker().runAsync(new AsyExplosionPushTask(list));
         }
     }
 
 
-    private void pushMinEntites(List<Entity> list, double fSize){
+    private class AsyExplosionPushTask extends ArrayList<Entity> implements Runnable{
+        AsyExplosionPushTask(List<Entity> list){
+            super(list);
+        }
+        @Override
+        public void run() {
+            pushMinEntites(this);
+            ((WorldServer)world).addSyncTask(() -> {
+                async = false;
+                completeExplosion(Explosion.this);
+            });
+        }
+    }
+
+
+    private void pushMinEntites(List<Entity> list){
+        float fSize = this.size * 2.0F;
         final ChunkLCache selector = this.selector;
         World world = this.world;
         Vec3d position = this.position;
@@ -252,67 +270,6 @@ public class Explosion {
                         zPos = zPos / d13;
                         double d14 = world.getBlockDensity(selector, position, entity.getEntityBoundingBox());
                         double d10 = (1.0D - d12) * d14;
-                        entity.attackEntityFrom(DamageSource.causeExplosionDamage(this), (float)((int)((d10 * d10 + d10) / 2.0D * 7.0D * fSize + 1.0D)));
-                        double d11 = d10;
-
-                        if (entity.isLiving()) {
-                            d11 = EnchantmentProtection.getBlastDamageReduction((EntityLivingBase)entity, d10);
-
-                            if (entity instanceof EntityPlayer) {
-                                EntityPlayer entityplayer = (EntityPlayer)entity;
-
-                                if (!entityplayer.isSpectator() && (!entityplayer.isCreative() || !entityplayer.capabilities.isFlying)) {
-                                    this.playerKnockbackMap.put(entityplayer, new Vec3d(xPos * d10, yPos * d10, zPos * d10));
-                                }
-                            }
-                        }
-
-                        entity.motionX += xPos * d11;
-                        entity.motionY += yPos * d11;
-                        entity.motionZ += zPos * d11;
-                    }
-                }
-            }
-        }
-    }
-
-
-    private void pushMoreEntites(List<Entity> list, double fSize){
-        final ChunkLCache selector = this.selector;
-        World world = this.world;
-        Vec3d position = this.position;
-        Object2DoubleOpenHashMap<AABKey> cache = new Object2DoubleOpenHashMap<>(list.size());
-        cache.defaultReturnValue(-1);
-        AABKey tKey = new AABKey(0,0,0,0,0,0);
-
-        for(int k2 = 0; k2 < list.size(); ++k2) {
-            Entity entity = list.get(k2);
-            if(entity.isDead)continue;
-
-            if (!entity.isImmuneToExplosions()) {
-                double d12 = entity.getDistance(x, y, z) / fSize;
-
-                if (d12 <= 1.0D) {
-                    double xPos = entity.posX - x;
-                    double yPos = entity.posY + entity.getEyeHeight() - y;
-                    double zPos = entity.posZ - z;
-                    double d13 = MathHelper.sqrt(xPos * xPos + yPos * yPos + zPos * zPos);
-
-                    if (d13 != 0.0D) {
-                        xPos = xPos / d13;
-                        yPos = yPos / d13;
-                        zPos = zPos / d13;
-
-                        tKey.init(entity.getEntityBoundingBox());
-
-                        double result = cache.getDouble(tKey);
-                        if(result == -1){
-                            result = world.getBlockDensity(selector, position, entity.getEntityBoundingBox());
-                            cache.put(tKey.copy(), result);
-                        }
-                        //double d14 = world.getBlockDensity(selector, position, entity.getEntityBoundingBox());
-
-                        double d10 = (1.0D - d12) * result;
                         entity.attackEntityFrom(DamageSource.causeExplosionDamage(this), (float)((int)((d10 * d10 + d10) / 2.0D * 7.0D * fSize + 1.0D)));
                         double d11 = d10;
 
@@ -396,6 +353,7 @@ public class Explosion {
 
 
     public static void completeExplosion(Explosion explosion){
+        if(explosion.async)return;
         explosion.doExplosionB(false);
 
         if (!explosion.damagesTerrain) {

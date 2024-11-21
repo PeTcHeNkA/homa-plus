@@ -69,6 +69,7 @@ public class ElcaConfig {
     public static int CACHE_CHUNK_DATA           = 24;
     public static int PCM_MAX_LOAD_PER_TICK      = 50;
     public static int PCM_MAX_SEND_PER_TICK      = 128;
+    public static int ASYNC_EXPLOSION_THRESHOLD  = 32;
 
     //public static boolean FAST_LIGHT                 = true;
     public static boolean SLOW_SWIM_AI                = true;
@@ -93,7 +94,6 @@ public class ElcaConfig {
     public static boolean ASYNC_PATHFINDING_AUTO      = true;
     public static boolean UNIMPORTANT_PACKET_QUEUE    = true;
     public static boolean ENABLE_ASM_TRIMMER          = true;
-    //public static boolean ENABLE_DATA_FIXER          = false;
 
 
     private static File dir(String str){
@@ -205,6 +205,7 @@ public class ElcaConfig {
         UNIMPORTANT_PACKET_QUEUE   = calc(map, "unimportant-packet-queue"    , UNIMPORTANT_PACKET_QUEUE   );
         ENABLE_ASM_TRIMMER         = calc(map, "enable-asm-trimmer"          , ENABLE_ASM_TRIMMER         );
         ASY_THREAD_POOL_SIZE       = calc(map, "thread-pool-size"            , ASY_THREAD_POOL_SIZE       );
+        ASYNC_EXPLOSION_THRESHOLD  = calc(map, "async-explosion-threshold"   , ASYNC_EXPLOSION_THRESHOLD  );
 
         if(INIT_PALETTE_LINEAR_BITS > 4 || INIT_PALETTE_LINEAR_BITS < 2){
             INIT_PALETTE_LINEAR_BITS = 4;
@@ -215,6 +216,9 @@ public class ElcaConfig {
             int newPoolSize = Runtime.getRuntime().availableProcessors() * 6;
             System.err.println(ASY_THREAD_POOL_SIZE+" is so much! Pool size trimmed to "+newPoolSize);
             ASY_THREAD_POOL_SIZE = newPoolSize;
+        }
+        if(ASYNC_EXPLOSION_THRESHOLD == -1){
+            ASYNC_EXPLOSION_THRESHOLD = Integer.MAX_VALUE;
         }
     }
 }
