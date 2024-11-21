@@ -210,8 +210,8 @@ public class PlayerChunkMapEntry extends EntityList<EntityPlayerMP> implements C
             if ((changes = this.changes) == 0) {
                 map.entryChanged(this);
             }
-            if(changes >= ForgeModContainer.clumpingThreshold)return;
             this.changedSectionFilter |= 1 << (y >> 4);
+            if(changes >= ForgeModContainer.clumpingThreshold) return;
             short codedPos = (short) (x << 12 | z << 8 | y);
 
             short[] changedBlocks = this.changedBlocks;
