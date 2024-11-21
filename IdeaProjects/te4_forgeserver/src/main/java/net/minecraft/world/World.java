@@ -2198,8 +2198,8 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         float d2 = 1.0f / ((float) (bbMaxZ - bbMinZ) * 2.0f + 1.0f);
 
         if (d0 >= 0.0D && d1 >= 0.0D && d2 >= 0.0D) {
-            double d3 = (1.0D - Math.floor(1.0D / d0) * d0) / 2.0D;
-            double d4 = (1.0D - Math.floor(1.0D / d2) * d2) / 2.0D;
+            double d3 = (1.0D - Math.floor(1.0D / d0) * d0) * 0.5D;
+            double d4 = (1.0D - Math.floor(1.0D / d2) * d2) * 0.5D;
 
             int j2 = 0, k2 = 0;
 
@@ -2226,7 +2226,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
-    private static boolean rtxForExplosion(BlockPos.MutableBlockPos blockPos, ChunkLCache selector, Vec3d st, Vec3d end, int lim) {
+    private static boolean rtxForExplosion(final BlockPos.MutableBlockPos blockPos, ChunkLCache selector, final Vec3d st, final Vec3d end, int lim) {
         if (!Double.isNaN(st.x) && !Double.isNaN(st.y) && !Double.isNaN(st.z)) {
             int sX = MathHelper.floor(end.x);
             int sY = MathHelper.floor(end.y);
@@ -2237,7 +2237,8 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
             blockPos.setPosB(xPos, yPos, zPos);
 
-            IBlockState state = selector.getBlockState(xPos, yPos, zPos);
+            selector = selector.getExecutor(xPos>>4, zPos>>4);
+            IBlockState state = selector.getChunk().getBlockState(xPos, yPos, zPos);
 
             if (state.getBlock().hasCollisionRayTrace(state, selector, blockPos, st, end)) return true;
 

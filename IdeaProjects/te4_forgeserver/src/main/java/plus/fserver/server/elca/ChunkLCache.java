@@ -16,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import plus.fserver.api.IBlockEAccess;
 import plus.fserver.utls.EmptyChunk;
+import plus.fserver.utls.math.MathUtls;
 
 
 public class ChunkLCache implements IBlockEAccess {
@@ -146,6 +147,15 @@ public class ChunkLCache implements IBlockEAccess {
             ++z;
         }
         return executor;
+    }
+
+
+    public final ChunkLCache getOrCreateExecutor(int x, int z, int lim){
+        int r1 = MathUtls.range(this.x, x);
+        if(r1 > lim || r1 < -lim)return new ChunkLCache(world, x, z);
+        r1 = MathUtls.range(this.z, z);
+        if(r1 > lim || r1 < -lim)return new ChunkLCache(world, x, z);
+        return getExecutor(x, z);
     }
 
 

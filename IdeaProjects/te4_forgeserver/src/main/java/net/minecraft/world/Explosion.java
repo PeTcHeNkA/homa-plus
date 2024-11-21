@@ -16,8 +16,10 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityTNTPrimed;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.SoundEvents;
+import net.minecraft.network.play.server.SPacketExplosion;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.SoundCategory;
@@ -28,7 +30,6 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import plus.fserver.api.IBlockEAccess;
 import plus.fserver.ElcaCV;
 import plus.fserver.server.elca.AABKey;
 import plus.fserver.server.elca.ChunkLCache;
@@ -40,7 +41,7 @@ import plus.tson.utl.uns.UnsafeUtils;
 public class Explosion {
     private final boolean causesFire;
     private final boolean damagesTerrain;
-    private final World world;
+    final World world;
     private final double x;
     private final double y;
     private final double z;
@@ -77,10 +78,21 @@ public class Explosion {
         this.damagesTerrain = damagesTerrain;
         this.position = new Vec3d(this.x, this.y, this.z);
 
-        ChunkLCache selector = world.bigLocalCache;
-        selector.init(MathHelper.floor(x)>>4, MathHelper.floor(z)>>4);
-        this.selector = selector;
+        this.selector = world.bigLocalCache.getOrCreateExecutor(MathHelper.floor(x)>>4, MathHelper.floor(z)>>4, 6);
     }
+
+//
+//    public static class Async extends Explosion{
+//        public Async(World worldIn, Entity entityIn, double x, double y, double z, float size, boolean causesFire, boolean damagesTerrain) {
+//            super(worldIn, entityIn, x, y, z, size, causesFire, damagesTerrain);
+//        }
+//
+//        @Override
+//        public void doExplosionA() {
+//            super.doExplosionA();
+//            ((WorldServer)world).addSyncTask(() -> completeExplosion(Async.this));
+//        }
+//    }
 
 
     private static long encodeWorldCoord(final int x, final int y, final int z) {
@@ -115,7 +127,7 @@ public class Explosion {
         final Entity exploder = this.exploder;
         final World world = this.world;
 
-        final ChunkLCache selector = this.selector;
+        ChunkLCache selector = this.selector;
         final float size = this.size;
         final double x = this.x, y = this.y, z = this.z;
 
@@ -144,7 +156,8 @@ public class Explosion {
                         int bz = MathHelper.floor(zPos = z);
 
                         blockpos.setPosB(bx, by, bz);
-                        IBlockState state = selector.getBlockState(bx, by, bz);
+                        selector = selector.getExecutor(bx>>4, bz>>4);
+                        IBlockState state = selector.getChunk().getBlockState(bx, by, bz);
 
                         l1: for (; fSize > 0.0F; fSize -= 0.22500001F) {
                             if (state.getMaterial() != Material.AIR) {
@@ -268,11 +281,11 @@ public class Explosion {
         final ChunkLCache selector = this.selector;
         World world = this.world;
         Vec3d position = this.position;
-        Object2DoubleOpenHashMap<AABKey> cache = new Object2DoubleOpenHashMap<>();
+        Object2DoubleOpenHashMap<AABKey> cache = new Object2DoubleOpenHashMap<>(list.size());
         cache.defaultReturnValue(-1);
         AABKey tKey = new AABKey(0,0,0,0,0,0);
 
-        for (int k2 = 0; k2 < list.size(); ++k2) {
+        for(int k2 = 0; k2 < list.size(); ++k2) {
             Entity entity = list.get(k2);
             if(entity.isDead)continue;
 
@@ -293,7 +306,7 @@ public class Explosion {
                         tKey.init(entity.getEntityBoundingBox());
 
                         double result = cache.getDouble(tKey);
-                        if(result < 0){
+                        if(result == -1){
                             result = world.getBlockDensity(selector, position, entity.getEntityBoundingBox());
                             cache.put(tKey.copy(), result);
                         }
@@ -336,7 +349,7 @@ public class Explosion {
             world.spawnParticle(EnumParticleTypes.EXPLOSION_LARGE, this.x, this.y, this.z, 1.0D, 0.0D, 0.0D);
         }
 
-        IBlockEAccess selector = this.selector;
+        ChunkLCache selector = this.selector;
 
         if (this.damagesTerrain) {
             for (BlockPos blockpos : this.affectedBlockPositions) {
@@ -377,6 +390,28 @@ public class Explosion {
                         && selector.getBlockState(pos.getX(), pos.getY()-1, pos.getZ()).isFullBlock() && (rand.nextInt() & 3) == 0) {
                     selector.setBlockState(pos, Blocks.FIRE.getDefaultState());
                 }
+            }
+        }
+    }
+
+
+    public static void completeExplosion(Explosion explosion){
+        explosion.doExplosionB(false);
+
+        if (!explosion.damagesTerrain) {
+            explosion.clearAffectedBlockPositions();
+        }
+
+        SPacketExplosion packet = null;
+        for (EntityPlayer entityplayer : explosion.world.curPlayerEntities) {
+            if (entityplayer.getDistanceSq(explosion.x, explosion.y, explosion.z) < 4096.0D) {
+                if(packet==null){
+                    packet = new SPacketExplosion(explosion.x, explosion.y, explosion.z, explosion.size,
+                            explosion.getAffectedBlockPositions(),
+                            explosion.getPlayerKnockbackMap().get(entityplayer)
+                    );
+                }
+                ((EntityPlayerMP)entityplayer).connection.netManager.sendPacketE(packet);
             }
         }
     }

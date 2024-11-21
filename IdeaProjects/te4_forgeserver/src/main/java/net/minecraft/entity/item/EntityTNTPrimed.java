@@ -10,6 +10,7 @@ import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import plus.fserver.ElcaCV;
 
 import static net.minecraft.entity.EMoveHelper.COMMON_FUTURE;
@@ -107,7 +108,11 @@ public class EntityTNTPrimed extends Entity {
 
 
     protected void explode() {
+//        if(!world.isRemote){
+//            ((WorldServer)world).explosionAsy(this, this.posX, this.posY + (double)(this.height / 16.0F), this.posZ, strength, false,  true);
+//        } else {
         this.world.createExplosion(this, this.posX, this.posY + (double)(this.height / 16.0F), this.posZ, strength, true);
+//        }
     }
 
 

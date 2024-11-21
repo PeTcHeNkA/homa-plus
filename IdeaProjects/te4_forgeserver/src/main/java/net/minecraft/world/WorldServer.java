@@ -1230,26 +1230,18 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         if (ElcaCV.ENABLE_EXPLOSION_EVENT &&
                 ForgeEventFactory.onExplosionStart(this, explosion)) return explosion;
         explosion.doExplosionA();
-        explosion.doExplosionB(false);
-
-        if (!damagesTerrain) {
-            explosion.clearAffectedBlockPositions();
-        }
-
-        SPacketExplosion packet = null;
-        for (EntityPlayer entityplayer : this.playerEntities) {
-            if (entityplayer.getDistanceSq(x, y, z) < 4096.0D) {
-                if(packet==null){
-                    packet = new SPacketExplosion(x, y, z, strength,
-                            explosion.getAffectedBlockPositions(),
-                            explosion.getPlayerKnockbackMap().get(entityplayer)
-                    );
-                }
-                ((EntityPlayerMP)entityplayer).connection.netManager.sendPacketE(packet);
-            }
-        }
+        Explosion.completeExplosion(explosion);
         return explosion;
     }
+//
+//
+//    public void explosionAsy(@Nullable Entity entityIn, double x, double y, double z, float strength, boolean causesFire, boolean damagesTerrain){
+//        Explosion explosion = new Explosion.Async(this, entityIn, x, y, z, strength, causesFire, damagesTerrain);
+//        if (ElcaCV.ENABLE_EXPLOSION_EVENT &&
+//                ForgeEventFactory.onExplosionStart(this, explosion)) return;
+//
+//        getMinecraftServer().ticker().runAsync(explosion::doExplosionA);
+//    }
 
 
     @Override
