@@ -4,6 +4,7 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.function.BiPredicate;
 import javax.annotation.Nullable;
+import it.unimi.dsi.fastutil.ints.Int2FloatFunction;
 import it.unimi.dsi.fastutil.ints.Int2FloatOpenHashMap;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -60,6 +61,8 @@ import plus.fserver.api.inject.VarOnly;
 import plus.fserver.server.SStrings;
 import plus.fserver.utls.EntityLodFunc;
 import plus.fserver.utls.collections.FixedItemList;
+import plus.fserver.utls.collections.Int2FloatSingletonFunc;
+
 import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
@@ -89,7 +92,7 @@ public abstract class EntityLiving extends EntityLivingBase {
 
     private boolean canPickUpLoot;
     private boolean persistenceRequired;
-    private Int2FloatOpenHashMap mapPathPriority;
+    private Int2FloatFunction mapPathPriority;
     private ResourceLocation deathLootTable;
     private long deathLootTableSeed;
     private boolean isLeashed;
@@ -132,7 +135,7 @@ public abstract class EntityLiving extends EntityLivingBase {
 
 
     public float getPathPriority(PathNodeType nodeType) {
-        Int2FloatOpenHashMap mapPathPriority;
+        Int2FloatFunction mapPathPriority;
         if((mapPathPriority = this.mapPathPriority) == null)
             return nodeType.getPriority();
 
@@ -143,10 +146,16 @@ public abstract class EntityLiving extends EntityLivingBase {
 
 
     public void setPathPriority(PathNodeType nodeType, float priority) {
-        Int2FloatOpenHashMap mapPathPriority;
+        Int2FloatFunction mapPathPriority;
         if((mapPathPriority = this.mapPathPriority) == null) {
-            this.mapPathPriority = mapPathPriority = new Int2FloatOpenHashMap(3);
-            mapPathPriority.defaultReturnValue(Float.NaN);
+            this.mapPathPriority = new Int2FloatSingletonFunc(nodeType.id, priority);
+            return;
+        }
+        if(mapPathPriority instanceof Int2FloatSingletonFunc){
+            Int2FloatSingletonFunc prev = (Int2FloatSingletonFunc) mapPathPriority;
+            Int2FloatOpenHashMap map = new Int2FloatOpenHashMap(3, 1);
+            map.defaultReturnValue(prev.defaultReturnValue());
+            mapPathPriority = this.mapPathPriority = map;
         }
         mapPathPriority.put(nodeType.id, priority);
     }
