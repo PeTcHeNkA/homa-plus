@@ -1,5 +1,7 @@
 package plus.fserver.utls.math;
 
+import net.minecraft.util.math.BlockPos;
+
 
 public class MathUtls {
     public static final float F_180_PI = 180F / (float)Math.PI;
@@ -54,5 +56,19 @@ public class MathUtls {
         y2 -= y1;
         z2 -= z1;
         return x2 * x2 + y2 * y2 + z2 * z2;
+    }
+
+
+    public static long encodeWorldCoord(final int x, final int y, final int z) {
+        return (long) y << 52 | x + 33554432L << 26 | z + 33554432L;
+    }
+
+
+    public static void decodeWorldCoord(final BlockPos.MutableBlockPos pos, final long longPos) {
+        pos.setPosB(
+                (int)(longPos >> 26 & 0x3FFFFFFL) - 33554432,
+                (int)(longPos >> 52 & 0xFFL),
+                (int)(longPos & 0x3FFFFFFL) - 33554432
+        );
     }
 }

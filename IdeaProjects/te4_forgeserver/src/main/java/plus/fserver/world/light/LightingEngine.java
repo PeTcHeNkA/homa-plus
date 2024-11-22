@@ -13,6 +13,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import plus.fserver.utls.collections.PooledLongQueue;
 import java.util.concurrent.locks.ReentrantLock;
+import static plus.fserver.utls.math.MathUtls.decodeWorldCoord;
+import static plus.fserver.utls.math.MathUtls.encodeWorldCoord;
 
 
 public class LightingEngine implements ILightingEngine {
@@ -67,7 +69,7 @@ public class LightingEngine implements ILightingEngine {
 
     @Override
     public void scheduleLightUpdate(final EnumSkyBlock lightType, final BlockPos pos) {
-        this.scheduleLightUpdate(lightType, encodeWorldCoord(pos));
+        this.scheduleLightUpdate(lightType, encodeWorldCoord(pos.getX(), pos.getY(), pos.getZ()));
     }
 
 
@@ -395,25 +397,6 @@ public class LightingEngine implements ILightingEngine {
     private static void enqueueDarkening(final PooledLongQueue[] queuedDarkenings, final BlockPos pos, final long longPos, final int oldLight, final Chunk chunk, final EnumSkyBlock lightType) {
         queuedDarkenings[oldLight].add(longPos);
         chunk.setLightFor(lightType, pos, 0);
-    }
-
-
-    private static void decodeWorldCoord(final BlockPos.MutableBlockPos pos, final long longPos) {
-        pos.setPosB(
-                (int)(longPos >> 26 & 0x3FFFFFFL) - 33554432,
-                    (int)(longPos >> 52 & 0xFFL),
-                (int)(longPos & 0x3FFFFFFL) - 33554432
-        );
-    }
-
-
-    private static long encodeWorldCoord(final int x, final int y, final int z) {
-        return (long) y << 52 | x + 33554432L << 26 | z + 33554432L;
-    }
-
-
-    private static long encodeWorldCoord(final BlockPos pos) {
-        return (long) pos.getY() << 52 | pos.getX() + 33554432L << 26 | pos.getZ() + 33554432L;
     }
 
 

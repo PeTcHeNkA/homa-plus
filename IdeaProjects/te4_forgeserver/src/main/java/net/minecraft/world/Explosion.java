@@ -36,6 +36,8 @@ import plus.fserver.server.elca.ChunkLCache;
 import plus.fserver.utls.collections.ArrayListE10;
 import plus.fserver.utls.math.MathUtls;
 import plus.tson.utl.uns.UnsafeUtils;
+import static plus.fserver.utls.math.MathUtls.decodeWorldCoord;
+import static plus.fserver.utls.math.MathUtls.encodeWorldCoord;
 
 
 public class Explosion {
@@ -95,11 +97,6 @@ public class Explosion {
 //        }
 //    }
 
-
-    private static long encodeWorldCoord(final int x, final int y, final int z) {
-        return (long) y << 52 | x + 33554432L << 26 | z + 33554432L;
-    }
-
     private static LongOpenHashSet _temp;
     private static final long tempOff = UnsafeUtils.offsetS(Explosion.class, "_temp");
     private static LongOpenHashSet tempSet(){
@@ -109,14 +106,6 @@ public class Explosion {
             return temp;
         }
         return new LongOpenHashSet(24, 0.75f);
-    }
-
-    private static void decodeWorldCoord(final BlockPos.MutableBlockPos pos, final long longPos) {
-        pos.setPosB(
-                (int)(longPos >> 26 & 0x3FFFFFFL) - 33554432,
-                (int)(longPos >> 52 & 0xFFL),
-                (int)(longPos & 0x3FFFFFFL) - 33554432
-        );
     }
 
 

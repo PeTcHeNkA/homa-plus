@@ -926,6 +926,10 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
         entityIn.chunkCoordY = part;
         entityIn.chunkCoordZ = this.z;
 
+//        if(entityIn.moveTask != null){
+//            ((WorldServer)world).collideTask.add(entityIn);
+//        }
+
         ClassInheritanceMultiMap<Entity> list = lists[part];
         if(list == null)list = lists[part] = new ClassInheritanceMultiMap<>(Entity.class);
 

@@ -1,5 +1,7 @@
 package net.minecraft.entity;
 
+import it.unimi.dsi.fastutil.longs.LongIterator;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ClassInheritanceMultiMap;
 import net.minecraft.util.EnumFacing;
@@ -15,6 +17,9 @@ import plus.fserver.server.elca.ChunkSelector;
 import plus.fserver.utls.collections.AABBList;
 import plus.tson.utl.Te4HashSet;
 import java.util.Arrays;
+
+import static plus.fserver.utls.math.MathUtls.decodeWorldCoord;
+import static plus.fserver.utls.math.MathUtls.encodeWorldCoord;
 
 
 public class EMoveHelper {
@@ -172,25 +177,12 @@ public class EMoveHelper {
 
 
     public static class ComboCollideTask extends BlockPos.MutableBlockPos{
-        private final Te4HashSet<BlockPos.MutableBlockPos> allUpdate = new Te4HashSet<>();
-        private BlockPos.MutableBlockPos[] temp = new MutableBlockPos[12];
-        private int tempSize = 0;
+        private final LongOpenHashSet allUpdate = new LongOpenHashSet();
         private EMoveHelper.MoveTask[] allTasks = new EMoveHelper.MoveTask[128];
         private int realSize = 0;
 
         public void add(Entity entity){
-            editRoot(entity.chunkCoordX, entity.chunkCoordY, entity.chunkCoordZ);
-            Te4HashSet<BlockPos.MutableBlockPos> allUpdate;
-            if(!(allUpdate = this.allUpdate).contains(this)) allUpdate.add(newPos());
-        }
-
-
-        private BlockPos.MutableBlockPos newPos(){
-            int size = tempSize-1;
-            if(size == -1)return new BlockPos.MutableBlockPos(this);
-            BlockPos.MutableBlockPos result = temp[size];
-            this.tempSize = size;
-            return result;
+            allUpdate.add(encodeWorldCoord(entity.chunkCoordX, entity.chunkCoordY, entity.chunkCoordZ));
         }
 
 
@@ -214,34 +206,36 @@ public class EMoveHelper {
         public void complete(WorldServer world, ChunkSelector selector, AxisAlignedBB tempAABB){
             if(allUpdate.isEmpty())return;
             ChunkProviderServer provider = selector.provider();
+            LongIterator itr = allUpdate.iterator();
 
-            BlockPos.MutableBlockPos[] temp = this.temp;
-            int tempSize = this.tempSize;
-
-            for (BlockPos.MutableBlockPos pos: allUpdate){
-                Chunk chunk = provider.getLoadedChunk(pos.getX(), pos.getZ());
+            while (itr.hasNext()){
+                decodeWorldCoord(this, itr.nextLong());
+                Chunk chunk = provider.getLoadedChunk(this.getX(), this.getZ());
                 if(chunk != null) {
-                    ClassInheritanceMultiMap<Entity> list = chunk.getEntityLists()[pos.getY()];
+                    ClassInheritanceMultiMap<Entity> list = chunk.getEntityLists()[this.getY()];
                     if(list != null) {
                         selector.setChunk(chunk);
                         completeMoveTasks(world, selector, tempAABB, list);
                     }
                 }
-                if(tempSize == temp.length){
-                    BlockPos.MutableBlockPos[] newTemp = new MutableBlockPos[temp.length+4];
-                    System.arraycopy(temp, 0, newTemp, 0, tempSize);
-                    temp = this.temp = newTemp;
-                }
-                temp[tempSize++] = pos;
             }
-            this.tempSize = tempSize;
             allUpdate.clear();
         }
 
 
         private void completeMoveTasks(WorldServer world, ChunkSelector selector, AxisAlignedBB tempAABB, ClassInheritanceMultiMap<Entity> list) {
             int size;
-            if ((size = list.sizeC()) < 2) return;
+            if ((size = list.sizeC()) < 2) {
+                if(size == 1){
+                    Entity entity;
+                    MoveTask curTask;
+                    if((entity = list.get(0)) != null && (curTask = entity.moveTask) != null){
+                        curTask.complete(this, world, selector, tempAABB);
+                        this.freeMoveTask(curTask);
+                    }
+                }
+                return;
+            }
             Entity[] arr = list.raw();
 
             //AxisAlignedBB tempAABB = this.tempAABB;
