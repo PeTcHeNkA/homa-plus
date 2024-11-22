@@ -336,11 +336,11 @@ public class EntityZombie extends EntityMob {
     @Override
     public void writeEntityToNBT(NBTTagCompound tag) {
         super.writeEntityToNBT(tag);
-
         if (this.isChild()) {
             tag.setBoolean("IsBaby", true);
         }
-        tag.setBoolean("CanBreakDoors", this.isBreakDoorsTaskSet());
+        if(this.isBreakDoorsTaskSet())
+            tag.setBoolean("CanBreakDoors", true);
     }
 
 

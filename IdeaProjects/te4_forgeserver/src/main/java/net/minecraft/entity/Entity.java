@@ -1766,34 +1766,22 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
             tag.setFloat(SStrings.FallDistance,     this.fallDistance);
             tag.setShortU(SStrings.Fire,            this.fire);
             tag.setShortU(SStrings.Air, (short)     this.getAir());
-            tag.setBoolean(SStrings.OnGround,       this.onGround);
             tag.setIntegerU(SStrings.Dimension,     this.dimension);
-            tag.setBoolean(SStrings.Invulnerable,   this.invulnerable);
             tag.setIntegerU(SStrings.PortalCooldown,this.timeUntilPortal);
             tag.setUniqueId(SStrings.UUID,          this.getUniqueID());
 
-            if (this.hasCustomName()) {
-                tag.setString(SStrings.CustomName, this.getCustomNameTag());
-            }
+            if(this.onGround)         tag.setBoolean(SStrings.OnGround, true);
+            if(this.invulnerable)     tag.setBoolean(SStrings.Invulnerable, true);
+            if(this.hasCustomName())  tag.setString(SStrings.CustomName, this.getCustomNameTag());
+            if(this.getAlwaysRenderNameTag()) tag.setBoolean(SStrings.CustomNameVisible, true);
 
-            if (this.getAlwaysRenderNameTag()) {
-                tag.setBoolean(SStrings.CustomNameVisible, this.getAlwaysRenderNameTag());
-            }
+            if(cmdResultStats != null)
+                this.cmdResultStats.writeStatsToNBT(tag);
 
-            if(cmdResultStats != null) this.cmdResultStats.writeStatsToNBT(tag);
-
-            if (this.isSilent()) {
-                tag.setBoolean(SStrings.Silent, this.isSilent());
-            }
-
-            if (this.hasNoGravity()) {
-                tag.setBoolean(SStrings.NoGravity, this.hasNoGravity());
-            }
-
-            if (this.glowing) {
-                tag.setBoolean(SStrings.Glowing, this.glowing);
-            }
-            tag.setBoolean(SStrings.UpdateBlocked, updateBlocked);
+            if(this.isSilent())     tag.setBoolean(SStrings.Silent, true);
+            if(this.hasNoGravity()) tag.setBoolean(SStrings.NoGravity, true);
+            if(this.glowing)        tag.setBoolean(SStrings.Glowing, true);
+            if(updateBlocked)       tag.setBoolean(SStrings.UpdateBlocked, true);
 
             if (this.tags != null && !this.tags.isEmpty()) {
                 NBTTagList nbttaglist = new NBTTagList();
@@ -1803,8 +1791,8 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
                 tag.setTag(SStrings.Tags, nbttaglist);
             }
 
-            if (customEntityData != null) tag.setTag(SStrings.ForgeData, customEntityData);
-            if (this.capabilities != null) tag.setTag(SStrings.ForgeCaps, this.capabilities.serializeNBT());
+            if(customEntityData != null)  tag.setTag(SStrings.ForgeData, customEntityData);
+            if(this.capabilities != null) tag.setTag(SStrings.ForgeCaps, this.capabilities.serializeNBT());
 
             this.writeEntityToNBT(tag);
 

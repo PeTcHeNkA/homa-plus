@@ -64,6 +64,9 @@ import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
 public abstract class EntityLiving extends EntityLivingBase {
+    private static final FixedItemList EMPTY_4 = new FixedItemList(4);
+    private static final FixedItemList EMPTY_2 = new FixedItemList(2);
+
     private static final DataParameter<Byte> AI_FLAGS = EntityDataManager.createKey(EntityLiving.class, DataSerializers.BYTE);
     public int livingSoundTime;
     protected int experienceValue;
@@ -79,10 +82,10 @@ public abstract class EntityLiving extends EntityLivingBase {
     private final EntitySenses senses;
 
     protected float[] inventoryHandsDropChances = new float[]{0.085F, 0.085F};
-    private final FixedItemList inventoryHands = new FixedItemList(2);
+    private FixedItemList inventoryHands = EMPTY_2;
 
     protected float[] inventoryArmorDropChances = new float[]{0.085F, 0.085F, 0.085F, 0.085F};
-    private final FixedItemList inventoryArmor = new FixedItemList(4);
+    private FixedItemList inventoryArmor = EMPTY_4;
 
     private boolean canPickUpLoot;
     private boolean persistenceRequired;
@@ -372,49 +375,67 @@ public abstract class EntityLiving extends EntityLivingBase {
     }
 
 
+    private static boolean isDefaultChance(float[] arr){
+        for (float f:arr)if(f != 0.085F)return false;
+        return true;
+    }
+
+
     @Override
     public void writeEntityToNBT(NBTTagCompound nbt) {
         super.writeEntityToNBT(nbt);
-        nbt.setBoolean(SStrings.CanPickUpLoot, this.canPickUpLoot());
-        nbt.setBoolean(SStrings.PersistenceRequired, this.persistenceRequired);
-        NBTTagList nbttaglist = new NBTTagList();
+        if(this.canPickUpLoot()) nbt.setBoolean(SStrings.CanPickUpLoot, true);
+        if(this.persistenceRequired) nbt.setBoolean(SStrings.PersistenceRequired, true);
 
-        for (ItemStack stack : this.inventoryArmor) {
-            NBTTagCompound tag = new NBTTagCompound();
-
-            if (!stack.isEmpty()) stack.writeToNBT(tag);
-
-            nbttaglist.appendTag(tag);
+        FixedItemList armor = this.inventoryArmor;
+        if(armor != EMPTY_4) {
+            NBTTagList nbttaglist = new NBTTagList(4);
+            boolean hasNonEmpty = false;
+            for (ItemStack stack : armor) {
+                if (!stack.isEmpty()) {
+                    hasNonEmpty = true;
+                    NBTTagCompound tag = new NBTTagCompound();
+                    stack.writeToNBT(tag);
+                    nbttaglist.appendTag(tag);
+                } else {
+                    nbttaglist.appendTag(new NBTTagCompound(2,1));
+                }
+            }
+            if(hasNonEmpty) nbt.setTag(SStrings.ArmorItems, nbttaglist);
         }
 
-        nbt.setTag(SStrings.ArmorItems, nbttaglist);
-        NBTTagList list = new NBTTagList();
-
-        for (ItemStack stack : this.inventoryHands) {
-            NBTTagCompound tag = new NBTTagCompound();
-
-            if (!stack.isEmpty())
-                stack.writeToNBT(tag);
-
-            list.appendTag(tag);
+        FixedItemList hands = this.inventoryHands;
+        if(hands != EMPTY_2) {
+            NBTTagList list = new NBTTagList(2);
+            boolean hasNonEmpty = false;
+            for (ItemStack stack : hands) {
+                if (!stack.isEmpty()) {
+                    hasNonEmpty = true;
+                    NBTTagCompound tag = new NBTTagCompound();
+                    stack.writeToNBT(tag);
+                    list.appendTag(tag);
+                } else {
+                    list.appendTag(new NBTTagCompound(2,1));
+                }
+            }
+            if(hasNonEmpty) nbt.setTag(SStrings.HandItems, list);
         }
 
-        nbt.setTag(SStrings.HandItems, list);
-        NBTTagList nbttaglist2 = new NBTTagList();
+        if(!isDefaultChance(inventoryArmorDropChances)) {
+            NBTTagList nbttaglist2 = new NBTTagList();
+            for (float f : this.inventoryArmorDropChances)
+                nbttaglist2.appendTag(new NBTTagFloat(f));
+            nbt.setTag(SStrings.ArmorDropChances, nbttaglist2);
+        }
 
-        for (float f : this.inventoryArmorDropChances)
-            nbttaglist2.appendTag(new NBTTagFloat(f));
+        if(!isDefaultChance(inventoryHandsDropChances)) {
+            NBTTagList nbttaglist3 = new NBTTagList();
+            for (float f1 : this.inventoryHandsDropChances)
+                nbttaglist3.appendTag(new NBTTagFloat(f1));
+            nbt.setTag(SStrings.HandDropChances, nbttaglist3);
+        }
 
-
-        nbt.setTag(SStrings.ArmorDropChances, nbttaglist2);
-        NBTTagList nbttaglist3 = new NBTTagList();
-
-        for (float f1 : this.inventoryHandsDropChances)
-            nbttaglist3.appendTag(new NBTTagFloat(f1));
-
-
-        nbt.setTag(SStrings.HandDropChances, nbttaglist3);
-        nbt.setBoolean(SStrings.Leashed, this.isLeashed);
+        if(isLeashed) nbt.setBoolean(SStrings.Leashed, true);
 
         if (this.leashHolder != null) {
             NBTTagCompound tag = new NBTTagCompound(8);
@@ -428,11 +449,10 @@ public abstract class EntityLiving extends EntityLivingBase {
                 tag.setIntegerU(SStrings.Y, blockpos.getY());
                 tag.setInteger(SStrings.Z, blockpos.getZ());
             }
-
             nbt.setTag(SStrings.Leash, tag);
         }
 
-        nbt.setBoolean(SStrings.LeftHanded, this.isLeftHanded());
+        if(this.isLeftHanded()) nbt.setBoolean(SStrings.LeftHanded, true);
 
         if (this.deathLootTable != null) {
             nbt.setString(SStrings.DeathLootTable, this.deathLootTable.toString());
@@ -455,6 +475,7 @@ public abstract class EntityLiving extends EntityLivingBase {
         this.persistenceRequired = nbt.getBoolean(SStrings.PersistenceRequired);
 
         if (nbt.hasKey(SStrings.ArmorItems, 9)) {
+            this.inventoryArmor = new FixedItemList(4);
             NBTTagList nbttaglist = nbt.getTagList(SStrings.ArmorItems, 10);
 
             for (int i = 0; i < 4; ++i)
@@ -462,6 +483,7 @@ public abstract class EntityLiving extends EntityLivingBase {
         }
 
         if (nbt.hasKey(SStrings.HandItems, 9)) {
+            this.inventoryHands = new FixedItemList(2);
             NBTTagList nbttaglist1 = nbt.getTagList(SStrings.HandItems, 10);
 
             for (int j = 0; j < 2; ++j)
@@ -779,11 +801,23 @@ public abstract class EntityLiving extends EntityLivingBase {
     @Override
     public void setItemStackToSlot(EntityEquipmentSlot slotIn, ItemStack stack) {
         switch (slotIn.getSlotType()) {
-            case HAND:
-                this.inventoryHands.fSet(slotIn.getIndex(), stack);
+            case HAND: {
+                FixedItemList arm = this.inventoryHands;
+                if(arm == EMPTY_4){
+                    if(stack.isEmpty())return;
+                    arm = this.inventoryHands = new FixedItemList(2);
+                }
+                arm.fSet(slotIn.getIndex(), stack);
                 break;
-            case ARMOR:
-                this.inventoryArmor.fSet(slotIn.getIndex(), stack);
+            }
+            case ARMOR: {
+                FixedItemList arm = this.inventoryArmor;
+                if(arm == EMPTY_4){
+                    if(stack.isEmpty())return;
+                    arm = this.inventoryArmor = new FixedItemList(4);
+                }
+                arm.fSet(slotIn.getIndex(), stack);
+            }
         }
     }
 

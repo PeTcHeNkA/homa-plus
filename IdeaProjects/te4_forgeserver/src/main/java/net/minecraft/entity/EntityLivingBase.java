@@ -389,9 +389,11 @@ public abstract class EntityLivingBase extends Entity {
     @Override
     public void writeEntityToNBT(NBTTagCompound nbt) {
         nbt.setFloat(SStrings.Health, this.getHealth());
-        nbt.setShortU(SStrings.HurtTime, (short)this.hurtTime);
+        if(hurtTime != 0)
+            nbt.setShortU(SStrings.HurtTime, (short)this.hurtTime);
         nbt.setInteger(SStrings.HurtByTimestamp, this.revengeTimer);
-        nbt.setShortU(SStrings.DeathTime, (short)this.deathTime);
+        if(deathTime != 0)
+            nbt.setShortU(SStrings.DeathTime, (short)this.deathTime);
         nbt.setFloat(SStrings.AbsorptionAmount, this.getAbsorptionAmount());
 
         for (EntityEquipmentSlot slot : EntityEquipmentSlot.VALUES) {
@@ -420,7 +422,8 @@ public abstract class EntityLivingBase extends Entity {
             }
             nbt.setTag(SStrings.ActiveEffects, list);
         }
-        nbt.setBoolean(SStrings.FallFlying, this.isElytraFlying());
+        if(this.isElytraFlying())
+            nbt.setBoolean(SStrings.FallFlying, true);
     }
 
 
