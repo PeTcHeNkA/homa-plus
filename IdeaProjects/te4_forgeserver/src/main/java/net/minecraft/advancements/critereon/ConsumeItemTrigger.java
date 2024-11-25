@@ -19,6 +19,11 @@ public class ConsumeItemTrigger extends ConcurrentHashMap<PlayerAdvancements, Co
 
     public ConsumeItemTrigger() {}
 
+
+    @Override //fix no-search field
+    public boolean isEmpty(){return super.isEmpty();}
+
+
     @Override
     public ResourceLocation getId() {
         return ID;

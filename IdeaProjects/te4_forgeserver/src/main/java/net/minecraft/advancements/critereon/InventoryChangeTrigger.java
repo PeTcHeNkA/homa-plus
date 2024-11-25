@@ -24,6 +24,10 @@ public class InventoryChangeTrigger extends ConcurrentHashMap<PlayerAdvancements
     }
 
 
+    @Override //fix no-search field
+    public boolean isEmpty(){return super.isEmpty();}
+
+
     @Override
     public ResourceLocation getId() {
         return ID;

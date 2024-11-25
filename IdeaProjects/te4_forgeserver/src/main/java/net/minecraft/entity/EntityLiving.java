@@ -153,7 +153,7 @@ public abstract class EntityLiving extends EntityLivingBase {
         }
         if(mapPathPriority instanceof Int2FloatSingletonFunc){
             Int2FloatSingletonFunc prev = (Int2FloatSingletonFunc) mapPathPriority;
-            Int2FloatOpenHashMap map = new Int2FloatOpenHashMap(3, 1);
+            Int2FloatOpenHashMap map = new Int2FloatOpenHashMap(3, 0.85f);
             map.defaultReturnValue(prev.defaultReturnValue());
             mapPathPriority = this.mapPathPriority = map;
         }

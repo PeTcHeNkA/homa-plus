@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package net.minecraft.advancements.critereon;
 
 import com.google.common.collect.Lists;
@@ -11,7 +6,6 @@ import com.google.gson.JsonObject;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-
 import net.minecraft.advancements.ICriterionTrigger;
 import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -26,6 +20,10 @@ public class PositionTrigger extends ConcurrentHashMap<PlayerAdvancements, Posit
     public PositionTrigger(ResourceLocation location) {
         this.id = location;
     }
+
+
+    @Override //fix no-search field
+    public boolean isEmpty(){return super.isEmpty();}
 
 
     @Override

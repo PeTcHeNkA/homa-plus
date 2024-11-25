@@ -708,6 +708,7 @@ net.minecraft.world.chunk.storage.IChunkLoader
 net.minecraft.world.chunk.storage.RegionFile$ChunkBuffer
 net.minecraft.world.chunk.storage.RegionFile
 net.minecraft.world.DimensionType
+net.minecraft.world.Explosion$AsyExplosionPushTask
 net.minecraft.world.Explosion
 net.minecraft.world.GameRules$Value
 net.minecraft.world.GameRules$ValueType

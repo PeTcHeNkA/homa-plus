@@ -23,6 +23,10 @@ public class NetherTravelTrigger extends ConcurrentHashMap<PlayerAdvancements, N
     }
 
 
+    @Override //fix no-search field
+    public boolean isEmpty(){return super.isEmpty();}
+
+
     @Override
     public ResourceLocation getId() {
         return ID;

@@ -22,6 +22,11 @@ public class RecipeUnlockedTrigger extends ConcurrentHashMap<PlayerAdvancements,
 
     public RecipeUnlockedTrigger() {}
 
+
+    @Override //fix no-search field
+    public boolean isEmpty(){return super.isEmpty();}
+
+
     @Override
     public ResourceLocation getId() {
         return ID;

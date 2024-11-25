@@ -23,6 +23,10 @@ public class KilledTrigger extends ConcurrentHashMap<PlayerAdvancements, KilledT
     }
 
 
+    @Override //fix no-search field
+    public boolean isEmpty(){return super.isEmpty();}
+
+
     @Override
     public ResourceLocation getId() {
         return this.id;

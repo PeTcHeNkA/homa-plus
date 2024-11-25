@@ -20,6 +20,10 @@ public class UsedTotemTrigger extends ConcurrentHashMap<PlayerAdvancements, Used
     public UsedTotemTrigger() {}
 
 
+    @Override //fix no-search field
+    public boolean isEmpty(){return super.isEmpty();}
+
+
     @Override
     public ResourceLocation getId() {
         return ID;
