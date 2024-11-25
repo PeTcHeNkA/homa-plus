@@ -22,11 +22,6 @@ public class RecipeUnlockedTrigger extends ConcurrentHashMap<PlayerAdvancements,
 
     public RecipeUnlockedTrigger() {}
 
-
-    @Override //fix no-search field
-    public boolean isEmpty(){return super.isEmpty();}
-
-
     @Override
     public ResourceLocation getId() {
         return ID;
@@ -85,6 +80,11 @@ public class RecipeUnlockedTrigger extends ConcurrentHashMap<PlayerAdvancements,
 
     static class Listeners extends Te4HashSet<ICriterionTrigger.Listener<Instance>> {
         public Listeners() {}
+
+
+        @Override //fix no-search field
+        public boolean isEmpty(){return super.isEmpty();}
+
 
         public void trigger(PlayerAdvancements adv, IRecipe recipe) {
             List<ICriterionTrigger.Listener<Instance>> listeners = null;

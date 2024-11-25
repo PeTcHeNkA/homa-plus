@@ -20,10 +20,6 @@ public class UsedTotemTrigger extends ConcurrentHashMap<PlayerAdvancements, Used
     public UsedTotemTrigger() {}
 
 
-    @Override //fix no-search field
-    public boolean isEmpty(){return super.isEmpty();}
-
-
     @Override
     public ResourceLocation getId() {
         return ID;
@@ -79,6 +75,11 @@ public class UsedTotemTrigger extends ConcurrentHashMap<PlayerAdvancements, Used
         public Listeners() {
             super(3);
         }
+
+
+        @Override //fix no-search field
+        public boolean isEmpty(){return super.isEmpty();}
+
 
         public void trigger(PlayerAdvancements adv, ItemStack stack) {
             List<ICriterionTrigger.Listener<Instance>> listeners = null;

@@ -22,10 +22,6 @@ public class EnchantedItemTrigger extends ConcurrentHashMap<PlayerAdvancements, 
     }
 
 
-    @Override //fix no-search field
-    public boolean isEmpty(){return super.isEmpty();}
-
-
     @Override
     public ResourceLocation getId() {
         return ID;
@@ -82,6 +78,11 @@ public class EnchantedItemTrigger extends ConcurrentHashMap<PlayerAdvancements, 
         public Listeners() {
             super(3);
         }
+
+
+        @Override //fix no-search field
+        public boolean isEmpty(){return super.isEmpty();}
+
 
         public void trigger(PlayerAdvancements adv, ItemStack stack, int lvl) {
             List<ICriterionTrigger.Listener<Instance>> listeners = null;

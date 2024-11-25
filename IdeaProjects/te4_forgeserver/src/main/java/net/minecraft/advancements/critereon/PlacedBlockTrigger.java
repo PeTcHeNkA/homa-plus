@@ -32,11 +32,6 @@ public class PlacedBlockTrigger extends ConcurrentHashMap<PlayerAdvancements, Pl
 
     public PlacedBlockTrigger() {}
 
-
-    @Override //fix no-search field
-    public boolean isEmpty(){return super.isEmpty();}
-
-
     @Override
     public ResourceLocation getId() {
         return ID;
@@ -81,7 +76,7 @@ public class PlacedBlockTrigger extends ConcurrentHashMap<PlayerAdvancements, Pl
                 throw new JsonSyntaxException("Unknown block type '" + lvt_4_1_ + "'");
             }
 
-            lvt_3_1_ = (Block)Block.REGISTRY.getObject(lvt_4_1_);
+            lvt_3_1_ = Block.REGISTRY.getObject(lvt_4_1_);
         }
 
         Map<IProperty<?>, Object> lvt_4_2_ = null;
@@ -96,12 +91,12 @@ public class PlacedBlockTrigger extends ConcurrentHashMap<PlayerAdvancements, Pl
             Optional lvt_10_1_;
             for(Iterator var6 = JsonUtils.getJsonObject(jObj, "state").entrySet().iterator(); var6.hasNext(); lvt_4_2_.put(lvt_8_1_, lvt_10_1_.get())) {
                 Map.Entry<String, JsonElement> lvt_7_1_ = (Map.Entry)var6.next();
-                lvt_8_1_ = lvt_5_1_.getProperty((String)lvt_7_1_.getKey());
+                lvt_8_1_ = lvt_5_1_.getProperty(lvt_7_1_.getKey());
                 if (lvt_8_1_ == null) {
-                    throw new JsonSyntaxException("Unknown block state property '" + (String)lvt_7_1_.getKey() + "' for block '" + Block.REGISTRY.getNameForObject(lvt_3_1_) + "'");
+                    throw new JsonSyntaxException("Unknown block state property '" + lvt_7_1_.getKey() + "' for block '" + Block.REGISTRY.getNameForObject(lvt_3_1_) + "'");
                 }
 
-                String lvt_9_1_ = JsonUtils.getString((JsonElement)lvt_7_1_.getValue(), (String)lvt_7_1_.getKey());
+                String lvt_9_1_ = JsonUtils.getString(lvt_7_1_.getValue(), lvt_7_1_.getKey());
                 lvt_10_1_ = lvt_8_1_.parseValue(lvt_9_1_);
                 if (!lvt_10_1_.isPresent()) {
                     throw new JsonSyntaxException("Invalid block state value '" + lvt_9_1_ + "' for property '" + (String)lvt_7_1_.getKey() + "' on block '" + Block.REGISTRY.getNameForObject(lvt_3_1_) + "'");
@@ -142,6 +137,11 @@ public class PlacedBlockTrigger extends ConcurrentHashMap<PlayerAdvancements, Pl
         public Listeners() {
             super(7);
         }
+
+
+        @Override //fix no-search field
+        public boolean isEmpty(){return super.isEmpty();}
+
 
 
         public void trigger(PlayerAdvancements adv, IBlockState state, BlockPos pos, WorldServer world, ItemStack stack) {

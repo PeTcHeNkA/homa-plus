@@ -22,10 +22,6 @@ public class EntityHurtPlayerTrigger extends ConcurrentHashMap<PlayerAdvancement
     }
 
 
-    @Override //fix no-search field
-    public boolean isEmpty(){return super.isEmpty();}
-
-
     @Override
     public ResourceLocation getId() {
         return ID;
@@ -81,6 +77,11 @@ public class EntityHurtPlayerTrigger extends ConcurrentHashMap<PlayerAdvancement
         public Listeners() {
             super(7);
         }
+
+
+        @Override //fix no-search field
+        public boolean isEmpty(){return super.isEmpty();}
+
 
         public void remove(ICriterionTrigger.Listener<Instance> listener) {
             super.remove(listener);

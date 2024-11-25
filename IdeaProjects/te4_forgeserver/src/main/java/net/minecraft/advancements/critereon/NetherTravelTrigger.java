@@ -23,10 +23,6 @@ public class NetherTravelTrigger extends ConcurrentHashMap<PlayerAdvancements, N
     }
 
 
-    @Override //fix no-search field
-    public boolean isEmpty(){return super.isEmpty();}
-
-
     @Override
     public ResourceLocation getId() {
         return ID;
@@ -85,6 +81,11 @@ public class NetherTravelTrigger extends ConcurrentHashMap<PlayerAdvancements, N
         public Listeners() {
             super(3);
         }
+
+
+        @Override //fix no-search field
+        public boolean isEmpty(){return super.isEmpty();}
+
 
         public void trigger(PlayerAdvancements adv, WorldServer world, Vec3d vec3d, double dx, double dy, double dz) {
             List<ICriterionTrigger.Listener<Instance>> listeners = null;

@@ -22,10 +22,6 @@ public class UsedEnderEyeTrigger extends ConcurrentHashMap<PlayerAdvancements, U
     }
 
 
-    @Override //fix no-search field
-    public boolean isEmpty(){return super.isEmpty();}
-
-
     @Override
     public ResourceLocation getId() {
         return ID;
@@ -83,6 +79,10 @@ public class UsedEnderEyeTrigger extends ConcurrentHashMap<PlayerAdvancements, U
         public Listeners() {
             super(3);
         }
+
+
+        @Override //fix no-search field
+        public boolean isEmpty(){return super.isEmpty();}
 
 
         public void trigger(PlayerAdvancements adv, double rangeSq) {

@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+
 import net.minecraft.advancements.ICriterionTrigger;
 import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -20,10 +21,6 @@ public class PositionTrigger extends ConcurrentHashMap<PlayerAdvancements, Posit
     public PositionTrigger(ResourceLocation location) {
         this.id = location;
     }
-
-
-    @Override //fix no-search field
-    public boolean isEmpty(){return super.isEmpty();}
 
 
     @Override
@@ -81,6 +78,11 @@ public class PositionTrigger extends ConcurrentHashMap<PlayerAdvancements, Posit
         public Listeners() {
             super(7);
         }
+
+
+        @Override //fix no-search field
+        public boolean isEmpty(){return super.isEmpty();}
+
 
         public void trigger(PlayerAdvancements adv, WorldServer world, double dx, double dy, double dz) {
             List<ICriterionTrigger.Listener<Instance>> listeners = null;

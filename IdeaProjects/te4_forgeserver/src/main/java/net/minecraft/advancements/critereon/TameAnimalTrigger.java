@@ -22,10 +22,6 @@ public class TameAnimalTrigger extends ConcurrentHashMap<PlayerAdvancements, Tam
     }
 
 
-    @Override //fix no-search field
-    public boolean isEmpty(){return super.isEmpty();}
-
-
     @Override
     public ResourceLocation getId() {
         return ID;
@@ -82,6 +78,11 @@ public class TameAnimalTrigger extends ConcurrentHashMap<PlayerAdvancements, Tam
         public Listeners(PlayerAdvancements advancements) {
             super(7);
         }
+
+
+        @Override //fix no-search field
+        public boolean isEmpty(){return super.isEmpty();}
+
 
         public void trigger(PlayerAdvancements adv, EntityPlayerMP player, EntityAnimal animal) {
             List<ICriterionTrigger.Listener<Instance>> listeners = null;

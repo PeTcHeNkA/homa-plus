@@ -23,10 +23,6 @@ public class VillagerTradeTrigger extends ConcurrentHashMap<PlayerAdvancements, 
     }
 
 
-    @Override //fix no-search field
-    public boolean isEmpty(){return super.isEmpty();}
-
-
     @Override
     public ResourceLocation getId() {
         return ID;
@@ -83,6 +79,11 @@ public class VillagerTradeTrigger extends ConcurrentHashMap<PlayerAdvancements, 
         public Listeners(PlayerAdvancements advancements) {
             super(7);
         }
+
+
+        @Override //fix no-search field
+        public boolean isEmpty(){return super.isEmpty();}
+
 
         public void trigger(PlayerAdvancements adv, EntityPlayerMP player, EntityVillager villager, ItemStack stack) {
             List<ICriterionTrigger.Listener<Instance>> listeners = null;

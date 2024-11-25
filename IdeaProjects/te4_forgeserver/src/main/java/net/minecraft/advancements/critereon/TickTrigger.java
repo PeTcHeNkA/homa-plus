@@ -20,10 +20,6 @@ public class TickTrigger extends ConcurrentHashMap<PlayerAdvancements, TickTrigg
     }
 
 
-    @Override //fix no-search field
-    public boolean isEmpty(){return super.isEmpty();}
-
-
     @Override
     public ResourceLocation getId() {
         return ID;
@@ -79,6 +75,10 @@ public class TickTrigger extends ConcurrentHashMap<PlayerAdvancements, TickTrigg
         public Listeners(PlayerAdvancements advancements) {
             super(7);
         }
+
+
+        @Override //fix no-search field
+        public boolean isEmpty(){return super.isEmpty();}
 
 
         public void trigger(PlayerAdvancements adv) {

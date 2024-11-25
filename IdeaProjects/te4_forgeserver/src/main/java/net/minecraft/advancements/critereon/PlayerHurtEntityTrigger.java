@@ -20,11 +20,6 @@ public class PlayerHurtEntityTrigger extends ConcurrentHashMap<PlayerAdvancement
 
     public PlayerHurtEntityTrigger() {}
 
-
-    @Override //fix no-search field
-    public boolean isEmpty(){return super.isEmpty();}
-
-
     @Override
     public ResourceLocation getId() {
         return ID;
@@ -81,6 +76,10 @@ public class PlayerHurtEntityTrigger extends ConcurrentHashMap<PlayerAdvancement
         public Listeners(PlayerAdvancements advancements) {
             super(7);
         }
+
+
+        @Override //fix no-search field
+        public boolean isEmpty(){return super.isEmpty();}
 
 
         public void trigger(PlayerAdvancements adv, EntityPlayerMP player, Entity entity, DamageSource src, float f1, float f2, boolean flag) {

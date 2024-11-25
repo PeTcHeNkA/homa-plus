@@ -24,10 +24,6 @@ public class BredAnimalsTrigger extends ConcurrentHashMap<PlayerAdvancements, Br
     }
 
 
-    @Override //fix no-search field
-    public boolean isEmpty(){return super.isEmpty();}
-
-
     @Override
     public ResourceLocation getId() {
         return ID;
@@ -85,6 +81,10 @@ public class BredAnimalsTrigger extends ConcurrentHashMap<PlayerAdvancements, Br
         public Listeners() {
             super(3);
         }
+
+
+        @Override //fix no-search field
+        public boolean isEmpty(){return super.isEmpty();}
 
 
         public void trigger(PlayerAdvancements adv, EntityPlayerMP player, EntityAnimal parent, EntityAnimal partner, EntityAgeable child) {

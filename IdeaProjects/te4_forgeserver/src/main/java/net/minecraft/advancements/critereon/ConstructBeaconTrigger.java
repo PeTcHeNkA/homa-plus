@@ -22,10 +22,6 @@ public class ConstructBeaconTrigger extends ConcurrentHashMap<PlayerAdvancements
     }
 
 
-    @Override //fix no-search field
-    public boolean isEmpty(){return super.isEmpty();}
-
-
     @Override
     public ResourceLocation getId() {
         return ID;
@@ -81,6 +77,10 @@ public class ConstructBeaconTrigger extends ConcurrentHashMap<PlayerAdvancements
         public Listeners(PlayerAdvancements advancements) {
             super(3);
         }
+
+
+        @Override //fix no-search field
+        public boolean isEmpty(){return super.isEmpty();}
 
 
         public void trigger(PlayerAdvancements adv, TileEntityBeacon beacon) {

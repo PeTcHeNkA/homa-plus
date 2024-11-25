@@ -25,10 +25,6 @@ public class BrewedPotionTrigger extends ConcurrentHashMap<PlayerAdvancements, B
     }
 
 
-    @Override //fix no-search field
-    public boolean isEmpty(){return super.isEmpty();}
-
-
     @Override
     public ResourceLocation getId() {
         return ID;
@@ -93,6 +89,11 @@ public class BrewedPotionTrigger extends ConcurrentHashMap<PlayerAdvancements, B
         public Listeners() {
             super(3);
         }
+
+
+        @Override //fix no-search field
+        public boolean isEmpty(){return super.isEmpty();}
+
 
         public void trigger(PlayerAdvancements adv, PotionType type) {
             List<ICriterionTrigger.Listener<Instance>> listeners = null;
