@@ -462,8 +462,8 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
                     this.floating = d12 >= -0.03125D;
                     this.floating &= !this.server.isFlightAllowed() && !player.capabilities.allowFlying;
                     this.floating &= !player.isPotionActive(MobEffects.LEVITATION) && !player.isElytraFlying()
-                            && !worldserver.checkBlockCollision(
-                            player.getEntityBoundingBox().grow(0.0625D, -0.4875D, 0.0625D)
+                            && !worldserver.checkBlockCollision( //todo is safe 'y' fix? -0.4875D -> 0.0625
+                            player.getEntityBoundingBox().grow(0.0625D, 0.0625, 0.0625D)
                     );
                     player.onGround = packetIn.isOnGround();
                     player.getServerWorld().getPlayerChunkMap().updateMovingPlayer(player);
