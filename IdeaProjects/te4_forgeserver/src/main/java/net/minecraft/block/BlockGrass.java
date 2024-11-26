@@ -96,7 +96,7 @@ public class BlockGrass extends BlockFx implements IGrowable {
         if (!world.isRemote) {
             ChunkSelector selector = world.localSelector; //safe
             final int posX, posZ;
-            if (selector.isAreaLoaded3(posX = pos.getX(), posZ = pos.getX())) {
+            if (selector.isAreaLoaded3(posX = pos.getX(), posZ = pos.getZ())) {
                 final int posY;
                 int num = world.getLight(posX, (posY = pos.getY()) + 1, posZ, true);
 

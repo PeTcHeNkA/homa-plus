@@ -157,7 +157,7 @@ public abstract class PlayerList {
         );
         netManager.addToQueueN(new SPacketCustomPayload("MC|Brand", (new PacketBuffer(Unpooled.buffer())).writeString(this.getServerInstance().getServerModName())));
         netManager.addToQueueN(new SPacketServerDifficulty(worldinfo.getDifficulty(), worldinfo.isDifficultyLocked()));
-        netManager.addToQueueN(new SPacketHeldItemChange(player.inventory.currentItem));
+        netManager.sendPacketE(new SPacketHeldItemChange(player.inventory.currentItem));
         netManager.sendPacketE(new SPacketPlayerAbilities(player.capabilities));
 
         this.updatePermissionLevel(player);

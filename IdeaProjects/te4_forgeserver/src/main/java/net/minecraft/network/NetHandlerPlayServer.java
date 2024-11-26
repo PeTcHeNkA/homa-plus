@@ -444,9 +444,10 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
                     d11 = d7 * d7 + d8 * d8 + d9 * d9;
                     boolean flag = false;
 
-                    if (!player.isInvulnerableDimensionChange() && d11 > 0.0625D && !player.isPlayerSleeping() && !player.interactionManager.isCreative() && player.interactionManager.getGameType() != GameType.SPECTATOR) {
+                    //todo is safe? 0.0625D -> 0.625D
+                    if (!player.isInvulnerableDimensionChange() && d11 > 0.625D && !player.isPlayerSleeping() && !player.interactionManager.isCreative() && player.interactionManager.getGameType() != GameType.SPECTATOR) {
                         flag = true;
-                        LOGGER.warn("{} moved wrongly!", player.getName());
+                        LOGGER.warn("{} moved wrongly! [{}]", player.getName(), d11-0.0625D);
                     }
 
                     player.setPositionAndRotation(d4, d5, d6, yaw, pitch);
@@ -458,13 +459,16 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
                             return;
                         }
                     }
-
-                    this.floating = d12 >= -0.03125D;
-                    this.floating &= !this.server.isFlightAllowed() && !player.capabilities.allowFlying;
-                    this.floating &= !player.isPotionActive(MobEffects.LEVITATION) && !player.isElytraFlying()
-                            && !worldserver.checkBlockCollision( //todo is safe 'y' fix? -0.4875D -> 0.0625
-                            player.getEntityBoundingBox().grow(0.0625D, 0.0625, 0.0625D)
-                    );
+                    boolean floating;
+                    floating = this.floating = d12 >= -0.03125D;
+                    if(floating) {
+                        floating = this.floating = !this.server.isFlightAllowed() && !player.capabilities.allowFlying;
+                        if(floating)
+                            this.floating = !player.isPotionActive(MobEffects.LEVITATION) && !player.isElytraFlying()
+                                && !worldserver.checkBlockCollision( //todo is safe 'y' fix? -0.4875D -> 0.0625
+                                player.getEntityBoundingBox().grow(0.0625D, 0.0625, 0.0625D)
+                        );
+                    }
                     player.onGround = packetIn.isOnGround();
                     player.getServerWorld().getPlayerChunkMap().updateMovingPlayer(player);
                     player.handleFalling(player.posY - d1, packetIn.isOnGround());

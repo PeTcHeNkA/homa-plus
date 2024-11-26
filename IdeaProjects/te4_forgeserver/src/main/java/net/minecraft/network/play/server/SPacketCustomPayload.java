@@ -54,7 +54,7 @@ public class SPacketCustomPayload extends SNodePacketPlayBase {
         buf.writeString(this.channel);
         synchronized (this.data) {
             this.data.markReaderIndex();
-            buf.writeBytes((ByteBuf)this.data);
+            buf.writeBytes(this.data);
             this.data.resetReaderIndex();
         }
     }
