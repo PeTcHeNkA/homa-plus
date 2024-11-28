@@ -125,7 +125,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
 
 
     private final ConcurrentHashMap<TQueuedChunk, TChunkTask> _chunkTasks = new ConcurrentHashMap<>();
-    private final ConcurrentLinkedQueue<Runnable> _syncTasks = new ConcurrentLinkedQueue<>();
+    protected final ConcurrentLinkedQueue<Runnable> _syncTasks = new ConcurrentLinkedQueue<>();
 
     public EMoveHelper.ComboCollideTask collideTask = new EMoveHelper.ComboCollideTask();
     public final NavChunkLSECache navChunkCache;
@@ -884,7 +884,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
 
     @Override
     public boolean canMineBlockBody(EntityPlayer player, BlockPos pos) {
-        return !this.server.isBlockProtected(this, pos, player) && this.getWorldBorder().contains(pos);
+        return !this.server.isBlockProtected(this, pos, player) && isInWorldBorder(pos.getX(), pos.getZ());
     }
 
 

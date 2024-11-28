@@ -1,4 +1,4 @@
-package plus.fserver.server.mergeworld;
+package plus.fserver.world.addon.mergeworld;
 
 import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.player.EntityPlayer;

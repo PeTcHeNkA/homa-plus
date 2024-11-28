@@ -1,4 +1,4 @@
-package plus.fserver.server.mergeworld;
+package plus.fserver.world.addon.mergeworld;
 
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
@@ -7,7 +7,6 @@ import net.minecraft.world.DimensionType;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.IChunkLoader;
-import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.storage.ISaveHandler;
 import plus.fserver.api.WorldConstructor;
 import java.util.concurrent.CopyOnWriteArrayList;

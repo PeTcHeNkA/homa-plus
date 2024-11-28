@@ -14,9 +14,18 @@ public class WorldConstructor {
     private static final IntObjectHashMap<Constructor> constructors = new IntObjectHashMap<>();
 
     public static void register(int id, Constructor constructor, DimensionType type){
-        constructors.put(id, constructor);
-        if(!DimensionManager.isDimensionRegistered(id))
-            DimensionManager.registerDimension(id, type);
+        synchronized (constructors) {
+            constructors.put(id, constructor);
+            if (!DimensionManager.isDimensionRegistered(id))
+                DimensionManager.registerDimension(id, type);
+        }
+    }
+
+
+    public static void unregister(int id){
+        synchronized (constructors) {
+            constructors.remove(id);
+        }
     }
 
 

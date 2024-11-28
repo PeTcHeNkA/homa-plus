@@ -1,4 +1,4 @@
-package plus.fserver.server.mergeworld;
+package plus.fserver.world.addon.mergeworld;
 
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;

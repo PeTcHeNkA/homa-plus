@@ -19,8 +19,7 @@ public class Scoreboard {
     private static String[] displaySlots;
 
     @Nullable
-    public ScoreObjective getObjective(String name)
-    {
+    public ScoreObjective getObjective(String name) {
         return this.scoreObjectives.get(name);
     }
 
@@ -191,6 +190,7 @@ public class Scoreboard {
     }
 
 
+    @Nullable
     public ScorePlayerTeam getTeam(String teamName) {
         return this.teams.get(teamName);
     }
@@ -205,12 +205,17 @@ public class Scoreboard {
             if (scoreplayerteam != null) {
                 throw new IllegalArgumentException("A team with the name '" + name + "' already exists!");
             } else {
-                scoreplayerteam = new ScorePlayerTeam(this, name);
+                scoreplayerteam = newTeam(name);
                 this.teams.put(name, scoreplayerteam);
                 this.broadcastTeamCreated(scoreplayerteam);
                 return scoreplayerteam;
             }
         }
+    }
+
+
+    protected ScorePlayerTeam newTeam(String name){
+        return new ScorePlayerTeam(this, name);
     }
 
 

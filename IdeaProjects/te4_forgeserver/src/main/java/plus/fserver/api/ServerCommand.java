@@ -1,17 +1,20 @@
 package plus.fserver.api;
 
+import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import javax.annotation.Nullable;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 
-public abstract class ServerCommand implements ICommand {
+public abstract class ServerCommand extends CommandBase {
     public static ArrayList<ServerCommand> commands = new ArrayList<>();
     protected static final List<String> empty = new AbstractList<String>() {
         @Override
@@ -47,6 +50,18 @@ public abstract class ServerCommand implements ICommand {
 
     protected static void reply(ICommandSender sender, String format, Object... args){
         sender.sendMessage(new TextComponentAuto((String.format(format, args)).replace("&", "§")));
+    }
+
+
+    protected void onError(ICommandSender sender, Throwable e){
+        reply(sender, "&4Critical server error on executing [%s]", getName());
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        PrintStream stream = new PrintStream(out);
+        stream.print("§4");
+        e.printStackTrace(stream);
+        stream.close();
+        reply(sender, out.toString());
     }
 
 

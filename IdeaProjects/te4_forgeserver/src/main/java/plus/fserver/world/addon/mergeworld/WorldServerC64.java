@@ -1,16 +1,12 @@
-package plus.fserver.server.mergeworld;
+package plus.fserver.world.addon.mergeworld;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityTracker;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldServerMulti;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.IChunkProvider;
-import net.minecraft.world.chunk.storage.IChunkLoader;
 import net.minecraft.world.storage.ISaveHandler;
-import plus.fserver.ElcaCV;
+import plus.fserver.world.addon.EmptyTeleporter;
 
 
 public abstract class WorldServerC64 extends WorldServerMulti {

@@ -130,15 +130,15 @@ public class WorldType
 
     public IChunkGenerator getChunkGenerator(final World p_getChunkGenerator_1_, final String p_getChunkGenerator_2_) {
         if (this == WorldType.FLAT) {
-            return (IChunkGenerator)new ChunkGeneratorFlat(p_getChunkGenerator_1_, p_getChunkGenerator_1_.getSeed(), p_getChunkGenerator_1_.getWorldInfo().isMapFeaturesEnabled(), p_getChunkGenerator_2_);
+            return new ChunkGeneratorFlat(p_getChunkGenerator_1_, p_getChunkGenerator_1_.getSeed(), p_getChunkGenerator_1_.getWorldInfo().isMapFeaturesEnabled(), p_getChunkGenerator_2_);
         }
         if (this == WorldType.DEBUG_ALL_BLOCK_STATES) {
-            return (IChunkGenerator)new ChunkGeneratorDebug(p_getChunkGenerator_1_);
+            return new ChunkGeneratorDebug(p_getChunkGenerator_1_);
         }
         if (this == WorldType.CUSTOMIZED) {
-            return (IChunkGenerator)new ChunkGeneratorOverworld(p_getChunkGenerator_1_, p_getChunkGenerator_1_.getSeed(), p_getChunkGenerator_1_.getWorldInfo().isMapFeaturesEnabled(), p_getChunkGenerator_2_);
+            return new ChunkGeneratorOverworld(p_getChunkGenerator_1_, p_getChunkGenerator_1_.getSeed(), p_getChunkGenerator_1_.getWorldInfo().isMapFeaturesEnabled(), p_getChunkGenerator_2_);
         }
-        return (IChunkGenerator)new ChunkGeneratorOverworld(p_getChunkGenerator_1_, p_getChunkGenerator_1_.getSeed(), p_getChunkGenerator_1_.getWorldInfo().isMapFeaturesEnabled(), p_getChunkGenerator_2_);
+        return new ChunkGeneratorOverworld(p_getChunkGenerator_1_, p_getChunkGenerator_1_.getSeed(), p_getChunkGenerator_1_.getWorldInfo().isMapFeaturesEnabled(), p_getChunkGenerator_2_);
     }
 
     public int getMinimumSpawnHeight(final World p_getMinimumSpawnHeight_1_) {

@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
-import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.NumberInvalidException;
@@ -35,24 +34,24 @@ import org.jetbrains.annotations.Nullable;
 import plus.fserver.ElcaConfig;
 import plus.fserver.api.ChatPacketBuilder;
 import plus.fserver.api.ServerCommand;
+import plus.fserver.api.WorldConstructor;
 import plus.fserver.plugin.SSPatchLoader;
 import plus.fserver.server.network.packet.SRawPacketPlayerListHeaderFooter;
 import plus.fserver.utls.EntityLodFunc;
 import plus.fserver.utls.collections.ArrayListE6;
 import plus.fserver.utls.collections.ArrayListEV;
+import plus.fserver.utls.math.FastRandom;
+import plus.fserver.world.addon.EmptyConstructor;
 import plus.tson.TsonFile;
 import plus.tson.TsonMap;
 import plus.tson.utl.ByteStrBuilder;
 import plus.tson.utl.Te4HashSet;
-
 import java.io.File;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.text.DecimalFormat;
 import java.util.*;
-
-import static net.minecraft.command.CommandBase.getListOfStringsMatchingLastWord;
 
 
 public class ElcaCommands extends ServerCommand {
@@ -63,7 +62,7 @@ public class ElcaCommands extends ServerCommand {
     private static final String normal   = "&a";
 
     private final List<String> completions = ImmutableList.copyOf(
-        new String[]{"version", "info", "tps", "mobs", "spawn", "hotpoints", "send", "setvar", "save"}
+        new String[]{"version", "info", "tps", "mobs", "spawn", "hotpoints", "send", "setvar", "save", "mkworld"}
     );
     private final List<String> allVars = ImmutableList.copyOf(new String[]{
             "time-packet-rate"            , "mean-balance-mob"            ,
@@ -148,9 +147,40 @@ public class ElcaCommands extends ServerCommand {
                 setVar(server, sender, args);return;
             }
             case "save":{
-                save(server, sender, args);
+                save(server, sender, args);return;
+            }
+            case "mkworld":{
+                mkWorld(server, sender, args);
             }
         }
+    }
+
+
+    private void mkWorld(MinecraftServer server, ICommandSender sender, String[] args) throws NumberInvalidException {
+        String type = args[1];
+        int dimId = parseInt(args[2]);
+        DimensionType dimType = DimensionType.OVERWORLD;
+        if(args.length >= 4) {
+            try {
+                dimType = DimensionType.byName(args[3]);
+            } catch (Exception e) {
+                reply(sender, "Unknown dimension type: ", args[3]);
+                return;
+            }
+        }
+        WorldConstructor.Constructor ctor = null;
+        switch (type){
+            case "empty":{
+                ctor = EmptyConstructor.get();
+                break;
+            }
+        }
+        if(ctor != null)
+            WorldConstructor.register(dimId, ctor, dimType);
+        if(DimensionManager.isDimensionRegistered(dimId)){
+            DimensionManager.unregisterDimension(dimId);
+        }
+        DimensionManager.registerDimension(dimId, dimType);
     }
 
 
@@ -390,7 +420,7 @@ public class ElcaCommands extends ServerCommand {
         }
         Vec3d from = posOf(sender, args, 2);
         Vec3d to   = posOf(sender, args, 5);
-        double step = args.length > 8? CommandBase.parseDouble(args[8]):1;
+        double step = args.length > 8? parseDouble(args[8]):1;
 
         double xMin = Math.min(from.x, to.x);
         double xMax = Math.max(from.x, to.x);
@@ -431,9 +461,9 @@ public class ElcaCommands extends ServerCommand {
     private Vec3d posOf(ICommandSender sender, String[] args, int index) throws NumberInvalidException {
         Vec3d vec = sender.getPositionVector();
 
-        double x = CommandBase.parseDouble(vec.x, args[index+0],  true);
-        double y = CommandBase.parseDouble(vec.y, args[index+1], false);
-        double z = CommandBase.parseDouble(vec.z, args[index+2], true);
+        double x = parseDouble(vec.x, args[index+0],  true);
+        double y = parseDouble(vec.y, args[index+1], false);
+        double z = parseDouble(vec.z, args[index+2], true);
 
         return new Vec3d(x, y, z);
     }
@@ -592,6 +622,9 @@ public class ElcaCommands extends ServerCommand {
                     return Collections.singletonList("track");
                 case "setvar":
                     return allVars;
+                case "mkworld":{
+                    return Collections.singletonList("empty "+FastRandom.INST.nextInt(1024)+" overworld");
+                }
             }
         }
         if(args.length < 2) return completions;

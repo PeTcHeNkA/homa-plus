@@ -32,6 +32,7 @@ import net.minecraftforge.event.terraingen.PopulateChunkEvent;
 import net.minecraftforge.event.terraingen.TerrainGen;
 import plus.fserver.ElcaConfig;
 import plus.fserver.world.generator.GenSession;
+import plus.fserver.world.generator.GenUtils;
 import plus.fserver.world.generator.biome.BiomeProviderEx;
 import plus.fserver.world.generator.future.WorldGenStalactite;
 import plus.fserver.world.generator.map.EMapGenBase;
@@ -579,10 +580,7 @@ public class ChunkGeneratorOverworld implements IChunkGenerator {
                 return this.oceanMonumentGenerator.getMonsters();
             }
         }
-        return (!world.isRemote || SERVER_COMPILE)?
-                world.localSelector.getBiome(pos).getSpawnableList(creatureType) //safe
-                :
-                world.getBiome(pos).getSpawnableList(creatureType);
+        return GenUtils.getPossibleCreatures(world, creatureType, pos);
     }
 
 

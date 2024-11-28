@@ -192,7 +192,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
         this.eventListeners = Lists.newArrayList(this.pathListener);
         this.calendar = Calendar.getInstance();
-        this.worldScoreboard = new Scoreboard();
+        this.worldScoreboard = createScoreBoard();
         this.spawnHostileMobs = true;
         this.spawnPeacefulMobs = true;
         this.saveHandler = saveHandlerIn;
@@ -222,6 +222,11 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         localSelector = initSelector(); //init
         effectiveAcces = this;
         //locals = ElcaServerUtls.createLocals(this);
+    }
+
+
+    protected Scoreboard createScoreBoard(){
+        return new Scoreboard();
     }
 
 

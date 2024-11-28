@@ -1,8 +1,9 @@
-package plus.fserver.server.mergeworld;
+package plus.fserver.world.addon;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ITeleporter;
+
 
 public final class EmptyTeleporter implements ITeleporter {
     public static final EmptyTeleporter INSTANCE = new EmptyTeleporter();
