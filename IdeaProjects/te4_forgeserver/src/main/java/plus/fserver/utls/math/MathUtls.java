@@ -8,6 +8,8 @@ public class MathUtls {
     public static final float F_256_T_360 = 0.7111111111111111F; //= 256 / 360
     public static final Integer INT_300 = new Integer(300);
     public static final Integer INT_0   = new Integer(0);
+    public static final Byte    BYTE_0  = new Byte((byte)0);
+
     public static final float D1_F24 = 1f / (float)(1 << 24);
     public static final int   FR24_MASK = 0xFFFFF;
 

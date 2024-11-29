@@ -254,7 +254,7 @@ public final class AsyWorldTickerV2{
                 try {
                     //todo test async net.minecraft.world.storage.MapStorage.saveData
                     worldserver.saveAllChunks(true,null);
-                    server.getPlayerList().saveLocalPlayers(worldserver);
+                    worldserver.savePlayers(true);
                     inf.save = 0;
                 } catch (Exception saveError){
                     inf.save = saveAllEvery - 75;

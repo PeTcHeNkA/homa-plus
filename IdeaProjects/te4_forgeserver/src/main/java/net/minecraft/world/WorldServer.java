@@ -37,6 +37,7 @@ import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.server.management.PlayerChunkMapEntry;
+import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -1725,6 +1726,24 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
     }
 
 
+    public void savePlayers(boolean async){
+        if(curPlayerEntities.isEmpty())return;
+        if(async) addAsyncTask(this::savePlayers);
+        else savePlayers();
+    }
+
+
+    protected void savePlayers(){
+        PlayerList pl = getMinecraftServer().getPlayerList();
+        for (EntityPlayer player: curPlayerEntities){
+            if(player instanceof EntityPlayerMP && player.world == WorldServer.this) {
+                EntityPlayerMP pl0 = (EntityPlayerMP) player;
+                if(pl0.needSave())pl.writePlayerData(pl0);
+            }
+        }
+    }
+
+
     public void saveAllChunks(boolean all, @Nullable IProgressUpdate progressCallback) throws MinecraftException {
         ChunkProviderServer chunkproviderserver = this.getChunkProvider();
         if (chunkproviderserver.canSave()) {
@@ -1821,7 +1840,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
                     }
                 }
 
-                if (provider.canDoRainSnowIce(chunk) && rand.nextInt(snowChance) == 0) {
+                if (rts > 0 && provider.canDoRainSnowIce(chunk) && rand.nextInt(snowChance) == 0) {
                     updateLCG = updateLCG * 3 + 1013904223;
                     int rNum = updateLCG >> 2;
                     int posX = startCX + (rNum & 15);

@@ -358,6 +358,7 @@ public class WorldClient extends World {
 
         for (int j1 = 0; j1 < this.loadedEntityList.size(); ++j1) {
             Entity entity1 = this.loadedEntityList.get(j1);
+            if(entity1 == null)continue;
             Entity entity2 = entity1.getRidingEntity();
 
             if (entity2 != null) {

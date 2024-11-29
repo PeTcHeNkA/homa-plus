@@ -1,6 +1,8 @@
 package plus.fserver.world.addon.pvpworld;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.server.MinecraftServer;
@@ -19,6 +21,13 @@ import plus.fserver.world.addon.ScoreboardEX;
 public abstract class PvpWorld extends WorldServerMulti {
     public PvpWorld(MinecraftServer server, ISaveHandler handler, int id, WorldServer parent, Profiler profiler) {
         super(server, handler, id, parent, profiler);
+    }
+
+
+    @Override
+    public void tick() {
+        super.tick();
+        getArena().onTick(this);
     }
 
 
@@ -52,6 +61,15 @@ public abstract class PvpWorld extends WorldServerMulti {
     @Override
     public ITeleporter getDefaultTeleporterRaw() {
         return getArena().getTeleporter();
+    }
+
+
+    @Override
+    public void onEntityRemoved(Entity entityIn) {
+        super.onEntityRemoved(entityIn);
+        if(entityIn instanceof EntityPlayerMP){
+            getArena().onDeath((EntityPlayerMP) entityIn);
+        }
     }
 
 

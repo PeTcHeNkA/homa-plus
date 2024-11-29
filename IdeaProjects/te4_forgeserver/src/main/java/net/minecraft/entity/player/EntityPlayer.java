@@ -96,6 +96,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.ElcaCV;
 import plus.fserver.utls.NbtUtils;
+import plus.fserver.utls.math.MathUtls;
 
 import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
@@ -2157,7 +2158,8 @@ public abstract class EntityPlayer extends EntityLivingBase {
 
     @Override
     public EnumHandSide getPrimaryHand() {
-        return this.dataManager.get(MAIN_HAND) == 0 ? EnumHandSide.LEFT : EnumHandSide.RIGHT;
+        EntityDataManager.DataEntry handV = this.dataManager.getEntry(MAIN_HAND);
+        return MathUtls.BYTE_0.equals(handV.getValue()) ? EnumHandSide.LEFT : EnumHandSide.RIGHT;
     }
 
 

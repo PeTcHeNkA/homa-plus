@@ -72,6 +72,7 @@ import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.*;
 import net.minecraft.world.storage.loot.ILootContainer;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.util.ITeleporter;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 import org.apache.logging.log4j.LogManager;
@@ -126,11 +127,12 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
     public byte renderRadius, prevRenderRadius;
 
     public byte bits;
-    //1     | 1  - is disconnected
-    //10    | 2  - chat colorus
-    //100   | 4  - should update player chunk map
-    //1000  | 8  - bool `invulnerableDimensionChange`
-    //10000 | 16 - bool `seenCredits`
+    //1      | 1  - is disconnected
+    //10     | 2  - chat colorus
+    //100    | 4  - should update player chunk map
+    //1000   | 8  - bool `invulnerableDimensionChange`
+    //10000  | 16 - bool `seenCredits`
+    //100000 | 32 - need save
 
     //not used
     public EntityPlayerMP(World world){
@@ -177,6 +179,12 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
         if(b)bits |= 4;
         else bits &= ~4;
     }
+    public boolean needSave() {return (bits & 32) == 32;}
+    public void setNeedSave(boolean b){
+        if(b)bits |= 32;
+        else bits &= ~32;
+    }
+
 
     @Override
     public void readEntityFromNBT(NBTTagCompound nbt) {
@@ -576,7 +584,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
 
 
     @Override
-    public Entity changeDimension(int dimensionIn, net.minecraftforge.common.util.ITeleporter teleporter) {
+    public Entity changeDimension(int dimensionIn, ITeleporter teleporter) {
         if (!net.minecraftforge.common.ForgeHooks.onTravelToDimension(this, dimensionIn)) return this;
         this.setInvulnerableDimensionChange(true);
 
@@ -593,18 +601,14 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
                 this.connection.netManager.sendPacketE(new SPacketChangeGameState(4, this.isSeenCredits() ? 0.0F : 1.0F));
                 this.setSeenCredits(true);
             }
-            return this;
         } else {
-            if (this.dimension == 0 && dimensionIn == 1) {
-                dimensionIn = 1;
-            }
             this.server.getPlayerList().transferPlayerToDimension(this, dimensionIn, teleporter);
             this.connection.netManager.sendPacketE(new SPacketEffect(1032, BlockPos.ORIGIN, 0, false));
             this.lastExperience = -1;
             this.lastHealth = -1.0F;
             this.lastFoodLevel = -1;
-            return this;
         }
+        return this;
     }
 
 

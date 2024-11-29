@@ -13,22 +13,37 @@ import net.minecraftforge.common.util.ITeleporter;
 
 
 public class LobbyTeleporter implements ITeleporter {
-    private final Vec3d lobby;
-    private final int distance;
-    private final GameType gameType;
+    private Vec3d lobby = new Vec3d(0,70,0);
+    private int distance;
+    private GameType gameType;
 
-    public LobbyTeleporter(Vec3d lobby, int distance, GameType gameType) {
+    public void init(Vec3d lobby, int distance, GameType gameType){
         this.lobby = lobby;
         this.distance = distance;
         this.gameType = gameType;
     }
+
+
+    public void readFrom(NBTTagCompound nbt){
+        NBTTagList pos = nbt.getTagList("lobby", 6);
+        GameType gameType = null;
+        if(nbt.hasKey("gm")){
+            gameType = GameType.getByID(nbt.getInteger("gm"));
+        }
+        init(
+                new Vec3d(pos.getDoubleAt(0), pos.getDoubleAt(1), pos.getDoubleAt(2)),
+                nbt.getInteger("distance"), gameType
+        );
+    }
+
 
     @Override
     public void placeEntity(final World world, final Entity entity, final float yaw) {
         entity.rotationYaw = entity.prevRotationYaw = yaw;
         if(entity instanceof EntityPlayerMP){
             EntityPlayerMP player = (EntityPlayerMP) entity;
-            player.setGameType(gameType);
+            if(gameType != null)
+                player.setGameType(gameType);
             Vec3d vec = findRandomNearSpawnPos(world);
             player.setPosition(vec.x, vec.y, vec.z);
         }
@@ -60,17 +75,9 @@ public class LobbyTeleporter implements ITeleporter {
         pos.set(1, new NBTTagDouble(lobby.y));
         pos.set(2, new NBTTagDouble(lobby.z));
         nbt.setTag("lobby", pos);
-        nbt.setIntegerU("gm", gameType.getID());
+        if(gameType != null)
+            nbt.setIntegerU("gm", gameType.getID());
         nbt.setIntegerU("distance", distance);
         return nbt;
-    }
-
-
-    public static LobbyTeleporter fromNbt(NBTTagCompound nbt){
-        NBTTagList pos = nbt.getTagList("lobby", 6);
-        return new LobbyTeleporter(
-                new Vec3d(pos.getDoubleAt(0), pos.getDoubleAt(1), pos.getDoubleAt(2)),
-                nbt.getInteger("distance"), GameType.getByID(nbt.getInteger("gm"))
-        );
     }
 }

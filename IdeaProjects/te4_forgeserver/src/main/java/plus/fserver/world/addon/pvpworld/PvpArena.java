@@ -1,6 +1,7 @@
 package plus.fserver.world.addon.pvpworld;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -13,10 +14,10 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
-import net.minecraft.world.gen.ChunkProviderServer;
 import plus.fserver.api.WorldConstructor;
 import plus.fserver.utls.EmptyChunk;
 import plus.fserver.utls.NbtUtils;
+import plus.fserver.world.addon.CleanLobbyTeleporter;
 import plus.fserver.world.addon.LobbyTeleporter;
 import plus.fserver.world.addon.MemoryChunkProviderServer;
 import plus.tson.utl.Tuple;
@@ -24,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 
 public class PvpArena {
@@ -35,19 +37,103 @@ public class PvpArena {
     private LobbyTeleporter teleporter;
     private WorldConstructor.Constructor constructor;
     private DimensionType type = DimensionType.OVERWORLD;
+    private Consumer<EntityPlayerMP> onAddPlayer                       = TaskRegistry.empty();
+    private Consumer<Tuple<EntityPlayerMP,PvpArena>> onRemovePlayer    = TaskRegistry.empty();
+    private Consumer<EntityPlayerMP> onPreRemovePlayer                 = TaskRegistry.empty();
+    private Consumer<EntityPlayerMP> onDeath                           = TaskRegistry.empty();
+    private Consumer<WorldServer>    onTick                            = TaskRegistry.empty();
 
     public PvpArena(NBTTagCompound data) {
         this.data = data;
         this.immutable = data.getBoolean("isImmutable");
         spawnPositions = readSpawnPositions(data);
         if(data.hasKey("teleporter")){
-            teleporter = LobbyTeleporter.fromNbt(data.getCompoundTag("teleporter"));
+            teleporter = new CleanLobbyTeleporter();
+            teleporter.readFrom(data.getCompoundTag("teleporter"));
         } else {
-            teleporter = new LobbyTeleporter(new Vec3d(0, 70, 0), 5, GameType.SPECTATOR);
+            teleporter = new CleanLobbyTeleporter();
         }
         if(data.hasKey("dimType")){
             type = DimensionType.getById(data.getInteger("dimType"));
         }
+        onAddPlayer       = TaskRegistry.REGISTRY.getTask(data.getString("onAddPL")   );
+        onRemovePlayer    = TaskRegistry.REGISTRY.getTask(data.getString("onRemPL")   );
+        onPreRemovePlayer = TaskRegistry.REGISTRY.getTask(data.getString("onPreRemPL"));
+        onDeath           = TaskRegistry.REGISTRY.getTask(data.getString("onDeath")   );
+        onTick            = TaskRegistry.REGISTRY.getTask(data.getString("onTick")    );
+    }
+
+
+    public boolean setOnAddPlayer(String id){
+        Consumer<EntityPlayerMP> task = TaskRegistry.REGISTRY.getTask(id);
+        onAddPlayer = task;
+        data.setString("onAddPL", id);
+        return TaskRegistry.isEmpty(task);
+    }
+
+
+    public boolean setOnRemPlayer(String id){
+        Consumer<Tuple<EntityPlayerMP,PvpArena>> task = TaskRegistry.REGISTRY.getTask(id);
+        onRemovePlayer = task;
+        data.setString("onRemPL", id);
+        return TaskRegistry.isEmpty(task);
+    }
+
+
+    public boolean setOnPreRemPlayer(String id){
+        Consumer<EntityPlayerMP> task = TaskRegistry.REGISTRY.getTask(id);
+        onPreRemovePlayer = task;
+        data.setString("onPreRemPL", id);
+        return TaskRegistry.isEmpty(task);
+    }
+
+
+    public boolean setOnDeath(String id){
+        Consumer<EntityPlayerMP> task = TaskRegistry.REGISTRY.getTask(id);
+        onDeath = task;
+        data.setString("onDeath", id);
+        return TaskRegistry.isEmpty(task);
+    }
+
+
+    public boolean setOnTick(String id){
+        Consumer<WorldServer> task = TaskRegistry.REGISTRY.getTask(id);
+        onTick = task;
+        data.setString("onTick", id);
+        return TaskRegistry.isEmpty(task);
+    }
+
+
+    public boolean setOnInit(String id){
+        Consumer<WorldServer> task = TaskRegistry.REGISTRY.getTask(id);
+        onTick = task;
+        data.setString("onInit", id);
+        return TaskRegistry.isEmpty(task);
+    }
+
+
+    public void onAddPlayer(EntityPlayerMP player){
+        onAddPlayer.accept(player);
+    }
+
+
+    public void onRemPlayer(EntityPlayerMP player){
+        onRemovePlayer.accept(new Tuple<>(player, this));
+    }
+
+
+    public void onPreRemPlayer(EntityPlayerMP player){
+        onPreRemovePlayer.accept(player);
+    }
+
+
+    public void onDeath(EntityPlayerMP player){
+        onDeath.accept(player);
+    }
+
+
+    public void onTick(WorldServer world){
+        onTick.accept(world);
     }
 
 
@@ -74,7 +160,7 @@ public class PvpArena {
 
 
     public void setTeleporter(Vec3d lobby, int distance, GameType gameType){
-        teleporter = new LobbyTeleporter(lobby, distance, gameType);
+        teleporter.init(lobby, distance, gameType);
         data.setTag("teleporter", teleporter.toNbt());
     }
 
@@ -91,6 +177,13 @@ public class PvpArena {
 
     public WorldConstructor.Constructor constructor(){
         if(constructor == null) return constructor = (server, saveHandler, dimId, delegate, profiler) -> new PvpWorld(server, saveHandler, dimId, delegate, profiler) {
+            @Override
+            public World init() {
+                super.init();
+                TaskRegistry.REGISTRY.getTask(data.getString("onInit")).accept(this);
+                return this;
+            }
+
             @Override
             PvpArena getArena() {
                 return PvpArena.this;

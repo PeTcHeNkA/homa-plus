@@ -46,9 +46,11 @@ import net.minecraft.world.border.IBorderListener;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
 import net.minecraft.world.storage.IPlayerFileData;
+import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.ITeleporter;
+import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -57,7 +59,6 @@ import org.apache.logging.log4j.Logger;
 import plus.fserver.ElcaConfig;
 import plus.fserver.api.Keep;
 import plus.fserver.event.ElcaConnectEvent;
-import plus.fserver.server.chunk.io.TChunkExecutor;
 import plus.tson.utl.Te4HashSet;
 
 
@@ -277,19 +278,19 @@ public abstract class PlayerList {
 
 
     @Nullable
-    public NBTTagCompound readPlayerDataFromFile(EntityPlayerMP playerIn) {
-        NBTTagCompound nbttagcompound = this.server.worlds[0].getWorldInfo().getPlayerNBTTagCompound();
-        NBTTagCompound nbttagcompound1;
+    public NBTTagCompound readPlayerDataFromFile(EntityPlayerMP player) {
+        //NBTTagCompound nbttagcompound = this.server.worlds[0].getWorldInfo().getPlayerNBTTagCompound();
+        //NBTTagCompound nbttagcompound1;
 
-        if (playerIn.getName().equals(this.server.getServerOwner()) && nbttagcompound != null) {
-            nbttagcompound1 = nbttagcompound;
-            playerIn.readFromNBT(nbttagcompound);
-            LOGGER.debug("loading single player");
-            net.minecraftforge.event.ForgeEventFactory.firePlayerLoadingEvent(playerIn, this.playerDataManager, playerIn.getUniqueID().toString());
-        } else {
-            nbttagcompound1 = this.playerDataManager.readPlayerData(playerIn);
-        }
-        return nbttagcompound1;
+//        if (player.getName().equals(this.server.getServerOwner()) && nbttagcompound != null) {
+//            nbttagcompound1 = nbttagcompound;
+//            player.readFromNBT(nbttagcompound);
+//            LOGGER.debug("loading single player");
+//            ForgeEventFactory.firePlayerLoadingEvent(player, this.playerDataManager, player.getUniqueID().toString());
+//        } else {
+        return this.playerDataManager.readPlayerData(player);
+//        }
+        //return nbttagcompound1;
     }
 
 
@@ -299,12 +300,12 @@ public abstract class PlayerList {
         if (player.getName().equals(this.server.getServerOwner()) && nbttagcompound != null) {
             return nbttagcompound;
         } else {
-            return ((net.minecraft.world.storage.SaveHandler)this.playerDataManager).getPlayerNBT(player);
+            return ((SaveHandler)this.playerDataManager).getPlayerNBT(player);
         }
     }
 
 
-    protected void writePlayerData(EntityPlayerMP playerIn) {
+    public void writePlayerData(EntityPlayerMP playerIn) {
         if (playerIn.connection == null) return;
         this.playerDataManager.writePlayerData(playerIn);
         StatisticsManagerServer statisticsmanagerserver = this.playerStatFiles.get(playerIn.getUniqueID());
@@ -1002,20 +1003,20 @@ public abstract class PlayerList {
             playerIn.connection.setLock(true);
             worldserver.addSyncTask(() -> {
                 worldIn.getPlayerChunkMap().removePlayer(playerIn);
-                preparePlayer0(worldserver, playerIn, worldIn);
+                completePreparePlayer(worldserver, playerIn, worldIn);
             });
         } else {
-            preparePlayer0(worldserver, playerIn, null);
+            completePreparePlayer(worldserver, playerIn, null);
         }
     }
 
 
-    private void preparePlayer0(WorldServer newWorld, EntityPlayerMP playerIn, @Nullable WorldServer worldIn){
-        newWorld.addSyncTask(() -> preparePlayer1(newWorld, playerIn, worldIn));
+    public final void completePreparePlayer(WorldServer newWorld, EntityPlayerMP playerIn, @Nullable WorldServer worldIn){
+        newWorld.addSyncTask(() -> completePreparePlayerSync(newWorld, playerIn, worldIn));
     }
 
 
-    private void preparePlayer1(WorldServer newWorld, EntityPlayerMP playerIn, @Nullable WorldServer worldIn){
+    public final void completePreparePlayerSync(WorldServer newWorld, EntityPlayerMP playerIn, @Nullable WorldServer worldIn){
         playerIn.connection.setLock(false);
         newWorld.getPlayerChunkMap().addPlayer(playerIn);
         newWorld.getChunkProvider().provideChunk((int)playerIn.posX >> 4, (int)playerIn.posZ >> 4);
@@ -1062,12 +1063,53 @@ public abstract class PlayerList {
     /**
      * @author Te4hno
      */
-    public void transferPlayerToDimension(EntityPlayerMP player, int dimensionIn, ITeleporter teleporter) {
-        player.connection.setLock(true);
+    public void transferPlayerToDimension(EntityPlayerMP player, int dimId, ITeleporter teleporter) {
+        if(teleporter.onPreTransfer(player, dimId))return;
         int oldId = player.dimension;
         WorldServer worldserver = this.server.getWorld(oldId);
-        player.dimension = dimensionIn;
-        WorldServer newWorld = this.server.getWorld(player.dimension);
+        if(worldserver.getDefaultTeleporterRaw().onRemoveOnTransfer(player, oldId, dimId))return;
+
+        WorldServer newWorld = procTransferPhase1(worldserver, player, dimId);
+
+        newWorld.addSyncTask(() -> {
+            procTransferPhase2(worldserver, newWorld, player, oldId, dimId, teleporter);
+
+            teleporter.onPostTransfer(player, dimId);
+        });
+    }
+
+
+    public static void procTransferPhase2(WorldServer worldserver, WorldServer newWorld, EntityPlayerMP player, int oldId, int dimId, ITeleporter teleporter){
+        PlayerList pList = worldserver.getMinecraftServer().getPlayerList();
+
+        pList.completeTransferEntityToWorld(player, oldId, worldserver, newWorld, teleporter);
+
+        pList.completePreparePlayerSync(newWorld, player, worldserver);
+        //player.interactionManager.setWorld(newWorld);
+        player.connection.setPlayerLocation(player.posX, player.posY, player.posZ, player.rotationYaw, player.rotationPitch);
+
+        player.connection.netManager.sendPacketE(new SPacketPlayerAbilities(player.capabilities));
+        pList.updateTimeAndWeatherForPlayer(player, newWorld);
+        pList.syncPlayerInventory(player);
+
+        for (PotionEffect potioneffect : player.getActivePotionEffects()) {
+            player.connection.netManager.sendPacketE(new SPacketEntityEffect(player.getEntityId(), potioneffect));
+        }
+
+        AttributeMap attributemap = (AttributeMap) player.getAttributeMap();
+        Collection<IAttributeInstance> watchedAttribs = attributemap.getWatchedAttributes();
+        if (!watchedAttribs.isEmpty())
+            player.connection.netManager.sendPacketE(new SPacketEntityProperties(player.getEntityId(), watchedAttribs));
+        FMLCommonHandler.instance().firePlayerChangedDimensionEvent(player, oldId, dimId);
+    }
+
+
+    public static WorldServer procTransferPhase1(WorldServer world, EntityPlayerMP player, int dimId){
+        MinecraftServer server = world.getMinecraftServer();
+
+        player.connection.setLock(true);
+        player.dimension = dimId;
+        WorldServer newWorld = server.getWorld(player.dimension);
         player.connection.netManager.sendPacketE(
                 new SPacketRespawn(
                         player.dimension,
@@ -1076,40 +1118,20 @@ public abstract class PlayerList {
                         player.interactionManager.getGameType()
                 )
         );
-        this.updatePermissionLevel(player);
-        worldserver.removeEntityDangerously(player);
+        server.getPlayerList().updatePermissionLevel(player);
+        world.removeEntityDangerously(player);
         player.isDead = false;
 
         if (player.isEntityAlive()) {
-            worldserver.updateEntityWithOptionalForce(player, false);
+            world.updateEntityWithOptionalForce(player, false);
         }
-        worldserver.getPlayerChunkMap().removePlayer(player);
+        world.getPlayerChunkMap().removePlayer(player);
 
-        newWorld.addSyncTask(() -> {
-            transferEntityToWorld0(player, oldId, worldserver, newWorld, teleporter);
-
-            preparePlayer1(newWorld, player, worldserver);
-            //player.interactionManager.setWorld(newWorld);
-            player.connection.setPlayerLocation(player.posX, player.posY, player.posZ, player.rotationYaw, player.rotationPitch);
-
-            player.connection.netManager.sendPacketE(new SPacketPlayerAbilities(player.capabilities));
-            updateTimeAndWeatherForPlayer(player, newWorld);
-            syncPlayerInventory(player);
-
-            for (PotionEffect potioneffect : player.getActivePotionEffects()) {
-                player.connection.netManager.sendPacketE(new SPacketEntityEffect(player.getEntityId(), potioneffect));
-            }
-
-            AttributeMap attributemap = (AttributeMap) player.getAttributeMap();
-            Collection<IAttributeInstance> watchedAttribs = attributemap.getWatchedAttributes();
-            if (!watchedAttribs.isEmpty())
-                player.connection.netManager.sendPacketE(new SPacketEntityProperties(player.getEntityId(), watchedAttribs));
-            FMLCommonHandler.instance().firePlayerChangedDimensionEvent(player, oldId, dimensionIn);
-        });
+        return newWorld;
     }
 
 
-    private void transferEntityToWorld0(Entity entityIn, int lastDimension, WorldServer oldWorldIn, WorldServer toWorldIn, net.minecraftforge.common.util.ITeleporter teleporter) {
+    public void completeTransferEntityToWorld(Entity entityIn, int lastDimension, WorldServer oldWorldIn, WorldServer toWorldIn, net.minecraftforge.common.util.ITeleporter teleporter) {
         double moveFactor = oldWorldIn.provider.getMovementFactor() / toWorldIn.provider.getMovementFactor();
         double d0 = MathHelper.clamp(entityIn.posX * moveFactor, toWorldIn.getWorldBorder().minX() + 16.0D, toWorldIn.getWorldBorder().maxX() - 16.0D);
         double d1 = MathHelper.clamp(entityIn.posZ * moveFactor, toWorldIn.getWorldBorder().minZ() + 16.0D, toWorldIn.getWorldBorder().maxZ() - 16.0D);
@@ -1142,14 +1164,15 @@ public abstract class PlayerList {
     }
 
 
-    public void saveLocalPlayers(WorldServer worldServer){
-        EntityPlayer[] players = playerEntityList.toArray(new EntityPlayerMP[0]);
-        worldServer.addAsyncTask(() -> {
-            for (EntityPlayer player:players){
-                if(player instanceof EntityPlayerMP) writePlayerData((EntityPlayerMP) player);
-            }
-        });
-    }
+//    public void saveLocalPlayers(WorldServer world){
+//        EntityPlayer[] players = playerEntityList.toArray(new EntityPlayerMP[0]);
+//        world.addAsyncTask(() -> {
+//            for (EntityPlayer player:players){
+//                if(player instanceof EntityPlayerMP && player.world == world)
+//                    writePlayerData((EntityPlayerMP) player);
+//            }
+//        });
+//    }
 
 
     /**
