@@ -595,8 +595,8 @@ public abstract class EntityPlayer extends EntityLivingBase {
 
     @Override
     public void onDeath(DamageSource cause) {
-        if (ForgeHooks.onLivingDeath(this,  cause)) return;
-        super.onDeath(cause);
+        if (world.onLivingDeath(this, cause)) return;
+        super.onDeathCommon(cause);
         this.setSize(0.2F, 0.2F);
         this.setPosition(this.posX, this.posY, this.posZ);
         this.motionY = 0.10000000149011612D;
@@ -674,7 +674,7 @@ public abstract class EntityPlayer extends EntityLivingBase {
 
     @Nullable
     public EntityItem dropItem(ItemStack itemStackIn, boolean unused) {
-        return net.minecraftforge.common.ForgeHooks.onPlayerTossEvent(this, itemStackIn, false);
+        return ForgeHooks.onPlayerTossEvent(this, itemStackIn, unused);
     }
 
 

@@ -60,7 +60,7 @@ public class CombatTracker extends ArrayListE2<CombatEntry> {
 
     public ITextComponent getDeathMessage() {
         if (super.isEmpty()) {
-            return new TextComponentTranslation("death.attack.generic", new Object[]{this.fighter.getDisplayName()});
+            return new TextComponentTranslation("death.attack.generic", this.fighter.getDisplayName());
         } else {
             CombatEntry lvt_1_1_ = this.getBestCombatEntry();
             CombatEntry lvt_2_1_ = super.get(super.size() - 1);

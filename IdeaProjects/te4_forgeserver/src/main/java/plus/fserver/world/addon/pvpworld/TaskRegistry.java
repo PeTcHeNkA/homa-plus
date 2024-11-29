@@ -37,4 +37,27 @@ public class TaskRegistry extends Te4HashMap<String, Consumer<?>> {
     public static boolean isEmpty(Consumer<?> task){
         return task == EMPTY;
     }
+
+
+    public static <T> Consumer<T> and(Consumer<T> first, Consumer<T> second){
+        if(first  == EMPTY)return second;
+        if(second == EMPTY)return first;
+        return new And<>(first, second);
+    }
+
+
+    private static class And<T> implements Consumer<T>{
+        private final Consumer<T> first, second;
+
+        private And(Consumer<T> first, Consumer<T> second) {
+            this.first = first;
+            this.second = second;
+        }
+
+        @Override
+        public void accept(T o) {
+            first.accept(o);
+            second.accept(o);
+        }
+    }
 }

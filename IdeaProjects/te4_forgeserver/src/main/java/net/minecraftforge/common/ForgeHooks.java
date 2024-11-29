@@ -390,7 +390,8 @@ public class ForgeHooks {
 
 
     public static boolean onLivingDeath(EntityLivingBase entity, DamageSource src) {
-        return MinecraftForge.EVENT_BUS.post(new LivingDeathEvent(entity, src));
+        return entity.world.onLivingDeath(entity, src);
+        //return MinecraftForge.EVENT_BUS.post(new LivingDeathEvent(entity, src));
     }
 
 

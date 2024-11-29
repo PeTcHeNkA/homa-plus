@@ -112,7 +112,9 @@ public class LivingSpawnEvent extends LivingEvent {
     @Cancelable
     public static class SpecialSpawn extends LivingSpawnEvent {
         @Nullable
-        private final MobSpawnerBaseLogic spawner;
+        private MobSpawnerBaseLogic spawner;
+
+        public SpecialSpawn(){}
 
         @Deprecated // TODO: remove in 1.13
         public SpecialSpawn(EntityLiving entity, World world, float x, float y, float z) {

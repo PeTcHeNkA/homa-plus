@@ -71,6 +71,7 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.*;
 import net.minecraft.world.storage.loot.ILootContainer;
+import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.ITeleporter;
 import net.minecraftforge.event.ForgeEventFactory;
@@ -434,7 +435,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
 
     @Override
     public void onDeath(DamageSource cause) {
-        if (net.minecraftforge.common.ForgeHooks.onLivingDeath(this, cause)) return;
+        if (world.onLivingDeath(this, cause)) return;
         boolean flag = this.world.getGameRules().getBoolean("showDeathMessages");
         this.connection.netManager.sendPacketE(new SPacketCombatEvent(this.getCombatTracker(), SPacketCombatEvent.Event.ENTITY_DIED, flag));
 

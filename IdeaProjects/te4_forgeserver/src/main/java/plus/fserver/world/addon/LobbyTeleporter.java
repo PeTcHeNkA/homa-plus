@@ -16,11 +16,17 @@ public class LobbyTeleporter implements ITeleporter {
     private Vec3d lobby = new Vec3d(0,70,0);
     private int distance;
     private GameType gameType;
+    private float yaw = Float.NaN, pith = Float.NaN;
 
     public void init(Vec3d lobby, int distance, GameType gameType){
         this.lobby = lobby;
         this.distance = distance;
         this.gameType = gameType;
+    }
+
+    public void setRotation(float yaw, float pith){
+        this.yaw  = yaw;
+        this.pith = pith;
     }
 
 
@@ -34,11 +40,18 @@ public class LobbyTeleporter implements ITeleporter {
                 new Vec3d(pos.getDoubleAt(0), pos.getDoubleAt(1), pos.getDoubleAt(2)),
                 nbt.getInteger("distance"), gameType
         );
+        if(nbt.hasKey("yaw")) yaw  = nbt.getFloat("yaw");
+        if(nbt.hasKey("pith"))pith = nbt.getFloat("pith");
     }
 
 
     @Override
-    public void placeEntity(final World world, final Entity entity, final float yaw) {
+    public void placeEntity(final World world, final Entity entity, float yaw) {
+        float yaw0 = this.yaw, pith = this.pith;
+        if(!Float.isNaN(yaw0))yaw = yaw0;
+        if(!Float.isNaN(pith))
+            entity.rotationPitch = entity.prevRotationPitch = pith;
+
         entity.rotationYaw = entity.prevRotationYaw = yaw;
         if(entity instanceof EntityPlayerMP){
             EntityPlayerMP player = (EntityPlayerMP) entity;
@@ -78,6 +91,9 @@ public class LobbyTeleporter implements ITeleporter {
         if(gameType != null)
             nbt.setIntegerU("gm", gameType.getID());
         nbt.setIntegerU("distance", distance);
+
+        if(!Float.isNaN(yaw))  nbt.setFloat("yaw", yaw);
+        if(!Float.isNaN(pith)) nbt.setFloat("pith", pith);
         return nbt;
     }
 }

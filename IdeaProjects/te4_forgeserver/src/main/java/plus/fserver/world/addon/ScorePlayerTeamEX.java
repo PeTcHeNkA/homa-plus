@@ -13,10 +13,15 @@ public class ScorePlayerTeamEX extends ScorePlayerTeam {
     }
 
 
-    public Object getCustom(String key){
+    public Object getCustomRaw(String key){
         Object2ObjectOpenHashMap<String,?> customData;
         if((customData = this.customData) == null)return null;
         return customData.get(key);
+    }
+
+
+    public <T> T getCustom(String key){
+        return (T) getCustomRaw(key);
     }
 
 

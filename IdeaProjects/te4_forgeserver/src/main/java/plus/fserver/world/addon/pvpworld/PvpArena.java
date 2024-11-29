@@ -5,6 +5,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3d;
@@ -14,34 +15,46 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
+import net.minecraftforge.common.DimensionManager;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import plus.fserver.api.WorldConstructor;
 import plus.fserver.utls.EmptyChunk;
 import plus.fserver.utls.NbtUtils;
 import plus.fserver.world.addon.CleanLobbyTeleporter;
 import plus.fserver.world.addon.LobbyTeleporter;
 import plus.fserver.world.addon.MemoryChunkProviderServer;
+import plus.tson.utl.Te4HashSet;
 import plus.tson.utl.Tuple;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 
 public class PvpArena {
-    private static Tuple<Chunk,NBTTagCompound> EMPTY = new Tuple<>(EmptyChunk.INSTANCE, new NBTTagCompound(2,1));
+    private static final Tuple<Chunk,NBTTagCompound> EMPTY = new Tuple<>(EmptyChunk.INSTANCE, new NBTTagCompound(2,1));
+    private static final int MIN_PVPA_DIM_ID = 700000;
+
     private final Long2ObjectOpenHashMap<ExtendedBlockStorage[]> cache = new Long2ObjectOpenHashMap<>();
+    private final Set<Integer> usedDimIds = new Te4HashSet<>();
+    private final Set<Integer> freeDimIds = new Te4HashSet<>();
     private final NBTTagCompound data;
     private boolean immutable = true;
     private List<List<BlockPos>> spawnPositions;
     private LobbyTeleporter teleporter;
     private WorldConstructor.Constructor constructor;
     private DimensionType type = DimensionType.OVERWORLD;
-    private Consumer<EntityPlayerMP> onAddPlayer                       = TaskRegistry.empty();
-    private Consumer<Tuple<EntityPlayerMP,PvpArena>> onRemovePlayer    = TaskRegistry.empty();
-    private Consumer<EntityPlayerMP> onPreRemovePlayer                 = TaskRegistry.empty();
-    private Consumer<EntityPlayerMP> onDeath                           = TaskRegistry.empty();
-    private Consumer<WorldServer>    onTick                            = TaskRegistry.empty();
+    private boolean mayReuseWorld = false;
+    private Consumer<EntityPlayerMP> onAddPlayer                    = TaskRegistry.empty();
+    private Consumer<Tuple<EntityPlayerMP,PvpArena>> onRemovePlayer = TaskRegistry.empty();
+    private Consumer<EntityPlayerMP> onPreRemovePlayer              = TaskRegistry.empty();
+    private Consumer<LivingDeathEvent> onDeath                      = TaskRegistry.empty();
+    private Consumer<WorldServer>    onTick                         = TaskRegistry.empty();
+    private int minPlayers = 2;
+    private int maxPlayers = 10;
+
 
     public PvpArena(NBTTagCompound data) {
         this.data = data;
@@ -89,7 +102,7 @@ public class PvpArena {
 
 
     public boolean setOnDeath(String id){
-        Consumer<EntityPlayerMP> task = TaskRegistry.REGISTRY.getTask(id);
+        Consumer<LivingDeathEvent> task = TaskRegistry.REGISTRY.getTask(id);
         onDeath = task;
         data.setString("onDeath", id);
         return TaskRegistry.isEmpty(task);
@@ -105,9 +118,15 @@ public class PvpArena {
 
 
     public boolean setOnInit(String id){
-        Consumer<WorldServer> task = TaskRegistry.REGISTRY.getTask(id);
-        onTick = task;
+        Consumer<Tuple<WorldServer,EntityPlayerMP[]>> task = TaskRegistry.REGISTRY.getTask(id);
         data.setString("onInit", id);
+        return TaskRegistry.isEmpty(task);
+    }
+
+
+    public boolean setOnComplete(String id){
+        Consumer<WorldServer> task = TaskRegistry.REGISTRY.getTask(id);
+        data.setString("onComplete", id);
         return TaskRegistry.isEmpty(task);
     }
 
@@ -127,13 +146,84 @@ public class PvpArena {
     }
 
 
-    public void onDeath(EntityPlayerMP player){
-        onDeath.accept(player);
+    public void onDeath(LivingDeathEvent event){
+        onDeath.accept(event);
     }
 
 
     public void onTick(WorldServer world){
         onTick.accept(world);
+    }
+
+
+    public int minPlayers(){
+        return minPlayers;
+    }
+
+
+    public int maxPlayers(){
+        return maxPlayers;
+    }
+
+
+    public void setPlayerLimits(int min, int max){
+        this.minPlayers = min;
+        this.maxPlayers = max;
+        //todo
+    }
+
+
+    public void onComplete(WorldServer world){
+        TaskRegistry.REGISTRY.getTask(data.getString("onComplete")).accept(world);
+    }
+
+
+    private int getFreeId(){
+        synchronized (freeDimIds){
+            if(freeDimIds.isEmpty()){
+                int id = getDimFreeId();
+                WorldConstructor.register(id, constructor(), type);
+                DimensionManager.registerDimension(id, type);
+                usedDimIds.add(id);
+                return id;
+            } else {
+                Integer id = freeDimIds.iterator().next();
+                freeDimIds.remove(id);
+                return id;
+            }
+        }
+    }
+
+
+    private static int getDimFreeId(){
+        int min = MIN_PVPA_DIM_ID+DimensionManager.getNextFreeDimId();
+        while (DimensionManager.isDimensionRegistered(min)){
+            ++min;
+        }
+        return min;
+    }
+
+
+    public void startNewGame(MinecraftServer server, EntityPlayerMP[] players){
+        int dimId = getDimFreeId();
+        PvpWorld world = (PvpWorld) server.getWorld(dimId);
+
+        world.onNewGame(players);
+        TaskRegistry.REGISTRY.getTask(data.getString("onInit")).accept(new Tuple<>(world, players));
+
+        for (EntityPlayerMP player:players){
+            player.changeDimension(dimId);
+        }
+
+
+
+        //onNewGame(world, players);
+    }
+
+
+    public void onStartNewGame(WorldServer world, EntityPlayerMP[] players){
+        ((PvpWorld)world).onNewGame(players);
+        TaskRegistry.REGISTRY.getTask(data.getString("onStart")).accept(new Tuple<>(world, players));
     }
 
 
@@ -178,14 +268,7 @@ public class PvpArena {
     public WorldConstructor.Constructor constructor(){
         if(constructor == null) return constructor = (server, saveHandler, dimId, delegate, profiler) -> new PvpWorld(server, saveHandler, dimId, delegate, profiler) {
             @Override
-            public World init() {
-                super.init();
-                TaskRegistry.REGISTRY.getTask(data.getString("onInit")).accept(this);
-                return this;
-            }
-
-            @Override
-            PvpArena getArena() {
+            public PvpArena getArena() {
                 return PvpArena.this;
             }
         };

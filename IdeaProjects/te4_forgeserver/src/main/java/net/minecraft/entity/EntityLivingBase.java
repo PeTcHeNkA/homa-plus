@@ -786,6 +786,12 @@ public abstract class EntityLivingBase extends Entity {
                     } else
                         this.attackedAtYaw = (float)((int)(Math.random() * 2.0D) * 180);
                 }
+                boolean flag2 = !flag || amount > 0.0F;
+                if (flag2) {
+                    this.lastDamageSource = source;
+                    this.lastDamageStamp = this.world.getTotalWorldTime();
+                }
+
                 if (this.getHealth() <= 0.0F) {
                     if (!this.checkTotemDeathProtection(source)) {
                         SoundEvent soundevent = this.getDeathSound();
@@ -796,11 +802,6 @@ public abstract class EntityLivingBase extends Entity {
                     }
                 } else if (flag1) this.playHurtSound(source);
 
-                boolean flag2 = !flag || amount > 0.0F;
-                if (flag2) {
-                    this.lastDamageSource = source;
-                    this.lastDamageStamp = this.world.getTotalWorldTime();
-                }
                 if (this instanceof EntityPlayerMP)
                     CriteriaTriggers.ENTITY_HURT_PLAYER.trigger((EntityPlayerMP)this, source, f, amount, flag);
 
@@ -854,7 +855,7 @@ public abstract class EntityLivingBase extends Entity {
 
     @Nullable
     public DamageSource getLastDamageSource() {
-        if (this.world.getTotalWorldTime() - this.lastDamageStamp > 40L) this.lastDamageSource = null;
+        if (!isDead && this.world.getTotalWorldTime() - this.lastDamageStamp > 40L) this.lastDamageSource = null;
         return this.lastDamageSource;
     }
 
@@ -902,8 +903,12 @@ public abstract class EntityLivingBase extends Entity {
 
 
     public void onDeath(DamageSource cause) {
-        if (ForgeHooks.onLivingDeath(this, cause)) return;
+        if (world.onLivingDeath(this, cause)) return;
+        onDeathCommon(cause);
+    }
 
+
+    public void onDeathCommon(DamageSource cause) {
         if (!this.dead) {
             Entity entity = cause.getTrueSource();
             EntityLivingBase entitylivingbase = this.getAttackingEntity();

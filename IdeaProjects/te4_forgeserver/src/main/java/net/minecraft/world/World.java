@@ -3889,19 +3889,20 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     private final LivingSpawnEvent.CheckSpawn checkSpawnEvemt = new LivingSpawnEvent.CheckSpawn();
     private final BlockEvent.EntityPlaceEvent blockPlaceEvent = new BlockEvent.EntityPlaceEvent();
     private final EntityMobGriefingEvent     mobGriefingEvent = new EntityMobGriefingEvent(null);
-    private final LivingEvent.LivingJumpEvent   jumpEvent     = new LivingEvent.LivingJumpEvent(null);
+    private final LivingEvent.LivingJumpEvent   jumpEvent     = new LivingEvent.LivingJumpEvent();
     private final LivingEvent.LivingUpdateEvent updateEvent   = new LivingEvent.LivingUpdateEvent().forBus(MinecraftForge.EVENT_BUS);
-    private final LivingAttackEvent             attackEvent   = new LivingAttackEvent(null, null, 0);
-    private final LivingHurtEvent               hurtEvent     = new LivingHurtEvent(null,null,0);
-    private final LivingDamageEvent             damageEvent   = new LivingDamageEvent(null, null, 0);
-    private final LivingSpawnEvent.SpecialSpawn specialSpawn  = new LivingSpawnEvent.SpecialSpawn(null,this,0,0,0,null);
+    private final LivingAttackEvent             attackEvent   = new LivingAttackEvent();
+    private final LivingHurtEvent               hurtEvent     = new LivingHurtEvent();
+    private final LivingDamageEvent             damageEvent   = new LivingDamageEvent();
+    private final LivingSpawnEvent.SpecialSpawn specialSpawn  = new LivingSpawnEvent.SpecialSpawn();
     private final LivingSpawnEvent.AllowDespawn allowDespawn  = new LivingSpawnEvent.AllowDespawn();
     private final BlockEvent.CropGrowEvent.Pre  cropGrowPre   = new BlockEvent.CropGrowEvent.Pre();
     private final BlockEvent.CropGrowEvent.Post croptGrowPost = new BlockEvent.CropGrowEvent.Post();
-    private final PlaySoundAtEntityEvent       playSoundEvent = new PlaySoundAtEntityEvent(null,null,null,0,0);
+    private final PlaySoundAtEntityEvent       playSoundEvent = new PlaySoundAtEntityEvent();
+    protected final LivingDeathEvent         livingDeathEvent = new LivingDeathEvent();
     private LivingSetAttackTargetEvent livingSetAttackTargetEvent;
 
-    public  final EntityEvent.EnteringChunk     enteringChunk = new EntityEvent.EnteringChunk(null,0,0,0,0);
+    public  final EntityEvent.EnteringChunk     enteringChunk = new EntityEvent.EnteringChunk();
     public  final ChunkWatchEvent             chunkWatchEvent = new ChunkWatchEvent.Watch().forBus(MinecraftForge.EVENT_BUS);
     public  final ChunkWatchEvent           chunkUnWatchEvent = new ChunkWatchEvent.UnWatch().forBus(MinecraftForge.EVENT_BUS);
     public  final EntityEvent.CanUpdate       canUpdateEvent  = new EntityEvent.CanUpdate(null).forBus(MinecraftForge.EVENT_BUS);
@@ -3928,6 +3929,13 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             livingSetAttackTargetEvent.init(null,null);
         }
         bigLocalCache.cleanAll();
+    }
+
+
+    public boolean onLivingDeath(EntityLivingBase entity, DamageSource src){
+        LivingDeathEvent ev = livingDeathEvent;
+        ev.init(entity, src);
+        return MinecraftForge.EVENT_BUS.post(ev);
     }
 
 
