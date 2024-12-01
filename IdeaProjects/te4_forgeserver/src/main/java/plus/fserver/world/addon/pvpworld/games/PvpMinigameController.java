@@ -9,7 +9,7 @@ import net.minecraft.world.WorldServer;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import plus.fserver.world.addon.pvpworld.MinigameController;
 import plus.fserver.world.addon.pvpworld.MinigameWorld;
-import plus.fserver.world.addon.pvpworld.stats.CombatData;
+import plus.fserver.world.addon.pvpworld.stats.WorldData;
 import plus.fserver.world.addon.pvpworld.tasks.RespawnAllRandomly;
 import java.util.*;
 
@@ -37,14 +37,14 @@ public class PvpMinigameController extends MinigameController {
     public void onPreRemPlayer(EntityPlayerMP player) {}
 
 
-    public static class Data extends CombatData{
+    public static class Data extends WorldData {
         public int rounds;
         public boolean isTimeOut, ticked;
     }
 
 
     @Override
-    public CombatData createData(MinigameWorld world) {
+    public WorldData createData(MinigameWorld world) {
         return new Data();
     }
 
@@ -56,7 +56,7 @@ public class PvpMinigameController extends MinigameController {
             EntityPlayerMP player = (EntityPlayerMP) entity;
             MinigameWorld world = (MinigameWorld) entity.world;
             if(!world.isGameMember(player))return;
-            CombatData data = world.data();
+            WorldData data = world.data();
 
             event.setCanceled(true);
             player.onPlayerDeath(event.getSource(), false);
@@ -120,7 +120,7 @@ public class PvpMinigameController extends MinigameController {
         //todo
         Data data = world.data();
 
-        CombatData.Results results = data.dumpResults(CombatData.Sorting.SCORE);
+        WorldData.Results results = data.dumpResults(WorldData.Sorting.SCORE);
         results.get(0); //is winner
 
         super.onComplete(world);

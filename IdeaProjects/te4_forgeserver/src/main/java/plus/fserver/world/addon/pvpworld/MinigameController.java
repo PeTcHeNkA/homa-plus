@@ -14,7 +14,6 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.GameType;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraftforge.common.DimensionManager;
@@ -26,7 +25,7 @@ import plus.fserver.utls.NbtUtils;
 import plus.fserver.world.addon.CleanLobbyTeleporter;
 import plus.fserver.world.addon.LobbyTeleporter;
 import plus.fserver.world.addon.MemoryChunkProviderServer;
-import plus.fserver.world.addon.pvpworld.stats.CombatData;
+import plus.fserver.world.addon.pvpworld.stats.WorldData;
 import plus.tson.utl.Te4HashMap;
 import plus.tson.utl.Te4HashSet;
 import plus.tson.utl.Tuple;
@@ -138,8 +137,8 @@ public abstract class MinigameController {
     public abstract void onTick(MinigameWorld world);
 
 
-    public CombatData createData(MinigameWorld world){
-        return new CombatData();
+    public WorldData createData(MinigameWorld world){
+        return new WorldData();
     }
 
 

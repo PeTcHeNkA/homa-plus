@@ -67,18 +67,24 @@ public class CombatStats {
     }
 
 
-    public void addKill(int n){
-        value = setKills(value, getKills(value) + n);
+    public int addKill(int n){
+        int result;
+        value = setKills(value, result = getKills(value) + n);
+        return result;
     }
 
 
-    public void addDeath(int n){
-        value = setDeaths(value, getDeaths(value) + n);
+    public int addDeath(int n){
+        int result;
+        value = setDeaths(value, result = getDeaths(value) + n);
+        return result;
     }
 
 
-    public void addScore(int n) {
-        value = setScore(value, getScore(value) + n);
+    public int addScore(int n) {
+        int result;
+        value = setScore(value, result = getScore(value) + n);
+        return result;
     }
 
 

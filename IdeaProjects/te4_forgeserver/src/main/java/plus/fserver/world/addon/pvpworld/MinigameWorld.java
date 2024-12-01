@@ -20,8 +20,7 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import plus.fserver.world.addon.EmptyChunkGenerator;
 import plus.fserver.world.addon.MemoryChunkProviderServer;
 import plus.fserver.world.addon.ScoreboardEX;
-import plus.fserver.world.addon.pvpworld.stats.CombatData;
-import plus.tson.utl.Te4HashMap;
+import plus.fserver.world.addon.pvpworld.stats.WorldData;
 import plus.tson.utl.Te4HashSet;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -33,10 +32,8 @@ import java.util.function.Consumer;
 
 public abstract class MinigameWorld extends WorldServerMulti {
     private ConcurrentLinkedQueue<DelayTask> futureTasks = new ConcurrentLinkedQueue<>();
-    private CombatData data;
+    private WorldData data;
     private Te4HashSet<UUID> awaitPlayers;
-    //private Te4HashMap<UUID,Te4HashMap> userData;
-    //private Te4HashMap<UUID,Integer> prevDims = new Te4HashMap<>(4);
     private boolean finished = true;
 
     public MinigameWorld(MinecraftServer server, ISaveHandler handler, int id, WorldServer parent, Profiler profiler) {
@@ -70,21 +67,16 @@ public abstract class MinigameWorld extends WorldServerMulti {
     }
 
 
-    public Te4HashMap<UUID,Integer> prevDimMap(){
-        return prevDims;
-    }
-
-
     public boolean isGameMember(EntityPlayerMP player){
-        return prevDims.containsKey(player.getUniqueID());
+        return data.containsKey(player.getUniqueID());
     }
 
 
     public List<EntityPlayerMP> getMembers(){
-        Te4HashMap<UUID, Integer> pd = prevDims;
+        WorldData data = this.data;
         List<EntityPlayerMP> players = new ArrayList<>();
         for (EntityPlayer player: this.playerEntities){
-            if(player instanceof EntityPlayerMP && pd.containsKey(player.getUniqueID())){
+            if(player instanceof EntityPlayerMP && data.contains(player)){
                 players.add((EntityPlayerMP) player);
             }
         }
@@ -120,7 +112,7 @@ public abstract class MinigameWorld extends WorldServerMulti {
 //    }
 
 
-    public <T extends CombatData> T data(){
+    public <T extends WorldData> T data(){
         return (T) data;
     }
 //
