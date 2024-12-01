@@ -99,7 +99,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public final List<Entity> loadedEntityList;
     public final EntityIDHashSplitedList realEntityList;
     protected final List<Entity> unloadedEntityList = Lists.newArrayList();
-    public final List<TileEntity> loadedTileEntityList= new ArrayRemSwapListE15<>();
+    public final List<TileEntity> loadedTileEntityList = new ArrayRemSwapListE15<>();
     public final ArrayRemSwapListE15<TileEntity> tickableTileEntities = new ArrayRemSwapListE15<>();
     private final List<TileEntity> addedTileEntityList = Lists.newArrayList();
     private final List<TileEntity> tileEntitiesToBeRemoved = Lists.newArrayList();
@@ -146,7 +146,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
     public boolean restoringBlockSnapshots = false;
     public boolean captureBlockSnapshots = false;
-    public java.util.ArrayList<net.minecraftforge.common.util.BlockSnapshot> capturedBlockSnapshots = new java.util.ArrayList<net.minecraftforge.common.util.BlockSnapshot>();
+    public ArrayList<net.minecraftforge.common.util.BlockSnapshot> capturedBlockSnapshots = new ArrayList<net.minecraftforge.common.util.BlockSnapshot>();
     private net.minecraftforge.common.capabilities.CapabilityDispatcher capabilities;
     private net.minecraftforge.common.util.WorldCapabilityData capabilityData;
     public boolean loaded = true;

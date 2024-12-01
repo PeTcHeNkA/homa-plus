@@ -18,6 +18,7 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import plus.fserver.api.ChatPacketBuilder;
 import plus.fserver.api.TextComponentAuto;
 import plus.fserver.api.WorldConstructor;
 import plus.fserver.utls.EmptyChunk;
@@ -27,7 +28,9 @@ import plus.fserver.world.addon.LobbyTeleporter;
 import plus.fserver.world.addon.MemoryChunkProviderServer;
 import plus.fserver.world.addon.pvpworld.stats.PlayerData;
 import plus.fserver.world.addon.pvpworld.stats.WorldData;
-import plus.tson.utl.Te4HashMap;
+import plus.tson.TsonMap;
+import plus.tson.TsonObj;
+import plus.tson.ext.TsonAccessUtils;
 import plus.tson.utl.Te4HashSet;
 import plus.tson.utl.Tuple;
 import java.io.File;
@@ -57,70 +60,21 @@ public abstract class MinigameController {
     public MinigameController(){}
 
 
-    public void readFrom(NBTTagCompound data) {
-        this.data = data;
-
-        if(data.hasKey("teleporter")){
-            teleporter.readFrom(data.getCompoundTag("teleporter"));
+    public void loadConfigurations(TsonMap map){
+        String dimType = map.getOrDefaultStr("dim_type", "overworld");
+        try {
+            type = DimensionType.byName(dimType);
+        } catch (Exception e){
+            MinecraftServer.LOGGER.error("Invalid dimension: {}", type);
+            type = DimensionType.OVERWORLD;
         }
-        if(data.hasKey("dimType")){
-            type = DimensionType.getById(data.getInteger("dimType"));
-        }
+        map.ifContainsMap("lobby", teleporter::readFrom);
     }
-//
-//
-//    public boolean setOnAddPlayer(String id){
-//        Consumer<EntityPlayerMP> task = TaskRegistry.REGISTRY.getTask(id);
-//        onAddPlayer = task;
-//        data.setString("onAddPL", id);
-//        return TaskRegistry.isEmpty(task);
-//    }
-//
-//
-//    public boolean setOnRemPlayer(String id){
-//        Consumer<Tuple<EntityPlayerMP,PvpArena>> task = TaskRegistry.REGISTRY.getTask(id);
-//        onRemovePlayer = task;
-//        data.setString("onRemPL", id);
-//        return TaskRegistry.isEmpty(task);
-//    }
-//
-//
-//    public boolean setOnPreRemPlayer(String id){
-//        Consumer<EntityPlayerMP> task = TaskRegistry.REGISTRY.getTask(id);
-//        onPreRemovePlayer = task;
-//        data.setString("onPreRemPL", id);
-//        return TaskRegistry.isEmpty(task);
-//    }
-//
-//
-//    public boolean setOnDeath(String id){
-//        Consumer<LivingDeathEvent> task = TaskRegistry.REGISTRY.getTask(id);
-//        onDeath = task;
-//        data.setString("onDeath", id);
-//        return TaskRegistry.isEmpty(task);
-//    }
-//
-//
-//    public boolean setOnTick(String id){
-//        Consumer<WorldServer> task = TaskRegistry.REGISTRY.getTask(id);
-//        onTick = task;
-//        data.setString("onTick", id);
-//        return TaskRegistry.isEmpty(task);
-//    }
-//
-//
-//    public boolean setOnInit(String id){
-//        Consumer<Tuple<WorldServer,EntityPlayerMP[]>> task = TaskRegistry.REGISTRY.getTask(id);
-//        data.setString("onInit", id);
-//        return TaskRegistry.isEmpty(task);
-//    }
-//
-//
-//    public boolean setOnComplete(String id){
-//        Consumer<WorldServer> task = TaskRegistry.REGISTRY.getTask(id);
-//        data.setString("onComplete", id);
-//        return TaskRegistry.isEmpty(task);
-//    }
+
+
+    public void setMap(NBTTagCompound data){
+        this.data = data;
+    }
 
 
     public abstract void onAddPlayer(EntityPlayerMP player);
@@ -250,11 +204,6 @@ public abstract class MinigameController {
     public LobbyTeleporter getTeleporter(){
         return teleporter;
     }
-//
-//
-//    public List<List<BlockPos>> spawnPositions(){
-//        return spawnPositions;
-//    }
 
 
     public WorldConstructor.Constructor constructor(){
@@ -273,14 +222,6 @@ public abstract class MinigameController {
         };
         return constructor;
     }
-//
-//
-//    public void addPos(int group, BlockPos pos){
-//        while (spawnPositions.size() <= group){
-//            spawnPositions.add(new ArrayList<>());
-//        }
-//        spawnPositions.get(group).add(pos);
-//    }
 
 
     public Tuple<Chunk,NBTTagCompound> createChunk(World world, int x, int z){
@@ -288,9 +229,6 @@ public abstract class MinigameController {
         if(data.hasKey(key)){
             NBTTagCompound nbt = data.getCompoundTag(key);
             return new Tuple<>(createFromNbt(nbt, world, x, z), nbt);
-        }
-        if(isImmutable()){
-            return EMPTY;
         }
         return new Tuple<>(new Chunk(world, x, z), EMPTY.B);
     }
@@ -419,6 +357,19 @@ public abstract class MinigameController {
                     future.accept(pl0);
                 }
             }, delay);
+        }
+    }
+
+
+    protected static ChatPacketBuilder getMsg(TsonMap map, String key){
+        TsonObj obj = TsonAccessUtils.getR(map, key);
+        if(obj == null)return ChatPacketBuilder.of("Default message: "+key);
+        try {
+            return ChatPacketBuilder.of(obj);
+        } catch (Exception e){
+            MinecraftServer.LOGGER.error("Error build message: ["+key+"] ->\n"+map.toString());
+            e.printStackTrace();
+            return ChatPacketBuilder.of("Default message: "+key);
         }
     }
 }

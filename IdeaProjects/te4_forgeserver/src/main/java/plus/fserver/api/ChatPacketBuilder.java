@@ -10,8 +10,13 @@ import net.minecraft.util.text.TextComponentString;
 import plus.fserver.ElcaCV2;
 import plus.fserver.api.placeholders.PlayerVarProvider;
 import plus.fserver.server.network.packet.SRawPacketChat;
+import plus.tson.TsonObj;
 import plus.tson.format.IVarGetter;
 import plus.tson.format.TextFormatter;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 
 public final class ChatPacketBuilder {
@@ -21,6 +26,16 @@ public final class ChatPacketBuilder {
 
     private ChatPacketBuilder(TextFormatter<EntityPlayerMP> format) {
         this.format = format.simplify();
+    }
+
+
+    public static ChatPacketBuilder of(TsonObj obj){
+        ChatPacketBuilder builder = of(TextComponentAuto.compFromTson(obj));
+        if(obj.isMap()){
+            if(obj.getMap().getOrDefaultBool("async", false))
+                builder.asyncRender(true);
+        }
+        return builder;
     }
 
 
@@ -63,6 +78,39 @@ public final class ChatPacketBuilder {
     }
 
 
+    public void send(List<EntityPlayerMP> players){
+        send(players, true);
+    }
+
+
+    public void send(List<EntityPlayerMP> players, boolean copy){
+        int size = players.size();
+        if(size == 0)return;
+        if(size == 1){
+            send(players.get(0));
+            return;
+        }
+        if(ElcaCV2.LIBBUILD){
+            players.forEach(this::send);
+            return;
+        }
+        if(asyncRender){
+            if(copy)players = new ArrayList<>(players);
+            List<EntityPlayerMP> finalPlayers = players;
+
+            players.get(0).connection.netManager.exec(() -> {
+                for (EntityPlayerMP player: finalPlayers){
+                    player.connection.netManager.sendPacketE(build(player));
+                }
+            });
+        } else {
+            for (EntityPlayerMP player:players){
+                player.connection.netManager.sendPacketE(build(player));
+            }
+        }
+    }
+
+
     public void send(EntityPlayerMP player){
         if(ElcaCV2.LIBBUILD){
             player.connection.sendPacket(build(player));
@@ -83,7 +131,7 @@ public final class ChatPacketBuilder {
             send((EntityPlayerMP) sender);
         } else {
             if(canSendNoPlayer) try {
-                send(null);
+                send((EntityPlayerMP)null);
             } catch (Exception e) {
                 e.printStackTrace();
                 canSendNoPlayer = false;

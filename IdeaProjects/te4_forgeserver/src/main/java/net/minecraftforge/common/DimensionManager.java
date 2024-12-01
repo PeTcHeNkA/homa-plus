@@ -178,20 +178,9 @@ public class DimensionManager {
             FMLLog.log.info("Unloading dimension {}", id);
         }
 
-        ArrayList<WorldServer> tmp = new ArrayList<WorldServer>();
-        if (worlds.get( 0) != null)
-            tmp.add(worlds.get( 0));
-        if (worlds.get(-1) != null)
-            tmp.add(worlds.get(-1));
-        if (worlds.get( 1) != null)
-            tmp.add(worlds.get( 1));
+        ArrayList<WorldServer> tmp = new ArrayList<>();
 
         for (Int2ObjectMap.Entry<WorldServer> entry : worlds.int2ObjectEntrySet()) {
-            int dim = entry.getIntKey();
-            if (dim >= -1 && dim <= 1)
-            {
-                continue;
-            }
             tmp.add(entry.getValue());
         }
         server.worlds = tmp.toArray(new WorldServer[0]);

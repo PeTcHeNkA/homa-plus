@@ -1,7 +1,11 @@
 package plus.fserver.utls;
 
+import java.util.function.Predicate;
+
 
 public class FastValidators {
+    public static final Predicate ALWAYS_TRUE = o -> true;
+
     public static boolean is_09_az(String name){
         char[] chars = name.toCharArray();
         for (char c:chars){

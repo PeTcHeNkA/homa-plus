@@ -10,6 +10,11 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameType;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ITeleporter;
+import plus.fserver.utls.McTsonUtils;
+import plus.tson.TsonList;
+import plus.tson.TsonMap;
+import plus.tson.TsonObj;
+import java.util.function.Consumer;
 
 
 public class LobbyTeleporter implements ITeleporter {
@@ -28,6 +33,19 @@ public class LobbyTeleporter implements ITeleporter {
         this.yaw  = yaw;
         this.pith = pith;
     }
+
+
+    public void readFrom(TsonMap map){
+        lobby = McTsonUtils.getVec3d(map.get("pos"));
+        if(map.containsKey("yaw"))
+            yaw = map.getFloat("yaw");
+        if(map.containsKey("yaw"))
+            pith = map.getFloat("pith");
+        distance = map.getOrDefaultInt("distance", 0);
+        if(map.containsKey("game-type"))
+            gameType = McTsonUtils.getGameType(map.get("game-type"));
+    }
+
 
 
     public void readFrom(NBTTagCompound nbt){

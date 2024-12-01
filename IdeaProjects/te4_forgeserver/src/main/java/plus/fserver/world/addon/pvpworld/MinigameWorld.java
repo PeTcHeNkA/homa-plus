@@ -1,5 +1,6 @@
 package plus.fserver.world.addon.pvpworld;
 
+import net.minecraft.entity.EMoveHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -9,14 +10,20 @@ import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.WorldEntitySpawner;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldServerMulti;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
+import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.ITeleporter;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import plus.fserver.ElcaCV;
+import plus.fserver.utls.FastValidators;
+import plus.fserver.utls.collections.EntityRemSwapList;
 import plus.fserver.world.addon.EmptyChunkGenerator;
 import plus.fserver.world.addon.MemoryChunkProviderServer;
 import plus.fserver.world.addon.ScoreboardEX;
@@ -28,6 +35,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 
 public abstract class MinigameWorld extends WorldServerMulti {
@@ -41,12 +49,71 @@ public abstract class MinigameWorld extends WorldServerMulti {
     }
 
 
+    @Override
+    protected void initUnimportant() {
+        collideTask = new EMoveHelper.ComboCollideTask(16);
+    }
+
+
+    public void cleanEntities() {
+        cleanEntities(FastValidators.ALWAYS_TRUE);
+    }
+
+
+    public void cleanEntities(Predicate<Entity> func) {
+        ChunkProviderServer cps = chunkProviderServer;
+        for (EntityRemSwapList.E15<Entity> list:realEntityList.getRaw()) {
+            Entity[] raw = list.raw();
+
+            int size = list.sizeC();
+            for (int cursor = 0; cursor < size; ++cursor) {
+                Entity entity = raw[cursor];
+                Entity ridding;
+
+                if ((ridding = entity.getRidingEntity()) != null) {
+                    if (!(ridding instanceof EntityPlayerMP && func.test(ridding)) && ridding.isPassenger(entity))
+                        continue;
+                    entity.dismountRidingEntity();
+                }
+
+
+                if (!(entity instanceof EntityPlayerMP) && func.test(ridding)) {
+                    if (entity.addedToChunk) {
+                        Chunk chunk = cps.getLoadedChunk(entity.chunkCoordX, entity.chunkCoordZ);
+                        if(chunk != null) {
+                            if(ElcaCV.ENABLE_CHUNK_ADD_LOCKS){
+                                synchronized (chunk){
+                                    chunk.removeEntity(entity); //sync
+                                }
+                            } else {
+                                chunk.removeEntity(entity); //def
+                            }
+                        }
+                    }
+                    list.removeSwap(cursor--);
+                    --size;
+                    this.onEntityRemoved(entity);
+                }
+            }
+        }
+    }
+
+
+    @Override
+    protected boolean needMobSpawn() {
+        return false;
+    }
+
+
+    @Override
+    protected WorldEntitySpawner makeWorldSpawner() {
+        return null;
+    }
+
+
     public void onNewGame(EntityPlayerMP[][] players){
         data = controller().createData(this);
-        //data     = new Te4HashMap<>();
-        //userData = new Te4HashMap<>();
         futureTasks = new ConcurrentLinkedQueue<>();
-        //prevDims = new Te4HashMap<>();
         finished = false;
         Te4HashSet<UUID> awaitPlayers = this.awaitPlayers = new Te4HashSet<>();
         for (EntityPlayerMP[] team : players) {
@@ -247,7 +314,7 @@ public abstract class MinigameWorld extends WorldServerMulti {
 
 
     @Override
-    public ITeleporter getDefaultTeleporterRaw() {
+    protected ITeleporter initTeleporter() {
         return controller().getTeleporter();
     }
 

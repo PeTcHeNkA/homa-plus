@@ -5,7 +5,10 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.monster.*;
 import net.minecraft.entity.passive.*;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.GameType;
 import net.minecraft.world.biome.Biome;
+import plus.tson.TsonList;
 import plus.tson.TsonMap;
 import plus.tson.TsonObj;
 import plus.tson.security.ClassManager;
@@ -132,5 +135,30 @@ public class McTsonUtils {
         } else if(obj.isString()){
             return Integer.parseInt(obj.getStr(), 16);
         } else throw new IllegalArgumentException();
+    }
+
+
+
+    public static Vec3d getVec3d(TsonObj obj){
+        if(obj.isList()){
+            TsonList list = obj.getList();
+            return new Vec3d(list.getDouble(0), list.getDouble(1), list.getDouble(2));
+        }
+        if(obj.isMap()){
+            TsonMap map = obj.getMap();
+            return new Vec3d(map.getDouble("x"), map.getDouble("y"), map.getDouble("z"));
+        }
+        throw new IllegalArgumentException("Invalid type: "+obj);
+    }
+
+
+    public static GameType getGameType(TsonObj obj){
+        if(obj.isNumber()){
+            return GameType.getByID(obj.getInt());
+        }
+        if(obj.isString()){
+            return GameType.getByName(obj.getStr());
+        }
+        throw new IllegalArgumentException("Invalid type: "+obj);
     }
 }

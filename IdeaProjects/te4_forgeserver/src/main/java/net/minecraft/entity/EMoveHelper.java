@@ -178,8 +178,12 @@ public class EMoveHelper {
 
     public static class ComboCollideTask extends BlockPos.MutableBlockPos{
         private final LongOpenHashSet allUpdate = new LongOpenHashSet();
-        private EMoveHelper.MoveTask[] allTasks = new EMoveHelper.MoveTask[128];
+        private EMoveHelper.MoveTask[] allTasks;
         private int realSize = 0;
+
+        public ComboCollideTask(int initTemp){
+            allTasks = new EMoveHelper.MoveTask[initTemp];
+        }
 
         public void add(Entity entity){
             allUpdate.add(encodeWorldCoord(entity.chunkCoordX, entity.chunkCoordY, entity.chunkCoordZ));

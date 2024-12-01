@@ -128,7 +128,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
     private final ConcurrentHashMap<TQueuedChunk, TChunkTask> _chunkTasks = new ConcurrentHashMap<>();
     protected final ConcurrentLinkedQueue<Runnable> _syncTasks = new ConcurrentLinkedQueue<>();
 
-    public EMoveHelper.ComboCollideTask collideTask = new EMoveHelper.ComboCollideTask();
+    public EMoveHelper.ComboCollideTask collideTask;
     public final NavChunkLSECache navChunkCache;
     private NavUpdateTask navTasks;
     //public final ConcurrentHashMap<Entity, PathFinder.PathGenTask> navTasks = new ConcurrentHashMap<>();
@@ -151,6 +151,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
         entitySpawner = makeWorldSpawner();
 
         initUnimportant();
+        perWorldStorage = new MapStorage(new WorldSpecificSaveHandler(this, saveHandler));
         this.playerChunkMap = createPCM();
 
         navChunkCache = new NavChunkLSECache(chunkProviderServer, 0,0);
@@ -264,7 +265,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
 
     protected void initUnimportant(){
         villageSiege = new VillageSiege(this);
-        perWorldStorage = new MapStorage(new WorldSpecificSaveHandler(this, saveHandler));
+        collideTask = new EMoveHelper.ComboCollideTask(128);
     }
 
 
@@ -662,7 +663,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
             EMoveHelper.ComboCollideTask task = this.collideTask;
             EMoveHelper.ComboCollideTask swap = null;
             if(swap == null){
-                swap = new EMoveHelper.ComboCollideTask();
+                swap = new EMoveHelper.ComboCollideTask(128);
             }
             this.collideTask = swap;
             //this.collideTempTask = null;
@@ -1465,12 +1466,17 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
     }
 
 
+    protected boolean needMobSpawn(){
+        return getGameRules().doMobSpawning.getBoolean();
+    }
+
+
     @Override
     public void tick() {
         localSelector.clear(); //safe
         super.tick();
         long prevWorldTotalTime = this.worldInfo.getWorldTotalTime();
-        if (getGameRules().doMobSpawning.getBoolean()) {
+        if (needMobSpawn()) {
             this.entitySpawner.findChunksForSpawning(this,
                     this.spawnHostileMobs, this.spawnPeacefulMobs,
                     prevWorldTotalTime % spawnOnSetTickRate == 0L);
@@ -1827,7 +1833,7 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
                     if (isRainingAt(chunk, blockpos)) {
                         DifficultyInstance difficultyinstance = getDifficultyForLocation(blockpos);
 
-                        if (getGameRules().doMobSpawning.getBoolean() && rand.nextDouble() < (double)difficultyinstance.getAdditionalDifficulty() * 0.01D) {
+                        if (needMobSpawn() && rand.nextDouble() < (double)difficultyinstance.getAdditionalDifficulty() * 0.01D) {
                             EntitySkeletonHorse horse = new EntitySkeletonHorse(WorldServer.this);
                             horse.setTrap(true);
                             horse.setGrowingAge(0);

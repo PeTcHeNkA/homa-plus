@@ -7,11 +7,14 @@ import net.minecraft.potion.PotionEffect;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import plus.fserver.api.ChatPacketBuilder;
 import plus.fserver.world.addon.pvpworld.MinigameController;
 import plus.fserver.world.addon.pvpworld.MinigameWorld;
 import plus.fserver.world.addon.pvpworld.stats.WorldData;
 import plus.fserver.world.addon.pvpworld.tasks.RespawnAllRandomly;
+import plus.tson.TsonMap;
 import java.util.*;
+import static plus.tson.ext.TsonAccessUtils.*;
 
 
 public class PvpMinigameController extends MinigameController {
@@ -25,8 +28,40 @@ public class PvpMinigameController extends MinigameController {
     private int nextRDelay       = 20*5;
     private RespawnAllRandomly respawner;
 
+    private ChatPacketBuilder onAddPlayer;
+    private ChatPacketBuilder onKillPlayerWinner;
+    private ChatPacketBuilder onKillOther;
+    private ChatPacketBuilder onNewRound;
+    private ChatPacketBuilder onFirtsRound;
+    private ChatPacketBuilder onEndCommon;
+    private ChatPacketBuilder onTimeOut;
+    private ChatPacketBuilder onEndPreparation;
+
     @Override
-    public void onAddPlayer(EntityPlayerMP player) {}
+    public void loadConfigurations(TsonMap map) {
+        super.loadConfigurations(map);
+        onAddPlayer        = getMsg(map, "msg.on-add");
+        onKillPlayerWinner = getMsg(map, "msg.on-kill.winner");
+        onKillOther        = getMsg(map, "msg.on-kill.other");
+        onNewRound         = getMsg(map, "msg.game.new-round");
+        onFirtsRound       = getMsg(map, "msg.game.first-round");
+        onEndCommon        = getMsg(map, "msg.game.timeout.common");
+        onTimeOut          = getMsg(map, "msg.game.timeout.game");
+        onEndPreparation   = getMsg(map, "msg.game.timeout.preparation");
+
+        isImmutable        = getR(map, "map.immutable", true);
+        preparationTicks   = getR(map, "game.preparation-ticks", preparationTicks);
+        commonTicks        = getR(map, "game.common-ticks", commonTicks);
+        timeOut            = getR(map, "game.timeout-ticks", timeOut);
+        winDelay           = getR(map, "game.win-delay-ticks", winDelay);
+        nextRDelay         = getR(map, "game.next-round-delay", nextRDelay);
+    }
+
+
+    @Override
+    public void onAddPlayer(EntityPlayerMP player) {
+        onAddPlayer.send(player);
+    }
 
 
     @Override
@@ -56,18 +91,20 @@ public class PvpMinigameController extends MinigameController {
             EntityPlayerMP player = (EntityPlayerMP) entity;
             MinigameWorld world = (MinigameWorld) entity.world;
             if(!world.isGameMember(player))return;
-            WorldData data = world.data();
+            Data data = world.data();
 
             event.setCanceled(true);
             player.onPlayerDeath(event.getSource(), false);
 
-            data.addDeath(player, 1);
-            //Vars.DEATHS.addInt((EntityPlayerMP) entity, 1);
+            if(!data.isTimeOut) {
+                data.addDeath(player, 1);
+                //Vars.DEATHS.addInt((EntityPlayerMP) entity, 1);
 
-            Entity cause = event.getSource().getTrueSource();
-            if(cause != null && cause instanceof EntityPlayerMP){
-                data.addKill(cause, 1);
-                //Vars.KILLS.addInt((EntityPlayerMP) cause, 1);
+                Entity cause = event.getSource().getTrueSource();
+                if (cause != null && cause instanceof EntityPlayerMP) {
+                    data.addKill(cause, 1);
+                    //Vars.KILLS.addInt((EntityPlayerMP) cause, 1);
+                }
             }
 
             if(nextRound(world)){
@@ -92,9 +129,15 @@ public class PvpMinigameController extends MinigameController {
     private void newRound(WorldServer worldServer){
         MinigameWorld world = (MinigameWorld) worldServer;
         List<EntityPlayerMP> members = world.getMembers();
+        Data data = world.data();
+        data.isTimeOut = false;
+
         for (EntityPlayerMP player:members){
             player.setGameType(GameType.SPECTATOR);
         }
+        onNewRound.send(members, false);
+
+        world.cleanEntities();
         world.addDelayedTask(this::onCompletePreparation, nextRDelay);
     }
 
@@ -111,6 +154,7 @@ public class PvpMinigameController extends MinigameController {
 
     @Override
     public void onNewGameStarted(MinigameWorld world, EntityPlayerMP[] players) {
+        onFirtsRound.send(world.getMembers(), false);
         world.addDelayedTask(this::onCompletePreparation, preparationTicks);
     }
 
@@ -129,9 +173,10 @@ public class PvpMinigameController extends MinigameController {
 
     private void onCompletePreparation(WorldServer worldServer){
         MinigameWorld world = (MinigameWorld) worldServer;
+
         List<EntityPlayerMP> members = world.getMembers();
         respawner.respawn(world, members);
-
+        onEndPreparation.send(members, false);
         world.addDelayedTask(this::onEndCommon, commonTicks);
     }
 
@@ -144,6 +189,7 @@ public class PvpMinigameController extends MinigameController {
         for (EntityPlayerMP player:members){
             player.addPotionEffect(new PotionEffect(MobEffects.GLOWING, Integer.MAX_VALUE, 1, true, false));
         }
+        onEndCommon.send(members, false);
 
         world.addDelayedTask(this::onTimeOut, timeOut);
     }
@@ -162,6 +208,7 @@ public class PvpMinigameController extends MinigameController {
         for (EntityPlayerMP player:members){
             player.onKillCommand();
         }
+        onTimeOut.send(members);
     }
 
 
