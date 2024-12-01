@@ -3,16 +3,16 @@ package plus.fserver.world.addon.pvpworld.stats;
 import plus.fserver.world.addon.ScorePlayerTeamEX;
 
 
-public class CombatStats {
+public class CombatData {
     //13 bits - kills    0 - 8191
     //13 bits - deaths   0 - 8191
     //18 bits - score    0 - 262143
     //20 bits - custom   0 - 1048575
     private long value;
 
-    public CombatStats(){}
+    public CombatData(){}
 
-    public CombatStats(long value) {
+    public CombatData(long value) {
         this.value = value;
     }
 
@@ -28,7 +28,7 @@ public class CombatStats {
 
 
     public int getKills(){
-        return CombatStats.getKills(value);
+        return CombatData.getKills(value);
     }
 
 
@@ -88,10 +88,10 @@ public class CombatStats {
     }
 
 
-    public static CombatStats get(ScorePlayerTeamEX team){
-        CombatStats res = team.getCustom(CombatStats.class);
+    public static CombatData get(ScorePlayerTeamEX team){
+        CombatData res = team.getCustom(CombatData.class);
         if(res == null)
-            team.setCustom(CombatStats.class, res = new CombatStats());
+            team.setCustom(CombatData.class, res = new CombatData());
         return res;
     }
 

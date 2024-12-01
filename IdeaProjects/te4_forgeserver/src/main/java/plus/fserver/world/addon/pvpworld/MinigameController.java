@@ -25,6 +25,7 @@ import plus.fserver.utls.NbtUtils;
 import plus.fserver.world.addon.CleanLobbyTeleporter;
 import plus.fserver.world.addon.LobbyTeleporter;
 import plus.fserver.world.addon.MemoryChunkProviderServer;
+import plus.fserver.world.addon.pvpworld.stats.PlayerData;
 import plus.fserver.world.addon.pvpworld.stats.WorldData;
 import plus.tson.utl.Te4HashMap;
 import plus.tson.utl.Te4HashSet;
@@ -134,7 +135,7 @@ public abstract class MinigameController {
     public abstract void onDeath(LivingDeathEvent event);
 
 
-    public abstract void onTick(MinigameWorld world);
+    public void onTick(MinigameWorld world){};
 
 
     public WorldData createData(MinigameWorld world){
@@ -160,12 +161,12 @@ public abstract class MinigameController {
 
     public void onComplete(MinigameWorld world){
         world.finish();
-        Te4HashMap<UUID, Integer> prevs = world.prevDimMap();
+        WorldData data = world.data();
         for (EntityPlayer player:world.playerEntities.toArray(new EntityPlayer[0])){
             if(player instanceof EntityPlayerMP){
-                Integer prev = prevs.get(player.getUniqueID());
-                if(prev != null){
-                    player.changeDimension(prev);
+                PlayerData stats = data.get(player.getUniqueID());
+                if(stats != null){
+                    player.changeDimension(stats.getDimToReturn());
                 } else {
                     ((EntityPlayerMP)player).connection.disconnect(new TextComponentAuto("Dimension to respawn not founded"));
                 }
@@ -205,22 +206,18 @@ public abstract class MinigameController {
         MinigameWorld world = (MinigameWorld) server.getWorld(dimId);
 
         world.onNewGame(players);
-        Te4HashMap<UUID, Integer> prevs = world.prevDimMap();
+        WorldData data = world.data();
         for (EntityPlayerMP[] team:players){
             for (EntityPlayerMP player:team){
-                prevs.fput(player.getUniqueID(), player.dimension);
+                data.stats(player).setDimToReturn(player.dimension);
             }
         }
-
-        TaskRegistry.REGISTRY.getTask(data.getString("onInit")).accept(new Tuple<>(world, players));
 
         for (EntityPlayerMP[] team:players) {
             for (EntityPlayerMP player : team) {
                 player.changeDimension(dimId);
             }
         }
-
-        //onNewGame(world, players);
     }
 
 

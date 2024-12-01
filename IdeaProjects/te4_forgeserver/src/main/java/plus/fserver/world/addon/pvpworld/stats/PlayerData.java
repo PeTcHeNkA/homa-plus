@@ -3,7 +3,7 @@ package plus.fserver.world.addon.pvpworld.stats;
 import java.util.UUID;
 
 
-public class PlayerCombatStats extends CombatStats{
+public class PlayerData extends CombatData {
     private UUID uuid;
     private int dimToReturn;
 

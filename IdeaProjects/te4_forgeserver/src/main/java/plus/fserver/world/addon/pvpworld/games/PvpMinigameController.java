@@ -39,7 +39,7 @@ public class PvpMinigameController extends MinigameController {
 
     public static class Data extends WorldData {
         public int rounds;
-        public boolean isTimeOut, ticked;
+        public boolean isTimeOut;
     }
 
 
@@ -101,17 +101,17 @@ public class PvpMinigameController extends MinigameController {
 
     @Override
     public void onTick(MinigameWorld world) {
-        Data data = world.data();
-
-        if(!data.ticked){
-            data.ticked = true;
-            world.addDelayedTask(this::onCompletePreparation, preparationTicks);
-        }
         if(!world.finished()){
             if(world.getMembers().size() > 1){
                 onComplete(world);
             }
         }
+    }
+
+
+    @Override
+    public void onNewGameStarted(MinigameWorld world, EntityPlayerMP[] players) {
+        world.addDelayedTask(this::onCompletePreparation, preparationTicks);
     }
 
 

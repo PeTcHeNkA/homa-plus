@@ -7,18 +7,23 @@ import java.util.Comparator;
 import java.util.UUID;
 
 
-public class WorldData extends Te4HashMap<UUID,PlayerCombatStats> {
+public class WorldData extends Te4HashMap<UUID, PlayerData> {
     public int addKill(Entity entity, int n){
         return addKill(entity.getUniqueID(), n);
     }
 
-    public PlayerCombatStats create(){
-        return new PlayerCombatStats();
+    public PlayerData create(){
+        return new PlayerData();
     }
 
 
-    public PlayerCombatStats stats(UUID uuid){
-        PlayerCombatStats stats = super.get(uuid);
+    public PlayerData stats(Entity entity){
+        return stats(entity.getUniqueID());
+    }
+
+
+    public PlayerData stats(UUID uuid){
+        PlayerData stats = super.get(uuid);
         if(stats == null){
             super.fput(uuid, stats = create());
             stats.setUUID(uuid);
@@ -48,7 +53,7 @@ public class WorldData extends Te4HashMap<UUID,PlayerCombatStats> {
 
 
     public int getKills(UUID uuid){
-        PlayerCombatStats stats = super.get(uuid);
+        PlayerData stats = super.get(uuid);
         if(stats == null)return 0;
         return stats.getKills();
     }
@@ -70,7 +75,7 @@ public class WorldData extends Te4HashMap<UUID,PlayerCombatStats> {
 
 
     public int getDeaths(UUID uuid){
-        PlayerCombatStats stats = super.get(uuid);
+        PlayerData stats = super.get(uuid);
         if(stats == null)return 0;
         return stats.getDeaths();
     }
@@ -102,7 +107,7 @@ public class WorldData extends Te4HashMap<UUID,PlayerCombatStats> {
 
 
     public int getCustom(UUID uuid){
-        PlayerCombatStats stats = super.get(uuid);
+        PlayerData stats = super.get(uuid);
         if(stats == null)return 0;
         return stats.getCustom();
     }
@@ -114,9 +119,9 @@ public class WorldData extends Te4HashMap<UUID,PlayerCombatStats> {
 
 
     public Results dumpResults(Sorting sorting){
-        PlayerCombatStats[] infs = new PlayerCombatStats[super.size()];
+        PlayerData[] infs = new PlayerData[super.size()];
         int i = 0;
-        for (Entry<UUID, PlayerCombatStats> entry : super.entrySet()) {
+        for (Entry<UUID, PlayerData> entry : super.entrySet()) {
             infs[i] = entry.getValue();
             ++i;
         }
@@ -127,10 +132,10 @@ public class WorldData extends Te4HashMap<UUID,PlayerCombatStats> {
 
 
     public static class Results {
-        private final CombatStats[] results;
+        private final CombatData[] results;
         private Sorting sorting;
 
-        Results(CombatStats[] results) {
+        Results(CombatData[] results) {
             this.results = results;
         }
 
@@ -158,7 +163,7 @@ public class WorldData extends Te4HashMap<UUID,PlayerCombatStats> {
         }
 
 
-        public CombatStats get(int index){
+        public CombatData get(int index){
             return results[index];
         }
     }
@@ -169,7 +174,7 @@ public class WorldData extends Te4HashMap<UUID,PlayerCombatStats> {
     }
 
 
-    public static final Comparator<CombatStats> TOP_BY_SCORE   = (o1, o2) -> Integer.compare(o1.getScore() , o2.getScore() );
-    public static final Comparator<CombatStats> TOP_BY_KILLS   = (o1, o2) -> Integer.compare(o1.getKills() , o2.getKills() );
-    public static final Comparator<CombatStats> TOP_BY_LEAVING = (o1, o2) -> Integer.compare(o2.getDeaths(), o1.getDeaths());
+    public static final Comparator<CombatData> TOP_BY_SCORE   = (o1, o2) -> Integer.compare(o1.getScore() , o2.getScore() );
+    public static final Comparator<CombatData> TOP_BY_KILLS   = (o1, o2) -> Integer.compare(o1.getKills() , o2.getKills() );
+    public static final Comparator<CombatData> TOP_BY_LEAVING = (o1, o2) -> Integer.compare(o2.getDeaths(), o1.getDeaths());
 }
