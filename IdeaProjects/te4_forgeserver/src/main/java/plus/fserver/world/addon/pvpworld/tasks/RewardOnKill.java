@@ -5,57 +5,53 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.scoreboard.Team;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import plus.fserver.utls.math.IntRef;
-import plus.fserver.world.addon.ScorePlayerTeamEX;
-import plus.fserver.world.addon.pvpworld.PvpWorld;
+import plus.fserver.world.addon.pvpworld.MinigameWorld;
+
 import java.util.function.Consumer;
 
 
-public class RewardOnKill implements Consumer<LivingDeathEvent> {
-    private final String key;
+public class RewardOnKill /*implements Consumer<LivingDeathEvent>*/ {
     private final int points;
     private final int pointsToReward;
 
-    public RewardOnKill(String key, int points, int pointsToReward) {
-        this.key = key;
+    public RewardOnKill(int points, int pointsToReward) {
         this.points = points;
         this.pointsToReward = pointsToReward;
     }
 
 
-    @Override
-    public void accept(LivingDeathEvent event) {
-        Entity entity = event.getEntity();
-        int points = getPointsAtTarget(entity);
-        if(points > 0){
-            EntityPlayerMP player = (EntityPlayerMP) entity;
-
-            EntityLivingBase attacker = player.getCombatTracker().getBestAttacker();
-            if(attacker == null)return;
-            Team team = attacker.getTeam();
-            if(team == null)return;
-
-            ScorePlayerTeamEX sTeam = (ScorePlayerTeamEX) team;
-
-            IntRef score = sTeam.getCustom(key);
-            if(score == null){
-                score = new IntRef(points);
-                sTeam.setCustom(key, score);
-            } else {
-                score.add(points);
-            }
-            if(score.get() >= pointsToReward){
-                PvpWorld pw = ((PvpWorld) player.world);
-                pw.getArena().onComplete(pw);
-            }
-        }
-    }
-
-
-    public int getPointsAtTarget(Entity entity){
-        if(entity instanceof EntityPlayerMP){
-            return points;
-        }
-        return 0;
-    }
+//    @Override
+//    public void accept(LivingDeathEvent event) {
+//        Entity entity = event.getEntity();
+//        int points = getPointsAtTarget(entity);
+//        if(points > 0){
+//            EntityPlayerMP player = (EntityPlayerMP) entity;
+//
+//            EntityLivingBase attacker = player.getCombatTracker().getBestAttacker();
+//            if(attacker == null)return;
+//            Team team = attacker.getTeam();
+//            if(team == null)return;
+//
+//            int score = Vars.SCORE.addInt(team, points);
+//            if(attacker instanceof EntityPlayerMP) {
+//                EntityPlayerMP atk = (EntityPlayerMP) attacker;
+//                Vars.SCORE.addInt(atk, score);
+//                Vars.KILLS.addInt(atk, 1);
+//            }
+//            Vars.DEATHS.addInt(player, 1);
+//
+//            if(score >= pointsToReward){
+//                MinigameWorld pw = ((MinigameWorld) player.world);
+//                pw.controller().onComplete(pw);
+//            }
+//        }
+//    }
+//
+//
+//    public int getPointsAtTarget(Entity entity){
+//        if(entity instanceof EntityPlayerMP){
+//            return points;
+//        }
+//        return 0;
+//    }
 }

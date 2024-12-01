@@ -1,13 +1,14 @@
 package plus.fserver.world.addon.pvpworld;
 
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.world.WorldServer;
 import plus.fserver.world.addon.CleanLobbyTeleporter;
 
 
-public class PvpLobbyTeleporter extends CleanLobbyTeleporter {
-    private final PvpArena arena;
+public class MinigameLobbyTeleporter extends CleanLobbyTeleporter {
+    private final MinigameController arena;
 
-    public PvpLobbyTeleporter(PvpArena arena) {
+    public MinigameLobbyTeleporter(MinigameController arena) {
         this.arena = arena;
     }
 
@@ -18,8 +19,8 @@ public class PvpLobbyTeleporter extends CleanLobbyTeleporter {
 
 
     @Override
-    public void onRollbackInventory(EntityPlayerMP player) {
-        arena.onRemPlayer(player);
+    public void onRollbackInventory(WorldServer prev, EntityPlayerMP player) {
+        arena.onRemPlayer((MinigameWorld) prev, player);
     }
 
 

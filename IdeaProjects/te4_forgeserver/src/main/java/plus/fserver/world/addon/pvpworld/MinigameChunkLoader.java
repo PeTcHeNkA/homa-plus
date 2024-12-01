@@ -12,10 +12,10 @@ import plus.tson.utl.Tuple;
 import java.io.IOException;
 
 
-public class PvpChunkLoader implements IChunkLoader {
-    private final PvpArena arena;
+public class MinigameChunkLoader implements IChunkLoader {
+    private final MinigameController arena;
 
-    public PvpChunkLoader(PvpArena arena) {
+    public MinigameChunkLoader(MinigameController arena) {
         this.arena = arena;
     }
 

@@ -16,7 +16,7 @@ import java.util.*;
 
 
 public class PvpArenaCmd extends ServerCommand {
-    private final Map<String,PvpArena> data = Collections.synchronizedMap(new HashMap<>());
+    private final Map<String, MinigameController> data = Collections.synchronizedMap(new HashMap<>());
     private final List<String> completions = ImmutableList.of(
             "clean-memory", "read", "save", "place"
     );
@@ -57,7 +57,7 @@ public class PvpArenaCmd extends ServerCommand {
         String id = args[1];
         String fileName = args[2];
 
-        PvpArena arena = data.get(id);
+        MinigameController arena = data.get(id);
         if(arena == null){
             onUnknown(sender, id);
             return;
@@ -69,7 +69,7 @@ public class PvpArenaCmd extends ServerCommand {
         }
         TsonFile.createPathIfNeed(file);
         try {
-            PvpArena.saveTo(arena, file);
+            MinigameController.saveTo(arena, file);
         } catch (Throwable e){
             onError(sender, e);
             e.printStackTrace();
@@ -103,7 +103,7 @@ public class PvpArenaCmd extends ServerCommand {
             return;
         }
         try {
-            PvpArena arena = PvpArena.readFrom(file);
+            MinigameController arena = MinigameController.readFrom(file);
             data.put(id, arena);
         } catch (Throwable e){
             onError(sender, e);
@@ -116,7 +116,7 @@ public class PvpArenaCmd extends ServerCommand {
 
     private void place(MinecraftServer server, ICommandSender sender, String[] args) throws NumberInvalidException {
         String id = args[1];
-        PvpArena arena = data.get(id);
+        MinigameController arena = data.get(id);
         if(arena == null){
             onUnknown(sender, id);
             return;

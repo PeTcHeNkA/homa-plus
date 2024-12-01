@@ -17,15 +17,15 @@ public class FastRandom extends Random {
 
 
     public void shuffle(Object[] array){
-        shuffle(array, array.length);
+        shuffle(this, array, array.length);
     }
 
 
-    public void shuffle(Object[] array, int to){
+    public static void shuffle(Random rand, Object[] array, int to){
         if(to == 0)return;
         int i = 0, e;
         Object swap;
-        int seed = nextInt();
+        int seed = rand.nextInt();
         do{
             swap = array[e = (seed & 0x7FFFFFFF) % to];
             array[e] = array[i];

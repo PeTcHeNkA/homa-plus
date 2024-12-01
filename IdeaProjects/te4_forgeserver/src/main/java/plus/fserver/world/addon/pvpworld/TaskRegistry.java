@@ -1,5 +1,7 @@
 package plus.fserver.world.addon.pvpworld;
 
+import net.minecraft.world.WorldServer;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.fml.common.FMLLog;
 import plus.tson.utl.Te4HashMap;
 import java.util.function.Consumer;
@@ -43,6 +45,11 @@ public class TaskRegistry extends Te4HashMap<String, Consumer<?>> {
         if(first  == EMPTY)return second;
         if(second == EMPTY)return first;
         return new And<>(first, second);
+    }
+
+
+    public static Consumer<LivingDeathEvent> adapt(Consumer<WorldServer> src){
+        return event -> src.accept((WorldServer) event.getEntity().world);
     }
 
 

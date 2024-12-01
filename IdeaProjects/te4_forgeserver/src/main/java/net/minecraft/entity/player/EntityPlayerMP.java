@@ -76,6 +76,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.ITeleporter;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
+import net.minecraftforge.event.entity.player.PlayerDropsEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import plus.fserver.server.network.packet.SElcaPacketDestroyEntities;
@@ -436,9 +437,15 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
     @Override
     public void onDeath(DamageSource cause) {
         if (world.onLivingDeath(this, cause)) return;
-        boolean flag = this.world.getGameRules().getBoolean("showDeathMessages");
-        this.connection.netManager.sendPacketE(new SPacketCombatEvent(this.getCombatTracker(), SPacketCombatEvent.Event.ENTITY_DIED, flag));
+        onPlayerDeath(cause, true);
+    }
 
+
+    public void onPlayerDeath(DamageSource cause, boolean sendPacket) {
+        boolean flag = this.world.getGameRules().getBoolean("showDeathMessages");
+        if (sendPacket){
+            this.connection.netManager.sendPacketE(new SPacketCombatEvent(this.getCombatTracker(), SPacketCombatEvent.Event.ENTITY_DIED, flag));
+        }
         if (flag) {
             Team team = this.getTeam();
 
@@ -463,7 +470,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
             this.inventory.dropAllItems();
 
             captureDrops = false;
-            net.minecraftforge.event.entity.player.PlayerDropsEvent event = new net.minecraftforge.event.entity.player.PlayerDropsEvent(this, cause, capturedDrops, recentlyHit > 0);
+            PlayerDropsEvent event = new PlayerDropsEvent(this, cause, capturedDrops, recentlyHit > 0);
             if (!net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(event)) {
                 for (net.minecraft.entity.item.EntityItem item : capturedDrops) {
                     this.world.spawnEntity(item);

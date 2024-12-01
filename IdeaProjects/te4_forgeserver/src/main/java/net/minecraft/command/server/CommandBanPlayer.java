@@ -56,7 +56,7 @@ public class CommandBanPlayer extends CommandBase {
             if(server.getNetworkSystem().hasFirewall()){
                 server.getNetworkSystem().softBan(player, 600_000);
             }
-            player.connection.disconnect(new TextComponentTranslation("multiplayer.disconnect.banned", new Object[0]));
+            player.connection.disconnect(new TextComponentTranslation("multiplayer.disconnect.banned"));
         }
         notifyCommandListener(sender, this, "commands.ban.success", args[0]);
     }

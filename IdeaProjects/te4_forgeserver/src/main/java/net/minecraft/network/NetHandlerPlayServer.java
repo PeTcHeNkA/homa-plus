@@ -864,7 +864,7 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
                     } else {
                         if (this.player.getHealth() > 0.0F) return;
 
-                        this.player = this.server.getPlayerList().recreatePlayerEntity(this.player, player.dimension, false);
+                        recreatePlayer(player.dimension);
                         if (this.server.isHardcore()) {
                             this.player.setGameType(GameType.SPECTATOR);
                         }
@@ -874,6 +874,11 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
                     this.player.getStatFile().sendStats(this.player);
             }
         });
+    }
+
+
+    public EntityPlayerMP recreatePlayer(int dimId){
+        return this.player = this.server.getPlayerList().recreatePlayerEntity(this.player, dimId, false);
     }
 
 

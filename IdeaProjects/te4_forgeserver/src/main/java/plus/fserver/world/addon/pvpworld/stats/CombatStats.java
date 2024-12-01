@@ -1,0 +1,121 @@
+package plus.fserver.world.addon.pvpworld.stats;
+
+import plus.fserver.world.addon.ScorePlayerTeamEX;
+
+
+public class CombatStats {
+    //13 bits - kills    0 - 8191
+    //13 bits - deaths   0 - 8191
+    //18 bits - score    0 - 262143
+    //20 bits - custom   0 - 1048575
+    private long value;
+
+    public CombatStats(){}
+
+    public CombatStats(long value) {
+        this.value = value;
+    }
+
+
+    public long getValue(){
+        return value;
+    }
+
+
+    public void setValue(long value){
+        this.value = value;
+    }
+
+
+    public int getKills(){
+        return CombatStats.getKills(value);
+    }
+
+
+    public int getDeaths(){
+        return getDeaths(value);
+    }
+
+
+    public int getScore(){
+        return getScore(value);
+    }
+
+
+    public int getCustom(){
+        return getCustom(value);
+    }
+
+
+    public void setKills(int kills){
+        value = setKills(value, kills);
+    }
+
+
+    public void setDeaths(int deaths){
+        value = setDeaths(value, deaths);
+    }
+
+
+    public void setScore(int score){
+        value = setScore(value, score);
+    }
+
+
+    public void setCustom(int custom){
+        value = setCustom(value, custom);
+    }
+
+
+    public void addKill(int n){
+        value = setKills(value, getKills(value) + n);
+    }
+
+
+    public void addDeath(int n){
+        value = setDeaths(value, getDeaths(value) + n);
+    }
+
+
+    public void addScore(int n) {
+        value = setScore(value, getScore(value) + n);
+    }
+
+
+    public static CombatStats get(ScorePlayerTeamEX team){
+        CombatStats res = team.getCustom(CombatStats.class);
+        if(res == null)
+            team.setCustom(CombatStats.class, res = new CombatStats());
+        return res;
+    }
+
+
+    //static get math
+    public static int getKills(long raw){
+        return (int) (raw & 0x1fff);
+    }
+    public static int getDeaths(long raw){
+        return (int) (raw >> 13 & 0x1fff);
+    }
+    public static int getScore(long raw){
+        return (int) (raw >> 26 & 0x3ffff);
+    }
+    public static int getCustom(long raw){
+        return (int) (raw >> 44);
+    }
+
+
+    //static set math
+    public static long setKills(long raw, int kills){
+        return (raw & 0x1fff0000) | (kills & 0x1fff);
+    }
+    public static long setDeaths(long raw, int deaths){
+        return (raw & 0x1fff) | ((deaths & 0x1fff) << 13);
+    }
+    public static long setScore(long raw, int score){
+        return (raw & 0x3ffff) | ((long) (score & 0x3ffff) << 26);
+    }
+    public static long setCustom(long raw, int custom){
+        return (raw & 0x3ffff) | ((long) (custom) << 44);
+    }
+}

@@ -39,7 +39,7 @@ public class CleanLobbyTeleporter extends LobbyTeleporter{
     }
 
 
-    private static void cleanPlayer(EntityPlayerMP player){
+    public static void cleanPlayer(EntityPlayerMP player){
         player.inventory.clear();
         player.clearActivePotions();
         player.extinguish();
@@ -52,7 +52,7 @@ public class CleanLobbyTeleporter extends LobbyTeleporter{
     public void onCleanInventory(EntityPlayerMP player){}
 
 
-    public void onRollbackInventory(EntityPlayerMP player){}
+    public void onRollbackInventory(WorldServer prev, EntityPlayerMP player){}
 
 
     @Override
@@ -69,7 +69,7 @@ public class CleanLobbyTeleporter extends LobbyTeleporter{
 
                 newWorld.addSyncTask(() -> {
                     player.setNeedSave(true);
-                    onRollbackInventory(player);
+                    onRollbackInventory(worldserver, player);
 
                     PlayerList.procTransferPhase2(worldserver, newWorld, player, oldId, dimId, CleanLobbyTeleporter.this);
 
