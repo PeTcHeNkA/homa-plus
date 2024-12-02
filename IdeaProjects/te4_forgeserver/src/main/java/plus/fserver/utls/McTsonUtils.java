@@ -4,6 +4,10 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.monster.*;
 import net.minecraft.entity.passive.*;
+import net.minecraft.init.Items;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.*;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameType;
@@ -12,6 +16,8 @@ import plus.tson.TsonList;
 import plus.tson.TsonMap;
 import plus.tson.TsonObj;
 import plus.tson.security.ClassManager;
+
+import java.util.function.BiConsumer;
 
 
 public class McTsonUtils {
@@ -83,6 +89,68 @@ public class McTsonUtils {
             return Block.getBlockById(obj.getInt()).getDefaultState();
         }
         throw new RuntimeException();
+    }
+
+
+    public static ItemStack itemStackOfTson(TsonMap obj){
+        Item item = itemOfTson(obj.get("id"));
+        if(item == Items.AIR)return ItemStack.EMPTY;
+        int count = obj.getOrDefaultInt("count", 1);
+        if(count == 0)return ItemStack.EMPTY;
+        int damage = obj.getOrDefaultInt("damage",0);
+        NBTBase caps = nbtOfTson(obj.get("ForgeCaps"));
+        NBTBase tag  = nbtOfTson(obj.get("tag"));
+
+        ItemStack stack = new ItemStack(item, count, damage, (NBTTagCompound) caps);
+        if(tag != null) stack.setTagCompound((NBTTagCompound) tag);
+        if(damage != 0) stack.setItemDamage(damage);
+        return stack;
+    }
+
+
+    public static NBTBase nbtOfTson(TsonObj obj){
+        if(obj == null)return null;
+        TsonObj.Type type = obj.type();
+        switch (type){
+            case STRING:
+                return new NBTTagString(obj.getStr());
+            case DOUBLE:
+                return new NBTTagDouble(obj.getDouble());
+            case BOOL:
+                return NbtUtils.create(obj.getBool());
+            case INT:
+                return NbtUtils.create(obj.getInt());
+            case FLOAT:
+                return new NBTTagFloat(obj.getFloat());
+            case LONG:
+                return new NBTTagLong(obj.getLong());
+            case LIST:{
+                TsonList tList = obj.getList();
+                NBTTagList nList = new NBTTagList(tList.size());
+                for (TsonObj obj0:tList){
+                    nList.appendTag(nbtOfTson(obj0));
+                }
+                return nList;
+            }
+            case MAP:{
+                TsonMap tMap = obj.getMap();
+                NBTTagCompound nMap = new NBTTagCompound(tMap.size());
+                tMap.forEach((name, obj1) -> nMap.setTag(name, nbtOfTson(obj1)));
+            }
+        }
+        throw new IllegalArgumentException("Invalid type: "+obj);
+    }
+
+
+    public static Item itemOfTson(TsonObj obj){
+        if(obj == null)return Items.AIR;
+        if(obj.isString()){
+            return Item.getByNameOrId(obj.getStr());
+        }
+        if(obj.isNumber()){
+            return Item.getItemById(obj.getInt());
+        }
+        throw new IllegalArgumentException();
     }
 
 

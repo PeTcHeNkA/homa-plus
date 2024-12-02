@@ -8,11 +8,15 @@ import net.minecraft.world.GameType;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import plus.fserver.api.ChatPacketBuilder;
+import plus.fserver.utls.McTsonUtils;
 import plus.fserver.world.addon.pvpworld.MinigameController;
 import plus.fserver.world.addon.pvpworld.MinigameWorld;
+import plus.fserver.world.addon.pvpworld.stats.PlayerData;
 import plus.fserver.world.addon.pvpworld.stats.WorldData;
+import plus.fserver.world.addon.pvpworld.tasks.GiveItems;
 import plus.fserver.world.addon.pvpworld.tasks.RespawnAllRandomly;
 import plus.tson.TsonMap;
+import plus.tson.TsonObj;
 import java.util.*;
 import static plus.tson.ext.TsonAccessUtils.*;
 
@@ -26,7 +30,7 @@ public class PvpMinigameController extends MinigameController {
     private int timeOut          = 20*45;
     private int winDelay         = 20*2;
     private int nextRDelay       = 20*5;
-    private RespawnAllRandomly respawner;
+    private RespawnAllRandomly respawner = new RespawnAllRandomly();
 
     private ChatPacketBuilder onAddPlayer;
     private ChatPacketBuilder onKillPlayerWinner;
@@ -36,10 +40,14 @@ public class PvpMinigameController extends MinigameController {
     private ChatPacketBuilder onEndCommon;
     private ChatPacketBuilder onTimeOut;
     private ChatPacketBuilder onEndPreparation;
+    private GiveItems         defaultKit;
 
     @Override
     public void loadConfigurations(TsonMap map) {
         super.loadConfigurations(map);
+        respawner.fromTson(map.getList("map.positions"));
+        type               = McTsonUtils.getGameType(getR(map, "map.gametype"));
+
         onAddPlayer        = getMsg(map, "msg.on-add");
         onKillPlayerWinner = getMsg(map, "msg.on-kill.winner");
         onKillOther        = getMsg(map, "msg.on-kill.other");
@@ -49,12 +57,28 @@ public class PvpMinigameController extends MinigameController {
         onTimeOut          = getMsg(map, "msg.game.timeout.game");
         onEndPreparation   = getMsg(map, "msg.game.timeout.preparation");
 
-        isImmutable        = getR(map, "map.immutable", true);
+        isImmutable        = getR(map, "map.immutable"         , true        );
         preparationTicks   = getR(map, "game.preparation-ticks", preparationTicks);
-        commonTicks        = getR(map, "game.common-ticks", commonTicks);
-        timeOut            = getR(map, "game.timeout-ticks", timeOut);
-        winDelay           = getR(map, "game.win-delay-ticks", winDelay);
-        nextRDelay         = getR(map, "game.next-round-delay", nextRDelay);
+        commonTicks        = getR(map, "game.common-ticks"     , commonTicks     );
+        timeOut            = getR(map, "game.timeout-ticks"    , timeOut         );
+        winDelay           = getR(map, "game.win-delay-ticks"  , winDelay        );
+        nextRDelay         = getR(map, "game.next-round-delay" , nextRDelay      );
+        rounds             = getR(map, "game.def-rounds"       , rounds          );
+
+        TsonObj items      = getR(map, "game.items"                             );
+        if(items != null) defaultKit = new GiveItems(items.getList());
+    }
+
+    protected static class PData extends PlayerData {
+        GiveItems usedKit;
+    }
+
+    protected static class WData extends CommonWorldData{
+        GiveItems usedKit;
+        @Override
+        public PlayerData create() {
+            return new PData();
+        }
     }
 
 
@@ -72,15 +96,9 @@ public class PvpMinigameController extends MinigameController {
     public void onPreRemPlayer(EntityPlayerMP player) {}
 
 
-    public static class Data extends WorldData {
-        public int rounds;
-        public boolean isTimeOut;
-    }
-
-
     @Override
     public WorldData createData(MinigameWorld world) {
-        return new Data();
+        return new WData();
     }
 
 
@@ -91,10 +109,11 @@ public class PvpMinigameController extends MinigameController {
             EntityPlayerMP player = (EntityPlayerMP) entity;
             MinigameWorld world = (MinigameWorld) entity.world;
             if(!world.isGameMember(player))return;
-            Data data = world.data();
+            CommonWorldData data = world.data();
 
             event.setCanceled(true);
             player.onPlayerDeath(event.getSource(), false);
+            player.setGameType(GameType.SPECTATOR);
 
             if(!data.isTimeOut) {
                 data.addDeath(player, 1);
@@ -119,7 +138,7 @@ public class PvpMinigameController extends MinigameController {
 
     private boolean nextRound(MinigameWorld world){
         if (this.rounds > 1) {
-            Data data = world.data();
+            CommonWorldData data = world.data();
             return (data.rounds += 1) < this.rounds;
         }
         return false;
@@ -129,7 +148,7 @@ public class PvpMinigameController extends MinigameController {
     private void newRound(WorldServer worldServer){
         MinigameWorld world = (MinigameWorld) worldServer;
         List<EntityPlayerMP> members = world.getMembers();
-        Data data = world.data();
+        CommonWorldData data = world.data();
         data.isTimeOut = false;
 
         for (EntityPlayerMP player:members){
@@ -153,6 +172,23 @@ public class PvpMinigameController extends MinigameController {
 
 
     @Override
+    public void onNewGameInitialized(MinigameWorld world, EntityPlayerMP[][] teams, TsonMap settings) {
+        if(settings != null){
+            TsonObj items = getR(settings, "game.items");
+            if(items != null){
+                WData data = world.data();
+                data.usedKit = new GiveItems(items.getList());
+            }
+            //todo
+//            TsonObj pItems = getR(settings, "game.player-items");
+//            if(pItems != null){
+//
+//            }
+        }
+    }
+
+
+    @Override
     public void onNewGameStarted(MinigameWorld world, EntityPlayerMP[] players) {
         onFirtsRound.send(world.getMembers(), false);
         world.addDelayedTask(this::onCompletePreparation, preparationTicks);
@@ -162,7 +198,7 @@ public class PvpMinigameController extends MinigameController {
     @Override
     public void onComplete(MinigameWorld world) {
         //todo
-        Data data = world.data();
+        CommonWorldData data = world.data();
 
         WorldData.Results results = data.dumpResults(WorldData.Sorting.SCORE);
         results.get(0); //is winner
@@ -176,6 +212,22 @@ public class PvpMinigameController extends MinigameController {
 
         List<EntityPlayerMP> members = world.getMembers();
         respawner.respawn(world, members);
+
+        WData wData = world.data();
+        for (EntityPlayerMP player:members){
+            PData pData = (PData) wData.stats(player);
+            if(pData.usedKit != null){
+                pData.usedKit.accept(player);
+            } else {
+                if(wData.usedKit != null){
+                    wData.usedKit.accept(player);
+                } else {
+                    if (defaultKit != null)
+                        defaultKit.accept(player);
+                }
+            }
+        }
+
         onEndPreparation.send(members, false);
         world.addDelayedTask(this::onEndCommon, commonTicks);
     }
@@ -200,7 +252,7 @@ public class PvpMinigameController extends MinigameController {
         if(world.finished())return;
 
         world.finish();
-        Data data = world.data();
+        CommonWorldData data = world.data();
         data.isTimeOut = true;
 
         List<EntityPlayerMP> members = world.getMembers();

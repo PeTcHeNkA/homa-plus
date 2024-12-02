@@ -4,10 +4,6 @@ import plus.fserver.world.addon.ScorePlayerTeamEX;
 
 
 public class CombatData {
-    //13 bits - kills    0 - 8191
-    //13 bits - deaths   0 - 8191
-    //18 bits - score    0 - 262143
-    //20 bits - custom   0 - 1048575
     private long value;
 
     public CombatData(){}
@@ -96,7 +92,13 @@ public class CombatData {
     }
 
 
+    //13 bits - kills    0 - 8191
+    //13 bits - deaths   0 - 8191
+    //18 bits - score    0 - 262143
+    //20 bits - custom   0 - 1048575
+
     //static get math
+
     public static int getKills(long raw){
         return (int) (raw & 0x1fff);
     }
@@ -113,12 +115,16 @@ public class CombatData {
 
     //static set math
     public static long setKills(long raw, int kills){
+        if(kills > 8191)kills = 8191;
         return (raw & 0x1fff0000) | (kills & 0x1fff);
     }
     public static long setDeaths(long raw, int deaths){
+        if(deaths > 8191)deaths = 8191;
         return (raw & 0x1fff) | ((deaths & 0x1fff) << 13);
     }
     public static long setScore(long raw, int score){
+        if(score > 262143) score = 262143;
+        if(score < 0)score = 0;
         return (raw & 0x3ffff) | ((long) (score & 0x3ffff) << 26);
     }
     public static long setCustom(long raw, int custom){

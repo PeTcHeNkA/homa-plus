@@ -7,16 +7,30 @@ import plus.fserver.utls.math.FastRandom;
 import plus.fserver.world.addon.CleanLobbyTeleporter;
 import plus.fserver.world.addon.LobbyTeleporter;
 import plus.fserver.world.addon.pvpworld.MinigameWorld;
+import plus.tson.TsonList;
+import plus.tson.TsonObj;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
 
 public class RespawnAllRandomly implements Consumer<WorldServer> {
-    private final LobbyTeleporter[] teleporters;
+    private LobbyTeleporter[] teleporters;
+
+    public RespawnAllRandomly(){}
 
     public RespawnAllRandomly(LobbyTeleporter[] teleporters) {
         this.teleporters = teleporters;
+    }
+
+    public void fromTson(TsonList list){
+        ArrayList<LobbyTeleporter> teleporters = new ArrayList<>();
+        for (TsonObj obj:list){
+            LobbyTeleporter teleporter = new LobbyTeleporter();
+            teleporter.readFrom(obj.getMap());
+            teleporters.add(teleporter);
+        }
+        this.teleporters = teleporters.toArray(new LobbyTeleporter[0]);
     }
 
 

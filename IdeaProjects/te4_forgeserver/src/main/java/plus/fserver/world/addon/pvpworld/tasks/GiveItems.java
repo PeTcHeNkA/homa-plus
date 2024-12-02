@@ -5,12 +5,30 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import plus.fserver.utls.McTsonUtils;
+import plus.tson.TsonList;
+import plus.tson.TsonMap;
+import plus.tson.TsonObj;
+
 import java.util.function.Consumer;
 
 
 public class GiveItems implements Consumer<EntityPlayerMP> {
     private final ItemStack[] stacks;
     private final int[] slots;
+
+    public GiveItems(TsonList list){
+        stacks = new ItemStack[list.size()];
+        slots  = new int[list.size()];
+        int i = 0;
+        for (TsonObj obj:list){
+            TsonMap map = obj.getMap();
+            stacks[i] = McTsonUtils.itemStackOfTson(map);
+            slots[i]  = map.getOrDefaultInt("slot", i);
+            ++i;
+        }
+    }
+
 
     public GiveItems(NBTTagList list) {
         stacks = new ItemStack[list.tagCount()];

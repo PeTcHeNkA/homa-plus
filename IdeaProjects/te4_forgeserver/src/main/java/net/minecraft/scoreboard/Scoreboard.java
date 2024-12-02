@@ -200,15 +200,15 @@ public class Scoreboard {
         if (name.length() > 16) {
             throw new IllegalArgumentException("The team name '" + name + "' is too long!");
         } else {
-            ScorePlayerTeam scoreplayerteam = this.getTeam(name);
+            ScorePlayerTeam team = this.getTeam(name);
 
-            if (scoreplayerteam != null) {
+            if (team != null) {
                 throw new IllegalArgumentException("A team with the name '" + name + "' already exists!");
             } else {
-                scoreplayerteam = newTeam(name);
-                this.teams.put(name, scoreplayerteam);
-                this.broadcastTeamCreated(scoreplayerteam);
-                return scoreplayerteam;
+                team = newTeam(name);
+                this.teams.put(name, team);
+                this.broadcastTeamCreated(team);
+                return team;
             }
         }
     }
@@ -230,16 +230,13 @@ public class Scoreboard {
 
 
     public boolean addPlayerToTeam(String player, String newTeam) {
+        ScorePlayerTeam scoreplayerteam;
         if (player.length() > 40) {
             throw new IllegalArgumentException("The player name '" + player + "' is too long!");
-        } else if (!this.teams.containsKey(newTeam)) {
+        } else if ((scoreplayerteam = this.getTeam(newTeam)) == null) {
             return false;
         } else {
-            ScorePlayerTeam scoreplayerteam = this.getTeam(newTeam);
-
-            if (this.getPlayersTeam(player) != null) {
-                this.removePlayerFromTeams(player);
-            }
+            this.removePlayerFromTeams(player);
 
             this.teamMemberships.put(player, scoreplayerteam);
             scoreplayerteam.getMembershipCollection().add(player);

@@ -288,7 +288,7 @@ public abstract class MinigameWorld extends WorldServerMulti {
 
     @Override
     protected Scoreboard createScoreBoard() {
-        return new ScoreboardEX();
+        return controller().createScoreboard(this);
     }
 
 

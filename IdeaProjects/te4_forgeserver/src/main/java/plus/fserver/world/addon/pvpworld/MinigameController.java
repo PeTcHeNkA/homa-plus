@@ -7,6 +7,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -23,9 +24,11 @@ import plus.fserver.api.TextComponentAuto;
 import plus.fserver.api.WorldConstructor;
 import plus.fserver.utls.EmptyChunk;
 import plus.fserver.utls.NbtUtils;
+import plus.fserver.utls.math.FastRandom;
 import plus.fserver.world.addon.CleanLobbyTeleporter;
 import plus.fserver.world.addon.LobbyTeleporter;
 import plus.fserver.world.addon.MemoryChunkProviderServer;
+import plus.fserver.world.addon.ScoreboardEX;
 import plus.fserver.world.addon.pvpworld.stats.PlayerData;
 import plus.fserver.world.addon.pvpworld.stats.WorldData;
 import plus.tson.TsonMap;
@@ -35,10 +38,7 @@ import plus.tson.utl.Te4HashSet;
 import plus.tson.utl.Tuple;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Consumer;
 
 
@@ -54,21 +54,26 @@ public abstract class MinigameController {
     private WorldConstructor.Constructor constructor;
     private DimensionType type = DimensionType.OVERWORLD;
     private boolean mayReuseWorld = false;
-    private int minPlayers = 2;
-    private int maxPlayers = 10;
+    private int minPlayers = 2, maxPlayers = 10;
 
     public MinigameController(){}
 
 
     public void loadConfigurations(TsonMap map){
-        String dimType = map.getOrDefaultStr("dim_type", "overworld");
-        try {
-            type = DimensionType.byName(dimType);
-        } catch (Exception e){
-            MinecraftServer.LOGGER.error("Invalid dimension: {}", type);
-            type = DimensionType.OVERWORLD;
-        }
+        type = getDimType(map, DimensionType.OVERWORLD);
         map.ifContainsMap("lobby", teleporter::readFrom);
+    }
+
+
+    protected static DimensionType getDimType(TsonMap map, DimensionType def){
+        String dimType = map.getOrDefaultStr("dim-type", null);
+        if(dimType == null)return def;
+        try {
+            return DimensionType.byName(dimType);
+        } catch (Exception e){
+            MinecraftServer.LOGGER.error("Invalid dimension: {}", dimType);
+            return def;
+        }
     }
 
 
@@ -77,16 +82,16 @@ public abstract class MinigameController {
     }
 
 
-    public abstract void onAddPlayer(EntityPlayerMP player);
+    public void onAddPlayer(EntityPlayerMP player){};
 
 
-    public abstract void onRemPlayer(MinigameWorld prev, EntityPlayerMP player);
+    public void onRemPlayer(MinigameWorld prev, EntityPlayerMP player){};
 
 
-    public abstract void onPreRemPlayer(EntityPlayerMP player);
+    public void onPreRemPlayer(EntityPlayerMP player){};
 
 
-    public abstract void onDeath(LivingDeathEvent event);
+    public void onDeath(LivingDeathEvent event){};
 
 
     public void onTick(MinigameWorld world){};
@@ -94,6 +99,11 @@ public abstract class MinigameController {
 
     public WorldData createData(MinigameWorld world){
         return new WorldData();
+    }
+
+
+    public Scoreboard createScoreboard(MinigameWorld world){
+        return new ScoreboardEX();
     }
 
 
@@ -129,19 +139,23 @@ public abstract class MinigameController {
     }
 
 
-    private int getFreeId(){
+    private int getFreeId(DimensionType type){
         synchronized (freeDimIds){
-            if(freeDimIds.isEmpty()){
-                int id = getDimFreeId();
-                WorldConstructor.register(id, constructor(), type);
-                DimensionManager.registerDimension(id, type);
-                usedDimIds.add(id);
-                return id;
-            } else {
-                Integer id = freeDimIds.iterator().next();
-                freeDimIds.remove(id);
-                return id;
+            if(!freeDimIds.isEmpty()){
+                Iterator<Integer> itr = freeDimIds.iterator();
+                while (itr.hasNext()) {
+                    Integer id = itr.next();
+                    if (DimensionManager.isDimensionRegistered(id) && DimensionManager.getProviderType(id) == type) {
+                        freeDimIds.remove(id);
+                        return id;
+                    }
+                }
             }
+            int id = getDimFreeId();
+            WorldConstructor.register(id, constructor(), type);
+            DimensionManager.registerDimension(id, type);
+            usedDimIds.add(id);
+            return id;
         }
     }
 
@@ -155,19 +169,35 @@ public abstract class MinigameController {
     }
 
 
-    public void startNewGame(MinecraftServer server, EntityPlayerMP[][] players){
-        int dimId = getDimFreeId();
+    public void startNewGame(MinecraftServer server, EntityPlayerMP[][] teams, TsonMap settings){
+        DimensionType type = this.type;
+        boolean shuffleTeams = true, shufflePlayers = true;
+        if(settings != null){
+            if(settings.containsKey("dim-type"))
+                type = getDimType(settings, type);
+            shuffleTeams   = settings.getOrDefaultBool("shuffle.team"   , shuffleTeams  );
+            shufflePlayers = settings.getOrDefaultBool("shuffle.players", shufflePlayers);
+        }
+
+        int dimId = getFreeId(type);
         MinigameWorld world = (MinigameWorld) server.getWorld(dimId);
 
-        world.onNewGame(players);
+        if(teams.length > 1 || shuffleTeams)
+            FastRandom.shuffle(world.rand, teams, teams.length);
+
+        world.onNewGame(teams);
         WorldData data = world.data();
-        for (EntityPlayerMP[] team:players){
+        for (EntityPlayerMP[] team:teams){
+            if(shufflePlayers)
+                FastRandom.shuffle(world.rand, team, team.length);
+
             for (EntityPlayerMP player:team){
                 data.stats(player).setDimToReturn(player.dimension);
             }
         }
+        onNewGameInitialized(world, teams, settings);
 
-        for (EntityPlayerMP[] team:players) {
+        for (EntityPlayerMP[] team:teams) {
             for (EntityPlayerMP player : team) {
                 player.changeDimension(dimId);
             }
@@ -175,13 +205,13 @@ public abstract class MinigameController {
     }
 
 
-    public void onNewGameStarted(MinigameWorld world, EntityPlayerMP[] players){
-        //((MinigameWorld)world).onNewGame(players);
-        //TaskRegistry.REGISTRY.getTask(data.getString("onStart")).accept(new Tuple<>(world, players));
-    }
+    public void onNewGameInitialized(MinigameWorld world, EntityPlayerMP[][] teams, TsonMap settings){}
 
 
-    public abstract boolean isImmutable();
+    public void onNewGameStarted(MinigameWorld world, EntityPlayerMP[] players) {}
+
+
+    public boolean isImmutable(){return false;}
 
 
     public void setDimensionType(DimensionType type){
