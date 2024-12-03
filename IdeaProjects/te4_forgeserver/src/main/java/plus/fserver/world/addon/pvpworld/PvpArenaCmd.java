@@ -103,8 +103,8 @@ public class PvpArenaCmd extends ServerCommand {
             return;
         }
         try {
-            MinigameController arena = MinigameController.readFrom(file);
-            data.put(id, arena);
+            //MinigameController arena = MinigameController.readFrom(file);
+            //data.put(id, arena);
         } catch (Throwable e){
             onError(sender, e);
             e.printStackTrace();

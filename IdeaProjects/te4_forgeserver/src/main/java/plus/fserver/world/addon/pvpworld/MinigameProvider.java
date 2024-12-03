@@ -115,7 +115,7 @@ public class MinigameProvider {
         }
 
 
-        public Info info(String path){
+        public Info info(){
             return new Info(getCfg());
         }
 
@@ -133,14 +133,27 @@ public class MinigameProvider {
         public class Info{
             private final TsonMap config;
             private Supplier<MinigameController> gFactory;
+            private final int teams, playersPerTeam;
 
             Info(TsonMap config) {
                 this.config = config;
+                this.teams = config.getInt("teams");
+                this.playersPerTeam = config.getOrDefaultInt("player-per-team", 1);
             }
 
 
             public NBTTagCompound getMap(){
                 return MinigameProvider.Map.this.getMap();
+            }
+
+
+            public int teams(){
+                return teams;
+            }
+
+
+            public int playersPerTeam(){
+                return playersPerTeam;
             }
 
 
