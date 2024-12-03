@@ -20,6 +20,10 @@ import java.util.Set;
 
 
 public class PvpTeamsMinigameController extends MinigameController {
+    public PvpTeamsMinigameController() {
+        super();
+    }
+
     public static class ScoreCombatTeam extends ScorePlayerTeamEX {
         public final CombatData data = new CombatData();
         public ScoreCombatTeam(Scoreboard scoreboard, String name) {

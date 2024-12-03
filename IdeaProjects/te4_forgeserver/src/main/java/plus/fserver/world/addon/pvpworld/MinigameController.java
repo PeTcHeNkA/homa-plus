@@ -19,7 +19,6 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import plus.fserver.api.ChatPacketBuilder;
 import plus.fserver.api.TextComponentAuto;
 import plus.fserver.api.WorldConstructor;
 import plus.fserver.utls.EmptyChunk;
@@ -32,18 +31,18 @@ import plus.fserver.world.addon.ScoreboardEX;
 import plus.fserver.world.addon.pvpworld.stats.PlayerData;
 import plus.fserver.world.addon.pvpworld.stats.WorldData;
 import plus.tson.TsonMap;
-import plus.tson.TsonObj;
-import plus.tson.ext.TsonAccessUtils;
 import plus.tson.utl.Te4HashSet;
 import plus.tson.utl.Tuple;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 
 public abstract class MinigameController {
     private static final Tuple<Chunk,NBTTagCompound> EMPTY = new Tuple<>(EmptyChunk.INSTANCE, new NBTTagCompound(2,1));
+    private static final HashMap<String, Supplier<MinigameController>> REGISTRY = new HashMap<>();
     private static final int MIN_PVPA_DIM_ID = 700000;
 
     private final Long2ObjectOpenHashMap<ExtendedBlockStorage[]> cache = new Long2ObjectOpenHashMap<>();
@@ -59,10 +58,14 @@ public abstract class MinigameController {
     public MinigameController(){}
 
 
-    public void loadConfigurations(TsonMap map){
+    public void init(MinigameControllerProvider pro, TsonMap map){
+        data = pro.getMap();
         type = getDimType(map, DimensionType.OVERWORLD);
         map.ifContainsMap("lobby", teleporter::readFrom);
     }
+
+
+    public void loadConfigurations(TsonMap map){}
 
 
     protected static DimensionType getDimType(TsonMap map, DimensionType def){
@@ -166,6 +169,16 @@ public abstract class MinigameController {
             ++min;
         }
         return min;
+    }
+
+
+    public static void register(String id, Supplier<MinigameController> func){
+        REGISTRY.put(id, func);
+    }
+
+
+    public static MinigameController create(String id){
+        return REGISTRY.get(id).get();
     }
 
 
@@ -295,7 +308,7 @@ public abstract class MinigameController {
     }
 
 
-    public NBTTagCompound getNbt(){
+    public NBTTagCompound getMapNbt(){
         return data;
     }
 
@@ -348,7 +361,7 @@ public abstract class MinigameController {
     public static void saveTo(MinigameController arena, File file){
         try {
             //writeSpawnPositionsTo(arena.getNbt(), arena.spawnPositions());
-            CompressedStreamTools.write(arena.getNbt(), file);
+            CompressedStreamTools.write(arena.getMapNbt(), file);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -390,16 +403,4 @@ public abstract class MinigameController {
         }
     }
 
-
-    protected static ChatPacketBuilder getMsg(TsonMap map, String key){
-        TsonObj obj = TsonAccessUtils.getR(map, key);
-        if(obj == null)return ChatPacketBuilder.of("Default message: "+key);
-        try {
-            return ChatPacketBuilder.of(obj);
-        } catch (Exception e){
-            MinecraftServer.LOGGER.error("Error build message: ["+key+"] ->\n"+map.toString());
-            e.printStackTrace();
-            return ChatPacketBuilder.of("Default message: "+key);
-        }
-    }
 }

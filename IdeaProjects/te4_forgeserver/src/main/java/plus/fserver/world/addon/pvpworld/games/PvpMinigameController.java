@@ -10,6 +10,7 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import plus.fserver.api.ChatPacketBuilder;
 import plus.fserver.utls.McTsonUtils;
 import plus.fserver.world.addon.pvpworld.MinigameController;
+import plus.fserver.world.addon.pvpworld.MinigameControllerProvider;
 import plus.fserver.world.addon.pvpworld.MinigameWorld;
 import plus.fserver.world.addon.pvpworld.stats.PlayerData;
 import plus.fserver.world.addon.pvpworld.stats.WorldData;
@@ -31,7 +32,6 @@ public class PvpMinigameController extends MinigameController {
     private int winDelay         = 20*2;
     private int nextRDelay       = 20*5;
     private RespawnAllRandomly respawner = new RespawnAllRandomly();
-
     private ChatPacketBuilder onAddPlayer;
     private ChatPacketBuilder onKillPlayerWinner;
     private ChatPacketBuilder onKillOther;
@@ -43,19 +43,23 @@ public class PvpMinigameController extends MinigameController {
     private GiveItems         defaultKit;
 
     @Override
+    public void init(MinigameControllerProvider pro, TsonMap map) {
+        super.init(pro, map);
+        onAddPlayer        = pro.getMsg("msg.on-add");
+        onKillPlayerWinner = pro.getMsg("msg.on-kill.winner");
+        onKillOther        = pro.getMsg("msg.on-kill.other");
+        onNewRound         = pro.getMsg("msg.game.new-round");
+        onFirtsRound       = pro.getMsg("msg.game.first-round");
+        onEndCommon        = pro.getMsg("msg.game.timeout.common");
+        onTimeOut          = pro.getMsg("msg.game.timeout.game");
+        onEndPreparation   = pro.getMsg("msg.game.timeout.preparation");
+    }
+
+
+    @Override
     public void loadConfigurations(TsonMap map) {
-        super.loadConfigurations(map);
         respawner.fromTson(map.getList("map.positions"));
         type               = McTsonUtils.getGameType(getR(map, "map.gametype"));
-
-        onAddPlayer        = getMsg(map, "msg.on-add");
-        onKillPlayerWinner = getMsg(map, "msg.on-kill.winner");
-        onKillOther        = getMsg(map, "msg.on-kill.other");
-        onNewRound         = getMsg(map, "msg.game.new-round");
-        onFirtsRound       = getMsg(map, "msg.game.first-round");
-        onEndCommon        = getMsg(map, "msg.game.timeout.common");
-        onTimeOut          = getMsg(map, "msg.game.timeout.game");
-        onEndPreparation   = getMsg(map, "msg.game.timeout.preparation");
 
         isImmutable        = getR(map, "map.immutable"         , true        );
         preparationTicks   = getR(map, "game.preparation-ticks", preparationTicks);
