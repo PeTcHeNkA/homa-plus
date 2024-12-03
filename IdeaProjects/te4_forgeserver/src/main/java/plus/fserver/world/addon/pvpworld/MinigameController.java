@@ -42,7 +42,7 @@ import java.util.function.Supplier;
 
 public abstract class MinigameController {
     private static final Tuple<Chunk,NBTTagCompound> EMPTY = new Tuple<>(EmptyChunk.INSTANCE, new NBTTagCompound(2,1));
-    private static final HashMap<String, Supplier<MinigameController>> REGISTRY = new HashMap<>();
+    protected static final HashMap<String, Supplier<MinigameController>> REGISTRY = new HashMap<>();
     private static final int MIN_PVPA_DIM_ID = 700000;
 
     private final Long2ObjectOpenHashMap<ExtendedBlockStorage[]> cache = new Long2ObjectOpenHashMap<>();
@@ -58,7 +58,7 @@ public abstract class MinigameController {
     public MinigameController(){}
 
 
-    public void init(MinigameControllerProvider pro, TsonMap map){
+    public void init(MinigameProvider.Map.Info pro, TsonMap map){
         data = pro.getMap();
         type = getDimType(map, DimensionType.OVERWORLD);
         map.ifContainsMap("lobby", teleporter::readFrom);

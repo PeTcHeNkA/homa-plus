@@ -9,8 +9,8 @@ import net.minecraft.world.WorldServer;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import plus.fserver.api.ChatPacketBuilder;
 import plus.fserver.utls.McTsonUtils;
+import plus.fserver.world.addon.pvpworld.MinigameProvider;
 import plus.fserver.world.addon.pvpworld.MinigameController;
-import plus.fserver.world.addon.pvpworld.MinigameControllerProvider;
 import plus.fserver.world.addon.pvpworld.MinigameWorld;
 import plus.fserver.world.addon.pvpworld.stats.PlayerData;
 import plus.fserver.world.addon.pvpworld.stats.WorldData;
@@ -43,7 +43,7 @@ public class PvpMinigameController extends MinigameController {
     private GiveItems         defaultKit;
 
     @Override
-    public void init(MinigameControllerProvider pro, TsonMap map) {
+    public void init(MinigameProvider.Map.Info pro, TsonMap map) {
         super.init(pro, map);
         onAddPlayer        = pro.getMsg("msg.on-add");
         onKillPlayerWinner = pro.getMsg("msg.on-kill.winner");
