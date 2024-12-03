@@ -2,6 +2,8 @@ package plus.fserver.world.addon.pvpworld;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import java.util.UUID;
 
 
@@ -10,6 +12,7 @@ public class MinigameAwaitRoom {
     private final MinigameProvider.Map.Info[] infs;
     private final Team[] teams;
 
+    @SideOnly(Side.CLIENT)
     public MinigameAwaitRoom(int cTeams, int players){
         Team[] teams = this.teams = new Team[cTeams];
         for (int i = 0; i < cTeams; i++)
@@ -119,9 +122,8 @@ public class MinigameAwaitRoom {
 
 
     public boolean canStart(){
-        for (Team cTeam:teams){
+        for (Team cTeam:teams)
             if(!cTeam.canStart())return false;
-        }
         return true;
     }
 
@@ -138,34 +140,43 @@ public class MinigameAwaitRoom {
     }
 
 
-    public void reBalance(int minRange, int attempts){
+    public int[][] calcScores(){
         Team[] teams = this.teams;
 
         int[][] score = new int[teams.length][];
+        int lenTeam = teams[0].players.length;
 
-        for (int i = 0; i < teams.length; i++){
+        for (int i = 0, l = teams.length; i < l; i++){
             Team rTeam = teams[i];
             UUID[] team  = rTeam.players;
-            int[] score0 = score[i];
+            int[] score0 = score[i] = new int[lenTeam];
 
-            for (int j = 0; j < team.length; j++){
-                score0[j] = getScore(team[i]);
+            for (int j = 0; j < lenTeam; j++){
+                score0[j] = getScore(team[j]);
             }
         }
+        return score;
+    }
 
-        while (attempts > 0){
-            --attempts;
+
+    public void reBalance(){
+        Team[] teams = this.teams;
+        int[][] score = calcScores();
+        int attempts = 2;
+        while (--attempts > 0){
             for (int i = 0, l = teams.length; i < l; i++){
                 Team cur1 = teams[i];
                 if(!cur1.canRebalance)continue;
                 int[] cScore1 = score[i];
 
                 for (int j = i + 1; j < l; j++){
-                    Team cur2 = teams[i];
-                    if(!cur2.canRebalance)continue;
-                    int[] cScore2 = score[i];
+                    if(i == j)continue;
 
-                    int index = swap(cScore1, cScore2, minRange);
+                    Team cur2 = teams[j];
+                    if(!cur2.canRebalance)continue;
+                    int[] cScore2 = score[j];
+
+                    int index = swap(cScore1, cScore2);
                     if(index != -1){
                         UUID pCur1 = cur1.players[index];
                         UUID pCur2 = cur2.players[index];
@@ -185,20 +196,21 @@ public class MinigameAwaitRoom {
     }
 
 
-    public int swap(int[] first, int[] second, int minRange){
+    public int swap(int[] first, int[] second){
         int sum1 = sum(first);
         int sum2 = sum(second);
 
         int delta = delta(sum1, sum2);
 
-        if(delta < minRange)return -1;
+        if(delta == 0)return -1;
 
         for (int i = 0; i < first.length; i++){
             int cur1 = first[i];
             int cur2 = second[i];
+            if(cur1 == cur2)continue;
 
             int ns1 = sum1 - cur1 + cur2;
-            int ns2 = sum2 + cur2 - cur1;
+            int ns2 = sum2 - cur2 + cur1;
 
             int dl2 = delta(ns1, ns2);
 
@@ -216,17 +228,7 @@ public class MinigameAwaitRoom {
     }
 
 
-//    private static int sum(int[] arr, int exclude, int add){
-//        int sum = add;
-//        for (int i = 0, l = arr.length;i<l; i++){
-//            if(i == exclude)continue;
-//            sum += arr[i];
-//        }
-//        return sum;
-//    }
-
-
-    private static int sum(int[] arr){
+    public static int sum(int[] arr){
         int s = 0;
         for (int i:arr) s += i;
         return s;
