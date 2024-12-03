@@ -15,15 +15,35 @@ import static plus.tson.ext.TsonAccessUtils.*;
 
 
 public class MinigameProvider {
+    private static MinigameProvider INSTANCE;
+    private final HashMap<String, Supplier<MinigameController>> registry = new HashMap<>();
     private final ObjectOpenHashSet<String> allIds = new ObjectOpenHashSet<>(4);
     private final HashMap<String, Map> maps = new HashMap<>(4);
     private HashMap<String,ChatPacketBuilder> msgCache;
     private final String pathToRootCfg;
     private TsonMap cachedCfg;
 
-    public MinigameProvider(String pathToRootCfg) {
+    public static MinigameProvider instance(){
+        MinigameProvider inst = INSTANCE;
+        if(inst == null)return INSTANCE = new MinigameProvider("minigames.tson");
+        return inst;
+    }
+
+
+    private MinigameProvider(String pathToRootCfg) {
         this.pathToRootCfg = pathToRootCfg;
     }
+
+
+    public void register(String id, Supplier<MinigameController> func){
+        registry.put(id, func);
+    }
+
+
+    public MinigameController create(String id){
+        return registry.get(id).get();
+    }
+
 
     public TsonMap getCfg(){
         if(cachedCfg == null)
@@ -145,7 +165,7 @@ public class MinigameProvider {
 
 
             public Supplier<MinigameController> getFactory(){
-                return MinigameController.REGISTRY.get(gameId());
+                return registry.get(gameId());
             }
 
 

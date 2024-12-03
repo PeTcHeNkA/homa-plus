@@ -37,12 +37,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 
 public abstract class MinigameController {
     private static final Tuple<Chunk,NBTTagCompound> EMPTY = new Tuple<>(EmptyChunk.INSTANCE, new NBTTagCompound(2,1));
-    protected static final HashMap<String, Supplier<MinigameController>> REGISTRY = new HashMap<>();
     private static final int MIN_PVPA_DIM_ID = 700000;
 
     private final Long2ObjectOpenHashMap<ExtendedBlockStorage[]> cache = new Long2ObjectOpenHashMap<>();
@@ -169,16 +167,6 @@ public abstract class MinigameController {
             ++min;
         }
         return min;
-    }
-
-
-    public static void register(String id, Supplier<MinigameController> func){
-        REGISTRY.put(id, func);
-    }
-
-
-    public static MinigameController create(String id){
-        return REGISTRY.get(id).get();
     }
 
 
