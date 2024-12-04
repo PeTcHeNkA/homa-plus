@@ -11,20 +11,17 @@ import net.minecraft.world.GameType;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ITeleporter;
 import plus.fserver.utls.McTsonUtils;
-import plus.tson.TsonList;
 import plus.tson.TsonMap;
-import plus.tson.TsonObj;
-import java.util.function.Consumer;
 
 
 public class LobbyTeleporter implements ITeleporter {
-    private Vec3d lobby = new Vec3d(0,70,0);
+    private Vec3d pos = new Vec3d(0,70,0);
     private int distance;
     private GameType gameType;
     private float yaw = Float.NaN, pith = Float.NaN;
 
     public void init(Vec3d lobby, int distance, GameType gameType){
-        this.lobby = lobby;
+        this.pos = lobby;
         this.distance = distance;
         this.gameType = gameType;
     }
@@ -36,7 +33,7 @@ public class LobbyTeleporter implements ITeleporter {
 
 
     public void readFrom(TsonMap map){
-        lobby = McTsonUtils.getVec3d(map.get("pos"));
+        pos = McTsonUtils.getVec3d(map.get("pos"));
         if(map.containsKey("yaw"))
             yaw = map.getFloat("yaw");
         if(map.containsKey("yaw"))
@@ -46,6 +43,10 @@ public class LobbyTeleporter implements ITeleporter {
             gameType = McTsonUtils.getGameType(map.get("game-type"));
     }
 
+
+    public Vec3d getPos(){
+        return pos;
+    }
 
 
     public void readFrom(NBTTagCompound nbt){
@@ -85,26 +86,26 @@ public class LobbyTeleporter implements ITeleporter {
         if(distance > 0){
             double dx = world.rand.nextDouble()*distance;
             double dz = world.rand.nextDouble()*distance;
-            Vec3d vec = lobby.add(dx, 0, dz);
+            Vec3d vec = pos.add(dx, 0, dz);
             BlockPos pos1 = new BlockPos(vec);
             pos1 = world.getChunk(pos1).getPrecipitationHeight(pos1);
 
-            double minY = lobby.y - distance;
-            double maxY = lobby.z + distance;
+            double minY = pos.y - distance;
+            double maxY = pos.z + distance;
             if(pos1.getY() <= minY && pos1.getY() <= maxY){
                 return vec;
             }
         }
-        return lobby;
+        return pos;
     }
 
 
     public NBTTagCompound toNbt(){
         NBTTagCompound nbt = new NBTTagCompound();
         NBTTagList pos = new NBTTagList(3);
-        pos.set(0, new NBTTagDouble(lobby.x));
-        pos.set(1, new NBTTagDouble(lobby.y));
-        pos.set(2, new NBTTagDouble(lobby.z));
+        pos.set(0, new NBTTagDouble(this.pos.x));
+        pos.set(1, new NBTTagDouble(this.pos.y));
+        pos.set(2, new NBTTagDouble(this.pos.z));
         nbt.setTag("lobby", pos);
         if(gameType != null)
             nbt.setIntegerU("gm", gameType.getID());

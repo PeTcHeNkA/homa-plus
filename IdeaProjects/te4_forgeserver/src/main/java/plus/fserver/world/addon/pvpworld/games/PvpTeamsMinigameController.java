@@ -20,6 +20,7 @@ import plus.fserver.world.addon.pvpworld.MinigameWorld;
 import plus.fserver.world.addon.pvpworld.stats.CombatData;
 import plus.fserver.world.addon.pvpworld.stats.PlayerData;
 import plus.fserver.world.addon.pvpworld.stats.WorldData;
+import plus.fserver.world.addon.pvpworld.tasks.GroupRespawnAllRandomly;
 import plus.tson.TsonMap;
 import java.util.List;
 import java.util.Set;
@@ -50,9 +51,12 @@ public class PvpTeamsMinigameController extends MinigameController {
 
     private int pendingToRespawn = 20*15;
     private boolean canRespawnIfAllDeath = true;
+    private final GroupRespawnAllRandomly respawner = new GroupRespawnAllRandomly();
 
     private ChatPacketBuilder onAddPlayer, onEndPreparation, onTimeOut,
             onEndCommon, onNewRound, onFirtsRound, onKillPlayerWinner, onKillOther;
+
+    private GameType gameType;
 
     @Override
     public void init(MinigameProvider.Map.Info pro, TsonMap map) {
@@ -64,6 +68,12 @@ public class PvpTeamsMinigameController extends MinigameController {
         onEndCommon        = pro.getMsg("msg.game.timeout.common");
         onTimeOut          = pro.getMsg("msg.game.timeout.game");
         onEndPreparation   = pro.getMsg("msg.game.timeout.preparation");
+    }
+
+
+    @Override
+    public void loadConfigurations(TsonMap map) {
+        respawner.fromTson(map.getList("map.gpositions"));
     }
 
 
@@ -88,7 +98,7 @@ public class PvpTeamsMinigameController extends MinigameController {
         Set<String> members = team.getMembershipCollection();
         for(int j2 = 0; j2 < players.size(); ++j2) {
             EntityPlayer player = players.get(j2);
-            if(player instanceof EntityPlayerMP && player.isEntityAlive()){
+            if(player instanceof EntityPlayerMP && player.isEntityAlive() && !player.isSpectator()){
                 if(members.contains(player.getName()))
                     return (EntityPlayerMP) player;
             }
@@ -203,5 +213,40 @@ public class PvpTeamsMinigameController extends MinigameController {
 //                onComplete(world);
 //            }
         }
+    }
+
+
+    @Override
+    public void onTick(MinigameWorld world) {
+        if(world.finished())return;
+        WData wData = world.data();
+        if(wData.isTimeOut)return;
+
+        List<EntityPlayerMP> members = world.getMembers();
+
+        for (EntityPlayerMP player:members){
+            PData data = (PData)wData.stats(player);
+            if(data.pendingToRespawn > 0){
+                if(--data.pendingToRespawn == 0){
+                    EntityPlayerMP player2 = geyFirstAliveMember((ScorePlayerTeam)player.getTeam(), world);
+                    if(player2 == null && canRespawnIfAllDeath){
+                        respawner.tpToRandom(player);
+                        onRespawn(player);
+                    } else {
+                        if(player2 != null){
+                            respawner.tpToNearest(player, player2.posX, player2.posY, player2.posZ);
+                            onRespawn(player);
+                        } else {
+                            data.pendingToRespawn = -1;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+    public void onRespawn(EntityPlayerMP player){
+        player.setGameType(gameType);
     }
 }

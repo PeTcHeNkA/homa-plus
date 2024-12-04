@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 
 
 public class RespawnAllRandomly implements Consumer<WorldServer> {
-    private LobbyTeleporter[] teleporters;
+    protected LobbyTeleporter[] teleporters;
 
     public RespawnAllRandomly(){}
 
