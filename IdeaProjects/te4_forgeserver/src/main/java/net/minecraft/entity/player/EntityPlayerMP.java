@@ -71,7 +71,6 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.*;
 import net.minecraft.world.storage.loot.ILootContainer;
-import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.ITeleporter;
 import net.minecraftforge.event.ForgeEventFactory;
@@ -79,13 +78,14 @@ import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 import net.minecraftforge.event.entity.player.PlayerDropsEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import plus.fserver.api.IPlayerDataModel;
 import plus.fserver.server.network.packet.SElcaPacketDestroyEntities;
 import plus.fserver.utls.collections.Int1LinkedList;
 
 import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
-public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
+public class EntityPlayerMP extends EntityPlayer implements IContainerListener, IPlayerDataModel {
     private static final Logger LOGGER = LogManager.getLogger();
     //todo maybe remove?
     private String language = "en_US";
@@ -437,16 +437,15 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
     @Override
     public void onDeath(DamageSource cause) {
         if (world.onLivingDeath(this, cause)) return;
-        onPlayerDeath(cause, true);
+        onPlayerDeath(cause, true, this.world.getGameRules().getBoolean("showDeathMessages"));
     }
 
 
-    public void onPlayerDeath(DamageSource cause, boolean sendPacket) {
-        boolean flag = this.world.getGameRules().getBoolean("showDeathMessages");
+    public void onPlayerDeath(DamageSource cause, boolean sendPacket, boolean sendMsg) {
         if (sendPacket){
-            this.connection.netManager.sendPacketE(new SPacketCombatEvent(this.getCombatTracker(), SPacketCombatEvent.Event.ENTITY_DIED, flag));
+            this.connection.netManager.sendPacketE(new SPacketCombatEvent(this.getCombatTracker(), SPacketCombatEvent.Event.ENTITY_DIED, sendMsg));
         }
-        if (flag) {
+        if (sendMsg) {
             Team team = this.getTeam();
 
             if (team != null && team.getDeathMessageVisibility() != Team.EnumVisible.ALWAYS) {
@@ -1357,5 +1356,11 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
                 }
             }
         }
+    }
+
+
+    @Override
+    public EntityPlayerMP getSelfPlayer() {
+        return this;
     }
 }

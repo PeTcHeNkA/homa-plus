@@ -88,7 +88,8 @@ public class PvpMinigameController extends MinigameController {
 
     @Override
     public void onAddPlayer(EntityPlayerMP player) {
-        onAddPlayer.send(player);
+        MinigameWorld mw = (MinigameWorld) player.world;
+        onAddPlayer.send(player, mw.getMembers(), false);
     }
 
 
@@ -116,7 +117,7 @@ public class PvpMinigameController extends MinigameController {
             CommonWorldData data = world.data();
 
             event.setCanceled(true);
-            player.onPlayerDeath(event.getSource(), false);
+            player.onPlayerDeath(event.getSource(), false, false);
             player.setGameType(GameType.SPECTATOR);
 
             if(!data.isTimeOut) {

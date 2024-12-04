@@ -12,8 +12,9 @@ public class MinigameLobbyTeleporter extends CleanLobbyTeleporter {
         this.arena = arena;
     }
 
+
     @Override
-    public void onCleanInventory(EntityPlayerMP player) {
+    public void onPostTransfer(EntityPlayerMP player, int dimId) {
         arena.onAddPlayer(player);
     }
 

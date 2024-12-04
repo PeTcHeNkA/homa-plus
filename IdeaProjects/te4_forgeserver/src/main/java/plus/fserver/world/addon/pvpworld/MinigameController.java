@@ -373,7 +373,7 @@ public abstract class MinigameController {
             EntityPlayerMP player = (EntityPlayerMP) entity;
             event.setCanceled(true);
 
-            player.onPlayerDeath(event.getSource(), false);
+            player.onPlayerDeath(event.getSource(), false, false);
             GameType prev = player.interactionManager.getGameType();
             player.setGameType(GameType.SPECTATOR);
             MinigameWorld world = (MinigameWorld) player.world;

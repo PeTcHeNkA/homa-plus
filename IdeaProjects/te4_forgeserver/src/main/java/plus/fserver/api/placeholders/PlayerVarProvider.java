@@ -1,24 +1,24 @@
 package plus.fserver.api.placeholders;
 
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagString;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
+import plus.fserver.api.IPlayerDataModel;
 import plus.tson.format.IVarGetter;
 import java.util.function.Function;
 
 
-public class PlayerVarProvider extends TreeVarProvider<EntityPlayerMP,PlayerVarProvider>{
+public class PlayerVarProvider extends TreeVarProvider<IPlayerDataModel,PlayerVarProvider>{
     public static PlayerVarProvider PROVIDER = new PlayerVarProvider();
 
     public PlayerVarProvider wAdd(String name, IVarGetter<World> func){
-        return super.add(name, (IVarGetter<EntityPlayerMP>) playerMP -> func.get(playerMP.world));
+        return super.add(name, (IVarGetter<IPlayerDataModel>) playerMP -> func.get(playerMP.getSelfPlayer().world));
     }
 
     public PlayerVarProvider sAdd(String name, IVarGetter<MinecraftServer> func){
-        return super.add(name, (IVarGetter<EntityPlayerMP>) playerMP -> func.get(playerMP.server));
+        return super.add(name, (IVarGetter<IPlayerDataModel>) playerMP -> func.get(playerMP.getSelfPlayer().server));
     }
 
     @Override
@@ -38,13 +38,17 @@ public class PlayerVarProvider extends TreeVarProvider<EntityPlayerMP,PlayerVarP
                 .add("posZ", PlayerVarProvider::posZ    )
                 .add("hp"  , PlayerVarProvider::health  )
                 .add("exp" , PlayerVarProvider::expLvl  )
-                .add("tag", (Function<Args, IVarGetter<EntityPlayerMP>>) args -> {
+                .add("tag", (Function<Args, IVarGetter<IPlayerDataModel>>) args -> {
                     String arg = args.allLast();
                     return playerMP -> {
-                        NBTBase tag = playerMP.getEntityData().getTag(arg);
+                        NBTBase tag = playerMP.getSelfPlayer().getEntityData().getTag(arg);
                         if(tag.getId() == 8)return ((NBTTagString)tag).getString();
                         return tag.toString();
                     };
+                });
+        PROVIDER.add("arg", (Function<Args, IVarGetter<IPlayerDataModel>>) args -> {
+                    String arg = args.cur();
+                    return model -> model.model().apply(arg);
                 })
         ;
 
@@ -67,35 +71,35 @@ public class PlayerVarProvider extends TreeVarProvider<EntityPlayerMP,PlayerVarP
 
 
     //player funcs
-    private static String userName(EntityPlayerMP player){
-        return player.getName();
+    private static String userName(IPlayerDataModel player){
+        return player.getSelfPlayer().getName();
     }
-    private static String ip(EntityPlayerMP player){
-        return player.getPlayerIP();
+    private static String ip(IPlayerDataModel player){
+        return player.getSelfPlayer().getPlayerIP();
     }
-    private static String uuid(EntityPlayerMP player){
-        return player.getUniqueID().toString();
+    private static String uuid(IPlayerDataModel player){
+        return player.getSelfPlayer().getUniqueID().toString();
     }
-    private static String ping(EntityPlayerMP player){
-        return String.valueOf(player.ping);
+    private static String ping(IPlayerDataModel player){
+        return String.valueOf(player.getSelfPlayer().ping);
     }
-    private static String pos(EntityPlayerMP player){
-        return player.getPosition().toString();
+    private static String pos(IPlayerDataModel player){
+        return player.getSelfPlayer().getPosition().toString();
     }
-    private static String posX(EntityPlayerMP player){
-        return String.valueOf(MathHelper.floor(player.posX));
+    private static String posX(IPlayerDataModel player){
+        return String.valueOf(MathHelper.floor(player.getSelfPlayer().posX));
     }
-    private static String posY(EntityPlayerMP player){
-        return String.valueOf(MathHelper.floor(player.posY));
+    private static String posY(IPlayerDataModel player){
+        return String.valueOf(MathHelper.floor(player.getSelfPlayer().posY));
     }
-    private static String posZ(EntityPlayerMP player){
-        return String.valueOf(MathHelper.floor(player.posZ));
+    private static String posZ(IPlayerDataModel player){
+        return String.valueOf(MathHelper.floor(player.getSelfPlayer().posZ));
     }
-    private static String health(EntityPlayerMP player){
-        return String.format("%.2f", player.getHealth());
+    private static String health(IPlayerDataModel player){
+        return String.format("%.2f", player.getSelfPlayer().getHealth());
     }
-    private static String expLvl(EntityPlayerMP player){
-        return String.valueOf(player.experienceLevel);
+    private static String expLvl(IPlayerDataModel player){
+        return String.valueOf(player.getSelfPlayer().experienceLevel);
     }
 
     //world funcs

@@ -3,13 +3,19 @@ package plus.fserver.world.addon.pvpworld.games;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.Packet;
+import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
+import net.minecraft.scoreboard.Team;
 import net.minecraft.world.GameType;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import org.jetbrains.annotations.Nullable;
+import plus.fserver.api.ChatPacketBuilder;
+import plus.fserver.api.IPlayerDataModel;
 import plus.fserver.world.addon.ScorePlayerTeamEX;
 import plus.fserver.world.addon.pvpworld.MinigameController;
+import plus.fserver.world.addon.pvpworld.MinigameProvider;
 import plus.fserver.world.addon.pvpworld.MinigameWorld;
 import plus.fserver.world.addon.pvpworld.stats.CombatData;
 import plus.fserver.world.addon.pvpworld.stats.PlayerData;
@@ -20,10 +26,6 @@ import java.util.Set;
 
 
 public class PvpTeamsMinigameController extends MinigameController {
-    public PvpTeamsMinigameController() {
-        super();
-    }
-
     public static class ScoreCombatTeam extends ScorePlayerTeamEX {
         public final CombatData data = new CombatData();
         public ScoreCombatTeam(Scoreboard scoreboard, String name) {
@@ -48,6 +50,36 @@ public class PvpTeamsMinigameController extends MinigameController {
 
     private int pendingToRespawn = 20*15;
     private boolean canRespawnIfAllDeath = true;
+
+    private ChatPacketBuilder onAddPlayer, onEndPreparation, onTimeOut,
+            onEndCommon, onNewRound, onFirtsRound, onKillPlayerWinner, onKillOther;
+
+    @Override
+    public void init(MinigameProvider.Map.Info pro, TsonMap map) {
+        onAddPlayer        = pro.getMsg("msg.on-add");
+        onKillPlayerWinner = pro.getMsg("msg.on-kill.winner-team");
+        onKillOther        = pro.getMsg("msg.on-kill.other-team");
+        onNewRound         = pro.getMsg("msg.game.new-round");
+        onFirtsRound       = pro.getMsg("msg.game.first-round");
+        onEndCommon        = pro.getMsg("msg.game.timeout.common");
+        onTimeOut          = pro.getMsg("msg.game.timeout.game");
+        onEndPreparation   = pro.getMsg("msg.game.timeout.preparation");
+    }
+
+
+    @Override
+    public void onAddPlayer(EntityPlayerMP player) {
+        Team team = player.getTeam();
+        if(team != null) {
+            MinigameWorld mw = (MinigameWorld) player.world;
+            Packet<INetHandlerPlayClient> msg = onAddPlayer.build(player);
+
+            for (EntityPlayerMP player1 : mw.getMembers()) {
+                if(team.isSameTeam(player1.getTeam()))
+                    ChatPacketBuilder.send(player1, msg);
+            }
+        }
+    }
 
 
     @Nullable
@@ -95,27 +127,29 @@ public class PvpTeamsMinigameController extends MinigameController {
     public void onDeath(LivingDeathEvent event) {
         Entity entity = event.getEntity();
         if(entity instanceof EntityPlayerMP){
-            EntityPlayerMP player = (EntityPlayerMP) entity;
+            EntityPlayerMP dPlayer = (EntityPlayerMP) entity;
             MinigameWorld world = (MinigameWorld) entity.world;
-            if(!world.isGameMember(player))return;
+            if(!world.isGameMember(dPlayer))return;
             WData data = world.data();
 
             event.setCanceled(true);
-            player.onPlayerDeath(event.getSource(), false);
-            player.setGameType(GameType.SPECTATOR);
+            dPlayer.onPlayerDeath(event.getSource(), false, false);
+            dPlayer.setGameType(GameType.SPECTATOR);
 
             if(!data.isTimeOut) {
-                PData uStats = (PData) data.stats(player);
+                PData uStats = (PData) data.stats(dPlayer);
                 uStats.addDeath(1);
                 uStats.addScore(-1);
 
-                ScoreCombatTeam dTeam = (ScoreCombatTeam) player.getTeam();
+                ScoreCombatTeam dTeam = (ScoreCombatTeam) dPlayer.getTeam();
                 if(dTeam != null){
                     dTeam.data.addDeath(1);
                     dTeam.data.addScore(-1);
                 }
 
                 Entity cause = event.getSource().getTrueSource();
+                IPlayerDataModel toDTeam;
+
                 if (cause != null && cause instanceof EntityPlayerMP) {
                     data.addKill(cause, 1);
 
@@ -135,14 +169,24 @@ public class PvpTeamsMinigameController extends MinigameController {
                         wTeam.data.addKill(1);
                         wTeam.data.addScore(score);
                     }
+
+                    toDTeam = ChatPacketBuilder.model(dPlayer, "killer", cause.getName());
+
+                    IPlayerDataModel toWTeam = ChatPacketBuilder
+                            .model((EntityPlayerMP) cause, "target", dPlayer.getName());
+
+                    onKillPlayerWinner.sendToTeam(toWTeam);
+                } else {
+                    toDTeam = ChatPacketBuilder.model(dPlayer, "killer", "???");
                 }
+                onKillOther.sendToTeam(toDTeam);
 
                 if(dTeam != null){
                     EntityPlayerMP player2 = geyFirstAliveMember(dTeam, world);
                     boolean needRespawn = pendingToRespawn != -1;
                     if(pendingToRespawn > 20 || !needRespawn) {
                         if (player2 != null)
-                            player.setSpectatingEntity(player2);
+                            dPlayer.setSpectatingEntity(player2);
                     }
                     if(needRespawn && (canRespawnIfAllDeath || player2 != null)){
                         uStats.pendingToRespawn = pendingToRespawn;
