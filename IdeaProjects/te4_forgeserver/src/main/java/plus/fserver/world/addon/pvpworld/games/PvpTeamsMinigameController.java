@@ -3,16 +3,20 @@ package plus.fserver.world.addon.pvpworld.games;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.MobEffects;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.INetHandlerPlayClient;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.world.GameType;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import org.jetbrains.annotations.Nullable;
 import plus.fserver.api.ChatPacketBuilder;
 import plus.fserver.api.IPlayerDataModel;
+import plus.fserver.world.addon.CleanLobbyTeleporter;
 import plus.fserver.world.addon.ScorePlayerTeamEX;
 import plus.fserver.world.addon.pvpworld.MinigameController;
 import plus.fserver.world.addon.pvpworld.MinigameProvider;
@@ -20,10 +24,13 @@ import plus.fserver.world.addon.pvpworld.MinigameWorld;
 import plus.fserver.world.addon.pvpworld.stats.CombatData;
 import plus.fserver.world.addon.pvpworld.stats.PlayerData;
 import plus.fserver.world.addon.pvpworld.stats.WorldData;
+import plus.fserver.world.addon.pvpworld.tasks.GiveItems;
 import plus.fserver.world.addon.pvpworld.tasks.GroupRespawnAllRandomly;
 import plus.tson.TsonMap;
+import plus.tson.TsonObj;
 import java.util.List;
 import java.util.Set;
+import static plus.tson.ext.TsonAccessUtils.getR;
 
 
 public class PvpTeamsMinigameController extends MinigameController {
@@ -39,10 +46,10 @@ public class PvpTeamsMinigameController extends MinigameController {
             return new ScoreCombatTeam(this, name);
         }
     }
-    public static class PData extends PlayerData{
+    public static class PData extends PvPlData{
         int pendingToRespawn;
     }
-    public static class WData extends CommonWorldData{
+    public static class WData extends PvWData{
         @Override
         public PlayerData create() {
             return new PData();
@@ -50,13 +57,23 @@ public class PvpTeamsMinigameController extends MinigameController {
     }
 
     private int pendingToRespawn = 20*15;
+    private int preparationTicks = 20*15;
+    private int commonTicks      = 20*90;
+    private int timeOut          = 20*20;
     private boolean canRespawnIfAllDeath = true;
     private final GroupRespawnAllRandomly respawner = new GroupRespawnAllRandomly();
 
-    private ChatPacketBuilder onAddPlayer, onEndPreparation, onTimeOut,
-            onEndCommon, onNewRound, onFirtsRound, onKillPlayerWinner, onKillOther;
+    private ChatPacketBuilder onAddPlayer;
+    private ChatPacketBuilder onEndPreparation;
+    private ChatPacketBuilder onTimeOut;
+    private ChatPacketBuilder onEndCommon;
+    private ChatPacketBuilder onNewRound;
+    private ChatPacketBuilder onFirtsRound;
+    private ChatPacketBuilder onKillPlayerWinner;
+    private ChatPacketBuilder onKillOther;
 
     private GameType gameType;
+    private GiveItems defaultKit;
 
     @Override
     public void init(MinigameProvider.Map.Info pro, TsonMap map) {
@@ -74,6 +91,14 @@ public class PvpTeamsMinigameController extends MinigameController {
     @Override
     public void loadConfigurations(TsonMap map) {
         respawner.fromTson(map.getList("map.gpositions"));
+
+        pendingToRespawn   = getR(map, "game.respawn-ticks"    , pendingToRespawn);
+        preparationTicks   = getR(map, "game.preparation-ticks", preparationTicks);
+        commonTicks        = getR(map, "game.common-ticks"     , commonTicks     );
+        timeOut            = getR(map, "game.timeout-ticks"    , timeOut         );
+
+        TsonObj items = getR(map, "game.items");
+        if(items != null) defaultKit = new GiveItems(items.getList());
     }
 
 
@@ -93,7 +118,7 @@ public class PvpTeamsMinigameController extends MinigameController {
 
 
     @Nullable
-    public static EntityPlayerMP geyFirstAliveMember(ScorePlayerTeam team, MinigameWorld world){
+    public static EntityPlayerMP getFirstAliveMember(ScorePlayerTeam team, MinigameWorld world){
         List<EntityPlayer> players = world.playerEntities;
         Set<String> members = team.getMembershipCollection();
         for(int j2 = 0; j2 < players.size(); ++j2) {
@@ -192,7 +217,7 @@ public class PvpTeamsMinigameController extends MinigameController {
                 onKillOther.sendToTeam(toDTeam);
 
                 if(dTeam != null){
-                    EntityPlayerMP player2 = geyFirstAliveMember(dTeam, world);
+                    EntityPlayerMP player2 = getFirstAliveMember(dTeam, world);
                     boolean needRespawn = pendingToRespawn != -1;
                     if(pendingToRespawn > 20 || !needRespawn) {
                         if (player2 != null)
@@ -217,7 +242,31 @@ public class PvpTeamsMinigameController extends MinigameController {
 
 
     @Override
-    public void onTick(MinigameWorld world) {
+    public void onNewGameStarted(MinigameWorld world, EntityPlayerMP[] players) {
+        super.onNewGameStarted(world, players);
+    }
+
+
+    private void onCompletePreparation(WorldServer worldServer){
+        MinigameWorld world = (MinigameWorld) worldServer;
+
+        List<EntityPlayerMP> members = world.getMembers();
+        respawner.respawnTeams(world, members);
+
+        for(EntityPlayerMP player:members){
+            CleanLobbyTeleporter.cleanPlayer(player);
+            player.setGameType(gameType);
+        }
+
+        PvpMinigameController.giveAllKits(defaultKit, world, members);
+
+        onEndPreparation.send(members, false);
+        world.addDelayedTask(this::onEndCommon, this::onUpdateCommon, commonTicks);
+    }
+
+
+    public void onUpdateCommon(WorldServer worlds) {
+        MinigameWorld world = (MinigameWorld) worlds;
         if(world.finished())return;
         WData wData = world.data();
         if(wData.isTimeOut)return;
@@ -228,7 +277,7 @@ public class PvpTeamsMinigameController extends MinigameController {
             PData data = (PData)wData.stats(player);
             if(data.pendingToRespawn > 0){
                 if(--data.pendingToRespawn == 0){
-                    EntityPlayerMP player2 = geyFirstAliveMember((ScorePlayerTeam)player.getTeam(), world);
+                    EntityPlayerMP player2 = getFirstAliveMember((ScorePlayerTeam)player.getTeam(), world);
                     if(player2 == null && canRespawnIfAllDeath){
                         respawner.tpToRandom(player);
                         onRespawn(player);
@@ -246,7 +295,40 @@ public class PvpTeamsMinigameController extends MinigameController {
     }
 
 
+    private void onEndCommon(WorldServer worldServer) {
+        MinigameWorld world = (MinigameWorld) worldServer;
+        if(world.finished())return;
+        List<EntityPlayerMP> members = world.getMembers();
+
+        for (EntityPlayerMP player:members){
+            player.addPotionEffect(new PotionEffect(MobEffects.GLOWING, Integer.MAX_VALUE, 1, true, false));
+        }
+        onEndCommon.send(members, false);
+
+        world.addDelayedTask(this::onTimeOut, timeOut);
+    }
+
+
+    private void onTimeOut(WorldServer worldServer) {
+        MinigameWorld world = (MinigameWorld) worldServer;
+        if(world.finished())return;
+
+        world.finish();
+        CommonWorldData data = world.data();
+        data.isTimeOut = true;
+
+        List<EntityPlayerMP> members = world.getMembers();
+
+        for (EntityPlayerMP player:members){
+            player.onKillCommand();
+        }
+        onTimeOut.send(members);
+    }
+
+
     public void onRespawn(EntityPlayerMP player){
+        CleanLobbyTeleporter.cleanPlayer(player);
         player.setGameType(gameType);
+        PvpMinigameController.giveKit(defaultKit, player);
     }
 }

@@ -76,7 +76,7 @@ public abstract class PlayerList {
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss z");
     private final MinecraftServer server;
     private final List<EntityPlayerMP> playerEntityList = new CopyOnWriteArrayList<>();
-    private final Map<UUID, EntityPlayerMP> uuidToPlayerMap = Maps.newHashMap();
+    private final Map<UUID, EntityPlayerMP> uuidToPlayerMap = new ConcurrentHashMap<>();
     private final UserListBans bannedPlayers;
     private final UserListIPBans bannedIPs;
     private final UserListOps ops;
@@ -279,18 +279,7 @@ public abstract class PlayerList {
 
     @Nullable
     public NBTTagCompound readPlayerDataFromFile(EntityPlayerMP player) {
-        //NBTTagCompound nbttagcompound = this.server.worlds[0].getWorldInfo().getPlayerNBTTagCompound();
-        //NBTTagCompound nbttagcompound1;
-
-//        if (player.getName().equals(this.server.getServerOwner()) && nbttagcompound != null) {
-//            nbttagcompound1 = nbttagcompound;
-//            player.readFromNBT(nbttagcompound);
-//            LOGGER.debug("loading single player");
-//            ForgeEventFactory.firePlayerLoadingEvent(player, this.playerDataManager, player.getUniqueID().toString());
-//        } else {
         return this.playerDataManager.readPlayerData(player);
-//        }
-        //return nbttagcompound1;
     }
 
 
@@ -305,6 +294,7 @@ public abstract class PlayerList {
     }
 
 
+    //todo
     public void writePlayerData(EntityPlayerMP playerIn) {
         if (playerIn.connection == null) return;
         this.playerDataManager.writePlayerData(playerIn);
@@ -331,7 +321,7 @@ public abstract class PlayerList {
 
 
     public void playerLoggedOut(EntityPlayerMP playerIn) {
-        net.minecraftforge.fml.common.FMLCommonHandler.instance().firePlayerLoggedOut(playerIn);
+        FMLCommonHandler.instance().firePlayerLoggedOut(playerIn);
         WorldServer worldserver = playerIn.getServerWorld();
         playerIn.addStat(StatList.LEAVE_GAME);
         this.writePlayerData(playerIn);

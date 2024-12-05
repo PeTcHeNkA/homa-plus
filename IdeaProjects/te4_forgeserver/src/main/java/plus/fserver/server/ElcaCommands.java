@@ -10,6 +10,8 @@ import net.minecraft.command.NumberInvalidException;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.nbt.CompressedStreamTools;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkSystem;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerChunkMapEntry;
@@ -42,11 +44,13 @@ import plus.fserver.utls.collections.ArrayListE6;
 import plus.fserver.utls.collections.ArrayListEV;
 import plus.fserver.utls.math.FastRandom;
 import plus.fserver.world.addon.EmptyConstructor;
+import plus.fserver.world.addon.MemoryChunkProviderServer;
 import plus.tson.TsonFile;
 import plus.tson.TsonMap;
 import plus.tson.utl.ByteStrBuilder;
 import plus.tson.utl.Te4HashSet;
 import java.io.File;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -62,7 +66,7 @@ public class ElcaCommands extends ServerCommand {
     private static final String normal   = "&a";
 
     private final List<String> completions = ImmutableList.copyOf(
-        new String[]{"version", "info", "tps", "mobs", "spawn", "hotpoints", "send", "setvar", "save", "mkworld"}
+        new String[]{"version", "info", "tps", "mobs", "spawn", "hotpoints", "send", "setvar", "save", "world"}
     );
     private final List<String> allVars = ImmutableList.copyOf(new String[]{
             "time-packet-rate"            , "mean-balance-mob"            ,
@@ -149,22 +153,53 @@ public class ElcaCommands extends ServerCommand {
             case "save":{
                 save(server, sender, args);return;
             }
-            case "mkworld":{
-                mkWorld(server, sender, args);
+            case "world":{
+                switch (args[1]){
+                    case "mk":
+                        mkWorld(server, sender, args);return;
+                    case "dump":
+                        dumpWorld(server, sender, args);return;
+                    case "loadvr":
+                        loadVr(server, sender, args);return;
+                }
             }
         }
     }
 
 
-    private void mkWorld(MinecraftServer server, ICommandSender sender, String[] args) throws NumberInvalidException {
-        String type = args[1];
-        int dimId = parseInt(args[2]);
-        DimensionType dimType = DimensionType.OVERWORLD;
-        if(args.length >= 4) {
+    private void loadVr(MinecraftServer server, ICommandSender sender, String[] args){
+
+    }
+
+
+    private void dumpWorld(MinecraftServer server, ICommandSender sender, String[] args) throws NumberInvalidException {
+        String path = args[2];
+        int fromX = parseInt(args[3]), fromZ = parseInt(args[4]), toX = parseInt(args[5]), toZ = parseInt(args[6]);
+
+        World world = sender.getEntityWorld();
+
+        NBTTagCompound nbt = MemoryChunkProviderServer.dumpToNbt(world.chunkProviderServer, fromX, fromZ, toX, toZ);
+
+        server.ticker().runAsync(() -> {
             try {
-                dimType = DimensionType.byName(args[3]);
+                CompressedStreamTools.write(nbt, new File(path));
+                reply(sender, "&aDump created.");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+
+    private void mkWorld(MinecraftServer server, ICommandSender sender, String[] args) throws NumberInvalidException {
+        String type = args[2];
+        int dimId = parseInt(args[3]);
+        DimensionType dimType = DimensionType.OVERWORLD;
+        if(args.length >= 5) {
+            try {
+                dimType = DimensionType.byName(args[4]);
             } catch (Exception e) {
-                reply(sender, "Unknown dimension type: ", args[3]);
+                reply(sender, "Unknown dimension type: ", args[4]);
                 return;
             }
         }
@@ -622,8 +657,9 @@ public class ElcaCommands extends ServerCommand {
                     return Collections.singletonList("track");
                 case "setvar":
                     return allVars;
-                case "mkworld":{
-                    return Collections.singletonList("empty "+FastRandom.INST.nextInt(1024)+" overworld");
+                case "world":{
+                    String name = sender.getName()+"_w.nbt";
+                    return Lists.newArrayList("mk empty"+FastRandom.INST.nextInt(1024)+" overworld", "dump "+name+" -16 -16 16 16", "loadvr "+name);
                 }
             }
         }

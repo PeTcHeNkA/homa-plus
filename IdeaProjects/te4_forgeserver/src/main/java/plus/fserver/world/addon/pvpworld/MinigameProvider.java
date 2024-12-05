@@ -88,7 +88,6 @@ public class MinigameProvider {
     }
 
 
-
     public class Map{
         private HashMap<String,ChatPacketBuilder> msgCache;
         private final String pathToMap;

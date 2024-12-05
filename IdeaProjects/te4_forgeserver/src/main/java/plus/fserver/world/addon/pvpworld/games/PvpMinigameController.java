@@ -9,10 +9,10 @@ import net.minecraft.world.WorldServer;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import plus.fserver.api.ChatPacketBuilder;
 import plus.fserver.utls.McTsonUtils;
+import plus.fserver.world.addon.CleanLobbyTeleporter;
 import plus.fserver.world.addon.pvpworld.MinigameProvider;
 import plus.fserver.world.addon.pvpworld.MinigameController;
 import plus.fserver.world.addon.pvpworld.MinigameWorld;
-import plus.fserver.world.addon.pvpworld.stats.PlayerData;
 import plus.fserver.world.addon.pvpworld.stats.WorldData;
 import plus.fserver.world.addon.pvpworld.tasks.GiveItems;
 import plus.fserver.world.addon.pvpworld.tasks.RespawnAllRandomly;
@@ -73,18 +73,6 @@ public class PvpMinigameController extends MinigameController {
         if(items != null) defaultKit = new GiveItems(items.getList());
     }
 
-    protected static class PData extends PlayerData {
-        GiveItems usedKit;
-    }
-
-    protected static class WData extends CommonWorldData{
-        GiveItems usedKit;
-        @Override
-        public PlayerData create() {
-            return new PData();
-        }
-    }
-
 
     @Override
     public void onAddPlayer(EntityPlayerMP player) {
@@ -103,7 +91,7 @@ public class PvpMinigameController extends MinigameController {
 
     @Override
     public WorldData createData(MinigameWorld world) {
-        return new WData();
+        return new PvWData();
     }
 
 
@@ -181,7 +169,7 @@ public class PvpMinigameController extends MinigameController {
         if(settings != null){
             TsonObj items = getR(settings, "game.items");
             if(items != null){
-                WData data = world.data();
+                PvWData data = world.data();
                 data.usedKit = new GiveItems(items.getList());
             }
             //todo
@@ -217,10 +205,22 @@ public class PvpMinigameController extends MinigameController {
 
         List<EntityPlayerMP> members = world.getMembers();
         respawner.respawn(world, members);
+        for(EntityPlayerMP player:members){
+            CleanLobbyTeleporter.cleanPlayer(player);
+            player.setGameType(type);
+        }
 
-        WData wData = world.data();
+        giveAllKits(defaultKit, world, members);
+
+        onEndPreparation.send(members, false);
+        world.addDelayedTask(this::onEndCommon, commonTicks);
+    }
+
+
+    public static void giveAllKits(GiveItems defaultKit, MinigameWorld world, List<EntityPlayerMP> members){
+        PvWData wData = world.data();
         for (EntityPlayerMP player:members){
-            PData pData = (PData) wData.stats(player);
+            PvPlData pData = (PvPlData) wData.stats(player);
             if(pData.usedKit != null){
                 pData.usedKit.accept(player);
             } else {
@@ -232,9 +232,22 @@ public class PvpMinigameController extends MinigameController {
                 }
             }
         }
+    }
 
-        onEndPreparation.send(members, false);
-        world.addDelayedTask(this::onEndCommon, commonTicks);
+
+    public static void giveKit(GiveItems defaultKit, EntityPlayerMP player){
+        PvWData wData = ((MinigameWorld)player.world).data();
+        PvPlData pData = (PvPlData) wData.stats(player);
+        if(pData.usedKit != null){
+            pData.usedKit.accept(player);
+        } else {
+            if(wData.usedKit != null){
+                wData.usedKit.accept(player);
+            } else {
+                if (defaultKit != null)
+                    defaultKit.accept(player);
+            }
+        }
     }
 
 

@@ -108,6 +108,7 @@ import net.minecraftforge.common.ForgeHooks;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import plus.fserver.ElcaConfig;
 import plus.fserver.utls.collections.TransactMap;
 import plus.fserver.utls.math.VecDFD;
 
@@ -207,9 +208,11 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
         MinecraftServer server = this.server;
         server.refreshStatusNextTick();
 
-        TextComponentTranslation textcomponenttranslation = new TextComponentTranslation("multiplayer.player.left", player.getDisplayName());
-        textcomponenttranslation.getStyle().setColor(TextFormatting.YELLOW);
-        server.getPlayerList().sendMessage(textcomponenttranslation);
+        if(ElcaConfig.ENABLE_DEFAULT_JOIN_MESSAGE) {
+            TextComponentTranslation textcomponenttranslation = new TextComponentTranslation("multiplayer.player.left", player.getDisplayName());
+            textcomponenttranslation.getStyle().setColor(TextFormatting.YELLOW);
+            server.getPlayerList().sendMessage(textcomponenttranslation);
+        }
         player.mountEntityAndWakeUp();
         server.getPlayerList().playerLoggedOut(player);
 
