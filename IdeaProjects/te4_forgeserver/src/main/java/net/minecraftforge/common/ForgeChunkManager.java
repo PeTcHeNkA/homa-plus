@@ -350,6 +350,7 @@ public class ForgeChunkManager {
         }
         WorldServer worldServer = (WorldServer) world;
         File chunkDir = worldServer.getChunkSaveLocation();
+        if(chunkDir == null)return;
         File chunkLoaderData = new File(chunkDir, "forcedchunks.dat");
 
         if (chunkLoaderData.exists() && chunkLoaderData.isFile()) {

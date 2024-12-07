@@ -23,6 +23,7 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.MinecraftException;
 import net.minecraft.world.NextTickListEntry;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.NibbleArray;
 import net.minecraft.world.storage.IThreadedFileIO;
@@ -32,12 +33,13 @@ import net.minecraftforge.event.world.ChunkDataEvent;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import plus.fserver.api.IAsyncChunkLoader;
 import plus.fserver.server.SStrings;
 import plus.fserver.utls.NbtUtils;
 import plus.fserver.world.light.LightingHooks;
 
 
-public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO, Runnable {
+public class AnvilChunkLoader implements IAsyncChunkLoader, IThreadedFileIO, Runnable {
     private static final Logger LOGGER = LogManager.getLogger();
     //public final Set<ChunkPos> allSaves = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private final Map<ChunkPos, NBTTagCompound> chunksToSave = Maps.newConcurrentMap();
@@ -69,6 +71,12 @@ public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO, Runnable
         }
 
         return null;
+    }
+
+
+    @Override
+    public Object[] loadAsync(WorldServer world, int x, int z) throws IOException {
+        return loadChunk__Async(world, x, z);
     }
 
 

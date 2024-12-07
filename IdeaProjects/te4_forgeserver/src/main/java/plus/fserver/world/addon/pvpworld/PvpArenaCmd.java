@@ -69,7 +69,7 @@ public class PvpArenaCmd extends ServerCommand {
         }
         TsonFile.createPathIfNeed(file);
         try {
-            MinigameController.saveTo(arena, file);
+            //MinigameController.saveTo(arena, file);
         } catch (Throwable e){
             onError(sender, e);
             e.printStackTrace();

@@ -48,6 +48,7 @@ import net.minecraft.village.VillageSiege;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
+import net.minecraft.world.chunk.storage.AnvilChunkLoader;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraft.world.chunk.storage.IChunkLoader;
 import net.minecraft.world.gen.ChunkGeneratorSettings;
@@ -1421,7 +1422,10 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
 
 
     public java.io.File getChunkSaveLocation() {
-        return ((net.minecraft.world.chunk.storage.AnvilChunkLoader)getChunkProvider().chunkLoader).chunkSaveLocation;
+        IChunkLoader loader = getChunkProvider().chunkLoader;
+        if(loader instanceof AnvilChunkLoader)
+            return ((AnvilChunkLoader) loader).chunkSaveLocation;
+        return null;
     }
 
 

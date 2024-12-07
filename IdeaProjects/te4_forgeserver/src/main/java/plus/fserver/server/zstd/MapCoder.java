@@ -2,6 +2,9 @@ package plus.fserver.server.zstd;
 
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.nbt.CompressedStreamTools;
+import net.minecraft.nbt.NBTSizeTracker;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.Loader;
@@ -110,9 +113,35 @@ public class MapCoder {
         train = true;
     }
 
+
     public static void completeTrain(){
         train = false;
         coder.train();
+    }
+
+
+
+    public static void writeCompressed(final NBTTagCompound compound, final File fileIn) throws IOException {
+        final DataOutputStream dataoutputstream = new DataOutputStream(MapCoder.newOStream(new FileOutputStream(fileIn)));
+        try {
+            CompressedStreamTools.write(compound, dataoutputstream);
+        } finally {
+            dataoutputstream.close();
+        }
+    }
+
+
+    public static NBTTagCompound readCompressed(final File fileIn) throws IOException {
+        if (!fileIn.exists()) return null;
+
+        final DataInputStream datainputstream = new DataInputStream(MapCoder.newIStream(new FileInputStream(fileIn)));
+        NBTTagCompound nbttagcompound;
+        try {
+            nbttagcompound = CompressedStreamTools.read(datainputstream, NBTSizeTracker.INFINITE);
+        } finally {
+            datainputstream.close();
+        }
+        return nbttagcompound;
     }
 
 

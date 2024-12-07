@@ -1,6 +1,5 @@
 package plus.fserver.world.addon.pvpworld;
 
-import net.minecraft.entity.EMoveHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -12,11 +11,9 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldEntitySpawner;
 import net.minecraft.world.WorldServer;
-import net.minecraft.world.WorldServerMulti;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.ChunkProviderServer;
-import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.ITeleporter;
@@ -24,9 +21,9 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import plus.fserver.ElcaCV;
 import plus.fserver.utls.FastValidators;
 import plus.fserver.utls.collections.EntityRemSwapList;
-import plus.fserver.world.addon.EmptyChunkGenerator;
+import plus.fserver.world.addon.DumpChunkLoader;
 import plus.fserver.world.addon.MemoryChunkProviderServer;
-import plus.fserver.world.addon.ScoreboardEX;
+import plus.fserver.world.addon.MemoryWorld;
 import plus.fserver.world.addon.pvpworld.stats.WorldData;
 import plus.tson.utl.Te4HashSet;
 import java.util.ArrayList;
@@ -38,7 +35,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 
-public abstract class MinigameWorld extends WorldServerMulti {
+public abstract class MinigameWorld extends MemoryWorld {
     private ConcurrentLinkedQueue<DelayTask> futureTasks = new ConcurrentLinkedQueue<>();
     private WorldData data;
     private Te4HashSet<UUID> awaitPlayers;
@@ -46,12 +43,6 @@ public abstract class MinigameWorld extends WorldServerMulti {
 
     public MinigameWorld(MinecraftServer server, ISaveHandler handler, int id, WorldServer parent, Profiler profiler) {
         super(server, handler, id, parent, profiler);
-    }
-
-
-    @Override
-    protected void initUnimportant() {
-        collideTask = new EMoveHelper.ComboCollideTask(16);
     }
 
 
@@ -303,13 +294,9 @@ public abstract class MinigameWorld extends WorldServerMulti {
 
     @Override
     public IChunkProvider createChunkProvider() {
-        return new MemoryChunkProviderServer(this, new MinigameChunkLoader(controller()), createChunkGenerator());
-    }
-
-
-    @Override
-    public IChunkGenerator createChunkGenerator() {
-        return new EmptyChunkGenerator(this);
+        MinigameController ctrl = controller();
+        DumpChunkLoader loader = new DumpChunkLoader(ctrl.getMapNbt(), ctrl.getMapCache());
+        return new MemoryChunkProviderServer(this, loader, createChunkGenerator());
     }
 
 

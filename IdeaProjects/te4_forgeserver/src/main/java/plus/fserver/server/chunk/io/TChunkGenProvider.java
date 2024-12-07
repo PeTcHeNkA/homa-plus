@@ -2,11 +2,12 @@ package plus.fserver.server.chunk.io;
 
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
+import net.minecraft.world.chunk.storage.IChunkLoader;
 import net.minecraft.world.gen.ChunkProviderServer;
 
 
 public class TChunkGenProvider extends TChunkTask implements Runnable{
-    TChunkGenProvider(WorldServer world, TQueuedChunk chunk, AnvilChunkLoader loader, ChunkProviderServer provider) {
+    TChunkGenProvider(WorldServer world, TQueuedChunk chunk, IChunkLoader loader, ChunkProviderServer provider) {
         super(world, chunk, loader, provider);
     }
 

@@ -26,6 +26,7 @@ import net.minecraftforge.fml.common.FMLLog;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import plus.fserver.ElcaConfig;
+import plus.fserver.api.IAsyncChunkLoader;
 import plus.fserver.api.Keep;
 import plus.fserver.server.chunk.io.TChunkExecutor;
 import plus.fserver.server.chunk.io.TChunkTask;
@@ -177,7 +178,7 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
 
                 loadingChunks.remove(chunkHash);
             } else {
-                AnvilChunkLoader loader = (AnvilChunkLoader) this.chunkLoader;
+                IChunkLoader loader = this.chunkLoader;
 
                 if(runnable == null){
                     if(loader.isChunkGeneratedAt(x, z)){
@@ -187,11 +188,11 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
                     }
                 } else {
                     if(loader.isChunkGeneratedAt(x, z)){
-                        TChunkExecutor.queueChunkLoad(world, loader, this, x, z, runnable);
+                        TChunkExecutor.queueChunkLoad(world, (IAsyncChunkLoader) loader, this, x, z, runnable);
                         return null;
                     } else {
                         if(chunkGenerator.maybeAsync()){
-                            TChunkExecutor.queueChunkGenerate(world, loader, this, x, z, runnable);
+                            TChunkExecutor.queueChunkGenerate(world, (IAsyncChunkLoader) loader, this, x, z, runnable);
                             return null;
                         }
                     }
@@ -210,7 +211,7 @@ public class ChunkProviderServer extends Long2ChunkMap implements IChunkProvider
         if (chunk == null) {
             long i = ChunkPos.asLong(x, z);
             try {
-                chunk = TChunkExecutor.syncChunkGen(world(x,z), (AnvilChunkLoader)this.chunkLoader, this, x, z);
+                chunk = TChunkExecutor.syncChunkGen(world(x,z), this.chunkLoader, this, x, z);
             } catch (Throwable throwable) {
                 CrashReport report = CrashReport.makeCrashReport(throwable, "Exception generating new chunk");
                 CrashReportCategory cat = report.makeCategory("Chunk to be generated");

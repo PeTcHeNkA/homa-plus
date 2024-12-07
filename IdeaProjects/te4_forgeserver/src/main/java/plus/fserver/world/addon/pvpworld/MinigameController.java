@@ -10,29 +10,23 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.GameType;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import plus.fserver.api.TextComponentAuto;
 import plus.fserver.api.WorldConstructor;
-import plus.fserver.utls.EmptyChunk;
 import plus.fserver.utls.NbtUtils;
 import plus.fserver.utls.math.FastRandom;
 import plus.fserver.world.addon.CleanLobbyTeleporter;
 import plus.fserver.world.addon.LobbyTeleporter;
-import plus.fserver.world.addon.MemoryChunkProviderServer;
 import plus.fserver.world.addon.ScoreboardEX;
 import plus.fserver.world.addon.pvpworld.stats.PlayerData;
 import plus.fserver.world.addon.pvpworld.stats.WorldData;
 import plus.tson.TsonMap;
 import plus.tson.utl.Te4HashSet;
-import plus.tson.utl.Tuple;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -40,10 +34,9 @@ import java.util.function.Consumer;
 
 
 public abstract class MinigameController {
-    private static final Tuple<Chunk,NBTTagCompound> EMPTY = new Tuple<>(EmptyChunk.INSTANCE, new NBTTagCompound(2,1));
     private static final int MIN_PVPA_DIM_ID = 700000;
 
-    private final Long2ObjectOpenHashMap<ExtendedBlockStorage[]> cache = new Long2ObjectOpenHashMap<>();
+    private final Long2ObjectOpenHashMap<ExtendedBlockStorage[]> cache = new Long2ObjectOpenHashMap<>(4);
     private final LobbyTeleporter teleporter = new CleanLobbyTeleporter();
     private final Set<Integer> usedDimIds = new Te4HashSet<>();
     private final Set<Integer> freeDimIds = new Te4HashSet<>();
@@ -255,114 +248,16 @@ public abstract class MinigameController {
     }
 
 
-    public Tuple<Chunk,NBTTagCompound> createChunk(World world, int x, int z){
-        String key = MemoryChunkProviderServer.chunkKey(x, z);
-        if(data.hasKey(key)){
-            NBTTagCompound nbt = data.getCompoundTag(key);
-            return new Tuple<>(createFromNbt(nbt, world, x, z), nbt);
-        }
-        return new Tuple<>(new Chunk(world, x, z), EMPTY.B);
-    }
-
-
-    private Chunk createFromNbt(NBTTagCompound nbt, World world, int x, int z){
-        if(isImmutable()) {
-            ExtendedBlockStorage[] cached;
-            synchronized (cache){
-                cached = cache.get(ChunkPos.asLong(x, z));
-            }
-            Chunk chunk;
-            if (cached != null) {
-                chunk = new Chunk(world, x, z);
-
-                NbtUtils.readCommonChunkData(chunk, nbt);
-
-                ExtendedBlockStorage[] arr = chunk.getBlockStorageArray();
-                for (int i = 0; i < arr.length; i++) {
-                    arr[i] = cached[i];
-                }
-
-                NbtUtils.readChunkCapabilities(chunk, nbt);
-            } else {
-                chunk = NbtUtils.readChunkFromNBT(world, nbt);
-                synchronized (cache) {
-                    cache.put(ChunkPos.asLong(x, z), chunk.getBlockStorageArray());
-                }
-            }
-            return chunk;
-        } else {
-            return NbtUtils.readChunkFromNBT(world, nbt);
-        }
-    }
-
 
     public NBTTagCompound getMapNbt(){
         return data;
     }
 
 
-    public static List<List<BlockPos>> readSpawnPositions(NBTTagCompound data){
-        List<List<BlockPos>> bGroups = new ArrayList<>();
-        if(data.hasKey("spawn_positions")){
-            NBTTagList list = data.getTagList("spawn_positions", 9);
-
-            for (int i = 0; i < list.tagCount(); i++){
-                NBTTagList group = (NBTTagList) list.get(i);
-                if(group.tagCount() == 0)continue;
-                List<BlockPos> bList = new ArrayList<>(group.tagCount());
-                bGroups.add(bList);
-
-                for (int j = 0; j < group.tagCount(); j+=3){
-                    bList.add(new BlockPos(
-                            group.getIntAt(j), group.getIntAt(j+1), group.getIntAt(j+2)
-                    ));
-                }
-            }
-        }
-        return bGroups;
+    public Long2ObjectOpenHashMap<ExtendedBlockStorage[]> getMapCache(){
+        if(isImmutable())return null;
+        return cache;
     }
-
-
-    public static void writeSpawnPositionsTo(NBTTagCompound data, List<List<BlockPos>> bGroups){
-        NBTTagList list = new NBTTagList();
-        data.setTag("spawn_positions", list);
-        for (List<BlockPos> bList:bGroups){
-            NBTTagList group = new NBTTagList();
-            for (BlockPos pos:bList){
-                group.appendTag(NbtUtils.create(pos.getX()));
-                group.appendTag(NbtUtils.create(pos.getY()));
-                group.appendTag(NbtUtils.create(pos.getZ()));
-            }
-            list.appendTag(group);
-        }
-    }
-
-
-//    public static PvpArena createFromWorld(WorldServer world, int minX, int minZ, int maxX, int maxZ){
-//        NBTTagCompound nbt = MemoryChunkProviderServer.dumpToNbt(
-//                world.getChunkProvider(), minX, minZ, maxX, maxZ
-//        );
-//        return new PvpArena(nbt);
-//    }
-
-
-    public static void saveTo(MinigameController arena, File file){
-        try {
-            //writeSpawnPositionsTo(arena.getNbt(), arena.spawnPositions());
-            CompressedStreamTools.write(arena.getMapNbt(), file);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-
-//    public static PvpArena readFrom(File file){
-//        try {
-//            return new PvpArena(CompressedStreamTools.read(file));
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
 
 
     //-------------- Functions ---------------------

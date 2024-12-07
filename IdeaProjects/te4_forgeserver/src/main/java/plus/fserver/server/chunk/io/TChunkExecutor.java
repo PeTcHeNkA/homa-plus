@@ -3,30 +3,43 @@ package plus.fserver.server.chunk.io;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
+import net.minecraft.world.chunk.storage.IChunkLoader;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraftforge.fml.common.FMLLog;
+import plus.fserver.api.IAsyncChunkLoader;
+import java.io.IOException;
 import java.util.function.Consumer;
 
 
 public class TChunkExecutor {
-    public static Chunk syncChunkLoad(WorldServer world, AnvilChunkLoader loader,
+    public static Chunk syncChunkLoad(WorldServer world, IChunkLoader loader,
                                       ChunkProviderServer provider, int x, int z) {
-        TQueuedChunk key = new TQueuedChunk(x, z);
 
-        TChunkTask task = world.getChunkTasks().remove(key);
+        if(loader instanceof IAsyncChunkLoader) {
+            TQueuedChunk key = new TQueuedChunk(x, z);
 
-        if (task != null) {
-            task.await();
+            TChunkTask task = world.getChunkTasks().remove(key);
+
+            if (task != null) {
+                task.await();
+            } else {
+                task = new TChunkIOProvider(world, key, (IAsyncChunkLoader) loader, provider);
+                task.run();
+            }
+            task.syncCallback();
+            return task.getChunk();
         } else {
-            task = new TChunkIOProvider(world, key, loader, provider);
-            task.run();
+            try {
+                return loader.loadChunk(world, x, z);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return new Chunk(world, x, z);
+            }
         }
-        task.syncCallback();
-        return task.getChunk();
     }
 
 
-    public static void queueChunkLoad(WorldServer world, AnvilChunkLoader loader, ChunkProviderServer provider,
+    public static void queueChunkLoad(WorldServer world, IAsyncChunkLoader loader, ChunkProviderServer provider,
                                       int x, int z, Consumer<Chunk> runnable) {
         TQueuedChunk key = new TQueuedChunk(x, z);
 
@@ -65,7 +78,7 @@ public class TChunkExecutor {
     }
 
 
-    public static Chunk syncChunkGen(WorldServer world, AnvilChunkLoader loader,
+    public static Chunk syncChunkGen(WorldServer world, IChunkLoader loader,
                                       ChunkProviderServer provider, int x, int z) {
         TQueuedChunk key = new TQueuedChunk(x, z);
 
@@ -82,7 +95,7 @@ public class TChunkExecutor {
     }
 
 
-    public static void queueChunkGenerate(WorldServer world, AnvilChunkLoader loader, ChunkProviderServer provider,
+    public static void queueChunkGenerate(WorldServer world, IAsyncChunkLoader loader, ChunkProviderServer provider,
                                           int x, int z, Consumer<Chunk> runnable) {
         TQueuedChunk key = new TQueuedChunk(x, z);
 

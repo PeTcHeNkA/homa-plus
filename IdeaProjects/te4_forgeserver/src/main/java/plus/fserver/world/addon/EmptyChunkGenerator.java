@@ -18,9 +18,17 @@ public class EmptyChunkGenerator implements IChunkGenerator {
         this.world = world;
     }
 
+    public static Chunk newEmptyChunk(World world, int x, int z){
+        Chunk chunk = new Chunk(world, x, z);
+        chunk.setLightPopulated(true);
+        chunk.setTerrainPopulated(true);
+        return chunk;
+    }
+
+
     @Override
     public Chunk generateChunk(int x, int z) {
-        return new Chunk(world, x, z);
+        return newEmptyChunk(world, x, z);
     }
 
 

@@ -77,8 +77,12 @@ public class EntityCollider {
             final CollisionPredicate cp = this.cp;
             final int limit = this.limit, size = this.size;
             final Object[] data = this.data;
-            for (int i = 0; i < size; i++)
-                ((CollideTask) data[i]).collide(cp, limit, temp);
+            try {
+                for (int i = 0; i < size; i++)
+                    ((CollideTask) data[i]).collide(cp, limit, temp);
+            } catch (Exception e){
+                e.printStackTrace();
+            }
         }
     }
 

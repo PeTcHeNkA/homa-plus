@@ -3,6 +3,7 @@ package plus.fserver.server.chunk.io;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
+import net.minecraft.world.chunk.storage.IChunkLoader;
 import net.minecraft.world.gen.ChunkProviderServer;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
@@ -11,14 +12,14 @@ import java.util.function.Consumer;
 public abstract class TChunkTask implements Runnable{
     protected final ConcurrentLinkedQueue<Consumer<Chunk>> callbacks = new ConcurrentLinkedQueue<>();
     protected final TQueuedChunk chunkInfo;
-    protected final AnvilChunkLoader loader;
+    protected final IChunkLoader loader;
     protected final ChunkProviderServer provider;
     protected WorldServer world;
     protected Chunk chunk;
     protected boolean finished = false;
 
 
-    TChunkTask(WorldServer world, TQueuedChunk chunk, AnvilChunkLoader loader, ChunkProviderServer provider) {
+    TChunkTask(WorldServer world, TQueuedChunk chunk, IChunkLoader loader, ChunkProviderServer provider) {
         this.world = world;
         this.chunkInfo = chunk;
         this.loader = loader;

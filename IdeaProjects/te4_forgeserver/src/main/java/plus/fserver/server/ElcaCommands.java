@@ -10,7 +10,6 @@ import net.minecraft.command.NumberInvalidException;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkSystem;
 import net.minecraft.server.MinecraftServer;
@@ -42,15 +41,14 @@ import plus.fserver.server.network.packet.SRawPacketPlayerListHeaderFooter;
 import plus.fserver.utls.EntityLodFunc;
 import plus.fserver.utls.collections.ArrayListE6;
 import plus.fserver.utls.collections.ArrayListEV;
-import plus.fserver.utls.math.FastRandom;
+import plus.fserver.world.addon.DumpChunkLoader;
 import plus.fserver.world.addon.EmptyConstructor;
-import plus.fserver.world.addon.MemoryChunkProviderServer;
+import plus.fserver.world.addon.MemoryWorld;
 import plus.tson.TsonFile;
 import plus.tson.TsonMap;
 import plus.tson.utl.ByteStrBuilder;
 import plus.tson.utl.Te4HashSet;
 import java.io.File;
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -167,8 +165,31 @@ public class ElcaCommands extends ServerCommand {
     }
 
 
-    private void loadVr(MinecraftServer server, ICommandSender sender, String[] args){
+    private void loadVr(MinecraftServer server, ICommandSender sender, String[] args) throws NumberInvalidException {
+        String path = args[2];
+        int dimId = parseInt(args[3]);
 
+        DimensionType dimType = DimensionType.OVERWORLD;
+        if(args.length >= 5) {
+            try {
+                dimType = DimensionType.byName(args[4]);
+            } catch (Exception e) {
+                reply(sender, "Unknown dimension type: ", args[4]);
+                return;
+            }
+        }
+
+        DimensionType dType = dimType;
+        DumpChunkLoader.readDumpFrom(path, dump -> {
+            WorldConstructor.Constructor ctor = MemoryWorld.makeCtor(dump);
+            WorldConstructor.register(dimId, ctor, dType);
+
+            if(DimensionManager.isDimensionRegistered(dimId)){
+                DimensionManager.unregisterDimension(dimId);
+            }
+            DimensionManager.registerDimension(dimId, dType);
+            reply(sender, "&aSuccess");
+        });
     }
 
 
@@ -178,15 +199,11 @@ public class ElcaCommands extends ServerCommand {
 
         World world = sender.getEntityWorld();
 
-        NBTTagCompound nbt = MemoryChunkProviderServer.dumpToNbt(world.chunkProviderServer, fromX, fromZ, toX, toZ);
+        NBTTagCompound nbt = DumpChunkLoader.dumpToNbt(world.chunkProviderServer, fromX, fromZ, toX, toZ);
 
         server.ticker().runAsync(() -> {
-            try {
-                CompressedStreamTools.write(nbt, new File(path));
-                reply(sender, "&aDump created.");
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            DumpChunkLoader.saveDumpTo(nbt, path, null);
+            reply(sender, "&aDump created.");
         });
     }
 
@@ -216,6 +233,7 @@ public class ElcaCommands extends ServerCommand {
             DimensionManager.unregisterDimension(dimId);
         }
         DimensionManager.registerDimension(dimId, dimType);
+        reply(sender, "&aSuccess");
     }
 
 
@@ -659,7 +677,8 @@ public class ElcaCommands extends ServerCommand {
                     return allVars;
                 case "world":{
                     String name = sender.getName()+"_w.nbt";
-                    return Lists.newArrayList("mk empty"+FastRandom.INST.nextInt(1024)+" overworld", "dump "+name+" -16 -16 16 16", "loadvr "+name);
+                    int rId = (sender.getName().hashCode()&1023);
+                    return Lists.newArrayList("mk empty "+rId+" overworld", "dump "+name+" -16 -16 16 16", "loadvr "+name+" "+rId+" overworld");
                 }
             }
         }
