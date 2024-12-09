@@ -94,6 +94,7 @@ public class ElcaConfig {
     public static boolean ASYNC_PATHFINDING_AUTO      = true;
     public static boolean UNIMPORTANT_PACKET_QUEUE    = true;
     public static boolean ENABLE_ASM_TRIMMER          = true;
+    public static boolean GLOBAL_LIGHT_POOL           = true;
 
 
     private static File dir(String str){
@@ -206,6 +207,7 @@ public class ElcaConfig {
         ENABLE_ASM_TRIMMER         = calc(map, "enable-asm-trimmer"          , ENABLE_ASM_TRIMMER         );
         ASY_THREAD_POOL_SIZE       = calc(map, "thread-pool-size"            , ASY_THREAD_POOL_SIZE       );
         ASYNC_EXPLOSION_THRESHOLD  = calc(map, "async-explosion-threshold"   , ASYNC_EXPLOSION_THRESHOLD  );
+        GLOBAL_LIGHT_POOL          = calc(map, "global-light-pool"           , GLOBAL_LIGHT_POOL          );
 
         if(INIT_PALETTE_LINEAR_BITS > 4 || INIT_PALETTE_LINEAR_BITS < 2){
             INIT_PALETTE_LINEAR_BITS = 4;

@@ -11,6 +11,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import plus.fserver.ElcaConfig;
 import plus.fserver.utls.collections.PooledLongQueue;
 import java.util.concurrent.locks.ReentrantLock;
 import static plus.fserver.utls.math.MathUtls.decodeWorldCoord;
@@ -19,6 +20,7 @@ import static plus.fserver.utls.math.MathUtls.encodeWorldCoord;
 
 public class LightingEngine implements ILightingEngine {
     public static final Logger LOGGER = LogManager.getLogger("PhosphorLE");
+    private static PooledLongQueue.Pool longPool;
     private final World world;
     private final PooledLongQueue[] queuedLightUpdates;
     private final PooledLongQueue[] queuedDarkenings;
@@ -47,7 +49,16 @@ public class LightingEngine implements ILightingEngine {
         this.isNeighborDataValid = false;
         this.neighborInfos = new NeighborInfo[6];
         this.world = world;
-        final PooledLongQueue.Pool pool = new PooledLongQueue.Pool();
+
+        PooledLongQueue.Pool pool;
+
+        if(ElcaConfig.GLOBAL_LIGHT_POOL) {
+            if((pool = longPool) == null)
+                pool = longPool = new PooledLongQueue.Pool();
+        } else {
+            pool = new PooledLongQueue.Pool();
+        }
+
         this.initialBrightenings = new PooledLongQueue(pool);
         this.initialDarkenings = new PooledLongQueue(pool);
         for (int i = 0; i < EnumSkyBlock.values().length; ++i) {
