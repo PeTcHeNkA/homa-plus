@@ -48,6 +48,4 @@ public class SmartChestGuiTemplate extends ChestGuiTemplate{
     public Int2ObjectMap<TsonFunc> functions(){
         return slotFunctions;
     }
-
-
 }
