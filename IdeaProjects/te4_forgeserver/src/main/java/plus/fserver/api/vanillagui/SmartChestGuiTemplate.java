@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ClickType;
+import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import plus.tson.TsonFunc;
 import plus.tson.TsonList;
@@ -22,11 +23,13 @@ public class SmartChestGuiTemplate extends ChestGuiTemplate{
             slotFunctions.defaultReturnValue(map.getFunc("default-action"));
         }
 
-        TsonList lActs = map.getList("actions");
+        if(map.containsKey("actions")) {
+            TsonList lActs = map.getList("actions");
 
-        for (TsonObj obj:lActs){
-            TsonMap map1 = obj.getMap();
-            slotFunctions.put(map1.getInt("slot"), map.getFunc("func"));
+            for (TsonObj obj : lActs) {
+                TsonMap map1 = obj.getMap();
+                slotFunctions.put(map1.getInt("slot"), map.getFunc("func"));
+            }
         }
 
         if(map.containsKey("on-close")){
@@ -37,9 +40,6 @@ public class SmartChestGuiTemplate extends ChestGuiTemplate{
 
     @Override
     public ChestGui create(){
-        if(functions().isEmpty()){
-            return super.create();
-        }
         SmartChestGui chest = new SmartChestGui(rows());
         chest.fillOf(this);
         chest.setCustomName(getCustomName());
@@ -54,7 +54,26 @@ public class SmartChestGuiTemplate extends ChestGuiTemplate{
     }
 
 
-    public static ItemStack cansel(ChestGui.VrContainer container, int slotId, int dragType, ClickType clickTypeIn, EntityPlayer player){
-        return container.gui().getStackInSlot(slotId);
+    public static ItemStack canselAll(ChestGui.VrContainer cont, Integer slotId, Integer dType, ClickType cType, EntityPlayer player){
+        if(cType == ClickType.PICKUP || cType == ClickType.PICKUP_ALL)
+            return player.inventory.getItemStack();
+        if(slotId < 0)return null;
+        if(slotId >= cont.inventorySlots.size())return ItemStack.EMPTY;
+        return cont.getSlot(slotId).getStack();
+    }
+
+
+    public static ItemStack canselAllSmart(ChestGui.VrContainer cont, Integer slotId, Integer dType, ClickType cType, EntityPlayer player){
+        if(slotId < 0)return null;
+        if(slotId >= cont.inventorySlots.size())return null;
+
+        Slot slot = cont.getSlot(slotId);
+        if(slot.inventory == cont.gui()){
+            if(cType == ClickType.PICKUP || cType == ClickType.PICKUP_ALL) {
+                return player.inventory.getItemStack();
+            }
+            return slot.getStack();
+        }
+        return null;
     }
 }

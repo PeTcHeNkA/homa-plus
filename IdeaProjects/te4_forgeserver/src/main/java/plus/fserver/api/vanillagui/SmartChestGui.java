@@ -16,9 +16,9 @@ public class SmartChestGui extends ChestGui{
         super(rows);
     }
 
+
     public void setFunctions(Int2ObjectMap<TsonFunc> funcs){
         slotFunctions = funcs;
-
     }
 
 

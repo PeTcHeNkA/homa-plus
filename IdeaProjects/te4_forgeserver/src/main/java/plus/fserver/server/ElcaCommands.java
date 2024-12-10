@@ -202,7 +202,7 @@ public class ElcaCommands extends ServerCommand {
             }
             case "open":{
                 String data = TsonFile.read("invs/"+id+".tson");
-                STsonParser parser = new STsonParser(data);
+                STsonParser parser = new STsonParser(data).with(TsonFunc.COMPILER);
 
                 player.displayGUIChest(ChestGuiTemplate.of(parser.getMap()).create());
 
