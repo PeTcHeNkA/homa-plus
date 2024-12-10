@@ -16,6 +16,7 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import org.jetbrains.annotations.Nullable;
 import plus.fserver.api.ChatPacketBuilder;
 import plus.fserver.api.IPlayerDataModel;
+import plus.fserver.api.placeholders.PlayerVarProvider;
 import plus.fserver.world.addon.CleanLobbyTeleporter;
 import plus.fserver.world.addon.ScorePlayerTeamEX;
 import plus.fserver.world.addon.pvpworld.MinigameController;
@@ -205,14 +206,14 @@ public class PvpTeamsMinigameController extends MinigameController {
                         wTeam.data.addScore(score);
                     }
 
-                    toDTeam = ChatPacketBuilder.model(dPlayer, "killer", cause.getName());
+                    toDTeam = PlayerVarProvider.model(dPlayer, "killer", cause.getName());
 
-                    IPlayerDataModel toWTeam = ChatPacketBuilder
+                    IPlayerDataModel toWTeam = PlayerVarProvider
                             .model((EntityPlayerMP) cause, "target", dPlayer.getName());
 
                     onKillPlayerWinner.sendToTeam(toWTeam);
                 } else {
-                    toDTeam = ChatPacketBuilder.model(dPlayer, "killer", "???");
+                    toDTeam = PlayerVarProvider.model(dPlayer, "killer", "???");
                 }
                 onKillOther.sendToTeam(toDTeam);
 

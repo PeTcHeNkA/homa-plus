@@ -2,10 +2,7 @@ package plus.fserver.api.vanillagui;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.ClickType;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.ContainerChest;
-import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.*;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
@@ -187,5 +184,29 @@ public class ChestGui implements IInventory, IInteractionObject {
         public boolean canInteractWith(EntityPlayer playerIn) {
             return true;
         }
+    }
+
+
+    public static ItemStack canselAll(VrContainer cont, Integer slotId, Integer dType, ClickType cType, EntityPlayer player){
+        if(cType == ClickType.PICKUP || cType == ClickType.PICKUP_ALL)
+            return player.inventory.getItemStack();
+        if(slotId < 0)return null;
+        if(slotId >= cont.inventorySlots.size())return ItemStack.EMPTY;
+        return cont.getSlot(slotId).getStack();
+    }
+
+
+    public static ItemStack canselAllSmart(VrContainer cont, Integer slotId, Integer dType, ClickType cType, EntityPlayer player){
+        if(slotId < 0)return null;
+        if(slotId >= cont.inventorySlots.size())return null;
+
+        Slot slot = cont.getSlot(slotId);
+        if(slot.inventory == cont.gui()){
+            if(cType == ClickType.PICKUP || cType == ClickType.PICKUP_ALL) {
+                return player.inventory.getItemStack();
+            }
+            return slot.getStack();
+        }
+        return null;
     }
 }

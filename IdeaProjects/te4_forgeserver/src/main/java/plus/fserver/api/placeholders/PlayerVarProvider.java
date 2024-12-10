@@ -1,5 +1,6 @@
 package plus.fserver.api.placeholders;
 
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagString;
@@ -8,6 +9,8 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import plus.fserver.api.IPlayerDataModel;
 import plus.tson.format.IVarGetter;
+
+import java.util.Map;
 import java.util.function.Function;
 
 
@@ -153,5 +156,90 @@ public class PlayerVarProvider extends TreeVarProvider<IPlayerDataModel,PlayerVa
             sum += v;
         }
         return ((double) sum / values.length) * 1.0E-6D;
+    }
+
+
+    private static class SingletonModel implements IPlayerDataModel, Function<String, String>{
+        final EntityPlayerMP player;
+        final String key, value;
+
+        private SingletonModel(EntityPlayerMP player, String key, String value) {
+            this.player = player;
+            this.key = key;
+            this.value = value;
+        }
+
+
+        @Override
+        public EntityPlayerMP getSelfPlayer() {
+            return player;
+        }
+
+
+        @Override
+        public Function<String, String> model() {
+            return this;
+        }
+
+
+        @Override
+        public String apply(String name) {
+            if(name.equals(key))return value;
+            return null;
+        }
+    }
+
+
+    private static class Pair2Model extends SingletonModel{
+        final String key2, value2;
+        private Pair2Model(EntityPlayerMP player, String key, String value, String key2, String value2) {
+            super(player, key, value);
+            this.key2 = key2;
+            this.value2 = value2;
+        }
+        @Override
+        public String apply(String name) {
+            if(name.equals(key))return value;
+            if(name.equals(key2))return value2;
+            return null;
+        }
+    }
+
+
+    private static class WrappedMapModel implements IPlayerDataModel, Function<String, String>{
+        final EntityPlayerMP player;
+        final Map<String,String> model;
+
+        private WrappedMapModel(EntityPlayerMP player, Map<String, String> model) {
+            this.player = player;
+            this.model = model;
+        }
+
+
+        @Override
+        public String apply(String name) {
+            return model.get(name);
+        }
+
+
+        @Override
+        public EntityPlayerMP getSelfPlayer() {
+            return player;
+        }
+    }
+
+
+    public static IPlayerDataModel model(EntityPlayerMP player, String key, String arg){
+        return new SingletonModel(player, key, arg);
+    }
+
+
+    public static IPlayerDataModel model(EntityPlayerMP player, String key1, String arg1, String key2, String arg2){
+        return new Pair2Model(player, key1, arg1, key2, arg2);
+    }
+
+
+    public static IPlayerDataModel model(EntityPlayerMP player, Map<String,String> model){
+        return new WrappedMapModel(player, model);
     }
 }

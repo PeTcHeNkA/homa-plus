@@ -708,13 +708,18 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
     //async
     @Override
     public void processChatMessage(@NotNull CPacketChatMessage packetIn) {
+        processChatMessage(packetIn.getMessage());
+    }
+
+
+    public void processChatMessage(@NotNull String rawMsg) {
         EntityPlayerMP player = this.player;
         if (player.getChatVisibility() == EntityPlayer.EnumChatVisibility.HIDDEN) {
             TextComponentTranslation textcomponenttranslation = new TextComponentTranslation("chat.cannotSend");
             textcomponenttranslation.getStyle().setColor(TextFormatting.RED);
             this.sendPacket(new SPacketChat(textcomponenttranslation));
         } else {
-            String msg = org.apache.commons.lang3.StringUtils.normalizeSpace(packetIn.getMessage());
+            String msg = org.apache.commons.lang3.StringUtils.normalizeSpace(rawMsg);
             char cur;
             for (int i = 0; i < msg.length(); ++i) {
                 if((cur = msg.charAt(i)) == 167 || cur < ' ' || cur == 127){
@@ -729,7 +734,7 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
             }
             player.markPlayerActive();
 
-            if (msg.startsWith("/")) {
+            if (msg.charAt(0) == '/') {
                 addToQueue(() -> handleSlashCommand(msg));
             } else {
                 ITextComponent itextcomponent = new TextComponentTranslation("chat.type.text", this.player.getDisplayName(), ForgeHooks.newChatWithLinks(msg));

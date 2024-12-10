@@ -2,10 +2,6 @@ package plus.fserver.api.vanillagui;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.ClickType;
-import net.minecraft.inventory.Slot;
-import net.minecraft.item.ItemStack;
 import plus.tson.TsonFunc;
 import plus.tson.TsonList;
 import plus.tson.TsonMap;
@@ -28,7 +24,7 @@ public class SmartChestGuiTemplate extends ChestGuiTemplate{
 
             for (TsonObj obj : lActs) {
                 TsonMap map1 = obj.getMap();
-                slotFunctions.put(map1.getInt("slot"), map.getFunc("func"));
+                slotFunctions.put(map1.getInt("slot"), map1.getFunc("func"));
             }
         }
 
@@ -54,26 +50,4 @@ public class SmartChestGuiTemplate extends ChestGuiTemplate{
     }
 
 
-    public static ItemStack canselAll(ChestGui.VrContainer cont, Integer slotId, Integer dType, ClickType cType, EntityPlayer player){
-        if(cType == ClickType.PICKUP || cType == ClickType.PICKUP_ALL)
-            return player.inventory.getItemStack();
-        if(slotId < 0)return null;
-        if(slotId >= cont.inventorySlots.size())return ItemStack.EMPTY;
-        return cont.getSlot(slotId).getStack();
-    }
-
-
-    public static ItemStack canselAllSmart(ChestGui.VrContainer cont, Integer slotId, Integer dType, ClickType cType, EntityPlayer player){
-        if(slotId < 0)return null;
-        if(slotId >= cont.inventorySlots.size())return null;
-
-        Slot slot = cont.getSlot(slotId);
-        if(slot.inventory == cont.gui()){
-            if(cType == ClickType.PICKUP || cType == ClickType.PICKUP_ALL) {
-                return player.inventory.getItemStack();
-            }
-            return slot.getStack();
-        }
-        return null;
-    }
 }

@@ -19,7 +19,6 @@ import plus.tson.format.TextFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 
 public final class ChatPacketBuilder {
@@ -77,17 +76,17 @@ public final class ChatPacketBuilder {
 
 
     public Packet<INetHandlerPlayClient> build(EntityPlayerMP player, String key, String value){
-        return build(model(player, key, value));
+        return build(PlayerVarProvider.model(player, key, value));
     }
 
 
     public Packet<INetHandlerPlayClient> build(EntityPlayerMP player, String key1, String value1, String key2, String value2){
-        return build(model(player, key1, value1, key2, value2));
+        return build(PlayerVarProvider.model(player, key1, value1, key2, value2));
     }
 
 
     public Packet<INetHandlerPlayClient> build(EntityPlayerMP player, Map<String,String> model){
-        return build(model(player, model));
+        return build(PlayerVarProvider.model(player, model));
     }
 
 
@@ -97,17 +96,17 @@ public final class ChatPacketBuilder {
 
 
     public String buildJson(EntityPlayerMP player, String key, String value){
-        return buildJson(model(player, key, value));
+        return buildJson(PlayerVarProvider.model(player, key, value));
     }
 
 
     public String buildJson(EntityPlayerMP player, String key1, String value1, String key2, String value2){
-        return buildJson(model(player, key1, value1, key2, value2));
+        return buildJson(PlayerVarProvider.model(player, key1, value1, key2, value2));
     }
 
 
     public String buildJson(EntityPlayerMP player, Map<String,String> model){
-        return buildJson(model(player, model));
+        return buildJson(PlayerVarProvider.model(player, model));
     }
 
 
@@ -252,90 +251,5 @@ public final class ChatPacketBuilder {
             if(player.getTeam() == team && player instanceof EntityPlayerMP)
                 ((EntityPlayerMP) player).connection.netManager.sendPacketSync(msg);
         }
-    }
-
-
-    private static class SingletonModel implements IPlayerDataModel, Function<String, String>{
-        final EntityPlayerMP player;
-        final String key, value;
-
-        private SingletonModel(EntityPlayerMP player, String key, String value) {
-            this.player = player;
-            this.key = key;
-            this.value = value;
-        }
-
-
-        @Override
-        public EntityPlayerMP getSelfPlayer() {
-            return player;
-        }
-
-
-        @Override
-        public Function<String, String> model() {
-            return this;
-        }
-
-
-        @Override
-        public String apply(String name) {
-            if(name.equals(key))return value;
-            return null;
-        }
-    }
-
-
-    private static class Pair2Model extends SingletonModel{
-        final String key2, value2;
-        private Pair2Model(EntityPlayerMP player, String key, String value, String key2, String value2) {
-            super(player, key, value);
-            this.key2 = key2;
-            this.value2 = value2;
-        }
-        @Override
-        public String apply(String name) {
-            if(name.equals(key))return value;
-            if(name.equals(key2))return value2;
-            return null;
-        }
-    }
-
-
-    private static class WrappedMapModel implements IPlayerDataModel, Function<String, String>{
-        final EntityPlayerMP player;
-        final Map<String,String> model;
-
-        private WrappedMapModel(EntityPlayerMP player, Map<String, String> model) {
-            this.player = player;
-            this.model = model;
-        }
-
-
-        @Override
-        public String apply(String name) {
-            return model.get(name);
-        }
-
-
-        @Override
-        public EntityPlayerMP getSelfPlayer() {
-            return player;
-        }
-    }
-
-
-    public static IPlayerDataModel model(EntityPlayerMP player, String key, String arg){
-        return new SingletonModel(player, key, arg);
-    }
-
-
-    public static IPlayerDataModel model(EntityPlayerMP player, String key1, String arg1, String key2, String arg2){
-        return new Pair2Model(player, key1, arg1, key2, arg2);
-    }
-
-
-    public static IPlayerDataModel model(EntityPlayerMP player, Map<String,String> model){
-        return new WrappedMapModel(player, model);
     }
 }
