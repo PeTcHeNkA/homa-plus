@@ -38,6 +38,14 @@ public class FixedItemList implements Iterable<ItemStack>{
     }
 
 
+    public boolean isAllEmpty(){
+        for (ItemStack stack:items){
+            if(!stack.isEmpty())return false;
+        }
+        return true;
+    }
+
+
     public void fSet(int i, ItemStack stack){
         items[i] = stack == null?ItemStack.EMPTY:stack;
     }

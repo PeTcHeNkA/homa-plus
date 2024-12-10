@@ -135,6 +135,21 @@ public class NBTTagCompound extends NBTBase {
     }
 
 
+    public long editLongMut(String key, long value) {
+        Te4HashMap<String, NBTBase> tagMap;
+        NBTBase prev = (tagMap = this.tagMap).get(key);
+        if(prev != null && prev.getId() == 4){
+            NBTTagLong prevL = (NBTTagLong) prev;
+            long result;
+            prevL.setValue(result = prevL.getLong() + value);
+            return result;
+        } else {
+            tagMap.fput(key, new NBTTagLong(value));
+            return value;
+        }
+    }
+
+
     public void setUniqueId(String key, UUID value) {
         this.setLong(key + "Most", value.getMostSignificantBits());
         this.setLong(key + "Least", value.getLeastSignificantBits());
@@ -182,6 +197,7 @@ public class NBTTagCompound extends NBTBase {
     }
 
 
+    @Nullable
     public NBTBase getTag(String key) {
         return this.tagMap.get(key);
     }

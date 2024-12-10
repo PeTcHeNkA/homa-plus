@@ -10,6 +10,9 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.PlayerAdvancements;
@@ -58,6 +61,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import plus.fserver.ElcaConfig;
 import plus.fserver.api.Keep;
+import plus.fserver.api.offline.OfflinePlayerMPAccess;
 import plus.fserver.event.ElcaConnectEvent;
 import plus.tson.utl.Te4HashSet;
 
@@ -91,6 +95,32 @@ public abstract class PlayerList {
     private GameType gameType;
     private boolean commandsAllowedForAll;
     private int playerPingIndex;
+    private final Map<UUID, ReentrantLock> locks = new HashMap<>();
+
+    public void lock(UUID uuid){
+        Map<UUID, ReentrantLock> locks = this.locks;
+        synchronized (locks) {
+            ReentrantLock lock = locks.get(uuid);
+            if (lock == null) {
+                locks.put(uuid, lock = new ReentrantLock());
+            }
+            lock.lock();
+        }
+    }
+
+
+    public void unlock(UUID uuid){
+        Map<UUID, ReentrantLock> locks = this.locks;
+        synchronized (locks){
+            ReentrantLock lock = locks.get(uuid);
+            if(lock != null) {
+                lock.unlock();
+                if(!lock.hasQueuedThreads())
+                    locks.remove(uuid);
+            }
+        }
+    }
+
 
     public PlayerList(MinecraftServer server) {
         this.bannedPlayers = new UserListBans(FILE_PLAYERBANS);
@@ -103,6 +133,39 @@ public abstract class PlayerList {
         this.bannedPlayers.setLanServer(false);
         this.bannedIPs.setLanServer(false);
         this.maxPlayers = 8;
+    }
+
+
+    public void applyForPlayerSafe(UUID uuid, Consumer<EntityPlayerMP> task, boolean sync, boolean advancements) {
+        EntityPlayerMP player = uuidToPlayerMap.get(uuid);
+        lock(uuid);
+        if (player == null) {
+            OfflinePlayerMPAccess offlinePlayer = OfflinePlayerMPAccess.create(server, uuid);
+            offlinePlayer.load();
+            if (advancements) {
+                offlinePlayer.loadAdvancements();
+            }
+            player = offlinePlayer;
+        }
+
+        if (sync) {
+            EntityPlayerMP finalPlayer = player;
+            player.getServerWorld().addAsyncTask(() -> {
+                try {
+                    task.accept(finalPlayer);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    unlock(uuid);
+                }
+            });
+        } else {
+            try {
+                task.accept(player);
+            } finally {
+                unlock(uuid);
+            }
+        }
     }
 
 
@@ -279,7 +342,11 @@ public abstract class PlayerList {
 
     @Nullable
     public NBTTagCompound readPlayerDataFromFile(EntityPlayerMP player) {
-        return this.playerDataManager.readPlayerData(player);
+        UUID uuid;
+        lock(uuid = player.getUniqueID());
+        NBTTagCompound result = this.playerDataManager.readPlayerData(player);
+        unlock(uuid);
+        return result;
     }
 
 
@@ -297,7 +364,9 @@ public abstract class PlayerList {
     //todo
     public void writePlayerData(EntityPlayerMP playerIn) {
         if (playerIn.connection == null) return;
+        lock(playerIn.getUniqueID());
         this.playerDataManager.writePlayerData(playerIn);
+        unlock(playerIn.getUniqueID());
         StatisticsManagerServer statisticsmanagerserver = this.playerStatFiles.get(playerIn.getUniqueID());
         if (statisticsmanagerserver != null) {
             statisticsmanagerserver.saveStatFile();

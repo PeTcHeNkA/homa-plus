@@ -1,6 +1,7 @@
 package plus.fserver.api.placeholders;
 
 import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagString;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.MathHelper;
@@ -41,7 +42,9 @@ public class PlayerVarProvider extends TreeVarProvider<IPlayerDataModel,PlayerVa
                 .add("tag", (Function<Args, IVarGetter<IPlayerDataModel>>) args -> {
                     String arg = args.allLast();
                     return playerMP -> {
-                        NBTBase tag = playerMP.getSelfPlayer().getEntityData().getTag(arg);
+                        NBTTagCompound data = playerMP.getSelfPlayer().getEntityDataRaw();
+                        if(data == null)return "null";
+                        NBTBase tag = data.getTag(arg);
                         if(tag.getId() == 8)return ((NBTTagString)tag).getString();
                         return tag.toString();
                     };

@@ -897,7 +897,7 @@ public final class ItemStack implements ICapabilitySerializable<NBTTagCompound> 
 
 
     @Nullable
-    private NBTTagCompound getCapsNbt(){
+    public NBTTagCompound getCapsNbt(){
         CapabilityDispatcher caps = this.capabilities;
         if(caps == EMPTY_CAPS)return this.capNBT;
         if(caps == null)return null;

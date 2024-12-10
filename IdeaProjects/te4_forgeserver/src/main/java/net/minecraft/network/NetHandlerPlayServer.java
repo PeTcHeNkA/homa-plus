@@ -1092,7 +1092,7 @@ public class NetHandlerPlayServer implements INetHandlerPlayServer, ITickable {
             double dist = lPlayer.getEntityAttribute(EntityPlayer.REACH_DISTANCE).getAttributeValue() + 3;
             dist *= dist;
             if (targetPos == null && lPlayer.getDistanceSq(blockpos.getX() + 0.5, blockpos.getY() + 0.5, blockpos.getZ() + 0.5) < dist &&
-                    !worldserver.isBlockModifiable(lPlayer, blockpos)) {
+                    worldserver.isBlockModifiable(lPlayer, blockpos)) {
 
                 final BlockPos blockPos2 = blockpos.offset(packetIn.getDirection());
 

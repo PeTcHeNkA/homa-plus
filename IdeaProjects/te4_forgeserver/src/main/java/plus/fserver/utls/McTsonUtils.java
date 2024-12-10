@@ -12,9 +12,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameType;
 import net.minecraft.world.biome.Biome;
-import plus.tson.TsonList;
-import plus.tson.TsonMap;
-import plus.tson.TsonObj;
+import plus.tson.*;
 import plus.tson.security.ClassManager;
 
 import java.util.function.BiConsumer;
@@ -92,19 +90,26 @@ public class McTsonUtils {
     }
 
 
-    public static ItemStack itemStackOfTson(TsonMap obj){
-        Item item = itemOfTson(obj.get("id"));
-        if(item == Items.AIR)return ItemStack.EMPTY;
-        int count = obj.getOrDefaultInt("count", 1);
-        if(count == 0)return ItemStack.EMPTY;
-        int damage = obj.getOrDefaultInt("damage",0);
-        NBTBase caps = nbtOfTson(obj.get("ForgeCaps"));
-        NBTBase tag  = nbtOfTson(obj.get("tag"));
+    public static ItemStack itemStackOfTson(TsonObj obj){
+        if(obj.isMap()) {
+            TsonMap map = obj.getMap();
+            Item item = itemOfTson(map.get("id"));
+            if (item == Items.AIR) return ItemStack.EMPTY;
+            int count = map.getOrDefaultInt("count", 1);
+            if (count == 0) return ItemStack.EMPTY;
+            int damage = map.getOrDefaultInt("damage", 0);
+            NBTBase caps = nbtOfTson(map.get("ForgeCaps"));
+            NBTBase tag = nbtOfTson(map.get("tag"));
 
-        ItemStack stack = new ItemStack(item, count, damage, (NBTTagCompound) caps);
-        if(tag != null) stack.setTagCompound((NBTTagCompound) tag);
-        if(damage != 0) stack.setItemDamage(damage);
-        return stack;
+            ItemStack stack = new ItemStack(item, count, damage, (NBTTagCompound) caps);
+            if (tag != null) stack.setTagCompound((NBTTagCompound) tag);
+            if (damage != 0) stack.setItemDamage(damage);
+            return stack;
+        } else if (obj.isString() || obj.isNumber()) {
+            Item item = itemOfTson(obj);
+            return new ItemStack(item);
+        }
+        throw new IllegalArgumentException("Unsupported type: "+obj);
     }
 
 
@@ -139,6 +144,90 @@ public class McTsonUtils {
             }
         }
         throw new IllegalArgumentException("Invalid type: "+obj);
+    }
+
+
+    public static TsonObj nbtToTson(NBTBase nbt){
+        if(nbt == null)return null;
+        switch (nbt.getId()){
+            case 0:
+                return null;
+            case 1:
+                return new TsonInt(((NBTPrimitive)nbt).getByte());
+            case 2:
+                return new TsonInt(((NBTPrimitive)nbt).getShort());
+            case 3:
+                return new TsonInt(((NBTPrimitive)nbt).getInt());
+            case 4:
+                return new TsonLong(((NBTPrimitive)nbt).getLong()); //new NBTTagLong();
+            case 5:
+                return new TsonFloat(((NBTPrimitive)nbt).getFloat());//new NBTTagFloat();
+            case 6:
+                return new TsonDouble(((NBTPrimitive)nbt).getFloat());//new NBTTagDouble();
+            case 8:
+                return new TsonStr(((NBTTagString)nbt).getString());
+            case 9:{
+                //return new NBTTagList();
+                NBTTagList list = (NBTTagList) nbt;
+                TsonList tList = new TsonList();
+                for (int i = 0; i < list.tagCount(); i++){
+                    TsonObj add = nbtToTson(list.get(i));
+                    if(add != null) tList.add(add);
+                }
+                return tList;
+            }
+            case 10:{
+                //return new NBTTagCompound();
+                NBTTagCompound map = (NBTTagCompound) nbt;
+                TsonMap tMap = new TsonMap();
+                for (String key:map.getKeySet()){
+                    TsonObj add = nbtToTson(map.getTag(key));
+                    if(add != null)tMap.fput(key, add);
+                }
+                return tMap;
+            }
+            default:
+                return null;
+        }
+    }
+
+
+    public static TsonObj itemStackToTson(ItemStack stack){
+        int count = stack.getCount();
+        if(count < 1)return new TsonStr("air");
+        int dmg = stack.getItemDamage();
+
+        TsonObj id = itemToTson(stack.getItem());
+
+        TsonObj forgeCaps = nbtToTson(stack.getCapsNbt());
+        TsonObj nbt       = nbtToTson(stack.getTagCompound());
+
+        if(dmg == 0 && count == 1 && forgeCaps == null && nbt == null){
+            return id;
+        }
+
+        TsonMap map = new TsonMap();
+        map.fput("id", id);
+        if(dmg != 0)map.put("damage", dmg);
+        if(count != 1)map.put("count", count);
+        if(forgeCaps != null){
+            map.fput("ForgeCaps", forgeCaps);
+        }
+        if(nbt != null){
+            map.fput("tag", nbt);
+        }
+        return map;
+    }
+
+
+    public static TsonObj itemToTson(Item item){
+        ResourceLocation resLoc = Item.REGISTRY.getNameForObject(item);
+        if(resLoc == null)return new TsonStr("air");
+        if(resLoc.getNamespace().equals("minecraft")){
+            return new TsonStr(resLoc.getPath());
+        } else {
+            return new TsonStr(resLoc.toString());
+        }
     }
 
 

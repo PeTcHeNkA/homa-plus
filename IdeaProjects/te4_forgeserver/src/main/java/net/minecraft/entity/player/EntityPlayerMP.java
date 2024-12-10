@@ -33,6 +33,7 @@ import net.minecraft.item.ItemMapBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
@@ -96,7 +97,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener, 
     public double managedPosZ;
     //private final List<Integer> entityRemoveQueue = new LinkedList<>();
     private final Int1LinkedList entityRemoveQueue = new Int1LinkedList();
-    private final PlayerAdvancements advancements;
+    private PlayerAdvancements advancements;
     private final StatisticsManagerServer statsFile;
     private float lastHealthScore = Float.MIN_VALUE;
     private int lastFoodScore = Integer.MIN_VALUE;
@@ -150,13 +151,18 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener, 
 
         this.server = server;
         this.statsFile = server.getPlayerList().getPlayerStatsFile(this);
-        this.advancements = server.getPlayerList().getPlayerAdvancements(this);
+        loadAdvancementsOnInit();
         this.stepHeight = 1.0F;
         this.moveToBlockPosAndAngles(blockpos, 0.0F, 0.0F);
 
         while (!worldIn.getCollisionBoxes(this, this.getEntityBoundingBox()).isEmpty() && this.posY < 255.0D) {
             this.setPosition(this.posX, this.posY + 1.0D, this.posZ);
         }
+    }
+
+
+    protected void loadAdvancementsOnInit(){
+        this.advancements = server.getPlayerList().getPlayerAdvancements(this);
     }
 
 
@@ -751,7 +757,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener, 
 
     public void displayGui(IInteractionObject guiOwner) {
         if (guiOwner instanceof ILootContainer && ((ILootContainer)guiOwner).getLootTable() != null && this.isSpectator()) {
-            this.sendStatusMessage((new TextComponentTranslation("container.spectatorCantOpen", new Object[0])).setStyle((new Style()).setColor(TextFormatting.RED)), true);
+            this.sendStatusMessage((new TextComponentTranslation("container.spectatorCantOpen")).setStyle((new Style()).setColor(TextFormatting.RED)), true);
         } else {
             this.getNextWindowId();
             this.connection.netManager.sendPacketE(new SPacketOpenWindow(this.currentWindowId, guiOwner.getGuiID(), guiOwner.getDisplayName()));
@@ -765,7 +771,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener, 
 
     public void displayGUIChest(IInventory chestInventory) {
         if (chestInventory instanceof ILootContainer && ((ILootContainer)chestInventory).getLootTable() != null && this.isSpectator()) {
-            this.sendStatusMessage((new TextComponentTranslation("container.spectatorCantOpen", new Object[0])).setStyle((new Style()).setColor(TextFormatting.RED)), true);
+            this.sendStatusMessage((new TextComponentTranslation("container.spectatorCantOpen")).setStyle((new Style()).setColor(TextFormatting.RED)), true);
         } else {
             if (this.openContainer != this.inventoryContainer) {
                 this.closeScreen();
@@ -1049,8 +1055,8 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener, 
 
         //Copy over a section of the Entity Data from the old player.
         //Allows mods to specify data that persists after players respawn.
-        NBTTagCompound old = that.getEntityData();
-        if (old.hasKey(PERSISTED_NBT_TAG)) {
+        NBTTagCompound old = that.getEntityDataRaw();
+        if (old != null && old.hasKey(PERSISTED_NBT_TAG)) {
             getEntityData().setTag(PERSISTED_NBT_TAG, old.getCompoundTag(PERSISTED_NBT_TAG));
         }
         ForgeEventFactory.onPlayerClone(this, that, !keepEverything);
@@ -1356,6 +1362,28 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener, 
                 }
             }
         }
+    }
+
+
+    public NBTTagCompound getPersisted(){
+        NBTTagCompound raw = getEntityData();
+        NBTBase nbt = raw.getTag(PERSISTED_NBT_TAG);
+        if(nbt == null){
+            NBTTagCompound res = new NBTTagCompound(4);
+            raw.setTag(PERSISTED_NBT_TAG, raw);
+            return res;
+        }
+        return (NBTTagCompound) nbt;
+    }
+
+
+    @Nullable
+    public NBTTagCompound getPersistedRaw(){
+        NBTTagCompound raw = getEntityDataRaw();
+        if(raw == null)return null;
+        NBTBase nbt = raw.getTag(PERSISTED_NBT_TAG);
+        if(nbt == null) return null;
+        return (NBTTagCompound) nbt;
     }
 
 

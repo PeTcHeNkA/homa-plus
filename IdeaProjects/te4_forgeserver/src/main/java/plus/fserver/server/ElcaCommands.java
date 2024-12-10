@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockChest;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.NumberInvalidException;
@@ -14,9 +16,12 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkSystem;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerChunkMapEntry;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.ClassInheritanceMultiMap;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.DimensionType;
@@ -36,6 +41,7 @@ import plus.fserver.ElcaConfig;
 import plus.fserver.api.ChatPacketBuilder;
 import plus.fserver.api.ServerCommand;
 import plus.fserver.api.WorldConstructor;
+import plus.fserver.api.vanillagui.ChestGuiTemplate;
 import plus.fserver.plugin.SSPatchLoader;
 import plus.fserver.server.network.packet.SRawPacketPlayerListHeaderFooter;
 import plus.fserver.utls.EntityLodFunc;
@@ -44,8 +50,7 @@ import plus.fserver.utls.collections.ArrayListEV;
 import plus.fserver.world.addon.DumpChunkLoader;
 import plus.fserver.world.addon.EmptyConstructor;
 import plus.fserver.world.addon.MemoryWorld;
-import plus.tson.TsonFile;
-import plus.tson.TsonMap;
+import plus.tson.*;
 import plus.tson.utl.ByteStrBuilder;
 import plus.tson.utl.Te4HashSet;
 import java.io.File;
@@ -64,7 +69,7 @@ public class ElcaCommands extends ServerCommand {
     private static final String normal   = "&a";
 
     private final List<String> completions = ImmutableList.copyOf(
-        new String[]{"version", "info", "tps", "mobs", "spawn", "hotpoints", "send", "setvar", "save", "world"}
+        new String[]{"version", "info", "tps", "mobs", "spawn", "hotpoints", "send", "setvar", "save", "world", "cgui"}
     );
     private final List<String> allVars = ImmutableList.copyOf(new String[]{
             "time-packet-rate"            , "mean-balance-mob"            ,
@@ -160,6 +165,48 @@ public class ElcaCommands extends ServerCommand {
                     case "loadvr":
                         loadVr(server, sender, args);return;
                 }
+            }
+            case "cgui":{
+                cGui(server, sender, args);
+            }
+        }
+    }
+
+    private void cGui(MinecraftServer server, ICommandSender sender, String[] args) throws NumberInvalidException {
+        String sub = args[1];
+        String id  = args[2];
+        EntityPlayerMP player = (EntityPlayerMP) sender;
+
+        switch (sub){
+            case "make":{
+                BlockPos pos = parseBlockPos(sender, args, 3, true);
+
+                TileEntity te = player.world.getTileEntity(pos);
+
+                if(te == null || !(te instanceof TileEntityChest)){
+                    reply(sender, "Chest in "+pos+" not founded");
+                    return;
+                }
+
+                TsonMap map = ChestGuiTemplate.of((TileEntityChest) te).toTson();
+
+                STsonWriter writer = new STsonWriter(map);
+
+                File file = new File("invs/"+id+".tson");
+
+                TsonFile.createPathIfNeed(file);
+                TsonFile.write(file, writer.toString());
+
+                reply(sender, "Success!");
+                return;
+            }
+            case "open":{
+                String data = TsonFile.read("invs/"+id+".tson");
+                STsonParser parser = new STsonParser(data);
+
+                player.displayGUIChest(ChestGuiTemplate.of(parser.getMap()).create());
+
+                return;
             }
         }
     }
@@ -679,6 +726,9 @@ public class ElcaCommands extends ServerCommand {
                     String name = sender.getName()+"_w.nbt";
                     int rId = (sender.getName().hashCode()&1023);
                     return Lists.newArrayList("mk empty "+rId+" overworld", "dump "+name+" -16 -16 16 16", "loadvr "+name+" "+rId+" overworld");
+                }
+                case "cgui":{
+                    return Arrays.asList("make example ~ ~-1 ~", "open example");
                 }
             }
         }

@@ -16,6 +16,11 @@ public class NBTTagLong extends NBTPrimitive {
     }
 
 
+    public void setValue(long l){
+        this.data = l;
+    }
+
+
     @Override
     void write(DataOutput output) throws IOException {
         output.writeLong(this.data);
