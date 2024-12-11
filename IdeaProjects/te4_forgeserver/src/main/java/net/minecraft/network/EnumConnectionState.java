@@ -124,10 +124,7 @@ import net.minecraft.network.status.server.SPacketServerInfo;
 import org.apache.logging.log4j.LogManager;
 import plus.fserver.ElcaConfig;
 import plus.fserver.server.Reflector;
-import plus.fserver.server.network.packet.SElcaPacketDestroyEntities;
-import plus.fserver.server.network.packet.SElcaPacketEntityEquipment;
-import plus.fserver.server.network.packet.SRawPacketChat;
-import plus.fserver.server.network.packet.SRawPacketPlayerListHeaderFooter;
+import plus.fserver.server.network.packet.*;
 
 
 public enum EnumConnectionState {
@@ -216,7 +213,10 @@ public enum EnumConnectionState {
         this.registerPacket(EnumPacketDirection.CLIENTBOUND, SPacketUpdateScore.class);
         this.registerPacket(EnumPacketDirection.CLIENTBOUND, SPacketSpawnPosition.class);
         this.registerPacket(EnumPacketDirection.CLIENTBOUND, SPacketTimeUpdate.class);
+
         this.registerPacket(EnumPacketDirection.CLIENTBOUND, SPacketTitle.class);
+        this.registerAlias(EnumPacketDirection.CLIENTBOUND, SPacketTitle.class, SRawPacketTitle.class);
+
         this.registerPacket(EnumPacketDirection.CLIENTBOUND, SPacketSoundEffect.class);
 
         this.registerPacket(EnumPacketDirection.CLIENTBOUND, SPacketPlayerListHeaderFooter.class);

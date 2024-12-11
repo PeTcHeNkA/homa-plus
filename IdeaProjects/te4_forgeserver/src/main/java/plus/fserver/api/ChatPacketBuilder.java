@@ -21,12 +21,12 @@ import java.util.List;
 import java.util.Map;
 
 
-public final class ChatPacketBuilder {
-    private final IVarGetter<IPlayerDataModel> format;
-    private boolean canSendNoPlayer = true;
-    private boolean asyncRender = false;
+public class ChatPacketBuilder implements ITextSender{
+    protected final IVarGetter<IPlayerDataModel> format;
+    protected boolean canSendNoPlayer = true;
+    protected boolean asyncRender = false;
 
-    private ChatPacketBuilder(TextFormatter<IPlayerDataModel> format) {
+    protected ChatPacketBuilder(TextFormatter<IPlayerDataModel> format) {
         this.format = format.simplify();
     }
 
@@ -110,11 +110,13 @@ public final class ChatPacketBuilder {
     }
 
 
+    @Override
     public void send(List<EntityPlayerMP> players){
         send(null, players, true);
     }
 
 
+    @Override
     public void send(IPlayerDataModel model, List<EntityPlayerMP> players){
         send(model, players, true);
     }
@@ -182,6 +184,7 @@ public final class ChatPacketBuilder {
     }
 
 
+    @Override
     public void send(IPlayerDataModel model){
         EntityPlayerMP player = model.getSelfPlayer();
         if(ElcaCV2.LIBBUILD){
@@ -198,6 +201,7 @@ public final class ChatPacketBuilder {
     }
 
 
+    @Override
     public void send(EntityPlayerMP player){
         if(ElcaCV2.LIBBUILD){
             player.connection.sendPacket(build(player));
