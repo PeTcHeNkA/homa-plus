@@ -20,6 +20,11 @@ public class ChestGui implements IInventory, IInteractionObject {
     }
 
 
+    public void open(EntityPlayer player){
+        player.displayGUIChest(this);
+    }
+
+
     public void fillOf(ChestGuiTemplate template){
         FixedItemList items = this.items;
         for (int i = 0, s = template.size(); i < s; i++){

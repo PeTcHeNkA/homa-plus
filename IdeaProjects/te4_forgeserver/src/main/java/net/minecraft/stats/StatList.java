@@ -85,7 +85,7 @@ public class StatList {
     public static StatBase getBlockStats(final Block blockIn) {
         int id = Block.getIdFromBlock(blockIn);
         StatBase[] stats = BLOCKS_STATS;
-        if(id > stats.length)return null;
+        if(id >= stats.length)return null;
         return stats[id];
         //return StatList.BLOCKS_STATS[Block.getIdFromBlock(blockIn)];
     }
@@ -95,7 +95,7 @@ public class StatList {
     public static StatBase getCraftStats(final Item itemIn) {
         int id = Item.getIdFromItem(itemIn);
         StatBase[] stats = CRAFTS_STATS;
-        if(id > stats.length)return null;
+        if(id >= stats.length)return null;
         return stats[id];
         //return StatList.CRAFTS_STATS[Item.getIdFromItem(itemIn)];
     }
@@ -105,7 +105,7 @@ public class StatList {
     public static StatBase getObjectUseStats(final Item itemIn) {
         int id = Item.getIdFromItem(itemIn);
         StatBase[] stats = OBJECT_USE_STATS;
-        if(id > stats.length)return null;
+        if(id >= stats.length)return null;
         return stats[id];
         //return StatList.OBJECT_USE_STATS[Item.getIdFromItem(itemIn)];
     }
@@ -115,7 +115,7 @@ public class StatList {
     public static StatBase getObjectBreakStats(final Item itemIn) {
         int id = Item.getIdFromItem(itemIn);
         StatBase[] stats = OBJECT_BREAK_STATS;
-        if(id > stats.length)return null;
+        if(id >= stats.length)return null;
         return stats[id];
         //return StatList.OBJECT_BREAK_STATS[Item.getIdFromItem(itemIn)];
     }
@@ -125,7 +125,7 @@ public class StatList {
     public static StatBase getObjectsPickedUpStats(final Item itemIn) {
         int id = Item.getIdFromItem(itemIn);
         StatBase[] stats = OBJECTS_PICKED_UP_STATS;
-        if(id > stats.length)return null;
+        if(id >= stats.length)return null;
         return stats[id];
         //return StatList.OBJECTS_PICKED_UP_STATS[Item.getIdFromItem(itemIn)];
     }
@@ -135,7 +135,7 @@ public class StatList {
     public static StatBase getDroppedObjectStats(final Item itemIn) {
         int id = Item.getIdFromItem(itemIn);
         StatBase[] stats = OBJECTS_DROPPED_STATS;
-        if(id > stats.length)return null;
+        if(id >= stats.length)return null;
         return stats[id];
         //return StatList.OBJECTS_DROPPED_STATS[Item.getIdFromItem(itemIn)];
     }

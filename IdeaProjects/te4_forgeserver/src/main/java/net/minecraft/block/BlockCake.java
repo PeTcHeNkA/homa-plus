@@ -85,6 +85,9 @@ public class BlockCake extends BlockFx {
 
     @Override
     public boolean canPlaceBlockAt(World world, BlockPos pos) {
+        if(world.isRemote){
+            return super.canPlaceBlockAtAsy(world, pos) && this.canBlockStay(world, pos);
+        }
         ElcaThread.Cache cache = ElcaThread.cache();
         return super.canPlaceBlockAtAsy(cache, pos) && this.canBlockStay(cache, pos);
     }

@@ -2083,7 +2083,11 @@ public abstract class EntityPlayer extends EntityLivingBase {
 
     @SideOnly(Side.CLIENT)
     public boolean isWearing(EnumPlayerModelParts part) {
-        return (this.getDataManager().get(PLAYER_MODEL_FLAG) & part.getPartMask()) == part.getPartMask();
+        try {
+            return (this.getDataManager().get(PLAYER_MODEL_FLAG) & part.getPartMask()) == part.getPartMask();
+        } catch (Throwable e){
+            return false;
+        }
     }
 
 
