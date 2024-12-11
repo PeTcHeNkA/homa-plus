@@ -24,7 +24,15 @@ public class SmartChestGuiTemplate extends ChestGuiTemplate{
 
             for (TsonObj obj : lActs) {
                 TsonMap map1 = obj.getMap();
-                slotFunctions.put(map1.getInt("slot"), map1.getFunc("func"));
+                TsonFunc func = map1.getFunc("func");
+                if(map1.containsKey("slots")){
+                    TsonList list = map1.getList("slots");
+                    for (TsonObj obj1:list){
+                        slotFunctions.put(obj1.getInt(), func);
+                    }
+                } else {
+                    slotFunctions.put(map1.getInt("slot"), func);
+                }
             }
         }
 
@@ -36,7 +44,7 @@ public class SmartChestGuiTemplate extends ChestGuiTemplate{
 
     @Override
     public ChestGui create(){
-        SmartChestGui chest = new SmartChestGui(rows());
+        SmartChestGui chest = new SmartChestGui(size());
         chest.fillOf(this);
         chest.setCustomName(getCustomName());
         chest.setFunctions(functions());

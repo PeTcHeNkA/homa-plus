@@ -400,6 +400,7 @@ net.minecraft.entity.projectile.EntityFishHook$State
 net.minecraft.entity.projectile.EntityFishHook
 net.minecraft.entity.projectile.EntityThrowable
 net.minecraft.inventory.Container
+net.minecraft.inventory.ContainerHopper
 net.minecraft.inventory.EntityEquipmentSlot$Type
 net.minecraft.inventory.EntityEquipmentSlot
 net.minecraft.inventory.InventoryCrafting
@@ -595,6 +596,7 @@ net.minecraft.pathfinding.WalkNodeProcessor, false, false
 net.minecraft.potion.Potion
 net.minecraft.scoreboard.Scoreboard, false, false
 net.minecraft.scoreboard.ScoreboardSaveData, false, false
+net.minecraft.scoreboard.ScorePlayerTeam, false, false
 net.minecraft.server.dedicated.DedicatedServer$1
 net.minecraft.server.dedicated.DedicatedServer
 net.minecraft.server.integrated.IntegratedServer
@@ -895,6 +897,7 @@ net.minecraftforge.common.ForgeHooks, true
 net.minecraftforge.common.ForgeModContainer, true
 net.minecraftforge.common.util.CompoundDataFixer$1, true
 net.minecraftforge.common.util.CompoundDataFixer, true
+net.minecraftforge.common.util.ITeleporter, true
 net.minecraftforge.event.entity.EntityEvent$CanUpdate, true
 net.minecraftforge.event.entity.EntityEvent$EnteringChunk, true
 net.minecraftforge.event.entity.EntityEvent$EntityConstructing, true
@@ -902,6 +905,7 @@ net.minecraftforge.event.entity.EntityEvent, true
 net.minecraftforge.event.entity.EntityJoinWorldEvent, true
 net.minecraftforge.event.entity.living.LivingAttackEvent, true
 net.minecraftforge.event.entity.living.LivingDamageEvent, true
+net.minecraftforge.event.entity.living.LivingDeathEvent, true
 net.minecraftforge.event.entity.living.LivingEvent$LivingJumpEvent, true
 net.minecraftforge.event.entity.living.LivingEvent$LivingUpdateEvent, true
 net.minecraftforge.event.entity.living.LivingEvent, true

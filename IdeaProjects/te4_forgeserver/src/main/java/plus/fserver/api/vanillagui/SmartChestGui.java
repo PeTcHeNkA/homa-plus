@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ClickType;
+import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 import plus.tson.TsonFunc;
 
@@ -12,8 +13,8 @@ public class SmartChestGui extends ChestGui{
     private Int2ObjectMap<TsonFunc> slotFunctions = Int2ObjectMaps.emptyMap();
     private TsonFunc onClose;
 
-    public SmartChestGui(int rows) {
-        super(rows);
+    public SmartChestGui(int size) {
+        super(size);
     }
 
 
@@ -34,9 +35,25 @@ public class SmartChestGui extends ChestGui{
 
 
     @Override
-    public ItemStack onClick(VrContainer container, int slotId, int dragType, ClickType clickTypeIn, EntityPlayer player) {
+    public ItemStack onClick(Container cont, int slotId, int dType, ClickType cType, EntityPlayer player) {
         TsonFunc func = slotFunctions.get(slotId);
         if(func == null)return null;
-        return (ItemStack)func.call(container, slotId, dragType, clickTypeIn, player);
+        ItemStack result;
+        if(func.countArgs() == 1){
+            result = ChestGui.canselAll(cont, slotId, dType, cType, player);
+            try {
+                func.call(player);
+            } catch (Throwable e){
+                e.printStackTrace();
+            }
+            return result;
+        }
+        try {
+            result = (ItemStack)func.call(cont, slotId, dType, cType, player);
+        } catch (Throwable e){
+            e.printStackTrace();
+            result = ChestGui.canselAll(cont, slotId, dType, cType, player);
+        }
+        return result;
     }
 }

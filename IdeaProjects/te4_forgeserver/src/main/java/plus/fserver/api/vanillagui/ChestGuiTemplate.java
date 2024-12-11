@@ -76,7 +76,7 @@ public class ChestGuiTemplate {
             TsonObj sizeR = map.get("size");
             if(sizeR.isNumber()) {
                 size = sizeR.getInt();
-                if (size % 9 != 0)
+                if (size % 9 != 0 && size != 5)
                     throw new IllegalArgumentException();
             }
         } else if(map.containsKey("rows")){
@@ -109,9 +109,11 @@ public class ChestGuiTemplate {
             }
 
             size = maxSlot;
-            int delta = maxSlot % 9;
-            if(delta != 0){
-                size = size - delta + 9;
+            if(size != 5) {
+                int delta = maxSlot % 9;
+                if (delta != 0) {
+                    size = size - delta + 9;
+                }
             }
         }
 
@@ -145,7 +147,7 @@ public class ChestGuiTemplate {
 
 
     public ChestGui create(){
-        ChestGui chest = new ChestGui(rows());
+        ChestGui chest = new ChestGui(size());
         chest.fillOf(this);
         chest.setCustomName(getCustomName());
         return chest;

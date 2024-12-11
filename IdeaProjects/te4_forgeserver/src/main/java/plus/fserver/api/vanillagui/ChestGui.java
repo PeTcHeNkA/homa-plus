@@ -15,8 +15,8 @@ public class ChestGui implements IInventory, IInteractionObject {
     private final FixedItemList items;
     private String customName;
 
-    public ChestGui(int rows) {
-        this.items = new FixedItemList(rows*9);
+    public ChestGui(int size) {
+        this.items = new FixedItemList(size);
     }
 
 
@@ -128,12 +128,14 @@ public class ChestGui implements IInventory, IInteractionObject {
 
     @Override
     public Container createContainer(InventoryPlayer invPlayer, EntityPlayer player) {
-        return new VrContainer(invPlayer, this, player);
+        if(items.size() == 5)return new VrContainerHopper(invPlayer, this, player);
+        return new VrContainerChest(invPlayer, this, player);
     }
 
 
     @Override
     public String getGuiID() {
+        if(items.size() == 5)return "minecraft:hopper";
         return "minecraft:container";
     }
 
@@ -155,31 +157,21 @@ public class ChestGui implements IInventory, IInteractionObject {
     }
 
 
-    public ItemStack onClick(VrContainer container, int slotId, int dragType, ClickType clickTypeIn, EntityPlayer player){
+    public ItemStack onClick(Container container, int slotId, int dragType, ClickType clickTypeIn, EntityPlayer player){
         return null;
     }
 
 
-    public class VrContainer extends ContainerChest {
-        private final ChestGui gui;
-        public VrContainer(IInventory plInv, ChestGui inv, EntityPlayer player) {
-            super(plInv, inv, player);
-            this.gui = inv;
+    private class VrContainerHopper extends ContainerHopper{
+        public VrContainerHopper(InventoryPlayer plInv, IInventory hopperInv, EntityPlayer player) {
+            super(plInv, hopperInv, player);
         }
-
-        public ChestGui gui(){
-            return gui;
-        }
-
-
         @Override
         public ItemStack slotClick(int slotId, int dragType, ClickType clickTypeIn, EntityPlayer player) {
             ItemStack result = onClick(this, slotId, dragType, clickTypeIn, player);
             if(result != null)return result;
             return super.slotClick(slotId, dragType, clickTypeIn, player);
         }
-
-
         @Override
         public boolean canInteractWith(EntityPlayer playerIn) {
             return true;
@@ -187,7 +179,24 @@ public class ChestGui implements IInventory, IInteractionObject {
     }
 
 
-    public static ItemStack canselAll(VrContainer cont, Integer slotId, Integer dType, ClickType cType, EntityPlayer player){
+    private class VrContainerChest extends ContainerChest {
+        public VrContainerChest(IInventory plInv, ChestGui inv, EntityPlayer player) {
+            super(plInv, inv, player);
+        }
+        @Override
+        public ItemStack slotClick(int slotId, int dragType, ClickType clickTypeIn, EntityPlayer player) {
+            ItemStack result = onClick(this, slotId, dragType, clickTypeIn, player);
+            if(result != null)return result;
+            return super.slotClick(slotId, dragType, clickTypeIn, player);
+        }
+        @Override
+        public boolean canInteractWith(EntityPlayer playerIn) {
+            return true;
+        }
+    }
+
+
+    public static ItemStack canselAll(Container cont, Integer slotId, Integer dType, ClickType cType, EntityPlayer player){
         if(cType == ClickType.PICKUP || cType == ClickType.PICKUP_ALL)
             return player.inventory.getItemStack();
         if(slotId < 0)return null;
@@ -196,13 +205,23 @@ public class ChestGui implements IInventory, IInteractionObject {
     }
 
 
-    public static ItemStack canselAllSmart(VrContainer cont, Integer slotId, Integer dType, ClickType cType, EntityPlayer player){
+    public static ItemStack canselAllSmart(Container cont, Integer slotId, Integer dType, ClickType cType, EntityPlayer player){
         if(slotId < 0)return null;
         if(slotId >= cont.inventorySlots.size())return null;
 
         Slot slot = cont.getSlot(slotId);
-        if(slot.inventory == cont.gui()){
-            if(cType == ClickType.PICKUP || cType == ClickType.PICKUP_ALL) {
+        IInventory other = null;
+
+        if(cont instanceof ContainerChest) {
+            ContainerChest cs = (ContainerChest) cont;
+            other = cs.getLowerChestInventory();
+        } else if (cont instanceof ContainerHopper) {
+            ContainerHopper hopper = (ContainerHopper) cont;
+            other = hopper.getHopperInventory();
+        }
+
+        if (other == null || slot.inventory == other) {
+            if (cType == ClickType.PICKUP || cType == ClickType.PICKUP_ALL) {
                 return player.inventory.getItemStack();
             }
             return slot.getStack();

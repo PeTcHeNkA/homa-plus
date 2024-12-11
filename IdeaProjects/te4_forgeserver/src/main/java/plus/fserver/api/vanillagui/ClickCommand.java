@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.ClickType;
+import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import plus.fserver.api.IPlayerDataModel;
@@ -39,11 +40,11 @@ public class ClickCommand implements TsonFunc {
 
     @Override
     public Object call(Object... args) {
-        return run((ChestGui.VrContainer) args[0], (Integer) args[1], (Integer) args[2], (ClickType) args[3], (EntityPlayer) args[4]);
+        return run((Container) args[0], (Integer) args[1], (Integer) args[2], (ClickType) args[3], (EntityPlayer) args[4]);
     }
 
 
-    public ItemStack run(ChestGui.VrContainer cont, Integer slotId, Integer dType, ClickType cType, EntityPlayer player){
+    public ItemStack run(Container cont, Integer slotId, Integer dType, ClickType cType, EntityPlayer player){
         ItemStack result = ChestGui.canselAll(cont, slotId, dType, cType, player);
         try {
             String msg;
