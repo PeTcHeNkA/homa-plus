@@ -259,7 +259,7 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     private int nextEntityID = 0;
     private int maxEntityId  = 0x7FFFFFF0;
 
-    public int nextEntityId(){
+    public synchronized int nextEntityId(){
         l1: if(nextEntityID == maxEntityId){
             int maxId = 0;
             int minId = Integer.MAX_VALUE;

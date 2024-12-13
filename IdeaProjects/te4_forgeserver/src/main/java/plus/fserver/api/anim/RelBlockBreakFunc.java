@@ -5,7 +5,6 @@ import net.minecraft.util.math.MathHelper;
 import plus.tson.TsonList;
 
 
-//plus.fserver.api.anim.RelBlockBreakFunc
 public class RelBlockBreakFunc implements IRelativeFunc {
     private final CameraAnimEngine.BlockEditEntry[] entries;
 

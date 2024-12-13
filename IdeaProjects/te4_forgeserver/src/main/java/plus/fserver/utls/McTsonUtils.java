@@ -10,6 +10,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.*;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameType;
 import net.minecraft.world.biome.Biome;
@@ -322,8 +323,17 @@ public class McTsonUtils {
 
 
     public static EnumParticleTypes particleTypeOf(TsonObj obj){
+        if(obj == null)return EnumParticleTypes.EXPLOSION_NORMAL;
         if(obj.isString())return EnumParticleTypes.getByName(obj.getStr());
         if(obj.isNumber())return EnumParticleTypes.getParticleFromId(obj.getInt());
+        throw new IllegalArgumentException("Invalid type: "+obj);
+    }
+
+
+    public static SoundCategory soundCatOf(TsonObj obj){
+        if(obj == null)return SoundCategory.AMBIENT;
+        if(obj.isString()) return SoundCategory.getByName(obj.getStr());
+        if(obj.isNumber()) return SoundCategory.values()[obj.getInt()];
         throw new IllegalArgumentException("Invalid type: "+obj);
     }
 }

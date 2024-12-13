@@ -47,7 +47,7 @@ public class ParticlesFunc implements IRelativeFunc{
     public void call(double x, double y, double z, EntityPlayerMP player) {
         player.connection.netManager.sendPacketE(new SPacketParticles(
                 particleType, longDistance,
-                (float) (xCoord+z), (float) (yCoord+y), (float) (zCoord+z),
+                (float) (xCoord+x), (float) (yCoord+y), (float) (zCoord+z),
                 xOffset, yOffset, zOffset, particleSpeed, particleCount,
                 particleArguments
         ));

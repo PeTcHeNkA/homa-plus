@@ -1,15 +1,21 @@
 package plus.fserver.api.anim;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityTracker;
+import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.network.play.server.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Rotations;
 import net.minecraft.world.WorldServer;
 import plus.fserver.server.network.packet.SNodePacketPlayBase;
 import plus.fserver.utls.McTsonUtils;
@@ -30,11 +36,33 @@ import static plus.tson.ext.TsonAccessUtils.*;
 
 
 public class CameraAnimEngine {
-    protected static SPacketEntityMetadata createInvisible(int id){
+    public static SPacketEntityMetadata createInvisible(int id){
         List<EntityDataManager.DataEntry<?>> inv = Collections.singletonList(
                     new EntityDataManager.DataEntry<>(EntityPlayerMP.FLAGS, (byte)32)
             );
         return new SPacketEntityMetadata(id, inv);
+    }
+
+
+    public static SPacketEntityMetadata createName(int id, String name){
+        List<EntityDataManager.DataEntry<?>> inv = Lists.newArrayList(
+                new EntityDataManager.DataEntry<>(EntityPlayerMP.CUSTOM_NAME, name),
+                new EntityDataManager.DataEntry<>(EntityPlayerMP.CUSTOM_NAME_VISIBLE, true)
+        );
+        return new SPacketEntityMetadata(id, inv);
+    }
+
+
+    public static SPacketEntityMetadata rotateHead(int id, float x, float y, float z){
+        List<EntityDataManager.DataEntry<?>> inv = Collections.singletonList(
+                new EntityDataManager.DataEntry<>(EntityArmorStand.HEAD_ROTATION, new Rotations(x,y,z))
+        );
+        return new SPacketEntityMetadata(id, inv);
+    }
+
+
+    public static SPacketEntityEquipment createHeadEquip(int id, ItemStack stack){
+        return new SPacketEntityEquipment(id, EntityEquipmentSlot.HEAD, stack);
     }
 
 
@@ -143,7 +171,12 @@ public class CameraAnimEngine {
             kPoints[i] = cur = new KeyPoint(last, points.getMap(i));
             last = cur;
         }
-        return new Animation(name, kPoints, calc(map, "relative", false));
+        Animation anim = new Animation(name, kPoints, calc(map, "relative", false));
+
+        if(map.containsKey("head")){
+            anim.setHead(McTsonUtils.itemStackOfTson(map.get("head")));
+        }
+        return anim;
     }
 
 
@@ -175,7 +208,7 @@ public class CameraAnimEngine {
                             sendDestroy = player.world == world;
                         }
                         if(sendDestroy){
-                            anim.camera.destroy(player);
+                            anim.camera.destroyCamera(player);
                         }
                     }
                     future.cancel(false);
@@ -217,11 +250,18 @@ public class CameraAnimEngine {
         final String name;
         final KeyPoint[] points;
         final boolean relative;
+        ItemStack head;
 
         public Animation(String name, KeyPoint[] points, boolean relative) {
             this.name = name;
             this.points = points;
             this.relative = relative;
+        }
+
+
+        public void setHead(ItemStack stack){
+            if(stack.isEmpty())return;
+            this.head = stack;
         }
 
 
@@ -254,7 +294,7 @@ public class CameraAnimEngine {
 
     public static class AnimPlayer{
         private final Animation animation;
-        private final Camera camera;
+        private final VrStand camera;
         private KeyPoint current, next;
         private int time = 1;
         private int nextPoint = 1;
@@ -264,8 +304,9 @@ public class CameraAnimEngine {
             this.animation = animation;
             this.current = animation.get(0);
             this.next    = animation.get(1);
-            this.camera  = new Camera(cameraId);
+            this.camera  = new VrStand(cameraId);
         }
+
 
         public AnimPlayer setShift(double x, double y, double z){
             dX = x;
@@ -278,7 +319,10 @@ public class CameraAnimEngine {
         public void setup(EntityPlayerMP player){
             if(current != null) {
                 camera.set(dX, dY, dZ,0,0);
-                camera.setup(player);
+                camera.setupCamera(player);
+                if(animation.head != null){
+                    camera.sendHead(player, animation.head);
+                }
                 runFunc(current.func, dX, dY, dZ, player);
             }
         }
@@ -298,7 +342,7 @@ public class CameraAnimEngine {
         public boolean update(EntityPlayerMP player){
             KeyPoint current, next;
             if((next = this.next) == null || (current = this.current) == null)return false;
-            Camera camera = this.camera;
+            VrStand camera = this.camera;
 
             if(current.updateCamera(camera, time++, next)){
                 this.current = next;
@@ -400,7 +444,7 @@ public class CameraAnimEngine {
         }
 
 
-        public boolean updateCamera(Camera camera, int cTime, KeyPoint next){
+        public boolean updateCamera(VrStand camera, int cTime, KeyPoint next){
             int time = this.time;
             double x, y, z;
             float yaw, pith;
@@ -425,14 +469,14 @@ public class CameraAnimEngine {
     }
 
 
-    public static class Camera{
+    public static class VrStand {
         private double posX, posY, posZ;
         private long prevX, prevY, prevZ;
         private float yaw, pith;
         private final int id;
         private final UUID uuid = UUID.randomUUID();
 
-        public Camera(int id) {
+        public VrStand(int id) {
             this.id = id;
         }
 
@@ -453,20 +497,40 @@ public class CameraAnimEngine {
         }
 
 
-        public void destroy(EntityPlayerMP player){
+        public void destroyCamera(EntityPlayerMP player){
             player.connection.netManager.sendPacketE(
                     new SPacketCamera(player.getEntityId())
             );
+            sendDespawn(player);
+        }
+
+
+        public void rotateHead(EntityPlayerMP player, float x, float y, float z){
+            player.connection.netManager.sendPacketE(CameraAnimEngine.rotateHead(id, x, y, z));
+        }
+
+
+        public void sendHead(EntityPlayerMP player, ItemStack stack){
+            player.connection.netManager.sendPacketE(createHeadEquip(id, stack));
+        }
+
+
+        public void sendName(EntityPlayerMP player, String name){
+            player.connection.netManager.sendPacketE(createName(id, name));
+        }
+
+
+        public void setupCamera(EntityPlayerMP player){
+            sendSpawn(player);
             player.connection.netManager.sendPacketE(
-                    new SPacketDestroyEntities(id)
+                    new SPacketCamera(id)
             );
         }
 
 
-        public void setup(EntityPlayerMP player){
-            sendSpawn(player);
+        public void sendDespawn(EntityPlayerMP player){
             player.connection.netManager.sendPacketE(
-                    new SPacketCamera(id)
+                    new SPacketDestroyEntities(id)
             );
         }
 
