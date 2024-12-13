@@ -8,6 +8,7 @@ import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.*;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameType;
@@ -316,6 +317,13 @@ public class McTsonUtils {
         if(obj.isString()){
             return GameType.getByName(obj.getStr());
         }
+        throw new IllegalArgumentException("Invalid type: "+obj);
+    }
+
+
+    public static EnumParticleTypes particleTypeOf(TsonObj obj){
+        if(obj.isString())return EnumParticleTypes.getByName(obj.getStr());
+        if(obj.isNumber())return EnumParticleTypes.getParticleFromId(obj.getInt());
         throw new IllegalArgumentException("Invalid type: "+obj);
     }
 }

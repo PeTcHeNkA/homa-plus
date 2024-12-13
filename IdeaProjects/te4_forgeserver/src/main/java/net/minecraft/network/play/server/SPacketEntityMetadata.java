@@ -16,6 +16,11 @@ public class SPacketEntityMetadata extends SEntityPacketPlayBase {
 
     public SPacketEntityMetadata() {}
 
+    public SPacketEntityMetadata(int id, List<EntityDataManager.DataEntry<?>> entries){
+        this.entityId = id;
+        this.dataManagerEntries = entries;
+    }
+
     public SPacketEntityMetadata(int id, EntityDataManager manager, boolean all) {
         this.entityId = id;
         if (all) {

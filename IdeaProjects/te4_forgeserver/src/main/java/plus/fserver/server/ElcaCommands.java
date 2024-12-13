@@ -4,8 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockChest;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.NumberInvalidException;
@@ -21,7 +19,6 @@ import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.ClassInheritanceMultiMap;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.DimensionType;
@@ -41,6 +38,7 @@ import plus.fserver.ElcaConfig;
 import plus.fserver.api.ChatPacketBuilder;
 import plus.fserver.api.ServerCommand;
 import plus.fserver.api.WorldConstructor;
+import plus.fserver.api.anim.CameraAnimEngine;
 import plus.fserver.api.vanillagui.ChestGuiTemplate;
 import plus.fserver.plugin.SSPatchLoader;
 import plus.fserver.server.network.packet.SRawPacketPlayerListHeaderFooter;
@@ -69,7 +67,7 @@ public class ElcaCommands extends ServerCommand {
     private static final String normal   = "&a";
 
     private final List<String> completions = ImmutableList.copyOf(
-        new String[]{"version", "info", "tps", "mobs", "spawn", "hotpoints", "send", "setvar", "save", "world", "cgui"}
+        new String[]{"version", "info", "tps", "mobs", "spawn", "hotpoints", "send", "setvar", "save", "world", "cgui", "planim"}
     );
     private final List<String> allVars = ImmutableList.copyOf(new String[]{
             "time-packet-rate"            , "mean-balance-mob"            ,
@@ -167,10 +165,41 @@ public class ElcaCommands extends ServerCommand {
                 }
             }
             case "cgui":{
-                cGui(server, sender, args);
+                cGui(server, sender, args);return;
+            }
+            case "planim":{
+                playAnim(server, sender, args);return;
             }
         }
     }
+
+
+    public void playAnim(MinecraftServer server, ICommandSender sender, String[] args){
+        String name = args[1];
+
+        EntityPlayerMP target;
+
+        if(args.length >= 3){
+            target = server.getPlayerList().getPlayerByUsername(args[2]);
+            if(target == null){
+                reply(sender, "&cPlayer ["+args[2]+"] not founded!");
+                return;
+            }
+        } else {
+            target = (EntityPlayerMP) sender;
+        }
+
+        String data = TsonFile.read("anims/"+name+".tson");
+        data = TsonFile.remBadChars(data);
+        STsonParser parser = new STsonParser(data);
+
+        CameraAnimEngine.Animation anim = CameraAnimEngine.readAnim(parser.getMap());
+        if(anim.getName() != null){
+            reply(target, "&eStart playing anim: "+anim.getName());
+        }
+        anim.forPlayer(target).start();
+    }
+
 
     private void cGui(MinecraftServer server, ICommandSender sender, String[] args) throws NumberInvalidException {
         String sub = args[1];
@@ -202,6 +231,7 @@ public class ElcaCommands extends ServerCommand {
             }
             case "open":{
                 String data = TsonFile.read("invs/"+id+".tson");
+                data = TsonFile.remBadChars(data);
                 STsonParser parser = new STsonParser(data).with(TsonFunc.COMPILER);
 
                 ChestGuiTemplate.of(parser.getMap()).create().open(player);

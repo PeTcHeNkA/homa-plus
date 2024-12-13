@@ -12,10 +12,11 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.api.IBlockEAccess;
 import plus.fserver.server.network.NetUtils;
+import plus.fserver.server.network.packet.SNodePacketPlayBase;
 import plus.fserver.server.network.packet.SPacketPlayBase;
 
 
-public class SPacketBlockChange extends SPacketPlayBase {
+public class SPacketBlockChange extends SNodePacketPlayBase {
     private BlockPos blockPosition;
     public IBlockState blockState;
 
@@ -25,6 +26,12 @@ public class SPacketBlockChange extends SPacketPlayBase {
     public SPacketBlockChange(World worldIn, BlockPos posIn) {
         this.blockPosition = posIn;
         this.blockState = worldIn.access().getBlockState(posIn);
+    }
+
+
+    public SPacketBlockChange(BlockPos pos, IBlockState state) {
+        this.blockPosition = pos;
+        this.blockState = state;
     }
 
 

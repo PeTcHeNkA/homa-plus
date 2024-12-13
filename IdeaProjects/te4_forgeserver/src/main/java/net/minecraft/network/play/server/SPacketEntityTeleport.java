@@ -22,6 +22,17 @@ public class SPacketEntityTeleport extends SEntityPacketPlayBase {
 
     public SPacketEntityTeleport() {}
 
+    public SPacketEntityTeleport(int id, double x, double y, double z, byte yaw, byte pith, boolean onGround){
+        this.entityId = id;
+        this.posX = x;
+        this.posY = y;
+        this.posZ = z;
+        this.yaw = yaw;
+        this.pitch = pith;
+        this.onGround = onGround;
+    }
+
+
     public SPacketEntityTeleport(Entity entity) {
         this.entityId = entity.getEntityId();
         this.posX = entity.posX;

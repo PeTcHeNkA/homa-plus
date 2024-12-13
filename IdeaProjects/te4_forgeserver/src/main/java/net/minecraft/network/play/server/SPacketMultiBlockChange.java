@@ -11,14 +11,22 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.server.network.NetUtils;
+import plus.fserver.server.network.packet.SNodePacketPlayBase;
 import plus.fserver.server.network.packet.SPacketPlayBase;
 
 
-public class SPacketMultiBlockChange extends SPacketPlayBase {
+public class SPacketMultiBlockChange extends SNodePacketPlayBase {
     private int chunkX, chunkZ;
     private BlockUpdateData[] changedBlocks;
 
     public SPacketMultiBlockChange() {}
+
+    public void init(int x, int z, BlockUpdateData[] data){
+        this.chunkX = x;
+        this.chunkZ = z;
+        this.changedBlocks = data;
+    }
+
 
     public SPacketMultiBlockChange(int count, short[] updates, Chunk chunk) {
         this.chunkX = chunk.x;
@@ -87,8 +95,13 @@ public class SPacketMultiBlockChange extends SPacketPlayBase {
     }
 
 
-    private static class BlockUpdateDataBase{
+    public static class BlockUpdateDataBase{
         void setParent(SPacketMultiBlockChange parent){}
+    }
+
+
+    public BlockUpdateData data(short offset, IBlockState state){
+        return new BlockUpdateData(this, offset, state);
     }
 
 

@@ -11,10 +11,10 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.server.network.NetUtils;
-import plus.fserver.server.network.packet.SPacketPlayBase;
+import plus.fserver.server.network.packet.SNodePacketPlayBase;
 
 
-public class SPacketSpawnObject extends SPacketPlayBase {
+public class SPacketSpawnObject extends SNodePacketPlayBase {
     private int entityId;
     private UUID uniqueId;
     private double x;
@@ -30,8 +30,29 @@ public class SPacketSpawnObject extends SPacketPlayBase {
 
     public SPacketSpawnObject() {}
 
-    public SPacketSpawnObject(Entity entity, int p_i46976_2_) {
-        this(entity, p_i46976_2_, 0);
+    public SPacketSpawnObject(Entity entity, int type) {
+        this(entity, type, 0);
+    }
+
+
+    public SPacketSpawnObject(int id, UUID uuid, double x, double y, double z, byte yaw, byte pith, int type, int data) {
+        this.entityId = id;
+        this.uniqueId = uuid;
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.pitch = pith;
+        this.yaw = yaw;
+        this.type = type;
+        this.data = data;
+    }
+
+
+    public SPacketSpawnObject setSpeed(int x, int y, int z){
+        this.speedX = x;
+        this.speedY = y;
+        this.speedZ = z;
+        return this;
     }
 
 

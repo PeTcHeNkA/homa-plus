@@ -517,6 +517,7 @@ net.minecraft.network.play.server.SPacketAnimation
 net.minecraft.network.play.server.SPacketBlockAction
 net.minecraft.network.play.server.SPacketBlockBreakAnim
 net.minecraft.network.play.server.SPacketBlockChange
+net.minecraft.network.play.server.SPacketCamera
 net.minecraft.network.play.server.SPacketChat
 net.minecraft.network.play.server.SPacketChunkData$1
 net.minecraft.network.play.server.SPacketChunkData$Node
@@ -545,7 +546,6 @@ net.minecraft.network.play.server.SPacketHeldItemChange
 net.minecraft.network.play.server.SPacketJoinGame
 net.minecraft.network.play.server.SPacketKeepAlive
 net.minecraft.network.play.server.SPacketMoveVehicle
-net.minecraft.network.play.server.SPacketMultiBlockChange$1
 net.minecraft.network.play.server.SPacketMultiBlockChange$BlockUpdateData
 net.minecraft.network.play.server.SPacketMultiBlockChange$BlockUpdateDataBase
 net.minecraft.network.play.server.SPacketMultiBlockChange
@@ -565,6 +565,8 @@ net.minecraft.network.play.server.SPacketStatistics
 net.minecraft.network.play.server.SPacketTabComplete
 net.minecraft.network.play.server.SPacketTeams
 net.minecraft.network.play.server.SPacketTimeUpdate
+net.minecraft.network.play.server.SPacketTitle$Type
+net.minecraft.network.play.server.SPacketTitle
 net.minecraft.network.play.server.SPacketUnloadChunk
 net.minecraft.network.play.server.SPacketUpdateHealth
 net.minecraft.network.play.server.SPacketWindowItems
