@@ -39,10 +39,12 @@ import plus.fserver.api.ChatPacketBuilder;
 import plus.fserver.api.ServerCommand;
 import plus.fserver.api.WorldConstructor;
 import plus.fserver.api.anim.CameraAnimEngine;
+import plus.fserver.api.inject.VarOnly;
 import plus.fserver.api.vanillagui.ChestGuiTemplate;
 import plus.fserver.plugin.SSPatchLoader;
 import plus.fserver.server.network.packet.SRawPacketPlayerListHeaderFooter;
 import plus.fserver.utls.EntityLodFunc;
+import plus.fserver.utls.ShootRTX;
 import plus.fserver.utls.collections.ArrayListE6;
 import plus.fserver.utls.collections.ArrayListEV;
 import plus.fserver.world.addon.DumpChunkLoader;
@@ -170,7 +172,16 @@ public class ElcaCommands extends ServerCommand {
             case "planim":{
                 playAnim(server, sender, args);return;
             }
+            case "debug":{
+                onDeubgCmd(server, sender, args);return;
+            }
         }
+    }
+
+
+    @VarOnly(var = "SIDE_SERVER", code = true)
+    public void onDeubgCmd(MinecraftServer server, ICommandSender sender, String[] args){
+        ShootRTX.debugShoot(server, sender, args);
     }
 
 
