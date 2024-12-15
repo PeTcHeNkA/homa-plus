@@ -827,7 +827,8 @@ public class ForgeHooks {
     @Nullable
     public static RayTraceResult rayTraceEyes(EntityLivingBase entity, double length) {
         Vec3d startPos = new Vec3d(entity.posX, entity.posY + entity.getEyeHeight(), entity.posZ);
-        Vec3d endPos = startPos.add(new Vec3d(entity.getLookVec().x * length, entity.getLookVec().y * length, entity.getLookVec().z * length));
+        Vec3d lookVec = entity.getLookVec();
+        Vec3d endPos = startPos.add(new Vec3d(lookVec.x * length, lookVec.y * length, lookVec.z * length));
         return entity.world.rayTraceBlocks(startPos, endPos);
     }
 

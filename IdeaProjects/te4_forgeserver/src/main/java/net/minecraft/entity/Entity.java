@@ -1641,6 +1641,11 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
 
     protected final Vec3d getVectorForRotation(float pitch, float yaw) {
+        return getVectorForRotationS(pitch, yaw);
+    }
+
+
+    public static Vec3d getVectorForRotationS(float pitch, float yaw) {
         float f = MathHelper.cos(-yaw * 0.017453292F - (float)Math.PI);
         float f1 = MathHelper.sin(-yaw * 0.017453292F - (float)Math.PI);
         float f2 = -MathHelper.cos(-pitch * 0.017453292F);
