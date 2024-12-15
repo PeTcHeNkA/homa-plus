@@ -44,7 +44,7 @@ import plus.fserver.api.vanillagui.ChestGuiTemplate;
 import plus.fserver.plugin.SSPatchLoader;
 import plus.fserver.server.network.packet.SRawPacketPlayerListHeaderFooter;
 import plus.fserver.utls.EntityLodFunc;
-import plus.fserver.utls.ShootRTX;
+import plus.fserver.api.shoot.ShootRTX;
 import plus.fserver.utls.collections.ArrayListE6;
 import plus.fserver.utls.collections.ArrayListEV;
 import plus.fserver.world.addon.DumpChunkLoader;

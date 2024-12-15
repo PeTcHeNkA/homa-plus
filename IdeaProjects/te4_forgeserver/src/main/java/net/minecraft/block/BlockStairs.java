@@ -95,6 +95,11 @@ public class BlockStairs extends Block {
     }
 
 
+    public IBlockState getParent(){
+        return modelState;
+    }
+
+
     @Override
     public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes, @Nullable Entity entityIn, boolean isActualState) {
         if (!isActualState) {

@@ -1,4 +1,4 @@
-package plus.fserver.utls;
+package plus.fserver.api.shoot;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.command.ICommandSender;
@@ -34,51 +34,11 @@ public class ShootRTX {
     public static void debugShoot(MinecraftServer server, ICommandSender sender, String[] args){
         Entity entity = (Entity) sender;
         //ForgeHooks.rayTraceEyeHitVec()
+        ShootCustom rtx1 = new ShootCustomB()
+                .setParticle(EnumParticleTypes.EXPLOSION_NORMAL, 10, 0)
+                .setMaxTargets(5).setPower(1d, 128d, 10);
 
-        ShootRTX rtx1 = new ShootRTX(){
-            final Te4HashSet<Entity> targets = new Te4HashSet<>();
-            int max = 0;
-
-            @Override
-            public void onInit() {
-                max = 5;
-            }
-            @Override
-            public void onClear() {
-                targets.clear();
-            }
-
-
-            @Override
-            public void onNextPos(ChunkSelector acc, double x, double y, double z) {
-                acc.getWorld().spawnParticle(
-                        EnumParticleTypes.FLAME, x, y, z, 50, 0d, 0d, 0d, 0.05d
-                );
-            }
-
-
-            @Override
-            public boolean onHitBlock(ChunkSelector acc) {
-                acc.setBlockState(pos(), Blocks.NETHERRACK.getDefaultState());
-                return --max < 0;
-            }
-
-
-            @Override
-            public boolean onHitEntities(ChunkSelector acc) {
-                Te4HashSet<Entity> targets = this.targets;
-                boolean hit = false;
-                for (Entity entity:this.entities()){
-                    if(targets.add(entity)){
-                        entity.attackEntityFrom(DamageSource.ON_FIRE, 10);
-                        hit = true;
-                    }
-                }
-                if(hit) return --max < 0;
-                return false;
-            }
-        };
-        rtx1.calc(entity, entity.rotationYaw, entity.rotationPitch, 1d, 64d);
+        rtx1.calc(entity, entity.rotationYaw, entity.rotationPitch);
     }
 
 
@@ -92,7 +52,7 @@ public class ShootRTX {
     }
 
 
-    public ShootRTX calc(@Nullable Entity exclude, ChunkSelector acc, double startX, double startY, double startZ, double stepX, double stepY, double stepZ, double maxDistance){
+    public ShootRTX calc(@Nullable Entity shooter, ChunkSelector acc, double startX, double startY, double startZ, double stepX, double stepY, double stepZ, double maxDistance){
         double maxSq = maxDistance * maxDistance;
         double curX = startX+stepX, curY = startY+stepY, curZ = startZ+stepZ;
 
@@ -124,20 +84,27 @@ public class ShootRTX {
                 chunk = acc.getLoadedE(nx >> 4, nz >> 4);
                 if(chunk == null){
                     hasResult = false;
+                    onComplete();
                     return this;
                 }
                 state = chunk.getBlockState(nx, ny, nz);
                 onNextBlockPos(acc, mut);
             }
 
-            if(getEntities(chunk, aabb, list, exclude)){
+            if(getEntities(chunk, aabb, list, shooter)){
                 hasResult = true;
-                if(onHitEntities(acc)) return this;
+                if(onHitEntities(acc, shooter)) {
+                    onComplete();
+                    return this;
+                }
             }
 
             if(hasBlockCollisions(acc, state, mut, aabb, aabbList)){
                 hasResult = true;
-                if(onHitBlock(acc)) return this;
+                if(onHitBlock(acc, shooter)) {
+                    onComplete();
+                    return this;
+                }
             }
             onNextPos(acc, curX, curY, curZ);
 
@@ -145,6 +112,7 @@ public class ShootRTX {
             aabb.offsetMut(stepX, stepY, stepZ);
         }
         hasResult = false;
+        onComplete();
         return this;
     }
 
@@ -158,13 +126,16 @@ public class ShootRTX {
     public void onNextBlockPos(ChunkSelector acc, BlockPos pos){}
 
 
-    public boolean onHitBlock(ChunkSelector acc){return true;}
+    public boolean onHitBlock(ChunkSelector acc, Entity shooter){return true;}
 
 
-    public boolean onHitEntities(ChunkSelector acc){return true;}
+    public boolean onHitEntities(ChunkSelector acc, Entity shooter){return true;}
 
 
     public void onClear(){}
+
+
+    public void onComplete(){}
 
 
     public BlockPos pos(){

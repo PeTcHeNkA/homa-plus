@@ -42,8 +42,7 @@ public class BlockTNT extends BlockFx {
     public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state) {
         super.onBlockAdded(worldIn, pos, state);
 
-        if (worldIn.isBlockPowered(pos))
-        {
+        if (worldIn.isBlockPowered(pos)) {
             this.onPlayerDestroy(worldIn, pos, state.withProperty(EXPLODE, Boolean.TRUE));
             worldIn.setBlockToAir(pos);
         }
