@@ -5,6 +5,7 @@ import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.EntityFallingBlock;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockIDIndexes;
 import net.minecraft.util.DamageSource;
@@ -32,20 +33,22 @@ public class ShootCustomB extends ShootCustom{
             }
 
             if(block == Blocks.PACKED_ICE){
-                acc.setBlockState(pos, Blocks.ICE.getDefaultState());
+                setBlockSmart(acc, pos, Blocks.ICE.getDefaultState());
                 return (curTargets-=2) < 0;
             }
 
             if(block == Blocks.STONE){
                 if(FastRandom.INST.nextBoolean()){
-                    acc.setBlockState(pos, Blocks.COBBLESTONE.getDefaultState());
+                    setBlockSmart(acc, pos, Blocks.COBBLESTONE.getDefaultState());
                 }
                 return false;
             }
 
             if(block == Blocks.COBBLESTONE){
                 if(FastRandom.INST.nextInt(4)==1){
-                    acc.setBlockState(pos, Blocks.GRAVEL.getDefaultState());
+                    IBlockState state2;
+                    acc.setBlockState(pos, state2 = Blocks.GRAVEL.getDefaultState());
+                    Blocks.GRAVEL.neighborChanged(state2, acc.getWorld(), pos, state2.getBlock(), pos);
                 }
                 return false;
             }
@@ -57,7 +60,7 @@ public class ShootCustomB extends ShootCustom{
 
             if(block == Blocks.PLANKS){
                 IBlockState stairs = chooseRandomStairs(state);
-                acc.setBlockState(pos, stairs);
+                setBlockSmart(acc, pos, stairs);
                 return false;
             }
 
@@ -65,7 +68,7 @@ public class ShootCustomB extends ShootCustom{
                 IBlockState parent = ((BlockStairs) block).getParent();
                 if(parent.getBlock() == Blocks.PLANKS){
                     IBlockState plate = chooseRandomPlate(parent);
-                    acc.setBlockState(pos, plate);
+                    setBlockSmart(acc, pos, plate);
                     break l1;
                 }
             }
@@ -77,6 +80,58 @@ public class ShootCustomB extends ShootCustom{
             return false;
         }
         return --curTargets < 0;
+    }
+
+
+    protected void setBlockSmart(ChunkSelector selector, BlockPos pos, IBlockState state){
+        if(needGravity()) {
+            if(checkGravity(selector, pos, state, maxGravityCascade()))return;
+        }
+        selector.setBlockState(pos, state);
+    }
+
+
+    private boolean checkGravity(ChunkSelector selector, BlockPos pos, IBlockState state, int deep){
+        if(state == BlockIDIndexes.AIR_STATE)return false;
+        WorldServer world = selector.getWorld();
+        if (BlockFalling.canFallThrough(selector.getBlockState(pos.getX(), pos.getY() - 1, pos.getZ()))) {
+            selector.setBlockState(pos, BlockIDIndexes.AIR_STATE);
+            EntityFallingBlock eFalling = new EntityFallingBlock(world, pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, state);
+            eFalling.setIgnoreFirstCheck();
+            world.spawnEntity(eFalling);
+            addMotion(eFalling);
+
+            if(deep > 0) {
+                --deep;
+                BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos(pos.getX(),pos.getY()+1,pos.getZ());
+
+                checkGravity(selector, mut, selector.getState(mut), deep);
+
+                mut.setPosB(pos.getX()-1, pos.getY(), pos.getZ());
+                checkGravity(selector, mut, selector.getState(mut), deep);
+
+                mut.setPosB(pos.getX()+1, pos.getY(), pos.getZ());
+                checkGravity(selector, mut, selector.getState(mut), deep);
+
+                mut.setPosB(pos.getX(), pos.getY(), pos.getZ()-1);
+                checkGravity(selector, mut, selector.getState(mut), deep);
+
+                mut.setPosB(pos.getX(), pos.getY(), pos.getZ()+1);
+                checkGravity(selector, mut, selector.getState(mut), deep);
+            }
+            return true;
+        }
+        return false;
+    }
+
+
+    public int maxGravityCascade(){
+        return 4;
+    }
+
+
+    protected boolean needGravity(){
+        return FastRandom.INST.nextInt(3) == 1;
     }
 
 
@@ -123,12 +178,17 @@ public class ShootCustomB extends ShootCustom{
             int curPow = super.curTargets;
             int max = super.maxTargets;
             if (curPow == max) {
-                AxisAlignedBB aabb = getAABB();
-                entity.motionX += ((aabb.maxX - aabb.minX) * 0.5);
-                entity.motionY += ((aabb.maxY - aabb.minY) * 0.5);
-                entity.motionZ += ((aabb.maxZ - aabb.minZ) * 0.5);
+                addMotion(entity);
             }
         }
         return result;
+    }
+
+
+    protected void addMotion(Entity entity){
+        AxisAlignedBB aabb = getAABB();
+        entity.motionX += ((aabb.maxX - aabb.minX) * 0.5);
+        entity.motionY += ((aabb.maxY - aabb.minY) * 0.5);
+        entity.motionZ += ((aabb.maxZ - aabb.minZ) * 0.5);
     }
 }

@@ -109,6 +109,11 @@ public class EntityFallingBlock extends Entity {
     }
 
 
+    public void setIgnoreFirstCheck(){
+        this.fallTime = 1;
+    }
+
+
     @Override
     public void onUpdate() {
         if (this.fallTile.getMaterial() == Material.AIR) {
@@ -156,7 +161,7 @@ public class EntityFallingBlock extends Entity {
                 }
 
                 if (!this.onGround && !flag2) {
-                    if ((this.fallTime > 100 && !world.isRemote && (pos2.getY() < 1 || pos2.getY() > 256)) || this.fallTime > 600) {
+                    if ((this.fallTime >= 100 && !world.isRemote && (pos2.getY() < 1 || pos2.getY() > 256)) || this.fallTime > 600) {
                         if (this.shouldDropItem && world.getGameRules().doEntityDrops.getBoolean()) {
                             this.entityDropItem(new ItemStack(block, 1, block.damageDropped(this.fallTile)), 0.0f);
                         }

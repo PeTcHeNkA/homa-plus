@@ -35,10 +35,16 @@ public class ShootRTX {
         Entity entity = (Entity) sender;
         //ForgeHooks.rayTraceEyeHitVec()
         ShootCustom rtx1 = new ShootCustomB()
-                .setParticle(EnumParticleTypes.EXPLOSION_NORMAL, 10, 0)
+                .setParticle(EnumParticleTypes.EXPLOSION_NORMAL, 5, 0)
                 .setMaxTargets(5).setPower(1d, 128d, 10);
 
-        rtx1.calc(entity, entity.rotationYaw, entity.rotationPitch);
+        rtx1.calc(entity, entity.rotationYaw-5, entity.rotationPitch-5);
+        rtx1.calc(entity, entity.rotationYaw-5, entity.rotationPitch+5);
+
+        rtx1.setParticle(EnumParticleTypes.EXPLOSION_LARGE, 5, 0);
+
+        rtx1.calc(entity, entity.rotationYaw+5, entity.rotationPitch+5);
+        rtx1.calc(entity, entity.rotationYaw+5, entity.rotationPitch-5);
     }
 
 

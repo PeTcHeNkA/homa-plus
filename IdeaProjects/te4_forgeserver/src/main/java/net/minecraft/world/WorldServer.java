@@ -8,6 +8,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.AdvancementManager;
@@ -1113,6 +1114,15 @@ public class WorldServer extends World implements IThreadListener, ElcaWorldServ
 
         if (aentity != null) for (Entity entity : aentity)
             this.entitiesById.removeObject(entity.getEntityId());
+
+        if(entityIn.trackerEntry != null){
+            EntityTrackerEntry entry = entityIn.trackerEntry;
+            Set<EntityPlayerMP> players = entry.trackingPlayers;
+            if(!players.isEmpty()){
+                entityIn.trackerEntry = null;
+                players.forEach(playerMP -> playerMP.removeEntity(entityIn));
+            }
+        }
     }
 
 
