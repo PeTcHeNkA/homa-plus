@@ -1,9 +1,11 @@
 package plus.fserver.api.vanillagui;
 
 import net.minecraft.block.BlockChest;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.world.ILockableContainer;
+import plus.fserver.api.IPlayerDataModel;
 import plus.fserver.utls.McTsonUtils;
 import plus.tson.TsonList;
 import plus.tson.TsonMap;
@@ -146,10 +148,17 @@ public class ChestGuiTemplate {
     }
 
 
-    public ChestGui create(){
+    protected ChestGui create(){
         ChestGui chest = new ChestGui(size());
         chest.fillOf(this);
         chest.setCustomName(getCustomName());
+        return chest;
+    }
+
+
+    public ChestGui open(IPlayerDataModel player){
+        ChestGui chest = create();
+        chest.open(player.getSelfPlayer());
         return chest;
     }
 

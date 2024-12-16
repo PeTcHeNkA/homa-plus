@@ -225,9 +225,5 @@ public class ElcaConfig {
         if(ASYNC_EXPLOSION_THRESHOLD == -1){
             ASYNC_EXPLOSION_THRESHOLD = Integer.MAX_VALUE;
         }
-
-        if(ENABLE_ITEM_BIND){
-            ItemBind.load();
-        }
     }
 }

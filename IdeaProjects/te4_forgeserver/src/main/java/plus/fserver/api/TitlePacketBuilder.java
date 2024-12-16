@@ -5,12 +5,12 @@ import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.network.play.server.SPacketTitle;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
+import plus.format.IVarGetter;
 import plus.fserver.ElcaCV2;
 import plus.fserver.api.placeholders.PlayerVarProvider;
 import plus.fserver.server.network.packet.SRawPacketTitle;
 import plus.tson.TsonMap;
 import plus.tson.TsonObj;
-import plus.tson.format.TextFormatter;
 import static plus.tson.ext.TsonNumUtils.*;
 
 
@@ -18,7 +18,7 @@ public class TitlePacketBuilder extends ChatPacketBuilder{
     protected SPacketTitle.Type type = SPacketTitle.Type.TITLE;
     protected int fadeIn = 10, display = 50, fadeOut = 10;
 
-    protected TitlePacketBuilder(TextFormatter<IPlayerDataModel> format) {
+    protected TitlePacketBuilder(IVarGetter<IPlayerDataModel> format) {
         super(format);
     }
 
@@ -70,10 +70,9 @@ public class TitlePacketBuilder extends ChatPacketBuilder{
 
 
     public static TitlePacketBuilder of(ITextComponent comp){
-        return new TitlePacketBuilder(TextFormatter.compile(
-                ITextComponent.Serializer.componentToJson(comp),
-                PlayerVarProvider.PROVIDER)
-        );
+        return new TitlePacketBuilder(PlayerVarProvider.buildFormat(
+                ITextComponent.Serializer.componentToJson(comp)
+        ));
     }
 
 
@@ -96,10 +95,10 @@ public class TitlePacketBuilder extends ChatPacketBuilder{
     @Override
     public Packet<INetHandlerPlayClient> build(IPlayerDataModel model) {
         if(ElcaCV2.LIBBUILD){
-            ITextComponent comp = ITextComponent.Serializer.jsonToComponent(format.get(model));
+            ITextComponent comp = ITextComponent.Serializer.jsonToComponent(format.getStr(model));
             if(comp == null)comp = new TextComponentString("");
             return new SPacketTitle(type, comp, fadeIn, display, fadeOut);
         }
-        return new SRawPacketTitle(type, format.get(model), fadeIn, display, fadeOut);
+        return new SRawPacketTitle(type, format.getStr(model), fadeIn, display, fadeOut);
     }
 }

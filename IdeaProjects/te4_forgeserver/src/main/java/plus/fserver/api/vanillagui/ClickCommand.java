@@ -11,8 +11,7 @@ import plus.fserver.api.IPlayerDataModel;
 import plus.fserver.api.placeholders.PlayerVarProvider;
 import plus.tson.TsonFunc;
 import plus.tson.TsonMap;
-import plus.tson.format.IVarGetter;
-import plus.tson.format.TextFormatter;
+import plus.format.IVarGetter;
 
 
 public class ClickCommand implements TsonFunc {
@@ -33,7 +32,7 @@ public class ClickCommand implements TsonFunc {
         if(fromServer && format.charAt(0) == '/'){
             format = format.substring(1);
         }
-        this.format = TextFormatter.compile(format, PlayerVarProvider.PROVIDER).simplify();
+        this.format = PlayerVarProvider.buildFormat(format);
         this.fromServer = fromServer;
     }
 
@@ -51,9 +50,9 @@ public class ClickCommand implements TsonFunc {
             if(!format.isConst()) {
                 ImmutableMap<String, String> map = ImmutableMap.of("slot", String.valueOf(cont.getSlot(slotId).slotNumber), "type", cType.name());
 
-                msg = format.get(PlayerVarProvider.model((EntityPlayerMP) player, map));
+                msg = format.getStr(PlayerVarProvider.model((EntityPlayerMP) player, map));
             } else {
-                msg = format.get(null);
+                msg = format.getStr(null);
             }
 
             MinecraftServer server = player.world.getMinecraftServer();

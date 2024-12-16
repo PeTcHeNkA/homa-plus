@@ -1,16 +1,29 @@
 package plus.fserver.api.placeholders;
 
-import plus.tson.format.IVarGetter;
-import plus.tson.format.IVarProvider;
+import plus.format.IVarGetter;
+import plus.format.IVarProvider;
 import plus.tson.utl.Te4HashMap;
 import java.util.function.Function;
 
 
 public class TreeVarProvider<T,S extends TreeVarProvider<T,S>> extends Te4HashMap<String, Object>
         implements IVarProvider<T>, Function<TreeVarProvider.Args,IVarGetter<T>>{
+    private final Class<T> type;
+
+    public TreeVarProvider(Class<T> type) {
+        this.type = type;
+    }
+
+
     @Override
     public IVarGetter<T> getFmGetter(String name) {
         return apply(new Args(name));
+    }
+
+
+    @Override
+    public Class<T> getInputType() {
+        return type;
     }
 
     public S add(String name){
@@ -21,7 +34,7 @@ public class TreeVarProvider<T,S extends TreeVarProvider<T,S>> extends Te4HashMa
 
 
     protected S create(){
-        return (S)new TreeVarProvider<>();
+        return (S)new TreeVarProvider<>(type);
     }
 
 
@@ -32,6 +45,12 @@ public class TreeVarProvider<T,S extends TreeVarProvider<T,S>> extends Te4HashMa
 
 
     public S add(String name, IVarGetter<T> func){
+        fput(name, func);
+        return (S) this;
+    }
+
+
+    public S add(String name, IVarGetter.Str<T> func){
         fput(name, func);
         return (S) this;
     }

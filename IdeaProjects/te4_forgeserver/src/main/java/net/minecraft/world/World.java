@@ -14,6 +14,8 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.command.ICommand;
+import net.minecraft.command.ICommandSender;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.crash.ICrashReportDetail;
@@ -3930,6 +3932,13 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
         }
         bigLocalCache.cleanAll();
     }
+
+
+    public boolean onCommand(ICommandSender sender, @Nullable ICommand command, String cmdName, String[] args){return false;}
+
+
+    @Nullable
+    public List<String> onCompleteCommand(ICommandSender sender, @Nullable ICommand icommand, String[] args, @Nullable final BlockPos pos){return null;}
 
 
     public boolean onLivingDeath(EntityLivingBase entity, DamageSource src){

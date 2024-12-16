@@ -281,7 +281,7 @@ public class ElcaCommands extends ServerCommand {
                 data = TsonFile.remBadChars(data);
                 STsonParser parser = new STsonParser(data).with(TsonFunc.COMPILER);
 
-                ChestGuiTemplate.of(parser.getMap()).create().open(player);
+                ChestGuiTemplate.of(parser.getMap()).open(player);
 
                 return;
             }

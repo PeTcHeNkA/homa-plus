@@ -81,6 +81,7 @@ import org.jetbrains.annotations.NotNull;
 import plus.fserver.ElcaConfig;
 import plus.fserver.api.BiomeIndexes;
 import plus.fserver.api.ServerCommand;
+import plus.fserver.api.bind.ItemBind;
 import plus.fserver.plugin.AsmTrimmer;
 import plus.fserver.server.AsyWorldTickerV2;
 import plus.fserver.server.ElcaCommands;
@@ -1323,6 +1324,11 @@ public abstract class MinecraftServer implements ICommandSender, Runnable, IThre
         try {
             if (initPatch()) {
                 net.minecraftforge.fml.common.FMLCommonHandler.instance().handleServerStarted();
+                if(ElcaConfig.ENABLE_ITEM_BIND) try {
+                    ItemBind.load();
+                } catch (Throwable e){
+                    e.printStackTrace();
+                }
                 this.currentTime = getCurrentTimeMillis();
                 long i = 0L;
                 this.statusResponse.setServerDescription(new TextComponentString(this.motd));

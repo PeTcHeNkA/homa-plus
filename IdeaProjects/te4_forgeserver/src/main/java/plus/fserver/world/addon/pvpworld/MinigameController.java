@@ -1,6 +1,8 @@
 package plus.fserver.world.addon.pvpworld;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import net.minecraft.command.ICommand;
+import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -27,6 +29,8 @@ import plus.fserver.world.addon.pvpworld.stats.PlayerData;
 import plus.fserver.world.addon.pvpworld.stats.WorldData;
 import plus.tson.TsonMap;
 import plus.tson.utl.Te4HashSet;
+
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -73,6 +77,15 @@ public abstract class MinigameController {
 
     public void setMap(NBTTagCompound data){
         this.data = data;
+    }
+
+
+    public boolean onCommand(MinigameWorld world, ICommandSender sender, @Nullable ICommand command, String cmdName, String[] args){return false;}
+
+
+    @Nullable
+    public List<String> onCompleteCommand(MinigameWorld world, ICommandSender sender, @Nullable ICommand icommand, String[] args, @Nullable final BlockPos pos){
+        return null;
     }
 
 

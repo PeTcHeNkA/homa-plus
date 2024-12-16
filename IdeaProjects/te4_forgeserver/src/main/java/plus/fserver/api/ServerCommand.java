@@ -43,25 +43,35 @@ public abstract class ServerCommand extends CommandBase {
     }
 
 
-    protected static void reply(ICommandSender sender, String msg){
+    public static void reply(ICommandSender sender, String msg){
         sender.sendMessage(new TextComponentAuto(msg.replace("&", "§")));
     }
 
 
-    protected static void reply(ICommandSender sender, String format, Object... args){
+    public static void reply(ICommandSender sender, String format, Object... args){
         sender.sendMessage(new TextComponentAuto((String.format(format, args)).replace("&", "§")));
     }
 
 
-    protected void onError(ICommandSender sender, Throwable e){
-        reply(sender, "&4Critical server error on executing [%s]", getName());
+    public void onError(ICommandSender sender, Throwable e){
+        onError(sender, getName(), e);
+    }
 
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        PrintStream stream = new PrintStream(out);
-        stream.print("§4");
-        e.printStackTrace(stream);
-        stream.close();
-        reply(sender, out.toString());
+
+    public static void onError(ICommandSender sender, String cmdName, Throwable e){
+        reply(sender, "&4Critical server error on executing [%s]", cmdName);
+
+        if(sender.canUseCommand(4, cmdName)){
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            PrintStream stream = new PrintStream(out);
+            stream.print("§4");
+            e.printStackTrace(stream);
+            stream.close();
+            reply(sender, out.toString());
+        } else {
+            reply(sender, "&4Contact with administrator to get more details");
+            e.printStackTrace();
+        }
     }
 
 

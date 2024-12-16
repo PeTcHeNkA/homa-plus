@@ -1,5 +1,7 @@
 package plus.fserver.world.addon.pvpworld;
 
+import net.minecraft.command.ICommand;
+import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -18,6 +20,7 @@ import net.minecraft.world.storage.ISaveHandler;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.ITeleporter;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import org.jetbrains.annotations.Nullable;
 import plus.fserver.ElcaCV;
 import plus.fserver.utls.FastValidators;
 import plus.fserver.utls.collections.EntityRemSwapList;
@@ -303,6 +306,19 @@ public abstract class MinigameWorld extends MemoryWorld {
     @Override
     protected ITeleporter initTeleporter() {
         return controller().getTeleporter();
+    }
+
+
+    @Override
+    public boolean onCommand(ICommandSender sender, @Nullable ICommand command, String cmdName, String[] args) {
+        return controller().onCommand(this, sender, command, cmdName, args);
+    }
+
+
+    @Nullable
+    @Override
+    public List<String> onCompleteCommand(ICommandSender sender, @Nullable ICommand icommand, String[] args, @Nullable BlockPos pos) {
+        return controller().onCompleteCommand(this, sender, icommand, args, pos);
     }
 
 

@@ -1,5 +1,6 @@
 package plus.fserver.world.addon.pvpworld.tasks;
 
+import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
@@ -9,13 +10,22 @@ import plus.fserver.utls.McTsonUtils;
 import plus.tson.TsonList;
 import plus.tson.TsonMap;
 import plus.tson.TsonObj;
-
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 
 
 public class GiveItems implements Consumer<EntityPlayerMP> {
     private final ItemStack[] stacks;
     private final int[] slots;
+
+    public static Map<String,GiveItems> kitMap(TsonMap map){
+        if(map.isEmpty())return ImmutableMap.of();
+        HashMap<String,GiveItems> map1 = new HashMap<>();
+        map.forEach((s, obj) -> map1.put(s, new GiveItems(obj.getList())));
+        return ImmutableMap.copyOf(map1);
+    }
+
 
     public GiveItems(TsonList list){
         stacks = new ItemStack[list.size()];

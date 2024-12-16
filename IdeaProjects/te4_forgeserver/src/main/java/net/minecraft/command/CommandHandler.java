@@ -1,6 +1,7 @@
 package net.minecraft.command;
 
 import net.minecraft.util.text.*;
+import net.minecraft.world.World;
 import net.minecraftforge.event.*;
 import net.minecraftforge.common.*;
 import com.google.common.base.*;
@@ -30,20 +31,22 @@ public abstract class CommandHandler implements ICommandManager {
         if (rawCommand.startsWith("/")) {
             rawCommand = rawCommand.substring(1);
         }
-        String[] astring = rawCommand.split(" ");
-        final String s = astring[0];
-        astring = dropFirstString(astring);
-        final ICommand icommand = this.commandMap.get(s);
+        String[] cArgs = rawCommand.split(" ");
+        final String cmd = cArgs[0];
+        cArgs = dropFirstString(cArgs);
+        final ICommand icommand = this.commandMap.get(cmd);
+        if(sender.getEntityWorld().onCommand(sender, null, cmd, cArgs)) return 1;
+
         int i = 0;
         try {
-            final int j = this.getUsernameIndex(icommand, astring);
+            final int j = this.getUsernameIndex(icommand, cArgs);
             if (icommand == null) {
                 final TextComponentTranslation textcomponenttranslation1 = new TextComponentTranslation("commands.generic.notFound", new Object[0]);
                 textcomponenttranslation1.getStyle().setColor(TextFormatting.RED);
                 sender.sendMessage(textcomponenttranslation1);
             }
             else if (icommand.checkPermission(this.getServer(), sender)) {
-                final CommandEvent event = new CommandEvent(icommand, sender, astring);
+                final CommandEvent event = new CommandEvent(icommand, sender, cArgs);
                 if (MinecraftForge.EVENT_BUS.post(event)) {
                     if (event.getException() != null) {
                         Throwables.throwIfUnchecked(event.getException());
@@ -51,26 +54,26 @@ public abstract class CommandHandler implements ICommandManager {
                     return 1;
                 }
                 if (event.getParameters() != null) {
-                    astring = event.getParameters();
+                    cArgs = event.getParameters();
                 }
                 if (j > -1) {
-                    final List<Entity> list = EntitySelector.matchEntities(sender, astring[j], Entity.class);
-                    final String s2 = astring[j];
+                    final List<Entity> list = EntitySelector.matchEntities(sender, cArgs[j], Entity.class);
+                    final String s2 = cArgs[j];
                     sender.setCommandStat(CommandResultStats.Type.AFFECTED_ENTITIES, list.size());
                     if (list.isEmpty()) {
-                        throw new PlayerNotFoundException("commands.generic.selector.notFound", astring[j]);
+                        throw new PlayerNotFoundException("commands.generic.selector.notFound", cArgs[j]);
                     }
                     for (final Entity entity : list) {
-                        astring[j] = entity.getCachedUniqueIdString();
-                        if (this.tryExecute(sender, astring, icommand, rawCommand)) {
+                        cArgs[j] = entity.getCachedUniqueIdString();
+                        if (this.tryExecute(sender, cArgs, icommand, rawCommand)) {
                             ++i;
                         }
                     }
-                    astring[j] = s2;
+                    cArgs[j] = s2;
                 }
                 else {
                     sender.setCommandStat(CommandResultStats.Type.AFFECTED_ENTITIES, 1);
-                    if (this.tryExecute(sender, astring, icommand, rawCommand)) {
+                    if (this.tryExecute(sender, cArgs, icommand, rawCommand)) {
                         ++i;
                     }
                 }
@@ -146,7 +149,7 @@ public abstract class CommandHandler implements ICommandManager {
         if (astring.length == 1) {
             final List<String> list = Lists.newArrayList();
             for (final Map.Entry<String, ICommand> entry : this.commandMap.entrySet()) {
-                if (CommandBase.doesStringStartWith(s, (String)entry.getKey()) && entry.getValue().checkPermission(this.getServer(), sender)) {
+                if (CommandBase.doesStringStartWith(s, entry.getKey()) && entry.getValue().checkPermission(this.getServer(), sender)) {
                     list.add(entry.getKey());
                 }
             }
@@ -154,6 +157,10 @@ public abstract class CommandHandler implements ICommandManager {
         }
         if (astring.length > 1) {
             final ICommand icommand = this.commandMap.get(s);
+
+            List<String> result = sender.getEntityWorld().onCompleteCommand(sender, icommand, astring, pos);
+            if(result != null)return result;
+
             if (icommand != null && icommand.checkPermission(this.getServer(), sender)) {
                 return icommand.getTabCompletions(this.getServer(), sender, dropFirstString(astring), pos);
             }

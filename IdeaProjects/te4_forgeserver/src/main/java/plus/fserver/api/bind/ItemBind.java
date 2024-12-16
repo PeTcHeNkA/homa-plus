@@ -5,6 +5,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
+import net.minecraftforge.common.MinecraftForge;
+import plus.fserver.event.ItemBindLoadingEvent;
 import plus.fserver.utls.NbtUtils;
 import plus.tson.*;
 import java.io.File;
@@ -66,5 +68,6 @@ public class ItemBind {
             int id = map.getInt("id");
             if(id != 0) register(id, map.getCustom("func"));
         }
+        MinecraftForge.EVENT_BUS.postF(new ItemBindLoadingEvent());
     }
 }

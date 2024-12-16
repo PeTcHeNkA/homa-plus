@@ -7,9 +7,9 @@ import net.minecraft.nbt.NBTTagString;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
+import plus.format.FormatBuilder;
 import plus.fserver.api.IPlayerDataModel;
-import plus.tson.format.IVarGetter;
-
+import plus.format.IVarGetter;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -17,13 +17,28 @@ import java.util.function.Function;
 public class PlayerVarProvider extends TreeVarProvider<IPlayerDataModel,PlayerVarProvider>{
     public static PlayerVarProvider PROVIDER = new PlayerVarProvider();
 
-    public PlayerVarProvider wAdd(String name, IVarGetter<World> func){
-        return super.add(name, (IVarGetter<IPlayerDataModel>) playerMP -> func.get(playerMP.getSelfPlayer().world));
+    public PlayerVarProvider() {
+        super(IPlayerDataModel.class);
     }
 
-    public PlayerVarProvider sAdd(String name, IVarGetter<MinecraftServer> func){
-        return super.add(name, (IVarGetter<IPlayerDataModel>) playerMP -> func.get(playerMP.getSelfPlayer().server));
+
+    public static IVarGetter<IPlayerDataModel> buildFormat(String format){
+        return builder().setFormat(format).build().simplify();
     }
+
+
+    public static FormatBuilder<IPlayerDataModel> builder(){
+        return new FormatBuilder<>(IPlayerDataModel.class)
+                .setProvider(PROVIDER);
+    }
+
+//    public PlayerVarProvider wAdd(String name, IVarGetter.Aut<World> func){
+//        return super.add(name, (IVarGetter<IPlayerDataModel>) playerMP -> func.get(playerMP.getSelfPlayer().world));
+//    }
+//
+//    public PlayerVarProvider sAdd(String name, IVarGetter<MinecraftServer> func){
+//        return super.add(name, (IVarGetter<IPlayerDataModel>) playerMP -> func.get(playerMP.getSelfPlayer().server));
+//    }
 
     @Override
     protected PlayerVarProvider create() {
@@ -42,37 +57,37 @@ public class PlayerVarProvider extends TreeVarProvider<IPlayerDataModel,PlayerVa
                 .add("posZ", PlayerVarProvider::posZ    )
                 .add("hp"  , PlayerVarProvider::health  )
                 .add("exp" , PlayerVarProvider::expLvl  )
-                .add("tag", (Function<Args, IVarGetter<IPlayerDataModel>>) args -> {
-                    String arg = args.allLast();
-                    return playerMP -> {
-                        NBTTagCompound data = playerMP.getSelfPlayer().getEntityDataRaw();
-                        if(data == null)return "null";
-                        NBTBase tag = data.getTag(arg);
-                        if(tag.getId() == 8)return ((NBTTagString)tag).getString();
-                        return tag.toString();
-                    };
-                });
-        PROVIDER.add("arg", (Function<Args, IVarGetter<IPlayerDataModel>>) args -> {
-                    String arg = args.cur();
-                    return model -> model.model().apply(arg);
-                })
+//                .add("tag", (Function<Args, IVarGetter<IPlayerDataModel>>) args -> {
+//                    String arg = args.allLast();
+//                    return playerMP -> {
+//                        NBTTagCompound data = playerMP.getSelfPlayer().getEntityDataRaw();
+//                        if(data == null)return "null";
+//                        NBTBase tag = data.getTag(arg);
+//                        if(tag.getId() == 8)return ((NBTTagString)tag).getString();
+//                        return tag.toString();
+//                    };
+//                });
+//        PROVIDER.add("arg", (Function<Args, IVarGetter<IPlayerDataModel>>) args -> {
+//                    String arg = args.cur();
+//                    return model -> model.model().apply(arg);
+//                })
         ;
 
-        PROVIDER.add("world")
-                .wAdd("name"    , PlayerVarProvider::worldName)
-                .wAdd("seed"    , PlayerVarProvider::seed     )
-                .wAdd("time"    , PlayerVarProvider::time     )
-                .wAdd("tick"    , PlayerVarProvider::meanTT   )
-                .wAdd("tps"     , PlayerVarProvider::tps      )
-                .wAdd("chunks"  , PlayerVarProvider::chunks   )
-                .wAdd("entities", PlayerVarProvider::entities )
-                .wAdd("players" , PlayerVarProvider::players  )
-        ;
-
-        PROVIDER.add("server")
-                .sAdd("name", PlayerVarProvider::serverName)
-                .sAdd("host", PlayerVarProvider::serverHost)
-        ;
+//        PROVIDER.add("world")
+//                .wAdd("name"    , PlayerVarProvider::worldName)
+//                .wAdd("seed"    , PlayerVarProvider::seed     )
+//                .wAdd("time"    , PlayerVarProvider::time     )
+//                .wAdd("tick"    , PlayerVarProvider::meanTT   )
+//                .wAdd("tps"     , PlayerVarProvider::tps      )
+//                .wAdd("chunks"  , PlayerVarProvider::chunks   )
+//                .wAdd("entities", PlayerVarProvider::entities )
+//                .wAdd("players" , PlayerVarProvider::players  )
+//        ;
+//
+//        PROVIDER.add("server")
+//                .sAdd("name", PlayerVarProvider::serverName)
+//                .sAdd("host", PlayerVarProvider::serverHost)
+//        ;
     }
 
 

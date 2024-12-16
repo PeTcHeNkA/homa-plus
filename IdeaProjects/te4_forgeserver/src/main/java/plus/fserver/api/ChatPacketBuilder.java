@@ -14,8 +14,7 @@ import plus.fserver.ElcaCV2;
 import plus.fserver.api.placeholders.PlayerVarProvider;
 import plus.fserver.server.network.packet.SRawPacketChat;
 import plus.tson.TsonObj;
-import plus.tson.format.IVarGetter;
-import plus.tson.format.TextFormatter;
+import plus.format.IVarGetter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -26,8 +25,8 @@ public class ChatPacketBuilder implements ITextSender{
     protected boolean canSendNoPlayer = true;
     protected boolean asyncRender = false;
 
-    protected ChatPacketBuilder(TextFormatter<IPlayerDataModel> format) {
-        this.format = format.simplify();
+    protected ChatPacketBuilder(IVarGetter<IPlayerDataModel> format) {
+        this.format = format;
     }
 
 
@@ -47,9 +46,8 @@ public class ChatPacketBuilder implements ITextSender{
 
 
     public static ChatPacketBuilder of(ITextComponent comp){
-        return new ChatPacketBuilder(TextFormatter.compile(
-                ITextComponent.Serializer.componentToJson(comp),
-                PlayerVarProvider.PROVIDER)
+        return new ChatPacketBuilder(
+                PlayerVarProvider.buildFormat(ITextComponent.Serializer.componentToJson(comp))
         );
     }
 
@@ -67,11 +65,11 @@ public class ChatPacketBuilder implements ITextSender{
 
     public Packet<INetHandlerPlayClient> build(IPlayerDataModel model){
         if(ElcaCV2.LIBBUILD){
-            ITextComponent comp = ITextComponent.Serializer.jsonToComponent(format.get(model));
+            ITextComponent comp = ITextComponent.Serializer.jsonToComponent(format.getStr(model));
             if(comp == null)comp = new TextComponentString("");
             return new SPacketChat(comp);
         }
-        return new SRawPacketChat(format.get(model));
+        return new SRawPacketChat(format.getStr(model));
     }
 
 
@@ -91,7 +89,7 @@ public class ChatPacketBuilder implements ITextSender{
 
 
     public String buildJson(IPlayerDataModel player){
-        return format.get(player);
+        return format.getStr(player);
     }
 
 

@@ -1,12 +1,16 @@
 package plus.fserver.world.addon.pvpworld.games;
 
+import net.minecraft.command.ICommand;
+import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.MobEffects;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import org.jetbrains.annotations.Nullable;
 import plus.fserver.api.ChatPacketBuilder;
 import plus.fserver.utls.McTsonUtils;
 import plus.fserver.world.addon.CleanLobbyTeleporter;
@@ -20,6 +24,7 @@ import plus.tson.TsonMap;
 import plus.tson.TsonObj;
 import java.util.*;
 import static plus.tson.ext.TsonAccessUtils.*;
+import static plus.fserver.api.ServerCommand.*;
 
 
 public class PvpMinigameController extends MinigameController {
@@ -41,6 +46,7 @@ public class PvpMinigameController extends MinigameController {
     private ChatPacketBuilder onTimeOut;
     private ChatPacketBuilder onEndPreparation;
     private GiveItems         defaultKit;
+    private Map<String,GiveItems> kitMap;
 
     @Override
     public void init(MinigameProvider.Map.Info pro, TsonMap map) {
@@ -71,6 +77,12 @@ public class PvpMinigameController extends MinigameController {
 
         TsonObj items      = getR(map, "game.items"                             );
         if(items != null) defaultKit = new GiveItems(items.getList());
+
+        TsonObj kits       = getR(map, "game.kits"                              );
+
+        if(kits != null){
+            kitMap = GiveItems.kitMap(kits.getMap());
+        }
     }
 
 
@@ -161,6 +173,47 @@ public class PvpMinigameController extends MinigameController {
                 onComplete(world);
             }
         }
+    }
+
+
+    @Override
+    public boolean onCommand(MinigameWorld world, ICommandSender sender, @Nullable ICommand command, String cmdName, String[] args) {
+        if(sender instanceof EntityPlayerMP) {
+            EntityPlayerMP player = (EntityPlayerMP) sender;
+            if (cmdName.equals("syskit")) {
+                PvWData data = world.data();
+
+                if(data.usedKit != null || kitMap == null){
+                    reply(sender, "&cChoose kit is locked!");
+                } else {
+                    PvPlData pData = (PvPlData)data.stats(player);
+
+                    GiveItems kit = kitMap.get(args[0]);
+                    if(kit == null && !args[0].equals("null")){
+                        reply(sender, "&cKit ["+args[0]+"] not founded!");
+                    } else {
+                        pData.usedKit = kit;
+                    }
+                }
+                return true;
+            }
+            return !player.server.getPlayerList().canSendCommands(player.getGameProfile());
+        }
+        return false;
+    }
+
+
+    @Nullable
+    @Override
+    public List<String> onCompleteCommand(MinigameWorld world, ICommandSender sender, @Nullable ICommand icommand, String[] args, @Nullable BlockPos pos) {
+        if(sender instanceof EntityPlayerMP){
+            EntityPlayerMP player = (EntityPlayerMP) sender;
+
+            if(!player.server.getPlayerList().canSendCommands(player.getGameProfile())){
+                return Collections.emptyList();
+            }
+        }
+        return super.onCompleteCommand(world, sender, icommand, args, pos);
     }
 
 
