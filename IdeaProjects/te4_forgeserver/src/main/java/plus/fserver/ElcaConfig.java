@@ -1,6 +1,7 @@
 package plus.fserver;
 
 import net.minecraftforge.fml.relauncher.FMLLaunchHandler;
+import plus.fserver.api.bind.ItemBind;
 import plus.tson.TsonFile;
 import plus.tson.TsonMap;
 import plus.tson.TsonObj;
@@ -95,6 +96,7 @@ public class ElcaConfig {
     public static boolean UNIMPORTANT_PACKET_QUEUE    = true;
     public static boolean ENABLE_ASM_TRIMMER          = true;
     public static boolean GLOBAL_LIGHT_POOL           = true;
+    public static boolean ENABLE_ITEM_BIND            = true;
 
 
     private static File dir(String str){
@@ -208,6 +210,7 @@ public class ElcaConfig {
         ASY_THREAD_POOL_SIZE       = calc(map, "thread-pool-size"            , ASY_THREAD_POOL_SIZE       );
         ASYNC_EXPLOSION_THRESHOLD  = calc(map, "async-explosion-threshold"   , ASYNC_EXPLOSION_THRESHOLD  );
         GLOBAL_LIGHT_POOL          = calc(map, "global-light-pool"           , GLOBAL_LIGHT_POOL          );
+        ENABLE_ITEM_BIND           = calc(map, "enable-item-binds"           , ENABLE_ITEM_BIND           );
 
         if(INIT_PALETTE_LINEAR_BITS > 4 || INIT_PALETTE_LINEAR_BITS < 2){
             INIT_PALETTE_LINEAR_BITS = 4;
@@ -221,6 +224,10 @@ public class ElcaConfig {
         }
         if(ASYNC_EXPLOSION_THRESHOLD == -1){
             ASYNC_EXPLOSION_THRESHOLD = Integer.MAX_VALUE;
+        }
+
+        if(ENABLE_ITEM_BIND){
+            ItemBind.load();
         }
     }
 }

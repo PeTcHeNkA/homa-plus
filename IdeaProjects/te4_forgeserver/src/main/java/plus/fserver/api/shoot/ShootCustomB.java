@@ -74,8 +74,21 @@ public class ShootCustomB extends ShootCustom{
             }
 
             if(block == Blocks.WOODEN_SLAB){
-                if(FastRandom.INST.nextBoolean())
-                    return (curTargets-=2) < 0;
+                int rNum = FastRandom.INST.nextInt(4);
+                if(rNum >= 2) return (curTargets-=2) < 0;
+                if(rNum == 0){
+                    if(needGravity()) {
+                        BlockSlab.EnumBlockHalf half = state.getValue(BlockSlab.HALF);
+                        if(half == BlockSlab.EnumBlockHalf.TOP){
+                            state = state.withProperty(BlockSlab.HALF, BlockSlab.EnumBlockHalf.BOTTOM);
+                        }
+
+                        if (!checkGravity(acc, pos, state, maxGravityCascade())) {
+                            acc.setBlockState(pos, state);
+                        }
+                        break l1;
+                    }
+                }
             }
             return false;
         }

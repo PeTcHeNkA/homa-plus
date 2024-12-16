@@ -30,6 +30,10 @@ import net.minecraft.util.text.*;
 import net.minecraft.util.text.event.*;
 import net.minecraftforge.common.capabilities.*;
 import net.minecraft.world.*;
+import plus.fserver.ElcaConfig;
+import plus.fserver.api.bind.ItemBind;
+
+import static plus.fserver.ElcaCV.SERVER_COMPILE;
 import static plus.tson.utl.uns.UnsafeUtils.newObj;
 
 
@@ -172,6 +176,17 @@ public final class ItemStack implements ICapabilitySerializable<NBTTagCompound> 
 
 
     public ActionResult<ItemStack> useItemRightClick(final World worldIn, final EntityPlayer playerIn, final EnumHand hand) {
+        if(ElcaConfig.ENABLE_ITEM_BIND) {
+            if(!worldIn.isRemote || SERVER_COMPILE) {
+                NBTTagCompound nbt;
+                if ((nbt = this.stackTagCompound) != null) {
+                    EnumActionResult result;
+                    if ((result = ItemBind.call(nbt.getInteger(ItemBind.ITEM_BIND_ID), this, playerIn, hand)) != null) {
+                        return worldIn.pooledAction.init(result, playerIn.getHeldItem(hand));
+                    }
+                }
+            }
+        }
         return this.getItem().onItemRightClick(worldIn, playerIn, hand);
     }
 

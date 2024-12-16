@@ -10,6 +10,7 @@ import net.minecraft.command.NumberInvalidException;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkSystem;
 import net.minecraft.server.MinecraftServer;
@@ -39,6 +40,7 @@ import plus.fserver.api.ChatPacketBuilder;
 import plus.fserver.api.ServerCommand;
 import plus.fserver.api.WorldConstructor;
 import plus.fserver.api.anim.CameraAnimEngine;
+import plus.fserver.api.bind.ItemBind;
 import plus.fserver.api.inject.VarOnly;
 import plus.fserver.api.vanillagui.ChestGuiTemplate;
 import plus.fserver.plugin.SSPatchLoader;
@@ -69,7 +71,7 @@ public class ElcaCommands extends ServerCommand {
     private static final String normal   = "&a";
 
     private final List<String> completions = ImmutableList.copyOf(
-        new String[]{"version", "info", "tps", "mobs", "spawn", "hotpoints", "send", "setvar", "save", "world", "cgui", "planim"}
+        new String[]{"version", "info", "tps", "mobs", "spawn", "hotpoints", "send", "setvar", "save", "world", "cgui", "planim", "bind"}
     );
     private final List<String> allVars = ImmutableList.copyOf(new String[]{
             "time-packet-rate"            , "mean-balance-mob"            ,
@@ -172,6 +174,9 @@ public class ElcaCommands extends ServerCommand {
             case "planim":{
                 playAnim(server, sender, args);return;
             }
+            case "bind":{
+                bind(server, sender, args);return;
+            }
             case "debug":{
                 onDeubgCmd(server, sender, args);return;
             }
@@ -182,6 +187,37 @@ public class ElcaCommands extends ServerCommand {
     @VarOnly(var = "SIDE_SERVER", code = true)
     public void onDeubgCmd(MinecraftServer server, ICommandSender sender, String[] args){
         ShootRTX.debugShoot(server, sender, args);
+    }
+
+
+    public void bind(MinecraftServer server, ICommandSender sender, String[] args) throws NumberInvalidException {
+        if(!ElcaConfig.ENABLE_ITEM_BIND){
+            reply(sender, "&cItem bind is disabled!");
+            return;
+        }
+        String name = args[1];
+        switch (name){
+            case "load":{
+                ItemBind.load();
+                return;
+            }
+            case "set":{
+                int id = parseInt(args[2]);
+                if(ItemBind.isRegistred(id)){
+                    EntityPlayerMP player = (EntityPlayerMP) sender;
+                    ItemStack stack = player.getHeldItemMainhand();
+                    if(stack.isEmpty()){
+                        reply(sender, "&cCant bind func to AIR");
+                        return;
+                    }
+                    ItemBind.bindFunc(id, stack);
+                    reply(sender, "&aSuccess bind func [&e"+id+"&a] to [&e"+stack.getDisplayName()+"&a]");
+                } else {
+                    reply(sender, "&cCant find func by id ["+id+"]");
+                    return;
+                }
+            }
+        }
     }
 
 
@@ -770,6 +806,9 @@ public class ElcaCommands extends ServerCommand {
                 }
                 case "cgui":{
                     return Arrays.asList("make example ~ ~-1 ~", "open example");
+                }
+                case "bind":{
+                    return Arrays.asList("load", "set");
                 }
             }
         }
