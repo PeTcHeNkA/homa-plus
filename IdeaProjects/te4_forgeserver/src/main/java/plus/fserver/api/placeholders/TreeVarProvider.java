@@ -50,7 +50,25 @@ public class TreeVarProvider<T,S extends TreeVarProvider<T,S>> extends Te4HashMa
     }
 
 
-    public S add(String name, IVarGetter.Str<T> func){
+    public S addStr(String name, IVarGetter.Str<T> func){
+        fput(name, func);
+        return (S) this;
+    }
+
+
+    public S addInt(String name, IVarGetter.Int<T> func){
+        fput(name, func);
+        return (S) this;
+    }
+
+
+    public S addDouble(String name, IVarGetter.Double<T> func){
+        fput(name, func);
+        return (S) this;
+    }
+
+
+    public S addBool(String name, IVarGetter.Double<T> func){
         fput(name, func);
         return (S) this;
     }
@@ -76,23 +94,40 @@ public class TreeVarProvider<T,S extends TreeVarProvider<T,S>> extends Te4HashMa
         Args(String name) {
             this.args = name.split(":");
         }
+
+
         public String cur(){
             return args[cursor];
         }
+
+
         public String get(int i){
             return args[cursor+i];
         }
+
+
         public int length(){
             return args.length-cursor;
         }
+
+
         public void shift(){
             ++cursor;
         }
+
+
         public boolean isLast(){
             return args.length == cursor-1;
         }
+
+
         public String allLast(){
-            if(length() == 0) return "";
+            return allLast("");
+        }
+
+
+        public String allLast(String def){
+            if(length() == 0) return def;
             if(length() == 1) return args[cursor];
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < args.length - cursor; i++) {

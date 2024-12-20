@@ -1,24 +1,48 @@
 package plus.fserver.api.placeholders;
 
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagString;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import plus.format.AdaptVarProvider;
 import plus.format.FormatBuilder;
+import plus.format.IVarProvider;
 import plus.fserver.api.IPlayerDataModel;
 import plus.format.IVarGetter;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
 
-public class PlayerVarProvider extends TreeVarProvider<IPlayerDataModel,PlayerVarProvider>{
-    public static PlayerVarProvider PROVIDER = new PlayerVarProvider();
+public class PlayerVarProvider<T> extends TreeVarProvider<T,PlayerVarProvider<T>>{
+    public  static final PlayerVarProvider<Entity>           ENTITY_PRO      = new PlayerVarProvider<>(Entity.class);
+    public  static final PlayerVarProvider<EntityPlayer>     PLAYER_PRO      = new PlayerVarProvider<>(EntityPlayer.class);
+    public  static final PlayerVarProvider<World>            WORLD_PRO       = new PlayerVarProvider<>(World.class);
+    public  static final PlayerVarProvider<MinecraftServer>  SERVER_PRO      = new PlayerVarProvider<>(MinecraftServer.class);
+    private static final PlayerVarProvider<IPlayerDataModel> MODEL_PRO       = new PlayerVarProvider<>(IPlayerDataModel.class);
+    private static final PlayerVarProvider<NBTBase>          NBT_ADAPT       = new PlayerVarProvider<>(NBTBase.class);
+    private static final IVarProvider<IPlayerDataModel>      MODEL_2_PLAYER  = new AdaptVarProvider<IPlayerDataModel, EntityPlayer>(PLAYER_PRO) {
+        public IVarGetter<IPlayerDataModel> adapt(IVarGetter<EntityPlayer> src) {
+            return new IVarGetter<IPlayerDataModel>() {
+                public Object get(IPlayerDataModel model) {return src.get(model.getSelfPlayer());}
+                public Class<?> getType() {return src.getType();}
+            };
+        }
+    };
 
-    public PlayerVarProvider() {
-        super(IPlayerDataModel.class);
+
+    public static final IVarProvider[] ALL_PROVIDERS = new IVarProvider[]{
+            ENTITY_PRO, PLAYER_PRO, WORLD_PRO, SERVER_PRO, MODEL_PRO, NBT_ADAPT, MODEL_2_PLAYER
+    };
+
+
+    public PlayerVarProvider(Class<T> type) {
+        super(type);
     }
 
 
@@ -29,99 +53,82 @@ public class PlayerVarProvider extends TreeVarProvider<IPlayerDataModel,PlayerVa
 
     public static FormatBuilder<IPlayerDataModel> builder(){
         return new FormatBuilder<>(IPlayerDataModel.class)
-                .setProvider(PROVIDER);
+                .setProvider(ALL_PROVIDERS);
     }
 
-//    public PlayerVarProvider wAdd(String name, IVarGetter.Aut<World> func){
-//        return super.add(name, (IVarGetter<IPlayerDataModel>) playerMP -> func.get(playerMP.getSelfPlayer().world));
-//    }
-//
-//    public PlayerVarProvider sAdd(String name, IVarGetter<MinecraftServer> func){
-//        return super.add(name, (IVarGetter<IPlayerDataModel>) playerMP -> func.get(playerMP.getSelfPlayer().server));
-//    }
 
     @Override
-    protected PlayerVarProvider create() {
-        return new PlayerVarProvider();
+    protected PlayerVarProvider<T> create() {
+        return new PlayerVarProvider<>(getInputType());
     }
+
 
     static {
-        PROVIDER.add("player")
-                .add("name", PlayerVarProvider::userName)
-                .add("ip"  , PlayerVarProvider::ip      )
-                .add("uuid", PlayerVarProvider::uuid    )
-                .add("ping", PlayerVarProvider::ping    )
-                .add("pos" , PlayerVarProvider::pos     )
-                .add("posX", PlayerVarProvider::posX    )
-                .add("posY", PlayerVarProvider::posY    )
-                .add("posZ", PlayerVarProvider::posZ    )
-                .add("hp"  , PlayerVarProvider::health  )
-                .add("exp" , PlayerVarProvider::expLvl  )
-//                .add("tag", (Function<Args, IVarGetter<IPlayerDataModel>>) args -> {
-//                    String arg = args.allLast();
-//                    return playerMP -> {
-//                        NBTTagCompound data = playerMP.getSelfPlayer().getEntityDataRaw();
-//                        if(data == null)return "null";
-//                        NBTBase tag = data.getTag(arg);
-//                        if(tag.getId() == 8)return ((NBTTagString)tag).getString();
-//                        return tag.toString();
-//                    };
-//                });
-//        PROVIDER.add("arg", (Function<Args, IVarGetter<IPlayerDataModel>>) args -> {
-//                    String arg = args.cur();
-//                    return model -> model.model().apply(arg);
-//                })
+        ENTITY_PRO.add("entity")
+            .addStr("name", Entity::getName)
+            .add("uuid", new IVarGetter<Entity>() {
+                public Object get(Entity entity) {return entity.getUniqueID();}
+                public Class<?> getType() {return UUID.class;}
+            })
+            .add("pos", new IVarGetter<Entity>() {
+                public Object get(Entity entity) {return entity.getPosition();}
+                public Class<?> getType() {return BlockPos.class;}
+            })
+            .addDouble("posX", entity -> entity.posX)
+            .addDouble("posY", entity -> entity.posY)
+            .addDouble("posZ", entity -> entity.posZ)
+            .add("tag", args -> new IVarGetter<Entity>() {
+                final String arg = args.allLast();
+                public Object get(Entity entity) {
+                    NBTTagCompound nbt = entity.getEntityDataRaw();
+                    if(nbt == null)return null;
+                    return nbt.getTag(arg);
+                }
+                public Class<?> getType() {return NBTBase.class;}
+            })
+            .add("world", new IVarGetter<Entity>() {
+                public Object get(Entity entity) {return entity.world;}
+                public Class<?> getType() {return World.class;}
+            })
         ;
 
-//        PROVIDER.add("world")
-//                .wAdd("name"    , PlayerVarProvider::worldName)
-//                .wAdd("seed"    , PlayerVarProvider::seed     )
-//                .wAdd("time"    , PlayerVarProvider::time     )
-//                .wAdd("tick"    , PlayerVarProvider::meanTT   )
-//                .wAdd("tps"     , PlayerVarProvider::tps      )
-//                .wAdd("chunks"  , PlayerVarProvider::chunks   )
-//                .wAdd("entities", PlayerVarProvider::entities )
-//                .wAdd("players" , PlayerVarProvider::players  )
-//        ;
-//
-//        PROVIDER.add("server")
-//                .sAdd("name", PlayerVarProvider::serverName)
-//                .sAdd("host", PlayerVarProvider::serverHost)
-//        ;
+        MODEL_PRO.add("arg", args -> new IVarGetter.Str<IPlayerDataModel>() {
+            private final String arg = args.cur();
+            public Object get(IPlayerDataModel model) {
+                return model.model().apply(arg);
+            }
+        });
+
+        NBT_ADAPT.add("str", args -> new IVarGetter.Str<NBTBase>() {
+            final String arg = args.allLast("null");
+            public Object get(NBTBase tag) {
+                if(tag == null)return arg;
+                if(tag.getId() == 8)return ((NBTTagString)tag).getString();
+                return tag.toString();
+            }
+        });
+
+        WORLD_PRO
+            .addStr("name"    , PlayerVarProvider::worldName)
+            .addStr("seed"    , PlayerVarProvider::seed     )
+            .addStr("time"    , PlayerVarProvider::time     )
+            .addStr("tick"    , PlayerVarProvider::meanTT   )
+            .addStr("tps"     , PlayerVarProvider::tps      )
+            .addStr("chunks"  , PlayerVarProvider::chunks   )
+            .addStr("entities", PlayerVarProvider::entities )
+            .addStr("players" , PlayerVarProvider::players  )
+            .add("server", new IVarGetter<World>() {
+                public Object get(World world) {return world.getMinecraftServer();}
+                public Class<?> getType() {return MinecraftServer.class;}
+            })
+        ;
+
+        SERVER_PRO
+            .addStr("name", PlayerVarProvider::serverName)
+            .addStr("host", PlayerVarProvider::serverHost)
+        ;
     }
 
-
-    //player funcs
-    private static String userName(IPlayerDataModel player){
-        return player.getSelfPlayer().getName();
-    }
-    private static String ip(IPlayerDataModel player){
-        return player.getSelfPlayer().getPlayerIP();
-    }
-    private static String uuid(IPlayerDataModel player){
-        return player.getSelfPlayer().getUniqueID().toString();
-    }
-    private static String ping(IPlayerDataModel player){
-        return String.valueOf(player.getSelfPlayer().ping);
-    }
-    private static String pos(IPlayerDataModel player){
-        return player.getSelfPlayer().getPosition().toString();
-    }
-    private static String posX(IPlayerDataModel player){
-        return String.valueOf(MathHelper.floor(player.getSelfPlayer().posX));
-    }
-    private static String posY(IPlayerDataModel player){
-        return String.valueOf(MathHelper.floor(player.getSelfPlayer().posY));
-    }
-    private static String posZ(IPlayerDataModel player){
-        return String.valueOf(MathHelper.floor(player.getSelfPlayer().posZ));
-    }
-    private static String health(IPlayerDataModel player){
-        return String.format("%.2f", player.getSelfPlayer().getHealth());
-    }
-    private static String expLvl(IPlayerDataModel player){
-        return String.valueOf(player.getSelfPlayer().experienceLevel);
-    }
 
     //world funcs
     private static String worldName(World world){
