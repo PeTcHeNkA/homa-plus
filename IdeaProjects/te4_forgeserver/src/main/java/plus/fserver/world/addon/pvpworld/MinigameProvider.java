@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import plus.fserver.api.ChatPacketBuilder;
+import plus.fserver.api.ITextSender;
 import plus.tson.TsonFile;
 import plus.tson.TsonMap;
 import plus.tson.TsonObj;
@@ -89,7 +90,7 @@ public class MinigameProvider {
 
 
     public class Map{
-        private HashMap<String,ChatPacketBuilder> msgCache;
+        private HashMap<String, ITextSender> msgCache;
         private final String pathToMap;
         private NBTTagCompound cachedMapNbt;
         private final String pathToConfig;
@@ -119,10 +120,10 @@ public class MinigameProvider {
         }
 
 
-        protected ChatPacketBuilder tryGetMsg(String id){
+        protected ITextSender tryGetMsg(String id){
             TsonObj msg = getR(getCfg(), id);
             if(msg == null)return null;
-            ChatPacketBuilder builder = ChatPacketBuilder.of(msg);
+            ITextSender builder = ITextSender.of(msg);
             if(msgCache == null)msgCache = new HashMap<>();
             msgCache.put(id, builder);
             return builder;
@@ -161,8 +162,8 @@ public class MinigameProvider {
             }
 
 
-            public ChatPacketBuilder getMsg(String id){
-                ChatPacketBuilder msg = Map.this.tryGetMsg(id);
+            public ITextSender getMsg(String id){
+                ITextSender msg = Map.this.tryGetMsg(id);
                 if(msg == null)
                     msg = MinigameProvider.this.tryGetMsg(id);
                 if(msg == null)

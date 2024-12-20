@@ -229,6 +229,7 @@ public class ChatPacketBuilder implements ITextSender{
     }
 
 
+    @Override
     public void sendToTeam(IPlayerDataModel model){
         EntityPlayerMP player = model.getSelfPlayer();
         Team team = player.getTeam();

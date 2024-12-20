@@ -20,6 +20,9 @@ public interface ITextSender {
     void send(IPlayerDataModel model, List<EntityPlayerMP> players);
 
 
+    void sendToTeam(IPlayerDataModel model);
+
+
     static ITextSender of(TsonObj obj){
         if(obj.isList()){
             TsonList list = obj.getList();
@@ -27,6 +30,7 @@ public interface ITextSender {
             for (int i = 0; i < senders.length; i++){
                 senders[i] = of(list.get(i));
             }
+            if(senders.length == 1)return senders[0];
             return new MultiSender(senders);
         }
         if(obj.isMap()){
@@ -44,6 +48,7 @@ public interface ITextSender {
 }
 class MultiSender implements ITextSender{
     private final ITextSender[] parents;
+
     MultiSender(ITextSender[] parents) {
         this.parents = parents;
     }
@@ -70,5 +75,11 @@ class MultiSender implements ITextSender{
     @Override
     public void send(IPlayerDataModel model, List<EntityPlayerMP> players) {
         for(ITextSender sender:parents)sender.send(model, players);
+    }
+
+
+    @Override
+    public void sendToTeam(IPlayerDataModel model) {
+        for(ITextSender sender:parents)sender.sendToTeam(model);
     }
 }

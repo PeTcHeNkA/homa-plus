@@ -11,7 +11,7 @@ import net.minecraft.world.GameType;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import org.jetbrains.annotations.Nullable;
-import plus.fserver.api.ChatPacketBuilder;
+import plus.fserver.api.ITextSender;
 import plus.fserver.utls.McTsonUtils;
 import plus.fserver.world.addon.CleanLobbyTeleporter;
 import plus.fserver.world.addon.pvpworld.MinigameProvider;
@@ -37,14 +37,14 @@ public class PvpMinigameController extends MinigameController {
     private int winDelay         = 20*2;
     private int nextRDelay       = 20*5;
     private RespawnAllRandomly respawner = new RespawnAllRandomly();
-    private ChatPacketBuilder onAddPlayer;
-    private ChatPacketBuilder onKillPlayerWinner;
-    private ChatPacketBuilder onKillOther;
-    private ChatPacketBuilder onNewRound;
-    private ChatPacketBuilder onFirtsRound;
-    private ChatPacketBuilder onEndCommon;
-    private ChatPacketBuilder onTimeOut;
-    private ChatPacketBuilder onEndPreparation;
+    private ITextSender onAddPlayer;
+    private ITextSender onKillPlayerWinner;
+    private ITextSender onKillOther;
+    private ITextSender onNewRound;
+    private ITextSender onFirtsRound;
+    private ITextSender onEndCommon;
+    private ITextSender onTimeOut;
+    private ITextSender onEndPreparation;
     private GiveItems         defaultKit;
     private Map<String,GiveItems> kitMap;
 
@@ -89,7 +89,7 @@ public class PvpMinigameController extends MinigameController {
     @Override
     public void onAddPlayer(EntityPlayerMP player) {
         MinigameWorld mw = (MinigameWorld) player.world;
-        onAddPlayer.send(player, mw.getMembers(), false);
+        onAddPlayer.send(player, mw.getMembers());
     }
 
 
@@ -159,7 +159,7 @@ public class PvpMinigameController extends MinigameController {
         for (EntityPlayerMP player:members){
             player.setGameType(GameType.SPECTATOR);
         }
-        onNewRound.send(members, false);
+        onNewRound.send(members);
 
         world.cleanEntities();
         world.addDelayedTask(this::onCompletePreparation, nextRDelay);
@@ -236,7 +236,7 @@ public class PvpMinigameController extends MinigameController {
 
     @Override
     public void onNewGameStarted(MinigameWorld world, EntityPlayerMP[] players) {
-        onFirtsRound.send(world.getMembers(), false);
+        onFirtsRound.send(world.getMembers());
         world.addDelayedTask(this::onCompletePreparation, preparationTicks);
     }
 
@@ -265,7 +265,7 @@ public class PvpMinigameController extends MinigameController {
 
         giveAllKits(defaultKit, world, members);
 
-        onEndPreparation.send(members, false);
+        onEndPreparation.send(members);
         world.addDelayedTask(this::onEndCommon, commonTicks);
     }
 
@@ -312,7 +312,7 @@ public class PvpMinigameController extends MinigameController {
         for (EntityPlayerMP player:members){
             player.addPotionEffect(new PotionEffect(MobEffects.GLOWING, Integer.MAX_VALUE, 1, true, false));
         }
-        onEndCommon.send(members, false);
+        onEndCommon.send(members);
 
         world.addDelayedTask(this::onTimeOut, timeOut);
     }

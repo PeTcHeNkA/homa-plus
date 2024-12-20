@@ -16,6 +16,7 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import org.jetbrains.annotations.Nullable;
 import plus.fserver.api.ChatPacketBuilder;
 import plus.fserver.api.IPlayerDataModel;
+import plus.fserver.api.ITextSender;
 import plus.fserver.api.placeholders.PlayerVarProvider;
 import plus.fserver.world.addon.CleanLobbyTeleporter;
 import plus.fserver.world.addon.ScorePlayerTeamEX;
@@ -29,6 +30,8 @@ import plus.fserver.world.addon.pvpworld.tasks.GiveItems;
 import plus.fserver.world.addon.pvpworld.tasks.GroupRespawnAllRandomly;
 import plus.tson.TsonMap;
 import plus.tson.TsonObj;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import static plus.tson.ext.TsonAccessUtils.getR;
@@ -64,14 +67,14 @@ public class PvpTeamsMinigameController extends MinigameController {
     private boolean canRespawnIfAllDeath = true;
     private final GroupRespawnAllRandomly respawner = new GroupRespawnAllRandomly();
 
-    private ChatPacketBuilder onAddPlayer;
-    private ChatPacketBuilder onEndPreparation;
-    private ChatPacketBuilder onTimeOut;
-    private ChatPacketBuilder onEndCommon;
-    private ChatPacketBuilder onNewRound;
-    private ChatPacketBuilder onFirtsRound;
-    private ChatPacketBuilder onKillPlayerWinner;
-    private ChatPacketBuilder onKillOther;
+    private ITextSender onAddPlayer;
+    private ITextSender onEndPreparation;
+    private ITextSender onTimeOut;
+    private ITextSender onEndCommon;
+    private ITextSender onNewRound;
+    private ITextSender onFirtsRound;
+    private ITextSender onKillPlayerWinner;
+    private ITextSender onKillOther;
 
     private GameType gameType;
     private GiveItems defaultKit;
@@ -108,12 +111,13 @@ public class PvpTeamsMinigameController extends MinigameController {
         Team team = player.getTeam();
         if(team != null) {
             MinigameWorld mw = (MinigameWorld) player.world;
-            Packet<INetHandlerPlayClient> msg = onAddPlayer.build(player);
+            ArrayList<EntityPlayerMP> players = new ArrayList<>();
 
             for (EntityPlayerMP player1 : mw.getMembers()) {
                 if(team.isSameTeam(player1.getTeam()))
-                    ChatPacketBuilder.send(player1, msg);
+                    players.add(player1);
             }
+            onAddPlayer.send(player, players);
         }
     }
 
@@ -261,7 +265,7 @@ public class PvpTeamsMinigameController extends MinigameController {
 
         PvpMinigameController.giveAllKits(defaultKit, world, members);
 
-        onEndPreparation.send(members, false);
+        onEndPreparation.send(members);
         world.addDelayedTask(this::onEndCommon, this::onUpdateCommon, commonTicks);
     }
 
@@ -304,7 +308,7 @@ public class PvpTeamsMinigameController extends MinigameController {
         for (EntityPlayerMP player:members){
             player.addPotionEffect(new PotionEffect(MobEffects.GLOWING, Integer.MAX_VALUE, 1, true, false));
         }
-        onEndCommon.send(members, false);
+        onEndCommon.send(members);
 
         world.addDelayedTask(this::onTimeOut, timeOut);
     }
