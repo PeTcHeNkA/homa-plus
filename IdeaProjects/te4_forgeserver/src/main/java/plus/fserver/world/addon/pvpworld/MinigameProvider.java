@@ -134,6 +134,7 @@ public class MinigameProvider {
             private final TsonMap config;
             private Supplier<MinigameController> gFactory;
             private final int teams, playersPerTeam;
+            private MinigameController controller;
 
             Info(TsonMap config) {
                 this.config = config;
@@ -182,8 +183,10 @@ public class MinigameProvider {
             }
 
 
-            public MinigameController create(){
-                MinigameController controller = getFactory().get();
+            public MinigameController controller(){
+                MinigameController controller = this.controller;
+                if(controller != null)return controller;
+                controller = getFactory().get();
                 controller.init(this, getCfg());
                 controller.loadConfigurations(getCfg());
                 return controller;

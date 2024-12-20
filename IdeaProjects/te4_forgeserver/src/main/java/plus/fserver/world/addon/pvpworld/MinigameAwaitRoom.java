@@ -1,16 +1,21 @@
 package plus.fserver.world.addon.pvpworld;
 
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 
 public class MinigameAwaitRoom {
-    private int nextGame = 0;
     private final MinigameProvider.Map.Info[] infs;
     private final Team[] teams;
+    private final int needPlayers;
+    private int nextGame = 0, curPlayers = 0;
 
     @SideOnly(Side.CLIENT)
     public MinigameAwaitRoom(int cTeams, int players){
@@ -18,7 +23,9 @@ public class MinigameAwaitRoom {
         for (int i = 0; i < cTeams; i++)
             teams[i] = new Team(players);
         this.infs = null;
+        this.needPlayers = cTeams * players;
     }
+
 
     public MinigameAwaitRoom(MinigameProvider.Map.Info[] infs) {
         if(infs.length == 0)throw new IllegalArgumentException("Infs shold be > 0");
@@ -35,6 +42,7 @@ public class MinigameAwaitRoom {
                 }
             }
         }
+        this.needPlayers = cTeams * players;
 
         Team[] teams = this.teams = new Team[cTeams];
         for (int i = 0; i < cTeams; i++)
@@ -93,12 +101,21 @@ public class MinigameAwaitRoom {
         public boolean canStart(){
             return cursor == players.length;
         }
+
+
+        public void clear(){
+            cursor = 0;
+            Arrays.fill(players, null);
+        }
     }
 
 
     public boolean remove(UUID uuid){
         for (Team team:teams){
-            if(team.remove(uuid))return true;
+            if(team.remove(uuid)){
+                --curPlayers;
+                return true;
+            }
         }
         return false;
     }
@@ -106,7 +123,10 @@ public class MinigameAwaitRoom {
 
     public boolean tryAdd(UUID uuid){
         for (Team team:teams){
-            if(team.add(uuid))return true;
+            if(team.add(uuid)){
+                ++curPlayers;
+                return true;
+            }
         }
         return false;
     }
@@ -115,28 +135,78 @@ public class MinigameAwaitRoom {
     public boolean tryAdd(UUID[] team){
         if(team.length > teams[0].players.length)return false;
         for (Team cTeam:teams){
-            if(cTeam.add(team))return true;
+            if(cTeam.add(team)){
+                curPlayers += team.length;
+                return true;
+            }
         }
         return false;
     }
 
 
     public boolean canStart(){
-        for (Team cTeam:teams)
-            if(!cTeam.canStart())return false;
-        return true;
+        return curPlayers == needPlayers;
     }
 
 
-    public boolean isAllOnline(MinecraftServer server){
-        PlayerList pl = server.getPlayerList();
+    public int getNeedPlayers(){
+        return needPlayers;
+    }
+
+
+    public int getCurPlayers(){
+        return curPlayers;
+    }
+
+
+    public void clear(){
+        for (Team team:teams){
+            team.clear();
+        }
+        curPlayers = 0;
+    }
+
+
+    public void forUUIDs(Consumer<UUID> func){
         for (Team team:teams){
             for (UUID uuid:team.players){
-                if(uuid == null)return false;
-                if(pl.getPlayerByUUID(uuid) == null)return false;
+                if(uuid == null)continue;
+                func.accept(uuid);
             }
         }
-        return true;
+    }
+
+
+    public void forPlayers(MinecraftServer server, Consumer<EntityPlayerMP> func){
+        PlayerList pl = server.getPlayerList();
+
+        for (Team team:teams){
+            for (UUID uuid:team.players){
+                if(uuid == null)continue;
+                EntityPlayerMP player = pl.getPlayerByUUID(uuid);
+                if(player != null) func.accept(player);
+            }
+        }
+    }
+
+
+    public boolean remOfflinePlayers(MinecraftServer server){
+        PlayerList pl = server.getPlayerList();
+        ArrayList<UUID> toRem = null;
+        for (Team team:teams){
+            for (UUID uuid:team.players){
+                if(uuid == null)continue;
+                if(pl.getPlayerByUUID(uuid) == null){
+                    if(toRem == null)toRem = new ArrayList<>();
+                    toRem.add(uuid);
+                }
+            }
+        }
+        if(toRem != null){
+            toRem.forEach(this::remove);
+            return true;
+        }
+        return false;
     }
 
 
@@ -260,6 +330,7 @@ public class MinigameAwaitRoom {
             }
         }
         onPreDump(uTeams);
+        this.curPlayers = 0;
         return uTeams;
     }
 
