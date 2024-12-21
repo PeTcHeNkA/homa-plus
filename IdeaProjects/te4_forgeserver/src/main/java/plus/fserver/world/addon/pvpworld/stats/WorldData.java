@@ -132,10 +132,10 @@ public class WorldData extends Te4HashMap<UUID, PlayerData> {
 
 
     public static class Results {
-        private final CombatData[] results;
+        private final PlayerData[] results;
         private Sorting sorting;
 
-        Results(CombatData[] results) {
+        Results(PlayerData[] results) {
             this.results = results;
         }
 
@@ -163,7 +163,7 @@ public class WorldData extends Te4HashMap<UUID, PlayerData> {
         }
 
 
-        public CombatData get(int index){
+        public PlayerData get(int index){
             return results[index];
         }
     }

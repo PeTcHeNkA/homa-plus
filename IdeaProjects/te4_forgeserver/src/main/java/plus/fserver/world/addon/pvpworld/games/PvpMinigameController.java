@@ -6,17 +6,20 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.MobEffects;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import org.jetbrains.annotations.Nullable;
 import plus.fserver.api.ITextSender;
+import plus.fserver.api.offline.ISafeTask;
 import plus.fserver.utls.McTsonUtils;
 import plus.fserver.world.addon.CleanLobbyTeleporter;
 import plus.fserver.world.addon.pvpworld.MinigameProvider;
 import plus.fserver.world.addon.pvpworld.MinigameController;
 import plus.fserver.world.addon.pvpworld.MinigameWorld;
+import plus.fserver.world.addon.pvpworld.stats.PlayerData;
 import plus.fserver.world.addon.pvpworld.stats.WorldData;
 import plus.fserver.world.addon.pvpworld.tasks.GiveItems;
 import plus.fserver.world.addon.pvpworld.tasks.RespawnAllRandomly;
@@ -40,6 +43,7 @@ public class PvpMinigameController extends MinigameController {
     private ITextSender onAddPlayer;
     private ITextSender onKillPlayerWinner;
     private ITextSender onKillOther;
+    private ITextSender onEndWin, onEndLose, onEndMid;
     private ITextSender onNewRound;
     private ITextSender onFirtsRound;
     private ITextSender onEndCommon;
@@ -47,6 +51,7 @@ public class PvpMinigameController extends MinigameController {
     private ITextSender onEndPreparation;
     private GiveItems         defaultKit;
     private Map<String,GiveItems> kitMap;
+    private ISafeTask rewardsWin, rewardsLose, rewardsMid;
 
     @Override
     public void init(MinigameProvider.Map.Info pro, TsonMap map) {
@@ -59,6 +64,10 @@ public class PvpMinigameController extends MinigameController {
         onEndCommon        = pro.getMsg("msg.game.timeout.common");
         onTimeOut          = pro.getMsg("msg.game.timeout.game");
         onEndPreparation   = pro.getMsg("msg.game.timeout.preparation");
+
+        onEndWin           = pro.getMsg("msg.end.win");
+        onEndLose          = pro.getMsg("msg.end.lose");
+        onEndMid           = pro.getMsg("msg.end.mid");
     }
 
 
@@ -83,6 +92,20 @@ public class PvpMinigameController extends MinigameController {
         if(kits != null){
             kitMap = GiveItems.kitMap(kits.getMap());
         }
+
+        TsonObj rewards = getR(map, "game.rewards.win");
+        if(rewards != null)
+            this.rewardsWin = safeTaskOf(rewards.getMap());
+
+        rewards = getR(map, "game.rewards.lose");
+
+        if(rewards != null)
+            this.rewardsLose = safeTaskOf(rewards.getMap());
+
+        rewards = getR(map, "game.rewards.mid");
+
+        if(rewards != null)
+            this.rewardsMid = safeTaskOf(rewards.getMap());
     }
 
 
@@ -98,7 +121,12 @@ public class PvpMinigameController extends MinigameController {
 
 
     @Override
-    public void onPreRemPlayer(EntityPlayerMP player) {}
+    public void onPreRemPlayer(EntityPlayerMP player) {
+        MinigameWorld world = (MinigameWorld) player.world;
+        if(!world.finished()){
+            player.onKillCommand();
+        }
+    }
 
 
     @Override
@@ -135,13 +163,15 @@ public class PvpMinigameController extends MinigameController {
                 world.clearDelaydTasks(); //todo
                 world.addDelayedTask(this::newRound, winDelay);
             } else {
-                onComplete(world);
+                world.finish();
+                world.addDelayedTask(worldServer -> onComplete(world), winDelay);
             }
         }
     }
 
 
     private boolean nextRound(MinigameWorld world){
+        if(world.finished())return false;
         if (this.rounds > 1) {
             CommonWorldData data = world.data();
             return (data.rounds += 1) < this.rounds;
@@ -243,13 +273,59 @@ public class PvpMinigameController extends MinigameController {
 
     @Override
     public void onComplete(MinigameWorld world) {
-        //todo
-        CommonWorldData data = world.data();
+        world.finish();
 
-        WorldData.Results results = data.dumpResults(WorldData.Sorting.SCORE);
-        results.get(0); //is winner
+        WorldData.Results results = world.results();
+        PlayerData winner = results.get(0);
+        PlayerData lose   = results.get(1);
 
+        if(winner.getScore() == lose.getScore()){
+            winner.setCustom(3);
+            lose.setCustom(3);
+
+            onEndFor(world, winner, 3);
+            onEndFor(world, lose  , 3);
+        } else {
+            winner.setCustom(1);
+            lose.setCustom(2);
+
+            onEndFor(world, winner, 1);
+            onEndFor(world, lose  , 2);
+        }
         super.onComplete(world);
+
+        MinecraftServer server = world.getMinecraftServer();
+
+        if(winner.getScore() == lose.getScore()){
+            if(rewardsMid != null){
+                rewardsMid.run(server, winner.getUUID());
+                rewardsLose.run(server, lose.getUUID());
+            }
+        } else {
+            if(rewardsWin != null)
+                rewardsWin.run(server, winner.getUUID());
+            if(rewardsLose != null)
+                rewardsLose.run(server, lose.getUUID());
+        }
+    }
+
+
+    private void onEndFor(MinigameWorld world, PlayerData data, int result){
+        EntityPlayerMP player = world.getMinecraftServer().getPlayerList().getPlayerByUUID(data.getUUID());
+        //1 = win, 2 = lost, 3 = mid
+        if(result == 1){
+            if(player != null){
+                onEndWin.send(player);
+            }
+        } else if(result == 2){
+            if(player != null){
+                onEndLose.send(player);
+            }
+        } else {
+            if(player != null){
+                onEndMid.send(player);
+            }
+        }
     }
 
 
@@ -332,6 +408,7 @@ public class PvpMinigameController extends MinigameController {
             player.onKillCommand();
         }
         onTimeOut.send(members);
+        world.addDelayedTask(w1 -> onComplete(world), winDelay);
     }
 
 

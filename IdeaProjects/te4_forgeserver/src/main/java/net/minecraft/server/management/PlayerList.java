@@ -62,6 +62,7 @@ import org.apache.logging.log4j.Logger;
 import plus.fserver.ElcaConfig;
 import plus.fserver.api.Keep;
 import plus.fserver.api.offline.OfflinePlayerMPAccess;
+import plus.fserver.api.offline.TaskType;
 import plus.fserver.event.ElcaConnectEvent;
 import plus.tson.utl.Te4HashSet;
 
@@ -136,10 +137,12 @@ public abstract class PlayerList {
     }
 
 
-    public void applyForPlayerSafe(UUID uuid, Consumer<EntityPlayerMP> task, boolean sync, boolean advancements) {
+    public void applyForPlayerSafe(UUID uuid, Consumer<EntityPlayerMP> task, TaskType type, boolean advancements) {
         EntityPlayerMP player = uuidToPlayerMap.get(uuid);
         lock(uuid);
+        boolean async = type != TaskType.SYNC;
         if (player == null) {
+            async = type == TaskType.SMART;
             OfflinePlayerMPAccess offlinePlayer = OfflinePlayerMPAccess.create(server, uuid);
             offlinePlayer.load();
             if (advancements) {
@@ -148,9 +151,9 @@ public abstract class PlayerList {
             player = offlinePlayer;
         }
 
-        if (sync) {
+        if (!async) {
             EntityPlayerMP finalPlayer = player;
-            player.getServerWorld().addAsyncTask(() -> {
+            player.getServerWorld().addSyncTask(() -> {
                 try {
                     task.accept(finalPlayer);
                 } catch (Exception e) {

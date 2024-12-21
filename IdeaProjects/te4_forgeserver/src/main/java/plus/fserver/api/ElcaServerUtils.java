@@ -18,11 +18,15 @@ import net.minecraftforge.registries.ForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import plus.fserver.ElcaCV2;
 import plus.fserver.api.inject.FieldAccessor;
+import plus.fserver.api.offline.TaskType;
 import plus.fserver.plugin.FieldAccessGen;
 import plus.fserver.server.ElcaThread;
 import plus.fserver.utls.collections.EntityChunkIter;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.function.Consumer;
+
 import static net.minecraft.network.NetworkSystem.SERVER_EPOLL_EVENTLOOP;
 import static net.minecraft.network.NetworkSystem.SERVER_NIO_EVENTLOOP;
 
@@ -122,5 +126,11 @@ public final class ElcaServerUtils {
 
     public static <V extends IForgeRegistryEntry<V>> void unsafeRegister(ForgeRegistry<V> registry, int id, V obj) {
         registry.addU(id, obj);
+    }
+
+
+    public static void applyForPlayerSafe(MinecraftServer server, UUID uuid, Consumer<EntityPlayerMP> task, TaskType type, boolean advancements){
+        if(ElcaCV2.LIBBUILD)throw new UnsupportedOperationException("Use only on Elca Server!");
+        server.getPlayerList().applyForPlayerSafe(uuid, task, type, advancements);
     }
 }

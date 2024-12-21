@@ -15,10 +15,18 @@ import java.nio.charset.StandardCharsets;
 
 public class ItemGenFunc implements TsonFunc {
     protected final IVarGetter<IPlayerDataModel> format;
+    private final ItemStack constResult;
 
     public ItemGenFunc(TsonObj item) {
         try {
-            this.format = createOfItem(item);
+            IVarGetter<IPlayerDataModel> format = createOfItem(item);
+            if(format.isConst()){
+                this.constResult = create(format, null);
+                this.format = null;
+            } else {
+                this.format = format;
+                this.constResult = null;
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -40,6 +48,13 @@ public class ItemGenFunc implements TsonFunc {
 
 
     public ItemStack create(IPlayerDataModel model){
+        ItemStack result;
+        if((result = this.constResult) == null)return create(format, model);
+        return result.copy();
+    }
+
+
+    private static ItemStack create(IVarGetter<IPlayerDataModel> format, IPlayerDataModel model){
         byte[] bytes0 = format.getStr(model).getBytes(StandardCharsets.UTF_8);
         ByteArrayInputStream isBytes = new ByteArrayInputStream(bytes0);
         DataInputStream is = new DataInputStream(isBytes);

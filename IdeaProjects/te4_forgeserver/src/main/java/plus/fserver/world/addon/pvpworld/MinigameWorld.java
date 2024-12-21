@@ -43,6 +43,7 @@ public abstract class MinigameWorld extends MemoryWorld {
     private WorldData data;
     private Te4HashSet<UUID> awaitPlayers;
     private boolean finished = true;
+    private WorldData.Results results;
 
     public MinigameWorld(MinecraftServer server, ISaveHandler handler, int id, WorldServer parent, Profiler profiler) {
         super(server, handler, id, parent, profiler);
@@ -125,6 +126,15 @@ public abstract class MinigameWorld extends MemoryWorld {
 
     public boolean finished(){
         return finished;
+    }
+
+
+    public WorldData.Results results(){
+        if(finished()){
+            WorldData.Results results = this.results;
+            if(results == null)return this.results = data().dumpResults();
+        }
+        return data().dumpResults();
     }
 
 

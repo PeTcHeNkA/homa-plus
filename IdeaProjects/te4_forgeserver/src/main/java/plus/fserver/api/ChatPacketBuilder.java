@@ -3,6 +3,7 @@ package plus.fserver.api;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.network.play.server.SPacketChat;
@@ -189,12 +190,14 @@ public class ChatPacketBuilder implements ITextSender{
             player.connection.sendPacket(build(player));
             return;
         }
+        NetHandlerPlayServer con;
+        if((con = player.connection) == null)return;
         if(asyncRender){
-            player.connection.netManager.exec(
+            con.netManager.exec(
                     () -> player.connection.netManager.sendPacketSync(build(player))
             );
         } else {
-            player.connection.netManager.sendPacketE(build(player));
+            con.netManager.sendPacketE(build(player));
         }
     }
 
@@ -205,12 +208,14 @@ public class ChatPacketBuilder implements ITextSender{
             player.connection.sendPacket(build(player));
             return;
         }
+        NetHandlerPlayServer con;
+        if((con = player.connection) == null)return;
         if(asyncRender){
-            player.connection.netManager.exec(
+            con.netManager.exec(
                     () -> player.connection.netManager.sendPacketSync(build(player))
             );
         } else {
-            player.connection.netManager.sendPacketE(build(player));
+            con.netManager.sendPacketE(build(player));
         }
     }
 

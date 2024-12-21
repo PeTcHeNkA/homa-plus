@@ -6,9 +6,7 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
@@ -20,7 +18,10 @@ import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import plus.fserver.api.TextComponentAuto;
 import plus.fserver.api.WorldConstructor;
-import plus.fserver.utls.NbtUtils;
+import plus.fserver.api.offline.ISafeTask;
+import plus.fserver.api.rewards.SRewardEconomy;
+import plus.fserver.api.rewards.SRewardItem;
+import plus.fserver.api.vanillagui.ItemGenFunc;
 import plus.fserver.utls.math.FastRandom;
 import plus.fserver.world.addon.CleanLobbyTeleporter;
 import plus.fserver.world.addon.LobbyTeleporter;
@@ -29,10 +30,7 @@ import plus.fserver.world.addon.pvpworld.stats.PlayerData;
 import plus.fserver.world.addon.pvpworld.stats.WorldData;
 import plus.tson.TsonMap;
 import plus.tson.utl.Te4HashSet;
-
 import javax.annotation.Nullable;
-import java.io.File;
-import java.io.IOException;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -299,4 +297,18 @@ public abstract class MinigameController {
         }
     }
 
+
+    public static ISafeTask safeTaskOf(TsonMap map){
+        if(map == null)return null;
+        String type = map.getStr("type");
+        switch (type){
+            case "economy":{
+                return new SRewardEconomy(map.getStr("id"), map.getInt("amount"));
+            }
+            case "item":{
+                return new SRewardItem(new ItemGenFunc(map.getMap("item")));
+            }
+        }
+        throw new IllegalArgumentException();
+    }
 }

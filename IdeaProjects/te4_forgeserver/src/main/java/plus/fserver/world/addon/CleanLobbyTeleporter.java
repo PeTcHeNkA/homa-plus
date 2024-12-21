@@ -72,8 +72,6 @@ public class CleanLobbyTeleporter extends LobbyTeleporter{
                     onRollbackInventory(worldserver, player);
 
                     PlayerList.procTransferPhase2(worldserver, newWorld, player, oldId, dimId, CleanLobbyTeleporter.this);
-
-                    CleanLobbyTeleporter.this.onPostTransfer(player, dimId);
                 });
             });
         } catch (Throwable e){

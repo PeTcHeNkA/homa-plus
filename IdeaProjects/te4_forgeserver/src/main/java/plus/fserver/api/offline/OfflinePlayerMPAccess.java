@@ -56,4 +56,15 @@ public class OfflinePlayerMPAccess extends EntityPlayerMP {
     public void unlock(){
         server.getPlayerList().unlock(super.getUniqueID());
     }
+
+
+    @Override
+    public boolean isSilent() {
+        return true;
+    }
+
+
+    public static boolean isOffline(EntityPlayerMP player){
+        return player instanceof OfflinePlayerMPAccess;
+    }
 }
