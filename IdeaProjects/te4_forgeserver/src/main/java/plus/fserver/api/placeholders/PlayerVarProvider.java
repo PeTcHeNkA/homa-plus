@@ -4,6 +4,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.NBTPrimitive;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagString;
 import net.minecraft.server.MinecraftServer;
@@ -79,10 +80,27 @@ public class PlayerVarProvider<T> extends TreeVarProvider<T,PlayerVarProvider<T>
             .addDouble("posZ", entity -> entity.posZ)
             .add("tag", args -> new IVarGetter<Entity>() {
                 final String arg = args.allLast();
-                public Object get(Entity entity) {
-                    NBTTagCompound nbt = entity.getEntityDataRaw();
-                    if(nbt == null)return null;
+                public NBTBase get(Entity entity) {
+                    NBTTagCompound nbt;
+                    if((nbt = entity.getEntityDataRaw()) == null)return null;
                     return nbt.getTag(arg);
+                }
+                public int getInt(Entity entity) {
+                    NBTBase result;
+                    if((result = get(entity)) == null)return 0;
+                    int id;
+                    if ((id = result.getId()) > 0 && id < 7)return ((NBTPrimitive)result).getInt();
+                    return 0;
+                }
+                public double getDouble(Entity entity) {
+                    NBTBase result;
+                    if((result = get(entity)) == null)return 0;
+                    int id;
+                    if ((id = result.getId()) > 0 && id < 7)return ((NBTPrimitive)result).getDouble();
+                    return 0;
+                }
+                public boolean getBool(Entity entity) {
+                    return getInt(entity) != 0;
                 }
                 public Class<?> getType() {return NBTBase.class;}
             })
@@ -114,9 +132,9 @@ public class PlayerVarProvider<T> extends TreeVarProvider<T,PlayerVarProvider<T>
             .addStr("time"    , PlayerVarProvider::time     )
             .addStr("tick"    , PlayerVarProvider::meanTT   )
             .addStr("tps"     , PlayerVarProvider::tps      )
-            .addStr("chunks"  , PlayerVarProvider::chunks   )
-            .addStr("entities", PlayerVarProvider::entities )
-            .addStr("players" , PlayerVarProvider::players  )
+            .addInt("chunks"  , PlayerVarProvider::chunks   )
+            .addInt("entities", PlayerVarProvider::entities )
+            .addInt("players" , PlayerVarProvider::players  )
             .add("server", new IVarGetter<World>() {
                 public Object get(World world) {return world.getMinecraftServer();}
                 public Class<?> getType() {return MinecraftServer.class;}
@@ -140,14 +158,14 @@ public class PlayerVarProvider<T> extends TreeVarProvider<T,PlayerVarProvider<T>
     private static String time(World world){
         return String.valueOf(world.getTotalWorldTime());
     }
-    private static String chunks(World world){
-        return String.valueOf(world.chunkProviderServer.size());
+    private static int chunks(World world){
+        return world.chunkProviderServer.size();
     }
-    private static String entities(World world){
-        return String.valueOf(world.loadedEntityList.size());
+    private static int entities(World world){
+        return world.loadedEntityList.size();
     }
-    private static String players(World world){
-        return String.valueOf(world.playerEntities.size());
+    private static int players(World world){
+        return world.playerEntities.size();
     }
 
     //tps
