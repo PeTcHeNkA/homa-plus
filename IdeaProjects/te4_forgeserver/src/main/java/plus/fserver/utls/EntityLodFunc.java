@@ -17,7 +17,7 @@ public final class EntityLodFunc {
     public EntityLodFunc(TsonObj obj, double near, double low){
         this.near   = param(obj, near, "0","near");
         this.low    = param(obj, low,  "1","low" );
-        this.lowest = param(obj, low+(low-near), "lowest");
+        this.lowest = param(obj, low+(low-near), "2", "lowest");
     }
 
 
@@ -30,7 +30,7 @@ public final class EntityLodFunc {
     public EntityLodFunc(TsonObj obj){
         near = param(obj, ElcaMobs.GLOBAL.near, "0","near");
         low  = param(obj, ElcaMobs.GLOBAL.low,  "1","low" );
-        lowest = param(obj, low+(low-near), "lowest");
+        lowest = param(obj, low+(low-near), "2", "lowest");
     }
 
 

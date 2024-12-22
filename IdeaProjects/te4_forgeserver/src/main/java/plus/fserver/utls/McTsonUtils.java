@@ -92,7 +92,7 @@ public class McTsonUtils {
     }
 
 
-    public static ItemStack itemStackOfTson(TsonObj obj){
+    public static ItemStack     itemStackOfTson(TsonObj obj){
         if(obj.isMap()) {
             TsonMap map = obj.getMap();
             Item item = itemOfTson(map.get("id"));

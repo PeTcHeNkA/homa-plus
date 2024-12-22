@@ -198,6 +198,7 @@ public class ElcaConfig {
 
         MAX_CONNECTIONS_PER        = calc(map, "max-connections-per"         , MAX_CONNECTIONS_PER        );
         MAX_CONNECTIONS_TIME       = calc(map, "max-connections-time"        , MAX_CONNECTIONS_TIME       );
+        MAX_CONNECTION_WARN        = calc(map, "max-connections-warn"        , MAX_CONNECTION_WARN        );
 
         INIT_PALETTE_LINEAR_BITS   = calc(map, "init-palette-linear-bits"    , INIT_PALETTE_LINEAR_BITS   );
         CACHE_CHUNK_DATA           = calc(map, "cache-chunk-data"            , CACHE_CHUNK_DATA           );

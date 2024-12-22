@@ -108,7 +108,7 @@ public class TextComponentAuto extends TextComponentString {
         if(obj.isMap()) {
             TsonMap map = obj.getMap();
 
-            Style style = styleFromTson(obj);
+            Style style = styleFromTson(map.get("style"));
             String text = map.getStr("text");
 
             String type = map.getOrDefaultStr("type", "text");

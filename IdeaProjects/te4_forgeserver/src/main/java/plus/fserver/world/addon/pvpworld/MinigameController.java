@@ -38,7 +38,7 @@ import java.util.function.Consumer;
 public abstract class MinigameController {
     private static final int MIN_PVPA_DIM_ID = 700000;
 
-    private final Long2ObjectOpenHashMap<ExtendedBlockStorage[]> cache = new Long2ObjectOpenHashMap<>(4);
+    //private final Long2ObjectOpenHashMap<ExtendedBlockStorage[]> cache = new Long2ObjectOpenHashMap<>(4);
     private final LobbyTeleporter teleporter = new CleanLobbyTeleporter();
     private final Set<Integer> usedDimIds = new Te4HashSet<>();
     private final Set<Integer> freeDimIds = new Te4HashSet<>();
@@ -266,8 +266,9 @@ public abstract class MinigameController {
 
 
     public Long2ObjectOpenHashMap<ExtendedBlockStorage[]> getMapCache(){
-        if(isImmutable())return null;
-        return cache;
+        return null;
+        //if(isImmutable())return null;
+        //return cache;
     }
 
 

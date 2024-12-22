@@ -1,5 +1,6 @@
 package plus.fserver.world.addon.pvpworld.games;
 
+import com.google.common.collect.ImmutableMap;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
@@ -14,6 +15,7 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import org.jetbrains.annotations.Nullable;
 import plus.fserver.api.ITextSender;
 import plus.fserver.api.offline.ISafeTask;
+import plus.fserver.api.placeholders.PlayerVarProvider;
 import plus.fserver.utls.McTsonUtils;
 import plus.fserver.world.addon.CleanLobbyTeleporter;
 import plus.fserver.world.addon.pvpworld.MinigameProvider;
@@ -189,7 +191,15 @@ public class PvpMinigameController extends MinigameController {
         for (EntityPlayerMP player:members){
             player.setGameType(GameType.SPECTATOR);
         }
-        onNewRound.send(members);
+        Map<String,String> map = ImmutableMap.of(
+                "rounds.cur", String.valueOf(data.rounds),
+                "rounds.max", String.valueOf(rounds)
+        );
+
+        ITextSender onNewRound = this.onNewRound;
+        for (EntityPlayerMP player:members){
+            onNewRound.send(PlayerVarProvider.model(player, map));
+        }
 
         world.cleanEntities();
         world.addDelayedTask(this::onCompletePreparation, nextRDelay);
