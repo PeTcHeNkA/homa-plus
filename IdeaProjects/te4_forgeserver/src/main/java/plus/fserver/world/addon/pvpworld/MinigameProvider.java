@@ -20,7 +20,7 @@ public class MinigameProvider {
     private final HashMap<String, Supplier<MinigameController>> registry = new HashMap<>();
     private final ObjectOpenHashSet<String> allIds = new ObjectOpenHashSet<>(4);
     private final HashMap<String, Map> maps = new HashMap<>(4);
-    private HashMap<String,ChatPacketBuilder> msgCache;
+    private HashMap<String, ITextSender> msgCache;
     private final String pathToRootCfg;
     private TsonMap cachedCfg;
 
@@ -53,11 +53,21 @@ public class MinigameProvider {
     }
 
 
-    protected ChatPacketBuilder tryGetMsg(String id){
+    protected ITextSender tryGetMsg(String id){
+        ITextSender builder;
+        HashMap<String, ITextSender> msgCache;
+
+        if((msgCache = this.msgCache) != null){
+            builder = msgCache.get(id);
+            if(builder != null)return builder;
+        }
+
         TsonObj msg = getR(getCfg(), id);
         if(msg == null)return null;
-        ChatPacketBuilder builder = ChatPacketBuilder.of(msg);
-        if(msgCache == null)msgCache = new HashMap<>();
+        builder = ITextSender.of(msg);
+        if(msgCache == null){
+            msgCache = this.msgCache = new HashMap<>();
+        }
         msgCache.put(id, builder);
         return builder;
     }
@@ -121,10 +131,20 @@ public class MinigameProvider {
 
 
         protected ITextSender tryGetMsg(String id){
+            ITextSender builder;
+            HashMap<String, ITextSender> msgCache;
+
+            if((msgCache = this.msgCache) != null){
+                builder = msgCache.get(id);
+                if(builder != null)return builder;
+            }
+
             TsonObj msg = getR(getCfg(), id);
             if(msg == null)return null;
-            ITextSender builder = ITextSender.of(msg);
-            if(msgCache == null)msgCache = new HashMap<>();
+            builder = ITextSender.of(msg);
+            if(msgCache == null){
+                msgCache = this.msgCache = new HashMap<>();
+            }
             msgCache.put(id, builder);
             return builder;
         }
@@ -186,7 +206,7 @@ public class MinigameProvider {
             public MinigameController controller(){
                 MinigameController controller = this.controller;
                 if(controller != null)return controller;
-                controller = getFactory().get();
+                controller = this.controller = getFactory().get();
                 controller.init(this, getCfg());
                 controller.loadConfigurations(getCfg());
                 return controller;
