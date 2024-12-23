@@ -1,11 +1,11 @@
 package plus.fserver.world.addon.pvpworld.games;
 
+import net.minecraft.command.ICommand;
+import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.MobEffects;
-import net.minecraft.network.Packet;
-import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
@@ -14,10 +14,10 @@ import net.minecraft.world.GameType;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import org.jetbrains.annotations.Nullable;
-import plus.fserver.api.ChatPacketBuilder;
 import plus.fserver.api.IPlayerDataModel;
 import plus.fserver.api.ITextSender;
 import plus.fserver.api.placeholders.PlayerVarProvider;
+import plus.fserver.utls.McTsonUtils;
 import plus.fserver.world.addon.CleanLobbyTeleporter;
 import plus.fserver.world.addon.ScorePlayerTeamEX;
 import plus.fserver.world.addon.pvpworld.MinigameController;
@@ -30,9 +30,9 @@ import plus.fserver.world.addon.pvpworld.tasks.GiveItems;
 import plus.fserver.world.addon.pvpworld.tasks.GroupRespawnAllRandomly;
 import plus.tson.TsonMap;
 import plus.tson.TsonObj;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import static plus.tson.ext.TsonAccessUtils.getR;
 
@@ -54,6 +54,7 @@ public class PvpTeamsMinigameController extends MinigameController {
         int pendingToRespawn;
     }
     public static class WData extends PvWData{
+        boolean lockKit = false;
         @Override
         public PlayerData create() {
             return new PData();
@@ -64,7 +65,8 @@ public class PvpTeamsMinigameController extends MinigameController {
     private int preparationTicks = 20*15;
     private int commonTicks      = 20*90;
     private int timeOut          = 20*20;
-    private boolean canRespawnIfAllDeath = true;
+    private int killsToWin       = 20;
+    //private boolean canRespawnIfAllDeath = true;
     private final GroupRespawnAllRandomly respawner = new GroupRespawnAllRandomly();
 
     private ITextSender onAddPlayer;
@@ -78,6 +80,9 @@ public class PvpTeamsMinigameController extends MinigameController {
 
     private GameType gameType;
     private GiveItems defaultKit;
+    private Map<String,GiveItems> kitMap;
+    private boolean lockKit = true;
+    private boolean isImmutable;
 
     @Override
     public void init(MinigameProvider.Map.Info pro, TsonMap map) {
@@ -95,14 +100,41 @@ public class PvpTeamsMinigameController extends MinigameController {
     @Override
     public void loadConfigurations(TsonMap map) {
         respawner.fromTson(map.getList("map.gpositions"));
+        gameType = McTsonUtils.getGameType(getR(map, "map.gametype"));
+
+        isImmutable        = getR(map, "map.immutable"         , true        );
 
         pendingToRespawn   = getR(map, "game.respawn-ticks"    , pendingToRespawn);
         preparationTicks   = getR(map, "game.preparation-ticks", preparationTicks);
         commonTicks        = getR(map, "game.common-ticks"     , commonTicks     );
         timeOut            = getR(map, "game.timeout-ticks"    , timeOut         );
+        lockKit            = getR(map, "game.lock-kit"         , lockKit         );
 
         TsonObj items = getR(map, "game.items");
         if(items != null) defaultKit = new GiveItems(items.getList());
+
+        TsonObj kits       = getR(map, "game.kits"                              );
+
+        if(kits != null){
+            kitMap = GiveItems.kitMap(kits.getMap());
+        }
+    }
+
+
+    private boolean canRespawnIfAllDeath(){
+        return killsToWin != -1;
+    }
+
+
+    @Override
+    public boolean onCommand(MinigameWorld world, ICommandSender sender, @Nullable ICommand command, String cmdName, String[] args) {
+        if(world.finished())return false;
+        WData data = world.data();
+        if(!data.lockKit && GiveItems.processKitCommand(kitMap, world, sender, command, cmdName, args))
+            return true;
+        if(sender instanceof EntityPlayerMP)
+            return !((EntityPlayerMP) sender).isOp();
+        else return false;
     }
 
 
@@ -118,6 +150,15 @@ public class PvpTeamsMinigameController extends MinigameController {
                     players.add(player1);
             }
             onAddPlayer.send(player, players);
+        }
+    }
+
+
+    @Override
+    public void onPreRemPlayer(EntityPlayerMP player) {
+        MinigameWorld world = (MinigameWorld) player.world;
+        if(!world.finished()){
+            player.onKillCommand();
         }
     }
 
@@ -163,6 +204,18 @@ public class PvpTeamsMinigameController extends MinigameController {
     }
 
 
+    private boolean isAllOtherTeamsIsDeath(MinigameWorld world, EntityPlayerMP player){
+        List<EntityPlayerMP> members = world.getMembers();
+        Team team = player.getTeam();
+        for (EntityPlayerMP other:members){
+            if(other.isEntityAlive()) {
+                if(team != other.getTeam())return false;
+            }
+        }
+        return true;
+    }
+
+
     @Override
     public void onDeath(LivingDeathEvent event) {
         Entity entity = event.getEntity();
@@ -188,9 +241,13 @@ public class PvpTeamsMinigameController extends MinigameController {
                 }
 
                 Entity cause = event.getSource().getTrueSource();
-                IPlayerDataModel toDTeam;
+                IPlayerDataModel toDTeam = null;
 
-                if (cause != null && cause instanceof EntityPlayerMP) {
+                l1: if (cause != null && cause instanceof EntityPlayerMP) {
+                    if(!world.isGameMember((EntityPlayerMP) cause)){
+                        cause = null;
+                        break l1;
+                    }
                     data.addKill(cause, 1);
 
                     int score = 5;
@@ -216,9 +273,10 @@ public class PvpTeamsMinigameController extends MinigameController {
                             .model((EntityPlayerMP) cause, "target", dPlayer.getName());
 
                     onKillPlayerWinner.sendToTeam(toWTeam);
-                } else {
-                    toDTeam = PlayerVarProvider.model(dPlayer, "killer", "???");
                 }
+                if(toDTeam == null)
+                    toDTeam = PlayerVarProvider.model(dPlayer, "killer", "???");
+
                 onKillOther.sendToTeam(toDTeam);
 
                 if(dTeam != null){
@@ -228,10 +286,27 @@ public class PvpTeamsMinigameController extends MinigameController {
                         if (player2 != null)
                             dPlayer.setSpectatingEntity(player2);
                     }
-                    if(needRespawn && (canRespawnIfAllDeath || player2 != null)){
+                    if(needRespawn && (canRespawnIfAllDeath() || player2 != null)){
                         uStats.pendingToRespawn = pendingToRespawn;
                     } else {
                         uStats.pendingToRespawn = -1;
+                    }
+                }
+
+                if(!canRespawnIfAllDeath()) {
+                    if(cause != null && cause instanceof EntityPlayerMP) {
+                        if(isAllOtherTeamsIsDeath(world, (EntityPlayerMP) cause)){
+                            onComplete(world, (EntityPlayerMP) cause);
+                            return;
+                        }
+                    }
+                } else {
+                    ScoreCombatTeam wTeam = (ScoreCombatTeam) cause.getTeam();
+                    if(wTeam != null){
+                        if(wTeam.data.getKills() >= killsToWin){
+                            onComplete(world, (EntityPlayerMP) cause);
+                            return;
+                        }
                     }
                 }
             }
@@ -246,14 +321,28 @@ public class PvpTeamsMinigameController extends MinigameController {
     }
 
 
+    public void onComplete(MinigameWorld world, EntityPlayerMP player){
+        onComplete(world);
+    }
+
+
+    @Override
+    public void onComplete(MinigameWorld world) {
+        super.onComplete(world);
+    }
+
+
     @Override
     public void onNewGameStarted(MinigameWorld world, EntityPlayerMP[] players) {
-        super.onNewGameStarted(world, players);
+        onFirtsRound.send(world.getMembers());
+        world.addDelayedTask(this::onCompletePreparation, preparationTicks);
     }
 
 
     private void onCompletePreparation(WorldServer worldServer){
         MinigameWorld world = (MinigameWorld) worldServer;
+        WData data = world.data();
+        data.lockKit = lockKit;
 
         List<EntityPlayerMP> members = world.getMembers();
         respawner.respawnTeams(world, members);
@@ -283,7 +372,7 @@ public class PvpTeamsMinigameController extends MinigameController {
             if(data.pendingToRespawn > 0){
                 if(--data.pendingToRespawn == 0){
                     EntityPlayerMP player2 = getFirstAliveMember((ScorePlayerTeam)player.getTeam(), world);
-                    if(player2 == null && canRespawnIfAllDeath){
+                    if(player2 == null && canRespawnIfAllDeath()){
                         respawner.tpToRandom(player);
                         onRespawn(player);
                     } else {
@@ -335,5 +424,11 @@ public class PvpTeamsMinigameController extends MinigameController {
         CleanLobbyTeleporter.cleanPlayer(player);
         player.setGameType(gameType);
         PvpMinigameController.giveKit(defaultKit, player);
+    }
+
+
+    @Override
+    public boolean isImmutable() {
+        return gameType == GameType.ADVENTURE || isImmutable;
     }
 }

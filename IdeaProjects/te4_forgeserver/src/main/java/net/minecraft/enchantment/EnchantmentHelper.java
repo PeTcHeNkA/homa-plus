@@ -33,10 +33,11 @@ public class EnchantmentHelper {
     public static int getEnchantmentLevel(Enchantment enchID, ItemStack stack) {
         if (stack.isEmpty()) return 0;
         else {
-            NBTTagList nbttaglist = stack.getEnchantmentTagList();
+            NBTTagList list = stack.getEnchantmentTagListFast();
+            if(list == null)return 0;
 
-            for (int i = 0; i < nbttaglist.tagCount(); ++i) {
-                NBTTagCompound nbttagcompound = nbttaglist.getCompoundTagAt(i);
+            for (int i = 0; i < list.tagCount(); ++i) {
+                NBTTagCompound nbttagcompound = list.getCompoundTagAt(i);
                 Enchantment enchantment = Enchantment.getEnchantmentByID(nbttagcompound.getShort("id"));
                 int j = nbttagcompound.getShort("lvl");
 
@@ -50,10 +51,10 @@ public class EnchantmentHelper {
     //thread-safe
     public static Map<Enchantment, Integer> getEnchantments(ItemStack stack) {
         Map<Enchantment, Integer> map = Maps.newLinkedHashMap();
-        NBTTagList nbttaglist = stack.getItem() == Items.ENCHANTED_BOOK ? ItemEnchantedBook.getEnchantments(stack) : stack.getEnchantmentTagList();
+        NBTTagList list = stack.getItem() == Items.ENCHANTED_BOOK ? ItemEnchantedBook.getEnchantments(stack) : stack.getEnchantmentTagList();
 
-        for (int i = 0; i < nbttaglist.tagCount(); ++i) {
-            NBTTagCompound nbttagcompound = nbttaglist.getCompoundTagAt(i);
+        for (int i = 0; i < list.tagCount(); ++i) {
+            NBTTagCompound nbttagcompound = list.getCompoundTagAt(i);
             Enchantment enchantment = Enchantment.getEnchantmentByID(nbttagcompound.getShort("id"));
             int j = nbttagcompound.getShort("lvl");
             map.put(enchantment, j);
@@ -71,10 +72,10 @@ public class EnchantmentHelper {
 
             if (enchantment != null) {
                 int i = entry.getValue();
-                NBTTagCompound nbttagcompound = new NBTTagCompound(4);
-                nbttagcompound.setShortU("id", (short)Enchantment.getEnchantmentID(enchantment));
-                nbttagcompound.setShortU("lvl", (short)i);
-                nbttaglist.appendTag(nbttagcompound);
+                NBTTagCompound nbt = new NBTTagCompound(4);
+                nbt.setShortU("id", (short)Enchantment.getEnchantmentID(enchantment));
+                nbt.setShortU("lvl", (short)i);
+                nbttaglist.appendTag(nbt);
 
                 if (stack.getItem() == Items.ENCHANTED_BOOK)
                     ItemEnchantedBook.addEnchantment(stack, new EnchantmentData(enchantment, i));
@@ -119,11 +120,13 @@ public class EnchantmentHelper {
     private static int getEnchantmentModifierDamage(ItemStack stack, DamageSource source) {
         int in = 0;
         if (!stack.isEmpty()) {
-            NBTTagList nbttaglist = stack.getEnchantmentTagList();
+            NBTTagList list = stack.getEnchantmentTagListFast();
+            if(list == null)return 0;
 
-            for (int i = 0; i < nbttaglist.tagCount(); ++i) {
-                int id = nbttaglist.getCompoundTagAt(i).getShort("id");
-                int lvl = nbttaglist.getCompoundTagAt(i).getShort("lvl");
+            for (int i = 0, l = list.tagCount(); i < l; ++i) {
+                NBTTagCompound tag = list.getCompoundTagAt(i);
+                int id  = tag.getShort("id");
+                int lvl = tag.getShort("lvl");
 
                 Enchantment ench = Enchantment.getEnchantmentByID(id);
                 if(ench != null)in += ench.calcModifierDamage(lvl, source);
@@ -145,11 +148,13 @@ public class EnchantmentHelper {
     public static float getModifierForCreature(ItemStack stack, EnumCreatureAttribute attr) {
         float in = 0;
         if (!stack.isEmpty()) {
-            NBTTagList nbttaglist = stack.getEnchantmentTagList();
+            NBTTagList list = stack.getEnchantmentTagListFast();
+            if(list == null)return 0;
 
-            for (int i = 0; i < nbttaglist.tagCount(); ++i) {
-                int id = nbttaglist.getCompoundTagAt(i).getShort("id");
-                int lvl = nbttaglist.getCompoundTagAt(i).getShort("lvl");
+            for (int i = 0, l = list.tagCount(); i < l; ++i) {
+                NBTTagCompound tag = list.getCompoundTagAt(i);
+                int id  = tag.getShort("id");
+                int lvl = tag.getShort("lvl");
 
                 Enchantment ench = Enchantment.getEnchantmentByID(id);
                 if(ench != null)in += ench.calcDamageByCreature(lvl, attr);
@@ -169,11 +174,13 @@ public class EnchantmentHelper {
     //tread-safe
     private static void applyThornEnchantments(EntityLivingBase user, Entity attacker, ItemStack stack) {
         if (!stack.isEmpty()) {
-            NBTTagList nbttaglist = stack.getEnchantmentTagList();
+            NBTTagList list = stack.getEnchantmentTagListFast();
+            if(list == null)return;
 
-            for (int i = 0; i < nbttaglist.tagCount(); ++i) {
-                int id = nbttaglist.getCompoundTagAt(i).getShort("id");
-                int lvl = nbttaglist.getCompoundTagAt(i).getShort("lvl");
+            for (int i = 0, l = list.tagCount(); i < l; ++i) {
+                NBTTagCompound tag = list.getCompoundTagAt(i);
+                int id  = tag.getShort("id");
+                int lvl = tag.getShort("lvl");
 
                 Enchantment ench = Enchantment.getEnchantmentByID(id);
                 if(ench != null)ench.onUserHurt(user, attacker, lvl);
@@ -196,11 +203,13 @@ public class EnchantmentHelper {
     //tread-safe
     private static void applyArthropodEnchantments(EntityLivingBase user, Entity target, ItemStack stack) {
         if (!stack.isEmpty()) {
-            NBTTagList nbttaglist = stack.getEnchantmentTagList();
+            NBTTagList list = stack.getEnchantmentTagListFast();
+            if(list == null)return;
 
-            for (int i = 0; i < nbttaglist.tagCount(); ++i) {
-                int id = nbttaglist.getCompoundTagAt(i).getShort("id");
-                int lvl = nbttaglist.getCompoundTagAt(i).getShort("lvl");
+            for (int i = 0, l = list.tagCount(); i < l; ++i) {
+                NBTTagCompound tag = list.getCompoundTagAt(i);
+                int id  = tag.getShort("id");
+                int lvl = tag.getShort("lvl");
 
                 Enchantment ench = Enchantment.getEnchantmentByID(id);
                 if(ench != null)ench.onEntityDamaged(user, target, lvl);

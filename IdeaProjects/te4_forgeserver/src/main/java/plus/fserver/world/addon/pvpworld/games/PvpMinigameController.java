@@ -29,11 +29,10 @@ import plus.tson.TsonMap;
 import plus.tson.TsonObj;
 import java.util.*;
 import static plus.tson.ext.TsonAccessUtils.*;
-import static plus.fserver.api.ServerCommand.*;
 
 
 public class PvpMinigameController extends MinigameController {
-    private GameType type;
+    private GameType gameType;
     private int rounds;
     private boolean isImmutable;
     private int preparationTicks = 20*15;
@@ -76,7 +75,7 @@ public class PvpMinigameController extends MinigameController {
     @Override
     public void loadConfigurations(TsonMap map) {
         respawner.fromTson(map.getList("map.positions"));
-        type               = McTsonUtils.getGameType(getR(map, "map.gametype"));
+        gameType = McTsonUtils.getGameType(getR(map, "map.gametype"));
 
         isImmutable        = getR(map, "map.immutable"         , true        );
         preparationTicks   = getR(map, "game.preparation-ticks", preparationTicks);
@@ -218,28 +217,12 @@ public class PvpMinigameController extends MinigameController {
 
     @Override
     public boolean onCommand(MinigameWorld world, ICommandSender sender, @Nullable ICommand command, String cmdName, String[] args) {
-        if(sender instanceof EntityPlayerMP) {
-            EntityPlayerMP player = (EntityPlayerMP) sender;
-            if (cmdName.equals("syskit")) {
-                PvWData data = world.data();
-
-                if(data.usedKit != null || kitMap == null){
-                    reply(sender, "&cChoose kit is locked!");
-                } else {
-                    PvPlData pData = (PvPlData)data.stats(player);
-
-                    GiveItems kit = kitMap.get(args[0]);
-                    if(kit == null && !args[0].equals("null")){
-                        reply(sender, "&cKit ["+args[0]+"] not founded!");
-                    } else {
-                        pData.usedKit = kit;
-                    }
-                }
-                return true;
-            }
-            return !player.server.getPlayerList().canSendCommands(player.getGameProfile());
-        }
-        return false;
+        if(world.finished())return false;
+        if(GiveItems.processKitCommand(kitMap, world, sender, command, cmdName, args))
+            return true;
+        if(sender instanceof EntityPlayerMP)
+            return !((EntityPlayerMP) sender).isOp();
+        else return false;
     }
 
 
@@ -346,7 +329,7 @@ public class PvpMinigameController extends MinigameController {
         respawner.respawn(world, members);
         for(EntityPlayerMP player:members){
             CleanLobbyTeleporter.cleanPlayer(player);
-            player.setGameType(type);
+            player.setGameType(gameType);
         }
 
         giveAllKits(defaultKit, world, members);
@@ -424,6 +407,6 @@ public class PvpMinigameController extends MinigameController {
 
     @Override
     public boolean isImmutable() {
-        return type == GameType.ADVENTURE || isImmutable;
+        return gameType == GameType.ADVENTURE || isImmutable;
     }
 }

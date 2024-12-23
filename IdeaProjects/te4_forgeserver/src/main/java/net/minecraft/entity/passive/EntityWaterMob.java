@@ -7,6 +7,8 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import plus.fserver.ElcaMobs;
+import plus.fserver.utls.NbtUtils;
+import plus.fserver.utls.math.MathUtls;
 
 
 public abstract class EntityWaterMob extends EntityLiving implements IAnimals {
@@ -47,7 +49,7 @@ public abstract class EntityWaterMob extends EntityLiving implements IAnimals {
 
     @Override
     protected int getExperiencePoints(EntityPlayer player) {
-        return 1 + this.world.rand.nextInt(3);
+        return 1 + this.rand.nextInt(3);
     }
 
 
@@ -61,10 +63,10 @@ public abstract class EntityWaterMob extends EntityLiving implements IAnimals {
             this.setAir(i);
 
             if (this.getAir() == -20) {
-                this.setAir(0);
+                this.setAir(MathUtls.INT_0);
                 this.attackEntityFrom(DamageSource.DROWN, 2.0F);
             }
-        } else this.setAir(300);
+        } else this.setAir(MathUtls.INT_300);
     }
 
 

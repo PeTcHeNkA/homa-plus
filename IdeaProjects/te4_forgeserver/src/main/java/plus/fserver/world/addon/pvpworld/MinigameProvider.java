@@ -5,9 +5,8 @@ import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import plus.fserver.api.ChatPacketBuilder;
 import plus.fserver.api.ITextSender;
-import plus.tson.TsonFile;
-import plus.tson.TsonMap;
-import plus.tson.TsonObj;
+import plus.fserver.server.Reflector;
+import plus.tson.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -17,7 +16,7 @@ import static plus.tson.ext.TsonAccessUtils.*;
 
 public class MinigameProvider {
     private static MinigameProvider INSTANCE;
-    private final HashMap<String, Supplier<MinigameController>> registry = new HashMap<>();
+    private final HashMap<String, Supplier<MinigameController>> cache = new HashMap<>();
     private final ObjectOpenHashSet<String> allIds = new ObjectOpenHashSet<>(4);
     private final HashMap<String, Map> maps = new HashMap<>(4);
     private HashMap<String, ITextSender> msgCache;
@@ -34,16 +33,16 @@ public class MinigameProvider {
     private MinigameProvider(String pathToRootCfg) {
         this.pathToRootCfg = pathToRootCfg;
     }
-
-
-    public void register(String id, Supplier<MinigameController> func){
-        registry.put(id, func);
-    }
-
-
-    public MinigameController create(String id){
-        return registry.get(id).get();
-    }
+//
+//
+//    public void register(String id, Supplier<MinigameController> func){
+//        registry.put(id, func);
+//    }
+//
+//
+//    public MinigameController create(String id){
+//        return registry.get(id).get();
+//    }
 
 
     public TsonMap getCfg(){
@@ -191,15 +190,33 @@ public class MinigameProvider {
                     msg = ChatPacketBuilder.of("Default message: ["+id+"]");
                 return msg;
             }
-
-
-            public String gameId(){
-                return config.getStr("game-id");
-            }
+//
+//
+//            public String gameId(){
+//                return config.getStr("game-id");
+//            }
 
 
             public Supplier<MinigameController> getFactory(){
-                return registry.get(gameId());
+                if(gFactory != null)return gFactory;
+
+
+                TsonObj func = getCfg().get("factory");
+                if(func.isCustom()){
+                    return (Supplier<MinigameController>) func.getField();
+                }
+                if(func.isString()){
+                    gFactory = cache.get(func.getStr());
+                    if(gFactory != null)return gFactory;
+                    try {
+                        gFactory = (Supplier<MinigameController>)Reflector.compileCtor(Class.forName(func.getStr()));
+                        cache.put(func.getStr(), gFactory);
+                        return gFactory;
+                    } catch (ClassNotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                throw new RuntimeException("Unsupported type: "+func);
             }
 
 

@@ -97,7 +97,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import plus.fserver.ElcaCV;
 import plus.fserver.utls.NbtUtils;
 import plus.fserver.utls.math.MathUtls;
-
 import static plus.fserver.ElcaCV.SERVER_COMPILE;
 
 
@@ -632,10 +631,11 @@ public abstract class EntityPlayer extends EntityLivingBase {
 
 
     protected void destroyVanishingCursedItems() {
-        for (int i = 0; i < this.inventory.getSizeInventory(); ++i) {
-            ItemStack itemstack = this.inventory.getStackInSlot(i);
+        InventoryPlayer inventory = this.inventory;
+        for (int i = 0, s = inventory.getSizeInventory(); i < s; ++i) {
+            ItemStack itemstack = inventory.getStackInSlot(i);
             if (!itemstack.isEmpty() && EnchantmentHelper.hasVanishingCurse(itemstack)) {
-                this.inventory.removeStackFromSlot(i);
+                inventory.removeStackFromSlot(i);
             }
         }
     }
@@ -666,7 +666,7 @@ public abstract class EntityPlayer extends EntityLivingBase {
         }
         if (stack.getItem().onDroppedByPlayer(stack, this)) {
             int count = dropAll ? this.inventory.getCurrentItem().getCount() : 1;
-            return net.minecraftforge.common.ForgeHooks.onPlayerTossEvent(this, inventory.decrStackSize(inventory.currentItem, count), true);
+            return ForgeHooks.onPlayerTossEvent(this, inventory.decrStackSize(inventory.currentItem, count), true);
         }
         return null;
     }

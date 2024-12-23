@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.epoll.Epoll;
 import io.netty.util.AttributeKey;
+import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
@@ -132,5 +133,10 @@ public final class ElcaServerUtils {
     public static void applyForPlayerSafe(MinecraftServer server, UUID uuid, Consumer<EntityPlayerMP> task, TaskType type, boolean advancements){
         if(ElcaCV2.LIBBUILD)throw new UnsupportedOperationException("Use only on Elca Server!");
         server.getPlayerList().applyForPlayerSafe(uuid, task, type, advancements);
+    }
+
+
+    public static boolean isOp(EntityPlayerMP player){
+        return player.isOp();
     }
 }

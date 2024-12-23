@@ -144,7 +144,13 @@ public class EntityZombie extends EntityMob {
 
     @Override
     protected int getExperiencePoints(EntityPlayer player) {
-        if (this.isChild()) this.experienceValue = (int)((float)this.experienceValue * 2.5F);
+        if (this.isChild()) {
+            int prev = this.experienceValue;
+            this.experienceValue = (int)((float)prev * 2.5F);
+            int result = super.getExperiencePoints(player);
+            this.experienceValue = prev;
+            return result;
+        }
         return super.getExperiencePoints(player);
     }
 

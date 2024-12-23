@@ -349,14 +349,9 @@ public abstract class EntityLivingBase extends Entity {
     protected void onDeathUpdate() {
         ++this.deathTime;
         if (this.deathTime == 20) {
-            if ((!this.world.isRemote || SERVER_COMPILE) && (this.isPlayer() || this.recentlyHit > 0 && this.canDropLoot() && this.world.getGameRules().doMobLoot.getBoolean())) {
-                int i = this.getExperiencePoints(this.attackingPlayer);
-                i = net.minecraftforge.event.ForgeEventFactory.getExperienceDrop(this, this.attackingPlayer, i);
-                while (i > 0) {
-                    int j = EntityXPOrb.getXPSplit(i);
-                    i -= j;
-                    this.world.spawnEntity(new EntityXPOrb(this.world, this.posX, this.posY, this.posZ, j));
-                }
+            World world = this.world;
+            if ((!world.isRemote || SERVER_COMPILE) && (this.isPlayer() || this.recentlyHit > 0 && this.canDropLoot() && world.getGameRules().doMobLoot.getBoolean())) {
+                dropExp(this, attackingPlayer);
             }
             this.setDead();
             if(world.isRemote) {
@@ -365,9 +360,26 @@ public abstract class EntityLivingBase extends Entity {
                     double d2 = rand.nextGaussian() * 0.02D;
                     double d0 = rand.nextGaussian() * 0.02D;
                     double d1 = rand.nextGaussian() * 0.02D;
-                    this.world.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, this.posX + (double) (this.rand.nextFloat() * this.width * 2.0F) - (double) this.width, this.posY + (double) (this.rand.nextFloat() * this.height), this.posZ + (double) (this.rand.nextFloat() * this.width * 2.0F) - (double) this.width, d2, d0, d1);
+                    world.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, this.posX + (double) (this.rand.nextFloat() * this.width * 2.0F) - (double) this.width, this.posY + (double) (this.rand.nextFloat() * this.height), this.posZ + (double) (this.rand.nextFloat() * this.width * 2.0F) - (double) this.width, d2, d0, d1);
                 }
             }
+        }
+    }
+
+
+    public static void dropExp(EntityLivingBase inst, EntityPlayer attackingPlayer){
+        int amount = inst.getExperiencePoints(attackingPlayer);
+        dropExp(inst.world, inst.posX, inst.posY, inst.posZ,
+                ForgeEventFactory.getExperienceDrop(inst, attackingPlayer, amount)
+        );
+    }
+
+
+    public static void dropExp(World world, double x, double y, double z, int amount){
+        while (amount > 0) {
+            int j = EntityXPOrb.getXPSplit(amount);
+            amount -= j;
+            world.spawnEntity(new EntityXPOrb(world, x, y, z, j));
         }
     }
 

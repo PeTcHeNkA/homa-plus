@@ -458,7 +458,16 @@ public final class ItemStack implements ICapabilitySerializable<NBTTagCompound> 
 
 
     public NBTTagList getEnchantmentTagList() {
-        return (this.stackTagCompound != null) ? this.stackTagCompound.getTagList("ench", 10) : new NBTTagList();
+        NBTTagCompound tag = this.stackTagCompound;
+        return (tag != null) ? tag.getTagList("ench", 10) : new NBTTagList();
+    }
+
+
+    @Nullable
+    public NBTTagList getEnchantmentTagListFast() {
+        NBTTagCompound tag = this.stackTagCompound;
+        if(tag == null)return null;
+        return tag.getListOrNull("ench", 10);
     }
 
 
@@ -548,14 +557,16 @@ public final class ItemStack implements ICapabilitySerializable<NBTTagCompound> 
         }
         if (this.hasTagCompound()) {
             if ((i2 & 0x1) == 0x0) {
-                final NBTTagList nbttaglist = this.getEnchantmentTagList();
-                for (int j = 0; j < nbttaglist.tagCount(); ++j) {
-                    final NBTTagCompound nbttagcompound = nbttaglist.getCompoundTagAt(j);
-                    final int k = nbttagcompound.getShort("id");
-                    final int l = nbttagcompound.getShort("lvl");
-                    final Enchantment enchantment = Enchantment.getEnchantmentByID(k);
-                    if (enchantment != null) {
-                        list.add(enchantment.getTranslatedName(l));
+                final NBTTagList ench = this.getEnchantmentTagListFast();
+                if(ench != null) {
+                    for (int j = 0; j < ench.tagCount(); ++j) {
+                        final NBTTagCompound nbttagcompound = ench.getCompoundTagAt(j);
+                        final int k = nbttagcompound.getShort("id");
+                        final int l = nbttagcompound.getShort("lvl");
+                        final Enchantment enchantment = Enchantment.getEnchantmentByID(k);
+                        if (enchantment != null) {
+                            list.add(enchantment.getTranslatedName(l));
+                        }
                     }
                 }
             }

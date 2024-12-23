@@ -16,6 +16,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.*;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.AbstractHorse;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.init.Items;
@@ -41,11 +42,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.client.CPacketClientSettings;
 import net.minecraft.network.play.server.*;
 import net.minecraft.potion.PotionEffect;
-import net.minecraft.scoreboard.IScoreCriteria;
-import net.minecraft.scoreboard.Score;
-import net.minecraft.scoreboard.ScoreObjective;
-import net.minecraft.scoreboard.ScorePlayerTeam;
-import net.minecraft.scoreboard.Team;
+import net.minecraft.scoreboard.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.server.management.PlayerInteractionManager;
@@ -476,25 +473,26 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener, 
 
             captureDrops = false;
             PlayerDropsEvent event = new PlayerDropsEvent(this, cause, capturedDrops, recentlyHit > 0);
-            if (!net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(event)) {
-                for (net.minecraft.entity.item.EntityItem item : capturedDrops) {
+            if (!MinecraftForge.EVENT_BUS.post(event)) {
+                for (EntityItem item : capturedDrops) {
                     this.world.spawnEntity(item);
                 }
             }
         }
 
-        for (ScoreObjective scoreobjective : this.world.getScoreboard().getObjectivesFromCriteria(IScoreCriteria.DEATH_COUNT)) {
-            Score score = this.getWorldScoreboard().getOrCreateScore(this.getName(), scoreobjective);
+        Scoreboard sb = this.getWorldScoreboard();
+        for (ScoreObjective scoreobjective : sb.getObjectivesFromCriteria(IScoreCriteria.DEATH_COUNT)) {
+            Score score = sb.getOrCreateScore(this.getName(), scoreobjective);
             score.incrementScore();
         }
 
         EntityLivingBase entitylivingbase = this.getAttackingEntity();
 
         if (entitylivingbase != null) {
-            EntityList.EntityEggInfo entitylist$entityegginfo = EntityList.ENTITY_EGGS.get(EntityList.getKey(entitylivingbase));
+            EntityList.EntityEggInfo info = EntityList.ENTITY_EGGS.get(EntityList.getKey(entitylivingbase));
 
-            if (entitylist$entityegginfo != null) {
-                this.addStat(entitylist$entityegginfo.entityKilledByStat);
+            if (info != null) {
+                this.addStat(info.entityKilledByStat);
             }
 
             entitylivingbase.awardKillScore(this, this.scoreValue, cause);
@@ -1390,5 +1388,10 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener, 
     @Override
     public EntityPlayerMP getSelfPlayer() {
         return this;
+    }
+
+
+    public boolean isOp(){
+        return !server.getPlayerList().canSendCommands(getGameProfile());
     }
 }

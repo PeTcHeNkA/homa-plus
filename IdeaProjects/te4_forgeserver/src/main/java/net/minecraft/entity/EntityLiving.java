@@ -244,13 +244,17 @@ public abstract class EntityLiving extends EntityLivingBase {
     protected int getExperiencePoints(EntityPlayer player) {
         if (this.experienceValue > 0) {
             int i = this.experienceValue;
+            FixedItemList inv = this.inventoryArmor;
+            Random rand = this.rand;
             for (int j = 0; j < 4; ++j)
-                if (!this.inventoryArmor.get(j).isEmpty() && this.inventoryArmorDropChances[j] <= 1.0F)
-                    i += 1 + this.rand.nextInt(3);
+                if(!inv.get(j).isEmpty() && this.inventoryArmorDropChances[j] <= 1.0F)
+                    i += 1 + rand.nextInt(3);
+
+            inv = this.inventoryHands;
 
             for (int k = 0; k < 2; ++k)
-                if (!this.inventoryHands.get(k).isEmpty() && this.inventoryHandsDropChances[k] <= 1.0F)
-                    i += 1 + this.rand.nextInt(3);
+                if (!inv.get(k).isEmpty() && this.inventoryHandsDropChances[k] <= 1.0F)
+                    i += 1 + rand.nextInt(3);
             return i;
         } else return this.experienceValue;
     }
