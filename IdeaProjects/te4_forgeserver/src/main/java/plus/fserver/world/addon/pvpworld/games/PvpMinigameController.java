@@ -4,8 +4,10 @@ import com.google.common.collect.ImmutableMap;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.MobEffects;
+import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
@@ -146,6 +148,7 @@ public class PvpMinigameController extends MinigameController {
             CommonWorldData data = world.data();
 
             event.setCanceled(true);
+            player.inventory.clear();
             player.onPlayerDeath(event.getSource(), false, false);
             player.setGameType(GameType.SPECTATOR);
 
@@ -408,5 +411,11 @@ public class PvpMinigameController extends MinigameController {
     @Override
     public boolean isImmutable() {
         return gameType == GameType.ADVENTURE || isImmutable;
+    }
+
+
+    @Override
+    public boolean onDropItem(MinigameWorld world, ItemStack item, EntityPlayer player) {
+        return false;
     }
 }

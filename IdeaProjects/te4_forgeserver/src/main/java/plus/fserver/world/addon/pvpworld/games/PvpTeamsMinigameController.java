@@ -6,6 +6,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.MobEffects;
+import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
@@ -226,6 +227,7 @@ public class PvpTeamsMinigameController extends MinigameController {
             WData data = world.data();
 
             event.setCanceled(true);
+            dPlayer.inventory.clear();
             dPlayer.onPlayerDeath(event.getSource(), false, false);
             dPlayer.setGameType(GameType.SPECTATOR);
 
@@ -430,5 +432,11 @@ public class PvpTeamsMinigameController extends MinigameController {
     @Override
     public boolean isImmutable() {
         return gameType == GameType.ADVENTURE || isImmutable;
+    }
+
+
+    @Override
+    public boolean onDropItem(MinigameWorld world, ItemStack item, EntityPlayer player) {
+        return false;
     }
 }

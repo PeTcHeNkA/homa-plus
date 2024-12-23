@@ -6,6 +6,7 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.server.MinecraftServer;
@@ -214,6 +215,11 @@ public abstract class MinigameController {
 
 
     public void onNewGameStarted(MinigameWorld world, EntityPlayerMP[] players) {}
+
+
+    public boolean onDropItem(MinigameWorld world, ItemStack item, EntityPlayer player) {
+        return true;
+    }
 
 
     public boolean isImmutable(){return false;}

@@ -462,7 +462,8 @@ public class Item extends net.minecraftforge.registries.IForgeRegistryEntry.Impl
      * @param item The item stack, before the item is removed.
      */
     public boolean onDroppedByPlayer(ItemStack item, EntityPlayer player) {
-        return true;
+        return player.world.onDropItem(item, player);
+        //return true;
     }
 
 

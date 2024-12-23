@@ -27,6 +27,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Biomes;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.Packet;
 import net.minecraft.pathfinding.PathWorldListener;
@@ -4664,5 +4665,10 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
             for (int zPos = l2; zPos <= i3; ++zPos)
                 if ((chunk = localSelector.getLoadedE(xPos, zPos)) != null)
                     chunk.getEntitiesWithinAABBForEntity(entityIn, boundingBox, list, predicate);
+    }
+
+
+    public boolean onDropItem(ItemStack item, EntityPlayer player) {
+        return true;
     }
 }

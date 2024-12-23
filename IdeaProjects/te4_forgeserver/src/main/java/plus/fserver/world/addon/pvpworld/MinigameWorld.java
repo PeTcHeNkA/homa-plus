@@ -6,6 +6,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemStack;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.server.MinecraftServer;
@@ -20,6 +21,7 @@ import net.minecraft.world.storage.ISaveHandler;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.ITeleporter;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import plus.fserver.ElcaCV;
 import plus.fserver.utls.FastValidators;
@@ -329,6 +331,12 @@ public abstract class MinigameWorld extends MemoryWorld {
     @Override
     public List<String> onCompleteCommand(ICommandSender sender, @Nullable ICommand icommand, String[] args, @Nullable BlockPos pos) {
         return controller().onCompleteCommand(this, sender, icommand, args, pos);
+    }
+
+
+    @Override
+    public boolean onDropItem(@NotNull ItemStack item, @NotNull EntityPlayer player) {
+        return controller().onDropItem(this, item, player);
     }
 
 
