@@ -267,6 +267,22 @@ public class SPacketChunkData extends SNodePacketPlayBase {
     }
 
 
+    public void setBuffer(byte[] buffer){
+        this.buffer = buffer;
+    }
+
+
+    public byte[] bytes(){
+        return buffer;
+    }
+
+
+    public void free(){
+        free(buffer);
+        buffer = null;
+    }
+
+
     private ByteBuf getWriteBuffer() {
         ByteBuf buf = Unpooled.wrappedBuffer(this.buffer);
         buf.writerIndex(0);
@@ -284,14 +300,11 @@ public class SPacketChunkData extends SNodePacketPlayBase {
                 resultMask |= 1 << index;
                 storage.write(buf);
                 storage.writeBlockLightTo(buf);
-                //buf.writeBytes(storage.getBlockLight().getData());
                 if (hasSkyLight) {
                     storage.writeSkyLightTo(buf);
-                    //buf.writeBytes(storage.getSkyLight().getData());
                 }
             }
         }
-
         if (fullChunk) {
             buf.writeBytes(chunk.getBiomeArray());
         }
@@ -300,9 +313,6 @@ public class SPacketChunkData extends SNodePacketPlayBase {
 
 
     private static int calculateChunkSize(Chunk chunk, boolean hasSkyLight, int mask, boolean isFull) {
-        //light engine
-        //chunk.getLightingEngine().processLightUpdates();
-
         int size = 0;
         ExtendedBlockStorage[] arrays = chunk.getBlockStorageArray();
 

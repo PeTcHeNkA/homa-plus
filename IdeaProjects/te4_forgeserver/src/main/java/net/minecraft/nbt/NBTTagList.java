@@ -3,7 +3,11 @@ package net.minecraft.nbt;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
+
 import plus.fserver.utls.collections.ArrayListE6;
 import static net.minecraft.server.MinecraftServer.LOGGER;
 
@@ -253,7 +257,21 @@ public class NBTTagList extends NBTBase implements java.lang.Iterable<NBTBase> {
 
 
     @Override
-    public java.util.Iterator<NBTBase> iterator() {
+    public Iterator<NBTBase> iterator() {
         return tagList.iterator();
+    }
+
+
+    protected void trim(Map<String,String> kc, Map<NBTBase, NBTBase> vc){
+        ArrayListE6<NBTBase> tagList = this.tagList;
+        tagList.trimToSize();
+
+        for (int i = 0, l = tagList.sizeC(); i < l; i++){
+            NBTBase cur   = tagList.get(i);
+            if(cur == null)continue;
+            NBTBase nCur  = NBTTagCompound.tryTrim(cur, kc, vc);
+
+            if(nCur != cur) tagList.set(i, nCur);
+        }
     }
 }

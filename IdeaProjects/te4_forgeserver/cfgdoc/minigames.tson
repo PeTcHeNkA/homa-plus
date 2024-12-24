@@ -1,14 +1,19 @@
 {
 	example-id = {
-		//Путь к карте
+		// Путь к карте
 		map-path = "/path/to/map/dump.nbt",
-		//Путь к конфигу, если нет - используется встроенный
+		// Путь к конфигу, если нет - используется встроенный
 		cfg-path = "/path/to/map/config.tson",
-		//Встроенный конфиг
+		// Встроенный конфиг
 		config = {
-			teams = 2          , //Количество команд
-			player-per-team = 1, //Количество игроков в 1 команде
-			game-id = "game-id", //ID игры
+			teams = 2          , // Количество команд
+			player-per-team = 1, // Количество игроков в 1 команде
+
+			// Класс-котроллер или кастомная функция создания конроллера
+			// Контроллеры 
+			// plus.fserver.world.addon.pvpworld.games.PvpMinigameController
+			// plus.fserver.world.addon.pvpworld.games.PvpTeamsMinigameController
+			factory = "plus.ExampleClass"
 		}
 	}
 }

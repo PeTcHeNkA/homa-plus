@@ -310,7 +310,7 @@ public abstract class MinigameWorld extends MemoryWorld {
     @Override
     public IChunkProvider createChunkProvider() {
         MinigameController ctrl = controller();
-        DumpChunkLoader loader = new DumpChunkLoader(ctrl.getMapNbt(), ctrl.getMapCache());
+        DumpChunkLoader loader = new DumpChunkLoader(ctrl.getMapNbt(), true);
         return new MemoryChunkProviderServer(this, loader, createChunkGenerator());
     }
 

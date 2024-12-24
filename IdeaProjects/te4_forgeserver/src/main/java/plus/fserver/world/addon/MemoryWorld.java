@@ -37,7 +37,7 @@ public class MemoryWorld extends WorldServerMulti {
                 return new MemoryWorld(server, saveHandler, dimId, delegate, profiler) {
                     @Override
                     public IChunkProvider createChunkProvider() {
-                        return new MemoryChunkProviderServer(this, new DumpChunkLoader(dump, null), createChunkGenerator());
+                        return new MemoryChunkProviderServer(this, new DumpChunkLoader(dump, false), createChunkGenerator());
                     }
                 };
             }

@@ -76,6 +76,11 @@ public class NBTTagString extends NBTBase {
     }
 
 
+    public void setString(String data){
+        this.data = data;
+    }
+
+
     public static String quoteAndEscape(final String p_193588_0_) {
         final StringBuilder stringbuilder = new StringBuilder("\"");
         for (int i = 0; i < p_193588_0_.length(); ++i) {

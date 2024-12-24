@@ -4,6 +4,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import net.minecraft.crash.CrashReport;
@@ -571,6 +572,39 @@ public class NBTTagCompound extends NBTBase {
                 this.setTag(s, nbtbase.copy());
             }
         }
+    }
+
+
+    public static NBTBase tryTrim(NBTBase base, Map<String,String> kc, Map<NBTBase, NBTBase> vc){
+        NBTBase prev = vc.get(base);
+        if(prev == null){
+            vc.put(base, base);
+            int id = base.getId();
+
+            if(id == 10){
+                NBTTagCompound nbt2 = (NBTTagCompound) base;
+                nbt2.tagMap.trim(kc, entry -> {
+                    NBTBase nbt = entry.getValue();
+                    NBTBase result = tryTrim(nbt, kc, vc);
+                    if(nbt != result) entry.setValue(result);
+                });
+
+            } else if (id == 8) {
+                NBTTagString str = (NBTTagString) base;
+                String str1 = str.getString();
+
+                String prev1 = kc.get(str1);
+                if(prev1 == null){
+                    kc.put(prev1 = str1, str1);
+                }
+                str.setString(prev1);
+            } else if (id == 9) {
+                NBTTagList list = (NBTTagList) base;
+                list.trim(kc, vc);
+            }
+            return base;
+        }
+        return prev;
     }
 
 

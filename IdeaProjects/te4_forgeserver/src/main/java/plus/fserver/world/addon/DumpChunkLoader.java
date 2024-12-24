@@ -2,7 +2,6 @@ package plus.fserver.world.addon;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.MinecraftException;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
@@ -25,18 +24,18 @@ import java.util.function.Consumer;
 public class DumpChunkLoader implements IAsyncChunkLoader {
     private static final Tuple<Chunk,NBTTagCompound> EMPTY = new Tuple<>(EmptyChunk.INSTANCE, new NBTTagCompound(2,1));
     private final NBTTagCompound data;
-    private final Long2ObjectOpenHashMap<ExtendedBlockStorage[]> cache;
+    private final boolean useBiomeRef;
 
-    public DumpChunkLoader(NBTTagCompound data, Long2ObjectOpenHashMap<ExtendedBlockStorage[]> cache) {
+    public DumpChunkLoader(NBTTagCompound data, boolean useBiomeRef) {
         this.data = data;
-        this.cache = cache;
+        this.useBiomeRef = useBiomeRef;
     }
 
 
     @Nullable
     @Override
     public Object[] loadAsync(WorldServer world, int x, int z) throws IOException {
-        Tuple<Chunk, NBTTagCompound> data = createChunk(cache, this.data, world, x, z);
+        Tuple<Chunk, NBTTagCompound> data = createChunk(this.data, world, x, z, useBiomeRef);
         return new Object[]{data.A, data.B};
     }
 
@@ -44,7 +43,7 @@ public class DumpChunkLoader implements IAsyncChunkLoader {
     @Nullable
     @Override
     public Chunk loadChunk(World worldIn, int x, int z) throws IOException {
-        Tuple<Chunk, NBTTagCompound> data = createChunk(cache, this.data, worldIn, x, z);
+        Tuple<Chunk, NBTTagCompound> data = createChunk(this.data, worldIn, x, z, useBiomeRef);
         NbtUtils.loadEntities(worldIn, data.B.getCompoundTag(SStrings.CL_LEVEL), data.A);
         return data.A;
     }
@@ -107,44 +106,18 @@ public class DumpChunkLoader implements IAsyncChunkLoader {
     }
 
 
-    public static Tuple<Chunk,NBTTagCompound> createChunk(Long2ObjectOpenHashMap<ExtendedBlockStorage[]> cache, NBTTagCompound data, World world, int x, int z){
+    public static Tuple<Chunk,NBTTagCompound> createChunk(NBTTagCompound data, World world, int x, int z, boolean useBiomeRef){
         String key = chunkKey(x, z);
         if(data.hasKey(key)){
             NBTTagCompound nbt = data.getCompoundTag(key);
-            return new Tuple<>(createFromNbt(cache, nbt, world, x, z), nbt);
+            return new Tuple<>(createFromNbt(nbt, world, useBiomeRef), nbt);
         }
         return new Tuple<>(EmptyChunkGenerator.newEmptyChunk(world, x, z), EMPTY.B);
     }
 
 
-    private static Chunk createFromNbt(Long2ObjectOpenHashMap<ExtendedBlockStorage[]> cache, NBTTagCompound nbt, World world, int x, int z){
-        if(cache != null) {
-            ExtendedBlockStorage[] cached;
-            synchronized (cache){
-                cached = cache.get(ChunkPos.asLong(x, z));
-            }
-            Chunk chunk;
-            if (cached != null) {
-                chunk = new Chunk(world, x, z);
-
-                NbtUtils.readCommonChunkData(chunk, nbt);
-
-                ExtendedBlockStorage[] arr = chunk.getBlockStorageArray();
-                for (int i = 0; i < arr.length; i++) {
-                    arr[i] = cached[i];
-                }
-
-                NbtUtils.readChunkCapabilities(chunk, nbt);
-            } else {
-                chunk = NbtUtils.readChunkFromNBT(world, nbt);
-                synchronized (cache) {
-                    cache.put(ChunkPos.asLong(x, z), chunk.getBlockStorageArray());
-                }
-            }
-            return chunk;
-        } else {
-            return NbtUtils.readChunkFromNBT(world, nbt);
-        }
+    private static Chunk createFromNbt(NBTTagCompound nbt, World world, boolean useBiomeRef){
+        return NbtUtils.readChunkFromNBT(world, nbt, useBiomeRef);
     }
 
 

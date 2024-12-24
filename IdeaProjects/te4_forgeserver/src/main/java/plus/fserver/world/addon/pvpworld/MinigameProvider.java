@@ -6,6 +6,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import plus.fserver.api.ChatPacketBuilder;
 import plus.fserver.api.ITextSender;
 import plus.fserver.server.Reflector;
+import plus.fserver.utls.NbtUtils;
 import plus.tson.*;
 import java.io.File;
 import java.io.IOException;
@@ -33,16 +34,6 @@ public class MinigameProvider {
     private MinigameProvider(String pathToRootCfg) {
         this.pathToRootCfg = pathToRootCfg;
     }
-//
-//
-//    public void register(String id, Supplier<MinigameController> func){
-//        registry.put(id, func);
-//    }
-//
-//
-//    public MinigameController create(String id){
-//        return registry.get(id).get();
-//    }
 
 
     public TsonMap getCfg(){
@@ -110,12 +101,15 @@ public class MinigameProvider {
             this.pathToConfig = pathToConfig;
         }
 
+
         public NBTTagCompound getMap(){
             if(cachedMapNbt == null){
                 cachedMapNbt = readMap(pathToMap);
+                NbtUtils.trimNbt(cachedMapNbt);
             }
             return cachedMapNbt;
         }
+
 
         public TsonMap getCfg(){
             if(cachedCfg == null)

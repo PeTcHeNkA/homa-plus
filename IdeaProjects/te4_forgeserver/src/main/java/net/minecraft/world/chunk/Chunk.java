@@ -64,7 +64,7 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
     @Keep
     private final ExtendedBlockStorage[] storageArrays;
     @Keep
-    private final byte[] blockBiomeArray;
+    private byte[] blockBiomeArray;
     @Keep
     private final short[] precipitationHeightMap;
     @Keep
@@ -1436,6 +1436,13 @@ public class Chunk implements net.minecraftforge.common.capabilities.ICapability
 
     public byte[] getBiomeArray() {
         return this.blockBiomeArray;
+    }
+
+
+    public void setBiomeArrayRef(byte[] biomeArray) {
+        if(this.blockBiomeArray.length == biomeArray.length)
+            this.blockBiomeArray = biomeArray;
+        else setBiomeArray(biomeArray);
     }
 
 

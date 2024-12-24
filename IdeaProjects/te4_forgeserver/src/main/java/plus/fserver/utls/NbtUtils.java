@@ -15,8 +15,13 @@ import net.minecraft.world.chunk.storage.AnvilChunkLoader;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import plus.fserver.server.SStrings;
 import plus.fserver.world.light.LightingHooks;
+import plus.tson.utl.Te4HashMap;
+
 import javax.annotation.Nullable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.BiConsumer;
 
 
 public class NbtUtils {
@@ -72,11 +77,16 @@ public class NbtUtils {
 
 
     public static Chunk readChunkFromNBT(World worldIn, NBTTagCompound nbt) {
+        return readChunkFromNBT(worldIn, nbt, false);
+    }
+
+
+    public static Chunk readChunkFromNBT(World worldIn, NBTTagCompound nbt, boolean useBref) {
         int xPos = nbt.getInteger("xPos");
         int zPos = nbt.getInteger("zPos");
         Chunk chunk = new Chunk(worldIn, xPos, zPos);
 
-        readCommonChunkData(chunk, nbt);
+        readCommonChunkData(chunk, nbt, useBref);
         readChunkBlockStorage(chunk, nbt);
         readChunkCapabilities(chunk, nbt);
 
@@ -92,6 +102,11 @@ public class NbtUtils {
 
 
     public static void readCommonChunkData(Chunk chunk, NBTTagCompound nbt) {
+        readCommonChunkData(chunk, nbt, false);
+    }
+
+
+    public static void readCommonChunkData(Chunk chunk, NBTTagCompound nbt, boolean useBref) {
         NBTBase heightMap = nbt.getTag("HeightMap");
         if(heightMap instanceof NBTTagIntArrayUnsafe){
             chunk.setHeightMap(((NBTTagIntArrayUnsafe)heightMap).array());
@@ -104,8 +119,13 @@ public class NbtUtils {
         chunk.setLightPopulated(nbt.getBoolean("LightPopulated"));
         chunk.setInhabitedTime(nbt.getLong("InhabitedTime"));
 
-        if (nbt.hasKey("Biomes", 7))
-            chunk.setBiomeArray(nbt.getByteArray("Biomes"));
+        if (nbt.hasKey("Biomes", 7)) {
+            if(useBref) {
+                chunk.setBiomeArray(nbt.getByteArray("Biomes"));
+            } else {
+                chunk.setBiomeArrayRef(nbt.getByteArray("Biomes"));
+            }
+        }
 
         LightingHooks.readNeighborLightChecksFromNBT(chunk, nbt);
         chunk.setLightInitialized(nbt.getBoolean("LightPopulated"));
@@ -274,5 +294,13 @@ public class NbtUtils {
             }
         }
         compound.setBoolean("LightPopulated", chunkIn.isLightInitialized());
+    }
+
+
+    public static void trimNbt(NBTTagCompound nbt){
+        Te4HashMap<String, String>   keyCache  = new Te4HashMap<>();
+        Te4HashMap<NBTBase,NBTBase> valueCache = new Te4HashMap<>();
+
+        NBTTagCompound.tryTrim(nbt, keyCache, valueCache);
     }
 }

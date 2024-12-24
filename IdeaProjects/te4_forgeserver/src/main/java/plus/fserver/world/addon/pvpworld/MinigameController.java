@@ -14,7 +14,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.GameType;
-import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import plus.fserver.api.TextComponentAuto;
@@ -39,7 +38,6 @@ import java.util.function.Consumer;
 public abstract class MinigameController {
     private static final int MIN_PVPA_DIM_ID = 700000;
 
-    //private final Long2ObjectOpenHashMap<ExtendedBlockStorage[]> cache = new Long2ObjectOpenHashMap<>(4);
     private final LobbyTeleporter teleporter = new CleanLobbyTeleporter();
     private final Set<Integer> usedDimIds = new Te4HashSet<>();
     private final Set<Integer> freeDimIds = new Te4HashSet<>();
@@ -268,13 +266,6 @@ public abstract class MinigameController {
 
     public NBTTagCompound getMapNbt(){
         return data;
-    }
-
-
-    public Long2ObjectOpenHashMap<ExtendedBlockStorage[]> getMapCache(){
-        return null;
-        //if(isImmutable())return null;
-        //return cache;
     }
 
 
