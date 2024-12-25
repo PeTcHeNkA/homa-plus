@@ -63,6 +63,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.*;
 import net.minecraft.world.chunk.storage.AnvilSaveConverter;
+import net.minecraft.world.chunk.storage.AnvilSaveHandler;
 import net.minecraft.world.storage.ISaveFormat;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
@@ -91,7 +92,7 @@ import plus.fserver.utls.math.FastRandom;
 public abstract class MinecraftServer implements ICommandSender, Runnable, IThreadListener, ISnooperInfo{
     public static final Logger LOGGER = LogManager.getLogger();
     public static final File USER_CACHE_FILE = new File("usercache.json");
-    private final ISaveFormat anvilConverterForAnvilFile;
+    private ISaveFormat anvilConverterForAnvilFile;
     private final Snooper usageSnooper = new Snooper("server", this, getCurrentTimeMillis());
     private final File anvilFile;
     private final List<ITickable> tickables = Lists.newArrayList();
@@ -172,7 +173,7 @@ public abstract class MinecraftServer implements ICommandSender, Runnable, IThre
         initTicker();
 
         this.commandManager = this.createCommandManager();
-        this.anvilConverterForAnvilFile = new AnvilSaveConverter(anvilFileIn, dataFixerIn);
+
         this.dataFixer = dataFixerIn;
         EnumConnectionState.await();
     }
@@ -621,8 +622,10 @@ public abstract class MinecraftServer implements ICommandSender, Runnable, IThre
     }
 
 
-    public ISaveFormat getActiveAnvilConverter()
-    {
+    public ISaveFormat getActiveAnvilConverter() {
+        if(anvilConverterForAnvilFile == null){
+            this.anvilConverterForAnvilFile = new AnvilSaveConverter(anvilFile, dataFixer);
+        }
         return this.anvilConverterForAnvilFile;
     }
 
@@ -1254,7 +1257,10 @@ public abstract class MinecraftServer implements ICommandSender, Runnable, IThre
                                 WorldType type, String generatorOptions){
         this.convertMapIfNeeded(saveName);
         this.setUserMessage("menu.loadingLevel");
-        saveHandler = this.anvilConverterForAnvilFile.getSaveLoader(saveName, true);
+
+        saveHandler = new AnvilSaveHandler(anvilFile, saveName, true, this.dataFixer);
+
+        //saveHandler = getActiveAnvilConverter().getSaveLoader(saveName, true);
 
         this.setResourcePackFromWorld(this.getFolderName(), saveHandler);
         WorldInfo worldinfo = saveHandler.loadWorldInfo();

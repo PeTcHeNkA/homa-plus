@@ -7,25 +7,20 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import javax.annotation.Nullable;
-import net.minecraft.block.Block;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.nbt.*;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ClassInheritanceMultiMap;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.datafix.FixTypes;
 import net.minecraft.util.datafix.IDataFixer;
 import net.minecraft.util.datafix.IDataWalker;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.MinecraftException;
 import net.minecraft.world.NextTickListEntry;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.NibbleArray;
 import net.minecraft.world.storage.IThreadedFileIO;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.MinecraftForge;
@@ -33,10 +28,12 @@ import net.minecraftforge.event.world.ChunkDataEvent;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import plus.fserver.ElcaConfig;
 import plus.fserver.api.IAsyncChunkLoader;
 import plus.fserver.server.SStrings;
 import plus.fserver.utls.NbtUtils;
-import plus.fserver.world.light.LightingHooks;
+import plus.fserver.world.save.ERMapData;
+import plus.fserver.world.save.IMapData;
 
 
 public class AnvilChunkLoader implements IAsyncChunkLoader, IThreadedFileIO, Runnable {
@@ -47,11 +44,24 @@ public class AnvilChunkLoader implements IAsyncChunkLoader, IThreadedFileIO, Run
     public final File chunkSaveLocation;
     private final DataFixer fixer;
     private boolean flushing;
+    private static IMapData mapData;
 
     public AnvilChunkLoader(File chunkSaveLocationIn, DataFixer dataFixerIn) {
         this.chunkSaveLocation = chunkSaveLocationIn;
         this.fixer = dataFixerIn;
+        getMapData();
     }
+
+
+    public static synchronized IMapData getMapData(){
+        if(mapData != null)return mapData;
+        if(ElcaConfig.USE_ER2_MAP){
+            return mapData = new ERMapData(ElcaConfig.MAP_MAX_OPEN_FILES);
+        } else {
+            return mapData = new RegionFileCache();
+        }
+    }
+
 
     @Deprecated // TODO: remove (1.13)
     public boolean chunkExists(World world, int x, int z) {
@@ -86,7 +96,7 @@ public class AnvilChunkLoader implements IAsyncChunkLoader, IThreadedFileIO, Run
         NBTTagCompound nbttagcompound = this.chunksToSave.get(chunkpos);
 
         if (nbttagcompound == null) {
-            DataInputStream datainputstream = RegionFileCache.getChunkInputStream(this.chunkSaveLocation, x, z);
+            DataInputStream datainputstream = mapData.getChunkInputStream(this.chunkSaveLocation, x, z);
 
             if (datainputstream == null) {
                 return null;
@@ -109,7 +119,7 @@ public class AnvilChunkLoader implements IAsyncChunkLoader, IThreadedFileIO, Run
     public boolean isChunkGeneratedAt(int x, int z) {
         ChunkPos chunkpos = new ChunkPos(x, z);
         NBTTagCompound nbttagcompound = this.chunksToSave.get(chunkpos);
-        return nbttagcompound != null || RegionFileCache.chunkExists(this.chunkSaveLocation, x, z);
+        return nbttagcompound != null || mapData.chunkExists(this.chunkSaveLocation, x, z);
     }
 
 
@@ -241,7 +251,7 @@ public class AnvilChunkLoader implements IAsyncChunkLoader, IThreadedFileIO, Run
 
 
     private void writeChunkData(ChunkPos pos, NBTTagCompound compound) throws IOException {
-        DataOutputStream dataoutputstream = RegionFileCache.getChunkOutputStream(
+        DataOutputStream dataoutputstream = mapData.getChunkOutputStream(
                 this.chunkSaveLocation, pos.x, pos.z
         );
         if(dataoutputstream == null)return;

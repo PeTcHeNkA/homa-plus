@@ -9,6 +9,7 @@ import java.util.Random;
 
 public class TestERF {
     public static void main(String[] args) throws Throwable {
+        testPoss();
         testIO();
 
         for (int i = 0; i < 20; i++){
@@ -63,10 +64,11 @@ public class TestERF {
 
 
     public static void testPoss() throws IOException {
-        ERegionFile file = new ERegionFile(null);
+        ERegionFile file = new ERegionFile(new RandomAccessFile("testdata.bin", "rw"));
+        file.close();
 
         Random rand = new Random(1);
-        int max = (1<<24)-1;
+        int max = (1<<15)-1;
         int off = 100;
 
         file.setPos(0, 0, off);

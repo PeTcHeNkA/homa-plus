@@ -98,6 +98,9 @@ public class ElcaConfig {
     public static boolean GLOBAL_LIGHT_POOL           = true;
     public static boolean ENABLE_ITEM_BIND            = true;
 
+    public static boolean USE_ER2_MAP                 = true;
+    public static int MAP_MAX_OPEN_FILES              = 256;
+
 
     private static File dir(String str){
         File file = new File(str);
