@@ -2,6 +2,7 @@ package plus.fserver.world.save;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.Arrays;
 
 
 public class ERegionFile {
@@ -49,12 +50,14 @@ public class ERegionFile {
 
     public synchronized void write(int x, int z, byte[] bytes, int length) throws IOException {
         int pos, newPos;
-        if((pos = getPos(x, z)) != -1) invalidate(pos);
+        int[] free = null;
+        if((pos = getPos(x, z)) != -1)
+            free = invalidate(pos);
         if(bytes == null){
             if(pos != -1) setPos(x, z, -1);
             return;
         }
-        if((newPos = write(new IOChunkBuf(bytes, length, x, z))) != pos)
+        if((newPos = write(new IOChunkBuf(bytes, length, x, z), free)) != pos)
             setPos(x, z, newPos);
     }
 
@@ -106,17 +109,39 @@ public class ERegionFile {
     }
 
 
-    private void invalidate(int pos) throws IOException {
+    private static int getCountChunks(int r){
+        int count = 1;
+        r -= 502;
+        while (r > 0) {
+            r -= 508;
+            ++count;
+        }
+        return count;
+    }
+
+
+    private int[] invalidate(int pos) throws IOException {
         RandomAccessFile raf = this.raf;
         int minCursor = this.cursor;
         if(pos < minCursor)minCursor = pos;
         int cursor = pos;
         raf.seek(cursor*512L);
         readMeta();
+
+        int[] free = new int[getCountChunks(MM_size())];
+        free[0] = pos;
+        int freeIdx = 1;
+
         while (!MM_isLastChunk()){
             int cur = cursor;
             cursor = MM_getNextOffset();
-            if(cursor < minCursor)minCursor = cursor;
+
+            if(freeIdx >= free.length)
+                free = Arrays.copyOf(free, freeIdx+1);
+
+            free[freeIdx++] = cursor;
+
+            if(cursor < minCursor) minCursor = cursor;
             MM_free();
             raf.seek(cur*512L);
             writeMeta();
@@ -127,6 +152,7 @@ public class ERegionFile {
         MM_free();
         raf.seek(cursor*512L);
         writeMeta();
+        return free;
     }
 
 
@@ -136,23 +162,22 @@ public class ERegionFile {
         raf.seek(pos*512L);
         readMeta();
         if(!MM_isStartChunk())throw new RuntimeException("Format error");
-        int read = 494; //start offset
+        //int read = 494; //start offset
 
         int x = MM_getRelX(), z = MM_getRelZ(), bufCursor = 0;
 
         byte[] buf = new byte[MM_size()];
 
         while (bufCursor != buf.length){
-
+            int pre = MM_nonMeta2Buf(buf, bufCursor);
+            bufCursor += pre;
             if(MM_isLastChunk()){
-                raf.read(buf, bufCursor, MM_getNextOffset());
+                raf.read(buf, bufCursor, MM_getNextOffset()-pre);
                 break;
             } else {
-                raf.read(buf, bufCursor, read);
-                bufCursor += read;
-                read = 508; //next offset
+                raf.read(buf, bufCursor, 502);
+                bufCursor += 502;
             }
-
             raf.seek(MM_getNextOffset()*512L);
             readMeta();
         }
@@ -161,17 +186,32 @@ public class ERegionFile {
     }
 
 
-    private int write(IOChunkBuf request) throws IOException {
+    private int write(IOChunkBuf request, int[] freeCache) throws IOException {
         int cursor = this.cursor;
         RandomAccessFile raf = this.raf;
         int prevMeta = -1;
         int head = -1;
+        int freeCursor = 0;
 
         while (request.needWrite()){
-            raf.seek(cursor*512L);
-            readMetaSafe();
+            boolean isFree = false;
 
-            if(MM_isFree()){
+            if(freeCache != null){
+                if(freeCursor < freeCache.length){
+                    cursor = freeCache[freeCursor++];
+                } else {
+                    freeCache = null;
+                    cursor = this.cursor;
+                }
+            }
+
+            if(freeCache == null) {
+                raf.seek(cursor*512L);
+                readMeta();
+                isFree = MM_isFree();
+            }
+
+            if(isFree){
                 if(prevMeta != -1){
                     raf.seek(prevMeta*512L);
                     readMeta();
@@ -214,7 +254,7 @@ public class ERegionFile {
         void write() throws IOException {
             int toNextSector;
             if(cursor == 0){
-                toNextSector = 494;
+                toNextSector = 502;
                 MM_setStartChunk(true);
                 MM_writeStart(length, x, z);
             } else {
@@ -240,80 +280,88 @@ public class ERegionFile {
 
 
     //Metadata
-    private static final int HEAD_BIT1 = 1 << 31;
-    private static final int HEAD_BIT2 = 1 << 30;
-    private static final int HEAD_BIT3 = ~(HEAD_BIT1 | HEAD_BIT2);
-    private int mm_meta, mm_size;
-    private short mm_subData;
+    byte[] mm_metb = new byte[10];
 
     private void writeMeta() throws IOException {
-        raf.writeInt(mm_meta);
         if(MM_isStartChunk()){
-            raf.writeShort(mm_subData);
-            raf.writeInt(mm_size);
-        }
-    }
-
-
-    private void readMetaSafe() throws IOException {
-        RandomAccessFile raf;
-        if((raf = this.raf).getFilePointer() >= raf.length()){
-            mm_meta = 0;
-            mm_subData = 0;
-            mm_size = 0;
+            raf.write(mm_metb, 0, 10);
         } else {
-            readMeta();
+            raf.write(mm_metb, 0, 4);
+        }
+    }
+    private void readMeta() throws IOException {
+        byte[] m;
+        int count = raf.read(m = this.mm_metb);
+        if(count == -1) for (int i = 0; i < 10; i++) m[i] = 0;
+    }
+
+
+    private int MM_nonMeta2Buf(byte[] buf, int cursor){
+        byte[] m = this.mm_metb;
+        if(MM_isStartChunk()){
+            return 0;
+        } else {
+            buf[cursor  ] = m[4];
+            buf[cursor+1] = m[5];
+            buf[cursor+2] = m[6];
+            buf[cursor+3] = m[7];
+            buf[cursor+4] = m[8];
+            buf[cursor+5] = m[9];
+            return 6;
         }
     }
 
-    private void readMeta() throws IOException {
-        RandomAccessFile raf;
-        int meta = mm_meta = (raf = this.raf).readInt();
-        if(MM_isStartChunk(meta)){
-            mm_subData = raf.readShort();
-            mm_size    = raf.readInt();
-        }
-    }
     private void MM_free(){
-        mm_meta = 0;
+        byte[] m = this.mm_metb;
+        for (int i = 0; i < 10; i++) m[i] = 0;
     }
     private int MM_size(){
-        return this.mm_size;
+        byte[] m = this.mm_metb;
+        return (((m[6] & 255) << 24) + ((m[7] & 255) << 16) + ((m[8] & 255) << 8) + (m[9] & 255));
     }
-    private void MM_writeStart(int size, int x, int z){
-        this.mm_size = size;
-        this.mm_subData = (short) (((x & 0x1F) << 8) | z & 0x1F);
+    private void MM_writeStart(int v, int x, int z){
+        byte[] m = this.mm_metb;
+        m[4] = (byte) (x & 0x1F);
+        m[5] = (byte) (z & 0x1F);
+        m[6] = (byte) ((v >>> 24) & 0xFF);
+        m[7] = (byte) ((v >>> 16) & 0xFF);
+        m[8] = (byte) ((v >>>  8) & 0xFF);
+        m[9] = (byte) ((v)        & 0xFF);
     }
     private int MM_getRelX(){
-        return mm_subData >> 8;
+        return mm_metb[4];
     }
     private int MM_getRelZ(){
-        return mm_subData & 0x1F;
+        return mm_metb[5];
     }
     private boolean MM_isFree(){
-        return mm_meta == 0;
+        byte[] m = this.mm_metb;
+        for (int i = 0; i < 4; i++) if(m[i] != 0)return false;
+        return true;
     }
     private boolean MM_isStartChunk(){
-        return (mm_meta & HEAD_BIT1) == HEAD_BIT1;
-    }
-    private static boolean MM_isStartChunk(int meta){
-        return (meta & HEAD_BIT1) == HEAD_BIT1;
+        return (mm_metb[0] & -128) == -128;
     }
     private void MM_setStartChunk(boolean b){
-        if(b) mm_meta |= HEAD_BIT1;
-        else mm_meta &= ~HEAD_BIT1;
+        if(b) mm_metb[0] |= -128;
+        else mm_metb[0] &= ~-128;
     }
     private boolean MM_isLastChunk(){
-        return (mm_meta & HEAD_BIT2) == HEAD_BIT2;
+        return (mm_metb[0] & 64) == 64;
     }
     private void MM_setLastChunk(boolean b){
-        if(b) mm_meta |= HEAD_BIT2;
-        else mm_meta &= ~HEAD_BIT2;
+        if(b) mm_metb[0] |= 64;
+        else mm_metb[0] &= ~64;
     }
     private int MM_getNextOffset(){
-        return mm_meta & HEAD_BIT3;
+        byte[] m = this.mm_metb;
+        return (((m[0] & 63) << 24) + ((m[1] & 255) << 16) + ((m[2] & 255) << 8) + (m[3] & 255));
     }
-    private void MM_setNextOffset(int value){
-        mm_meta = (mm_meta & (HEAD_BIT1 | HEAD_BIT2)) | value & HEAD_BIT3;
+    private void MM_setNextOffset(int v){
+        byte[] m = this.mm_metb;
+        m[0] = (byte) ((m[0] & -64) | ((v >>> 24) & 0xFF));
+        m[1] = (byte) ((v >>> 16) & 0xFF);
+        m[2] = (byte) ((v >>>  8) & 0xFF);
+        m[3] = (byte) ((v)        & 0xFF);
     }
 }

@@ -12,7 +12,7 @@ import static col.TestLists.testTime;
 
 public class TestERF {
     public static void main(String[] args) throws Throwable {
-//        testPoss();
+        //testPoss();
 //        testIO();
 //
 //        for (int i = 0; i < 20; i++){
@@ -20,9 +20,18 @@ public class TestERF {
 //        }
 //        testPerf();
 //        testPerf();
+        //testPerf();
+//        testPerf();
         testPerf();
-        testPerf();
-        testPerf();
+    }
+
+
+    public static int[] getBits(byte b) {
+        int[] bits = new int[8];
+        for (int i = 0; i < 8; i++){
+            bits[i] = ((b & (1 << (7-i))) == 0) ? 0 : 1;
+        }
+        return bits;
     }
 
 
@@ -57,30 +66,32 @@ public class TestERF {
 
         Random rand = new Random(1);
 
+        int x12 = 12, x13 = 13, x11 = 11, z17 = 17;
+
         //test1
         byte[] data = new byte[2100];
         rand.nextBytes(data);
-        file.write(12,17, data);
-        byte[] data2 = file.read(12,17);
+        file.write(x12,z17, data);
+        byte[] data2 = file.read(x12,z17);
 
         System.out.println(Arrays.equals(data, data2));
 
         //test2
         byte[] data3 = new byte[300];
-        file.write(13,17, data3);
-        byte[] data4 = file.read(13,17);
+        file.write(x13, z17, data3);
+        byte[] data4 = file.read(x13,z17);
 
         System.out.println(Arrays.equals(data3, data4));
 
 
         //test3
-        file.write(12,17, data3);
-        file.write(11,17, data3);
+        file.write(x12,z17, data3);
+        file.write(x11,z17, data3);
 
-        data4 = file.read(12,17);
+        data4 = file.read(x12,z17);
         System.out.println(Arrays.equals(data3, data4));
 
-        data4 = file.read(11,17);
+        data4 = file.read(x11,z17);
         System.out.println(Arrays.equals(data3, data4));
 
 
@@ -88,12 +99,29 @@ public class TestERF {
         //test4
         file = new ERegionFile(new RandomAccessFile("testdata.bin", "rw"));
 
-        data4 = file.read(12,17);
+        data4 = file.read(x12,z17);
         System.out.println(Arrays.equals(data3, data4));
 
-        data4 = file.read(11,17);
+        data4 = file.read(x11,z17);
         System.out.println(Arrays.equals(data3, data4));
         file.close();
+    }
+
+
+    public static int equals1(byte[] a, byte[] a2) {
+        if (a==a2)
+            return -1;
+        if (a==null || a2==null)
+            return -1;
+
+        int length = a.length;
+        if (a2.length != length)
+            return 0;
+
+        for (int i=0; i<length; i++)
+            if (a[i] != a2[i])
+                return i;
+        return -1;
     }
 
 
@@ -103,7 +131,7 @@ public class TestERF {
 
         Random rand = new Random(1);
         int max = (1<<15)-1;
-        int off = 100;
+        int off = 1200;
 
         file.setPos(0, 0, off);
 
