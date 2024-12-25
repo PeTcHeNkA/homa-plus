@@ -207,7 +207,7 @@ public class ERegionFile {
 
 
         boolean needWrite(){
-            return cursor < bytes.length;
+            return cursor < length;
         }
 
 

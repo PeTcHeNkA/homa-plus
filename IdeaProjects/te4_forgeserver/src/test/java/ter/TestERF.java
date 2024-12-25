@@ -1,20 +1,54 @@
 package ter;
 
 import plus.fserver.world.save.ERegionFile;
+
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Arrays;
 import java.util.Random;
+import static col.TestLists.testTime;
 
 
 public class TestERF {
     public static void main(String[] args) throws Throwable {
-        testPoss();
-        testIO();
+//        testPoss();
+//        testIO();
+//
+//        for (int i = 0; i < 20; i++){
+//            testIO();
+//        }
+//        testPerf();
+//        testPerf();
+        testPerf();
+        testPerf();
+        testPerf();
+    }
 
-        for (int i = 0; i < 20; i++){
-            testIO();
-        }
+
+    public static void testPerf() throws IOException {
+        ERegionFile file = new ERegionFile(new RandomAccessFile("testdata.bin", "rw"));
+
+        Random rand = new Random(1);
+        byte[] data = new byte[2900];
+        rand.nextBytes(data);
+
+        testTime("ERF", () -> {
+            for (int i = 0; i < 5; i++){
+                for (int x = 0; x < 32; x++){
+                    for (int z = 0; z < 32; z++){
+                        try {
+                            int rs = rand.nextInt(data.length);
+                            //System.out.println("Write X:"+x+" Z:"+z+" L:"+rs);
+                            file.write(x, z, data, rs);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
+            }
+        });
+        file.close();
     }
 
 

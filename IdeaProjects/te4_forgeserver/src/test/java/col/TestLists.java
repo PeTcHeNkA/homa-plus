@@ -39,7 +39,7 @@ public class TestLists {
     }
 
 
-    private static void testTime(String h, Runnable r){
+    public static void testTime(String h, Runnable r){
         long start = System.currentTimeMillis();
         r.run();
         System.out.println(h+":"+(System.currentTimeMillis()-start));
