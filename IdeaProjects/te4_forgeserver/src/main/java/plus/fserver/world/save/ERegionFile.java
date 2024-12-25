@@ -8,7 +8,7 @@ public class ERegionFile {
     private final RandomAccessFile raf;
     private final byte[] offsets1 = new byte[1024];
     private byte[] offsets2, offsets3;
-
+    private short cursor = 0;
 
     public ERegionFile(RandomAccessFile raf) throws IOException {
         this.raf = raf;
@@ -25,12 +25,17 @@ public class ERegionFile {
         long cursor = 0;
         RandomAccessFile raf = this.raf;
         long len = raf.length();
+        boolean firstFree = true;
 
         while (cursor < len){
             raf.seek(cursor);
             readMeta();
             if(MM_isStartChunk()){
                 setPos(MM_getRelX(), MM_getRelZ(), (int)(cursor>>9));
+            }
+            else if(firstFree){
+                this.cursor = (short) (((int)(cursor>>9)) & 0xFFFF);
+                firstFree = false;
             }
             cursor += 512;
         }
@@ -49,7 +54,7 @@ public class ERegionFile {
             if(pos != -1) setPos(x, z, -1);
             return;
         }
-        if((newPos = write(0, new IOChunkBuf(bytes, length, x, z))) != pos)
+        if((newPos = write(new IOChunkBuf(bytes, length, x, z))) != pos)
             setPos(x, z, newPos);
     }
 
@@ -103,18 +108,22 @@ public class ERegionFile {
 
     private void invalidate(int pos) throws IOException {
         RandomAccessFile raf = this.raf;
+        int minCursor = this.cursor;
+        if(pos < minCursor)minCursor = pos;
         int cursor = pos;
         raf.seek(cursor*512L);
         readMeta();
         while (!MM_isLastChunk()){
             int cur = cursor;
             cursor = MM_getNextOffset();
+            if(cursor < minCursor)minCursor = cursor;
             MM_free();
             raf.seek(cur*512L);
             writeMeta();
             raf.seek(cursor*512L);
             readMeta();
         }
+        this.cursor = (short) minCursor;
         MM_free();
         raf.seek(cursor*512L);
         writeMeta();
@@ -152,7 +161,8 @@ public class ERegionFile {
     }
 
 
-    private int write(int cursor, IOChunkBuf request) throws IOException {
+    private int write(IOChunkBuf request) throws IOException {
+        int cursor = this.cursor;
         RandomAccessFile raf = this.raf;
         int prevMeta = -1;
         int head = -1;
@@ -179,6 +189,7 @@ public class ERegionFile {
             }
             ++cursor;
         }
+        this.cursor = (short)(cursor & 0xFFFF);
         return head;
     }
 

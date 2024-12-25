@@ -76,7 +76,7 @@ public class ERMapData implements IMapData{
     }
 
 
-    private synchronized void clearIfNeed(){
+    private synchronized void clearIfNeed() throws IOException {
         HashMap<File, ErChunkFile> ch = this.cache;
         if(ch.size() > maxOpens){
             final long[] last = {Long.MIN_VALUE};
@@ -88,7 +88,8 @@ public class ERMapData implements IMapData{
                     toRem[0] = file;
                 }
             });
-            ch.remove(toRem[0]);
+            ErChunkFile val = ch.remove(toRem[0]);
+            if(val != null)val.close();
         }
     }
 
