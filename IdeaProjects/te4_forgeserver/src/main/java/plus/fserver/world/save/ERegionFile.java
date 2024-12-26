@@ -252,11 +252,20 @@ public class ERegionFile {
                 MM_setLastChunk(true);
                 MM_setNextOffset(count);
             }
-            writeMeta();
+            int min = MM_isStartChunk()?10:4;
 
-            raf.write(bytes, cursor, count);
-
-            cursor += count;
+            int cursor = this.cursor;
+            if(cursor >= min){
+                byte[] temp = new byte[min];
+                System.arraycopy(bytes, cursor-min, temp, 0, min);
+                System.arraycopy(mm_metb, 0, bytes, cursor-min, min);
+                raf.write(bytes, cursor-min, count+min);
+                System.arraycopy(temp, 0, bytes, cursor-min, min);
+            } else {
+                writeMeta();
+                raf.write(bytes, cursor, count);
+            }
+            this.cursor += count;
         }
     }
 
