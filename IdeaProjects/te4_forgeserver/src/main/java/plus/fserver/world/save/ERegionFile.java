@@ -105,17 +105,6 @@ public class ERegionFile {
     }
 
 
-    private static int getCountChunks(int r){
-        int count = 1;
-        r -= 502;
-        while (r > 0) {
-            r -= 508;
-            ++count;
-        }
-        return count;
-    }
-
-
     private void invalidate(int pos) throws IOException {
         RandomAccessFile raf = this.raf;
         VarIntBuf free = this.free;
