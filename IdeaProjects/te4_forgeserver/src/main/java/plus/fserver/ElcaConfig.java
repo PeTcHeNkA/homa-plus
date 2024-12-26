@@ -99,6 +99,7 @@ public class ElcaConfig {
     public static boolean ENABLE_ITEM_BIND            = true;
 
     public static boolean USE_ER2_MAP                 = true;
+    public static boolean ENABLE_ER2_CONVERTER        = false;
     public static int MAP_MAX_OPEN_FILES              = 256;
 
 

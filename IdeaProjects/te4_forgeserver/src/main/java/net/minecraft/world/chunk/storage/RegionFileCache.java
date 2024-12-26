@@ -1,6 +1,7 @@
 package net.minecraft.world.chunk.storage;
 
 import com.google.common.collect.Maps;
+import plus.fserver.ElcaConfig;
 import plus.fserver.world.save.IMapData;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -13,18 +14,18 @@ import java.util.Map;
 public class RegionFileCache implements IMapData {
     private final Map<File, RegionFile> REGIONS_BY_FILE = Maps.newHashMap();
 
-    public synchronized RegionFile createOrLoadRegionFile(File p_76550_0_, int p_76550_1_, int p_76550_2_) {
-        File lvt_3_1_ = new File(p_76550_0_, "region");
-        File lvt_4_1_ = new File(lvt_3_1_, "r." + (p_76550_1_ >> 5) + "." + (p_76550_2_ >> 5) + ".mca");
+    public synchronized RegionFile createOrLoadRegionFile(File dir, int x, int z) {
+        File subDir = new File(dir, "region");
+        File lvt_4_1_ = getFile(subDir, x >> 5, z >> 5);
         RegionFile lvt_5_1_ = REGIONS_BY_FILE.get(lvt_4_1_);
         if (lvt_5_1_ != null) {
             return lvt_5_1_;
         } else {
-            if (!lvt_3_1_.exists()) {
-                lvt_3_1_.mkdirs();
+            if (!subDir.exists()) {
+                subDir.mkdirs();
             }
 
-            if (REGIONS_BY_FILE.size() >= 256) {
+            if (REGIONS_BY_FILE.size() >= ElcaConfig.MAP_MAX_OPEN_FILES) {
                 clearRegionFileReferences();
             }
 
@@ -35,17 +36,21 @@ public class RegionFileCache implements IMapData {
     }
 
 
-    public synchronized RegionFile getRegionFileIfExists(File p_191065_0_, int p_191065_1_, int p_191065_2_) {
-        File lvt_3_1_ = new File(p_191065_0_, "region");
-        File lvt_4_1_ = new File(lvt_3_1_, "r." + (p_191065_1_ >> 5) + "." + (p_191065_2_ >> 5) + ".mca");
+    public static File getFile(File subDir, int x, int z){
+        return new File(subDir, "r." + (x >> 5) + "." + (z >> 5) + ".mca");
+    }
+
+
+    public synchronized RegionFile getRegionFileIfExists(File dir, int x, int z) {
+        File subDir = new File(dir, "region");
+        File lvt_4_1_ = getFile(subDir, x >> 5, z >> 5);
         RegionFile lvt_5_1_ = REGIONS_BY_FILE.get(lvt_4_1_);
         if (lvt_5_1_ != null) {
             return lvt_5_1_;
-        } else if (lvt_3_1_.exists() && lvt_4_1_.exists()) {
+        } else if (subDir.exists() && lvt_4_1_.exists()) {
             if (REGIONS_BY_FILE.size() >= 256) {
                 clearRegionFileReferences();
             }
-
             RegionFile lvt_6_1_ = new RegionFile(lvt_4_1_);
             REGIONS_BY_FILE.put(lvt_4_1_, lvt_6_1_);
             return lvt_6_1_;

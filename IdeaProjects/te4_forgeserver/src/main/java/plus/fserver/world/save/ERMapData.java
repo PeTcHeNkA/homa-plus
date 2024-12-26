@@ -1,5 +1,8 @@
 package plus.fserver.world.save;
 
+import net.minecraft.world.chunk.storage.RegionFile;
+import net.minecraft.world.chunk.storage.RegionFileCache;
+import plus.fserver.ElcaConfig;
 import plus.fserver.server.zstd.MapCoder;
 import java.io.*;
 import java.util.HashMap;
@@ -16,7 +19,7 @@ public class ERMapData implements IMapData{
 
     @Override
     public synchronized DataInputStream getChunkInputStream(final File dir, final int x, final int z){
-        File subDir = new File(dir, "er2");
+        File subDir     = new File(dir, "region");
         checkDir(subDir);
 
         try {
@@ -30,9 +33,14 @@ public class ERMapData implements IMapData{
     }
 
 
+    public boolean needConvert(){
+        return ElcaConfig.ENABLE_ER2_CONVERTER;
+    }
+
+
     @Override
     public synchronized DataOutputStream getChunkOutputStream(File dir, int x, int z) {
-        File subDir = new File(dir, "er2");
+        File subDir = new File(dir, "region");
         checkDir(subDir);
         try {
             ErChunkFile erf = get(subDir, x, z, true);
@@ -63,16 +71,44 @@ public class ERMapData implements IMapData{
 
     private synchronized ErChunkFile get(File subDir, int x, int z, boolean create) throws IOException {
         File file = new File(subDir, fileName(x, z));
-        if(!file.exists()){
-            if(!create) return null;
-        }
         ErChunkFile erf = cache.get(file);
-        if(erf == null){
+        if(erf != null)return erf;
+
+        if(!file.exists()){
+            if(needConvert()){
+                File mca = RegionFileCache.getFile(subDir, x, z);
+                if (mca.exists()) {
+                    erf = new ErChunkFile(file);
+                    convert(new RegionFile(mca), erf);
+                    mca.delete();
+                }
+            }
+            else if(!create) return null;
+        }
+
+        if(erf == null) {
             erf = new ErChunkFile(file);
+
+            if(needConvert()){
+                File mca = RegionFileCache.getFile(subDir, x, z);
+                if (mca.exists()) {
+                    convert(new RegionFile(mca), erf);
+                    mca.delete();
+                }
+            }
             cache.put(file, erf);
             clearIfNeed();
         }
         return erf;
+    }
+
+
+    private static void convert(RegionFile from, ERMapData.ErChunkFile to) throws IOException {
+        try {
+            MCAtoER2Converter.MCAToER2(from, to);
+        } catch (Exception e) {
+            throw new IOException("Critical error on convert MCA (" + from + ") to ER2 (" + to + ")", e);
+        }
     }
 
 
@@ -102,7 +138,7 @@ public class ERMapData implements IMapData{
     }
 
 
-    private static class ErChunkFile extends ERegionFile{
+    protected static class ErChunkFile extends ERegionFile{
         long lastUsage = System.currentTimeMillis();
         ErChunkFile(File file) throws IOException {
             super(new RandomAccessFile(file, "rw"));
