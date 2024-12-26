@@ -1,8 +1,6 @@
 package ter;
 
 import plus.fserver.world.save.ERegionFile;
-
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Arrays;
@@ -43,7 +41,7 @@ public class TestERF {
         rand.nextBytes(data);
 
         testTime("ERF", () -> {
-            for (int i = 0; i < 5; i++){
+            for (int i = 0; i < 15; i++){
                 for (int x = 0; x < 32; x++){
                     for (int z = 0; z < 32; z++){
                         try {

@@ -2,14 +2,13 @@ package plus.fserver.world.save;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.Arrays;
 
 
 public class ERegionFile {
+    private final VarIntBuf free = new VarIntBuf();
     private final RandomAccessFile raf;
     private final byte[] offsets1 = new byte[1024];
     private byte[] offsets2, offsets3;
-    private short cursor = 0;
 
     public ERegionFile(RandomAccessFile raf) throws IOException {
         this.raf = raf;
@@ -25,18 +24,15 @@ public class ERegionFile {
     private synchronized void rescanSectors() throws IOException {
         long cursor = 0;
         RandomAccessFile raf = this.raf;
+        VarIntBuf free = this.free;
         long len = raf.length();
-        boolean firstFree = true;
-
         while (cursor < len){
             raf.seek(cursor);
             readMeta();
             if(MM_isStartChunk()){
                 setPos(MM_getRelX(), MM_getRelZ(), (int)(cursor>>9));
-            }
-            else if(firstFree){
-                this.cursor = (short) (((int)(cursor>>9)) & 0xFFFF);
-                firstFree = false;
+            } else if(MM_isFree()){
+                free.add((int)(cursor>>9));
             }
             cursor += 512;
         }
@@ -50,14 +46,14 @@ public class ERegionFile {
 
     public synchronized void write(int x, int z, byte[] bytes, int length) throws IOException {
         int pos, newPos;
-        int[] free = null;
+
         if((pos = getPos(x, z)) != -1)
-            free = invalidate(pos);
+            invalidate(pos);
         if(bytes == null){
             if(pos != -1) setPos(x, z, -1);
             return;
         }
-        if((newPos = write(new IOChunkBuf(bytes, length, x, z), free)) != pos)
+        if((newPos = write(new IOChunkBuf(bytes, length, x, z))) != pos)
             setPos(x, z, newPos);
     }
 
@@ -120,39 +116,28 @@ public class ERegionFile {
     }
 
 
-    private int[] invalidate(int pos) throws IOException {
+    private void invalidate(int pos) throws IOException {
         RandomAccessFile raf = this.raf;
-        int minCursor = this.cursor;
-        if(pos < minCursor)minCursor = pos;
+        VarIntBuf free = this.free;
         int cursor = pos;
         raf.seek(cursor*512L);
         readMeta();
-
-        int[] free = new int[getCountChunks(MM_size())];
-        free[0] = pos;
-        int freeIdx = 1;
+        free.add(pos);
 
         while (!MM_isLastChunk()){
+            if(MM_isFree())break;
             int cur = cursor;
             cursor = MM_getNextOffset();
-
-            if(freeIdx >= free.length)
-                free = Arrays.copyOf(free, freeIdx+1);
-
-            free[freeIdx++] = cursor;
-
-            if(cursor < minCursor) minCursor = cursor;
+            free.add(cursor);
             MM_free();
             raf.seek(cur*512L);
             writeMeta();
             raf.seek(cursor*512L);
             readMeta();
         }
-        this.cursor = (short) minCursor;
         MM_free();
         raf.seek(cursor*512L);
         writeMeta();
-        return free;
     }
 
 
@@ -186,32 +171,30 @@ public class ERegionFile {
     }
 
 
-    private int write(IOChunkBuf request, int[] freeCache) throws IOException {
-        int cursor = this.cursor;
+    private int write(IOChunkBuf request) throws IOException {
+        VarIntBuf free = this.free;
         RandomAccessFile raf = this.raf;
         int prevMeta = -1;
         int head = -1;
-        int freeCursor = 0;
+        boolean canNext = true;
+        int cursor = 0;
 
         while (request.needWrite()){
-            boolean isFree = false;
-
-            if(freeCache != null){
-                if(freeCursor < freeCache.length){
-                    cursor = freeCache[freeCursor++];
-                } else {
-                    freeCache = null;
-                    cursor = this.cursor;
+            boolean read = true;
+            if(canNext){
+                cursor = free.remMax();
+                if(cursor == -1) {
+                    cursor = (int)(raf.length()/512L);
+                    read = false;
+                    MM_free();
+                    canNext = false;
                 }
             }
-
-            if(freeCache == null) {
+            if(read) {
                 raf.seek(cursor*512L);
                 readMeta();
-                isFree = MM_isFree();
             }
-
-            if(isFree){
+            if(MM_isFree()){
                 if(prevMeta != -1){
                     raf.seek(prevMeta*512L);
                     readMeta();
@@ -229,7 +212,6 @@ public class ERegionFile {
             }
             ++cursor;
         }
-        this.cursor = (short)(cursor & 0xFFFF);
         return head;
     }
 
@@ -283,11 +265,10 @@ public class ERegionFile {
     byte[] mm_metb = new byte[10];
 
     private void writeMeta() throws IOException {
-        if(MM_isStartChunk()){
+        if(MM_isStartChunk())
             raf.write(mm_metb, 0, 10);
-        } else {
+        else
             raf.write(mm_metb, 0, 4);
-        }
     }
     private void readMeta() throws IOException {
         byte[] m;
