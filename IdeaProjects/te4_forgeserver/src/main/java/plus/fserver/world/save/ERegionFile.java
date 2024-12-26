@@ -174,7 +174,7 @@ public class ERegionFile {
     private int write(IOChunkBuf request) throws IOException {
         VarIntBuf free = this.free;
         RandomAccessFile raf = this.raf;
-        int prevMeta = -1;
+        int prevCursor = -1;
         int head = -1;
         boolean canNext = true;
         int cursor = 0;
@@ -195,20 +195,23 @@ public class ERegionFile {
                 readMeta();
             }
             if(MM_isFree()){
-                if(prevMeta != -1){
-                    raf.seek(prevMeta*512L);
-                    readMeta();
-                    MM_setNextOffset(cursor);
-                    raf.seek(prevMeta*512L);
-                    writeMeta();
-                    raf.seek(cursor*512L);
-                } else {
-                    head = cursor;
-                    raf.seek(cursor*512L);
-                }
+                if(head == -1)head = cursor;
 
-                request.write();
-                prevMeta = cursor;
+                if(request.isSingle()) {
+                    raf.seek(cursor * 512L);
+                    request.write(prevCursor);
+                    break;
+                } else {
+                    if(prevCursor != -1){
+                        raf.seek(prevCursor * 512L);
+                        request.write(cursor);
+                        if(request.needLast()){
+                            raf.seek(cursor * 512L);
+                            request.write(-1);
+                        }
+                    }
+                }
+                prevCursor = cursor;
             }
             ++cursor;
         }
@@ -233,7 +236,17 @@ public class ERegionFile {
         }
 
 
-        void write() throws IOException {
+        boolean needLast(){
+            return length - cursor <= (cursor == 0 ? 502:508);
+        }
+
+
+        boolean isSingle(){
+            return length <= 502;
+        }
+
+
+        void write(int next) throws IOException {
             int toNextSector;
             if(cursor == 0){
                 toNextSector = 502;
@@ -248,6 +261,7 @@ public class ERegionFile {
             if(count > toNextSector){
                 count = toNextSector;
                 MM_setLastChunk(false);
+                MM_setNextOffset(next);
             } else {
                 MM_setLastChunk(true);
                 MM_setNextOffset(count);

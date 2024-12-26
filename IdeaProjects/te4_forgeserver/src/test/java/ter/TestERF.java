@@ -11,7 +11,7 @@ import static col.TestLists.testTime;
 public class TestERF {
     public static void main(String[] args) throws Throwable {
         //testPoss();
-        //testIO();
+//        testIO();
 //
 //        for (int i = 0; i < 20; i++){
 //            testIO();
@@ -67,15 +67,29 @@ public class TestERF {
         int x12 = 12, x13 = 13, x11 = 11, z17 = 17;
 
         //test1
-        byte[] data = new byte[2100];
-        rand.nextBytes(data);
-        file.write(x12,z17, data);
-        byte[] data2 = file.read(x12,z17);
+        byte[] data = new byte[1900];
+        //rand.nextBytes(data);
 
-        System.out.println(Arrays.equals(data, data2));
+        l1: {
+            int i = 0, s = 0;
+            while (true) {
+                for (int j = 0; j < 100; j++) {
+                    if (i >= data.length) break l1;
+                    data[i] = (byte) s;
+                    ++i;
+                }
+                ++s;
+            }
+        }
+
+        file.write(x12, z17, data);
+        byte[] data2 = file.read(x12, z17);
+
+        System.out.println(equals1(data, data2));
 
         //test2
         byte[] data3 = new byte[300];
+        rand.nextBytes(data3);
         file.write(x13, z17, data3);
         byte[] data4 = file.read(x13,z17);
 
