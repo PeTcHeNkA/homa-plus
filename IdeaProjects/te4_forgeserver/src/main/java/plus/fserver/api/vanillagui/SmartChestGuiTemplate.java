@@ -15,6 +15,7 @@ public class SmartChestGuiTemplate extends ChestGuiTemplate{
     private TsonFunc onClose;
     private TsonFunc[] runtimeInvGen;
     private byte[] runtimeInvSlots;
+    private Object[] runtimeVrPl;
 
     public SmartChestGuiTemplate(TsonMap map) {
         super(map);
@@ -59,6 +60,32 @@ public class SmartChestGuiTemplate extends ChestGuiTemplate{
             }
         }
 
+
+        if(vrPl != null && map.containsKey("dynamicpl")){
+            TsonList lActs = map.getList("dynamicpl");
+
+            TsonFunc[] runtimeInvGenU = new TsonFunc[41];
+            byte[] runtimeInvSlotsU = new byte[41];
+
+            runtimeVrPl = new Object[]{
+                    runtimeInvGenU, runtimeInvSlotsU
+            };
+
+            int i = 0;
+
+            for (TsonObj obj : lActs) {
+                TsonMap map1 = obj.getMap();
+                TsonObj obj2 = map1.get("item");
+                if(obj2.isFunc()) {
+                    runtimeInvGenU[i] = (TsonFunc) obj2.getField();
+                } else {
+                    runtimeInvGenU[i] = new ItemGenFunc(obj2);
+                }
+                runtimeInvSlotsU[i] = (byte) map1.getInt("slot");
+                ++i;
+            }
+        }
+
         if(map.containsKey("on-close")){
             onClose = map.getFunc("on-close");
         }
@@ -72,6 +99,8 @@ public class SmartChestGuiTemplate extends ChestGuiTemplate{
         chest.setCustomName(getCustomName());
         chest.setFunctions(functions());
         chest.setOnClose(onClose);
+        chest.setVrPl(vrPl);
+        chest.setRuntimeVrPl(runtimeVrPl);
         return chest;
     }
 

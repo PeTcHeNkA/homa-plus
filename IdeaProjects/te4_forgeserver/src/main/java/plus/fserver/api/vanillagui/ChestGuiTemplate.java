@@ -1,7 +1,6 @@
 package plus.fserver.api.vanillagui;
 
 import net.minecraft.block.BlockChest;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.world.ILockableContainer;
@@ -16,6 +15,7 @@ public class ChestGuiTemplate {
     private final ItemStack[] stacks;
     private final byte[] slots;
     private String customName;
+    protected Object[] vrPl;
 
     public static ChestGuiTemplate of(TsonMap map){
         if(map.containsKey("actions") || map.containsKey("default-action") || map.containsKey("on-close")){
@@ -145,6 +145,38 @@ public class ChestGuiTemplate {
             slots[i]  = (byte) slot;
             ++i;
         }
+
+        if(map.containsKey("uitems")){
+            lItems = map.getList("uitems");
+
+            ItemStack[] stacksU = new ItemStack[41];
+            byte[] slotsU = new byte[41];
+
+            vrPl = new Object[]{stacksU, slotsU};
+
+            for (TsonObj item:lItems){
+                int slot = i;
+                if(item.isMap()){
+                    if(item.getMap().containsKey("slots")){
+                        ItemStack item1 = McTsonUtils.itemStackOfTson(item);
+
+                        TsonList slots1 = item.getMap().getList("slots");
+                        for (TsonObj slot0:slots1){
+                            int slot1 = slot0.getInt();
+                            slotsU[slot1] = (byte) slot1;
+                            stacksU[slot1] = item1;
+                        }
+                        ++i;
+                        continue;
+                    } else {
+                        slot = item.getMap().getOrDefaultInt("slot", slot);
+                    }
+                }
+                stacksU[i] = McTsonUtils.itemStackOfTson(item);
+                slotsU[i]  = (byte) slot;
+                ++i;
+            }
+        }
     }
 
 
@@ -152,6 +184,7 @@ public class ChestGuiTemplate {
         ChestGui chest = new ChestGui(size());
         chest.fillOf(this);
         chest.setCustomName(getCustomName());
+        chest.setVrPl(vrPl);
         return chest;
     }
 

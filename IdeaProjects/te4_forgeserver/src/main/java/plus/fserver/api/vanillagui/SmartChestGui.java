@@ -6,15 +6,22 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ClickType;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
+import plus.fserver.api.IPlayerDataModel;
 import plus.tson.TsonFunc;
 
 
 public class SmartChestGui extends ChestGui{
     private Int2ObjectMap<TsonFunc> slotFunctions = Int2ObjectMaps.emptyMap();
     private TsonFunc onClose;
+    private Object[] runtimeVrPl;
 
     public SmartChestGui(int size) {
         super(size);
+    }
+
+
+    protected void setRuntimeVrPl(Object[] vrPl){
+        this.runtimeVrPl = vrPl;
     }
 
 
@@ -30,7 +37,15 @@ public class SmartChestGui extends ChestGui{
 
     @Override
     public void closeInventory(EntityPlayer player) {
+        super.closeInventory(player);
         if(onClose != null)onClose.call(this, player);
+    }
+
+
+    @Override
+    protected void onCreateVrPl(VrPlayerInv inv, IPlayerDataModel model) {
+        Object[] vr = runtimeVrPl;
+        if(vr != null) inv.fill(model, (TsonFunc[])vr[0], (byte[])vr[1]);
     }
 
 

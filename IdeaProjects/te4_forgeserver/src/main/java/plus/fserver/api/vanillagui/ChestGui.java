@@ -1,6 +1,7 @@
 package plus.fserver.api.vanillagui;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.*;
 import net.minecraft.item.ItemStack;
@@ -8,15 +9,22 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.IInteractionObject;
+import plus.fserver.api.IPlayerDataModel;
 import plus.fserver.utls.collections.FixedItemList;
 
 
 public class ChestGui implements IInventory, IInteractionObject {
     private final FixedItemList items;
     private String customName;
+    private Object[] vrPl;
 
     public ChestGui(int size) {
         this.items = new FixedItemList(size);
+    }
+
+
+    protected void setVrPl(Object[] vrPl){
+        this.vrPl = vrPl;
     }
 
 
@@ -100,7 +108,12 @@ public class ChestGui implements IInventory, IInteractionObject {
 
 
     @Override
-    public void closeInventory(EntityPlayer player) {}
+    public void closeInventory(EntityPlayer player) {
+        if(vrPl != null) {
+            EntityPlayerMP mp = ((EntityPlayerMP) player);
+            mp.sendAllContents(mp.inventoryContainer, mp.inventoryContainer.getInventory());
+        }
+    }
 
 
     @Override
@@ -133,9 +146,20 @@ public class ChestGui implements IInventory, IInteractionObject {
 
     @Override
     public Container createContainer(InventoryPlayer invPlayer, EntityPlayer player) {
-        if(items.size() == 5)return new VrContainerHopper(invPlayer, this, player);
-        return new VrContainerChest(invPlayer, this, player);
+        IInventory inv = invPlayer;
+        Object[] vrPl = this.vrPl;
+        if(vrPl != null){
+            VrPlayerInv inv1 = new VrPlayerInv((ItemStack[]) vrPl[0], (byte[]) vrPl[1]);
+            onCreateVrPl(inv1, (IPlayerDataModel)player);
+            inv = inv1;
+        }
+
+        if(items.size() == 5)return new VrContainerHopper(inv, this, player);
+        return new VrContainerChest(inv, this, player);
     }
+
+
+    protected void onCreateVrPl(VrPlayerInv inv, IPlayerDataModel model){}
 
 
     @Override
@@ -168,8 +192,8 @@ public class ChestGui implements IInventory, IInteractionObject {
 
 
     private class VrContainerHopper extends ContainerHopper{
-        public VrContainerHopper(InventoryPlayer plInv, IInventory hopperInv, EntityPlayer player) {
-            super(plInv, hopperInv, player);
+        public VrContainerHopper(IInventory plInv, IInventory hopperInv, EntityPlayer player) {
+            super((InventoryPlayer) plInv, hopperInv, player);
         }
         @Override
         public ItemStack slotClick(int slotId, int dragType, ClickType clickTypeIn, EntityPlayer player) {
