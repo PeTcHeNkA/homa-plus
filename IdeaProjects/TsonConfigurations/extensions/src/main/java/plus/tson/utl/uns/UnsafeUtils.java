@@ -60,6 +60,20 @@ public class UnsafeUtils {
 
 
     /**
+     * Atomically updates Java variable to {@code cur} if it is currently
+     * holding {@code expected}.
+     *
+     * <p>This operation has memory semantics of a {@code volatile} read
+     * and write.  Corresponds to C11 atomic_compare_exchange_strong. See {@link Unsafe#compareAndSwapLong(Object, long, long, long)}
+     *
+     * @return {@code true} if successful
+     */
+    public static boolean compareAndSwap(Object ref, long offset, long prev, long cur){
+        return UNSAFE.compareAndSwapLong(ref, offset, prev, cur);
+    }
+
+
+    /**
      * @return Offset of object field {@code name} in {@code clazz}
      */
     public static long offset(Class<?> clazz, String name){
