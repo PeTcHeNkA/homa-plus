@@ -1,6 +1,7 @@
 package plus.elch.chat.rule;
 
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 import java.util.Iterator;
 
 
@@ -14,6 +15,7 @@ public class SelectAll implements IUserSelector{
     }
 
 
+    @NotNull
     @Override
     public Iterator<? extends Player> selectBy(Player player) {
         return player.getServer().getOnlinePlayers().iterator();

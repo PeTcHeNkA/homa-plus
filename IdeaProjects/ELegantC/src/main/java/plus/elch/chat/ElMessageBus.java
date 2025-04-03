@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.UUID;
-
 import static plus.tson.utl.uns.UnsafeUtils.*;
 
 
@@ -42,8 +41,29 @@ public class ElMessageBus {
     }
 
 
-    public ElMessage create(Player player, String msg, UUID... targets) throws IOException, FastExitException {
+    public ElMessage create(Player player, String msg, UUID... targets) {
         return new ElMessage(this, player, msg).setTargets(targets);
+    }
+
+
+    public void append(ElMessage msg){
+        try {
+            getByTime(System.currentTimeMillis()).addMessage(msg);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (FastExitException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    //todo
+    public void saveAll(){
+        try {
+            curFile.flush();
+        } catch (IOException | FastExitException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 

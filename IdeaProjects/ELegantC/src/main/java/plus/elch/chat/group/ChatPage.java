@@ -63,7 +63,7 @@ public class ChatPage implements Comparable<ChatPage>{
     }
 
 
-    public boolean canGet(ElData data){
+    public boolean canGetMessage(ElData data){
         return !allowIgnore || !data.getBit(getId());
     }
 

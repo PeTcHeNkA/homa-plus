@@ -2,12 +2,14 @@ package plus.elch.chat.rule;
 
 import org.bukkit.entity.Player;
 import java.util.Iterator;
+import org.jetbrains.annotations.NotNull;
 import plus.tson.TsonMap;
 import plus.tson.TsonObj;
 import static plus.tson.ext.TsonNumUtils.*;
 
 
 public interface IUserSelector {
+    @NotNull
     Iterator<? extends Player> selectBy(Player player);
 
     static IUserSelector fromTson(TsonObj obj){
