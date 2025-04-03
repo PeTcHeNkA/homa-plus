@@ -1,0 +1,4 @@
+name: ELegantC
+version: '${version}'
+main: plus.elch
+api-version: '1.16'
