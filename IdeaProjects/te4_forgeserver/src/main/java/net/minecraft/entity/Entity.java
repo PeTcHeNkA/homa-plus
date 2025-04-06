@@ -2370,7 +2370,8 @@ public abstract class Entity implements ICommandSender, net.minecraftforge.commo
 
 
     public boolean isOnScoreboardTeam(Team teamIn) {
-        return this.getTeam() != null ? this.getTeam().isSameTeam(teamIn) : false;
+        Team team;
+        return (team = this.getTeam()) != null ? team.isSameTeam(teamIn) : false;
     }
 
 

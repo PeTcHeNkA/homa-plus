@@ -57,7 +57,7 @@ public class EntityAIHurtByTarget extends EntityAITarget {
                 taskOwner.posZ + 1.0 + distance
         );
 
-        taskOwner.world.getEntitiesWithinAABBNoCache(agent, taskOwner.getClass(), box, null);
+        taskOwner.world.getEntitiesWithinAABBNoCache_B(agent, taskOwner.getClass(), box, null);
     }
 
 
@@ -66,7 +66,7 @@ public class EntityAIHurtByTarget extends EntityAITarget {
         public boolean add(EntityCreature creature) {
             EntityCreature tOwn;
             if((tOwn = EntityAIHurtByTarget.this.taskOwner) == creature || creature.getAttackTarget() != null)return false;
-            if(tOwn instanceof EntityTameable && ((EntityTameable)tOwn).getOwner() != ((EntityTameable)creature).getOwner())return false;
+            if(tOwn.isTeamable() && ((EntityTameable)tOwn).getOwner() != ((EntityTameable)creature).getOwner())return false;
             if(creature.isOnSameTeam(tOwn.getRevengeTarget()))return false;
 
             for (Class<?> clazz : EntityAIHurtByTarget.this.excludedReinforcementTypes) {

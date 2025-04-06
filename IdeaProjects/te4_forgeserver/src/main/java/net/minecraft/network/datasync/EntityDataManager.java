@@ -144,7 +144,12 @@ public class EntityDataManager extends Int2ObjectMap<EntityDataManager.DataEntry
 
 
     public <T> T get(DataParameter<T> key) {
-        return this.getEntry(key).getValue();
+        return this.getEntry(key).value;
+    }
+
+
+    public Object getRaw(int id) {
+        return super.get(id).value;
     }
 
 
@@ -338,7 +343,7 @@ public class EntityDataManager extends Int2ObjectMap<EntityDataManager.DataEntry
 
     public static class DataEntry<T> {
         private final DataParameter<T> key;
-        private T value;
+        protected T value;
         private boolean dirty;
 
         public DataEntry(DataParameter<T> keyIn, T valueIn) {

@@ -15,7 +15,7 @@ public class Scoreboard {
     private final Map<String, Map<ScoreObjective, Score>> entitiesScoreObjectives = new Te4HashMap<>();
     private final ScoreObjective[] objectiveDisplaySlots = new ScoreObjective[19];
     private final Map<String, ScorePlayerTeam> teams = new Te4HashMap<>(3);
-    private final Map<String, ScorePlayerTeam> teamMemberships = new Te4HashMap<>(3);
+    private final Te4HashMap<String, ScorePlayerTeam> teamMemberships = new Te4HashMap<>(3);
     private static String[] displaySlots;
 
     @Nullable
@@ -238,7 +238,7 @@ public class Scoreboard {
         } else {
             this.removePlayerFromTeams(player);
 
-            this.teamMemberships.put(player, scoreplayerteam);
+            this.teamMemberships.fput(player, scoreplayerteam);
             scoreplayerteam.getMembershipCollection().add(player);
             return true;
         }

@@ -111,16 +111,16 @@ public class EntityOcelot extends EntityTameable {
 
 
     @Override
-    public void writeEntityToNBT(final NBTTagCompound compound) {
-        super.writeEntityToNBT(compound);
-        compound.setIntegerU("CatType", this.getTameSkin());
+    public void writeEntityToNBT(final NBTTagCompound nbt) {
+        super.writeEntityToNBT(nbt);
+        nbt.setIntegerU("CatType", this.getTameSkin());
     }
 
 
     @Override
-    public void readEntityFromNBT(final NBTTagCompound compound) {
-        super.readEntityFromNBT(compound);
-        this.setTameSkin(compound.getInteger("CatType"));
+    public void readEntityFromNBT(final NBTTagCompound nbt) {
+        super.readEntityFromNBT(nbt);
+        this.setTameSkin(nbt.getInteger("CatType"));
     }
 
 

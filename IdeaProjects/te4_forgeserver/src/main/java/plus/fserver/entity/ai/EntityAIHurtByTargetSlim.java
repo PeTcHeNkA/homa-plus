@@ -47,7 +47,7 @@ public class EntityAIHurtByTargetSlim extends EntityAITarget {
                                 creature = var4.next();
                             } while(this.taskOwner == creature);
                         } while(creature.getAttackTarget() != null);
-                    } while(this.taskOwner instanceof EntityTameable && ((EntityTameable)this.taskOwner).getOwner() != ((EntityTameable)creature).getOwner());
+                    } while(this.taskOwner.isTeamable() && ((EntityTameable)this.taskOwner).getOwner() != ((EntityTameable)creature).getOwner());
                 } while(creature.isOnSameTeam(this.taskOwner.getRevengeTarget()));
 
                 this.setEntityAttackTarget(creature, this.taskOwner.getRevengeTarget());

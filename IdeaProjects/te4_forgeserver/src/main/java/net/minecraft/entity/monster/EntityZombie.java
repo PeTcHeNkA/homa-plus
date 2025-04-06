@@ -53,6 +53,9 @@ public class EntityZombie extends EntityMob {
     private static final DataParameter<Boolean> IS_CHILD = EntityDataManager.createKey(EntityZombie.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> VILLAGER_TYPE = EntityDataManager.createKey(EntityZombie.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> ARMS_RAISED = EntityDataManager.createKey(EntityZombie.class, DataSerializers.BOOLEAN);
+
+    private static final int IS_CHILD_ID = IS_CHILD.getId();
+
     private final EntityAIBreakDoor breakDoor = new EntityAIBreakDoor(this);
     private boolean isBreakDoorsTaskSet;
     private float zombieWidth = -1.0F;
@@ -138,7 +141,7 @@ public class EntityZombie extends EntityMob {
 
     @Override
     public boolean isChild() {
-        return this.getDataManager().get(IS_CHILD);
+        return (Boolean)dataManager.getRaw(IS_CHILD_ID);
     }
 
 

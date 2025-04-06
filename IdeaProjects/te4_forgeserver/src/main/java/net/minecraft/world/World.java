@@ -3764,6 +3764,92 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     }
 
 
+    @NotNull
+    public <T extends Entity> List<T> getEntitiesWithinAABB_B(@NotNull Class <? extends T > clazz, @NotNull AxisAlignedBB aabb,
+                                                            @Nullable Predicate<? super T > filter) {
+        if(ElcaCV.MORE_MOBS_OPTIMIZER) {
+            SyncListCache.EList eeCache;
+            AABKey key = (eeCache = this.eeCache).key(aabb);
+            //AABKey key = new AABKey(aabb);
+            final EntityList<Entity> entities = eeCache.getC(key);
+            if (entities != null) {
+                if (entities.isEmptyC()) return (List<T>) entities;
+                for (final Entity entity : entities) {
+                    if (!clazz.isInstance(entity) || filter != null && !filter.apply((T) entity)) {
+                        EntityList<T> res = eeCache.allocArr();
+
+                        getEntitiesWithinAABBNoCache_B(res, clazz, aabb, filter);
+                        eeCache.add(key, (EntityList<Entity>)res);
+                        return res;
+                    }
+                }
+                return (List<T>) entities;
+            } else {
+                EntityList<T> res = eeCache.allocArr();
+                getEntitiesWithinAABBNoCache_B(res, clazz, aabb, filter);
+                eeCache.add(key, (EntityList<Entity>) res);
+                return res;
+            }
+        } else {
+            EntityList<T> res = new EntityList<>();
+            getEntitiesWithinAABBNoCache_B(res, clazz, aabb, filter);
+            return res;
+        }
+    }
+
+
+    @Keep
+    public <T extends Entity> void getEntitiesWithinAABBNoCache_B(List<T> list, Class <? extends T > clazz,
+                                                                AxisAlignedBB aabb, @Nullable Predicate<? super T > filter) {
+        int minX = MathHelper.floor(aabb.minX - MAX_ENTITY_RADIUS) >> 4;
+        int maxX = MathHelper.ceil (aabb.maxX + MAX_ENTITY_RADIUS) >> 4;
+
+        int minZ = MathHelper.floor(aabb.minZ - MAX_ENTITY_RADIUS) >> 4;
+        int maxZ = MathHelper.ceil (aabb.maxZ + MAX_ENTITY_RADIUS) >> 4;
+
+        final int minY = MathUtls.clamp16c(aabb.minY - World.MAX_ENTITY_RADIUS),
+                  maxY = MathUtls.clamp16c(aabb.maxY + World.MAX_ENTITY_RADIUS);
+
+        Chunk chunk;
+
+        for (int xPos = minX; xPos <= maxX; ++xPos) {
+            boolean isAllInsideX = xPos != minX && xPos != maxX;
+
+            for (int zPos = minZ; zPos <= maxZ; ++zPos) {
+                if ((chunk = chunkProviderServer.getLoadedChunk(xPos, zPos)) != null) {
+                    boolean isAllInsideZ = zPos != minZ && zPos != maxZ;
+
+                    ClassInheritanceMultiMap<Entity>[] lists = chunk.getEntityLists();
+
+                    for (int k = minY; k <= maxY; ++k) {
+                        ClassInheritanceMultiMap<Entity> list1 = lists[k];
+                        if(list1 != null) {
+                            if(isAllInsideX && isAllInsideZ && k != minY && k != maxY){
+                                for (T t : list1.getByClass(clazz))
+                                    if (filter == null || filter.apply(t))
+                                        list.add(t);
+                            } else {
+                                for (T t : list1.getByClass(clazz)) {
+                                    AxisAlignedBB cabb = t.getEntityBoundingBox();
+                                    if(
+                                            (isAllInsideX || (cabb.minX < aabb.maxX && cabb.maxX > aabb.minX)) &&
+                                            (isAllInsideZ || (cabb.minZ < aabb.maxZ && cabb.maxZ > aabb.minZ)) &&
+                                            (cabb.minY < aabb.maxY && cabb.maxY > aabb.minY)
+                                    )
+                                        if(filter == null || filter.apply(t)) list.add(t);
+
+//                                    if (t.getEntityBoundingBox().intersects(aabb) && (filter == null || filter.apply(t)))
+//                                        list.add(t);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
     public <T extends Entity> List<T> getEntitiesWithinAABBNoCache(@NotNull Class <? extends T > clazz, @NotNull AxisAlignedBB aabb,
                                                             @Nullable Predicate<? super T > filter){
         EntityList<T> res = new EntityList<>();

@@ -88,6 +88,11 @@ public abstract class EntityCreature extends EntityLiving {
     }
 
 
+    public boolean isTeamable(){
+        return false;
+    }
+
+
     @Override
     protected void updateLeashedState() {
         super.updateLeashedState();

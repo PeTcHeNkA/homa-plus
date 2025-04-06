@@ -5,6 +5,7 @@ import io.netty.util.collection.IntObjectHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.minecraft.entity.Entity;
 import org.jetbrains.annotations.NotNull;
+import plus.fserver.ElcaCV;
 import plus.fserver.utls.collections.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -98,7 +99,7 @@ public class ClassInheritanceMultiMap<T extends Entity> extends SubList<T> {
         boolean flag = false;
         final Class<?> clazz = obj.getClass();
         Entity ent = (Entity) obj;
-
+        IntObjectHashMap<SubList<T>> map = this.map;
         for (Class<?> oclass : this.knownKeys) {
             if (oclass.isAssignableFrom(clazz)) {
                 SubList<T> list;
@@ -173,10 +174,12 @@ final class ByClass<S,T extends Entity> implements Iterable<S>, Iterator<S> {
 
 
     private void calcNext(){
-        while (cursor<src.sizeC()){
+        EntityRemSwapList<T> src = this.src;
+        int cursor;
+        while ((cursor = this.cursor) < src.sizeC()){
             T temp = src.get(cursor);
-            ++cursor;
-            if(clazz.isInstance(temp)){
+            ++this.cursor;
+            if(ElcaCV.FAST_BY_CLASS_ITER || clazz.isInstance(temp)){
                 next = temp;
                 return;
             }

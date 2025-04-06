@@ -96,6 +96,9 @@ public abstract class EntityLivingBase extends Entity {
     private static final DataParameter<Integer> POTION_EFFECTS = EntityDataManager.createKey(EntityLivingBase.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> HIDE_PARTICLES = EntityDataManager.createKey(EntityLivingBase.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> ARROW_COUNT_IN_ENTITY = EntityDataManager.createKey(EntityLivingBase.class, DataSerializers.VARINT);
+
+    private static final int HEALTH_ID = HEALTH.getId();
+
     private AbstractAttributeMap attributeMap;
     private final CombatTracker combatTracker = new CombatTracker(this);
     private PotionMap activePotionsMap;
@@ -696,7 +699,7 @@ public abstract class EntityLivingBase extends Entity {
 
 
     public final float getHealth() {
-        return this.dataManager.get(HEALTH);
+        return (Float)this.dataManager.getRaw(HEALTH_ID);
     }
 
 

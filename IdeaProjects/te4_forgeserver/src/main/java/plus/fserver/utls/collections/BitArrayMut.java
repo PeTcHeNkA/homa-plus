@@ -37,7 +37,7 @@ public class BitArrayMut {
 
     public void setAt(int index, int value) {
         if(ElcaCV.CHECK_BI_ARRAY)
-            if(index<0 || index>=this.arraySize || value>maxEntryValue)
+            if(index<0 || index>=this.arraySize || value > maxEntryValue)
                 throw new IllegalArgumentException("Index ["+index+"] should be in [0, "+this.arraySize+"] and value ["+value+"] in [0, "+maxEntryValue+"]");
 
         int i = index * this.bitsPerEntry;
