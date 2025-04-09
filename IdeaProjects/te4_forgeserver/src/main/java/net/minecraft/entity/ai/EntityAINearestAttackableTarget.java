@@ -55,11 +55,12 @@ public class EntityAINearestAttackableTarget<T extends EntityLivingBase> extends
     //private
     @Override
     public boolean shouldExecute() {
-        if (this.targetChance > 0 && this.taskOwner.getRNG().nextInt(this.targetChance) != 0) {
+        EntityCreature taskOwner = this.taskOwner;
+        if (this.targetChance > 0 && taskOwner.getRNG().nextInt(this.targetChance) != 0) {
             this.targetEntity = null;
             return false;
         } else if (this.targetClass != EntityPlayer.class && this.targetClass != EntityPlayerMP.class) {
-            List<T> list = this.taskOwner.world.getEntitiesWithinAABB_B(this.targetClass, this.getTargetableArea(this.getTargetDistance()), this.targetEntitySelector);
+            List<T> list = taskOwner.world.getEntitiesWithinAABB_B(this.targetClass, this.getTargetableArea(this.getTargetDistance()), this.targetEntitySelector);
             if (!list.isEmpty()) {
                 list.sort(this.sorter);
                 for (T potentialTarget : list) {
@@ -73,7 +74,7 @@ public class EntityAINearestAttackableTarget<T extends EntityLivingBase> extends
             this.targetEntity = null;
             return false;
         } else {
-            ArrayList<Player2Double> players = getNearestAttackablePlayer(this.taskOwner.posX, this.taskOwner.posY + (double) this.taskOwner.getEyeHeight(), this.taskOwner.posZ, this.getTargetDistance(), this.getTargetDistance(),
+            ArrayList<Player2Double> players = getNearestAttackablePlayer(taskOwner.posX, taskOwner.posY + (double) taskOwner.getEyeHeight(), taskOwner.posZ, this.getTargetDistance(), this.getTargetDistance(),
                     player -> {
                         ItemStack itemstack = player.getItemStackFromSlot(EntityEquipmentSlot.HEAD);
 

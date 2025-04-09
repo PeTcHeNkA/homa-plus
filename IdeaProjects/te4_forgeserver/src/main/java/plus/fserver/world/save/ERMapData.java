@@ -55,7 +55,7 @@ public class ERMapData implements IMapData{
 
     @Override
     public boolean chunkExists(File dir, int x, int z) {
-        File subDir = new File(dir, "er2");
+        File subDir = new File(dir, "region");
         checkDir(subDir);
 
         try {
