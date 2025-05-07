@@ -10,6 +10,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Images\delete_ico.png" />
+    <None Remove="Images\delete_ico.svg" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="GF2RU_ICO.ico" />
   </ItemGroup>
 
@@ -28,6 +33,9 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Images\colphne1.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\delete_ico.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Images\groza0.png">

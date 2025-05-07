@@ -2,25 +2,32 @@
 using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Net.Http;
+using System.Text;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using SourceChord.FluentWPF;
 namespace GF2_RU_Launch;
 
 
 public partial class MainWindow : AcrylicWindow{
-    private static string GF2_DATA_TABLE  = "GF2_Exilium_Data/LocalCache/Data/Table";
-    private static string GF2_LANG_PACK   = "/LangPackageTableEnusData.bytes";
-    private static string GF2_LANG_BACKUP = "/LangPackageTableEnusData_ORIGINAL.bytes";
-    private static string GF2_RU_PACK     = "./LangPack.bytes";
-    private static string GF2_LOAD_URL    = "https://gitlab.com/homaplus/grils-frontline-team-translate/-/raw/master/LangPackageTableEnusDataRES.bytes?ref_type=heads&inline=false";
+    private static string GF2_DATA_TABLE    = "GF2_Exilium_Data/LocalCache/Data/Table";
+    private static string GF2_LANG_PACK     = "/LangPackageTableEnusData.bytes";
+    private static string GF2_LANG_BACKUP   = "/LangPackageTableEnusData_ORIGINAL.bytes";
+    private static string GF2_RU_PACK       = "./LangPack.bytes";
+    private static string GF2_LOAD_URL      = "https://gitlab.com/homaplus/grils-frontline-team-translate/-/raw/%__BRANCH%__%/LangPackageTableEnusDataRES.bytes?ref_type=heads&inline=false";
+    private static string GF2_CHANGELOG_URL = "https://gitlab.com/homaplus/grils-frontline-team-translate/-/raw/%__BRANCH%__%/Changelog.md?ref_type=heads&inline=false";
+
     private string GF2_Path = null;
+    private Changelogs subWindow;
+    private bool needLoadPack = true;
 
     public MainWindow() 
     {
         InitializeComponent();
         loadConfig();
-        BTnnUninstall.Content = "DEL";
+        //BTnnUninstall.Content = "DEL";
         BTnnUninstall.Visibility = Visibility.Hidden;
 
         var rand = new Random(DateTime.Now.Second);
@@ -46,6 +53,16 @@ public partial class MainWindow : AcrylicWindow{
 
         updatePlayBtn();
         editBtnStatus(false);
+    }
+
+
+    protected override void OnClosed(EventArgs e)
+    {
+        base.OnClosed(e);
+        if(subWindow != null)
+        {
+            subWindow.Close();
+        }
     }
 
 
@@ -159,14 +176,92 @@ public partial class MainWindow : AcrylicWindow{
     }
 
 
+    public string getLoadPackUrl()
+    {
+        string loadUrl = getCfgValue("GFT_LoadUrl");
+        if (loadUrl == null || loadUrl.Length == 0)
+        {
+            loadUrl = GF2_LOAD_URL;
+        }
+
+        string branch = getCfgValue("GFT_Branch");
+        if(branch == null || branch.Length == 0)
+        {
+            branch = "master";
+        }
+
+        return loadUrl.Replace("%__BRANCH%__%", branch);
+    }
+
+
+    public string getLoadChangesUrl()
+    {
+        string loadUrl = getCfgValue("GFT_ChangesUrl");
+        if (loadUrl == null || loadUrl.Length == 0)
+        {
+            loadUrl = GF2_CHANGELOG_URL;
+        }
+
+        string branch = getCfgValue("GFT_Branch");
+        if (branch == null || branch.Length == 0)
+        {
+            branch = "master";
+        }
+
+        return loadUrl.Replace("%__BRANCH%__%", branch);
+    }
+
+
     public void onBtnLoadClick(object sender, RoutedEventArgs e)
     {
-        editBtnStatus(load(GF2_LOAD_URL, GF2_RU_PACK));
+        bool result = true;
+        if (needLoadPack)
+        {
+            string log = loadStr(getLoadChangesUrl());
+            if (log != null)
+            {
+                string firstLine = log.Split("\n")[0];
+                string curVersion = getCfgValue("GFT_Version");
+
+                if(firstLine != null && curVersion != null && curVersion.Length != 0)
+                {
+                    if (firstLine.Equals(curVersion) && File.Exists(GF2_RU_PACK))
+                    {
+                        needLoadPack = false;
+                    }
+                }
+                if (needLoadPack)
+                {
+                    if(firstLine != null && firstLine.Length != 0)
+                    {
+                        setCfgValue("GFT_Version", firstLine);
+                    }
+                    subWindow = new Changelogs(this, log);
+                    subWindow.Show();
+                }
+            }
+
+            result = load(getLoadPackUrl(), GF2_RU_PACK);
+        }
+        if (result)
+        {
+            needLoadPack = false;
+        }
+        editBtnStatus(result);
     }
 
 
     private void onInstallClickProxy(object sender, RoutedEventArgs e)
     {   
+
+        //if ((Keyboard.Modifiers & ModifierKeys.Shift) > 0)
+        //{
+        //    subWindow = new Changelogs(this, "");
+        //    subWindow.Show();
+
+        //    return;
+        //}
+
         if(clickAction != null)
         {
             clickAction.Invoke(sender, e);
@@ -237,6 +332,7 @@ public partial class MainWindow : AcrylicWindow{
             {
                 msg = "Установлено";
                 installLoadedPack(null, null);
+                clickAction = null;
             } 
             else
             {
@@ -293,5 +389,16 @@ public partial class MainWindow : AcrylicWindow{
             return true;
         }
         return false;
+    }
+
+
+    private static string loadStr(string url)
+    {
+        using (WebClient webClient = new WebClient())
+        {
+            byte[] data = webClient.DownloadData(url);
+            return Encoding.UTF8.GetString(data);
+        }
+        return null;
     }
 }

@@ -1,0 +1,49 @@
+﻿<fw:AcrylicWindow x:Class="GF2_RU_Launch.Changelogs"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:GF2_RU_Launch"
+        xmlns:fw="clr-namespace:SourceChord.FluentWPF;assembly=FluentWPF"
+        mc:Ignorable="d"
+        Title="Girls Frontline 2: Exilium RU Launcher | Changelog" Height="350" Width="650" MinHeight="300" MinWidth="610"
+        TintColor="#90FFFFFF" TintOpacity="0.5"
+        FallbackColor="#90FFFFFF"
+        AcrylicWindowStyle="NoIcon"
+        fw:AcrylicWindow.AcrylicAccentState="BlurBehind" Background="#26FFFFFF" FontFamily="Arial" RenderTransformOrigin="0.5,0.5">
+    <fw:AcrylicWindow.BorderBrush>
+        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+            <GradientStop Color="#FF515254" Offset="0.01"/>
+            <GradientStop Color="#FFC5DCE4" Offset="1"/>
+        </LinearGradientBrush>
+    </fw:AcrylicWindow.BorderBrush>
+    <fw:AcrylicWindow.RenderTransform>
+        <TransformGroup>
+            <ScaleTransform/>
+            <SkewTransform/>
+            <RotateTransform/>
+            <TranslateTransform X="0"/>
+        </TransformGroup>
+    </fw:AcrylicWindow.RenderTransform>
+
+    <Grid>
+
+        <Border Background="#4C6F6F6F" VerticalAlignment="Top" Height="44" BorderThickness="0,1,0,1">
+            <Border.BorderBrush>
+                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                    <GradientStop Color="#00F1F1F1"/>
+                    <GradientStop Color="#7F383838" Offset="1"/>
+                </LinearGradientBrush>
+            </Border.BorderBrush>
+            <TextBlock x:Name="ChangeLHead" 
+               VerticalAlignment="Center"
+               TextAlignment="Center"
+               FontFamily="Microsoft YaHei" FontSize="24" 
+               >
+                Список изменений
+            </TextBlock>
+        </Border>
+        <TextBlock x:Name="ChangeLText" Margin="10,59,10,10"></TextBlock>
+    </Grid>
+
+</fw:AcrylicWindow>
