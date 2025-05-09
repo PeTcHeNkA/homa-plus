@@ -1,8 +1,8 @@
-package plus.proto;
+package test;
 
 import plus.tson.TsonFile;
 import java.io.File;
-import static plus.proto.Main.*;
+import static test.Main.*;
 
 
 public class TestSelf {

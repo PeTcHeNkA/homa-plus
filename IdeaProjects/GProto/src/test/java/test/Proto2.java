@@ -1,10 +1,7 @@
-package plus.proto;
+package test;
 
 import com.google.protobuf.*;
 import plus.proto.lang.TableData;
-import plus.tson.TsonFile;
-import java.io.File;
-import java.nio.charset.StandardCharsets;
 
 
 public class Proto2 {

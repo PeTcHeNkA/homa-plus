@@ -1,6 +1,5 @@
-package plus.proto;
+package test;
 
-import com.google.protobuf.InvalidProtocolBufferException;
 import plus.proto.lang.TableData;
 import plus.tson.TsonFile;
 
@@ -8,7 +7,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 
-import static plus.proto.Main.FILE1;
+import static test.Main.FILE1;
 
 
 public class ProtoRead {
