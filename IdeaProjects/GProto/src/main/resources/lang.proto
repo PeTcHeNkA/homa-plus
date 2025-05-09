@@ -4,18 +4,16 @@ option java_package = "plus.proto.lang";
 option java_outer_classname = "TableData";
 
 message Item {
-  optional int64 id  = 1;
+  optional int32 id  = 1;
   optional string name = 2;
 }
 
 message BItem {
-  optional int64 id  = 1;
+  optional int32 id  = 1;
   optional bytes data = 2;
 }
 
 message Data {
-  repeated Item item = 1;
-  //optional int32 numA = 2;
   repeated BItem bdat = 3;
-  //repeated NumPair numPair = 2;
+  repeated Item item = 1;
 }

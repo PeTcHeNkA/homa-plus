@@ -30,15 +30,15 @@ public final class TableData {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>optional int64 id = 1;</code>
+     * <code>optional int32 id = 1;</code>
      * @return Whether the id field is set.
      */
     boolean hasId();
     /**
-     * <code>optional int64 id = 1;</code>
+     * <code>optional int32 id = 1;</code>
      * @return The id.
      */
-    long getId();
+    int getId();
 
     /**
      * <code>optional string name = 2;</code>
@@ -97,9 +97,9 @@ public final class TableData {
 
     private int bitField0_;
     public static final int ID_FIELD_NUMBER = 1;
-    private long id_ = 0L;
+    private int id_ = 0;
     /**
-     * <code>optional int64 id = 1;</code>
+     * <code>optional int32 id = 1;</code>
      * @return Whether the id field is set.
      */
     @java.lang.Override
@@ -107,11 +107,11 @@ public final class TableData {
       return ((bitField0_ & 0x00000001) != 0);
     }
     /**
-     * <code>optional int64 id = 1;</code>
+     * <code>optional int32 id = 1;</code>
      * @return The id.
      */
     @java.lang.Override
-    public long getId() {
+    public int getId() {
       return id_;
     }
 
@@ -179,7 +179,7 @@ public final class TableData {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (((bitField0_ & 0x00000001) != 0)) {
-        output.writeInt64(1, id_);
+        output.writeInt32(1, id_);
       }
       if (((bitField0_ & 0x00000002) != 0)) {
         com.google.protobuf.GeneratedMessage.writeString(output, 2, name_);
@@ -195,7 +195,7 @@ public final class TableData {
       size = 0;
       if (((bitField0_ & 0x00000001) != 0)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(1, id_);
+          .computeInt32Size(1, id_);
       }
       if (((bitField0_ & 0x00000002) != 0)) {
         size += com.google.protobuf.GeneratedMessage.computeStringSize(2, name_);
@@ -238,8 +238,7 @@ public final class TableData {
       hash = (19 * hash) + getDescriptor().hashCode();
       if (hasId()) {
         hash = (37 * hash) + ID_FIELD_NUMBER;
-        hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-            getId());
+        hash = (53 * hash) + getId();
       }
       if (hasName()) {
         hash = (37 * hash) + NAME_FIELD_NUMBER;
@@ -376,7 +375,7 @@ public final class TableData {
       public Builder clear() {
         super.clear();
         bitField0_ = 0;
-        id_ = 0L;
+        id_ = 0;
         name_ = "";
         return this;
       }
@@ -470,7 +469,7 @@ public final class TableData {
                 done = true;
                 break;
               case 8: {
-                id_ = input.readInt64();
+                id_ = input.readInt32();
                 bitField0_ |= 0x00000001;
                 break;
               } // case 8
@@ -496,9 +495,9 @@ public final class TableData {
       }
       private int bitField0_;
 
-      private long id_ ;
+      private int id_ ;
       /**
-       * <code>optional int64 id = 1;</code>
+       * <code>optional int32 id = 1;</code>
        * @return Whether the id field is set.
        */
       @java.lang.Override
@@ -506,19 +505,19 @@ public final class TableData {
         return ((bitField0_ & 0x00000001) != 0);
       }
       /**
-       * <code>optional int64 id = 1;</code>
+       * <code>optional int32 id = 1;</code>
        * @return The id.
        */
       @java.lang.Override
-      public long getId() {
+      public int getId() {
         return id_;
       }
       /**
-       * <code>optional int64 id = 1;</code>
+       * <code>optional int32 id = 1;</code>
        * @param value The id to set.
        * @return This builder for chaining.
        */
-      public Builder setId(long value) {
+      public Builder setId(int value) {
 
         id_ = value;
         bitField0_ |= 0x00000001;
@@ -526,12 +525,12 @@ public final class TableData {
         return this;
       }
       /**
-       * <code>optional int64 id = 1;</code>
+       * <code>optional int32 id = 1;</code>
        * @return This builder for chaining.
        */
       public Builder clearId() {
         bitField0_ = (bitField0_ & ~0x00000001);
-        id_ = 0L;
+        id_ = 0;
         onChanged();
         return this;
       }
@@ -672,15 +671,15 @@ public final class TableData {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>optional int64 id = 1;</code>
+     * <code>optional int32 id = 1;</code>
      * @return Whether the id field is set.
      */
     boolean hasId();
     /**
-     * <code>optional int64 id = 1;</code>
+     * <code>optional int32 id = 1;</code>
      * @return The id.
      */
-    long getId();
+    int getId();
 
     /**
      * <code>optional bytes data = 2;</code>
@@ -733,9 +732,9 @@ public final class TableData {
 
     private int bitField0_;
     public static final int ID_FIELD_NUMBER = 1;
-    private long id_ = 0L;
+    private int id_ = 0;
     /**
-     * <code>optional int64 id = 1;</code>
+     * <code>optional int32 id = 1;</code>
      * @return Whether the id field is set.
      */
     @java.lang.Override
@@ -743,11 +742,11 @@ public final class TableData {
       return ((bitField0_ & 0x00000001) != 0);
     }
     /**
-     * <code>optional int64 id = 1;</code>
+     * <code>optional int32 id = 1;</code>
      * @return The id.
      */
     @java.lang.Override
-    public long getId() {
+    public int getId() {
       return id_;
     }
 
@@ -785,7 +784,7 @@ public final class TableData {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (((bitField0_ & 0x00000001) != 0)) {
-        output.writeInt64(1, id_);
+        output.writeInt32(1, id_);
       }
       if (((bitField0_ & 0x00000002) != 0)) {
         output.writeBytes(2, data_);
@@ -801,7 +800,7 @@ public final class TableData {
       size = 0;
       if (((bitField0_ & 0x00000001) != 0)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(1, id_);
+          .computeInt32Size(1, id_);
       }
       if (((bitField0_ & 0x00000002) != 0)) {
         size += com.google.protobuf.CodedOutputStream
@@ -845,8 +844,7 @@ public final class TableData {
       hash = (19 * hash) + getDescriptor().hashCode();
       if (hasId()) {
         hash = (37 * hash) + ID_FIELD_NUMBER;
-        hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-            getId());
+        hash = (53 * hash) + getId();
       }
       if (hasData()) {
         hash = (37 * hash) + DATA_FIELD_NUMBER;
@@ -983,7 +981,7 @@ public final class TableData {
       public Builder clear() {
         super.clear();
         bitField0_ = 0;
-        id_ = 0L;
+        id_ = 0;
         data_ = com.google.protobuf.ByteString.EMPTY;
         return this;
       }
@@ -1075,7 +1073,7 @@ public final class TableData {
                 done = true;
                 break;
               case 8: {
-                id_ = input.readInt64();
+                id_ = input.readInt32();
                 bitField0_ |= 0x00000001;
                 break;
               } // case 8
@@ -1101,9 +1099,9 @@ public final class TableData {
       }
       private int bitField0_;
 
-      private long id_ ;
+      private int id_ ;
       /**
-       * <code>optional int64 id = 1;</code>
+       * <code>optional int32 id = 1;</code>
        * @return Whether the id field is set.
        */
       @java.lang.Override
@@ -1111,19 +1109,19 @@ public final class TableData {
         return ((bitField0_ & 0x00000001) != 0);
       }
       /**
-       * <code>optional int64 id = 1;</code>
+       * <code>optional int32 id = 1;</code>
        * @return The id.
        */
       @java.lang.Override
-      public long getId() {
+      public int getId() {
         return id_;
       }
       /**
-       * <code>optional int64 id = 1;</code>
+       * <code>optional int32 id = 1;</code>
        * @param value The id to set.
        * @return This builder for chaining.
        */
-      public Builder setId(long value) {
+      public Builder setId(int value) {
 
         id_ = value;
         bitField0_ |= 0x00000001;
@@ -1131,12 +1129,12 @@ public final class TableData {
         return this;
       }
       /**
-       * <code>optional int64 id = 1;</code>
+       * <code>optional int32 id = 1;</code>
        * @return This builder for chaining.
        */
       public Builder clearId() {
         bitField0_ = (bitField0_ & ~0x00000001);
-        id_ = 0L;
+        id_ = 0;
         onChanged();
         return this;
       }
@@ -1237,6 +1235,30 @@ public final class TableData {
       com.google.protobuf.MessageOrBuilder {
 
     /**
+     * <code>repeated .protobuf.BItem bdat = 3;</code>
+     */
+    java.util.List<plus.proto.lang.TableData.BItem> 
+        getBdatList();
+    /**
+     * <code>repeated .protobuf.BItem bdat = 3;</code>
+     */
+    plus.proto.lang.TableData.BItem getBdat(int index);
+    /**
+     * <code>repeated .protobuf.BItem bdat = 3;</code>
+     */
+    int getBdatCount();
+    /**
+     * <code>repeated .protobuf.BItem bdat = 3;</code>
+     */
+    java.util.List<? extends plus.proto.lang.TableData.BItemOrBuilder> 
+        getBdatOrBuilderList();
+    /**
+     * <code>repeated .protobuf.BItem bdat = 3;</code>
+     */
+    plus.proto.lang.TableData.BItemOrBuilder getBdatOrBuilder(
+        int index);
+
+    /**
      * <code>repeated .protobuf.Item item = 1;</code>
      */
     java.util.List<plus.proto.lang.TableData.Item> 
@@ -1258,61 +1280,6 @@ public final class TableData {
      * <code>repeated .protobuf.Item item = 1;</code>
      */
     plus.proto.lang.TableData.ItemOrBuilder getItemOrBuilder(
-        int index);
-
-    /**
-     * <code>optional int32 numA = 2;</code>
-     * @return Whether the numA field is set.
-     */
-    boolean hasNumA();
-    /**
-     * <code>optional int32 numA = 2;</code>
-     * @return The numA.
-     */
-    int getNumA();
-
-    /**
-     * <pre>
-     * repeated NumPair numPair = 2;
-     * </pre>
-     *
-     * <code>repeated .protobuf.BItem bdat = 3;</code>
-     */
-    java.util.List<plus.proto.lang.TableData.BItem> 
-        getBdatList();
-    /**
-     * <pre>
-     * repeated NumPair numPair = 2;
-     * </pre>
-     *
-     * <code>repeated .protobuf.BItem bdat = 3;</code>
-     */
-    plus.proto.lang.TableData.BItem getBdat(int index);
-    /**
-     * <pre>
-     * repeated NumPair numPair = 2;
-     * </pre>
-     *
-     * <code>repeated .protobuf.BItem bdat = 3;</code>
-     */
-    int getBdatCount();
-    /**
-     * <pre>
-     * repeated NumPair numPair = 2;
-     * </pre>
-     *
-     * <code>repeated .protobuf.BItem bdat = 3;</code>
-     */
-    java.util.List<? extends plus.proto.lang.TableData.BItemOrBuilder> 
-        getBdatOrBuilderList();
-    /**
-     * <pre>
-     * repeated NumPair numPair = 2;
-     * </pre>
-     *
-     * <code>repeated .protobuf.BItem bdat = 3;</code>
-     */
-    plus.proto.lang.TableData.BItemOrBuilder getBdatOrBuilder(
         int index);
   }
   /**
@@ -1337,8 +1304,8 @@ public final class TableData {
       super(builder);
     }
     private Data() {
-      item_ = java.util.Collections.emptyList();
       bdat_ = java.util.Collections.emptyList();
+      item_ = java.util.Collections.emptyList();
     }
 
     public static final com.google.protobuf.Descriptors.Descriptor
@@ -1354,7 +1321,47 @@ public final class TableData {
               plus.proto.lang.TableData.Data.class, plus.proto.lang.TableData.Data.Builder.class);
     }
 
-    private int bitField0_;
+    public static final int BDAT_FIELD_NUMBER = 3;
+    @SuppressWarnings("serial")
+    private java.util.List<plus.proto.lang.TableData.BItem> bdat_;
+    /**
+     * <code>repeated .protobuf.BItem bdat = 3;</code>
+     */
+    @java.lang.Override
+    public java.util.List<plus.proto.lang.TableData.BItem> getBdatList() {
+      return bdat_;
+    }
+    /**
+     * <code>repeated .protobuf.BItem bdat = 3;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends plus.proto.lang.TableData.BItemOrBuilder> 
+        getBdatOrBuilderList() {
+      return bdat_;
+    }
+    /**
+     * <code>repeated .protobuf.BItem bdat = 3;</code>
+     */
+    @java.lang.Override
+    public int getBdatCount() {
+      return bdat_.size();
+    }
+    /**
+     * <code>repeated .protobuf.BItem bdat = 3;</code>
+     */
+    @java.lang.Override
+    public plus.proto.lang.TableData.BItem getBdat(int index) {
+      return bdat_.get(index);
+    }
+    /**
+     * <code>repeated .protobuf.BItem bdat = 3;</code>
+     */
+    @java.lang.Override
+    public plus.proto.lang.TableData.BItemOrBuilder getBdatOrBuilder(
+        int index) {
+      return bdat_.get(index);
+    }
+
     public static final int ITEM_FIELD_NUMBER = 1;
     @SuppressWarnings("serial")
     private java.util.List<plus.proto.lang.TableData.Item> item_;
@@ -1396,86 +1403,6 @@ public final class TableData {
       return item_.get(index);
     }
 
-    public static final int NUMA_FIELD_NUMBER = 2;
-    private int numA_ = 0;
-    /**
-     * <code>optional int32 numA = 2;</code>
-     * @return Whether the numA field is set.
-     */
-    @java.lang.Override
-    public boolean hasNumA() {
-      return ((bitField0_ & 0x00000001) != 0);
-    }
-    /**
-     * <code>optional int32 numA = 2;</code>
-     * @return The numA.
-     */
-    @java.lang.Override
-    public int getNumA() {
-      return numA_;
-    }
-
-    public static final int BDAT_FIELD_NUMBER = 3;
-    @SuppressWarnings("serial")
-    private java.util.List<plus.proto.lang.TableData.BItem> bdat_;
-    /**
-     * <pre>
-     * repeated NumPair numPair = 2;
-     * </pre>
-     *
-     * <code>repeated .protobuf.BItem bdat = 3;</code>
-     */
-    @java.lang.Override
-    public java.util.List<plus.proto.lang.TableData.BItem> getBdatList() {
-      return bdat_;
-    }
-    /**
-     * <pre>
-     * repeated NumPair numPair = 2;
-     * </pre>
-     *
-     * <code>repeated .protobuf.BItem bdat = 3;</code>
-     */
-    @java.lang.Override
-    public java.util.List<? extends plus.proto.lang.TableData.BItemOrBuilder> 
-        getBdatOrBuilderList() {
-      return bdat_;
-    }
-    /**
-     * <pre>
-     * repeated NumPair numPair = 2;
-     * </pre>
-     *
-     * <code>repeated .protobuf.BItem bdat = 3;</code>
-     */
-    @java.lang.Override
-    public int getBdatCount() {
-      return bdat_.size();
-    }
-    /**
-     * <pre>
-     * repeated NumPair numPair = 2;
-     * </pre>
-     *
-     * <code>repeated .protobuf.BItem bdat = 3;</code>
-     */
-    @java.lang.Override
-    public plus.proto.lang.TableData.BItem getBdat(int index) {
-      return bdat_.get(index);
-    }
-    /**
-     * <pre>
-     * repeated NumPair numPair = 2;
-     * </pre>
-     *
-     * <code>repeated .protobuf.BItem bdat = 3;</code>
-     */
-    @java.lang.Override
-    public plus.proto.lang.TableData.BItemOrBuilder getBdatOrBuilder(
-        int index) {
-      return bdat_.get(index);
-    }
-
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -1490,14 +1417,11 @@ public final class TableData {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      for (int i = 0; i < item_.size(); i++) {
-        output.writeMessage(1, item_.get(i));
-      }
-      if (((bitField0_ & 0x00000001) != 0)) {
-        output.writeInt32(2, numA_);
-      }
       for (int i = 0; i < bdat_.size(); i++) {
         output.writeMessage(3, bdat_.get(i));
+      }
+      for (int i = 0; i < item_.size(); i++) {
+        output.writeMessage(1, item_.get(i));
       }
       getUnknownFields().writeTo(output);
     }
@@ -1511,10 +1435,6 @@ public final class TableData {
       for (int i = 0; i < item_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, item_.get(i));
-      }
-      if (((bitField0_ & 0x00000001) != 0)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(2, numA_);
       }
       for (int i = 0; i < bdat_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
@@ -1535,15 +1455,10 @@ public final class TableData {
       }
       plus.proto.lang.TableData.Data other = (plus.proto.lang.TableData.Data) obj;
 
-      if (!getItemList()
-          .equals(other.getItemList())) return false;
-      if (hasNumA() != other.hasNumA()) return false;
-      if (hasNumA()) {
-        if (getNumA()
-            != other.getNumA()) return false;
-      }
       if (!getBdatList()
           .equals(other.getBdatList())) return false;
+      if (!getItemList()
+          .equals(other.getItemList())) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -1555,17 +1470,13 @@ public final class TableData {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      if (getItemCount() > 0) {
-        hash = (37 * hash) + ITEM_FIELD_NUMBER;
-        hash = (53 * hash) + getItemList().hashCode();
-      }
-      if (hasNumA()) {
-        hash = (37 * hash) + NUMA_FIELD_NUMBER;
-        hash = (53 * hash) + getNumA();
-      }
       if (getBdatCount() > 0) {
         hash = (37 * hash) + BDAT_FIELD_NUMBER;
         hash = (53 * hash) + getBdatList().hashCode();
+      }
+      if (getItemCount() > 0) {
+        hash = (37 * hash) + ITEM_FIELD_NUMBER;
+        hash = (53 * hash) + getItemList().hashCode();
       }
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
@@ -1698,21 +1609,20 @@ public final class TableData {
       public Builder clear() {
         super.clear();
         bitField0_ = 0;
-        if (itemBuilder_ == null) {
-          item_ = java.util.Collections.emptyList();
-        } else {
-          item_ = null;
-          itemBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000001);
-        numA_ = 0;
         if (bdatBuilder_ == null) {
           bdat_ = java.util.Collections.emptyList();
         } else {
           bdat_ = null;
           bdatBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00000004);
+        bitField0_ = (bitField0_ & ~0x00000001);
+        if (itemBuilder_ == null) {
+          item_ = java.util.Collections.emptyList();
+        } else {
+          item_ = null;
+          itemBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000002);
         return this;
       }
 
@@ -1746,34 +1656,28 @@ public final class TableData {
       }
 
       private void buildPartialRepeatedFields(plus.proto.lang.TableData.Data result) {
-        if (itemBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) != 0)) {
-            item_ = java.util.Collections.unmodifiableList(item_);
-            bitField0_ = (bitField0_ & ~0x00000001);
-          }
-          result.item_ = item_;
-        } else {
-          result.item_ = itemBuilder_.build();
-        }
         if (bdatBuilder_ == null) {
-          if (((bitField0_ & 0x00000004) != 0)) {
+          if (((bitField0_ & 0x00000001) != 0)) {
             bdat_ = java.util.Collections.unmodifiableList(bdat_);
-            bitField0_ = (bitField0_ & ~0x00000004);
+            bitField0_ = (bitField0_ & ~0x00000001);
           }
           result.bdat_ = bdat_;
         } else {
           result.bdat_ = bdatBuilder_.build();
         }
+        if (itemBuilder_ == null) {
+          if (((bitField0_ & 0x00000002) != 0)) {
+            item_ = java.util.Collections.unmodifiableList(item_);
+            bitField0_ = (bitField0_ & ~0x00000002);
+          }
+          result.item_ = item_;
+        } else {
+          result.item_ = itemBuilder_.build();
+        }
       }
 
       private void buildPartial0(plus.proto.lang.TableData.Data result) {
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
-        if (((from_bitField0_ & 0x00000002) != 0)) {
-          result.numA_ = numA_;
-          to_bitField0_ |= 0x00000001;
-        }
-        result.bitField0_ |= to_bitField0_;
       }
 
       @java.lang.Override
@@ -1788,40 +1692,11 @@ public final class TableData {
 
       public Builder mergeFrom(plus.proto.lang.TableData.Data other) {
         if (other == plus.proto.lang.TableData.Data.getDefaultInstance()) return this;
-        if (itemBuilder_ == null) {
-          if (!other.item_.isEmpty()) {
-            if (item_.isEmpty()) {
-              item_ = other.item_;
-              bitField0_ = (bitField0_ & ~0x00000001);
-            } else {
-              ensureItemIsMutable();
-              item_.addAll(other.item_);
-            }
-            onChanged();
-          }
-        } else {
-          if (!other.item_.isEmpty()) {
-            if (itemBuilder_.isEmpty()) {
-              itemBuilder_.dispose();
-              itemBuilder_ = null;
-              item_ = other.item_;
-              bitField0_ = (bitField0_ & ~0x00000001);
-              itemBuilder_ = 
-                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
-                   internalGetItemFieldBuilder() : null;
-            } else {
-              itemBuilder_.addAllMessages(other.item_);
-            }
-          }
-        }
-        if (other.hasNumA()) {
-          setNumA(other.getNumA());
-        }
         if (bdatBuilder_ == null) {
           if (!other.bdat_.isEmpty()) {
             if (bdat_.isEmpty()) {
               bdat_ = other.bdat_;
-              bitField0_ = (bitField0_ & ~0x00000004);
+              bitField0_ = (bitField0_ & ~0x00000001);
             } else {
               ensureBdatIsMutable();
               bdat_.addAll(other.bdat_);
@@ -1834,12 +1709,38 @@ public final class TableData {
               bdatBuilder_.dispose();
               bdatBuilder_ = null;
               bdat_ = other.bdat_;
-              bitField0_ = (bitField0_ & ~0x00000004);
+              bitField0_ = (bitField0_ & ~0x00000001);
               bdatBuilder_ = 
                 com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
                    internalGetBdatFieldBuilder() : null;
             } else {
               bdatBuilder_.addAllMessages(other.bdat_);
+            }
+          }
+        }
+        if (itemBuilder_ == null) {
+          if (!other.item_.isEmpty()) {
+            if (item_.isEmpty()) {
+              item_ = other.item_;
+              bitField0_ = (bitField0_ & ~0x00000002);
+            } else {
+              ensureItemIsMutable();
+              item_.addAll(other.item_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.item_.isEmpty()) {
+            if (itemBuilder_.isEmpty()) {
+              itemBuilder_.dispose();
+              itemBuilder_ = null;
+              item_ = other.item_;
+              bitField0_ = (bitField0_ & ~0x00000002);
+              itemBuilder_ = 
+                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                   internalGetItemFieldBuilder() : null;
+            } else {
+              itemBuilder_.addAllMessages(other.item_);
             }
           }
         }
@@ -1882,11 +1783,6 @@ public final class TableData {
                 }
                 break;
               } // case 10
-              case 16: {
-                numA_ = input.readInt32();
-                bitField0_ |= 0x00000002;
-                break;
-              } // case 16
               case 26: {
                 plus.proto.lang.TableData.BItem m =
                     input.readMessage(
@@ -1917,12 +1813,252 @@ public final class TableData {
       }
       private int bitField0_;
 
+      private java.util.List<plus.proto.lang.TableData.BItem> bdat_ =
+        java.util.Collections.emptyList();
+      private void ensureBdatIsMutable() {
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          bdat_ = new java.util.ArrayList<plus.proto.lang.TableData.BItem>(bdat_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilder<
+          plus.proto.lang.TableData.BItem, plus.proto.lang.TableData.BItem.Builder, plus.proto.lang.TableData.BItemOrBuilder> bdatBuilder_;
+
+      /**
+       * <code>repeated .protobuf.BItem bdat = 3;</code>
+       */
+      public java.util.List<plus.proto.lang.TableData.BItem> getBdatList() {
+        if (bdatBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(bdat_);
+        } else {
+          return bdatBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .protobuf.BItem bdat = 3;</code>
+       */
+      public int getBdatCount() {
+        if (bdatBuilder_ == null) {
+          return bdat_.size();
+        } else {
+          return bdatBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .protobuf.BItem bdat = 3;</code>
+       */
+      public plus.proto.lang.TableData.BItem getBdat(int index) {
+        if (bdatBuilder_ == null) {
+          return bdat_.get(index);
+        } else {
+          return bdatBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .protobuf.BItem bdat = 3;</code>
+       */
+      public Builder setBdat(
+          int index, plus.proto.lang.TableData.BItem value) {
+        if (bdatBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureBdatIsMutable();
+          bdat_.set(index, value);
+          onChanged();
+        } else {
+          bdatBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .protobuf.BItem bdat = 3;</code>
+       */
+      public Builder setBdat(
+          int index, plus.proto.lang.TableData.BItem.Builder builderForValue) {
+        if (bdatBuilder_ == null) {
+          ensureBdatIsMutable();
+          bdat_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          bdatBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .protobuf.BItem bdat = 3;</code>
+       */
+      public Builder addBdat(plus.proto.lang.TableData.BItem value) {
+        if (bdatBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureBdatIsMutable();
+          bdat_.add(value);
+          onChanged();
+        } else {
+          bdatBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .protobuf.BItem bdat = 3;</code>
+       */
+      public Builder addBdat(
+          int index, plus.proto.lang.TableData.BItem value) {
+        if (bdatBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureBdatIsMutable();
+          bdat_.add(index, value);
+          onChanged();
+        } else {
+          bdatBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .protobuf.BItem bdat = 3;</code>
+       */
+      public Builder addBdat(
+          plus.proto.lang.TableData.BItem.Builder builderForValue) {
+        if (bdatBuilder_ == null) {
+          ensureBdatIsMutable();
+          bdat_.add(builderForValue.build());
+          onChanged();
+        } else {
+          bdatBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .protobuf.BItem bdat = 3;</code>
+       */
+      public Builder addBdat(
+          int index, plus.proto.lang.TableData.BItem.Builder builderForValue) {
+        if (bdatBuilder_ == null) {
+          ensureBdatIsMutable();
+          bdat_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          bdatBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .protobuf.BItem bdat = 3;</code>
+       */
+      public Builder addAllBdat(
+          java.lang.Iterable<? extends plus.proto.lang.TableData.BItem> values) {
+        if (bdatBuilder_ == null) {
+          ensureBdatIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, bdat_);
+          onChanged();
+        } else {
+          bdatBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .protobuf.BItem bdat = 3;</code>
+       */
+      public Builder clearBdat() {
+        if (bdatBuilder_ == null) {
+          bdat_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          bdatBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .protobuf.BItem bdat = 3;</code>
+       */
+      public Builder removeBdat(int index) {
+        if (bdatBuilder_ == null) {
+          ensureBdatIsMutable();
+          bdat_.remove(index);
+          onChanged();
+        } else {
+          bdatBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .protobuf.BItem bdat = 3;</code>
+       */
+      public plus.proto.lang.TableData.BItem.Builder getBdatBuilder(
+          int index) {
+        return internalGetBdatFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .protobuf.BItem bdat = 3;</code>
+       */
+      public plus.proto.lang.TableData.BItemOrBuilder getBdatOrBuilder(
+          int index) {
+        if (bdatBuilder_ == null) {
+          return bdat_.get(index);  } else {
+          return bdatBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .protobuf.BItem bdat = 3;</code>
+       */
+      public java.util.List<? extends plus.proto.lang.TableData.BItemOrBuilder> 
+           getBdatOrBuilderList() {
+        if (bdatBuilder_ != null) {
+          return bdatBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(bdat_);
+        }
+      }
+      /**
+       * <code>repeated .protobuf.BItem bdat = 3;</code>
+       */
+      public plus.proto.lang.TableData.BItem.Builder addBdatBuilder() {
+        return internalGetBdatFieldBuilder().addBuilder(
+            plus.proto.lang.TableData.BItem.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .protobuf.BItem bdat = 3;</code>
+       */
+      public plus.proto.lang.TableData.BItem.Builder addBdatBuilder(
+          int index) {
+        return internalGetBdatFieldBuilder().addBuilder(
+            index, plus.proto.lang.TableData.BItem.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .protobuf.BItem bdat = 3;</code>
+       */
+      public java.util.List<plus.proto.lang.TableData.BItem.Builder> 
+           getBdatBuilderList() {
+        return internalGetBdatFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilder<
+          plus.proto.lang.TableData.BItem, plus.proto.lang.TableData.BItem.Builder, plus.proto.lang.TableData.BItemOrBuilder> 
+          internalGetBdatFieldBuilder() {
+        if (bdatBuilder_ == null) {
+          bdatBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+              plus.proto.lang.TableData.BItem, plus.proto.lang.TableData.BItem.Builder, plus.proto.lang.TableData.BItemOrBuilder>(
+                  bdat_,
+                  ((bitField0_ & 0x00000001) != 0),
+                  getParentForChildren(),
+                  isClean());
+          bdat_ = null;
+        }
+        return bdatBuilder_;
+      }
+
       private java.util.List<plus.proto.lang.TableData.Item> item_ =
         java.util.Collections.emptyList();
       private void ensureItemIsMutable() {
-        if (!((bitField0_ & 0x00000001) != 0)) {
+        if (!((bitField0_ & 0x00000002) != 0)) {
           item_ = new java.util.ArrayList<plus.proto.lang.TableData.Item>(item_);
-          bitField0_ |= 0x00000001;
+          bitField0_ |= 0x00000002;
          }
       }
 
@@ -2072,7 +2208,7 @@ public final class TableData {
       public Builder clearItem() {
         if (itemBuilder_ == null) {
           item_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
+          bitField0_ = (bitField0_ & ~0x00000002);
           onChanged();
         } else {
           itemBuilder_.clear();
@@ -2149,364 +2285,12 @@ public final class TableData {
           itemBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
               plus.proto.lang.TableData.Item, plus.proto.lang.TableData.Item.Builder, plus.proto.lang.TableData.ItemOrBuilder>(
                   item_,
-                  ((bitField0_ & 0x00000001) != 0),
+                  ((bitField0_ & 0x00000002) != 0),
                   getParentForChildren(),
                   isClean());
           item_ = null;
         }
         return itemBuilder_;
-      }
-
-      private int numA_ ;
-      /**
-       * <code>optional int32 numA = 2;</code>
-       * @return Whether the numA field is set.
-       */
-      @java.lang.Override
-      public boolean hasNumA() {
-        return ((bitField0_ & 0x00000002) != 0);
-      }
-      /**
-       * <code>optional int32 numA = 2;</code>
-       * @return The numA.
-       */
-      @java.lang.Override
-      public int getNumA() {
-        return numA_;
-      }
-      /**
-       * <code>optional int32 numA = 2;</code>
-       * @param value The numA to set.
-       * @return This builder for chaining.
-       */
-      public Builder setNumA(int value) {
-
-        numA_ = value;
-        bitField0_ |= 0x00000002;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional int32 numA = 2;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearNumA() {
-        bitField0_ = (bitField0_ & ~0x00000002);
-        numA_ = 0;
-        onChanged();
-        return this;
-      }
-
-      private java.util.List<plus.proto.lang.TableData.BItem> bdat_ =
-        java.util.Collections.emptyList();
-      private void ensureBdatIsMutable() {
-        if (!((bitField0_ & 0x00000004) != 0)) {
-          bdat_ = new java.util.ArrayList<plus.proto.lang.TableData.BItem>(bdat_);
-          bitField0_ |= 0x00000004;
-         }
-      }
-
-      private com.google.protobuf.RepeatedFieldBuilder<
-          plus.proto.lang.TableData.BItem, plus.proto.lang.TableData.BItem.Builder, plus.proto.lang.TableData.BItemOrBuilder> bdatBuilder_;
-
-      /**
-       * <pre>
-       * repeated NumPair numPair = 2;
-       * </pre>
-       *
-       * <code>repeated .protobuf.BItem bdat = 3;</code>
-       */
-      public java.util.List<plus.proto.lang.TableData.BItem> getBdatList() {
-        if (bdatBuilder_ == null) {
-          return java.util.Collections.unmodifiableList(bdat_);
-        } else {
-          return bdatBuilder_.getMessageList();
-        }
-      }
-      /**
-       * <pre>
-       * repeated NumPair numPair = 2;
-       * </pre>
-       *
-       * <code>repeated .protobuf.BItem bdat = 3;</code>
-       */
-      public int getBdatCount() {
-        if (bdatBuilder_ == null) {
-          return bdat_.size();
-        } else {
-          return bdatBuilder_.getCount();
-        }
-      }
-      /**
-       * <pre>
-       * repeated NumPair numPair = 2;
-       * </pre>
-       *
-       * <code>repeated .protobuf.BItem bdat = 3;</code>
-       */
-      public plus.proto.lang.TableData.BItem getBdat(int index) {
-        if (bdatBuilder_ == null) {
-          return bdat_.get(index);
-        } else {
-          return bdatBuilder_.getMessage(index);
-        }
-      }
-      /**
-       * <pre>
-       * repeated NumPair numPair = 2;
-       * </pre>
-       *
-       * <code>repeated .protobuf.BItem bdat = 3;</code>
-       */
-      public Builder setBdat(
-          int index, plus.proto.lang.TableData.BItem value) {
-        if (bdatBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureBdatIsMutable();
-          bdat_.set(index, value);
-          onChanged();
-        } else {
-          bdatBuilder_.setMessage(index, value);
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * repeated NumPair numPair = 2;
-       * </pre>
-       *
-       * <code>repeated .protobuf.BItem bdat = 3;</code>
-       */
-      public Builder setBdat(
-          int index, plus.proto.lang.TableData.BItem.Builder builderForValue) {
-        if (bdatBuilder_ == null) {
-          ensureBdatIsMutable();
-          bdat_.set(index, builderForValue.build());
-          onChanged();
-        } else {
-          bdatBuilder_.setMessage(index, builderForValue.build());
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * repeated NumPair numPair = 2;
-       * </pre>
-       *
-       * <code>repeated .protobuf.BItem bdat = 3;</code>
-       */
-      public Builder addBdat(plus.proto.lang.TableData.BItem value) {
-        if (bdatBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureBdatIsMutable();
-          bdat_.add(value);
-          onChanged();
-        } else {
-          bdatBuilder_.addMessage(value);
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * repeated NumPair numPair = 2;
-       * </pre>
-       *
-       * <code>repeated .protobuf.BItem bdat = 3;</code>
-       */
-      public Builder addBdat(
-          int index, plus.proto.lang.TableData.BItem value) {
-        if (bdatBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureBdatIsMutable();
-          bdat_.add(index, value);
-          onChanged();
-        } else {
-          bdatBuilder_.addMessage(index, value);
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * repeated NumPair numPair = 2;
-       * </pre>
-       *
-       * <code>repeated .protobuf.BItem bdat = 3;</code>
-       */
-      public Builder addBdat(
-          plus.proto.lang.TableData.BItem.Builder builderForValue) {
-        if (bdatBuilder_ == null) {
-          ensureBdatIsMutable();
-          bdat_.add(builderForValue.build());
-          onChanged();
-        } else {
-          bdatBuilder_.addMessage(builderForValue.build());
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * repeated NumPair numPair = 2;
-       * </pre>
-       *
-       * <code>repeated .protobuf.BItem bdat = 3;</code>
-       */
-      public Builder addBdat(
-          int index, plus.proto.lang.TableData.BItem.Builder builderForValue) {
-        if (bdatBuilder_ == null) {
-          ensureBdatIsMutable();
-          bdat_.add(index, builderForValue.build());
-          onChanged();
-        } else {
-          bdatBuilder_.addMessage(index, builderForValue.build());
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * repeated NumPair numPair = 2;
-       * </pre>
-       *
-       * <code>repeated .protobuf.BItem bdat = 3;</code>
-       */
-      public Builder addAllBdat(
-          java.lang.Iterable<? extends plus.proto.lang.TableData.BItem> values) {
-        if (bdatBuilder_ == null) {
-          ensureBdatIsMutable();
-          com.google.protobuf.AbstractMessageLite.Builder.addAll(
-              values, bdat_);
-          onChanged();
-        } else {
-          bdatBuilder_.addAllMessages(values);
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * repeated NumPair numPair = 2;
-       * </pre>
-       *
-       * <code>repeated .protobuf.BItem bdat = 3;</code>
-       */
-      public Builder clearBdat() {
-        if (bdatBuilder_ == null) {
-          bdat_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000004);
-          onChanged();
-        } else {
-          bdatBuilder_.clear();
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * repeated NumPair numPair = 2;
-       * </pre>
-       *
-       * <code>repeated .protobuf.BItem bdat = 3;</code>
-       */
-      public Builder removeBdat(int index) {
-        if (bdatBuilder_ == null) {
-          ensureBdatIsMutable();
-          bdat_.remove(index);
-          onChanged();
-        } else {
-          bdatBuilder_.remove(index);
-        }
-        return this;
-      }
-      /**
-       * <pre>
-       * repeated NumPair numPair = 2;
-       * </pre>
-       *
-       * <code>repeated .protobuf.BItem bdat = 3;</code>
-       */
-      public plus.proto.lang.TableData.BItem.Builder getBdatBuilder(
-          int index) {
-        return internalGetBdatFieldBuilder().getBuilder(index);
-      }
-      /**
-       * <pre>
-       * repeated NumPair numPair = 2;
-       * </pre>
-       *
-       * <code>repeated .protobuf.BItem bdat = 3;</code>
-       */
-      public plus.proto.lang.TableData.BItemOrBuilder getBdatOrBuilder(
-          int index) {
-        if (bdatBuilder_ == null) {
-          return bdat_.get(index);  } else {
-          return bdatBuilder_.getMessageOrBuilder(index);
-        }
-      }
-      /**
-       * <pre>
-       * repeated NumPair numPair = 2;
-       * </pre>
-       *
-       * <code>repeated .protobuf.BItem bdat = 3;</code>
-       */
-      public java.util.List<? extends plus.proto.lang.TableData.BItemOrBuilder> 
-           getBdatOrBuilderList() {
-        if (bdatBuilder_ != null) {
-          return bdatBuilder_.getMessageOrBuilderList();
-        } else {
-          return java.util.Collections.unmodifiableList(bdat_);
-        }
-      }
-      /**
-       * <pre>
-       * repeated NumPair numPair = 2;
-       * </pre>
-       *
-       * <code>repeated .protobuf.BItem bdat = 3;</code>
-       */
-      public plus.proto.lang.TableData.BItem.Builder addBdatBuilder() {
-        return internalGetBdatFieldBuilder().addBuilder(
-            plus.proto.lang.TableData.BItem.getDefaultInstance());
-      }
-      /**
-       * <pre>
-       * repeated NumPair numPair = 2;
-       * </pre>
-       *
-       * <code>repeated .protobuf.BItem bdat = 3;</code>
-       */
-      public plus.proto.lang.TableData.BItem.Builder addBdatBuilder(
-          int index) {
-        return internalGetBdatFieldBuilder().addBuilder(
-            index, plus.proto.lang.TableData.BItem.getDefaultInstance());
-      }
-      /**
-       * <pre>
-       * repeated NumPair numPair = 2;
-       * </pre>
-       *
-       * <code>repeated .protobuf.BItem bdat = 3;</code>
-       */
-      public java.util.List<plus.proto.lang.TableData.BItem.Builder> 
-           getBdatBuilderList() {
-        return internalGetBdatFieldBuilder().getBuilderList();
-      }
-      private com.google.protobuf.RepeatedFieldBuilder<
-          plus.proto.lang.TableData.BItem, plus.proto.lang.TableData.BItem.Builder, plus.proto.lang.TableData.BItemOrBuilder> 
-          internalGetBdatFieldBuilder() {
-        if (bdatBuilder_ == null) {
-          bdatBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
-              plus.proto.lang.TableData.BItem, plus.proto.lang.TableData.BItem.Builder, plus.proto.lang.TableData.BItemOrBuilder>(
-                  bdat_,
-                  ((bitField0_ & 0x00000004) != 0),
-                  getParentForChildren(),
-                  isClean());
-          bdat_ = null;
-        }
-        return bdatBuilder_;
       }
 
       // @@protoc_insertion_point(builder_scope:protobuf.Data)
@@ -2585,11 +2369,10 @@ public final class TableData {
   static {
     java.lang.String[] descriptorData = {
       "\n\nlang.proto\022\010protobuf\" \n\004Item\022\n\n\002id\030\001 \001" +
-      "(\003\022\014\n\004name\030\002 \001(\t\"!\n\005BItem\022\n\n\002id\030\001 \001(\003\022\014\n" +
-      "\004data\030\002 \001(\014\"Q\n\004Data\022\034\n\004item\030\001 \003(\0132\016.prot" +
-      "obuf.Item\022\014\n\004numA\030\002 \001(\005\022\035\n\004bdat\030\003 \003(\0132\017." +
-      "protobuf.BItemB\034\n\017plus.proto.langB\tTable" +
-      "Data"
+      "(\005\022\014\n\004name\030\002 \001(\t\"!\n\005BItem\022\n\n\002id\030\001 \001(\005\022\014\n" +
+      "\004data\030\002 \001(\014\"C\n\004Data\022\035\n\004bdat\030\003 \003(\0132\017.prot" +
+      "obuf.BItem\022\034\n\004item\030\001 \003(\0132\016.protobuf.Item" +
+      "B\034\n\017plus.proto.langB\tTableData"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -2612,7 +2395,7 @@ public final class TableData {
     internal_static_protobuf_Data_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_protobuf_Data_descriptor,
-        new java.lang.String[] { "Item", "NumA", "Bdat", });
+        new java.lang.String[] { "Bdat", "Item", });
     descriptor.resolveAllFeaturesImmutable();
   }
 
