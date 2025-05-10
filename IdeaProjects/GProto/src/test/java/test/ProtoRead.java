@@ -14,6 +14,8 @@ public class ProtoRead {
     public static void main(String[] args) throws IOException {
         byte[] data = TsonFile.readFile(new File(FILE1));
 
+        //data[2] = 0;
+
         int shift = 8;  //it work
         //shift += 0x600c;
 
@@ -25,7 +27,7 @@ public class ProtoRead {
 
         TableData.Data data3 = TableData.Data.parseFrom(data2);
 
-        //TsonFile.write(new File("rdaata.json"), data3.toString());
+        TsonFile.write(new File("rdaata.json"), data3.toString());
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         out.write(pre);

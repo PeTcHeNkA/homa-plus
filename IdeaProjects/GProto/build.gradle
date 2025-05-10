@@ -1,0 +1,28 @@
+plugins {
+    id 'java'
+}
+
+group = 'plus.proto'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.google.protobuf:protobuf-java:4.30.2'
+    implementation 'com.google.code.gson:gson:2.13.1'
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'C:/Users/Te4hnoPlus/IdeaProjects/TsonConfigurations/core/src/main/java'
+            srcDir 'C:/Users/Te4hnoPlus/IdeaProjects/TsonConfigurations/extensions/src/main/java'
+        }
+    }
+}
+
+test {
+    useJUnitPlatform()
+}

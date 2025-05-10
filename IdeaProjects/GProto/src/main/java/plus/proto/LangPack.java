@@ -39,6 +39,10 @@ public class LangPack {
     public void write(File file){
         try {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+            header[0] = (byte) 0xff;
+            header[1] = (byte) 0xff;
+
             out.write(header);
             table.writeTo(out);
             TsonFile.write(file, out.toByteArray());
@@ -88,6 +92,17 @@ public class LangPack {
     public void replace(String key, String value){
         Node node = new Node(-1, value);
         replaceRules.put(key, node);
+    }
+
+
+    public byte[] findData(int id){
+        for (int i = 0, len = table.getBdatCount(); i < len; i++){
+            TableData.BItem item = table.getBdat(i);
+            if (item.getId() == id){
+                return item.getData().toByteArray();
+            }
+        }
+        return null;
     }
 
 
