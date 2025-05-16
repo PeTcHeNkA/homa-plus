@@ -197,7 +197,7 @@ public class STsonParser extends ByteStrBuilder{
                 this.cursor = cursor+1;
                 return;
             }
-            if(chr == ' ' || chr == '\n')continue;
+            if(chr == ' ' || chr == '\n' || chr == '\r' || chr == '\t')continue;
             if(waitSep) {
                 if(chr == ',') waitSep = false;
             }else if(waitKey){
@@ -238,7 +238,7 @@ public class STsonParser extends ByteStrBuilder{
                 this.cursor = cursor+1;
                 return;
             }
-            if(chr == ' ' || chr == '\n')continue;
+            if(chr == ' ' || chr == '\n' || chr == '\r' || chr == '\t')continue;
             if(waitSep) {
                 if(chr == ',') waitSep = false;
                 continue;
