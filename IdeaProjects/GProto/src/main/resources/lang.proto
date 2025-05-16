@@ -4,17 +4,27 @@ option java_package = "plus.proto.lang";
 option java_outer_classname = "TableData";
 
 message Item {
-  optional int32 id  = 1;
+  optional int64 id  = 1;
   optional string name = 2;
 }
 
-message BItem {
-  optional int32 id  = 1;
-  optional bytes data = 2;
+message IndexItem {
+  optional uint32 beginOff = 1;
+  optional uint32 length   = 2;
 }
 
-message Data {
-  //8 байт отступаем
-  repeated BItem bdat = 3; //идет сначала, не смотря на то, что ID больше
-  repeated Item item = 1;
+message Index {
+  optional uint32 dist = 1;
+  optional bool  sect = 2;
+  map<uint32, IndexItem> index = 3;
+//  repeated IndexItem item = 3;
 }
+
+message Translations {
+  repeated Item data = 1;
+}
+
+//All file
+//0-4 bytes - int32, len of BData
+//Index
+//Translations
