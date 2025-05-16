@@ -40,8 +40,8 @@ public class LangPack {
         try {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-            header[0] = (byte) 0xff;
-            header[1] = (byte) 0xff;
+            header[0] = (byte) 0x61;
+            //header[1] = (byte) 0xff;
 
             out.write(header);
             table.writeTo(out);

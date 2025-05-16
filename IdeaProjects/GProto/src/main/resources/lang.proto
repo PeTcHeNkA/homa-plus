@@ -14,6 +14,7 @@ message BItem {
 }
 
 message Data {
-  repeated BItem bdat = 3;
+  //8 байт отступаем
+  repeated BItem bdat = 3; //идет сначала, не смотря на то, что ID больше
   repeated Item item = 1;
 }

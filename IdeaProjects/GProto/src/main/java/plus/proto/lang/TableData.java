@@ -1235,24 +1235,44 @@ public final class TableData {
       com.google.protobuf.MessageOrBuilder {
 
     /**
+     * <pre>
+     * 8 байт отступаем
+     * </pre>
+     *
      * <code>repeated .protobuf.BItem bdat = 3;</code>
      */
     java.util.List<plus.proto.lang.TableData.BItem> 
         getBdatList();
     /**
+     * <pre>
+     * 8 байт отступаем
+     * </pre>
+     *
      * <code>repeated .protobuf.BItem bdat = 3;</code>
      */
     plus.proto.lang.TableData.BItem getBdat(int index);
     /**
+     * <pre>
+     * 8 байт отступаем
+     * </pre>
+     *
      * <code>repeated .protobuf.BItem bdat = 3;</code>
      */
     int getBdatCount();
     /**
+     * <pre>
+     * 8 байт отступаем
+     * </pre>
+     *
      * <code>repeated .protobuf.BItem bdat = 3;</code>
      */
     java.util.List<? extends plus.proto.lang.TableData.BItemOrBuilder> 
         getBdatOrBuilderList();
     /**
+     * <pre>
+     * 8 байт отступаем
+     * </pre>
+     *
      * <code>repeated .protobuf.BItem bdat = 3;</code>
      */
     plus.proto.lang.TableData.BItemOrBuilder getBdatOrBuilder(
@@ -1325,6 +1345,10 @@ public final class TableData {
     @SuppressWarnings("serial")
     private java.util.List<plus.proto.lang.TableData.BItem> bdat_;
     /**
+     * <pre>
+     * 8 байт отступаем
+     * </pre>
+     *
      * <code>repeated .protobuf.BItem bdat = 3;</code>
      */
     @java.lang.Override
@@ -1332,6 +1356,10 @@ public final class TableData {
       return bdat_;
     }
     /**
+     * <pre>
+     * 8 байт отступаем
+     * </pre>
+     *
      * <code>repeated .protobuf.BItem bdat = 3;</code>
      */
     @java.lang.Override
@@ -1340,6 +1368,10 @@ public final class TableData {
       return bdat_;
     }
     /**
+     * <pre>
+     * 8 байт отступаем
+     * </pre>
+     *
      * <code>repeated .protobuf.BItem bdat = 3;</code>
      */
     @java.lang.Override
@@ -1347,6 +1379,10 @@ public final class TableData {
       return bdat_.size();
     }
     /**
+     * <pre>
+     * 8 байт отступаем
+     * </pre>
+     *
      * <code>repeated .protobuf.BItem bdat = 3;</code>
      */
     @java.lang.Override
@@ -1354,6 +1390,10 @@ public final class TableData {
       return bdat_.get(index);
     }
     /**
+     * <pre>
+     * 8 байт отступаем
+     * </pre>
+     *
      * <code>repeated .protobuf.BItem bdat = 3;</code>
      */
     @java.lang.Override
@@ -1417,11 +1457,11 @@ public final class TableData {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      for (int i = 0; i < bdat_.size(); i++) {
-        output.writeMessage(3, bdat_.get(i));
-      }
       for (int i = 0; i < item_.size(); i++) {
         output.writeMessage(1, item_.get(i));
+      }
+      for (int i = 0; i < bdat_.size(); i++) {
+        output.writeMessage(3, bdat_.get(i));
       }
       getUnknownFields().writeTo(output);
     }
@@ -1826,6 +1866,10 @@ public final class TableData {
           plus.proto.lang.TableData.BItem, plus.proto.lang.TableData.BItem.Builder, plus.proto.lang.TableData.BItemOrBuilder> bdatBuilder_;
 
       /**
+       * <pre>
+       * 8 байт отступаем
+       * </pre>
+       *
        * <code>repeated .protobuf.BItem bdat = 3;</code>
        */
       public java.util.List<plus.proto.lang.TableData.BItem> getBdatList() {
@@ -1836,6 +1880,10 @@ public final class TableData {
         }
       }
       /**
+       * <pre>
+       * 8 байт отступаем
+       * </pre>
+       *
        * <code>repeated .protobuf.BItem bdat = 3;</code>
        */
       public int getBdatCount() {
@@ -1846,6 +1894,10 @@ public final class TableData {
         }
       }
       /**
+       * <pre>
+       * 8 байт отступаем
+       * </pre>
+       *
        * <code>repeated .protobuf.BItem bdat = 3;</code>
        */
       public plus.proto.lang.TableData.BItem getBdat(int index) {
@@ -1856,6 +1908,10 @@ public final class TableData {
         }
       }
       /**
+       * <pre>
+       * 8 байт отступаем
+       * </pre>
+       *
        * <code>repeated .protobuf.BItem bdat = 3;</code>
        */
       public Builder setBdat(
@@ -1873,6 +1929,10 @@ public final class TableData {
         return this;
       }
       /**
+       * <pre>
+       * 8 байт отступаем
+       * </pre>
+       *
        * <code>repeated .protobuf.BItem bdat = 3;</code>
        */
       public Builder setBdat(
@@ -1887,6 +1947,10 @@ public final class TableData {
         return this;
       }
       /**
+       * <pre>
+       * 8 байт отступаем
+       * </pre>
+       *
        * <code>repeated .protobuf.BItem bdat = 3;</code>
        */
       public Builder addBdat(plus.proto.lang.TableData.BItem value) {
@@ -1903,6 +1967,10 @@ public final class TableData {
         return this;
       }
       /**
+       * <pre>
+       * 8 байт отступаем
+       * </pre>
+       *
        * <code>repeated .protobuf.BItem bdat = 3;</code>
        */
       public Builder addBdat(
@@ -1920,6 +1988,10 @@ public final class TableData {
         return this;
       }
       /**
+       * <pre>
+       * 8 байт отступаем
+       * </pre>
+       *
        * <code>repeated .protobuf.BItem bdat = 3;</code>
        */
       public Builder addBdat(
@@ -1934,6 +2006,10 @@ public final class TableData {
         return this;
       }
       /**
+       * <pre>
+       * 8 байт отступаем
+       * </pre>
+       *
        * <code>repeated .protobuf.BItem bdat = 3;</code>
        */
       public Builder addBdat(
@@ -1948,6 +2024,10 @@ public final class TableData {
         return this;
       }
       /**
+       * <pre>
+       * 8 байт отступаем
+       * </pre>
+       *
        * <code>repeated .protobuf.BItem bdat = 3;</code>
        */
       public Builder addAllBdat(
@@ -1963,6 +2043,10 @@ public final class TableData {
         return this;
       }
       /**
+       * <pre>
+       * 8 байт отступаем
+       * </pre>
+       *
        * <code>repeated .protobuf.BItem bdat = 3;</code>
        */
       public Builder clearBdat() {
@@ -1976,6 +2060,10 @@ public final class TableData {
         return this;
       }
       /**
+       * <pre>
+       * 8 байт отступаем
+       * </pre>
+       *
        * <code>repeated .protobuf.BItem bdat = 3;</code>
        */
       public Builder removeBdat(int index) {
@@ -1989,6 +2077,10 @@ public final class TableData {
         return this;
       }
       /**
+       * <pre>
+       * 8 байт отступаем
+       * </pre>
+       *
        * <code>repeated .protobuf.BItem bdat = 3;</code>
        */
       public plus.proto.lang.TableData.BItem.Builder getBdatBuilder(
@@ -1996,6 +2088,10 @@ public final class TableData {
         return internalGetBdatFieldBuilder().getBuilder(index);
       }
       /**
+       * <pre>
+       * 8 байт отступаем
+       * </pre>
+       *
        * <code>repeated .protobuf.BItem bdat = 3;</code>
        */
       public plus.proto.lang.TableData.BItemOrBuilder getBdatOrBuilder(
@@ -2006,6 +2102,10 @@ public final class TableData {
         }
       }
       /**
+       * <pre>
+       * 8 байт отступаем
+       * </pre>
+       *
        * <code>repeated .protobuf.BItem bdat = 3;</code>
        */
       public java.util.List<? extends plus.proto.lang.TableData.BItemOrBuilder> 
@@ -2017,6 +2117,10 @@ public final class TableData {
         }
       }
       /**
+       * <pre>
+       * 8 байт отступаем
+       * </pre>
+       *
        * <code>repeated .protobuf.BItem bdat = 3;</code>
        */
       public plus.proto.lang.TableData.BItem.Builder addBdatBuilder() {
@@ -2024,6 +2128,10 @@ public final class TableData {
             plus.proto.lang.TableData.BItem.getDefaultInstance());
       }
       /**
+       * <pre>
+       * 8 байт отступаем
+       * </pre>
+       *
        * <code>repeated .protobuf.BItem bdat = 3;</code>
        */
       public plus.proto.lang.TableData.BItem.Builder addBdatBuilder(
@@ -2032,6 +2140,10 @@ public final class TableData {
             index, plus.proto.lang.TableData.BItem.getDefaultInstance());
       }
       /**
+       * <pre>
+       * 8 байт отступаем
+       * </pre>
+       *
        * <code>repeated .protobuf.BItem bdat = 3;</code>
        */
       public java.util.List<plus.proto.lang.TableData.BItem.Builder> 

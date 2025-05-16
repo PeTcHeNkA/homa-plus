@@ -1,1 +1,2 @@
 C:/Users/Te4hnoPlus/Desktop/protoc/bin/protoc -I=C:/Users/Te4hnoPlus/IdeaProjects/GProto/src/main/resources --java_out=C:/Users/Te4hnoPlus/IdeaProjects/GProto/src/main/java lang.proto
+@pause

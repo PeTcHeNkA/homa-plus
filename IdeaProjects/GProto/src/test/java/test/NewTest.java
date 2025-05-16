@@ -18,6 +18,6 @@ public class NewTest {
 
         pack.applyChanges();
 
-        pack.write(new File("UButes.bytes"));
+        pack.write(new File("LangPackageTableEnusData.bytes"));
     }
 }

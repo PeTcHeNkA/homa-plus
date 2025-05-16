@@ -12,12 +12,13 @@ import static test.Main.FILE1;
 
 public class ProtoRead {
     public static void main(String[] args) throws IOException {
+        //FILE1 = "C:\\Games\\GF2Exilium\\GF2 Game\\GF2_Exilium_Data\\LocalCache\\Data\\Table\\LangPackageTableThthData.bytes".replace("\\","/");
         byte[] data = TsonFile.readFile(new File(FILE1));
 
-        //data[2] = 0;
+
 
         int shift = 8;  //it work
-        //shift += 0x600c;
+        //shift += 0x00_04_0C_60;
 
         byte[] data2 = new byte[data.length - shift];
         byte[] pre   = new byte[shift];
@@ -38,4 +39,6 @@ public class ProtoRead {
 
         //System.out.println(data3.getId());
     }
+
+
 }
