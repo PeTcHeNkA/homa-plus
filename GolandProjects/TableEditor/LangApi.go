@@ -31,7 +31,7 @@ func freePack(id string) int {
 	if prev == nil {
 		return 1
 	}
-	packs[id] = nil
+	delete(packs, id)
 	return 0
 }
 
