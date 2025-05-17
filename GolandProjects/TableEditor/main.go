@@ -1,10 +1,8 @@
 package main
 
 import (
-	"TableEditor/Lang"
 	"errors"
 	"fmt"
-	"google.golang.org/protobuf/proto"
 	"io/fs"
 	"os"
 	"strings"
@@ -19,27 +17,6 @@ const illegalPackFormat = "Illegal pack format"
 const illegalMappings = "Illegal mappings format"
 
 func main() {
-	name := "a"
-	id := int64(9)
-	item := Lang.Item{
-		Id:   &id,
-		Name: &name,
-	}
-
-	data, _ := proto.Marshal(&item)
-	fmt.Println(data)
-
-	msg2 := Lang.Translations{
-		Data: make([]*Lang.Item, 1),
-	}
-	msg2.Data[0] = &item
-
-	data2, _ := proto.Marshal(&msg2)
-
-	fmt.Println(data2)
-}
-
-func main1() {
 	count := len(os.Args)
 
 	if count < 6 {

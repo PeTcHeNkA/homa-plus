@@ -10,7 +10,7 @@ type LangTable struct {
 	lines []*Line
 	sect  *bool
 	dest  *uint32
-	index map[string]*Line
+	index map[string][]*Line
 }
 
 type Line struct {
@@ -45,7 +45,10 @@ func (inst *LangMapping) applyFor(table *LangTable) {
 	for key, val := range inst.mappings {
 		line := index[key]
 		if line != nil {
-			line.actual = &val
+			len0 := len(line)
+			for i := 0; i < len0; i++ {
+				line[i].actual = &val
+			}
 		}
 	}
 }
@@ -58,10 +61,6 @@ func (inst *LangTable) readFrom(data []byte) error {
 
 	indexData := data[4:indexLen]
 	err := proto.Unmarshal(indexData, &index)
-	if err != nil {
-		return err
-	}
-	//fmt.Printf("%s %s\n", *index.Dist, *index.Sect)
 
 	inst.sect = index.Sect
 	inst.dest = index.Dist
@@ -108,10 +107,10 @@ func (inst *LangTable) writeTo() ([]byte, error) {
 	cLines := inst.lines
 
 	curIndex := uint32(0)
+	tempData := [10]*Lang.Item{}
 
 	for i := 0; i < len(cLines); {
-		next10, err := writeNext10(i, cLines, &count, &curIndex)
-		//fmt.Println("I", i, len(next10))
+		next10, err := writeNext10(i, cLines, &count, &curIndex, &tempData)
 
 		if err != nil {
 			return nil, err
@@ -121,15 +120,11 @@ func (inst *LangTable) writeTo() ([]byte, error) {
 		fCursize := curSize
 		fLen := uint32(len(next10))
 
-		//fmt.Println(fCursize)
-
 		item := Lang.IndexItem{
 			BeginOff: &fCursize,
 			Length:   &fLen,
 		}
 		index.Index[curIndex] = &item
-
-		//fmt.Println(index.Index[curIndex])
 
 		i += int(count)
 		curSize += fLen
@@ -150,19 +145,25 @@ func (inst *LangTable) writeTo() ([]byte, error) {
 }
 
 func (inst *LangTable) makeIndex() {
-	index := make(map[string]*Line)
+	index := make(map[string][]*Line)
 
 	for _, line := range inst.lines {
-		index[line.str] = line
+		prev := index[line.str]
+		if prev == nil {
+			arr := make([]*Line, 1)
+			arr[0] = line
+			index[line.str] = arr
+		} else {
+			prev = append(prev, line)
+			index[line.str] = prev
+		}
 	}
 
 	inst.index = index
 }
 
-func writeNext10(from int, lines []*Line, count *uint32, indexId *uint32) ([]byte, error) {
-	data := make([]byte, 0)
+func writeNext10(from int, lines []*Line, count *uint32, indexId *uint32, temp *[10]*Lang.Item) ([]byte, error) {
 	*count = 0
-
 	*indexId = uint32(lines[from].id / 10)
 
 	for i := from; i < from+10 && i < len(lines); i++ {
@@ -181,18 +182,19 @@ func writeNext10(from int, lines []*Line, count *uint32, indexId *uint32) ([]byt
 			Id:   &line.id,
 			Name: actual,
 		}
-
-		data0, err := proto.Marshal(&item)
-		if err != nil {
-			return nil, err
-		}
-
-		data = append(data, 10, 5)
-		data = append(data, data0...)
+		temp[i-from] = &item
 
 		*count += 1
 	}
-	return data, nil
+
+	pack1 := Lang.Translations{
+		Data: make([]*Lang.Item, *count),
+	}
+
+	for i := 0; uint32(i) < *count; i++ {
+		pack1.Data[i] = temp[i]
+	}
+	return proto.Marshal(&pack1)
 }
 
 func writeInt(buf []byte, data int) {
