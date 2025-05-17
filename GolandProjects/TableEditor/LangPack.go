@@ -59,7 +59,7 @@ func (inst *LangTable) readFrom(data []byte) error {
 
 	indexLen := readInt(data)
 
-	indexData := data[4:indexLen]
+	indexData := data[4:20]
 	err := proto.Unmarshal(indexData, &index)
 
 	inst.sect = index.Sect
@@ -158,7 +158,6 @@ func (inst *LangTable) makeIndex() {
 			index[line.str] = prev
 		}
 	}
-
 	inst.index = index
 }
 

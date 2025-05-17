@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"io/fs"
 	"os"
 	"strings"
@@ -20,20 +19,29 @@ func main() {
 	count := len(os.Args)
 
 	if count < 6 {
-		fmt.Println(invalidMsg)
+		println(invalidMsg)
 		os.Exit(1)
 		return
 	}
 
 	args := make(map[string]*string)
+	var key *string
 
-	for i := 0; i < len(os.Args); i += 2 {
-		res := strings.ReplaceAll(os.Args[i+1], "\\", "/")
-		args[os.Args[i]] = &res
+	for i := 0; i < len(os.Args); i += 1 {
+		cur := os.Args[i]
+		if cur[0:1] == "-" {
+			key = &cur
+		} else {
+			if key != nil {
+				res := strings.ReplaceAll(cur, "\\", "/")
+				args[*key] = &res
+				key = nil
+			}
+		}
 	}
 
 	if args["-p"] == nil || args["-m"] == nil || args["-o"] == nil {
-		fmt.Println(invalidMsg)
+		println(invalidMsg)
 		os.Exit(1)
 		return
 	}
@@ -52,13 +60,13 @@ func main() {
 				}
 			}
 		} else {
-			fmt.Println(illegalSave, err)
+			println(illegalSave, err)
 			os.Exit(1)
 			return
 		}
 	} else {
 		if stat.IsDir() {
-			fmt.Println(illegalSave)
+			println(illegalSave)
 			os.Exit(1)
 			return
 		}
@@ -78,18 +86,18 @@ func main() {
 
 	result, err := table.writeTo()
 	if err != nil {
-		fmt.Println(illegalSave, err)
+		println(illegalSave, err)
 		os.Exit(1)
 		return
 	}
 
 	err = os.WriteFile(out, result, fs.ModePerm)
 	if err != nil {
-		fmt.Println(illegalSave, err)
+		println(illegalSave, err)
 		os.Exit(1)
 		return
 	}
-	fmt.Println("Success")
+	println("Success")
 	os.Exit(0)
 }
 
@@ -98,14 +106,14 @@ func loadPackFromFile(wg *sync.WaitGroup, langTable *LangTable, file string) {
 
 	langPack, err := os.ReadFile(file)
 	if err != nil {
-		fmt.Println(illegalReadPack, err)
+		println(illegalReadPack, err)
 		os.Exit(1)
 		return
 	}
 
 	err = langTable.readFrom(langPack)
 	if err != nil {
-		fmt.Println(illegalPackFormat, err)
+		println(illegalPackFormat, err)
 		os.Exit(1)
 		return
 	}
@@ -118,13 +126,13 @@ func loadMappingsFromFile(wg *sync.WaitGroup, mappings *LangMapping, file string
 
 	mappingData, err := os.ReadFile(file)
 	if err != nil {
-		fmt.Println(illegalReadMappings, err)
+		println(illegalReadMappings, err)
 		os.Exit(1)
 		return
 	}
 	err = mappings.readFrom(mappingData)
 	if err != nil {
-		fmt.Println(illegalMappings, err)
+		println(illegalMappings, err)
 		os.Exit(1)
 		return
 	}
