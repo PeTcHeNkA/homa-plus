@@ -35,6 +35,14 @@ func (inst *LangMapping) readFrom(data []byte) error {
 	return nil
 }
 
+func (inst *LangMapping) write() ([]byte, error) {
+	result, err := json.Marshal(inst.mappings)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
 func (inst *LangMapping) applyFor(table *LangTable) {
 	index := table.index
 	if index == nil {
@@ -49,6 +57,25 @@ func (inst *LangMapping) applyFor(table *LangTable) {
 			for i := 0; i < len0; i++ {
 				line[i].actual = &val
 			}
+		}
+	}
+}
+
+func (inst *LangMapping) useOf(table *LangTable, raw bool) {
+	mappings := make(map[string]string)
+	inst.mappings = mappings
+	cLines := table.lines
+
+	for cursor := range cLines {
+		line := cLines[cursor]
+		if raw {
+			mappings[line.str] = line.str
+		} else {
+			actual := line.actual
+			if actual == nil {
+				actual = &line.str
+			}
+			mappings[line.str] = *actual
 		}
 	}
 }
@@ -92,7 +119,7 @@ func (inst *LangTable) readFrom(data []byte) error {
 	return nil
 }
 
-func (inst *LangTable) writeTo() ([]byte, error) {
+func (inst *LangTable) write() ([]byte, error) {
 	tabData := make([]byte, 0)
 
 	var count uint32 = 0

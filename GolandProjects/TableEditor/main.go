@@ -84,7 +84,7 @@ func main() {
 
 	mappings.applyFor(table)
 
-	result, err := table.writeTo()
+	result, err := table.write()
 	if err != nil {
 		println(illegalSave, err)
 		os.Exit(1)

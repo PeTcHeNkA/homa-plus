@@ -55,26 +55,46 @@ func applyMappings(id string, data []byte) int {
 	return 0
 }
 
+//export exportMappings
+func exportMappings(id string, actual bool) []byte {
+	if packs == nil {
+		return errCode(1)
+	}
+	pack := packs[id]
+	if pack == nil {
+		return errCode(1)
+	}
+
+	mappngs := LangMapping{}
+	mappngs.useOf(pack, actual)
+
+	result, err := mappngs.write()
+	if err != nil {
+		return errCode(2)
+	}
+	return result
+}
+
 //export writePack
 func writePack(id string) []byte {
 	if packs == nil {
-		data := make([]byte, 1)
-		data[0] = 1
-		return data
+		return errCode(1)
 	}
 	pack := packs[id]
 
 	if pack == nil {
-		data := make([]byte, 1)
-		data[0] = 1
-		return data
+		return errCode(1)
 	}
 
-	result, err := pack.writeTo()
+	result, err := pack.write()
 	if err != nil {
-		data := make([]byte, 1)
-		data[0] = 2
-		return data
+		return errCode(2)
 	}
 	return result
+}
+
+func errCode(code byte) []byte {
+	data := make([]byte, 1)
+	data[0] = code
+	return data
 }
