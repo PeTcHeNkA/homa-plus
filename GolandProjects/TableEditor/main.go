@@ -1,6 +1,7 @@
 package main
 
 import (
+	"TableEditor/Pack"
 	"errors"
 	"io/fs"
 	"os"
@@ -72,8 +73,8 @@ func main() {
 		}
 	}
 
-	table := &LangTable{}
-	mappings := &LangMapping{}
+	table := &Pack.LangTable{}
+	mappings := &Pack.LangMapping{}
 
 	var wg sync.WaitGroup
 	wg.Add(1)
@@ -82,9 +83,9 @@ func main() {
 	loadPackFromFile(&wg, table, *args["-p"])
 	wg.Wait()
 
-	mappings.applyFor(table)
+	mappings.ApplyFor(table)
 
-	result, err := table.write()
+	result, err := table.Write()
 	if err != nil {
 		println(illegalSave, err)
 		os.Exit(1)
@@ -101,7 +102,7 @@ func main() {
 	os.Exit(0)
 }
 
-func loadPackFromFile(wg *sync.WaitGroup, langTable *LangTable, file string) {
+func loadPackFromFile(wg *sync.WaitGroup, langTable *Pack.LangTable, file string) {
 	defer wg.Done()
 
 	langPack, err := os.ReadFile(file)
@@ -111,16 +112,16 @@ func loadPackFromFile(wg *sync.WaitGroup, langTable *LangTable, file string) {
 		return
 	}
 
-	err = langTable.readFrom(langPack)
+	err = langTable.ReadFrom(langPack)
 	if err != nil {
 		println(illegalPackFormat, err)
 		os.Exit(1)
 		return
 	}
-	langTable.makeIndex()
+	langTable.MakeIndex()
 }
 
-func loadMappingsFromFile(wg *sync.WaitGroup, mappings *LangMapping, file string) {
+func loadMappingsFromFile(wg *sync.WaitGroup, mappings *Pack.LangMapping, file string) {
 	wg.Add(1)
 	defer wg.Done()
 
@@ -130,7 +131,7 @@ func loadMappingsFromFile(wg *sync.WaitGroup, mappings *LangMapping, file string
 		os.Exit(1)
 		return
 	}
-	err = mappings.readFrom(mappingData)
+	err = mappings.ReadFrom(mappingData)
 	if err != nil {
 		println(illegalMappings, err)
 		os.Exit(1)

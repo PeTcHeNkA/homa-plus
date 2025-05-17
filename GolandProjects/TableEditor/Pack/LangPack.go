@@ -1,4 +1,4 @@
-package main
+package Pack
 
 import (
 	"TableEditor/Lang"
@@ -24,7 +24,7 @@ type LangMapping struct {
 	mappings map[string]string
 }
 
-func (inst *LangMapping) readFrom(data []byte) error {
+func (inst *LangMapping) ReadFrom(data []byte) error {
 	mappings := make(map[string]string)
 	inst.mappings = mappings
 
@@ -35,7 +35,7 @@ func (inst *LangMapping) readFrom(data []byte) error {
 	return nil
 }
 
-func (inst *LangMapping) write() ([]byte, error) {
+func (inst *LangMapping) Write() ([]byte, error) {
 	result, err := json.Marshal(inst.mappings)
 	if err != nil {
 		return nil, err
@@ -43,10 +43,10 @@ func (inst *LangMapping) write() ([]byte, error) {
 	return result, nil
 }
 
-func (inst *LangMapping) applyFor(table *LangTable) {
+func (inst *LangMapping) ApplyFor(table *LangTable) {
 	index := table.index
 	if index == nil {
-		table.makeIndex()
+		table.MakeIndex()
 		index = table.index
 	}
 
@@ -61,7 +61,7 @@ func (inst *LangMapping) applyFor(table *LangTable) {
 	}
 }
 
-func (inst *LangMapping) useOf(table *LangTable, raw bool) {
+func (inst *LangMapping) UseOf(table *LangTable, raw bool) {
 	mappings := make(map[string]string)
 	inst.mappings = mappings
 	cLines := table.lines
@@ -80,7 +80,7 @@ func (inst *LangMapping) useOf(table *LangTable, raw bool) {
 	}
 }
 
-func (inst *LangTable) readFrom(data []byte) error {
+func (inst *LangTable) ReadFrom(data []byte) error {
 	index := Lang.Index{}
 	rawTable := Lang.Translations{}
 
@@ -119,7 +119,7 @@ func (inst *LangTable) readFrom(data []byte) error {
 	return nil
 }
 
-func (inst *LangTable) write() ([]byte, error) {
+func (inst *LangTable) Write() ([]byte, error) {
 	tabData := make([]byte, 0)
 
 	var count uint32 = 0
@@ -171,7 +171,7 @@ func (inst *LangTable) write() ([]byte, error) {
 	return allData, nil
 }
 
-func (inst *LangTable) makeIndex() {
+func (inst *LangTable) MakeIndex() {
 	index := make(map[string][]*Line)
 
 	for _, line := range inst.lines {

@@ -1,21 +1,25 @@
 package main
 
-var packs map[string]*LangTable
+import "TableEditor/Pack"
+
+var packs map[string]*Pack.LangTable
+
+func main() {}
 
 //export loadPack
 func loadPack(id string, data []byte) int {
 	if packs == nil {
-		packs = make(map[string]*LangTable)
+		packs = make(map[string]*Pack.LangTable)
 	}
-	var pack *LangTable
+	var pack *Pack.LangTable
 
 	if packs[id] == nil {
-		pack = &LangTable{}
+		pack = &Pack.LangTable{}
 		packs[id] = pack
 	} else {
 		pack = packs[id]
 	}
-	err := pack.readFrom(data)
+	err := pack.ReadFrom(data)
 	if err != nil {
 		return 3
 	}
@@ -44,14 +48,14 @@ func applyMappings(id string, data []byte) int {
 	if pack == nil {
 		return 1
 	}
-	mappngs := LangMapping{}
+	mappngs := Pack.LangMapping{}
 
-	err := mappngs.readFrom(data)
+	err := mappngs.ReadFrom(data)
 
 	if err != nil {
 		return 2
 	}
-	mappngs.applyFor(pack)
+	mappngs.ApplyFor(pack)
 	return 0
 }
 
@@ -65,10 +69,10 @@ func exportMappings(id string, actual bool) []byte {
 		return errCode(1)
 	}
 
-	mappngs := LangMapping{}
-	mappngs.useOf(pack, actual)
+	mappngs := Pack.LangMapping{}
+	mappngs.UseOf(pack, actual)
 
-	result, err := mappngs.write()
+	result, err := mappngs.Write()
 	if err != nil {
 		return errCode(2)
 	}
@@ -86,7 +90,7 @@ func writePack(id string) []byte {
 		return errCode(1)
 	}
 
-	result, err := pack.write()
+	result, err := pack.Write()
 	if err != nil {
 		return errCode(2)
 	}
