@@ -1,15 +1,20 @@
 package main
 
-import "TableEditor/Pack"
+import (
+	"TableEditor/Pack"
+)
+import "C"
 
-var packs map[string]*Pack.LangTable
+var packs map[int]*Pack.LangTable
+var code1 = errCode(1)
+var code2 = errCode(2)
 
 func main() {}
 
-//export loadPack
-func loadPack(id string, data []byte) int {
+//export LoadPack
+func LoadPack(id int, data []byte) int {
 	if packs == nil {
-		packs = make(map[string]*Pack.LangTable)
+		packs = make(map[int]*Pack.LangTable)
 	}
 	var pack *Pack.LangTable
 
@@ -21,13 +26,13 @@ func loadPack(id string, data []byte) int {
 	}
 	err := pack.ReadFrom(data)
 	if err != nil {
-		return 3
+		return 2
 	}
 	return 0
 }
 
-//export freePack
-func freePack(id string) int {
+//export FreePack
+func FreePack(id int) int {
 	if packs == nil {
 		return 1
 	}
@@ -39,8 +44,8 @@ func freePack(id string) int {
 	return 0
 }
 
-//export applyMappings
-func applyMappings(id string, data []byte) int {
+//export ApplyMappings
+func ApplyMappings(id int, data []byte) int {
 	if packs == nil {
 		return 1
 	}
@@ -59,14 +64,14 @@ func applyMappings(id string, data []byte) int {
 	return 0
 }
 
-//export exportMappings
-func exportMappings(id string, actual bool) []byte {
+//export ExportMappings
+func ExportMappings(id int, actual bool) []byte {
 	if packs == nil {
 		return errCode(1)
 	}
 	pack := packs[id]
 	if pack == nil {
-		return errCode(1)
+		return code1
 	}
 
 	mappngs := Pack.LangMapping{}
@@ -74,25 +79,25 @@ func exportMappings(id string, actual bool) []byte {
 
 	result, err := mappngs.Write()
 	if err != nil {
-		return errCode(2)
+		return code2
 	}
 	return result
 }
 
-//export writePack
-func writePack(id string) []byte {
+//export WritePack
+func WritePack(id int) []byte {
 	if packs == nil {
-		return errCode(1)
+		return code1
 	}
 	pack := packs[id]
 
 	if pack == nil {
-		return errCode(1)
+		return code1
 	}
 
 	result, err := pack.Write()
 	if err != nil {
-		return errCode(2)
+		return code2
 	}
 	return result
 }

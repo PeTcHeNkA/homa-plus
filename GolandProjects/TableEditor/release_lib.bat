@@ -2,6 +2,7 @@
 
 set $GOARCH=amd64
 set $GOOS=windows
-go build -o build/langedit.dll -trimpath -buildmode=c-shared -ldflags "-s -w -buildid=" -gcflags=all="-l -B -wb=false -C" LApi/LangApi.go
+set CGO_ENABLED=1
+go build -o build/langedit.dll -trimpath -buildmode=c-shared -ldflags "-s -w" -gcflags=all="-l -B -wb=false" LApi/LangApi.go
 
 @pause
