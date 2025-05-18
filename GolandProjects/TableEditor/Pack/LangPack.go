@@ -84,22 +84,22 @@ func (inst *LangMapping) UseOf(table *LangTable, raw bool, useId bool) {
 
 	for cursor := range cLines {
 		line := cLines[cursor]
-		actual := &line.str
+		value := &line.str
 		if raw {
-			actual1 := line.actual
-			if actual1 != nil {
-				actual = actual1
+			actual := line.actual
+			if actual != nil {
+				value = actual
 			}
 		}
 		mKey := line.str
 
 		if useId {
-			preVval := mappings[mKey]
-			if preVval != "" {
+			prev := mappings[mKey]
+			if prev != "" {
 				mKey = writeId(uint32(line.id)) + line.str
 			}
 		}
-		mappings[line.str] = *actual
+		mappings[line.str] = *value
 	}
 }
 
