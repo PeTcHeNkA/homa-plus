@@ -118,7 +118,7 @@ func (inst *LangMapping) UseOf(keySrc *LangTable, valueSrc *LangTable, raw bool,
 
 		if useId {
 			lines := keySrc.index[mKey]
-			if lines == nil && len(lines) > 1 {
+			if lines != nil && len(lines) > 1 {
 				mKey = writeId(uint32(kLine.id)) + kLine.str
 			}
 		}
@@ -131,8 +131,11 @@ func writeId(id uint32) string {
 }
 
 func readId(str string) uint32 {
+	max1 := len(str)
+	if max1 <= 4 {
+		return 0
+	}
 	if str[0:4] == "#ID:" {
-		max1 := len(str)
 		id := uint32(0)
 		for i := 3; i < max1; i++ {
 			chr := str[i]
@@ -253,6 +256,8 @@ func (inst *LangTable) MakeIndex() {
 		} else {
 			prev = append(prev, line)
 			index[line.str] = prev
+			//
+			//println("EXPAND KEY " + line.str)
 		}
 	}
 }
