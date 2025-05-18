@@ -88,6 +88,12 @@ func (inst *LangMapping) UseOf(keySrc *LangTable, valueSrc *LangTable, raw bool,
 	inst.mappings = mappings
 	kLines := keySrc.lines
 
+	if useId {
+		if keySrc.index == nil {
+			keySrc.MakeIndex()
+		}
+	}
+
 	for cursor := range kLines {
 		kLine := kLines[cursor]
 		var vLine *Line = nil
@@ -111,8 +117,8 @@ func (inst *LangMapping) UseOf(keySrc *LangTable, valueSrc *LangTable, raw bool,
 		mKey := kLine.str
 
 		if useId {
-			prev := mappings[mKey]
-			if prev != "" {
+			lines := keySrc.index[mKey]
+			if lines == nil && len(lines) > 1 {
 				mKey = writeId(uint32(kLine.id)) + kLine.str
 			}
 		}
