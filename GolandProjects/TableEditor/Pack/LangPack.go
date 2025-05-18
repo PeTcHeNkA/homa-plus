@@ -2,6 +2,7 @@ package Pack
 
 import (
 	"TableEditor/Lang"
+	"bytes"
 	"encoding/json"
 	"google.golang.org/protobuf/proto"
 	"strconv"
@@ -38,11 +39,16 @@ func (inst *LangMapping) ReadFrom(data []byte) error {
 }
 
 func (inst *LangMapping) Write() ([]byte, error) {
-	result, err := json.Marshal(inst.mappings)
+	buf := new(bytes.Buffer)
+	enc := json.NewEncoder(buf)
+	enc.SetIndent("", "    ")
+	enc.SetEscapeHTML(false)
+
+	err := enc.Encode(inst.mappings)
 	if err != nil {
 		return nil, err
 	}
-	return result, nil
+	return buf.Bytes(), nil
 }
 
 func (inst *LangMapping) ApplyFor(table *LangTable) {
