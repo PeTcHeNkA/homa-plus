@@ -5,28 +5,31 @@ import (
 )
 import "C"
 
-var packs map[int]*Pack.LangTable
-var code1 = errCode(1)
-var code2 = errCode(2)
+var packs map[int]*tableField
 
 func main() {}
+
+type tableField struct {
+	table *Pack.LangTable
+	cache []byte
+}
 
 //export LoadPack
 func LoadPack(id int, data []byte) int {
 	if packs == nil {
-		packs = make(map[int]*Pack.LangTable)
+		packs = make(map[int]*tableField)
 	}
 	var pack *Pack.LangTable
 
 	if packs[id] == nil {
 		pack = &Pack.LangTable{}
-		packs[id] = pack
+		packs[id] = &tableField{table: pack}
 	} else {
-		pack = packs[id]
+		pack = packs[id].table
 	}
 	err := pack.ReadFrom(data)
 	if err != nil {
-		return 2
+		return -2
 	}
 	return 0
 }
@@ -60,50 +63,64 @@ func ApplyMappings(id int, data []byte) int {
 	if err != nil {
 		return 2
 	}
-	mappngs.ApplyFor(pack)
+	mappngs.ApplyFor(pack.table)
 	return 0
 }
 
 //export ExportMappings
-func ExportMappings(id int, actual bool) []byte {
+func ExportMappings(id int, actual bool, useId bool) int {
 	if packs == nil {
-		return errCode(1)
+		return -1
 	}
 	pack := packs[id]
 	if pack == nil {
-		return code1
+		return -1
 	}
 
 	mappngs := Pack.LangMapping{}
-	mappngs.UseOf(pack, actual)
+	mappngs.UseOf(pack.table, actual, useId)
 
 	result, err := mappngs.Write()
 	if err != nil {
-		return code2
+		return -2
 	}
-	return result
+	pack.cache = result
+	return len(result)
 }
 
-//export WritePack
-func WritePack(id int) []byte {
+//export FlushTo
+func FlushTo(id int, data []byte) int {
 	if packs == nil {
-		return code1
+		return -1
 	}
 	pack := packs[id]
 
 	if pack == nil {
-		return code1
+		return -1
 	}
-
-	result, err := pack.Write()
-	if err != nil {
-		return code2
+	if pack.cache == nil {
+		return -2
 	}
-	return result
+	copy(pack.cache, data)
+	pack.cache = nil
+	return 0
 }
 
-func errCode(code byte) []byte {
-	data := make([]byte, 1)
-	data[0] = code
-	return data
+//export WritePack
+func WritePack(id int) int {
+	if packs == nil {
+		return -1
+	}
+	pack := packs[id]
+
+	if pack == nil {
+		return -1
+	}
+
+	result, err := pack.table.Write()
+	if err != nil {
+		return -2
+	}
+	pack.cache = result
+	return len(result)
 }

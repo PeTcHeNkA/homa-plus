@@ -4,6 +4,7 @@ import (
 	"TableEditor/Lang"
 	"encoding/json"
 	"google.golang.org/protobuf/proto"
+	"strconv"
 )
 
 type LangTable struct {
@@ -11,6 +12,7 @@ type LangTable struct {
 	sect  *bool
 	dest  *uint32
 	index map[string][]*Line
+	ididx map[uint32]*Line
 }
 
 type Line struct {
@@ -49,8 +51,22 @@ func (inst *LangMapping) ApplyFor(table *LangTable) {
 		table.MakeIndex()
 		index = table.index
 	}
+	idIndex := table.ididx
 
 	for key, val := range inst.mappings {
+		id := readId(key)
+		if id != 0 {
+			if idIndex == nil {
+				table.MakeIdIndex()
+				idIndex = table.ididx
+			}
+			line := idIndex[id]
+			if line != nil {
+				line.actual = &val
+			}
+			continue
+		}
+
 		line := index[key]
 		if line != nil {
 			len0 := len(line)
@@ -61,23 +77,53 @@ func (inst *LangMapping) ApplyFor(table *LangTable) {
 	}
 }
 
-func (inst *LangMapping) UseOf(table *LangTable, raw bool) {
+func (inst *LangMapping) UseOf(table *LangTable, raw bool, useId bool) {
 	mappings := make(map[string]string)
 	inst.mappings = mappings
 	cLines := table.lines
 
 	for cursor := range cLines {
 		line := cLines[cursor]
+		actual := &line.str
 		if raw {
-			mappings[line.str] = line.str
-		} else {
-			actual := line.actual
-			if actual == nil {
-				actual = &line.str
+			actual1 := line.actual
+			if actual1 != nil {
+				actual = actual1
 			}
-			mappings[line.str] = *actual
+		}
+		mKey := line.str
+
+		if useId {
+			preVval := mappings[mKey]
+			if preVval != "" {
+				mKey = writeId(uint32(line.id)) + line.str
+			}
+		}
+		mappings[line.str] = *actual
+	}
+}
+
+func writeId(id uint32) string {
+	return "#ID:" + strconv.FormatUint(uint64(id), 10) + "|"
+}
+
+func readId(str string) uint32 {
+	if str[0:4] == "#ID:" {
+		max1 := len(str)
+		id := uint32(0)
+		for i := 3; i < max1; i++ {
+			chr := str[i]
+			if chr >= '0' && chr <= '9' {
+				id *= 10
+				id += uint32(chr - '0')
+			} else if chr == '|' {
+				return id
+			} else {
+				return 0
+			}
 		}
 	}
+	return 0
 }
 
 func (inst *LangTable) ReadFrom(data []byte) error {
@@ -173,6 +219,7 @@ func (inst *LangTable) Write() ([]byte, error) {
 
 func (inst *LangTable) MakeIndex() {
 	index := make(map[string][]*Line)
+	inst.index = index
 
 	for _, line := range inst.lines {
 		prev := index[line.str]
@@ -185,7 +232,15 @@ func (inst *LangTable) MakeIndex() {
 			index[line.str] = prev
 		}
 	}
-	inst.index = index
+}
+
+func (inst LangTable) MakeIdIndex() {
+	idIndex := make(map[uint32]*Line)
+	inst.ididx = idIndex
+
+	for _, line := range inst.lines {
+		idIndex[uint32(line.id)] = line
+	}
 }
 
 func writeNext10(from int, lines []*Line, count *uint32, indexId *uint32, temp *[10]*Lang.Item) ([]byte, error) {
