@@ -83,29 +83,40 @@ func (inst *LangMapping) ApplyFor(table *LangTable) {
 	}
 }
 
-func (inst *LangMapping) UseOf(table *LangTable, raw bool, useId bool) {
+func (inst *LangMapping) UseOf(keySrc *LangTable, valueSrc *LangTable, raw bool, useId bool) {
 	mappings := make(map[string]string)
 	inst.mappings = mappings
-	cLines := table.lines
+	kLines := keySrc.lines
 
-	for cursor := range cLines {
-		line := cLines[cursor]
-		value := &line.str
+	for cursor := range kLines {
+		kLine := kLines[cursor]
+		var vLine *Line = nil
+
+		if keySrc == valueSrc {
+			vLine = kLine
+		} else {
+			vLine = valueSrc.findLine(kLine.index, kLine.id)
+			if vLine == nil {
+				vLine = kLine
+			}
+		}
+
+		value := &vLine.str
 		if raw {
-			actual := line.actual
+			actual := vLine.actual
 			if actual != nil {
 				value = actual
 			}
 		}
-		mKey := line.str
+		mKey := kLine.str
 
 		if useId {
 			prev := mappings[mKey]
 			if prev != "" {
-				mKey = writeId(uint32(line.id)) + line.str
+				mKey = writeId(uint32(kLine.id)) + kLine.str
 			}
 		}
-		mappings[line.str] = *value
+		mappings[mKey] = *value
 	}
 }
 
@@ -240,7 +251,21 @@ func (inst *LangTable) MakeIndex() {
 	}
 }
 
-func (inst LangTable) MakeIdIndex() {
+func (inst *LangTable) findLine(index int64, id int64) *Line {
+	table := inst.lines
+	if index >= 0 && index < int64(len(table)) {
+		candidate := table[index]
+		if candidate.id == id {
+			return candidate
+		}
+	}
+	if inst.ididx == nil {
+		inst.MakeIdIndex()
+	}
+	return inst.ididx[uint32(id)]
+}
+
+func (inst *LangTable) MakeIdIndex() {
 	idIndex := make(map[uint32]*Line)
 	inst.ididx = idIndex
 
