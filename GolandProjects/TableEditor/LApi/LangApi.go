@@ -101,7 +101,7 @@ func FlushTo(id int, data []byte) int {
 	if pack.cache == nil {
 		return -2
 	}
-	copy(pack.cache, data)
+	copy(data, pack.cache)
 	pack.cache = nil
 	return 0
 }
