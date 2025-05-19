@@ -11,7 +11,7 @@
         FallbackColor="#90FFFFFF"
         AcrylicWindowStyle="NoIcon"
         fw:AcrylicWindow.AcrylicAccentState="BlurBehind" Background="#26FFFFFF" FontFamily="Arial" RenderTransformOrigin="0.5,0.5">
-    
+
     <fw:AcrylicWindow.BorderBrush>
         <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
             <GradientStop Color="#FF515254" Offset="0.01"/>
@@ -29,14 +29,14 @@
 
     <Grid>
 
-        <Menu x:Name="MENU" Height="30" VerticalAlignment="Top" Margin="0,30,0,0" Background="#7FF0F0F0">
+        <Menu x:Name="MENU" Height="18" VerticalAlignment="Top" Margin="0,30,0,0" Background="#7FF0F0F0">
             <MenuItem Header="Файл" >
                 <MenuItem Header="Импорт">
                     <MenuItem Header="Шаблон .bytes" Click="onClickLoad"></MenuItem>
                     <MenuItem Header="Релиз .bytes" Click="onClickLoadSecond"></MenuItem>
                     <MenuItem Header="Карта переводов .json" Click="onClickLoadLang"></MenuItem>
                     <MenuItem Header="Правила сортировки .json" Foreground="#FFFF6666" ></MenuItem>
-                    
+
                 </MenuItem>
                 <MenuItem Header="Экспорт" >
                     <MenuItem Header="Релиз .bytes"></MenuItem>
@@ -46,9 +46,9 @@
                 <MenuItem Header="Закрыть таблицу" Click="onClickClose"></MenuItem>
             </MenuItem>
             <MenuItem Header="Фильтр">
-                <MenuItem Header="По ключам" Foreground="#FFFF6666"></MenuItem>
-                <MenuItem Header="По значениям" Foreground="#FFFF6666"></MenuItem>
-    
+                <MenuItem Header="По ключам" Click="clickKeyFilter"></MenuItem>
+                <MenuItem Header="По значениям" Click="clickValueFilter"></MenuItem>
+                <MenuItem Header="Сбросить" Click="clickResetFilter"></MenuItem>
             </MenuItem>
             <MenuItem Header="Сортировка">
                 <MenuItem Header="По ID"></MenuItem>
@@ -57,11 +57,11 @@
             </MenuItem>
         </Menu>
 
-        <DataGrid x:Name="TTable" Margin="10,60,10,0" AutoGenerateColumns="False" IsEnabled="True" Grid.ColumnSpan="2">
+        <DataGrid x:Name="TTable" AutoGenerateColumns="False" IsEnabled="True" Margin="0,48,0,0">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="15" CanUserResize="True" />
+                <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="45" CanUserResize="True" />
                 <DataGridTextColumn Header="ORIGINAL" Binding="{Binding Original}" Width="200" CanUserResize="True" />
-                <DataGridTextColumn Header="VALUE" Binding="{Binding Value}" Width="200" CanUserResize="True" />
+                <DataGridTextColumn Header="VALUE" Binding="{Binding Value}" Width="250" CanUserResize="True" />
             </DataGrid.Columns>
         </DataGrid>
 

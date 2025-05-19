@@ -6,39 +6,29 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
 using SourceChord.FluentWPF;
 using LangEditAPI;
 using System.Text.Json;
 using System.Text.Encodings.Web;
-
+using Microsoft.VisualBasic;
 
 namespace GF2_RU_Launch
 {
 
     public partial class Editor : AcrylicWindow
     {
-
-        [DllImport("kernel32")]
-        private static extern bool AllocConsole();
-
         private ArrayList data = new ArrayList();
         private ArrayList viewData = new ArrayList();
         private MainWindow parent;
 
         private LangEditAPI.Table? table1, table2;
+        private ELine? filter;
 
         public Editor(MainWindow main)
         {
             parent = main;
             InitializeComponent();
             SetExtendViewIntoTitleBar(this, true);
-            
-            Console.WriteLine("NEN!");
 
             TTable.ItemsSource = viewData;
         }
@@ -59,7 +49,39 @@ namespace GF2_RU_Launch
         private void updateView()
         {
             viewData.Clear();
-            viewData.AddRange(data);
+
+            var fLtr = filter;
+
+            if (fLtr == null)
+            {
+                viewData.AddRange(data);
+            }
+            else
+            {
+                foreach (var item in data)
+                {
+                    if (item != null)
+                    {
+                        ELine cur = item as ELine;
+
+                        if (fLtr.Value != null && cur.Value != null)
+                        {
+                            if (cur.Value.Contains(fLtr.Value))
+                            {
+                                viewData.Add(cur);
+                            }
+                            
+                        }
+                        else if (fLtr.Original != null && cur.Original != null)
+                        {
+                            if (cur.Original.Contains(fLtr.Original))
+                            {
+                                viewData.Add(cur);
+                            }
+                        }
+                    }
+                }
+            }
             TTable.Items.Refresh();
         }
 
@@ -81,6 +103,44 @@ namespace GF2_RU_Launch
             table1.load(dataBytes);
 
             onCompleteImport();
+        }
+
+
+        private void clickKeyFilter(object sender, RoutedEventArgs e)
+        {
+            var res = Interaction.InputBox("Подстрока", "Введите фильтр", "");
+            if (res != null && res.Length > 0) {
+                if (filter == null) {
+                    filter = new ELine();
+                }
+                filter.Original = res;
+            }
+            updateView();
+        }
+
+
+        private void clickValueFilter(object sender, RoutedEventArgs e)
+        {
+            var res = Interaction.InputBox("Подстрока", "Введите фильтр", "");
+            if (res != null && res.Length > 0)
+            {
+                if (filter == null)
+                {
+                    filter = new ELine();
+                }
+                filter.Value = res;
+            }
+            updateView();
+        }
+
+
+        private void clickResetFilter(object sender, RoutedEventArgs e)
+        {
+            if (filter != null)
+            {
+                filter = null;
+                updateView();
+            }
         }
 
 
