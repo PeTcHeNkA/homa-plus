@@ -361,3 +361,12 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+GF2_RU_Launch/build
+.gitignore
+GF2_RU_Launch/build/FluentWPF.dll
+GF2_RU_Launch/build/GF2_RU_Launch_2.0+pre.zip
+GF2_RU_Launch/build/GF2_RU_Launch.deps.json
+GF2_RU_Launch/build/GF2_RU_Launch.dll
+GF2_RU_Launch/build/GF2_RU_Launch.exe
+GF2_RU_Launch/build/GF2_RU_Launch.runtimeconfig.json
+GF2_RU_Launch/build/langedit.dll
