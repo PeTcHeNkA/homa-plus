@@ -21,13 +21,15 @@ public partial class MainWindow : AcrylicWindow{
 
     private string GF2_Path = null;
     private Changelogs subWindow;
+    private Editor editor;
     private bool needLoadPack = true;
 
     public MainWindow() 
     {
         InitializeComponent();
+        SetExtendViewIntoTitleBar(this, true);
         loadConfig();
-        //BTnnUninstall.Content = "DEL";
+
         BTnnUninstall.Visibility = Visibility.Hidden;
 
         var rand = new Random(DateTime.Now.Second);
@@ -51,8 +53,21 @@ public partial class MainWindow : AcrylicWindow{
         BTnPlayInstall.Click += onInstallClickProxy;
         BTnnUninstall.Click += onUnInstallClick;
 
+        BTNEditor.Click += onClickOpenEditor;
+
         updatePlayBtn();
         editBtnStatus(false);
+
+        //onClickOpenEditor(null, null);
+    }
+
+
+    public void onEditorClosed()
+    {
+        if (editor != null)
+        {
+            editor = null;
+        }
     }
 
 
@@ -63,6 +78,22 @@ public partial class MainWindow : AcrylicWindow{
         {
             subWindow.Close();
         }
+        if(editor != null)
+        {
+            editor.Close();
+        }
+    }
+
+
+    private void onClickOpenEditor(object sender, RoutedEventArgs e)
+    {
+        if (editor != null)
+        {
+            editor.Focus();
+            return;
+        }
+        editor = new Editor(this);
+        editor.Show();
     }
 
 
@@ -252,17 +283,17 @@ public partial class MainWindow : AcrylicWindow{
 
 
     private void onInstallClickProxy(object sender, RoutedEventArgs e)
-    {   
+    {
 
         //if ((Keyboard.Modifiers & ModifierKeys.Shift) > 0)
         //{
-        //    subWindow = new Changelogs(this, "");
-        //    subWindow.Show();
+        //    editor = new Editor(this);
+        //    editor.Show();
 
         //    return;
         //}
 
-        if(clickAction != null)
+        if (clickAction != null)
         {
             clickAction.Invoke(sender, e);
         }

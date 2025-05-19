@@ -10,12 +10,21 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Images\close_ico.png" />
     <None Remove="Images\delete_ico.png" />
     <None Remove="Images\delete_ico.svg" />
+    <None Remove="Images\edit_ico.png" />
+    <None Remove="Images\expand_ico.png" />
+    <None Remove="Images\minimize_ico.png" />
+    <None Remove="Images\settings_ico.png" />
+    <None Remove="langedit.dll" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Include="GF2RU_ICO.ico" />
+    <Resource Include="Images\edit_ico.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
   <ItemGroup>
@@ -44,6 +53,9 @@
     <Resource Include="Images\groza1.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
+    <Content Include="langedit.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

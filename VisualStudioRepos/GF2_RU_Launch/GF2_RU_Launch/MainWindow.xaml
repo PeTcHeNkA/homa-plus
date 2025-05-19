@@ -28,6 +28,14 @@
 
 
     <Grid x:Name="Layer1">
+        <!-- Header -->
+
+        <Grid Background="#7FECECEC" Panel.ZIndex="1000" Height="30" VerticalAlignment="Top">
+            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Margin="-67,0,0,0" Width="249" FontSize="14">Girls Frontline 2: Exilium RU Launcher</TextBlock>
+        </Grid>
+
+
+        <!-- Background -->
         <Border BorderThickness="0,0,0,3" VerticalAlignment="Top" Margin="0,0,0,75">
             <Border.BorderBrush>
                 <LinearGradientBrush StartPoint="0.5,0.995" EndPoint="0.5,1" >
@@ -37,11 +45,58 @@
             </Border.BorderBrush>
 
             <Image x:Name="BGImg" Source="/images/groza1.png" 
-               VerticalAlignment="Center" Stretch="UniformToFill">
-            </Image>
+               VerticalAlignment="Center" Stretch="UniformToFill"/>
         </Border>
 
+        <!-- Open Editor -->
+        <Button x:Name="BTNEditor" Width="95" Height="95" Margin="0,30,0,0" VerticalAlignment="Top" HorizontalAlignment="Left">
+            <Button.Style>
+                <Style TargetType="Button">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type Button}" >
+                                <Border 
+                            Background="{TemplateBinding Background}" 
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            Padding="{TemplateBinding Padding}"
+                            BorderThickness="0"
+                            >
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
 
+                    <Setter Property="Background">
+                        <Setter.Value>
+                            <LinearGradientBrush EndPoint="0.5,1" StartPoint="0,0.5">
+                                <GradientStop Color="#7FECECEC"/>
+                                <GradientStop Color="Transparent" Offset="0.35"/>
+                            </LinearGradientBrush>
+                        </Setter.Value>
+                    </Setter>
+
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background">
+                                <Setter.Value>
+                                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0,0.5">
+                                        <GradientStop Color="#BFD8D8D8"/>
+                                        <GradientStop Color="Transparent" Offset="0.6"/>
+                                    </LinearGradientBrush>
+                                </Setter.Value>
+                            </Setter>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Button.Style>
+            <Grid Width="95" Height="95">
+                <Image Height="30" Width="30" VerticalAlignment="Top" HorizontalAlignment="Left" Source="/Images/edit_ico.png" Margin="8,8,0,0" />
+            </Grid>
+        </Button>
+
+
+        <!-- Play bottons start -->
         <Button x:Name="BTnPlay" Margin="0,0,10,21" Height="44" 
                 VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="230" 
                 FontFamily="Microsoft YaHei" FontSize="24">
@@ -165,8 +220,9 @@
 
             <Image Source="/Images/delete_ico.png" 
                    Stretch="UniformToFill" Width="25" Height="25"/>
-            
+
         </Button>
+        <!-- Play bottons end   -->
     </Grid>
 
 </fw:AcrylicWindow>

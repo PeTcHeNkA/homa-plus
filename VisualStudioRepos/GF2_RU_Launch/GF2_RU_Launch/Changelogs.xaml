@@ -17,14 +17,7 @@
             <GradientStop Color="#FFC5DCE4" Offset="1"/>
         </LinearGradientBrush>
     </fw:AcrylicWindow.BorderBrush>
-    <fw:AcrylicWindow.RenderTransform>
-        <TransformGroup>
-            <ScaleTransform/>
-            <SkewTransform/>
-            <RotateTransform/>
-            <TranslateTransform X="0"/>
-        </TransformGroup>
-    </fw:AcrylicWindow.RenderTransform>
+
 
     <Grid>
 
