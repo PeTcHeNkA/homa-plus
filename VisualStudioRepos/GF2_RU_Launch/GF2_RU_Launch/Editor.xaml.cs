@@ -23,6 +23,10 @@ namespace GF2_RU_Launch
 
         private LangEditAPI.Table? table1, table2;
         private ELine? filter;
+        private bool hideEmpty = false;
+        private bool showId = true;
+
+        private bool locked = false;
 
         public Editor(MainWindow main)
         {
@@ -48,13 +52,40 @@ namespace GF2_RU_Launch
 
         private void updateView()
         {
+
+            TTable.UnselectAllCells();
+            TTable.UnselectAll();
+            TTable.ItemsSource = null;
+
             viewData.Clear();
 
             var fLtr = filter;
 
             if (fLtr == null)
             {
-                viewData.AddRange(data);
+                if (hideEmpty)
+                {
+                    foreach (var item in data)
+                    {
+                        if (item != null)
+                        {
+                            ELine cur = item as ELine;
+                            if(cur.Original == null || cur.Original.Length == 0)
+                            {
+                                if(cur.Value == null || cur.Value.Length == 0)
+                                {
+                                    continue;
+                                }
+                            }
+
+                            viewData.Add(cur);
+                        }
+                    }
+                }
+                else
+                {
+                    viewData.AddRange(data);
+                }
             }
             else
             {
@@ -82,11 +113,106 @@ namespace GF2_RU_Launch
                     }
                 }
             }
-            TTable.Items.Refresh();
+
+
+            TTable.ItemsSource = viewData;
+            //TTable.Items.Refresh();
         }
 
 
         private void onClickLoad(object sender, RoutedEventArgs e)
+        {
+
+            if (locked) return;
+            locked = true;
+            Task.Run(() =>
+            {
+                onClickLoad0();
+
+                var jData = table1.exportMappings(table2, 0xf);
+
+                Dispatcher.Invoke(() => {
+                    locked = false;
+                    onCompleteImportB(jData);
+                });
+            });
+        }
+
+
+        private void onClickLoadActivePack(object sender, RoutedEventArgs e)
+        {
+            if (locked) return;
+            if (!parent.isValidGamePath())
+            {
+                MessageBox.Show("Путь к игре не указан! Автоматический импорт невозможен.");
+                return;
+            }
+            locked = true;
+            onClickClose(null, null);
+
+            Task.Run(() => {
+                try
+                {
+                    onClickLoadActivePackB();
+                    var jData = table1.exportMappings(table2, 0xf);
+
+                    Dispatcher.Invoke(() =>
+                    {
+                        locked = false;
+                        onCompleteImportB(jData);
+                    });
+                }
+                finally
+                {
+                    locked = false;
+                }
+            });
+        }
+
+
+        private void onClickLoadActivePackB()
+        {
+            var cur = parent.getLangPackPath();
+            var backup = parent.getBackupPackPath();
+
+            var hasBackup = File.Exists(backup);
+
+            byte[] origBytes = null;
+            byte[] curBytes = null;
+
+            if (hasBackup) 
+            { 
+                origBytes = File.ReadAllBytes(backup);
+                curBytes = File.ReadAllBytes(cur);
+            }
+            else
+            {
+                origBytes = File.ReadAllBytes(cur);
+
+                if (File.Exists(MainWindow.GF2_RU_PACK))
+                {
+                    curBytes = File.ReadAllBytes(MainWindow.GF2_RU_PACK);
+                }
+            }
+
+            table1 = new LangEditAPI.Table(1);
+            table1.load(origBytes);
+
+            if (table2 != null)
+            {
+                table2.free();
+                table2 = null;
+            }
+
+            if (curBytes != null)
+            {
+                table2 = new LangEditAPI.Table(2);
+                table2.load(curBytes);
+            }
+        }
+
+
+        private void onClickLoad0()
         {
             var dataBytes = open("Выберите шаблон Lang.bytes", ".bytes", "Lang.bytes|*.bytes");
             if (dataBytes == null)
@@ -101,8 +227,6 @@ namespace GF2_RU_Launch
 
             table1 = new LangEditAPI.Table(1);
             table1.load(dataBytes);
-
-            onCompleteImport();
         }
 
 
@@ -136,6 +260,7 @@ namespace GF2_RU_Launch
 
         private void clickResetFilter(object sender, RoutedEventArgs e)
         {
+            hideEmpty = false;
             if (filter != null)
             {
                 filter = null;
@@ -152,13 +277,17 @@ namespace GF2_RU_Launch
 
         private void onCompleteImport()
         {
-            if(table1 == null)
+            if (table1 == null)
             {
                 wanEmptyTable();
                 return;
             }
             var jData = table1.exportMappings(table2, 0xf);
+        }
 
+
+        private void onCompleteImportB(byte[] jData)
+        {
             if (jData != null)
             {
                 try
@@ -182,6 +311,7 @@ namespace GF2_RU_Launch
 
         private void onClickLoadSecond(object sender, RoutedEventArgs e)
         {
+            if (locked) return;
             var dataBytes = open("Выберите релиз Lang.bytes", ".bytes", "Lang.bytes|*.bytes");
             if (dataBytes == null)
             {
@@ -195,14 +325,36 @@ namespace GF2_RU_Launch
         }
 
 
+        private void onClickShowEmpty(object sender, RoutedEventArgs e)
+        {
+            var prev = hideEmpty;
+            hideEmpty = false;
+            if(prev != hideEmpty)
+            {
+                updateView();
+            }
+        }
+
+
+        private void onClickHideEmpty(object sender, RoutedEventArgs e)
+        {
+            var prev = hideEmpty;
+            hideEmpty = true;
+            if (prev != hideEmpty)
+            {
+                updateView();
+            }
+        }
+
+
         private void onClickClose(object sender, RoutedEventArgs e)
         {
             if(table1 != null)
             {
                 table1.free();
                 table1 = null;
-                setMainData(new ArrayList());
             }
+            setMainData(new ArrayList());
         }
 
 
@@ -232,6 +384,11 @@ namespace GF2_RU_Launch
 
         private void onClickExportLangJsonID(object sender, RoutedEventArgs e)
         {
+            if (!showId)
+            {
+                MessageBox.Show("В режиме слияния строк экспорт с ID невозможен");
+                return;
+            }
             exportLang(true);
         }
 
@@ -250,7 +407,7 @@ namespace GF2_RU_Launch
                 return;
             }
 
-            var bData = toJsonBytes(data, true);
+            var bData = exportTableBytes(showId);
             table1.applyMappngs(bData);
 
             bData = table1.save();
@@ -263,6 +420,48 @@ namespace GF2_RU_Launch
             {
                 MessageBox.Show("Ошибка сохранения!");
             }
+        }
+
+
+        private void onClickEnableMerge(object sender, RoutedEventArgs e)
+        {
+            if (table1 == null)
+            {
+                wanEmptyTable();
+                return;
+            }
+            var bData = exportTableBytes(showId);
+            table1.applyMappngs(bData);
+
+            var jData = table1.exportMappings(null, 2);
+
+            var arr = fromJsonBytes(jData);
+            showId = false;
+            setMainData(arr);
+        }
+
+
+        private void onClickDisableMerge(object sender, RoutedEventArgs e)
+        {
+            if (table1 == null)
+            {
+                wanEmptyTable();
+                return;
+            }
+            var bData = exportTableBytes(showId);
+            table1.applyMappngs(bData);
+
+            var jData = table1.exportMappings(null, 15);
+
+            var arr = fromJsonBytes(jData);
+            showId = true;
+            setMainData(arr);
+        }
+
+
+        private byte[] exportTableBytes(bool useId)
+        {
+            return toJsonBytes(data, useId);
         }
 
 
@@ -279,7 +478,7 @@ namespace GF2_RU_Launch
                 return;
             }
 
-            var data2 = toJsonBytes(data, useId);
+            var data2 = exportTableBytes(useId);
 
             try
             {
@@ -327,7 +526,7 @@ namespace GF2_RU_Launch
         }
 
 
-        public static ArrayList fromJsonBytes(byte[] data)
+        public ArrayList fromJsonBytes(byte[] data)
         {
             ArrayList list = new ArrayList();
             var map = JsonSerializer.Deserialize<Dictionary<string, string>>(UTF8Encoding.UTF8.GetString(data));
@@ -335,6 +534,7 @@ namespace GF2_RU_Launch
             foreach (var item in map)
             {
                 var id = getId(item.Key);
+
                 var orig = remId(item.Key);
                 ELine eLine = new ELine(id, orig);
                 eLine.Value = item.Value;
@@ -419,7 +619,7 @@ namespace GF2_RU_Launch
 
         public string getSaveKey(bool useId)
         {
-            if (!useId) return Value;
+            if (!useId || Id == 0) return Value;
 
             return "#ID:" + Id + "|" + Value;
         }
