@@ -2,7 +2,7 @@
 {
     public class GroupComparator : IComparer<string>
     {
-        private Group defaultGroup = new Group("", 0);
+        private Group defaultGroup = new Group("", 0, "default");
         private Group[] groups = new Group[0];
         private Group[][] mappingByFirst = new Group[128][];
         private Group[] noMapped = new Group[0];
@@ -21,7 +21,11 @@
                 int index = line.IndexOf('|', 2);
                 if (index == -1) continue;
                 int num = 0;
-                for (int i = 2; i < index; i++)
+                bool invert = line[2] == '-';
+                int i = 2;
+                if (invert) i = 3;
+
+                for (; i < index; i++)
                 {
                     var chr2 = line[i];
                     num *= 10;
@@ -34,26 +38,35 @@
 
                 string groupName = line.Substring(index+1, index2-index-1);
 
+                string display = "";
+                if (index2 != line.Length) 
+                {
+                    display = line.Substring(index2 + 1,line.Length-index2-1).Trim();
+                } else
+                {
+                    display = "group_" + num;
+                }
+
                 if (chr == 's')
                 {
-                    comparator.Add(groupName, num);
+                    comparator.Add(groupName, num, display);
                 } else if(chr == 'c')
                 {
-                    comparator.AddB(groupName, num);
+                    comparator.AddB(groupName, num, display);
                 }
             }
             comparator.Complete();
             return comparator;
         }
 
-        public void Add(string prefix, int sortIndex)
+        public void Add(string prefix, int sortIndex, string display)
         {
-            groups = Add0(groups, new Group(prefix, sortIndex));
+            groups = Add0(groups, new Group(prefix, sortIndex, display));
         }
 
-        public void AddB(string prefix, int sortIndex)
+        public void AddB(string prefix, int sortIndex, string display)
         {
-            groups = Add0(groups, new GroupB(prefix, sortIndex));
+            groups = Add0(groups, new GroupB(prefix, sortIndex, display));
         }
 
 
@@ -69,10 +82,11 @@
         public void Complete()
         {
             Array.Sort(groups, (o1, o2) => o2.Prefix.Length.CompareTo(o1.Prefix.Length));
-
+            int minValue = 0;
             
             foreach (var group in groups)
             {
+                if(group.SortIndex < minValue) minValue = group.SortIndex;
                 if (group.GetType() != typeof(GroupB))
                 {
                     int index = Index(group.Prefix);
@@ -83,6 +97,12 @@
                     noMapped = Add0(noMapped, group);
                 }
             }
+            minValue = (-minValue);
+
+            foreach (var group in groups)
+            {
+                group.SortIndex += minValue;
+            }
         }
 
         private static int Index(string str)
@@ -91,9 +111,9 @@
             return str[0] & 127;
         }
 
-        public void SetDefaultGroup(string prefix, int sortIndex)
+        public void SetDefaultGroup(string prefix, int sortIndex, string dsiplay)
         {
-            defaultGroup = new Group(prefix, sortIndex);
+            defaultGroup = new Group(prefix, sortIndex, dsiplay);
         }
 
         public Group FindGroup(string key)
@@ -172,12 +192,14 @@
     public class Group
     {
         public string Prefix { get; }
-        public int SortIndex { get; }
+        public int SortIndex { get; set; }
+        public string Display { get; }
 
-        public Group(string prefix, int sortIndex)
+        public Group(string prefix, int sortIndex, string display)
         {
             Prefix = prefix;
             SortIndex = sortIndex;
+            Display = display;
         }
 
         public virtual bool IsSomeGroup(string key)
@@ -189,7 +211,7 @@
 
     public class GroupB : Group
     {
-        public GroupB(string prefix, int sortIndex) : base(prefix, sortIndex) { }
+        public GroupB(string prefix, int sortIndex, string display) : base(prefix, sortIndex, display) { }
 
         public override bool IsSomeGroup(string key)
         {

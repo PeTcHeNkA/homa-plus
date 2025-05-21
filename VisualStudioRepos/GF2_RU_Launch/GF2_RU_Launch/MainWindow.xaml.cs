@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Security.Policy;
 using System.Text;
 using System.Windows;
 using System.Windows.Input;
@@ -310,12 +311,17 @@ public partial class MainWindow : AcrylicWindow{
 
                         Dispatcher.Invoke(() => {
                             var add = "";
-                            for (int i = 0; i < points; i++)
+                            int i = 0;
+                            for (i = 0; i < points; i++)
                             {
                                 add += ".";
                             }
+                            for (; i < 3; ++i)
+                            {
+                                add += " ";
+                            }
                             if (completed)return;
-                            BTnPlayInstall.Content = "Загрузка обновлений."+add;
+                            BTnPlayInstall.Content = "Загрузка обновлений ."+add;
                         });
                     }
                 });
@@ -330,7 +336,16 @@ public partial class MainWindow : AcrylicWindow{
             var loaded = false;
             if (result)
             {
-                loaded = load(getLoadPackUrl(), GF2_RU_PACK);
+                try
+                {
+                    loaded = load(getLoadPackUrl(), GF2_RU_PACK);
+                }
+                catch
+                {
+                    Dispatcher.Invoke(() => {
+                        MessageBox.Show("Ошибка загрузки обновления!");
+                    });
+                }
             } 
             else
             {
@@ -401,6 +416,8 @@ public partial class MainWindow : AcrylicWindow{
         {
             string packPath = getLangPackPath();
             string origPath = getBackupPackPath();
+
+            CreatePathIfNeed(origPath);
 
             if (!File.Exists(origPath))
             {
@@ -520,9 +537,23 @@ public partial class MainWindow : AcrylicWindow{
 
     private static bool load(string url, string filename)
     {
+        CreatePathIfNeed(filename);
         using (WebClient webClient = new WebClient())
         {
             webClient.DownloadFile(url, filename);
+            return true;
+        }
+        return false;
+    }
+
+
+    public static bool CreatePathIfNeed(string fileName)
+    {
+        FileInfo file = new FileInfo(fileName);
+        DirectoryInfo parent = file.Directory;
+        if (parent != null)
+        {
+            parent.Create();
             return true;
         }
         return false;
@@ -540,14 +571,16 @@ public partial class MainWindow : AcrylicWindow{
     }
 
 
+    private static string getSHA256(byte[] src)
+    {
+        //SHA256 mySHA256 = SHA256.Create();
+        //todo
+        return "";
+    }
+
+
     private void setupAnalitics()
     {
-
-        //var service = new AnalyticsService(new BaseClientService.Initializer()
-        //{
-        //    ApiKey = "yQ-Szt8JQFy1d9VWufe4IQ"
-        //});
-
-        //service.
+        //todo
     }
 }

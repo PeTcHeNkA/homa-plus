@@ -827,4 +827,25 @@ namespace GF2_RU_Launch
             return copy;
         }
     }
+
+
+    public class ELineGroup
+    {
+        private Group group;
+        private List<ELine> lines = new List<ELine>();
+
+        public static Dictionary<string, ELineGroup> splitByGroups(GroupComparator comp, List<ELine> lines)
+        {
+            Dictionary<string, ELineGroup> map = new Dictionary<string, ELineGroup>();
+
+            foreach(ELine line in lines)
+            {
+                var gId = comp.FindGroup(line.Original);
+
+                //map[gId.Display]
+            }
+
+            return map;
+        }
+    }
 }
