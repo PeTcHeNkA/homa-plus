@@ -413,6 +413,70 @@ namespace GF2_RU_Launch
         }
 
 
+        private void onClickExportByGroups(object sender, RoutedEventArgs e)
+        {
+            var dir = getSaveDir("Выберите папку экспорта");
+        }
+
+
+        public void onExportByGroups(string targetDir, List<ELine> src, bool useId)
+        {
+            var data = splitByGroups(gcom, src);
+
+            Dictionary<string, List<ELine>> map = new Dictionary<string, List<ELine>>();
+
+            foreach (var group in data)
+            {
+                var list = map[group.Key.Display];
+                if (list == null)
+                {
+                    list = new List<ELine>();
+                    map[group.Key.Display] = list;
+                }
+                list.AddRange(group.Value);
+            }
+
+            List<Task> allTasks = new List<Task>();
+
+            foreach (var group in map)
+            {
+                var resultName = targetDir + "/" + group+".json";
+
+                MainWindow.CreatePathIfNeed(resultName);
+
+                byte[] bytes = toJsonBytes(group.Value, useId, gcom);
+                var task = File.WriteAllBytesAsync(resultName, bytes);
+
+                allTasks.Add(task);
+            }
+
+            foreach (var task in allTasks)
+            {
+                task.Wait();
+            }
+        }
+
+
+        public static Dictionary<Group, List<ELine>> splitByGroups(GroupComparator comp, List<ELine> lines)
+        {
+            Dictionary<Group, List<ELine>> map = new Dictionary<Group, List<ELine>>();
+
+            foreach (ELine line in lines)
+            {
+                var gId = comp.FindGroup(line.Original);
+
+                var eGroup = map[gId];
+                if (eGroup == null)
+                {
+                    eGroup = new List<ELine>();
+                    map[gId] = eGroup;
+                }
+                eGroup.Add(line);
+            }
+            return map;
+        }
+
+
         private void onClickExportLangBytes(object sender, RoutedEventArgs e)
         {
             if (table1 == null)
@@ -521,6 +585,7 @@ namespace GF2_RU_Launch
             TTable.ItemsSource = list2;
         }
 
+
         private class WrappedLineComparer : IComparer<ELine>
         {
             private IComparer<string> parent;
@@ -543,6 +608,7 @@ namespace GF2_RU_Launch
                 return parent.Compare(x.Value, y.Value);
             }
         }
+
 
         private byte[] exportTableBytes(bool useId)
         {
@@ -664,6 +730,24 @@ namespace GF2_RU_Launch
             catch (Exception ex) {
                 MessageBox.Show("Ошибка сохранения!");
             }
+        }
+
+
+        public static string? getSaveDir(string title)
+        {
+            //todo
+            //FolderBrowserDialog fbd = new FolderBrowserDialog();
+
+            //dlg.Title = title;
+            //dlg.CheckPathExists = true;
+
+            //Nullable<bool> result = dlg.ShowDialog();
+
+            //if (result == true)
+            //{
+            //    return dlg.FileName;
+            //}
+            return null;
         }
 
 
@@ -825,27 +909,6 @@ namespace GF2_RU_Launch
             copy.Value = Value;
             copy.Original = Original;
             return copy;
-        }
-    }
-
-
-    public class ELineGroup
-    {
-        private Group group;
-        private List<ELine> lines = new List<ELine>();
-
-        public static Dictionary<string, ELineGroup> splitByGroups(GroupComparator comp, List<ELine> lines)
-        {
-            Dictionary<string, ELineGroup> map = new Dictionary<string, ELineGroup>();
-
-            foreach(ELine line in lines)
-            {
-                var gId = comp.FindGroup(line.Original);
-
-                //map[gId.Display]
-            }
-
-            return map;
         }
     }
 }

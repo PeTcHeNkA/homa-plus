@@ -50,6 +50,9 @@
                             <MenuItem Header="Упрощенная, включая не переводимое" Click="onClickExportNotTranslatedALL"></MenuItem>
                             <MenuItem Header="С ID, включая не переводимое" Click="onClickExportNotTranslatedIDALL"></MenuItem>
                         </MenuItem>
+                        <MenuItem Header="Разделенная по группам" Click="onClickExportByGroups">
+                            
+                        </MenuItem>
                     </MenuItem>
                 </MenuItem>
                 <Separator/>
