@@ -12,30 +12,34 @@ using System.Text.Json;
 using System.Text.Encodings.Web;
 using Microsoft.VisualBasic;
 using System.Windows.Markup;
+using SortJsonUtils;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.ComponentModel;
 
 namespace GF2_RU_Launch
 {
-
     public partial class Editor : AcrylicWindow
     {
-        private ArrayList data = new ArrayList();
-        private ArrayList viewData = new ArrayList();
+        private List<ELine> data = new List<ELine>();
+        private List<ELine> viewData = new List<ELine>();
         private MainWindow parent;
 
         private LangEditAPI.Table? table1, table2;
         private ELine? filter;
         private bool hideEmpty = false, hideNonTranslatable = false;
         private bool showId = true;
-
         private bool locked = false;
+        private GroupComparator gcom = new GroupComparator();
 
         public Editor(MainWindow main)
         {
             parent = main;
             InitializeComponent();
             SetExtendViewIntoTitleBar(this, true);
-
             TTable.ItemsSource = viewData;
+
+            var view = CollectionViewSource.GetDefaultView(TTable.ItemsSource);
         }
 
 
@@ -45,7 +49,7 @@ namespace GF2_RU_Launch
         }
 
 
-        private void setMainData(ArrayList newData)
+        private void setMainData(List<ELine> newData)
         {
             data = newData;
             updateView();
@@ -370,7 +374,7 @@ namespace GF2_RU_Launch
                 table1.free();
                 table1 = null;
             }
-            setMainData(new ArrayList());
+            setMainData(new List<ELine>());
         }
 
 
@@ -381,7 +385,7 @@ namespace GF2_RU_Launch
                 wanEmptyTable();
                 return;
             }
-            var dataBytes = open("Выберите карту переводов mappings.json", ".json", "mappings.bytes|*.json");
+            var dataBytes = open("Выберите карту переводов mappings.json", ".json", "mappings.json|*.json");
             if (dataBytes == null)
             {
                 return;
@@ -475,11 +479,75 @@ namespace GF2_RU_Launch
         }
 
 
-        private byte[] exportTableBytes(bool useId)
+        private void onClicImportSortTable(object sender, RoutedEventArgs e)
         {
-            return toJsonBytes(data, useId);
+            var bytes = open("Выберите правила сортировки rules.txt", ".txt", "rules.txt|*.txt");
+
+            if (bytes == null)
+            {
+                return;
+            }
+
+            try
+            {
+                var table = UTF8Encoding.UTF8.GetString(bytes);
+                gcom = GroupComparator.fromTable(table);
+            }
+            catch (Exception ex) { 
+                MessageBox.Show("Правила сортировки имеют недопустимый формат!");
+            }
         }
 
+
+        private void onClicResetSortTable(object sender, RoutedEventArgs e)
+        {
+            gcom = new GroupComparator();
+        }
+
+        private void onClicSortByDefRules(object sender, RoutedEventArgs e)
+        {
+            List<ELine> list2 = viewData;
+            list2.Sort(new WrappedLineComparer(new GroupComparator()));
+            TTable.ItemsSource = null;
+            TTable.ItemsSource = list2;
+        }
+
+
+        private void onClicSortByRules(object sender, RoutedEventArgs e)
+        {
+            List<ELine> list2 = viewData;
+            list2.Sort(new WrappedLineComparer(gcom));
+            TTable.ItemsSource = null;
+            TTable.ItemsSource = list2;
+        }
+
+        private class WrappedLineComparer : IComparer<ELine>
+        {
+            private IComparer<string> parent;
+
+            public WrappedLineComparer(IComparer<string> parent)
+            {
+                this.parent = parent;
+            }
+            public int Compare(ELine? x, ELine? y)
+            {
+                if(x  == null)
+                {
+                    if (y == null)return 0;
+                    return 1;
+                }
+                else
+                {
+                    if(x == null)return -1;
+                }
+                return parent.Compare(x.Value, y.Value);
+            }
+        }
+
+        private byte[] exportTableBytes(bool useId)
+        {
+            return toJsonBytes(data, useId, gcom);
+        }
 
         private void onClickExportNotTranslated(object sender, RoutedEventArgs e)
         {
@@ -511,14 +579,14 @@ namespace GF2_RU_Launch
                 wanEmptyTable();
                 return;
             }
-            var res = getSaveFile("Выберите карту переводов mappings.json", ".json", "mappings.bytes|*.json");
+            var res = getSaveFile("Выберите карту переводов mappings.json", ".json", "mappings.json|*.json");
 
             if (res == null)
             {
                 return;
             }
 
-            ArrayList list = new ArrayList();
+            List<ELine> list = new List<ELine>();
             //toJsonBytes(data, useId);
             foreach (ELine item in data) {
                 if (item != null) {
@@ -534,7 +602,7 @@ namespace GF2_RU_Launch
                 }
             }
             
-            var data2 = toJsonBytes(list, useId);
+            var data2 = toJsonBytes(list, useId, gcom);
 
             try
             {
@@ -554,14 +622,14 @@ namespace GF2_RU_Launch
                 wanEmptyTable();
                 return;
             }
-            var res = getSaveFile("Выберите карту переводов mappings.json", ".json", "mappings.bytes|*.json");
+            var res = getSaveFile("Выберите карту переводов mappings.json", ".json", "mappings.json|*.json");
 
             if (res == null)
             {
                 return;
             }
 
-            var data2 = toJsonBytes(viewData, showId);
+            var data2 = toJsonBytes(viewData, showId, gcom);
 
             try
             {
@@ -581,7 +649,7 @@ namespace GF2_RU_Launch
                 wanEmptyTable();
                 return;
             }
-            var res = getSaveFile("Выберите карту переводов mappings.json", ".json", "mappings.bytes|*.json");
+            var res = getSaveFile("Выберите карту переводов mappings.json", ".json", "mappings.json|*.json");
 
             if (res == null) {
                 return;
@@ -635,9 +703,9 @@ namespace GF2_RU_Launch
         }
 
 
-        public ArrayList fromJsonBytes(byte[] data)
+        public List<ELine> fromJsonBytes(byte[] data)
         {
-            ArrayList list = new ArrayList();
+            List<ELine> list = new List<ELine>();
             var map = JsonSerializer.Deserialize<Dictionary<string, string>>(UTF8Encoding.UTF8.GetString(data));
 
             foreach (var item in map)
@@ -652,12 +720,10 @@ namespace GF2_RU_Launch
             return list;
         }
 
-
-        public static byte[] toJsonBytes(ArrayList list, bool useId)
+        public static byte[] toJsonBytes(List<ELine> list, bool useId, IComparer<string> comparer)
         {
-            Dictionary<string, string> map = new Dictionary<string, string>();
-            foreach (var item in list) { 
-                ELine? line = item as ELine;
+            SortedDictionary<string, string> map = new SortedDictionary<string, string>(comparer);
+            foreach (var line in list) { 
                 if (line != null)
                 {
                     map[line.getSaveKey(useId)] = line.actualValue();
@@ -741,9 +807,9 @@ namespace GF2_RU_Launch
 
         public string getSaveKey(bool useId)
         {
-            if (!useId || Id == 0) return Value;
+            if (!useId || Id == 0) return Original;
 
-            return "#ID:" + Id + "|" + Value;
+            return "#ID:" + Id + "|" + Original;
         }
 
         public string actualValue()

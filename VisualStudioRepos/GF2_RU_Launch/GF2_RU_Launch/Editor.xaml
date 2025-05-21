@@ -36,8 +36,7 @@
                     <MenuItem Header="Релиз .bytes" Click="onClickLoadSecond"></MenuItem>
                     <MenuItem Header="Карта переводов .json" Click="onClickLoadLang"></MenuItem>
                     <MenuItem Header="Установленный пакет локализации" Click="onClickLoadActivePack"></MenuItem>
-                    <MenuItem Header="Правила сортировки .json" Foreground="#FFFF6666" ></MenuItem>
-
+                    <MenuItem Header="Правила сортировки .json" Click="onClicImportSortTable"></MenuItem>
                 </MenuItem>
                 <MenuItem Header="Экспорт" >
                     <MenuItem Header="Релиз .bytes"></MenuItem>
@@ -53,36 +52,40 @@
                         </MenuItem>
                     </MenuItem>
                 </MenuItem>
-                <MenuItem Header="Закрыть таблицу" Click="onClickClose"></MenuItem>
+                <Separator/>
+                <MenuItem Header="Закрыть таблицу" Click="onClickClose" Foreground="#FFD62323"></MenuItem>
             </MenuItem>
             <MenuItem Header="Фильтр">
                 <MenuItem Header="По ключам" Click="clickKeyFilter"></MenuItem>
                 <MenuItem Header="По значениям" Click="clickValueFilter"></MenuItem>
                 <MenuItem Header="Пустые" >
-                    <MenuItem Header="Показать" Click="onClickShowEmpty" Foreground="#FF91D64E"></MenuItem>
-                    <MenuItem Header="Скрыть" Click="onClickHideEmpty" Foreground="#FFFF6666"></MenuItem>
+                    <MenuItem Header="Показать" Click="onClickShowEmpty" Foreground="#FF318C00"></MenuItem>
+                    <MenuItem Header="Скрыть" Click="onClickHideEmpty" Foreground="#FFD62323"></MenuItem>
                 </MenuItem>
                 <MenuItem Header="Непереводимое" >
-                    <MenuItem Header="Показать" Click="onClickShowNonTranslatable" Foreground="#FF91D64E"></MenuItem>
-                    <MenuItem Header="Скрыть" Click="onClickHideNonTranslatable" Foreground="#FFFF6666"></MenuItem>
+                    <MenuItem Header="Показать" Click="onClickShowNonTranslatable" Foreground="#FF318C00"></MenuItem>
+                    <MenuItem Header="Скрыть" Click="onClickHideNonTranslatable" Foreground="#FFD62323"></MenuItem>
                 </MenuItem>
                 <MenuItem Header="Слияние по значению">
-                    <MenuItem Header="Включить" Click="onClickEnableMerge" Foreground="#FF91D64E"></MenuItem>
-                    <MenuItem Header="Выключить" Click="onClickDisableMerge" Foreground="#FFFF6666"></MenuItem>
+                    <MenuItem Header="Включить" Click="onClickEnableMerge" Foreground="#FF318C00"></MenuItem>
+                    <MenuItem Header="Выключить" Click="onClickDisableMerge" Foreground="#FFD62323"></MenuItem>
                 </MenuItem>
-                <MenuItem Header="Сбросить" Click="clickResetFilter"></MenuItem>
+                <Separator/>
+                <MenuItem Header="Сбросить" Click="clickResetFilter" Foreground="#FFD62323"></MenuItem>
             </MenuItem>
             <MenuItem Header="Сортировка">
-                <MenuItem Header="По длине" Foreground="#FFFF6666"></MenuItem>
-                <MenuItem Header="По правилам" Foreground="#FFFF6666"></MenuItem>
+                <MenuItem Header="По умолчанию" Click="onClicSortByDefRules"></MenuItem>
+                <MenuItem Header="По правилам" Click="onClicSortByRules"></MenuItem>
+                <Separator/>
+                <MenuItem Header="Сбросить правила по умолчанию" Click="onClicResetSortTable" Foreground="#FFD62323"></MenuItem>
             </MenuItem>
         </Menu>
 
         <DataGrid x:Name="TTable" AutoGenerateColumns="False" IsEnabled="True" Margin="0,48,0,0">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50" CanUserResize="True" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Оригинал" Binding="{Binding Original}" Width="290" CanUserResize="True" />
-                <DataGridTextColumn Header="Перевод" Binding="{Binding Value}" Width="300" CanUserResize="True" />
+                <DataGridTextColumn x:Name="TT_ID" Header="ID" Binding="{Binding Id}" Width="50" CanUserResize="True" IsReadOnly="True"/>
+                <DataGridTextColumn x:Name="TT_ORG" Header="Оригинал" Binding="{Binding Original}" Width="290" CanUserResize="True" />
+                <DataGridTextColumn x:Name="TT_RES" Header="Перевод" Binding="{Binding Value}" Width="300" CanUserResize="True" />
             </DataGrid.Columns>
 
 
