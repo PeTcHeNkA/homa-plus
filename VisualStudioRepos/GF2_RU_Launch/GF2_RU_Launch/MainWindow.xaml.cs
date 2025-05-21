@@ -9,16 +9,22 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media.Imaging;
 using SourceChord.FluentWPF;
+
+//using Google.Apis.Services;
+//using Google.Apis.Analytics.v3;
+//using Google.Apis.Auth.OAuth2;
+
 namespace GF2_RU_Launch;
 
 
 public partial class MainWindow : AcrylicWindow{
     public static string GF2_DATA_TABLE    = "GF2_Exilium_Data/LocalCache/Data/Table";
     public static string GF2_LANG_PACK     = "/LangPackageTableEnusData.bytes";
-    public static string GF2_LANG_BACKUP   = "/LangPackageTableEnusData_ORIGINAL.bytes";
-    public static string GF2_RU_PACK       = "./LangPack.bytes";
+    public static string GF2_LANG_BACKUP   = "./backups/LangPackageTableEnusData.bytes";
+    public static string GF2_RU_PACK       = "./loadings/LangPack.bytes";
     public static string GF2_LOAD_URL      = "https://gitlab.com/homaplus/grils-frontline-team-translate/-/raw/%__BRANCH%__%/LangPackageTableEnusDataRES.bytes?ref_type=heads&inline=false";
     public static string GF2_CHANGELOG_URL = "https://gitlab.com/homaplus/grils-frontline-team-translate/-/raw/%__BRANCH%__%/Changelog.md?ref_type=heads&inline=false";
+    //private static string GF2_MASTER_URL;
 
     private string GF2_Path = null;
     private Changelogs subWindow;
@@ -60,7 +66,13 @@ public partial class MainWindow : AcrylicWindow{
         updatePlayBtn();
         editBtnStatus(false);
 
-        //onClickOpenEditor(null, null);
+        try
+        {
+            setupAnalitics();
+        }
+        catch { 
+
+        }
     }
 
 
@@ -252,6 +264,10 @@ public partial class MainWindow : AcrylicWindow{
             branch = "master";
         }
 
+        //if (branch == "master")
+        //{
+        //    return GF2_MASTER_URL;
+        //}
         return loadUrl.Replace("%__BRANCH%__%", branch);
     }
 
@@ -381,45 +397,59 @@ public partial class MainWindow : AcrylicWindow{
 
     private void installLoadedPack(object sender, RoutedEventArgs e)
     {
-        //todo install
-        string tablePath = GF2_Path + GF2_DATA_TABLE;
-
-        string packPath = tablePath + GF2_LANG_PACK;
-        string origPath = tablePath + GF2_LANG_BACKUP;
-
-        if (!File.Exists(origPath))
+        try
         {
-            File.Move(packPath, origPath);
-            File.Copy(GF2_RU_PACK, packPath, true);
-        } else
+            string packPath = getLangPackPath();
+            string origPath = getBackupPackPath();
+
+            if (!File.Exists(origPath))
+            {
+                File.Move(packPath, origPath);
+                File.Copy(GF2_RU_PACK, packPath, true);
+            }
+            else
+            {
+                File.Delete(packPath);
+                File.Copy(GF2_RU_PACK, packPath, true);
+            }
+            BTnnUninstall.Visibility = Visibility.Visible;
+        } catch
         {
-            File.Delete(packPath);
-            File.Copy(GF2_RU_PACK, packPath, true);
+            onError();
         }
-        BTnnUninstall.Visibility = Visibility.Visible;
     }
 
 
     public void onUnInstallClick(object sender, RoutedEventArgs e)
     {
         if (locked) return;
-        string tablePath = GF2_Path + GF2_DATA_TABLE;
-
-        string packPath = tablePath + GF2_LANG_PACK;
-        string origPath = tablePath + GF2_LANG_BACKUP;
-
-        if (File.Exists(origPath))
+        try
         {
-            File.Delete(packPath);
-            File.Move(origPath, packPath);
-            BTnnUninstall.Visibility = Visibility.Hidden;
+            string packPath = getLangPackPath();
+            string origPath = getBackupPackPath();
 
-            MessageBox.Show("Русский пакет локализации удален.");
-        } else
+            if (File.Exists(origPath))
+            {
+                File.Delete(packPath);
+                File.Move(origPath, packPath);
+                BTnnUninstall.Visibility = Visibility.Hidden;
+
+                MessageBox.Show("Русский пакет локализации удален.");
+            }
+            else
+            {
+                MessageBox.Show("Пакет локализации по умолчанию не найден! Удаление русской локализации было отменено, в связи с тем, что это может сломать игру.");
+            }
+            editBtnStatus(false);
+        } catch
         {
-            MessageBox.Show("Пакет локализации по умолчанию не найден! Удаление русской локализации было отменено, в связи с тем, что это может сломать игру.");
+            onError();
         }
-        editBtnStatus(false);
+    }
+
+    public void onError()
+    {
+        MessageBox.Show("Произошла непредвиденная ошибка\nПопробуйте запустить лаунчер от имени Администратора", "Ошибка");
     }
 
 
@@ -507,5 +537,17 @@ public partial class MainWindow : AcrylicWindow{
             return Encoding.UTF8.GetString(data);
         }
         return null;
+    }
+
+
+    private void setupAnalitics()
+    {
+
+        //var service = new AnalyticsService(new BaseClientService.Initializer()
+        //{
+        //    ApiKey = "yQ-Szt8JQFy1d9VWufe4IQ"
+        //});
+
+        //service.
     }
 }

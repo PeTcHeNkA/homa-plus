@@ -11,6 +11,7 @@ using LangEditAPI;
 using System.Text.Json;
 using System.Text.Encodings.Web;
 using Microsoft.VisualBasic;
+using System.Windows.Markup;
 
 namespace GF2_RU_Launch
 {
@@ -23,7 +24,7 @@ namespace GF2_RU_Launch
 
         private LangEditAPI.Table? table1, table2;
         private ELine? filter;
-        private bool hideEmpty = false;
+        private bool hideEmpty = false, hideNonTranslatable = false;
         private bool showId = true;
 
         private bool locked = false;
@@ -63,21 +64,25 @@ namespace GF2_RU_Launch
 
             if (fLtr == null)
             {
-                if (hideEmpty)
+                if (hideEmpty || hideNonTranslatable)
                 {
-                    foreach (var item in data)
+                    foreach (ELine cur in data)
                     {
-                        if (item != null)
+                        if (cur != null)
                         {
-                            ELine cur = item as ELine;
-                            if(cur.Original == null || cur.Original.Length == 0)
-                            {
-                                if(cur.Value == null || cur.Value.Length == 0)
+                            if (hideEmpty) {
+                                if (cur.Original == null || cur.Original.Length == 0)
                                 {
-                                    continue;
+                                    if (cur.Value == null || cur.Value.Length == 0)
+                                    {
+                                        continue;
+                                    }
                                 }
                             }
-
+                            if (hideNonTranslatable)
+                            {
+                                if (!isTranslatable(cur.Original)) continue;
+                            }
                             viewData.Add(cur);
                         }
                     }
@@ -89,12 +94,10 @@ namespace GF2_RU_Launch
             }
             else
             {
-                foreach (var item in data)
+                foreach (ELine cur in data)
                 {
-                    if (item != null)
+                    if (cur != null)
                     {
-                        ELine cur = item as ELine;
-
                         if (fLtr.Value != null && cur.Value != null)
                         {
                             if (cur.Value.Contains(fLtr.Value))
@@ -105,6 +108,10 @@ namespace GF2_RU_Launch
                         }
                         else if (fLtr.Original != null && cur.Original != null)
                         {
+                            if (hideNonTranslatable)
+                            {
+                                if (!isTranslatable(cur.Original)) continue;
+                            }
                             if (cur.Original.Contains(fLtr.Original))
                             {
                                 viewData.Add(cur);
@@ -114,9 +121,7 @@ namespace GF2_RU_Launch
                 }
             }
 
-
             TTable.ItemsSource = viewData;
-            //TTable.Items.Refresh();
         }
 
 
@@ -283,6 +288,7 @@ namespace GF2_RU_Launch
                 return;
             }
             var jData = table1.exportMappings(table2, 0xf);
+            onCompleteImportB(jData);
         }
 
 
@@ -329,10 +335,7 @@ namespace GF2_RU_Launch
         {
             var prev = hideEmpty;
             hideEmpty = false;
-            if(prev != hideEmpty)
-            {
-                updateView();
-            }
+            if(prev != hideEmpty)updateView();
         }
 
 
@@ -340,10 +343,23 @@ namespace GF2_RU_Launch
         {
             var prev = hideEmpty;
             hideEmpty = true;
-            if (prev != hideEmpty)
-            {
-                updateView();
-            }
+            if (prev != hideEmpty)updateView();
+        }
+
+
+        private void onClickHideNonTranslatable(object sender, RoutedEventArgs e)
+        {
+            var prev = hideNonTranslatable;
+            hideNonTranslatable = true;
+            if (prev != hideNonTranslatable) updateView();
+        }
+
+
+        private void onClickShowNonTranslatable(object sender, RoutedEventArgs e)
+        {
+            var prev = hideNonTranslatable;
+            hideNonTranslatable = false;
+            if (prev != hideNonTranslatable) updateView();
         }
 
 
@@ -462,6 +478,99 @@ namespace GF2_RU_Launch
         private byte[] exportTableBytes(bool useId)
         {
             return toJsonBytes(data, useId);
+        }
+
+
+        private void onClickExportNotTranslated(object sender, RoutedEventArgs e)
+        {
+            exportNonTranslated(false, false);
+        }
+
+
+        private void onClickExportNotTranslatedALL(object sender, RoutedEventArgs e)
+        {
+            exportNonTranslated(false, true);
+        }
+
+        private void onClickExportNotTranslatedID(object sender, RoutedEventArgs e)
+        {
+            exportNonTranslated(true, false);
+        }
+
+
+        private void onClickExportNotTranslatedIDALL(object sender, RoutedEventArgs e)
+        {
+            exportNonTranslated(true, false);
+        }
+
+
+        private void exportNonTranslated(bool useId, bool exportNonTranslatable)
+        {
+            if (table1 == null)
+            {
+                wanEmptyTable();
+                return;
+            }
+            var res = getSaveFile("Выберите карту переводов mappings.json", ".json", "mappings.bytes|*.json");
+
+            if (res == null)
+            {
+                return;
+            }
+
+            ArrayList list = new ArrayList();
+            //toJsonBytes(data, useId);
+            foreach (ELine item in data) {
+                if (item != null) {
+                    if (item.Original != null && item.Original.Length != 0) { 
+                        if(item.Value == null || item.Value == item.Original)
+                        {
+                            if (exportNonTranslatable || isTranslatable(item.Original))
+                            {
+                                list.Add(item);
+                            }
+                        }
+                    }
+                }
+            }
+            
+            var data2 = toJsonBytes(list, useId);
+
+            try
+            {
+                File.WriteAllBytes(res, data2);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка сохранения!");
+            }
+        }
+
+
+        private void exportCurrentView(object sender, RoutedEventArgs e)
+        {
+            if (table1 == null)
+            {
+                wanEmptyTable();
+                return;
+            }
+            var res = getSaveFile("Выберите карту переводов mappings.json", ".json", "mappings.bytes|*.json");
+
+            if (res == null)
+            {
+                return;
+            }
+
+            var data2 = toJsonBytes(viewData, showId);
+
+            try
+            {
+                File.WriteAllBytes(res, data2);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка сохранения!");
+            }
         }
 
 
@@ -597,6 +706,19 @@ namespace GF2_RU_Launch
         }
 
 
+        public static bool isTranslatable(string? str)
+        {
+            if(String.IsNullOrWhiteSpace(str)) return false;
+            var len = str.Length;
+
+            for(int i = 0; i < len; i++)
+            {
+                var chr = str[i];
+                if (chr >= 'a' && chr <= 'z') return true;
+                if (chr >= 'A' && chr <= 'Z') return true;
+            }
+            return false;
+        }
     }
 
 
