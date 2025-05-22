@@ -559,13 +559,13 @@ public partial class MainWindow : AcrylicWindow{
                 if (result)
                 {
                     msg = "Проверить обновления";
+                    BTnnUninstall.Visibility = Visibility.Visible;
                 }
                 else
                 {
                     msg = "Установить";
                 }
                 clickAction = onBtnLoadClick;
-                BTnnUninstall.Visibility = Visibility.Visible;
             }
         }
         

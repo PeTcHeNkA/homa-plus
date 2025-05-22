@@ -806,19 +806,20 @@ namespace GF2_RU_Launch
                 if (i1 && i2)
                 {
                     openDialogFlag = 1;
-                } else
+                }
+                else
                 {
                     openDialogFlag = 2;
                 }
             }
-            if(openDialogFlag == 2)
+            if (openDialogFlag == 2)
             {
                 MessageBox.Show("Модуль выбора дериктории отсутствует.");
                 return null;
             }
 
             string? result = null;
-            if(openDialogFlag == 1)
+            if (openDialogFlag == 1)
             {
                 result = getSaveDiU(title);
             }
