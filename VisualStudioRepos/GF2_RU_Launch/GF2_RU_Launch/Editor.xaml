@@ -46,7 +46,7 @@
                             <MenuItem Header="Упрощенная, включая не переводимое" Click="onClickExportNotTranslatedALL"></MenuItem>
                             <MenuItem Header="С ID, включая не переводимое" Click="onClickExportNotTranslatedIDALL"></MenuItem>
                         </MenuItem>
-                        <MenuItem Header="Разделенная по группам" Click="onClickExportByGroups">
+                        <MenuItem Header="Разделенная по группам" Click="onClickExportByGroups" Background="#FFDE3A3A" >
 
                         </MenuItem>
                     </MenuItem>

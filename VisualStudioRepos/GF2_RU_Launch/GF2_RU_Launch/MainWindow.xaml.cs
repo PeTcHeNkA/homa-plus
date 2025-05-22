@@ -2,9 +2,11 @@
 using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Security.Cryptography;
 using System.Text;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Markup;
 using System.Windows.Media.Imaging;
 using SourceChord.FluentWPF;
 
@@ -22,6 +24,8 @@ public partial class MainWindow : AcrylicWindow{
     public static string GF2_RU_PACK       = "./loadings/LangPack.bytes";
     public static string GF2_LOAD_URL      = "https://gitlab.com/homaplus/grils-frontline-team-translate/-/raw/%__BRANCH%__%/LangPackageTableEnusDataRES.bytes?ref_type=heads&inline=false";
     public static string GF2_CHANGELOG_URL = "https://gitlab.com/homaplus/grils-frontline-team-translate/-/raw/%__BRANCH%__%/Changelog.md?ref_type=heads&inline=false";
+    public static string NATIVES_LOAD_URL  = "https://gitlab.com/homaplus/girls-frontline-2-exilium-ru-launcher/-/raw/natives/%__FILE__%?ref_type=heads&inline=false";
+    
     //private static string GF2_MASTER_URL;
 
     private string GF2_Path = null;
@@ -34,12 +38,28 @@ public partial class MainWindow : AcrylicWindow{
     {
         InitializeComponent();
         SetExtendViewIntoTitleBar(this, true);
-        loadConfig();
-
+        LoadConfig();
+        ChooseRandomBg();
         BTnnUninstall.Visibility = Visibility.Hidden;
 
+        UpdatePlayButton();
+        editBtnStatus(false, true);
+
+        //OnClickOpenEditor(null, null);
+
+        try
+        {
+            SetupAnalitics();
+        }
+        catch { 
+
+        }
+    }
+
+    private void ChooseRandomBg()
+    {
         var rand = new Random(DateTime.Now.Second);
-        string[] characters = {"colphne", "groza"};
+        string[] characters = { "colphne", "groza" };
 
         string name = characters[rand.Next(characters.Length)];
 
@@ -48,36 +68,16 @@ public partial class MainWindow : AcrylicWindow{
         if (hr > 7 && hr < 23)
         {
             name += "1";
-        } else
+        }
+        else
         {
             name += "0";
         }
-
         BGImg.Source = ImgByName(name);
-
-        BTnPlay.Click += onClickPlay;
-        BTnPlayInstall.Click += onInstallClickProxy;
-        BTnnUninstall.Click += onUnInstallClick;
-
-        BTNEditor.Click += onClickOpenEditor;
-
-        updatePlayBtn();
-        editBtnStatus(false);
-
-        onClickOpenEditor(null, null);
-        
-
-        try
-        {
-            setupAnalitics();
-        }
-        catch { 
-
-        }
     }
 
 
-    public void onEditorClosed()
+    public void OnEditorClosed()
     {
         if (editor != null)
         {
@@ -100,7 +100,7 @@ public partial class MainWindow : AcrylicWindow{
     }
 
 
-    private void onClickOpenEditor(object sender, RoutedEventArgs e)
+    private void OnClickOpenEditor(object sender, RoutedEventArgs e)
     {
         if (editor != null)
         {
@@ -113,10 +113,10 @@ public partial class MainWindow : AcrylicWindow{
     }
 
 
-    private void onClickPlay(object sender, RoutedEventArgs e)
+    private void OnClickPlay(object sender, RoutedEventArgs e)
     {
         if (locked) return;
-        if (checkValidGamePath())
+        if (IsValidGamePath())
         {
             Process.Start(GF2_Path + "GF2_Exilium.exe");
             this.WindowState = WindowState.Minimized;
@@ -148,14 +148,14 @@ public partial class MainWindow : AcrylicWindow{
                 }
             }
         }
-        updatePlayBtn();
+        UpdatePlayButton();
     }
 
 
-    private void updatePlayBtn()
+    private void UpdatePlayButton()
     {
 
-        if (checkValidGamePath()) 
+        if (IsValidGamePath()) 
         {
             BTnPlay.Content = "Играть";
             BTnPlayInstall.Visibility = Visibility.Visible;
@@ -164,15 +164,26 @@ public partial class MainWindow : AcrylicWindow{
         {
             BTnPlay.Content = "Выбрать игру";
             BTnPlayInstall.Visibility = Visibility.Hidden;
+            BTnnUninstall.Visibility = Visibility.Hidden;
         }
     }
 
 
-    public bool isValidGamePath()
+    public bool IsValidGamePath()
     {
         return GF2_Path != null && GF2_Path.Length > 0;
     }
 
+
+    public bool IsPackInstalled()
+    {
+        string val = getCfgValue("GF2_ISHA256");
+        if (val == null || val.Length == 0) return false;
+
+        var curSha = getSHA256(getLangPackPath());
+
+        return curSha == val;
+    }
 
     public string getLangPackPath()
     {
@@ -182,32 +193,32 @@ public partial class MainWindow : AcrylicWindow{
 
     public string getBackupPackPath()
     {
-        return GF2_Path + GF2_DATA_TABLE + GF2_LANG_BACKUP;
+        return GF2_LANG_BACKUP;
     }
 
 
-    private bool checkValidGamePath()
-    {
-        if(isValidGamePath())
-        {
-            var hasBackup = File.Exists(getBackupPackPath());
-            var installed = File.Exists(getLangPackPath());
+    //private bool checkValidGamePath()
+    //{
+    //    if(IsValidGamePath())
+    //    {
+    //        var hasBackup = File.Exists(getBackupPackPath());
+    //        var installed = File.Exists(getLangPackPath());
 
-            if (this.hasBackup()) 
-            {
-                BTnnUninstall.Visibility = Visibility.Visible;
-            } 
-            else
-            {
-                BTnnUninstall.Visibility = Visibility.Hidden;
-            }
-            return installed;
-        }
-        return false;
-    }
+    //        if (this.hasBackup()) 
+    //        {
+    //            BTnnUninstall.Visibility = Visibility.Visible;
+    //        } 
+    //        else
+    //        {
+    //            BTnnUninstall.Visibility = Visibility.Hidden;
+    //        }
+    //        return installed;
+    //    }
+    //    return false;
+    //}
 
 
-    private void loadConfig()  {
+    private void LoadConfig()  {
         GF2_Path = getCfgValue("GFT_Path");
     }
 
@@ -286,6 +297,16 @@ public partial class MainWindow : AcrylicWindow{
             }
             else
             {
+                locked = true;
+                Task.Run(() =>
+                {
+                    installLoadedPack();
+                    Dispatcher.Invoke(() =>
+                    {
+                        locked = false;
+                        editBtnStatus(true, false);
+                    });
+                });
                 return;
             }
         }
@@ -341,7 +362,7 @@ public partial class MainWindow : AcrylicWindow{
                 {
                     loaded = load(getLoadPackUrl(), GF2_RU_PACK);
                 }
-                catch
+                catch (Exception e)
                 {
                     Dispatcher.Invoke(() => {
                         MessageBox.Show("Ошибка загрузки обновления!");
@@ -358,10 +379,11 @@ public partial class MainWindow : AcrylicWindow{
                 needLoadPack = false;
             }
             completed = true;
+            installLoadedPack();
 
             Dispatcher.Invoke(() => {
                 locked = false;
-                editBtnStatus(loaded);
+                editBtnStatus(loaded, false);
             });
         });
     }
@@ -411,18 +433,17 @@ public partial class MainWindow : AcrylicWindow{
     private RoutedEventHandler clickAction;
 
 
-    private void installLoadedPack(object sender, RoutedEventArgs e)
+    private void installLoadedPack()
     {
         try
         {
             string packPath = getLangPackPath();
-            string origPath = getBackupPackPath();
+            string backupPath = getBackupPackPath();
 
-            CreatePathIfNeed(origPath);
-
-            if (!File.Exists(origPath))
+            if (!File.Exists(backupPath))
             {
-                File.Move(packPath, origPath);
+                CreatePathIfNeed(backupPath);
+                File.Move(packPath, backupPath);
                 File.Copy(GF2_RU_PACK, packPath, true);
             }
             else
@@ -430,8 +451,13 @@ public partial class MainWindow : AcrylicWindow{
                 File.Delete(packPath);
                 File.Copy(GF2_RU_PACK, packPath, true);
             }
-            BTnnUninstall.Visibility = Visibility.Visible;
-        } catch
+
+            setCfgValue("GF2_ISHA256", getSHA256(packPath));
+
+            Dispatcher.Invoke(() => {
+                BTnnUninstall.Visibility = Visibility.Visible;
+            });
+        } catch (Exception err)
         {
             onError();
         }
@@ -458,7 +484,7 @@ public partial class MainWindow : AcrylicWindow{
             {
                 MessageBox.Show("Пакет локализации по умолчанию не найден! Удаление русской локализации было отменено, в связи с тем, что это может сломать игру.");
             }
-            editBtnStatus(false);
+            editBtnStatus(false, false);
         } catch
         {
             onError();
@@ -473,11 +499,11 @@ public partial class MainWindow : AcrylicWindow{
 
     private bool hasBackup()
     {
-        return File.Exists(GF2_Path + GF2_DATA_TABLE + GF2_LANG_BACKUP);
+        return File.Exists(GF2_LANG_BACKUP);
     }
 
 
-    private void editBtnStatus(bool updated)
+    private void editBtnStatus(bool updated, bool checkSha)
     {
         var loaded = File.Exists(GF2_RU_PACK);
 
@@ -487,19 +513,30 @@ public partial class MainWindow : AcrylicWindow{
             if (updated)
             {
                 msg = "Установлено";
-                installLoadedPack(null, null);
+                BTnnUninstall.Visibility = Visibility.Visible;
             } 
             else
             {
-                if (hasBackup())
+                var result = false;
+                if (checkSha)
+                {
+                    result = IsPackInstalled();
+                }
+                else
+                {
+                    result = hasBackup();
+                }
+                if (result)
                 {
                     msg = "Проверить обновления";
+                    BTnnUninstall.Visibility = Visibility.Visible;
                 } 
                 else
                 {
                     msg = "Установить";
                 }
                 clickAction = onBtnLoadClick;
+
             }
         }
         else
@@ -510,7 +547,16 @@ public partial class MainWindow : AcrylicWindow{
             } 
             else
             {
-                if (hasBackup())
+                var result = false;
+                if (checkSha)
+                {
+                    result = IsPackInstalled();
+                }
+                else
+                {
+                    result = hasBackup();
+                }
+                if (result)
                 {
                     msg = "Проверить обновления";
                 }
@@ -519,6 +565,7 @@ public partial class MainWindow : AcrylicWindow{
                     msg = "Установить";
                 }
                 clickAction = onBtnLoadClick;
+                BTnnUninstall.Visibility = Visibility.Visible;
             }
         }
         
@@ -536,12 +583,31 @@ public partial class MainWindow : AcrylicWindow{
     }
 
 
+    public static bool ensureNativeInstalled(string name)
+    {
+        if (File.Exists(name))
+        {
+            return true;
+        }
+
+        var url = NATIVES_LOAD_URL.Replace("%__FILE__%", name);
+
+        return load(url, name);
+    }
+
+
     private static bool load(string url, string filename)
     {
         CreatePathIfNeed(filename);
         using (WebClient webClient = new WebClient())
         {
-            webClient.DownloadFile(url, filename);
+            try
+            {
+                webClient.DownloadFile(url, filename);
+            }
+            catch (Exception ex) {
+                return false;
+            }
             return true;
         }
         return false;
@@ -572,15 +638,23 @@ public partial class MainWindow : AcrylicWindow{
     }
 
 
-    private static string getSHA256(byte[] src)
+    private static string getSHA256(string file)
     {
-        //SHA256 mySHA256 = SHA256.Create();
-        //todo
+        if (File.Exists(file))
+        {
+            return getSHA256(File.ReadAllBytes(file));
+        }
         return "";
     }
 
+    private static string getSHA256(byte[] src)
+    {
+        SHA256 sha = SHA256.Create();
+        byte[] hash = sha.ComputeHash(src);
+        return Convert.ToBase64String(hash);
+    }
 
-    private void setupAnalitics()
+    private void SetupAnalitics()
     {
         //todo
     }

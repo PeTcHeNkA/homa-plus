@@ -7,12 +7,16 @@ using System.Text.Encodings.Web;
 using Microsoft.VisualBasic;
 using SortJsonUtils;
 using System.Windows.Data;
+using Microsoft.WindowsAPICodePack.Dialogs;
 
 
 namespace GF2_RU_Launch
 {
     public partial class Editor : AcrylicWindow
     {
+        private static byte tableEditorFlag = 0;
+        private static byte openDialogFlag = 0;
+
         private List<ELine> data = new List<ELine>();
         private List<ELine> viewData = new List<ELine>();
         private MainWindow parent;
@@ -27,6 +31,26 @@ namespace GF2_RU_Launch
         public Editor(MainWindow main)
         {
             parent = main;
+
+            if (tableEditorFlag == 0)
+            {
+                var i1 = MainWindow.ensureNativeInstalled("langedit.dll");
+                if (i1)
+                {
+                    tableEditorFlag = 1;
+                }
+                else
+                {
+                    tableEditorFlag = 2;
+                }
+            }
+            if (tableEditorFlag == 2)
+            {
+                MessageBox.Show("Модуль редактора таблц не установлен!");
+                Close();
+                return;
+            }
+
             InitializeComponent();
             SetExtendViewIntoTitleBar(this, true);
             TTable.ItemsSource = viewData;
@@ -37,7 +61,7 @@ namespace GF2_RU_Launch
 
         protected override void OnClosed(EventArgs e)
         {
-            parent.onEditorClosed();
+            parent.OnEditorClosed();
         }
 
 
@@ -145,7 +169,7 @@ namespace GF2_RU_Launch
         private void onClickLoadActivePack(object sender, RoutedEventArgs e)
         {
             if (locked) return;
-            if (!parent.isValidGamePath())
+            if (!parent.IsValidGamePath())
             {
                 MessageBox.Show("Путь к игре не указан! Автоматический импорт невозможен.");
                 return;
@@ -166,6 +190,9 @@ namespace GF2_RU_Launch
                         locked = false;
                         onCompleteImportB(jData);
                     });
+                } catch
+                {
+                    parent.onError();
                 }
                 finally
                 {
@@ -424,6 +451,7 @@ namespace GF2_RU_Launch
         private void onClickExportByGroups(object sender, RoutedEventArgs e)
         {
             var dir = getSaveDir("Выберите папку экспорта");
+            onExportByGroups(dir, data, false);
         }
 
 
@@ -768,22 +796,53 @@ namespace GF2_RU_Launch
             }
         }
 
-
         public static string? getSaveDir(string title)
         {
-            //todo
-            //FolderBrowserDialog fbd = new FolderBrowserDialog();
+            if (openDialogFlag == 0)
+            {
+                var i1 = MainWindow.ensureNativeInstalled("Microsoft.WindowsAPICodePack.dll");
+                var i2 = MainWindow.ensureNativeInstalled("Microsoft.WindowsAPICodePack.Shell.dll");
 
-            //dlg.Title = title;
-            //dlg.CheckPathExists = true;
+                if (i1 && i2)
+                {
+                    openDialogFlag = 1;
+                } else
+                {
+                    openDialogFlag = 2;
+                }
+            }
+            if(openDialogFlag == 2)
+            {
+                MessageBox.Show("Модуль выбора дериктории отсутствует.");
+                return null;
+            }
 
-            //Nullable<bool> result = dlg.ShowDialog();
+            string? result = null;
+            if(openDialogFlag == 1)
+            {
+                result = getSaveDiU(title);
+            }
 
-            //if (result == true)
-            //{
-            //    return dlg.FileName;
-            //}
-            return null;
+            return result;
+        }
+
+
+        private static string? getSaveDiU(string title)
+        {
+            try
+            {
+                CommonOpenFileDialog dialog = new CommonOpenFileDialog();
+                dialog.IsFolderPicker = true;
+                if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+                {
+                    return dialog.FileName;
+                }
+                return null;
+            } catch
+            {
+                openDialogFlag = 2;
+                return null;
+            }
         }
 
 
