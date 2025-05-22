@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:GF2_RU_Launch"
         xmlns:fw="clr-namespace:SourceChord.FluentWPF;assembly=FluentWPF" xmlns:col="clr-namespace:System.Collections;assembly=mscorlib"
                   mc:Ignorable="d"
-        Title="Girls Frontline 2: Exilium RU Launcher | Changelog" Height="350" Width="650" MinHeight="300" MinWidth="610"
+        Title="Girls Frontline 2: Translation table editor" Height="350" Width="650" MinHeight="300" MinWidth="610"
         TintColor="#90FFFFFF" TintOpacity="0.5"
         FallbackColor="#90FFFFFF"
         AcrylicWindowStyle="NoIcon"
@@ -28,6 +28,13 @@
     </fw:AcrylicWindow.RenderTransform>
 
     <Grid>
+        <!-- Header -->
+
+        <Grid Background="#7FECECEC" Panel.ZIndex="1000" Height="30" VerticalAlignment="Top">
+            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Margin="-67,0,0,0" Width="249" FontSize="14">Girls Frontline 2: Translation table editor</TextBlock>
+        </Grid>
+        
+        <!-- Menu -->
 
         <Menu x:Name="MENU" Height="18" VerticalAlignment="Top" Margin="0,30,0,0" Background="#7FF0F0F0">
             <MenuItem Header="Файл" >

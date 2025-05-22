@@ -606,6 +606,7 @@ namespace GF2_RU_Launch
             list2.Sort(new WrappedLineComparer(gcom));
             TTable.ItemsSource = null;
             TTable.ItemsSource = list2;
+            gcom.cache = null;
         }
 
         private static Dictionary<string, Group> buildGroupsDictionary(List<ELine> list2,
