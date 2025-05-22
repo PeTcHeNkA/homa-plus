@@ -5,6 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GF2_RU_Launch"
         xmlns:fw="clr-namespace:SourceChord.FluentWPF;assembly=FluentWPF"
+                  
+        xmlns:svg="http://sharpvectors.codeplex.com/runtime/"
+        xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
+
         mc:Ignorable="d"
         Title="Girls Frontline 2: Exilium RU Launcher" Height="350" Width="650" MinHeight="300" MinWidth="610"
         TintColor="{DynamicResource L_Background_Main_Color}" TintOpacity="0.5"
@@ -16,7 +20,11 @@
         <!-- Header -->
 
         <Grid Background="{StaticResource Header}" Panel.ZIndex="1000" Height="30" VerticalAlignment="Top">
-            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Margin="-67,0,0,0" Width="249" FontSize="14">Girls Frontline 2: Exilium RU Launcher</TextBlock>
+            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Margin="-67,0,0,0" Width="249" FontSize="14"
+                       Foreground="{StaticResource Header_Text}"
+                       >
+                Girls Frontline 2: Exilium RU Launcher
+            </TextBlock>
         </Grid>
 
 
@@ -26,6 +34,7 @@
                VerticalAlignment="Center" Stretch="UniformToFill"/>
         </Border>
 
+        
         <!-- Open Editor -->
         <Button x:Name="BTNEditor" Width="95" Height="95" Margin="0,30,0,0" VerticalAlignment="Top" HorizontalAlignment="Left">
             <Button.Style>
@@ -70,9 +79,11 @@
             </Button.Style>
             
             <Grid Width="95" Height="95">
-                <Image Height="30" Width="30" VerticalAlignment="Top" HorizontalAlignment="Left" Source="/Images/edit_ico.png" Margin="8,8,0,0" />
+                <Image Height="30" Width="30" VerticalAlignment="Top" HorizontalAlignment="Left" 
+                       Source="/Images/edit_ico.png" Margin="8,8,0,0" />
             </Grid>
         </Button>
+
 
 
         <!-- Play bottons start -->

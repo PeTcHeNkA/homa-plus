@@ -9,17 +9,23 @@ namespace GF2_RU_Launch;
 /// Interaction logic for App.xaml
 /// </summary>
 public partial class App : Application{
-
+    private bool enableDark = false;
     public App()
     {
     }
 
     protected override void OnStartup(StartupEventArgs e)
     {
-        //tweakColor("L_Background_Main_Color");
-        //tweakColor("L_Background_Second");
-        //tweakColor("Header_Color");
-        //tweakColor("Header_Light");
+        if (enableDark)
+        {
+            var tweaks = new string[]{
+            "L_Background_Main_Color", "L_Background_Second",
+            "Header_Color", "Header_Light", "Header_Text_Color"
+        };
+
+            foreach (var tweak in tweaks) tweakColor(tweak);
+        }
+
         base.OnStartup(e);
     }
 

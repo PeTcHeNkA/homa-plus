@@ -12,6 +12,7 @@
         
         <!-- Main Colors -->
         <Color x:Key="Header_Color">#7FECECEC</Color>
+        <Color x:Key="Header_Text_Color">#000000</Color>
         <Color x:Key="Header_Light">#BFD8D8D8</Color>
         <Color x:Key="Green_Color">#FF7AFF4C</Color>
         <Color x:Key="Yellow_Color">#FFFFC84F</Color>
@@ -28,6 +29,7 @@
         <Color x:Key="L_Background_Second_Color_D">#90010101</Color>
         <Color x:Key="Header_Color_D">#90111111</Color>
         <Color x:Key="Header_Light_D">#90222222</Color>
+        <Color x:Key="Header_Text_Color_D">#cfcfcf</Color>
         <!-- Dark theme colors end-->
 
         <!-- Launcher Brushes -->
@@ -40,6 +42,7 @@
 
         <!-- Brushes -->
         <SolidColorBrush x:Key="Header"  Color="{DynamicResource Header_Color}"/>
+        <SolidColorBrush x:Key="Header_Text"  Color="{DynamicResource Header_Text_Color}"/>
         <SolidColorBrush x:Key="Bottons_Background" Color="#4C6F6F6F"/>
         <SolidColorBrush x:Key="BtnPlay_Hover" Color="{DynamicResource Green_Color}"/>
         <SolidColorBrush x:Key="BtnInst_Hover" Color="{DynamicResource Yellow_Color}"/>

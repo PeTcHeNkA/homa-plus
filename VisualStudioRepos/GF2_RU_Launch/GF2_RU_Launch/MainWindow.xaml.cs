@@ -64,6 +64,9 @@ public partial class MainWindow : AcrylicWindow{
         updatePlayBtn();
         editBtnStatus(false);
 
+        onClickOpenEditor(null, null);
+        
+
         try
         {
             setupAnalitics();
@@ -106,6 +109,7 @@ public partial class MainWindow : AcrylicWindow{
         }
         editor = new Editor(this);
         editor.Show();
+        editor.Focus();
     }
 
 

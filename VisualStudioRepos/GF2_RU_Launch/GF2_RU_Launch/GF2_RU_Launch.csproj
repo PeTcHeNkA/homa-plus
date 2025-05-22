@@ -10,6 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Images\Close.svg" />
     <None Remove="Images\close_ico.png" />
     <None Remove="Images\delete_ico.png" />
     <None Remove="Images\delete_ico.svg" />
