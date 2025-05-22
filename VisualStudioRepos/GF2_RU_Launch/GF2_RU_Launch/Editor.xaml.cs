@@ -1,20 +1,13 @@
-﻿using System.Collections;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
+﻿using System.IO;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using SourceChord.FluentWPF;
-using LangEditAPI;
 using System.Text.Json;
 using System.Text.Encodings.Web;
 using Microsoft.VisualBasic;
-using System.Windows.Markup;
 using SortJsonUtils;
-using System.Windows.Controls;
 using System.Windows.Data;
-using System.ComponentModel;
+
 
 namespace GF2_RU_Launch
 {

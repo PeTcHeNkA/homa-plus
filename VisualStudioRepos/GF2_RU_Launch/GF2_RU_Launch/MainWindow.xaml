@@ -7,79 +7,12 @@
         xmlns:fw="clr-namespace:SourceChord.FluentWPF;assembly=FluentWPF"
         mc:Ignorable="d"
         Title="Girls Frontline 2: Exilium RU Launcher" Height="350" Width="650" MinHeight="300" MinWidth="610"
-        TintColor="#90FFFFFF" TintOpacity="0.5"
-        FallbackColor="#90FFFFFF"
+        TintColor="{DynamicResource L_Background_Main_Color}" TintOpacity="0.5"
+        FallbackColor="{DynamicResource L_Background_Main_Color}"
         AcrylicWindowStyle="NoIcon"
-        fw:AcrylicWindow.AcrylicAccentState="BlurBehind" Background="#26FFFFFF" FontFamily="Arial" RenderTransformOrigin="0.5,0.5">
-    <fw:AcrylicWindow.BorderBrush>
-        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-            <GradientStop Color="#FF515254" Offset="0.01"/>
-            <GradientStop Color="#FFC5DCE4" Offset="1"/>
-        </LinearGradientBrush>
-    </fw:AcrylicWindow.BorderBrush>
-    <fw:AcrylicWindow.RenderTransform>
-        <TransformGroup>
-            <ScaleTransform/>
-            <SkewTransform/>
-            <RotateTransform/>
-            <TranslateTransform X="0"/>
-        </TransformGroup>
-    </fw:AcrylicWindow.RenderTransform>
-
-    <Window.Resources>
-        <!-- Colors -->
-        <Color x:Key="Launch_Color">#90FFFFFF</Color>
-        
-        <Color x:Key="Header_Color">#7FECECEC</Color>
-        <Color x:Key="Header_Light">#BFD8D8D8</Color>
-        <Color x:Key="Green_Color">#FF7AFF4C</Color>
-        <Color x:Key="Yellow_Color">#FFFFC84F</Color>
-        <Color x:Key="Red_Color">#E5FF2C2C</Color>
-        <Color x:Key="Grad_Start_Color">#7F383838</Color>
-        <Color x:Key="Grad_End_Color">#00F1F1F1</Color>
-
-        <!-- Brushes -->
-        <SolidColorBrush x:Key="Header"  Color="{StaticResource Header_Color}"/>
-        <SolidColorBrush x:Key="Bottons_Background" Color="#4C6F6F6F"/>
-        <SolidColorBrush x:Key="BtnPlay_Hover" Color="{StaticResource Green_Color}"/>
-        <SolidColorBrush x:Key="BtnInst_Hover" Color="{StaticResource Yellow_Color}"/>
-        <SolidColorBrush x:Key="BtnDel_Hover" Color="{StaticResource Red_Color}"/>
-
-        <LinearGradientBrush x:Key="Background" StartPoint="0.5,0.995" EndPoint="0.5,1" >
-            <GradientStop Color="{StaticResource Grad_Start_Color}"/>
-            <GradientStop Color="{StaticResource Grad_End_Color}"/>
-        </LinearGradientBrush>
-
-        <LinearGradientBrush x:Key="Bottons_Border" EndPoint="0.5,1" StartPoint="0.5,0">
-            <GradientStop Color="{StaticResource Grad_End_Color}"/>
-            <GradientStop Color="{StaticResource Grad_Start_Color}" Offset="1"/>
-        </LinearGradientBrush>
-
-        <!-- Styles -->
-        <Style TargetType="Button" x:Key="LBottons">
-
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type Button}" >
-                        <Border 
-                                    Background="{TemplateBinding Background}" 
-                                    BorderBrush="{TemplateBinding BorderBrush}"
-                                    Padding="{TemplateBinding Padding}"
-                                    BorderThickness="{TemplateBinding BorderThickness}"
-                                    >
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-
-            <Setter Property="Background" Value="{StaticResource Bottons_Background}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource Bottons_Border}"/>
-        </Style>
-    </Window.Resources>
-
-    <Grid x:Name="Layer1">
-
+        fw:AcrylicWindow.AcrylicAccentState="BlurBehind" Background="{StaticResource L_Background_Second}" 
+        FontFamily="Arial" RenderTransformOrigin="0.5,0.5" BorderBrush="{StaticResource L_Border}">
+    <Grid>
         <!-- Header -->
 
         <Grid Background="{StaticResource Header}" Panel.ZIndex="1000" Height="30" VerticalAlignment="Top">
@@ -115,7 +48,7 @@
                     <Setter Property="Background">
                         <Setter.Value>
                             <LinearGradientBrush EndPoint="0.5,1" StartPoint="0,0.5">
-                                <GradientStop Color="{StaticResource Header_Color}"/>
+                                <GradientStop Color="{DynamicResource Header_Color}"/>
                                 <GradientStop Color="Transparent" Offset="0.35"/>
                             </LinearGradientBrush>
                         </Setter.Value>
@@ -126,7 +59,7 @@
                             <Setter Property="Background">
                                 <Setter.Value>
                                     <LinearGradientBrush EndPoint="0.5,1" StartPoint="0,0.5">
-                                        <GradientStop Color="{StaticResource Header_Light}"/>
+                                        <GradientStop Color="{DynamicResource Header_Light}"/>
                                         <GradientStop Color="Transparent" Offset="0.6"/>
                                     </LinearGradientBrush>
                                 </Setter.Value>

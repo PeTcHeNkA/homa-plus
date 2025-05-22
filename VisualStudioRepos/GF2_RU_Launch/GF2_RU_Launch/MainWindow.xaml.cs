@@ -2,12 +2,9 @@
 using System.Diagnostics;
 using System.IO;
 using System.Net;
-using System.Net.Http;
-using System.Security.Policy;
 using System.Text;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Interop;
 using System.Windows.Media.Imaging;
 using SourceChord.FluentWPF;
 
