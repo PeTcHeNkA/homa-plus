@@ -6,6 +6,7 @@
         private Group[] groups = new Group[0];
         private Group[][] mappingByFirst = new Group[128][];
         private Group[] noMapped = new Group[0];
+        public Dictionary<string, Group> cache = new();
 
         public static GroupComparator fromTable(string data)
         {
@@ -133,10 +134,10 @@
 
         public int Compare(string o1r, string o2r)
         {
-            string o1 = RemId(o1r);
-            string o2 = RemId(o2r);
-            Group group1 = FindGroup(o1);
-            Group group2 = FindGroup(o2);
+            string o1 = (o1r);
+            string o2 = (o2r);
+            Group group1 = cache[o1] ?? FindGroup(o1);
+            Group group2 = cache[o2] ?? FindGroup(o2);
             if (group1 != group2)
             {
                 int result = group1.SortIndex.CompareTo(group2.SortIndex);

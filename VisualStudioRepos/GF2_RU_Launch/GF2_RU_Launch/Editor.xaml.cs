@@ -585,7 +585,6 @@ namespace GF2_RU_Launch
             TTable.ItemsSource = list2;
         }
 
-
         private class WrappedLineComparer : IComparer<ELine>
         {
             private IComparer<string> parent;
@@ -608,7 +607,6 @@ namespace GF2_RU_Launch
                 return parent.Compare(x.Value, y.Value);
             }
         }
-
 
         private byte[] exportTableBytes(bool useId)
         {
@@ -806,13 +804,10 @@ namespace GF2_RU_Launch
 
         public static byte[] toJsonBytes(List<ELine> list, bool useId, IComparer<string> comparer)
         {
-            SortedDictionary<string, string> map = new SortedDictionary<string, string>(comparer);
-            foreach (var line in list) { 
-                if (line != null)
-                {
-                    map[line.getSaveKey(useId)] = line.actualValue();
-                }
-            }
+           var map = list.Select(x =>
+            {
+                return new { key = x.getSaveKey(useId), value = x.Value };
+            }).ToDictionary(x => x.key, x => x.value);
 
             var options = new JsonSerializerOptions
             {
