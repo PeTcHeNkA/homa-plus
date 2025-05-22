@@ -1,5 +1,4 @@
-﻿
-using System.Collections;
+﻿using System.Collections;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -57,7 +56,6 @@ namespace GF2_RU_Launch
 
         private void updateView()
         {
-
             TTable.UnselectAllCells();
             TTable.UnselectAll();
             TTable.ItemsSource = null;
@@ -74,7 +72,8 @@ namespace GF2_RU_Launch
                     {
                         if (cur != null)
                         {
-                            if (hideEmpty) {
+                            if (hideEmpty)
+                            {
                                 if (cur.Original == null || cur.Original.Length == 0)
                                 {
                                     if (cur.Value == null || cur.Value.Length == 0)
@@ -83,10 +82,12 @@ namespace GF2_RU_Launch
                                     }
                                 }
                             }
+
                             if (hideNonTranslatable)
                             {
                                 if (!isTranslatable(cur.Original)) continue;
                             }
+
                             viewData.Add(cur);
                         }
                     }
@@ -108,7 +109,6 @@ namespace GF2_RU_Launch
                             {
                                 viewData.Add(cur);
                             }
-                            
                         }
                         else if (fLtr.Original != null && cur.Original != null)
                         {
@@ -116,6 +116,7 @@ namespace GF2_RU_Launch
                             {
                                 if (!isTranslatable(cur.Original)) continue;
                             }
+
                             if (cur.Original.Contains(fLtr.Original))
                             {
                                 viewData.Add(cur);
@@ -131,7 +132,6 @@ namespace GF2_RU_Launch
 
         private void onClickLoad(object sender, RoutedEventArgs e)
         {
-
             if (locked) return;
             locked = true;
             Task.Run(() =>
@@ -140,7 +140,8 @@ namespace GF2_RU_Launch
 
                 var jData = table1.exportMappings(table2, 0xf);
 
-                Dispatcher.Invoke(() => {
+                Dispatcher.Invoke(() =>
+                {
                     locked = false;
                     onCompleteImportB(jData);
                 });
@@ -156,10 +157,12 @@ namespace GF2_RU_Launch
                 MessageBox.Show("Путь к игре не указан! Автоматический импорт невозможен.");
                 return;
             }
+
             locked = true;
             onClickClose(null, null);
 
-            Task.Run(() => {
+            Task.Run(() =>
+            {
                 try
                 {
                     onClickLoadActivePackB();
@@ -189,8 +192,8 @@ namespace GF2_RU_Launch
             byte[] origBytes = null;
             byte[] curBytes = null;
 
-            if (hasBackup) 
-            { 
+            if (hasBackup)
+            {
                 origBytes = File.ReadAllBytes(backup);
                 curBytes = File.ReadAllBytes(cur);
             }
@@ -242,12 +245,16 @@ namespace GF2_RU_Launch
         private void clickKeyFilter(object sender, RoutedEventArgs e)
         {
             var res = Interaction.InputBox("Подстрока", "Введите фильтр", "");
-            if (res != null && res.Length > 0) {
-                if (filter == null) {
+            if (res != null && res.Length > 0)
+            {
+                if (filter == null)
+                {
                     filter = new ELine();
                 }
+
                 filter.Original = res;
             }
+
             updateView();
         }
 
@@ -261,8 +268,10 @@ namespace GF2_RU_Launch
                 {
                     filter = new ELine();
                 }
+
                 filter.Value = res;
             }
+
             updateView();
         }
 
@@ -291,6 +300,7 @@ namespace GF2_RU_Launch
                 wanEmptyTable();
                 return;
             }
+
             var jData = table1.exportMappings(table2, 0xf);
             onCompleteImportB(jData);
         }
@@ -311,6 +321,7 @@ namespace GF2_RU_Launch
                     return;
                 }
             }
+
             if (table2 != null)
             {
                 table2.free();
@@ -339,7 +350,7 @@ namespace GF2_RU_Launch
         {
             var prev = hideEmpty;
             hideEmpty = false;
-            if(prev != hideEmpty)updateView();
+            if (prev != hideEmpty) updateView();
         }
 
 
@@ -347,7 +358,7 @@ namespace GF2_RU_Launch
         {
             var prev = hideEmpty;
             hideEmpty = true;
-            if (prev != hideEmpty)updateView();
+            if (prev != hideEmpty) updateView();
         }
 
 
@@ -369,11 +380,12 @@ namespace GF2_RU_Launch
 
         private void onClickClose(object sender, RoutedEventArgs e)
         {
-            if(table1 != null)
+            if (table1 != null)
             {
                 table1.free();
                 table1 = null;
             }
+
             setMainData(new List<ELine>());
         }
 
@@ -385,11 +397,13 @@ namespace GF2_RU_Launch
                 wanEmptyTable();
                 return;
             }
+
             var dataBytes = open("Выберите карту переводов mappings.json", ".json", "mappings.json|*.json");
             if (dataBytes == null)
             {
                 return;
             }
+
             table1.applyMappngs(dataBytes);
 
             onCompleteImport();
@@ -409,6 +423,7 @@ namespace GF2_RU_Launch
                 MessageBox.Show("В режиме слияния строк экспорт с ID невозможен");
                 return;
             }
+
             exportLang(true);
         }
 
@@ -433,6 +448,7 @@ namespace GF2_RU_Launch
                     list = new List<ELine>();
                     map[group.Key.Display] = list;
                 }
+
                 list.AddRange(group.Value);
             }
 
@@ -440,7 +456,7 @@ namespace GF2_RU_Launch
 
             foreach (var group in map)
             {
-                var resultName = targetDir + "/" + group+".json";
+                var resultName = targetDir + "/" + group + ".json";
 
                 MainWindow.CreatePathIfNeed(resultName);
 
@@ -471,8 +487,10 @@ namespace GF2_RU_Launch
                     eGroup = new List<ELine>();
                     map[gId] = eGroup;
                 }
+
                 eGroup.Add(line);
             }
+
             return map;
         }
 
@@ -484,6 +502,7 @@ namespace GF2_RU_Launch
                 wanEmptyTable();
                 return;
             }
+
             var res = getSaveFile("Выберите релиз Lang.bytes", ".bytes", "Lang.bytes|*.bytes");
 
             if (res == null)
@@ -514,6 +533,7 @@ namespace GF2_RU_Launch
                 wanEmptyTable();
                 return;
             }
+
             var bData = exportTableBytes(showId);
             table1.applyMappngs(bData);
 
@@ -532,6 +552,7 @@ namespace GF2_RU_Launch
                 wanEmptyTable();
                 return;
             }
+
             var bData = exportTableBytes(showId);
             table1.applyMappngs(bData);
 
@@ -557,7 +578,8 @@ namespace GF2_RU_Launch
                 var table = UTF8Encoding.UTF8.GetString(bytes);
                 gcom = GroupComparator.fromTable(table);
             }
-            catch (Exception ex) { 
+            catch (Exception ex)
+            {
                 MessageBox.Show("Правила сортировки имеют недопустимый формат!");
             }
         }
@@ -580,11 +602,22 @@ namespace GF2_RU_Launch
         private void onClicSortByRules(object sender, RoutedEventArgs e)
         {
             List<ELine> list2 = viewData;
+            gcom.cache = buildGroupsDictionary(list2, gcom);
             list2.Sort(new WrappedLineComparer(gcom));
             TTable.ItemsSource = null;
             TTable.ItemsSource = list2;
         }
 
+        private static Dictionary<string, Group> buildGroupsDictionary(List<ELine> list2,
+            GroupComparator gcom)
+        {
+            return list2.AsParallel().Select(x =>
+                {
+                    return new { original = x.Value, value = gcom.FindGroup(x.Value) };
+                })
+                .DistinctBy(x => x.original)
+                .ToDictionary(x => x.original, x => x.value);
+        }
 
         private class WrappedLineComparer : IComparer<ELine>
         {
@@ -594,21 +627,22 @@ namespace GF2_RU_Launch
             {
                 this.parent = parent;
             }
+
             public int Compare(ELine? x, ELine? y)
             {
-                if(x  == null)
+                if (x == null)
                 {
-                    if (y == null)return 0;
+                    if (y == null) return 0;
                     return 1;
                 }
                 else
                 {
-                    if(x == null)return -1;
+                    if (x == null) return -1;
                 }
+
                 return parent.Compare(x.Value, y.Value);
             }
         }
-
 
         private byte[] exportTableBytes(bool useId)
         {
@@ -645,6 +679,7 @@ namespace GF2_RU_Launch
                 wanEmptyTable();
                 return;
             }
+
             var res = getSaveFile("Выберите карту переводов mappings.json", ".json", "mappings.json|*.json");
 
             if (res == null)
@@ -654,10 +689,13 @@ namespace GF2_RU_Launch
 
             List<ELine> list = new List<ELine>();
             //toJsonBytes(data, useId);
-            foreach (ELine item in data) {
-                if (item != null) {
-                    if (item.Original != null && item.Original.Length != 0) { 
-                        if(item.Value == null || item.Value == item.Original)
+            foreach (ELine item in data)
+            {
+                if (item != null)
+                {
+                    if (item.Original != null && item.Original.Length != 0)
+                    {
+                        if (item.Value == null || item.Value == item.Original)
                         {
                             if (exportNonTranslatable || isTranslatable(item.Original))
                             {
@@ -667,7 +705,7 @@ namespace GF2_RU_Launch
                     }
                 }
             }
-            
+
             var data2 = toJsonBytes(list, useId, gcom);
 
             try
@@ -688,6 +726,7 @@ namespace GF2_RU_Launch
                 wanEmptyTable();
                 return;
             }
+
             var res = getSaveFile("Выберите карту переводов mappings.json", ".json", "mappings.json|*.json");
 
             if (res == null)
@@ -715,9 +754,11 @@ namespace GF2_RU_Launch
                 wanEmptyTable();
                 return;
             }
+
             var res = getSaveFile("Выберите карту переводов mappings.json", ".json", "mappings.json|*.json");
 
-            if (res == null) {
+            if (res == null)
+            {
                 return;
             }
 
@@ -727,7 +768,8 @@ namespace GF2_RU_Launch
             {
                 File.WriteAllBytes(res, data2);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 MessageBox.Show("Ошибка сохранения!");
             }
         }
@@ -766,6 +808,7 @@ namespace GF2_RU_Launch
             {
                 return dlg.FileName;
             }
+
             return null;
         }
 
@@ -780,9 +823,11 @@ namespace GF2_RU_Launch
 
             Nullable<bool> result = dlg.ShowDialog();
 
-            if (result == true) {
+            if (result == true)
+            {
                 return File.ReadAllBytes(dlg.FileName);
             }
+
             return null;
         }
 
@@ -801,18 +846,29 @@ namespace GF2_RU_Launch
                 eLine.Value = item.Value;
                 list.Add(eLine);
             }
+
             return list;
         }
 
         public static byte[] toJsonBytes(List<ELine> list, bool useId, IComparer<string> comparer)
         {
-            SortedDictionary<string, string> map = new SortedDictionary<string, string>(comparer);
-            foreach (var line in list) { 
-                if (line != null)
-                {
-                    map[line.getSaveKey(useId)] = line.actualValue();
-                }
+            if (comparer is GroupComparator)
+            {
+                var groupComparator = (GroupComparator)comparer;
+                groupComparator.cache = buildGroupsDictionary(list, groupComparator);
             }
+
+            var map = list.Select(x => { return new { key = x.getSaveKey(useId), value = x.Value }; }).OrderBy(x =>
+            {
+                if (x.key.StartsWith("#ID:"))
+                {
+                    int index = x.key.IndexOf("|");
+                    if (index == -1) return x.key;
+                    return x.key.Substring(index + 1);
+                }
+
+                return x.key;
+            }, comparer).ToDictionary(x => x.key, x => x.value);
 
             var options = new JsonSerializerOptions
             {
@@ -827,19 +883,21 @@ namespace GF2_RU_Launch
 
         public static int getId(string str)
         {
-            if(str == null || str.Length <= 5)return 0;
+            if (str == null || str.Length <= 5) return 0;
             if (str.StartsWith("#ID:"))
             {
                 int index = str.IndexOf('|', 4);
-                if (index == -1)return 0;
+                if (index == -1) return 0;
                 int num = 0;
                 for (int i = 4; i < index; i++)
                 {
                     num *= 10;
                     num += (str[i] - '0');
                 }
+
                 return num;
             }
+
             return 0;
         }
 
@@ -852,21 +910,23 @@ namespace GF2_RU_Launch
                 if (index == -1) return src;
                 return src[(index + 1)..];
             }
+
             return src;
         }
 
 
         public static bool isTranslatable(string? str)
         {
-            if(String.IsNullOrWhiteSpace(str)) return false;
+            if (String.IsNullOrWhiteSpace(str)) return false;
             var len = str.Length;
 
-            for(int i = 0; i < len; i++)
+            for (int i = 0; i < len; i++)
             {
                 var chr = str[i];
                 if (chr >= 'a' && chr <= 'z') return true;
                 if (chr >= 'A' && chr <= 'Z') return true;
             }
+
             return false;
         }
     }
@@ -876,11 +936,13 @@ namespace GF2_RU_Launch
     {
         public int Id { get; set; }
         public string? Value { get; set; }
-        public string Original {  get; set; }
+        public string Original { get; set; }
 
-        public ELine() {
+        public ELine()
+        {
             Original = "";
         }
+
         public ELine(int id, string value)
         {
             Id = id;

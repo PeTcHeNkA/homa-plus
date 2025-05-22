@@ -6,6 +6,7 @@
         private Group[] groups = new Group[0];
         private Group[][] mappingByFirst = new Group[128][];
         private Group[] noMapped = new Group[0];
+        public Dictionary<string, Group> cache = new();
 
         public static GroupComparator fromTable(string data)
         {
@@ -16,8 +17,6 @@
             {
                 if (line.Length == 0) continue;
                 var chr = line[0];
-                if (chr == '#') continue;
-
                 int index = line.IndexOf('|', 2);
                 if (index == -1) continue;
                 int num = 0;
@@ -81,7 +80,7 @@
 
         public void Complete()
         {
-            Array.Sort(groups, (o1, o2) => o2.Prefix.Length.CompareTo(o1.Prefix.Length));
+            Array.Sort(groups, (o1, o2) =>o1.SortIndex.CompareTo(o2.SortIndex) );;
             int minValue = 0;
             
             foreach (var group in groups)
@@ -133,10 +132,10 @@
 
         public int Compare(string o1r, string o2r)
         {
-            string o1 = RemId(o1r);
-            string o2 = RemId(o2r);
-            Group group1 = FindGroup(o1);
-            Group group2 = FindGroup(o2);
+            string o1 = (o1r);
+            string o2 = (o2r);
+            Group group1 = cache.TryGetValue(o1, out var groupFromCahce1) ? groupFromCahce1 : FindGroup(o1);
+            Group group2 = cache.TryGetValue(o2, out var groupFromCahce2) ? groupFromCahce2 : FindGroup(o2); //fallback codefault group
             if (group1 != group2)
             {
                 int result = group1.SortIndex.CompareTo(group2.SortIndex);
