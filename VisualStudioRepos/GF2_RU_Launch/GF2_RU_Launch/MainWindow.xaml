@@ -26,24 +26,69 @@
         </TransformGroup>
     </fw:AcrylicWindow.RenderTransform>
 
+    <Window.Resources>
+        <!-- Colors -->
+        <Color x:Key="Launch_Color">#90FFFFFF</Color>
+        
+        <Color x:Key="Header_Color">#7FECECEC</Color>
+        <Color x:Key="Header_Light">#BFD8D8D8</Color>
+        <Color x:Key="Green_Color">#FF7AFF4C</Color>
+        <Color x:Key="Yellow_Color">#FFFFC84F</Color>
+        <Color x:Key="Red_Color">#E5FF2C2C</Color>
+        <Color x:Key="Grad_Start_Color">#7F383838</Color>
+        <Color x:Key="Grad_End_Color">#00F1F1F1</Color>
+
+        <!-- Brushes -->
+        <SolidColorBrush x:Key="Header"  Color="{StaticResource Header_Color}"/>
+        <SolidColorBrush x:Key="Bottons_Background" Color="#4C6F6F6F"/>
+        <SolidColorBrush x:Key="BtnPlay_Hover" Color="{StaticResource Green_Color}"/>
+        <SolidColorBrush x:Key="BtnInst_Hover" Color="{StaticResource Yellow_Color}"/>
+        <SolidColorBrush x:Key="BtnDel_Hover" Color="{StaticResource Red_Color}"/>
+
+        <LinearGradientBrush x:Key="Background" StartPoint="0.5,0.995" EndPoint="0.5,1" >
+            <GradientStop Color="{StaticResource Grad_Start_Color}"/>
+            <GradientStop Color="{StaticResource Grad_End_Color}"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="Bottons_Border" EndPoint="0.5,1" StartPoint="0.5,0">
+            <GradientStop Color="{StaticResource Grad_End_Color}"/>
+            <GradientStop Color="{StaticResource Grad_Start_Color}" Offset="1"/>
+        </LinearGradientBrush>
+
+        <!-- Styles -->
+        <Style TargetType="Button" x:Key="LBottons">
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}" >
+                        <Border 
+                                    Background="{TemplateBinding Background}" 
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    Padding="{TemplateBinding Padding}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    >
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+
+            <Setter Property="Background" Value="{StaticResource Bottons_Background}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Bottons_Border}"/>
+        </Style>
+    </Window.Resources>
 
     <Grid x:Name="Layer1">
+
         <!-- Header -->
 
-        <Grid Background="#7FECECEC" Panel.ZIndex="1000" Height="30" VerticalAlignment="Top">
+        <Grid Background="{StaticResource Header}" Panel.ZIndex="1000" Height="30" VerticalAlignment="Top">
             <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Margin="-67,0,0,0" Width="249" FontSize="14">Girls Frontline 2: Exilium RU Launcher</TextBlock>
         </Grid>
 
 
         <!-- Background -->
-        <Border BorderThickness="0,0,0,3" VerticalAlignment="Top" Margin="0,0,0,75">
-            <Border.BorderBrush>
-                <LinearGradientBrush StartPoint="0.5,0.995" EndPoint="0.5,1" >
-                    <GradientStop Color="#7F383838"/>
-                    <GradientStop Color="#00F1F1F1"/>
-                </LinearGradientBrush>
-            </Border.BorderBrush>
-
+        <Border BorderThickness="0,0,0,3" VerticalAlignment="Top" Margin="0,0,0,75" BorderBrush="{StaticResource Background}">
             <Image x:Name="BGImg" Source="/images/groza1.png" 
                VerticalAlignment="Center" Stretch="UniformToFill"/>
         </Border>
@@ -70,7 +115,7 @@
                     <Setter Property="Background">
                         <Setter.Value>
                             <LinearGradientBrush EndPoint="0.5,1" StartPoint="0,0.5">
-                                <GradientStop Color="#7FECECEC"/>
+                                <GradientStop Color="{StaticResource Header_Color}"/>
                                 <GradientStop Color="Transparent" Offset="0.35"/>
                             </LinearGradientBrush>
                         </Setter.Value>
@@ -81,7 +126,7 @@
                             <Setter Property="Background">
                                 <Setter.Value>
                                     <LinearGradientBrush EndPoint="0.5,1" StartPoint="0,0.5">
-                                        <GradientStop Color="#BFD8D8D8"/>
+                                        <GradientStop Color="{StaticResource Header_Light}"/>
                                         <GradientStop Color="Transparent" Offset="0.6"/>
                                     </LinearGradientBrush>
                                 </Setter.Value>
@@ -90,6 +135,7 @@
                     </Style.Triggers>
                 </Style>
             </Button.Style>
+            
             <Grid Width="95" Height="95">
                 <Image Height="30" Width="30" VerticalAlignment="Top" HorizontalAlignment="Left" Source="/Images/edit_ico.png" Margin="8,8,0,0" />
             </Grid>
@@ -100,38 +146,11 @@
         <Button x:Name="BTnPlay" Margin="0,0,10,21" Height="44" 
                 VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="230" 
                 FontFamily="Microsoft YaHei" FontSize="24">
-
             <Button.Style>
-                <Style TargetType="Button">
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="{x:Type Button}" >
-                                <Border 
-                                    Background="{TemplateBinding Background}" 
-                                    BorderBrush="{TemplateBinding BorderBrush}"
-                                    Padding="{TemplateBinding Padding}"
-                                    BorderThickness="{TemplateBinding BorderThickness}"
-                                    >
-                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
-
-                    <Setter Property="Background" Value="#4C6F6F6F"/>
-
-                    <Setter Property="BorderBrush">
-                        <Setter.Value>
-                            <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-                                <GradientStop Color="#00F1F1F1"/>
-                                <GradientStop Color="#7F383838" Offset="1"/>
-                            </LinearGradientBrush>
-                        </Setter.Value>
-                    </Setter>
-
+                <Style TargetType="Button" BasedOn="{StaticResource LBottons}">
                     <Style.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="#FF7AFF4C"/>
+                            <Setter Property="Background" Value="{StaticResource BtnPlay_Hover}"/>
                         </Trigger>
                     </Style.Triggers>
                 </Style>
@@ -142,36 +161,10 @@
                 VerticalAlignment="Bottom" FontFamily="Microsoft YaHei" FontSize="24" 
                 Content="">
             <Button.Style>
-                <Style TargetType="Button">
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="{x:Type Button}" >
-                                <Border 
-                                    Background="{TemplateBinding Background}" 
-                                    BorderBrush="{TemplateBinding BorderBrush}"
-                                    Padding="{TemplateBinding Padding}"
-                                    BorderThickness="{TemplateBinding BorderThickness}"
-                                    >
-                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
-
-                    <Setter Property="Background" Value="#4C6F6F6F"/>
-
-                    <Setter Property="BorderBrush">
-                        <Setter.Value>
-                            <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-                                <GradientStop Color="#00F1F1F1"/>
-                                <GradientStop Color="#7F383838" Offset="1"/>
-                            </LinearGradientBrush>
-                        </Setter.Value>
-                    </Setter>
-
+                <Style TargetType="Button" BasedOn="{StaticResource LBottons}">
                     <Style.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="#FFFFC84F"/>
+                            <Setter Property="Background" Value="{StaticResource BtnInst_Hover}"/>
                         </Trigger>
                     </Style.Triggers>
                 </Style>
@@ -183,36 +176,10 @@
                 AutomationProperties.Name="Uninstall" HorizontalAlignment="Left" Width="45"
                 >
             <Button.Style>
-                <Style TargetType="Button">
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="{x:Type Button}" >
-                                <Border 
-                                    Background="{TemplateBinding Background}" 
-                                    BorderBrush="{TemplateBinding BorderBrush}"
-                                    Padding="{TemplateBinding Padding}"
-                                    BorderThickness="{TemplateBinding BorderThickness}"
-                                    >
-                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
-
-                    <Setter Property="Background" Value="#4C6F6F6F"/>
-
-                    <Setter Property="BorderBrush">
-                        <Setter.Value>
-                            <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-                                <GradientStop Color="#00F1F1F1"/>
-                                <GradientStop Color="#7F383838" Offset="1"/>
-                            </LinearGradientBrush>
-                        </Setter.Value>
-                    </Setter>
-
+                <Style TargetType="Button" BasedOn="{StaticResource LBottons}">
                     <Style.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="#E5FF2C2C"/>
+                            <Setter Property="Background" Value="{StaticResource BtnDel_Hover}"/>
                         </Trigger>
                     </Style.Triggers>
                 </Style>
