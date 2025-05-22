@@ -12,7 +12,23 @@ public partial class App : Application{
 
     public App()
     {
-        //Resources["Red_Color"] = ColorConverter.ConvertFromString("#FF7AFF4C");
+    }
+
+    protected override void OnStartup(StartupEventArgs e)
+    {
+        //tweakColor("L_Background_Main_Color");
+        //tweakColor("L_Background_Second");
+        //tweakColor("Header_Color");
+        //tweakColor("Header_Light");
+        base.OnStartup(e);
+    }
+
+    private void tweakColor(string name)
+    {
+        var val = Resources[name+"_D"];
+        if (val != null) {
+            Resources[name] = val;
+        }
     }
 }
 

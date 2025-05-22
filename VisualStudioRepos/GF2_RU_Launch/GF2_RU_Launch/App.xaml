@@ -22,6 +22,13 @@
         <!-- Editor Colors -->
         <Color x:Key="Editor_Green_color">#FF318C00</Color>
         <Color x:Key="Editor_Red_color">#FFD62323</Color>
+        
+        <!-- Dark theme colors start-->
+        <Color x:Key="L_Background_Main_Color_D">#90111111</Color>
+        <Color x:Key="L_Background_Second_Color_D">#90010101</Color>
+        <Color x:Key="Header_Color_D">#90111111</Color>
+        <Color x:Key="Header_Light_D">#90222222</Color>
+        <!-- Dark theme colors end-->
 
         <!-- Launcher Brushes -->
         <SolidColorBrush x:Key="L_Background_Second"  Color="{DynamicResource L_Background_Second_Color}"/>

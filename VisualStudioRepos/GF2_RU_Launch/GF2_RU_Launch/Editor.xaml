@@ -21,7 +21,7 @@
 
         <!-- Menu -->
 
-        <Menu x:Name="MENU" Height="18" VerticalAlignment="Top" Margin="0,30,0,0" Background="#7FF0F0F0">
+        <Menu x:Name="MENU" Height="18" VerticalAlignment="Top" Margin="0,30,0,0" Background="{StaticResource Header}">
             <MenuItem Header="Файл" >
                 <MenuItem Header="Импорт">
                     <MenuItem Header="Шаблон .bytes" Click="onClickLoad"></MenuItem>
@@ -76,7 +76,9 @@
             </MenuItem>
         </Menu>
 
-        <DataGrid x:Name="TTable" AutoGenerateColumns="False" IsEnabled="True" Margin="0,48,0,0">
+        <DataGrid x:Name="TTable" AutoGenerateColumns="False" IsEnabled="True" Margin="0,48,0,0" 
+                  Background="{DynamicResource Header}"
+        >
             <DataGrid.Columns>
                 <DataGridTextColumn x:Name="TT_ID" Header="ID" Binding="{Binding Id}" Width="50" CanUserResize="True" IsReadOnly="True"/>
                 <DataGridTextColumn x:Name="TT_ORG" Header="Оригинал" Binding="{Binding Original}" Width="290" CanUserResize="True" />

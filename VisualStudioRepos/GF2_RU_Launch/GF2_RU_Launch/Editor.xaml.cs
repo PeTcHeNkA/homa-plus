@@ -913,12 +913,16 @@ namespace GF2_RU_Launch
         {
             if (String.IsNullOrWhiteSpace(str)) return false;
             var len = str.Length;
+            int attempt = 1;
 
             for (int i = 0; i < len; i++)
             {
                 var chr = str[i];
-                if (chr >= 'a' && chr <= 'z') return true;
-                if (chr >= 'A' && chr <= 'Z') return true;
+                if (chr >= 'a' && chr <= 'z' || chr >= 'A' && chr <= 'Z')
+                {
+                    attempt -= 1;
+                    if (attempt < 0) return true;
+                }
             }
 
             return false;
