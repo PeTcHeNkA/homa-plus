@@ -580,9 +580,18 @@ namespace GF2_RU_Launch
         private void onClicSortByRules(object sender, RoutedEventArgs e)
         {
             List<ELine> list2 = viewData;
+            gcom.cache = buildGroupsDictionary(list2,gcom);
             list2.Sort(new WrappedLineComparer(gcom));
             TTable.ItemsSource = null;
             TTable.ItemsSource = list2;
+        }
+
+        private static Dictionary<string, Group> buildGroupsDictionary(List<ELine> list2,
+            GroupComparator gcom)
+        {
+            return list2.AsParallel().Select(x => { return new { original = x.Value, value = gcom.FindGroup(x.Value) }; })
+                .DistinctBy(x => x.original)
+                .ToDictionary(x => x.original, x => x.value);
         }
 
         private class WrappedLineComparer : IComparer<ELine>
@@ -807,7 +816,16 @@ namespace GF2_RU_Launch
            var map = list.Select(x =>
             {
                 return new { key = x.getSaveKey(useId), value = x.Value };
-            }).ToDictionary(x => x.key, x => x.value);
+            }).OrderBy(x =>
+           {
+               if (x.key.StartsWith("#ID:"))
+               {
+                   int index = x.key.IndexOf("|");
+                   if (index == -1) return x.key;
+                   return x.key.Substring(index + 1);
+               }
+               return x.key;
+           },comparer).ToDictionary(x => x.key, x => x.value);
 
             var options = new JsonSerializerOptions
             {
