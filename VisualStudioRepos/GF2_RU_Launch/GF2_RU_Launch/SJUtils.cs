@@ -17,7 +17,7 @@ namespace SortJsonUtils
 
             foreach (string line in lines)
             {
-                if (line.Length == 0) continue;
+                if (String.IsNullOrWhiteSpace(line)) continue;
                 var chr = line[0];
                 int index = line.IndexOf('|', 2);
                 if (index == -1) continue;
@@ -31,6 +31,10 @@ namespace SortJsonUtils
                     var chr2 = line[i];
                     num *= 10;
                     num += (chr2 - '0');
+                }
+                if (invert)
+                {
+                    num = -num;
                 }
 
                 int index2 = line.IndexOf('|', index+1);
@@ -83,11 +87,11 @@ namespace SortJsonUtils
         public void Complete()
         {
             Array.Sort(groups, (o1, o2) =>o1.SortIndex.CompareTo(o2.SortIndex) );;
-            int minValue = 0;
+            //int minValue = 0;
             
             foreach (var group in groups)
             {
-                if(group.SortIndex < minValue) minValue = group.SortIndex;
+                //if(group.SortIndex < minValue) minValue = group.SortIndex;
                 if (group.GetType() != typeof(GroupB))
                 {
                     int index = Index(group.Prefix);
@@ -98,12 +102,13 @@ namespace SortJsonUtils
                     noMapped = Add0(noMapped, group);
                 }
             }
-            minValue = (-minValue);
+            //minValue = (-minValue);
 
-            foreach (var group in groups)
-            {
-                group.SortIndex += minValue;
-            }
+            //foreach (var group in groups)
+            //{
+            //    group.SortIndex += minValue;
+            //}
+            //defaultGroup.SortIndex = minValue;
         }
 
         private static int Index(string str)

@@ -155,6 +155,11 @@ namespace GF2_RU_Launch
             Task.Run(() =>
             {
                 onClickLoad0();
+                if (table1 == null)
+                {
+                    locked = false;
+                    return;
+                }
 
                 var jData = table1.exportMappings(table2, 0xf);
 
@@ -451,8 +456,24 @@ namespace GF2_RU_Launch
 
         private void onClickExportByGroups(object sender, RoutedEventArgs e)
         {
-            var dirName = getSaveDir("Выберите папку экспорта");
+            var dirName = getAndCheckDir("Выберите папку экспорта");
             if (dirName == null) return;
+            onExportByGroups(dirName, data, false);
+        }
+
+
+        private void onClickExportByGroupsID(object sender, RoutedEventArgs e)
+        {
+            var dirName = getAndCheckDir("Выберите папку экспорта");
+            if (dirName == null) return;
+            onExportByGroups(dirName, data, true);
+        }
+
+
+        private string? getAndCheckDir(string lore)
+        {
+            var dirName = getSaveDir(lore);
+            if (dirName == null) return null;
             try
             {
                 var dir = new DirectoryInfo(dirName);
@@ -460,12 +481,13 @@ namespace GF2_RU_Launch
                 {
                     dir.Create();
                 }
-            } catch
+            }
+            catch
             {
                 MessageBox.Show("Выбран нелегальный путь для сохранения");
-                return;
+                return null;
             }
-            onExportByGroups(dirName, data, false);
+            return dirName;
         }
 
 
@@ -496,7 +518,7 @@ namespace GF2_RU_Launch
 
             foreach (var group in map)
             {
-                var resultName = targetDir + "/" + group + ".json";
+                var resultName = targetDir + "/" + group.Key + ".json";
 
                 var task = Task.Run(() => {
                     MainWindow.CreatePathIfNeed(resultName);
@@ -519,8 +541,16 @@ namespace GF2_RU_Launch
             Group? prevGroup = null;
             List<ELine>? prevEGroup = null;
 
+            
+            List<ELine> nonTrs = new List<ELine>();
+
             foreach (ELine line in lines)
             {
+                if (!isTranslatable(line.Original))
+                {
+                    nonTrs.Add(line);
+                    continue;
+                }
                 var group = comp.FindGroup(line.Original);
 
                 List<ELine> eGroup;
@@ -545,6 +575,10 @@ namespace GF2_RU_Launch
                 eGroup.Add(line);
             }
 
+            if (nonTrs.Count > 0) {
+                Group nonTranslatable = new Group("", 0, "nontanslatable");
+                map[nonTranslatable] = nonTrs;
+            }
             return map;
         }
 
@@ -941,9 +975,10 @@ namespace GF2_RU_Launch
                     if (index == -1) return x.key;
                     return x.key.Substring(index + 1);
                 }
-                //.DistinctBy(x => x.key)
+
                 return x.key;
-            }, comparer).ToDictionary(x => x.key, x => x.value);
+            }, comparer).DistinctBy(x => x.key).ToDictionary(x => x.key, x => x.value);
+
 
             var options = new JsonSerializerOptions
             {
