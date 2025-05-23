@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Concurrent;
+using System.IO;
 using System.Text;
 using System.Windows;
 using SourceChord.FluentWPF;
@@ -9,6 +10,8 @@ using SortJsonUtils;
 using System.Windows.Data;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using Group = SortJsonUtils.Group;
 
 
 namespace GF2_RU_Launch
@@ -45,6 +48,7 @@ namespace GF2_RU_Launch
                     tableEditorFlag = 2;
                 }
             }
+
             if (tableEditorFlag == 2)
             {
                 MessageBox.Show("Модуль редактора таблц не установлен!");
@@ -196,7 +200,8 @@ namespace GF2_RU_Launch
                         locked = false;
                         onCompleteImportB(jData);
                     });
-                } catch
+                }
+                catch
                 {
                     parent.onError();
                 }
@@ -454,11 +459,11 @@ namespace GF2_RU_Launch
         }
 
 
-        private void onClickExportByGroups(object sender, RoutedEventArgs e)
+        private async void onClickExportByGroups(object sender, RoutedEventArgs e)
         {
             var dirName = getAndCheckDir("Выберите папку экспорта");
             if (dirName == null) return;
-            onExportByGroups(dirName, data, false);
+            await OnExportByGroupsAsync(dirName, data, false);
         }
 
 
@@ -487,9 +492,27 @@ namespace GF2_RU_Launch
                 MessageBox.Show("Выбран нелегальный путь для сохранения");
                 return null;
             }
+
             return dirName;
         }
 
+        public async Task OnExportByGroupsAsync(string targetDir, List<ELine> src, bool useId)
+        {
+            gcom.MakeCache(src);
+            var data = splitByGroups(gcom, src);
+            var groupedData = data.ToLookup(g => g.Key.Display, g => g.Value)
+                .ToDictionary(g => g.Key, g => g.SelectMany(v => v).ToList());
+            var tasks = groupedData.AsParallel().Select(group =>
+            {
+                var resultName = Path.Combine(targetDir, $"{group.Key}.json");
+
+                var directory = Path.GetDirectoryName(resultName);
+                Directory.CreateDirectory(directory);
+                var bytes = toJsonBytes(group.Value, useId, gcom);
+                return File.WriteAllBytesAsync(resultName, bytes);
+            });
+            await Task.WhenAll(tasks);
+        }
 
         public void onExportByGroups(string targetDir, List<ELine> src, bool useId)
         {
@@ -511,6 +534,7 @@ namespace GF2_RU_Launch
                     lines = new List<ELine>();
                     map[key] = lines;
                 }
+
                 lines.AddRange(group.Value);
             }
 
@@ -520,7 +544,8 @@ namespace GF2_RU_Launch
             {
                 var resultName = targetDir + "/" + group.Key + ".json";
 
-                var task = Task.Run(() => {
+                var task = Task.Run(() =>
+                {
                     MainWindow.CreatePathIfNeed(resultName);
                     byte[] bytes = toJsonBytes(group.Value, useId, gcom);
                     File.WriteAllBytes(resultName, bytes);
@@ -541,7 +566,7 @@ namespace GF2_RU_Launch
             Group? prevGroup = null;
             List<ELine>? prevEGroup = null;
 
-            
+
             List<ELine> nonTrs = new List<ELine>();
 
             foreach (ELine line in lines)
@@ -551,34 +576,24 @@ namespace GF2_RU_Launch
                     nonTrs.Add(line);
                     continue;
                 }
-                var group = comp.FindGroup(line.Original);
 
-                List<ELine> eGroup;
-                if(group == prevGroup)
+                var group = comp.cache.TryGetValue(line.Original, out var cacheGroup)
+                    ? cacheGroup
+                    : comp.FindGroup(line.Original);
+                if (!map.TryGetValue(group, out var groupLines))
                 {
-                    eGroup = prevEGroup;
+                    groupLines = new List<ELine>();
+                    map[group] = groupLines;
                 }
-                else
-                {
-                    if (map.ContainsKey(group))
-                    {
-                        eGroup = map[group];
-                    }
-                    else
-                    {
-                        eGroup = new List<ELine>();
-                        map[group] = eGroup;
-                    }
-                    prevGroup = group;
-                    prevEGroup = eGroup;
-                }
-                eGroup.Add(line);
+                groupLines.Add(line);
             }
 
-            if (nonTrs.Count > 0) {
+            if (nonTrs.Count > 0)
+            {
                 Group nonTranslatable = new Group("", 0, "nontanslatable");
                 map[nonTranslatable] = nonTrs;
             }
+
             return map;
         }
 
@@ -723,6 +738,7 @@ namespace GF2_RU_Launch
 
         private byte[] exportTableBytes(bool useId)
         {
+            gcom.MakeCache(data);
             return toJsonBytes(data, useId, gcom);
         }
 
@@ -783,6 +799,7 @@ namespace GF2_RU_Launch
                 }
             }
 
+            gcom.MakeCache(list);
             var data2 = toJsonBytes(list, useId, gcom);
 
             try
@@ -811,6 +828,7 @@ namespace GF2_RU_Launch
                 return;
             }
 
+            gcom.MakeCache(viewData);
             var data2 = toJsonBytes(viewData, showId, gcom);
 
             try
@@ -867,6 +885,7 @@ namespace GF2_RU_Launch
                     openDialogFlag = 2;
                 }
             }
+
             if (openDialogFlag == 2)
             {
                 MessageBox.Show("Модуль выбора дериктории отсутствует.");
@@ -893,8 +912,10 @@ namespace GF2_RU_Launch
                 {
                     return dialog.FileName;
                 }
+
                 return null;
-            } catch
+            }
+            catch
             {
                 openDialogFlag = 2;
                 return null;
@@ -961,12 +982,6 @@ namespace GF2_RU_Launch
 
         public static byte[] toJsonBytes(List<ELine> list, bool useId, IComparer<string> comparer)
         {
-            if (comparer is GroupComparator)
-            {
-                var groupComparator = (GroupComparator)comparer;
-                comparer = groupComparator.Copy().MakeCache(list);
-            }
-
             var map = list.Select(x => { return new { key = x.getSaveKey(useId), value = x.Value }; }).OrderBy(x =>
             {
                 if (x.key.StartsWith("#ID:"))
@@ -1028,20 +1043,13 @@ namespace GF2_RU_Launch
         public static bool isTranslatable(string? str)
         {
             if (String.IsNullOrWhiteSpace(str)) return false;
-            var len = str.Length;
-            int attempt = 1;
-
-            for (int i = 0; i < len; i++)
+            if (str.Length == 1)
             {
-                var chr = str[i];
-                if (chr >= 'a' && chr <= 'z' || chr >= 'A' && chr <= 'Z')
-                {
-                    attempt -= 1;
-                    if (attempt < 0) return true;
-                }
+                return false;
             }
 
-            return false;
+            var regex = "[a-zA-Z]";
+            return Regex.IsMatch(str, regex);
         }
     }
 
