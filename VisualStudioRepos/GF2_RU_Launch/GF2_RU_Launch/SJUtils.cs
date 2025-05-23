@@ -223,7 +223,7 @@ namespace SortJsonUtils
         {
             return list2.AsParallel().Select(x =>
             {
-                return new { original = x.Value, value = gcom.FindGroup(x.Value) };
+                return new { original = x.Original, value = gcom.FindGroup(x.Original) };
             })
                 .DistinctBy(x => x.original)
                 .ToDictionary(x => x.original, x => x.value);

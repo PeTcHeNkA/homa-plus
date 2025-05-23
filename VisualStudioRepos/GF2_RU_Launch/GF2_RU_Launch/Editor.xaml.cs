@@ -717,7 +717,7 @@ namespace GF2_RU_Launch
                     if (x == null) return -1;
                 }
 
-                return parent.Compare(x.Value, y.Value);
+                return parent.Compare(x.Original, y.Original);
             }
         }
 
