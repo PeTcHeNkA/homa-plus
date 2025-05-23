@@ -568,10 +568,10 @@ namespace GF2_RU_Launch
 
 
             List<ELine> nonTrs = new List<ELine>();
-
+            var regex = new Regex("^(?:[^a-zA-Z]*|[^a-zA-Z]*[a-zA-Z][^a-zA-Z]*)$", RegexOptions.Compiled);
             foreach (ELine line in lines)
             {
-                if (!isTranslatable(line.Original))
+                if (!isTranslatable(line.Original, regex))
                 {
                     nonTrs.Add(line);
                     continue;
@@ -1039,17 +1039,18 @@ namespace GF2_RU_Launch
             return src;
         }
 
-
         public static bool isTranslatable(string? str)
+        {
+            return isTranslatable(str, new Regex("^(?:[^a-zA-Z]*|[^a-zA-Z]*[a-zA-Z][^a-zA-Z]*)$"));
+        }
+        public static bool isTranslatable(string? str, Regex regex)
         {
             if (String.IsNullOrWhiteSpace(str)) return false;
             if (str.Length == 1)
             {
                 return false;
             }
-
-            var regex = "[a-zA-Z]";
-            return Regex.IsMatch(str, regex);
+            return !regex.IsMatch(str);;
         }
     }
 
