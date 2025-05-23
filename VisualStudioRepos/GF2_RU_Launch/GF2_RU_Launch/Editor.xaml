@@ -35,7 +35,7 @@
                     <MenuItem Header="Правила сортировки .json" Click="onClicImportSortTable"></MenuItem>
                 </MenuItem>
                 <MenuItem Header="Экспорт" >
-                    <MenuItem Header="Релиз .bytes"></MenuItem>
+                    <MenuItem Header="Релиз .bytes" Click="onClickExportLangBytes"></MenuItem>
                     <MenuItem Header="Карта переводов .json">
                         <MenuItem Header="Текущая открытая таблица" Click="exportCurrentView"></MenuItem>
                         <MenuItem Header="Полная, упрощенная" Click="onClickExportLangJson"></MenuItem>

@@ -467,11 +467,11 @@ namespace GF2_RU_Launch
         }
 
 
-        private void onClickExportByGroupsID(object sender, RoutedEventArgs e)
+        private async void onClickExportByGroupsID(object sender, RoutedEventArgs e)
         {
             var dirName = getAndCheckDir("Выберите папку экспорта");
             if (dirName == null) return;
-            onExportByGroups(dirName, data, true);
+            await OnExportByGroupsAsync(dirName, data, true);
         }
 
 
@@ -496,10 +496,11 @@ namespace GF2_RU_Launch
             return dirName;
         }
 
+
         public async Task OnExportByGroupsAsync(string targetDir, List<ELine> src, bool useId)
         {
-            gcom.MakeCache(src);
-            var data = splitByGroups(gcom, src);
+            var comp = gcom.Copy().MakeCache(src);
+            var data = splitByGroups(comp, src);
             var groupedData = data.ToLookup(g => g.Key.Display, g => g.Value)
                 .ToDictionary(g => g.Key, g => g.SelectMany(v => v).ToList());
             var tasks = groupedData.AsParallel().Select(group =>
@@ -508,55 +509,10 @@ namespace GF2_RU_Launch
 
                 var directory = Path.GetDirectoryName(resultName);
                 Directory.CreateDirectory(directory);
-                var bytes = toJsonBytes(group.Value, useId, gcom);
+                var bytes = toJsonBytes(group.Value, useId, comp);
                 return File.WriteAllBytesAsync(resultName, bytes);
             });
             await Task.WhenAll(tasks);
-        }
-
-        public void onExportByGroups(string targetDir, List<ELine> src, bool useId)
-        {
-            var data = splitByGroups(gcom, src);
-
-            Dictionary<string, List<ELine>> map = new Dictionary<string, List<ELine>>();
-
-            foreach (var group in data)
-            {
-                List<ELine> lines;
-
-                var key = group.Key.Display;
-                if (map.ContainsKey(key))
-                {
-                    lines = map[key];
-                }
-                else
-                {
-                    lines = new List<ELine>();
-                    map[key] = lines;
-                }
-
-                lines.AddRange(group.Value);
-            }
-
-            List<Task> allTasks = new List<Task>();
-
-            foreach (var group in map)
-            {
-                var resultName = targetDir + "/" + group.Key + ".json";
-
-                var task = Task.Run(() =>
-                {
-                    MainWindow.CreatePathIfNeed(resultName);
-                    byte[] bytes = toJsonBytes(group.Value, useId, gcom);
-                    File.WriteAllBytes(resultName, bytes);
-                });
-                allTasks.Add(task);
-            }
-
-            foreach (var task in allTasks)
-            {
-                task.Wait();
-            }
         }
 
 
