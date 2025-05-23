@@ -8,6 +8,7 @@ using Microsoft.VisualBasic;
 using SortJsonUtils;
 using System.Windows.Data;
 using Microsoft.WindowsAPICodePack.Dialogs;
+using System.Collections.Generic;
 
 
 namespace GF2_RU_Launch
@@ -450,8 +451,21 @@ namespace GF2_RU_Launch
 
         private void onClickExportByGroups(object sender, RoutedEventArgs e)
         {
-            var dir = getSaveDir("Выберите папку экспорта");
-            onExportByGroups(dir, data, false);
+            var dirName = getSaveDir("Выберите папку экспорта");
+            if (dirName == null) return;
+            try
+            {
+                var dir = new DirectoryInfo(dirName);
+                if (!dir.Exists)
+                {
+                    dir.Create();
+                }
+            } catch
+            {
+                MessageBox.Show("Выбран нелегальный путь для сохранения");
+                return;
+            }
+            onExportByGroups(dirName, data, false);
         }
 
 
@@ -463,14 +477,19 @@ namespace GF2_RU_Launch
 
             foreach (var group in data)
             {
-                var list = map[group.Key.Display];
-                if (list == null)
-                {
-                    list = new List<ELine>();
-                    map[group.Key.Display] = list;
-                }
+                List<ELine> lines;
 
-                list.AddRange(group.Value);
+                var key = group.Key.Display;
+                if (map.ContainsKey(key))
+                {
+                    lines = map[key];
+                }
+                else
+                {
+                    lines = new List<ELine>();
+                    map[key] = lines;
+                }
+                lines.AddRange(group.Value);
             }
 
             List<Task> allTasks = new List<Task>();
@@ -479,11 +498,11 @@ namespace GF2_RU_Launch
             {
                 var resultName = targetDir + "/" + group + ".json";
 
-                MainWindow.CreatePathIfNeed(resultName);
-
-                byte[] bytes = toJsonBytes(group.Value, useId, gcom);
-                var task = File.WriteAllBytesAsync(resultName, bytes);
-
+                var task = Task.Run(() => {
+                    MainWindow.CreatePathIfNeed(resultName);
+                    byte[] bytes = toJsonBytes(group.Value, useId, gcom);
+                    File.WriteAllBytes(resultName, bytes);
+                });
                 allTasks.Add(task);
             }
 
@@ -497,18 +516,32 @@ namespace GF2_RU_Launch
         public static Dictionary<Group, List<ELine>> splitByGroups(GroupComparator comp, List<ELine> lines)
         {
             Dictionary<Group, List<ELine>> map = new Dictionary<Group, List<ELine>>();
+            Group? prevGroup = null;
+            List<ELine>? prevEGroup = null;
 
             foreach (ELine line in lines)
             {
-                var gId = comp.FindGroup(line.Original);
+                var group = comp.FindGroup(line.Original);
 
-                var eGroup = map[gId];
-                if (eGroup == null)
+                List<ELine> eGroup;
+                if(group == prevGroup)
                 {
-                    eGroup = new List<ELine>();
-                    map[gId] = eGroup;
+                    eGroup = prevEGroup;
                 }
-
+                else
+                {
+                    if (map.ContainsKey(group))
+                    {
+                        eGroup = map[group];
+                    }
+                    else
+                    {
+                        eGroup = new List<ELine>();
+                        map[group] = eGroup;
+                    }
+                    prevGroup = group;
+                    prevEGroup = eGroup;
+                }
                 eGroup.Add(line);
             }
 
@@ -623,22 +656,10 @@ namespace GF2_RU_Launch
         private void onClicSortByRules(object sender, RoutedEventArgs e)
         {
             List<ELine> list2 = viewData;
-            gcom.cache = buildGroupsDictionary(list2, gcom);
-            list2.Sort(new WrappedLineComparer(gcom));
+
+            list2.Sort(new WrappedLineComparer(gcom.Copy().MakeCache(list2)));
             TTable.ItemsSource = null;
             TTable.ItemsSource = list2;
-            gcom.cache = null;
-        }
-
-        private static Dictionary<string, Group> buildGroupsDictionary(List<ELine> list2,
-            GroupComparator gcom)
-        {
-            return list2.AsParallel().Select(x =>
-                {
-                    return new { original = x.Value, value = gcom.FindGroup(x.Value) };
-                })
-                .DistinctBy(x => x.original)
-                .ToDictionary(x => x.original, x => x.value);
         }
 
         private class WrappedLineComparer : IComparer<ELine>
@@ -909,7 +930,7 @@ namespace GF2_RU_Launch
             if (comparer is GroupComparator)
             {
                 var groupComparator = (GroupComparator)comparer;
-                groupComparator.cache = buildGroupsDictionary(list, groupComparator);
+                comparer = groupComparator.Copy().MakeCache(list);
             }
 
             var map = list.Select(x => { return new { key = x.getSaveKey(useId), value = x.Value }; }).OrderBy(x =>
@@ -920,7 +941,7 @@ namespace GF2_RU_Launch
                     if (index == -1) return x.key;
                     return x.key.Substring(index + 1);
                 }
-
+                //.DistinctBy(x => x.key)
                 return x.key;
             }, comparer).ToDictionary(x => x.key, x => x.value);
 

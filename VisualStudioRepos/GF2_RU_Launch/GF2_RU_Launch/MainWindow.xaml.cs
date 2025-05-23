@@ -440,17 +440,27 @@ public partial class MainWindow : AcrylicWindow{
             string packPath = getLangPackPath();
             string backupPath = getBackupPackPath();
 
-            if (!File.Exists(backupPath))
+            CreatePathIfNeed(backupPath);
+
+            if (File.Exists(backupPath))
             {
-                CreatePathIfNeed(backupPath);
-                File.Move(packPath, backupPath);
-                File.Copy(GF2_RU_PACK, packPath, true);
+                File.Delete(backupPath);
             }
-            else
-            {
-                File.Delete(packPath);
-                File.Copy(GF2_RU_PACK, packPath, true);
-            }
+
+            File.Move(packPath, backupPath);
+            File.Copy(GF2_RU_PACK, packPath, true);
+
+            //if (!File.Exists(backupPath))
+            //{
+            //    CreatePathIfNeed(backupPath);
+            //    File.Move(packPath, backupPath);
+            //    File.Copy(GF2_RU_PACK, packPath, true);
+            //}
+            //else
+            //{
+            //    File.Delete(packPath);
+            //    File.Copy(GF2_RU_PACK, packPath, true);
+            //}
 
             setCfgValue("GF2_ISHA256", getSHA256(packPath));
 
@@ -478,6 +488,7 @@ public partial class MainWindow : AcrylicWindow{
                 File.Move(origPath, packPath);
                 BTnnUninstall.Visibility = Visibility.Hidden;
 
+                setCfgValue("GF2_ISHA256", "");
                 MessageBox.Show("Русский пакет локализации удален.");
             }
             else

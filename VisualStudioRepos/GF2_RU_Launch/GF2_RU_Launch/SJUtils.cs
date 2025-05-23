@@ -1,4 +1,6 @@
-﻿namespace SortJsonUtils
+﻿using GF2_RU_Launch;
+
+namespace SortJsonUtils
 {
     public class GroupComparator : IComparer<string>
     {
@@ -185,6 +187,41 @@
                 return src.Substring(index + 1);
             }
             return src;
+        }
+
+        public GroupComparator CleanCache()
+        {
+            cache = new();
+            return this;
+        }
+
+
+        public GroupComparator Copy()
+        {
+            GroupComparator copy = new GroupComparator();
+            copy.defaultGroup = defaultGroup;
+            copy.groups = groups;
+            copy.mappingByFirst = mappingByFirst;
+            copy.noMapped = noMapped;
+
+            return copy;
+        }
+
+        public GroupComparator MakeCache(List<ELine> list)
+        {
+            cache = buildGroupsDictionary(list, this);
+            return this;
+        }
+
+        private static Dictionary<string, Group> buildGroupsDictionary(List<ELine> list2,
+    GroupComparator gcom)
+        {
+            return list2.AsParallel().Select(x =>
+            {
+                return new { original = x.Value, value = gcom.FindGroup(x.Value) };
+            })
+                .DistinctBy(x => x.original)
+                .ToDictionary(x => x.original, x => x.value);
         }
     }
 
