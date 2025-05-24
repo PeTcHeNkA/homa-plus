@@ -70,7 +70,19 @@ func buildMappings(args map[string]*string) {
 	}
 
 	mappngs := Pack.LangMapping{}
-	mappngs.UseOf(pack1, pack2, boolOf(args, "-actual", false), boolOf(args, "-use-id", false))
+
+	flags := 0
+	if boolOf(args, "-actual", false) {
+		flags &= 1
+	}
+	if boolOf(args, "-use-id", false) {
+		flags &= 2
+	}
+	if boolOf(args, "-use-oth-id", false) {
+		flags &= 4
+	}
+
+	mappngs.UseOf(pack1, pack2, flags)
 
 	result, err := mappngs.Write()
 	if err != nil {

@@ -3,7 +3,7 @@ package protobuf;
 option go_package = "/Lang";
 
 message Item {
-  required int64 id  = 1;
+  required uint32 id  = 1;
   optional string name = 2;
 }
 

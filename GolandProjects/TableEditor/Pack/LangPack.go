@@ -9,7 +9,7 @@ import (
 )
 
 type LangTable struct {
-	lines []*Line
+	lines []Line
 	sect  *bool
 	dest  *uint32
 	index map[string][]*Line
@@ -17,8 +17,7 @@ type LangTable struct {
 }
 
 type Line struct {
-	id     int64
-	index  int64
+	id     uint32
 	str    string
 	actual *string
 }
@@ -83,7 +82,15 @@ func (inst *LangMapping) ApplyFor(table *LangTable) {
 	}
 }
 
-func (inst *LangMapping) UseOf(keySrc *LangTable, valueSrc *LangTable, raw bool, useId bool) {
+// UseOf flags
+// 1 - use ID
+// 2 - use actual
+// 4 - use other ID
+func (inst *LangMapping) UseOf(keySrc *LangTable, valueSrc *LangTable, flags int) {
+	useId := getFlag(flags, 0)
+	raw := getFlag(flags, 1)
+	otherId := getFlag(flags, 2)
+
 	mappings := make(map[string]string)
 	inst.mappings = mappings
 	kLines := keySrc.lines
@@ -95,13 +102,13 @@ func (inst *LangMapping) UseOf(keySrc *LangTable, valueSrc *LangTable, raw bool,
 	}
 
 	for cursor := range kLines {
-		kLine := kLines[cursor]
+		kLine := &kLines[cursor]
 		var vLine *Line = nil
 
 		if keySrc == valueSrc {
 			vLine = kLine
 		} else {
-			vLine = valueSrc.findLine(kLine.index, kLine.id)
+			vLine = valueSrc.findLine(uint32(cursor), kLine.id)
 			if vLine == nil {
 				vLine = kLine
 			}
@@ -116,10 +123,12 @@ func (inst *LangMapping) UseOf(keySrc *LangTable, valueSrc *LangTable, raw bool,
 		}
 		mKey := kLine.str
 
-		if useId {
+		if useId || otherId {
 			lines := keySrc.index[mKey]
-			if lines != nil && len(lines) > 1 {
-				mKey = writeId(uint32(kLine.id)) + kLine.str
+			hasMoreLines := lines != nil && len(lines) > 1
+
+			if hasMoreLines == useId || hasMoreLines != otherId {
+				mKey = writeId(kLine.id) + kLine.str
 			}
 		}
 		mappings[mKey] = *value
@@ -171,7 +180,7 @@ func (inst *LangTable) ReadFrom(data []byte) error {
 		return err
 	}
 	countLines := len(rawTable.Data)
-	lines := make([]*Line, countLines)
+	lines := make([]Line, countLines)
 	inst.lines = lines
 
 	itemList := rawTable.Data
@@ -183,16 +192,62 @@ func (inst *LangTable) ReadFrom(data []byte) error {
 		if value == nil {
 			value = &empty
 		}
-		line := Line{
-			*item.Id, int64(i), *value, nil,
-		}
-		lines[i] = &line
+		line := &lines[i]
+		line.id = *item.Id
+		line.str = *value
 	}
 	return nil
 }
 
+type writeInfo struct {
+	refs    [10]*[]byte
+	cap     int
+	sumSize uint32
+	next    *writeInfo
+}
+
+func (inst *writeInfo) add(item *[]byte, itemLen uint32) {
+	inst.refs[inst.cap] = item
+	inst.sumSize += itemLen
+	inst.cap += 1
+}
+
+func (inst *writeInfo) isFull() bool {
+	return inst.cap == 10
+}
+
+func (inst *writeInfo) createNext() *writeInfo {
+	inf := &writeInfo{}
+	inst.next = inf
+	return inf
+}
+
+func (inst *writeInfo) merge() []byte {
+	totalSize := uint32(0)
+	curInf := inst
+
+	for curInf != nil {
+		totalSize += curInf.sumSize
+		curInf = curInf.next
+	}
+
+	data := make([]byte, totalSize)
+	curInf = inst
+
+	curShift := 0
+
+	for curInf != nil {
+		for cursor := 0; cursor < curInf.cap; cursor++ {
+			curShift += copy(data[curShift:], *curInf.refs[cursor])
+		}
+		curInf = curInf.next
+	}
+	return data
+}
+
 func (inst *LangTable) Write() ([]byte, error) {
-	tabData := make([]byte, 0)
+	inf := writeInfo{}
+	curInf := &inf
 
 	var count uint32 = 0
 	var curSize uint32 = 0
@@ -214,10 +269,15 @@ func (inst *LangTable) Write() ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
-		tabData = append(tabData, next10...)
 
 		fCursize := curSize
 		fLen := uint32(len(next10))
+
+		curInf.add(&next10, fLen)
+
+		if curInf.isFull() {
+			curInf = curInf.createNext()
+		}
 
 		item := Lang.IndexItem{
 			BeginOff: &fCursize,
@@ -230,24 +290,30 @@ func (inst *LangTable) Write() ([]byte, error) {
 	}
 
 	indexData, err := proto.Marshal(&index)
+	idxLen := len(indexData)
 	if err != nil {
 		return nil, err
 	}
 
 	allData := make([]byte, 4)
-	writeInt(allData, len(indexData))
+	writeInt(allData, idxLen)
 
-	allData = append(allData, indexData...)
-	allData = append(allData, tabData...)
+	header := writeInfo{}
+	header.add(&allData, 4)
+	header.add(&indexData, uint32(idxLen))
+	header.next = &inf
 
-	return allData, nil
+	return header.merge(), nil
 }
 
 func (inst *LangTable) MakeIndex() {
 	index := make(map[string][]*Line)
 	inst.index = index
+	lines := inst.lines
 
-	for _, line := range inst.lines {
+	for cursor := range lines {
+		line := &lines[cursor]
+
 		prev := index[line.str]
 		if prev == nil {
 			arr := make([]*Line, 1)
@@ -256,16 +322,14 @@ func (inst *LangTable) MakeIndex() {
 		} else {
 			prev = append(prev, line)
 			index[line.str] = prev
-			//
-			//println("EXPAND KEY " + line.str)
 		}
 	}
 }
 
-func (inst *LangTable) findLine(index int64, id int64) *Line {
+func (inst *LangTable) findLine(index uint32, id uint32) *Line {
 	table := inst.lines
-	if index >= 0 && index < int64(len(table)) {
-		candidate := table[index]
+	if index < uint32(len(table)) {
+		candidate := &table[index]
 		if candidate.id == id {
 			return candidate
 		}
@@ -273,26 +337,29 @@ func (inst *LangTable) findLine(index int64, id int64) *Line {
 	if inst.ididx == nil {
 		inst.MakeIdIndex()
 	}
-	return inst.ididx[uint32(id)]
+	return inst.ididx[id]
 }
 
 func (inst *LangTable) MakeIdIndex() {
 	idIndex := make(map[uint32]*Line)
 	inst.ididx = idIndex
+	lines := inst.lines
 
-	for _, line := range inst.lines {
-		idIndex[uint32(line.id)] = line
+	for cursor := range lines {
+		line := &lines[cursor]
+		idIndex[line.id] = line
 	}
 }
 
-func writeNext10(from int, lines []*Line, count *uint32, indexId *uint32, temp *[10]*Lang.Item) ([]byte, error) {
+func writeNext10(from int, lines []Line, count *uint32, indexId *uint32, temp *[10]*Lang.Item) ([]byte, error) {
 	*count = 0
-	*indexId = uint32(lines[from].id / 10)
+	*indexId = lines[from].id / 10
+	lenLines := len(lines)
 
-	for i := from; i < from+10 && i < len(lines); i++ {
+	for i := from; i < from+10 && i < lenLines; i++ {
 		line := lines[i]
 
-		if (uint32(lines[i].id / 10)) != *indexId {
+		if (lines[i].id / 10) != *indexId {
 			break
 		}
 
@@ -332,4 +399,8 @@ func readInt(buf []byte) int {
 		int(buf[2]&0xff)<<16 |
 		int(buf[1]&0xff)<<8 |
 		int(buf[0]&0xff)
+}
+
+func getFlag(flags int, num int) bool {
+	return (flags >> num & 1) == 1
 }

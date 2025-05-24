@@ -23,7 +23,7 @@ const (
 
 type Item struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            *int64                 `protobuf:"varint,1,req,name=id" json:"id,omitempty"`
+	Id            *uint32                `protobuf:"varint,1,req,name=id" json:"id,omitempty"`
 	Name          *string                `protobuf:"bytes,2,opt,name=name" json:"name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -59,7 +59,7 @@ func (*Item) Descriptor() ([]byte, []int) {
 	return file_lang_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *Item) GetId() int64 {
+func (x *Item) GetId() uint32 {
 	if x != nil && x.Id != nil {
 		return *x.Id
 	}
@@ -236,7 +236,7 @@ const file_lang_proto_rawDesc = "" +
 	"\n" +
 	"lang.proto\x12\bprotobuf\"*\n" +
 	"\x04Item\x12\x0e\n" +
-	"\x02id\x18\x01 \x02(\x03R\x02id\x12\x12\n" +
+	"\x02id\x18\x01 \x02(\rR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\"?\n" +
 	"\tIndexItem\x12\x1a\n" +
 	"\bbeginOff\x18\x01 \x02(\rR\bbeginOff\x12\x16\n" +

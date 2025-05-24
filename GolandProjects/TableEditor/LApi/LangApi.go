@@ -68,7 +68,7 @@ func ApplyMappings(id int, data []byte) int {
 }
 
 //export ExportMappings
-func ExportMappings(kId int, valId int, actual bool, useId bool) int {
+func ExportMappings(kId int, valId int, flags int) int {
 	if packs == nil {
 		return -1
 	}
@@ -82,7 +82,7 @@ func ExportMappings(kId int, valId int, actual bool, useId bool) int {
 	}
 
 	mappngs := Pack.LangMapping{}
-	mappngs.UseOf(pack.table, pack2.table, actual, useId)
+	mappngs.UseOf(pack.table, pack2.table, flags)
 
 	result, err := mappngs.Write()
 	if err != nil {
