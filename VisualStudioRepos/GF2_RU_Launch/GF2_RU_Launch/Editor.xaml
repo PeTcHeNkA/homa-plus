@@ -31,8 +31,9 @@
                     <MenuItem Header="Шаблон .bytes" Click="onClickLoad"></MenuItem>
                     <MenuItem Header="Релиз .bytes" Click="onClickLoadSecond"></MenuItem>
                     <MenuItem Header="Карта переводов .json" Click="onClickLoadLang"></MenuItem>
+                    <MenuItem Header="Папка с переводами" Click="onClickLoadLandDir"></MenuItem>
                     <MenuItem Header="Установленный пакет локализации" Click="onClickLoadActivePack"></MenuItem>
-                    <MenuItem Header="Правила сортировки .json" Click="onClicImportSortTable"></MenuItem>
+                    <MenuItem Header="Правила сортировки .txt" Click="onClicImportSortTable"></MenuItem>
                 </MenuItem>
                 <MenuItem Header="Экспорт" >
                     <MenuItem Header="Релиз .bytes" Click="onClickExportLangBytes"></MenuItem>

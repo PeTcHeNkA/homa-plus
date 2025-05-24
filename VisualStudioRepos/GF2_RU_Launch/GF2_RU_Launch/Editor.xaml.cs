@@ -429,15 +429,73 @@ namespace GF2_RU_Launch
                 return;
             }
 
-            var dataBytes = open("Выберите карту переводов mappings.json", ".json", "mappings.json|*.json");
-            if (dataBytes == null)
+            var result = OpenFiles("Выберите карту переводов mappings.json", ".json", "mappings.json|*.json");
+            if (result == null)
             {
                 return;
             }
-
-            table1.applyMappngs(dataBytes);
+            LoadJsonTranslations(result);
 
             onCompleteImport();
+        }
+
+
+        private void onClickLoadLandDir(object sender, RoutedEventArgs e)
+        {
+            string? dir = VisualGetDir("Выберите папку с переводами");
+            if (dir != null) 
+            { 
+                DirectoryInfo info = new DirectoryInfo(dir);
+                var paths = ScanFileTreeForLangs(info, ".json");
+                LoadJsonTranslations(paths);
+                onCompleteImport();
+            }
+        }
+
+
+        public static List<string>? OpenFiles(string title, string ext, string filter)
+        {
+            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+
+            dlg.Title = title;
+            dlg.DefaultExt = ext;
+            dlg.Filter = filter;
+            dlg.Multiselect = true;
+
+            Nullable<bool> result = dlg.ShowDialog();
+
+            if (result == true)
+            {
+                return new List<string>(dlg.FileNames);
+            }
+            return null;
+        }
+
+
+        private List<string> ScanFileTreeForLangs(DirectoryInfo dir, string extension)
+        {
+            if (!dir.Exists) return Enumerable.Empty<string>().ToList();
+
+            var files = new List<string>();
+
+            foreach (var subDir in dir.EnumerateDirectories())
+            {
+                files.AddRange(ScanFileTreeForLangs(subDir, extension));
+            }
+
+            files.AddRange(dir.EnumerateFiles().Where(inf => inf.Extension == extension)
+                .Select(inf => inf.FullName)
+            );
+            return files;
+        }
+
+
+        private void LoadJsonTranslations(List<string> paths)
+        {
+            paths.AsParallel().ForAll(str => {
+                var data = File.ReadAllBytes(str);
+                table1.applyMappngs(data);
+            });
         }
 
 
@@ -477,7 +535,7 @@ namespace GF2_RU_Launch
 
         private string? getAndCheckDir(string lore)
         {
-            var dirName = getSaveDir(lore);
+            var dirName = VisualGetDir(lore);
             if (dirName == null) return null;
             try
             {
@@ -825,7 +883,21 @@ namespace GF2_RU_Launch
             }
         }
 
-        public static string? getSaveDir(string title)
+
+        public static string? VisualGetDir(string title)
+        {
+            
+            string? result = null;
+            if (EnsureDirModLoaded())
+            {
+                result = GetOpenDiU(title);
+            }
+
+            return result;
+        }
+
+
+        private static bool EnsureDirModLoaded()
         {
             if (openDialogFlag == 0)
             {
@@ -845,20 +917,13 @@ namespace GF2_RU_Launch
             if (openDialogFlag == 2)
             {
                 MessageBox.Show("Модуль выбора дериктории отсутствует.");
-                return null;
+                return false;
             }
-
-            string? result = null;
-            if (openDialogFlag == 1)
-            {
-                result = getSaveDiU(title);
-            }
-
-            return result;
+            return true;
         }
 
 
-        private static string? getSaveDiU(string title)
+        private static string? GetOpenDiU(string title)
         {
             try
             {
