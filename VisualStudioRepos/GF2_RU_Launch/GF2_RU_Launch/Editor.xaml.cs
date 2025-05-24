@@ -1,5 +1,4 @@
-﻿using System.Collections.Concurrent;
-using System.IO;
+﻿using System.IO;
 using System.Text;
 using System.Windows;
 using SourceChord.FluentWPF;
@@ -9,7 +8,6 @@ using Microsoft.VisualBasic;
 using SortJsonUtils;
 using System.Windows.Data;
 using Microsoft.WindowsAPICodePack.Dialogs;
-using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Group = SortJsonUtils.Group;
 using LangEditAPI;
@@ -211,17 +209,23 @@ namespace GF2_RU_Launch
             locked = true;
             Task.Run(() =>
             {
-                onClickLoad0();
-                if (table1 == null)
-                {
-                    locked = false;
-                    return;
-                }
+                var dataBytes = open("Выберите шаблон Lang.bytes", ".bytes", "Lang.bytes|*.bytes");
+                if (dataBytes == null)return;
+                
+                if (table1 != null)table1.free();
 
-                var jData = table1.exportMappings(table2, 0xf);
+                Dispatcher.Invoke(() =>{
+                    table1 = new LangEditAPI.Table(1);
+                    table1.load(dataBytes);
 
-                Dispatcher.Invoke(() =>
-                {
+                    if (table1 == null)
+                    {
+                        locked = false;
+                        return;
+                    }
+
+                    var jData = table1.exportMappings(table2, 0xf);
+
                     locked = false;
                     onCompleteImportB(jData);
                 });
@@ -305,24 +309,6 @@ namespace GF2_RU_Launch
                 table2 = new LangEditAPI.Table(2);
                 table2.load(curBytes);
             }
-        }
-
-
-        private void onClickLoad0()
-        {
-            var dataBytes = open("Выберите шаблон Lang.bytes", ".bytes", "Lang.bytes|*.bytes");
-            if (dataBytes == null)
-            {
-                return;
-            }
-
-            if (table1 != null)
-            {
-                table1.free();
-            }
-
-            table1 = new LangEditAPI.Table(1);
-            table1.load(dataBytes);
         }
 
 
@@ -550,8 +536,10 @@ namespace GF2_RU_Launch
 
         private static void LoadJsonTranslations(Table table, List<string> paths)
         {
-            paths.AsParallel().ForAll(str => {
-                var data = File.ReadAllBytes(str);
+            paths.AsParallel().Select(str => {
+                return File.ReadAllBytes(str);
+
+            }).ForAll(data => {
                 table.applyMappngs(data);
             });
         }
