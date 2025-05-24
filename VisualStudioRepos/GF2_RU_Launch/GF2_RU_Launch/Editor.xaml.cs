@@ -12,6 +12,7 @@ using Microsoft.WindowsAPICodePack.Dialogs;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Group = SortJsonUtils.Group;
+using LangEditAPI;
 
 
 namespace GF2_RU_Launch
@@ -36,6 +37,22 @@ namespace GF2_RU_Launch
         {
             parent = main;
 
+            if (!EnsureEditorLoaded())
+            {
+                Close();
+                return;
+            }
+
+            InitializeComponent();
+            SetExtendViewIntoTitleBar(this, true);
+            TTable.ItemsSource = viewData;
+
+            var view = CollectionViewSource.GetDefaultView(TTable.ItemsSource);
+        }
+
+
+        public static bool EnsureEditorLoaded()
+        {
             if (tableEditorFlag == 0)
             {
                 var i1 = MainWindow.ensureNativeInstalled("langedit.dll");
@@ -52,15 +69,51 @@ namespace GF2_RU_Launch
             if (tableEditorFlag == 2)
             {
                 MessageBox.Show("Модуль редактора таблц не установлен!");
-                Close();
-                return;
+                return false;
             }
+            return true;
+        }
 
-            InitializeComponent();
-            SetExtendViewIntoTitleBar(this, true);
-            TTable.ItemsSource = viewData;
 
-            var view = CollectionViewSource.GetDefaultView(TTable.ItemsSource);
+        public static bool BuildPackNogui(MainWindow? w, string srcPackPath, string srcDir1, string? srcDir2, string outPath)
+        {
+            var src1 = ScanFileTreeForLangs(new DirectoryInfo(srcPackPath), ".json");
+            var src2 = ScanFileTreeForLangs(new DirectoryInfo(srcPackPath), ".json");
+
+            return BuildPackNogui(w, srcPackPath, src1, src2, outPath);
+        }
+
+
+        public static bool BuildPackNogui(MainWindow? w, string srcPackPath, List<string> srcJson1, List<string>? srcJson2, string outPath)
+        {
+            if (!EnsureEditorLoaded())
+            {
+                return false;
+            }
+            Table table = new Table(101);
+            try
+            {
+                table.load(File.ReadAllBytes(srcPackPath));
+
+                LoadJsonTranslations(table, srcJson1);
+                if(srcJson2 != null)
+                {
+                    LoadJsonTranslations(table, srcJson2);
+                }
+                File.WriteAllBytes(outPath, table.save());
+            } catch
+            {
+                if(w != null)
+                {
+                    w.onError();
+                }
+                return false;
+            }
+            finally
+            {
+                table.free();
+            }
+            return true;
         }
 
 
@@ -434,7 +487,7 @@ namespace GF2_RU_Launch
             {
                 return;
             }
-            LoadJsonTranslations(result);
+            LoadJsonTranslations(table1, result);
 
             onCompleteImport();
         }
@@ -442,12 +495,17 @@ namespace GF2_RU_Launch
 
         private void onClickLoadLandDir(object sender, RoutedEventArgs e)
         {
+            if (table1 == null)
+            {
+                wanEmptyTable();
+                return;
+            }
             string? dir = VisualGetDir("Выберите папку с переводами");
             if (dir != null) 
             { 
                 DirectoryInfo info = new DirectoryInfo(dir);
                 var paths = ScanFileTreeForLangs(info, ".json");
-                LoadJsonTranslations(paths);
+                LoadJsonTranslations(table1, paths);
                 onCompleteImport();
             }
         }
@@ -472,7 +530,7 @@ namespace GF2_RU_Launch
         }
 
 
-        private List<string> ScanFileTreeForLangs(DirectoryInfo dir, string extension)
+        private static List<string> ScanFileTreeForLangs(DirectoryInfo dir, string extension)
         {
             if (!dir.Exists) return Enumerable.Empty<string>().ToList();
 
@@ -490,11 +548,11 @@ namespace GF2_RU_Launch
         }
 
 
-        private void LoadJsonTranslations(List<string> paths)
+        private static void LoadJsonTranslations(Table table, List<string> paths)
         {
             paths.AsParallel().ForAll(str => {
                 var data = File.ReadAllBytes(str);
-                table1.applyMappngs(data);
+                table.applyMappngs(data);
             });
         }
 

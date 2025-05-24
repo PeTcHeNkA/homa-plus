@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Markup;
 using System.Windows.Media.Imaging;
+using LangEditAPI;
 using SourceChord.FluentWPF;
 
 //using Google.Apis.Services;
@@ -20,9 +21,10 @@ namespace GF2_RU_Launch;
 public partial class MainWindow : AcrylicWindow{
     public static string GF2_DATA_TABLE    = "GF2_Exilium_Data/LocalCache/Data/Table";
     public static string GF2_LANG_PACK     = "/LangPackageTableEnusData.bytes";
-    public static string GF2_LANG_BACKUP   = "./backups/LangPackageTableEnusData.bytes";
-    public static string GF2_RU_PACK       = "./loadings/LangPack.bytes";
-    public static string GF2_LOAD_URL      = "https://gitlab.com/homaplus/grils-frontline-team-translate/-/raw/%__BRANCH%__%/LangPackageTableEnusDataRES.bytes?ref_type=heads&inline=false";
+    public static string GF2_LANG_BACKUP   = "./data/BACKUP_LangPackageTableEnusData.bytes";
+    public static string GF2_RU_PACK       = "./data/LangPackageRU.bytes";
+    public static string GF2_RU_PACK_JSON  = "./data/translation_ru.json";
+    public static string GF2_LOAD_URL      = "https://gitlab.com/homaplus/grils-frontline-team-translate/-/raw/%__BRANCH%__%/translations_release.json?ref_type=heads&inline=false";
     public static string GF2_CHANGELOG_URL = "https://gitlab.com/homaplus/grils-frontline-team-translate/-/raw/%__BRANCH%__%/Changelog.md?ref_type=heads&inline=false";
     public static string NATIVES_LOAD_URL  = "https://gitlab.com/homaplus/girls-frontline-2-exilium-ru-launcher/-/raw/natives/%__FILE__%?ref_type=heads&inline=false";
     
@@ -317,6 +319,7 @@ public partial class MainWindow : AcrylicWindow{
             var resultT = checkVersion();
             bool result = resultT.Item1;
             bool completed = false;
+            bool building  = false;
 
             Dispatcher.Invoke(() => {
                 BTnPlayInstall.Content = "Загрузка обновлений.";
@@ -343,7 +346,14 @@ public partial class MainWindow : AcrylicWindow{
                                 add += " ";
                             }
                             if (completed)return;
-                            BTnPlayInstall.Content = "Загрузка обновлений ."+add;
+                            if (building)
+                            {
+                                BTnPlayInstall.Content = "Сборка пакета ." + add;
+                            }
+                            else
+                            {
+                                BTnPlayInstall.Content = "Загрузка обновлений ." + add;
+                            }
                         });
                     }
                 });
@@ -360,7 +370,7 @@ public partial class MainWindow : AcrylicWindow{
             {
                 try
                 {
-                    loaded = load(getLoadPackUrl(), GF2_RU_PACK);
+                    loaded = load(getLoadPackUrl(), GF2_RU_PACK_JSON);
                 }
                 catch (Exception e)
                 {
@@ -368,23 +378,81 @@ public partial class MainWindow : AcrylicWindow{
                         MessageBox.Show("Ошибка загрузки обновления!");
                     });
                 }
+                if (loaded)
+                {
+                    if (!Editor.EnsureEditorLoaded())
+                    {
+                        onPostLoad(false, ref completed);
+                        return;
+                    }
+                    building = true;
+
+                    byte[]? jBytes, pBytes;
+                    try
+                    {
+                        jBytes = File.ReadAllBytes(GF2_RU_PACK_JSON);
+                        pBytes = File.ReadAllBytes(getLangPackPath());
+                    } catch
+                    {
+                        Dispatcher.Invoke(() => {
+                            MessageBox.Show("Ошибка загрузки обновления!");
+                        });
+                        onPostLoad(false, ref completed);
+                        return;
+                    }
+
+                    Dispatcher.Invoke(() =>
+                    {
+                        Table table = new Table(101);
+                        table.load(pBytes);
+                        table.applyMappngs(jBytes);
+
+                        var eData = table.save();
+
+                        Task.Run(() => {
+                            try
+                            {
+                                File.WriteAllBytes(GF2_RU_PACK, eData);
+                                onPostLoad(true, ref completed);
+                            }
+                            catch
+                            {
+                                onPostLoad(false, ref completed);
+                                Dispatcher.Invoke(() => {
+                                    MessageBox.Show("Ошибка сборки пакета!");
+                                });
+                            }
+                            finally
+                            {
+                                table.free();
+                            }
+                        });
+                    });
+                }
             } 
             else
             {
                 loaded = true;
+                onPostLoad(true, ref completed);
             }
+        });
+    }
 
-            if (loaded)
-            {
-                needLoadPack = false;
-            }
-            completed = true;
+
+    private void onPostLoad(bool loaded, ref bool completed)
+    {
+        if (loaded)
+        {
+            needLoadPack = false;
+        }
+        completed = true;
+        if (loaded)
+        {
             installLoadedPack();
-
-            Dispatcher.Invoke(() => {
-                locked = false;
-                editBtnStatus(loaded, false);
-            });
+        }
+        Dispatcher.Invoke(() => {
+            locked = false;
+            editBtnStatus(loaded, false);
         });
     }
 
