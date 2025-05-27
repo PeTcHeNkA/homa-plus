@@ -59,6 +59,15 @@ message AvgContentGroup{
   repeated AvgContent data = 1;
 }
 
+message VideoSubtitle{
+  optional uint32 id = 1;
+  optional TRef data = 2;
+}
+
+message VideoSubtitleGroup{
+  repeated VideoSubtitle data = 1;
+}
+
 //All file
 //0-4 bytes - int32, len of BData
 //Index

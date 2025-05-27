@@ -18,7 +18,8 @@ public class ReadFuncRegistry {
     }
 
     static {
-        reg("itemgetlist", ItemGetListProc::new);
-        reg("avgcontent" , AvgContentProc::new);
+        reg("itemgetlist"  , ItemGetListProc::new);
+        reg("avgcontent"   , AvgContentProc::new);
+        reg("videosubtitle", VideoSubtitleProc::new);
     }
 }

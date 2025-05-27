@@ -92,6 +92,10 @@ public class GroupScanner {
         IntFuncExecutor readFunc = ReadFuncRegistry.create(finalGroupName);
         readFunc.readFrom(file);
         readFunc.apply(func);
+//
+//        if(finalGroupName.equals("videosubtitle")){
+//            System.out.println("NEN");
+//        }
     }
 
 
@@ -100,10 +104,11 @@ public class GroupScanner {
             "collection", "cloth", "control", "dungeon", "guide", "guild", "item", "kittycafe", "tpss",
             "unlock", "weekly", "stsp", "sim", "rogue", "rich", "player", "shortcut", "store", "warmup",
             "nrt", "love", "handmode", "enemy", "event", "festival", "information", "language", "rouge",
-            "supply", "bp", "element", "difficulty", "tutorial", "stage"
+            "supply", "bp", "element", "difficulty", "tutorial", "stage", "amoactivity", "back", "candycatch",
+            "character", "combat", "command"
     };
     private static final String[] shortSubGroups = new String[]{
-        "monopoly", "sandbox", "repository", "handmade", "highpvp"
+        "monopoly", "sandbox", "repository", "handmade", "highpvp", "squad", "story"
     };
 
     public String getClazzName(ELine line){
