@@ -45,7 +45,7 @@ public class JsonUtils {
     /**
      * Записать Map в json-файл с указанным типом
      */
-    public static void writeFile(String path, Map<String, String> map, Type type) {
+    public static void writeFile(String path, Iterable<Map.Entry<String, String>> map, Type type) {
         File file = new File(path);
         createPathIfNeed(file);
 
@@ -57,9 +57,9 @@ public class JsonUtils {
             jw.setIndent("  ");
 
             jw.beginObject();
-            map.forEach((s, s2) -> {
+            map.forEach(s -> {
                 try {
-                    jw.name(s).value(s2);
+                    jw.name(s.getKey()).value(s.getValue());
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }

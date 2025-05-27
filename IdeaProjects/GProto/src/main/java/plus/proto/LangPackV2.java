@@ -3,9 +3,9 @@ package plus.proto;
 
 import com.google.protobuf.CodedOutputStream;
 import com.google.protobuf.InvalidProtocolBufferException;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import plus.proto.lang.TableData;
 import plus.tson.TsonFile;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -13,9 +13,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 
-public class LangPackV2 {
+public class LangPackV2<T extends LangPackV2.Line> {
     private Line[] lines;
     private HashMap<String, Object> index = new HashMap<>();
+    private Int2ObjectOpenHashMap<Line> idIndex = new Int2ObjectOpenHashMap<>();
     private int dist = 10;
     private boolean sect = true;
 
@@ -77,10 +78,10 @@ public class LangPackV2 {
     }
 
 
-    private static void writeNext10(int from, Line[] lines, CodedOutputStream out, WriteCallback c) throws IOException {
+    public static void writeNext10(int from, Line[] lines, CodedOutputStream out, WriteCallback c) throws IOException {
         c.startOff = out.getTotalBytesWritten();
 
-        int indexId = (int) (lines[from].id / 10);
+        int indexId = lines[from].id / 10;
         int count = 0;
 
         for (int i = from; i < from + 10 && i < lines.length; i++){
@@ -98,7 +99,7 @@ public class LangPackV2 {
     }
 
 
-    private static class WriteCallback{
+    public static class WriteCallback{
         int index;
         int count    = 0;
         int bLen = 0;
@@ -108,8 +109,11 @@ public class LangPackV2 {
 
     private void makeIndex(){
         HashMap<String, Object> index = this.index;
+        Int2ObjectOpenHashMap<Line> idIndex = this.idIndex;
+
         index.clear();
         for (Line line : lines){
+            idIndex.put((int)line.id, line);
             Object prev = index.put(line.src, line);
             if(prev != null){
                 if (prev instanceof Line){
@@ -126,17 +130,37 @@ public class LangPackV2 {
     }
 
 
-    public static Line[] readLines(TableData.Translations translations) {
+    public Line[] readLines(TableData.Translations translations) {
         Line[] result = new Line[translations.getDataCount()];
         for (int i = 0; i < translations.getDataCount(); i++) {
             TableData.Item data = translations.getData(i);
-            result[i] = new Line(data.getId(), i, data.getName());
+            result[i] = createLine((int)data.getId(), i, data.getName());
         }
         return result;
     }
 
 
-    private static byte[] copy(byte[] data, int from, int len){
+    public T createLine(int id, int index, String src){
+        return (T)new Line(id, index, src);
+    }
+
+
+    public T getLineById(int id){
+        return (T)idIndex.get(id);
+    }
+
+
+    public T getLineByIndex(int index){
+        return (T)lines[index];
+    }
+
+
+    public int size(){
+        return lines.length;
+    }
+
+
+    static byte[] copy(byte[] data, int from, int len){
         byte[] result = new byte[len];
         System.arraycopy(data, from, result, 0, len);
         return result;
@@ -160,11 +184,11 @@ public class LangPackV2 {
 
 
     public static class Line implements Comparable<Line> {
-        public final long id, index;
+        public final int id, index;
         public final String src;
         public String actual;
 
-        private Line(long id, int index, String src) {
+        public Line(int id, int index, String src) {
             this.id = id;
             this.index = index;
             this.src = src;

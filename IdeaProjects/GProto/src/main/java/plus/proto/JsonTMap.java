@@ -35,6 +35,6 @@ public class JsonTMap {
                 invalid.put(entry.getKey(), entry.getValue());
         }
         if(logInvalid && !invalid.isEmpty())
-            JsonUtils.writeFile("invalid.json", invalid, JsonUtils.Type.UTF8);
+            JsonUtils.writeFile("invalid.json", invalid.entrySet(), JsonUtils.Type.UTF8);
     }
 }

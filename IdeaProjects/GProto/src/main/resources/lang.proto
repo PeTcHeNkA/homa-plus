@@ -24,6 +24,18 @@ message Translations {
   repeated Item data = 1;
 }
 
+message TRef{
+  required uint32 id = 1;
+}
+
+message UnknownGroup{
+  repeated Unknown data = 1;
+}
+
+message Unknown{
+
+}
+
 //All file
 //0-4 bytes - int32, len of BData
 //Index
