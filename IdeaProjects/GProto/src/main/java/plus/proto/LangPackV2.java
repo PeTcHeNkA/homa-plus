@@ -160,7 +160,7 @@ public class LangPackV2<T extends LangPackV2.Line> {
     }
 
 
-    static byte[] copy(byte[] data, int from, int len){
+    public static byte[] copy(byte[] data, int from, int len){
         byte[] result = new byte[len];
         System.arraycopy(data, from, result, 0, len);
         return result;

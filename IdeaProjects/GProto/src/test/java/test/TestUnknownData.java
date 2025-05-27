@@ -1,8 +1,5 @@
 package test;
 
-import plus.proto.UPack;
-import java.io.File;
-
 
 public class TestUnknownData {
     public static final String PRE = "C:\\Games\\GF2Exilium\\GF2 Game\\GF2_Exilium_Data\\LocalCache\\Data\\Table/".replace('\\', '/');
@@ -12,7 +9,7 @@ public class TestUnknownData {
     }
 
     public static void main(String[] args) throws Exception {
-        UPack pack = new UPack(src("StoryData"));
+        //UPack pack = new UPack(src("StoryData"));
 
         //System.out.println(pack.tryFindStrIDS());
 //        System.out.println(pack);

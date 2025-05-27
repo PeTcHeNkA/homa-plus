@@ -25,7 +25,7 @@ message Translations {
 }
 
 message TRef{
-  required uint32 id = 1;
+  required int64 id = 1;
 }
 
 message UnknownGroup{
@@ -36,6 +36,18 @@ message Unknown{
 
 }
 
+message ItemGetList{
+  optional uint32 id = 1;
+  optional uint32 type = 2;
+  optional TRef title = 3;
+  optional bool canJump = 4;
+  optional string jumpC = 5;
+  optional uint32 quickBye = 6;
+}
+
+message ItemGetListGroup{
+  repeated ItemGetList data = 1;
+}
 //All file
 //0-4 bytes - int32, len of BData
 //Index

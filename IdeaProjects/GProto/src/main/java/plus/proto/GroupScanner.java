@@ -1,6 +1,10 @@
 package plus.proto;
 
 import com.google.protobuf.InvalidProtocolBufferException;
+import plus.proto.tparsers.IntConsumer;
+import plus.proto.tparsers.IntFuncExecutor;
+import plus.proto.tparsers.ReadFuncRegistry;
+
 import java.io.File;
 import java.util.*;
 import java.util.function.Function;
@@ -60,20 +64,22 @@ public class GroupScanner {
         String groupName = file.getName().toLowerCase();
         String finalGroupName = groupName.substring(0, groupName.length()-10);
 
-        UPack pack1 = new UPack(file);
-        pack1.tryFindStrIDS(new UPack.IntConsumer() {
+        IntConsumer func = new IntConsumer() {
             int index = 0;
-            @Override
             public void apply(int id) {
                 ELine line = pack.getLineById(id);
-                if(line != null){
+                if (line != null) {
                     line.viewSortIdx = index;
                     line.classes.add(
                             finalGroupName);
                 }
                 index += 1;
             }
-        });
+        };
+
+        IntFuncExecutor readFunc = ReadFuncRegistry.create(finalGroupName);
+        readFunc.readFrom(file);
+        readFunc.apply(func);
     }
 
 
