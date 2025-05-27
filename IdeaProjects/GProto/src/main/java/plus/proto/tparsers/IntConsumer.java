@@ -1,8 +1,15 @@
 package plus.proto.tparsers;
 
+
 public interface IntConsumer {
-    void apply(int id);
-    default void apply(long id){
-        apply((int)id);
-    }
+    int index();
+
+
+    void setIndex(int index);
+
+
+    String gefGroup();
+
+
+    void apply(String group, int id);
 }

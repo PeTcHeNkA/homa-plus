@@ -48,6 +48,17 @@ message ItemGetList{
 message ItemGetListGroup{
   repeated ItemGetList data = 1;
 }
+
+message AvgContent{
+  optional uint32 id = 1;
+  optional TRef data1 = 2;
+  optional TRef data2 = 3;
+}
+
+message AvgContentGroup{
+  repeated AvgContent data = 1;
+}
+
 //All file
 //0-4 bytes - int32, len of BData
 //Index

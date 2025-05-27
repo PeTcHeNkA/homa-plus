@@ -35,7 +35,7 @@ public class UPack implements IntFuncExecutor {
             try {
                 TableData.TRef ref = TableData.TRef.parseFrom(bs);
                 if(ref.hasId())
-                    consumer.apply(ref.getId());
+                    consumer.apply(consumer.gefGroup(), (int)ref.getId());
                 checkAll(ref.getUnknownFields(), consumer);
             } catch (Exception err){
                 continue;

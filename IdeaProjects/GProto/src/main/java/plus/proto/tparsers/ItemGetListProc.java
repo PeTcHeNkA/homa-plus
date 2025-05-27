@@ -17,7 +17,7 @@ public class ItemGetListProc implements IntFuncExecutor{
         for (int i = 0; i < count; i++){
             TableData.ItemGetList data = group.getData(i);
             if(data.hasTitle())
-                consumer.apply(data.getTitle().getId());
+                consumer.apply(consumer.gefGroup(), (int)data.getTitle().getId());
         }
     }
 }

@@ -4,7 +4,6 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import plus.proto.tparsers.IntConsumer;
 import plus.proto.tparsers.IntFuncExecutor;
 import plus.proto.tparsers.ReadFuncRegistry;
-
 import java.io.File;
 import java.util.*;
 import java.util.function.Function;
@@ -45,6 +44,11 @@ public class GroupScanner {
     }
 
 
+    public EPack getPack(){
+        return pack;
+    }
+
+
     public GroupScanner scanUsages(){
         for (File file:new DeepFileIter(new File(this.root))){
             if(file == null)continue;
@@ -66,12 +70,20 @@ public class GroupScanner {
 
         IntConsumer func = new IntConsumer() {
             int index = 0;
-            public void apply(int id) {
+            public void setIndex(int index) {
+                this.index = index;
+            }
+            public int index() {
+                return index;
+            }
+            public String gefGroup() {
+                return finalGroupName;
+            }
+            public void apply(String group, int id) {
                 ELine line = pack.getLineById(id);
                 if (line != null) {
                     line.viewSortIdx = index;
-                    line.classes.add(
-                            finalGroupName);
+                    line.classes.add(group);
                 }
                 index += 1;
             }
@@ -83,35 +95,77 @@ public class GroupScanner {
     }
 
 
-    public void export(String exportRoot){
+    private static final String[] subGroups = new String[]{
+            "darkzone", "skill", "mail", "weapon", "activity", "achievement", "battle",
+            "collection", "cloth", "control", "dungeon", "guide", "guild", "item", "kittycafe", "tpss",
+            "unlock", "weekly", "stsp", "sim", "rogue", "rich", "player", "shortcut", "store", "warmup",
+            "nrt", "love", "handmode", "enemy", "event", "festival", "information", "language", "rouge",
+            "supply", "bp", "element", "difficulty", "tutorial", "stage"
+    };
+    private static final String[] shortSubGroups = new String[]{
+        "monopoly", "sandbox", "repository", "handmade", "highpvp"
+    };
+
+    public String getClazzName(ELine line){
+        String clazz = line.getPriorityClazz();
+
+        if(clazz.startsWith("gun")){
+            return "weapon/"+substrSmart(clazz, 3);
+        }
+        if(clazz.startsWith("dz")){
+            return "darkzone/"+substrSmart(clazz, 2);
+        }
+
+        for (String sub : subGroups){
+            if(clazz.startsWith(sub))
+                return sub+"/"+substrSmart(clazz, sub.length());
+        }
+
+        for (String sub : shortSubGroups){
+            if(clazz.startsWith(sub))
+                return sub;
+        }
+
+        return clazz;
+    }
+
+
+    private static String substrSmart(String str, int start){
+        int len = str.length();
+        if(start >= len)return "common";
+        return str.substring(start);
+    }
+
+
+    public void export(String exportRoot, boolean writeId){
         HashMap<String, ArrayList<ELine>> groups = new HashMap<>();
         int size = pack.size();
 
         for (int i = 0; i < size; i++){
             ELine line = pack.getLineByIndex(i);
-            String clazz = line.getPriorityClazz();
+            String clazz = getClazzName(line);
             ArrayList<ELine> gr = groups.computeIfAbsent(clazz, NEW_LIST);
             gr.add(line);
         }
 
         groups.forEach((name, eLines) -> {
             eLines.sort(E_LINE_COMPARATOR);
-            JsonUtils.writeFile(exportRoot+"/"+name+".json", new ELineSaveIter(eLines), JsonUtils.Type.UTF8);
+            JsonUtils.writeFile(exportRoot+"/"+name+".json", new ELineSaveIter(eLines, writeId), JsonUtils.Type.UTF8);
         });
     }
 
 
-    private static class ELineSaveIter implements Iterable<Map.Entry<String, String>>, Map.Entry<String, String>, Iterator<Map.Entry<String, String>>{
+    private class ELineSaveIter implements Iterable<Map.Entry<String, String>>, Map.Entry<String, String>, Iterator<Map.Entry<String, String>>{
         private final ArrayList<ELine> eLines;
         private ELine current, next;
         int index = 0;
+        private final boolean writeId;
 
-        private ELineSaveIter(ArrayList<ELine> eLines) {
+        private ELineSaveIter(ArrayList<ELine> eLines, boolean writeId) {
             this.eLines = eLines;
+            this.writeId = writeId;
             if(!eLines.isEmpty()) {
-                current = eLines.get(0);
-                if (eLines.size() >= 2)
-                    next = eLines.get(1);
+                current = next = eLines.get(0);
                 index = 1;
             }
         }
@@ -125,8 +179,14 @@ public class GroupScanner {
 
         @Override
         public String getKey() {
+            if(writeId){
+                LangPackV2.Line[] lines = pack.getLines(current.src);
+                if(lines != null && lines.length != 1)
+                    return "ID#"+current.id+"|"+current.src;
+            }
             return current.src;
         }
+
 
         @Override
         public String getValue() {

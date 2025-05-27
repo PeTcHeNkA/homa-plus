@@ -19,5 +19,6 @@ public class ReadFuncRegistry {
 
     static {
         reg("itemgetlist", ItemGetListProc::new);
+        reg("avgcontent" , AvgContentProc::new);
     }
 }

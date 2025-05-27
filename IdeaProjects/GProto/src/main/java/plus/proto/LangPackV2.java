@@ -240,4 +240,13 @@ public class LangPackV2<T extends LangPackV2.Line> {
         }
         return true;
     }
+
+
+    public void mergeWith(LangPackV2<?> other){
+        for (Line line : other.lines){
+            T line1 = getLineById(line.id);
+            if(line1 != null)
+                line1.actual = line.getActual();
+        }
+    }
 }

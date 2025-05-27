@@ -6415,6 +6415,1648 @@ plus.proto.lang.TableData.IndexItem defaultValue) {
 
   }
 
+  public interface AvgContentOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:protobuf.AvgContent)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>optional uint32 id = 1;</code>
+     * @return Whether the id field is set.
+     */
+    boolean hasId();
+    /**
+     * <code>optional uint32 id = 1;</code>
+     * @return The id.
+     */
+    int getId();
+
+    /**
+     * <code>optional .protobuf.TRef data1 = 2;</code>
+     * @return Whether the data1 field is set.
+     */
+    boolean hasData1();
+    /**
+     * <code>optional .protobuf.TRef data1 = 2;</code>
+     * @return The data1.
+     */
+    plus.proto.lang.TableData.TRef getData1();
+    /**
+     * <code>optional .protobuf.TRef data1 = 2;</code>
+     */
+    plus.proto.lang.TableData.TRefOrBuilder getData1OrBuilder();
+
+    /**
+     * <code>optional .protobuf.TRef data2 = 3;</code>
+     * @return Whether the data2 field is set.
+     */
+    boolean hasData2();
+    /**
+     * <code>optional .protobuf.TRef data2 = 3;</code>
+     * @return The data2.
+     */
+    plus.proto.lang.TableData.TRef getData2();
+    /**
+     * <code>optional .protobuf.TRef data2 = 3;</code>
+     */
+    plus.proto.lang.TableData.TRefOrBuilder getData2OrBuilder();
+  }
+  /**
+   * Protobuf type {@code protobuf.AvgContent}
+   */
+  public static final class AvgContent extends
+      com.google.protobuf.GeneratedMessage implements
+      // @@protoc_insertion_point(message_implements:protobuf.AvgContent)
+      AvgContentOrBuilder {
+  private static final long serialVersionUID = 0L;
+    static {
+      com.google.protobuf.RuntimeVersion.validateProtobufGencodeVersion(
+        com.google.protobuf.RuntimeVersion.RuntimeDomain.PUBLIC,
+        /* major= */ 4,
+        /* minor= */ 30,
+        /* patch= */ 2,
+        /* suffix= */ "",
+        AvgContent.class.getName());
+    }
+    // Use AvgContent.newBuilder() to construct.
+    private AvgContent(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+    }
+    private AvgContent() {
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return plus.proto.lang.TableData.internal_static_protobuf_AvgContent_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return plus.proto.lang.TableData.internal_static_protobuf_AvgContent_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              plus.proto.lang.TableData.AvgContent.class, plus.proto.lang.TableData.AvgContent.Builder.class);
+    }
+
+    private int bitField0_;
+    public static final int ID_FIELD_NUMBER = 1;
+    private int id_ = 0;
+    /**
+     * <code>optional uint32 id = 1;</code>
+     * @return Whether the id field is set.
+     */
+    @java.lang.Override
+    public boolean hasId() {
+      return ((bitField0_ & 0x00000001) != 0);
+    }
+    /**
+     * <code>optional uint32 id = 1;</code>
+     * @return The id.
+     */
+    @java.lang.Override
+    public int getId() {
+      return id_;
+    }
+
+    public static final int DATA1_FIELD_NUMBER = 2;
+    private plus.proto.lang.TableData.TRef data1_;
+    /**
+     * <code>optional .protobuf.TRef data1 = 2;</code>
+     * @return Whether the data1 field is set.
+     */
+    @java.lang.Override
+    public boolean hasData1() {
+      return ((bitField0_ & 0x00000002) != 0);
+    }
+    /**
+     * <code>optional .protobuf.TRef data1 = 2;</code>
+     * @return The data1.
+     */
+    @java.lang.Override
+    public plus.proto.lang.TableData.TRef getData1() {
+      return data1_ == null ? plus.proto.lang.TableData.TRef.getDefaultInstance() : data1_;
+    }
+    /**
+     * <code>optional .protobuf.TRef data1 = 2;</code>
+     */
+    @java.lang.Override
+    public plus.proto.lang.TableData.TRefOrBuilder getData1OrBuilder() {
+      return data1_ == null ? plus.proto.lang.TableData.TRef.getDefaultInstance() : data1_;
+    }
+
+    public static final int DATA2_FIELD_NUMBER = 3;
+    private plus.proto.lang.TableData.TRef data2_;
+    /**
+     * <code>optional .protobuf.TRef data2 = 3;</code>
+     * @return Whether the data2 field is set.
+     */
+    @java.lang.Override
+    public boolean hasData2() {
+      return ((bitField0_ & 0x00000004) != 0);
+    }
+    /**
+     * <code>optional .protobuf.TRef data2 = 3;</code>
+     * @return The data2.
+     */
+    @java.lang.Override
+    public plus.proto.lang.TableData.TRef getData2() {
+      return data2_ == null ? plus.proto.lang.TableData.TRef.getDefaultInstance() : data2_;
+    }
+    /**
+     * <code>optional .protobuf.TRef data2 = 3;</code>
+     */
+    @java.lang.Override
+    public plus.proto.lang.TableData.TRefOrBuilder getData2OrBuilder() {
+      return data2_ == null ? plus.proto.lang.TableData.TRef.getDefaultInstance() : data2_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      if (hasData1()) {
+        if (!getData1().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      if (hasData2()) {
+        if (!getData2().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (((bitField0_ & 0x00000001) != 0)) {
+        output.writeUInt32(1, id_);
+      }
+      if (((bitField0_ & 0x00000002) != 0)) {
+        output.writeMessage(2, getData1());
+      }
+      if (((bitField0_ & 0x00000004) != 0)) {
+        output.writeMessage(3, getData2());
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(1, id_);
+      }
+      if (((bitField0_ & 0x00000002) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, getData1());
+      }
+      if (((bitField0_ & 0x00000004) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(3, getData2());
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof plus.proto.lang.TableData.AvgContent)) {
+        return super.equals(obj);
+      }
+      plus.proto.lang.TableData.AvgContent other = (plus.proto.lang.TableData.AvgContent) obj;
+
+      if (hasId() != other.hasId()) return false;
+      if (hasId()) {
+        if (getId()
+            != other.getId()) return false;
+      }
+      if (hasData1() != other.hasData1()) return false;
+      if (hasData1()) {
+        if (!getData1()
+            .equals(other.getData1())) return false;
+      }
+      if (hasData2() != other.hasData2()) return false;
+      if (hasData2()) {
+        if (!getData2()
+            .equals(other.getData2())) return false;
+      }
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (hasId()) {
+        hash = (37 * hash) + ID_FIELD_NUMBER;
+        hash = (53 * hash) + getId();
+      }
+      if (hasData1()) {
+        hash = (37 * hash) + DATA1_FIELD_NUMBER;
+        hash = (53 * hash) + getData1().hashCode();
+      }
+      if (hasData2()) {
+        hash = (37 * hash) + DATA2_FIELD_NUMBER;
+        hash = (53 * hash) + getData2().hashCode();
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static plus.proto.lang.TableData.AvgContent parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static plus.proto.lang.TableData.AvgContent parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static plus.proto.lang.TableData.AvgContent parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static plus.proto.lang.TableData.AvgContent parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static plus.proto.lang.TableData.AvgContent parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static plus.proto.lang.TableData.AvgContent parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static plus.proto.lang.TableData.AvgContent parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input);
+    }
+    public static plus.proto.lang.TableData.AvgContent parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static plus.proto.lang.TableData.AvgContent parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static plus.proto.lang.TableData.AvgContent parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static plus.proto.lang.TableData.AvgContent parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input);
+    }
+    public static plus.proto.lang.TableData.AvgContent parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(plus.proto.lang.TableData.AvgContent prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code protobuf.AvgContent}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:protobuf.AvgContent)
+        plus.proto.lang.TableData.AvgContentOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return plus.proto.lang.TableData.internal_static_protobuf_AvgContent_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return plus.proto.lang.TableData.internal_static_protobuf_AvgContent_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                plus.proto.lang.TableData.AvgContent.class, plus.proto.lang.TableData.AvgContent.Builder.class);
+      }
+
+      // Construct using plus.proto.lang.TableData.AvgContent.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage
+                .alwaysUseFieldBuilders) {
+          internalGetData1FieldBuilder();
+          internalGetData2FieldBuilder();
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        id_ = 0;
+        data1_ = null;
+        if (data1Builder_ != null) {
+          data1Builder_.dispose();
+          data1Builder_ = null;
+        }
+        data2_ = null;
+        if (data2Builder_ != null) {
+          data2Builder_.dispose();
+          data2Builder_ = null;
+        }
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return plus.proto.lang.TableData.internal_static_protobuf_AvgContent_descriptor;
+      }
+
+      @java.lang.Override
+      public plus.proto.lang.TableData.AvgContent getDefaultInstanceForType() {
+        return plus.proto.lang.TableData.AvgContent.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public plus.proto.lang.TableData.AvgContent build() {
+        plus.proto.lang.TableData.AvgContent result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public plus.proto.lang.TableData.AvgContent buildPartial() {
+        plus.proto.lang.TableData.AvgContent result = new plus.proto.lang.TableData.AvgContent(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(plus.proto.lang.TableData.AvgContent result) {
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.id_ = id_;
+          to_bitField0_ |= 0x00000001;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.data1_ = data1Builder_ == null
+              ? data1_
+              : data1Builder_.build();
+          to_bitField0_ |= 0x00000002;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.data2_ = data2Builder_ == null
+              ? data2_
+              : data2Builder_.build();
+          to_bitField0_ |= 0x00000004;
+        }
+        result.bitField0_ |= to_bitField0_;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof plus.proto.lang.TableData.AvgContent) {
+          return mergeFrom((plus.proto.lang.TableData.AvgContent)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(plus.proto.lang.TableData.AvgContent other) {
+        if (other == plus.proto.lang.TableData.AvgContent.getDefaultInstance()) return this;
+        if (other.hasId()) {
+          setId(other.getId());
+        }
+        if (other.hasData1()) {
+          mergeData1(other.getData1());
+        }
+        if (other.hasData2()) {
+          mergeData2(other.getData2());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        if (hasData1()) {
+          if (!getData1().isInitialized()) {
+            return false;
+          }
+        }
+        if (hasData2()) {
+          if (!getData2().isInitialized()) {
+            return false;
+          }
+        }
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                id_ = input.readUInt32();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 8
+              case 18: {
+                input.readMessage(
+                    internalGetData1FieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
+              case 26: {
+                input.readMessage(
+                    internalGetData2FieldBuilder().getBuilder(),
+                    extensionRegistry);
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 26
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private int id_ ;
+      /**
+       * <code>optional uint32 id = 1;</code>
+       * @return Whether the id field is set.
+       */
+      @java.lang.Override
+      public boolean hasId() {
+        return ((bitField0_ & 0x00000001) != 0);
+      }
+      /**
+       * <code>optional uint32 id = 1;</code>
+       * @return The id.
+       */
+      @java.lang.Override
+      public int getId() {
+        return id_;
+      }
+      /**
+       * <code>optional uint32 id = 1;</code>
+       * @param value The id to set.
+       * @return This builder for chaining.
+       */
+      public Builder setId(int value) {
+
+        id_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional uint32 id = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearId() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        id_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private plus.proto.lang.TableData.TRef data1_;
+      private com.google.protobuf.SingleFieldBuilder<
+          plus.proto.lang.TableData.TRef, plus.proto.lang.TableData.TRef.Builder, plus.proto.lang.TableData.TRefOrBuilder> data1Builder_;
+      /**
+       * <code>optional .protobuf.TRef data1 = 2;</code>
+       * @return Whether the data1 field is set.
+       */
+      public boolean hasData1() {
+        return ((bitField0_ & 0x00000002) != 0);
+      }
+      /**
+       * <code>optional .protobuf.TRef data1 = 2;</code>
+       * @return The data1.
+       */
+      public plus.proto.lang.TableData.TRef getData1() {
+        if (data1Builder_ == null) {
+          return data1_ == null ? plus.proto.lang.TableData.TRef.getDefaultInstance() : data1_;
+        } else {
+          return data1Builder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .protobuf.TRef data1 = 2;</code>
+       */
+      public Builder setData1(plus.proto.lang.TableData.TRef value) {
+        if (data1Builder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          data1_ = value;
+        } else {
+          data1Builder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .protobuf.TRef data1 = 2;</code>
+       */
+      public Builder setData1(
+          plus.proto.lang.TableData.TRef.Builder builderForValue) {
+        if (data1Builder_ == null) {
+          data1_ = builderForValue.build();
+        } else {
+          data1Builder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .protobuf.TRef data1 = 2;</code>
+       */
+      public Builder mergeData1(plus.proto.lang.TableData.TRef value) {
+        if (data1Builder_ == null) {
+          if (((bitField0_ & 0x00000002) != 0) &&
+            data1_ != null &&
+            data1_ != plus.proto.lang.TableData.TRef.getDefaultInstance()) {
+            getData1Builder().mergeFrom(value);
+          } else {
+            data1_ = value;
+          }
+        } else {
+          data1Builder_.mergeFrom(value);
+        }
+        if (data1_ != null) {
+          bitField0_ |= 0x00000002;
+          onChanged();
+        }
+        return this;
+      }
+      /**
+       * <code>optional .protobuf.TRef data1 = 2;</code>
+       */
+      public Builder clearData1() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        data1_ = null;
+        if (data1Builder_ != null) {
+          data1Builder_.dispose();
+          data1Builder_ = null;
+        }
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .protobuf.TRef data1 = 2;</code>
+       */
+      public plus.proto.lang.TableData.TRef.Builder getData1Builder() {
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return internalGetData1FieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .protobuf.TRef data1 = 2;</code>
+       */
+      public plus.proto.lang.TableData.TRefOrBuilder getData1OrBuilder() {
+        if (data1Builder_ != null) {
+          return data1Builder_.getMessageOrBuilder();
+        } else {
+          return data1_ == null ?
+              plus.proto.lang.TableData.TRef.getDefaultInstance() : data1_;
+        }
+      }
+      /**
+       * <code>optional .protobuf.TRef data1 = 2;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          plus.proto.lang.TableData.TRef, plus.proto.lang.TableData.TRef.Builder, plus.proto.lang.TableData.TRefOrBuilder> 
+          internalGetData1FieldBuilder() {
+        if (data1Builder_ == null) {
+          data1Builder_ = new com.google.protobuf.SingleFieldBuilder<
+              plus.proto.lang.TableData.TRef, plus.proto.lang.TableData.TRef.Builder, plus.proto.lang.TableData.TRefOrBuilder>(
+                  getData1(),
+                  getParentForChildren(),
+                  isClean());
+          data1_ = null;
+        }
+        return data1Builder_;
+      }
+
+      private plus.proto.lang.TableData.TRef data2_;
+      private com.google.protobuf.SingleFieldBuilder<
+          plus.proto.lang.TableData.TRef, plus.proto.lang.TableData.TRef.Builder, plus.proto.lang.TableData.TRefOrBuilder> data2Builder_;
+      /**
+       * <code>optional .protobuf.TRef data2 = 3;</code>
+       * @return Whether the data2 field is set.
+       */
+      public boolean hasData2() {
+        return ((bitField0_ & 0x00000004) != 0);
+      }
+      /**
+       * <code>optional .protobuf.TRef data2 = 3;</code>
+       * @return The data2.
+       */
+      public plus.proto.lang.TableData.TRef getData2() {
+        if (data2Builder_ == null) {
+          return data2_ == null ? plus.proto.lang.TableData.TRef.getDefaultInstance() : data2_;
+        } else {
+          return data2Builder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .protobuf.TRef data2 = 3;</code>
+       */
+      public Builder setData2(plus.proto.lang.TableData.TRef value) {
+        if (data2Builder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          data2_ = value;
+        } else {
+          data2Builder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .protobuf.TRef data2 = 3;</code>
+       */
+      public Builder setData2(
+          plus.proto.lang.TableData.TRef.Builder builderForValue) {
+        if (data2Builder_ == null) {
+          data2_ = builderForValue.build();
+        } else {
+          data2Builder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .protobuf.TRef data2 = 3;</code>
+       */
+      public Builder mergeData2(plus.proto.lang.TableData.TRef value) {
+        if (data2Builder_ == null) {
+          if (((bitField0_ & 0x00000004) != 0) &&
+            data2_ != null &&
+            data2_ != plus.proto.lang.TableData.TRef.getDefaultInstance()) {
+            getData2Builder().mergeFrom(value);
+          } else {
+            data2_ = value;
+          }
+        } else {
+          data2Builder_.mergeFrom(value);
+        }
+        if (data2_ != null) {
+          bitField0_ |= 0x00000004;
+          onChanged();
+        }
+        return this;
+      }
+      /**
+       * <code>optional .protobuf.TRef data2 = 3;</code>
+       */
+      public Builder clearData2() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        data2_ = null;
+        if (data2Builder_ != null) {
+          data2Builder_.dispose();
+          data2Builder_ = null;
+        }
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .protobuf.TRef data2 = 3;</code>
+       */
+      public plus.proto.lang.TableData.TRef.Builder getData2Builder() {
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return internalGetData2FieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .protobuf.TRef data2 = 3;</code>
+       */
+      public plus.proto.lang.TableData.TRefOrBuilder getData2OrBuilder() {
+        if (data2Builder_ != null) {
+          return data2Builder_.getMessageOrBuilder();
+        } else {
+          return data2_ == null ?
+              plus.proto.lang.TableData.TRef.getDefaultInstance() : data2_;
+        }
+      }
+      /**
+       * <code>optional .protobuf.TRef data2 = 3;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          plus.proto.lang.TableData.TRef, plus.proto.lang.TableData.TRef.Builder, plus.proto.lang.TableData.TRefOrBuilder> 
+          internalGetData2FieldBuilder() {
+        if (data2Builder_ == null) {
+          data2Builder_ = new com.google.protobuf.SingleFieldBuilder<
+              plus.proto.lang.TableData.TRef, plus.proto.lang.TableData.TRef.Builder, plus.proto.lang.TableData.TRefOrBuilder>(
+                  getData2(),
+                  getParentForChildren(),
+                  isClean());
+          data2_ = null;
+        }
+        return data2Builder_;
+      }
+
+      // @@protoc_insertion_point(builder_scope:protobuf.AvgContent)
+    }
+
+    // @@protoc_insertion_point(class_scope:protobuf.AvgContent)
+    private static final plus.proto.lang.TableData.AvgContent DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new plus.proto.lang.TableData.AvgContent();
+    }
+
+    public static plus.proto.lang.TableData.AvgContent getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<AvgContent>
+        PARSER = new com.google.protobuf.AbstractParser<AvgContent>() {
+      @java.lang.Override
+      public AvgContent parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<AvgContent> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<AvgContent> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public plus.proto.lang.TableData.AvgContent getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface AvgContentGroupOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:protobuf.AvgContentGroup)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>repeated .protobuf.AvgContent data = 1;</code>
+     */
+    java.util.List<plus.proto.lang.TableData.AvgContent> 
+        getDataList();
+    /**
+     * <code>repeated .protobuf.AvgContent data = 1;</code>
+     */
+    plus.proto.lang.TableData.AvgContent getData(int index);
+    /**
+     * <code>repeated .protobuf.AvgContent data = 1;</code>
+     */
+    int getDataCount();
+    /**
+     * <code>repeated .protobuf.AvgContent data = 1;</code>
+     */
+    java.util.List<? extends plus.proto.lang.TableData.AvgContentOrBuilder> 
+        getDataOrBuilderList();
+    /**
+     * <code>repeated .protobuf.AvgContent data = 1;</code>
+     */
+    plus.proto.lang.TableData.AvgContentOrBuilder getDataOrBuilder(
+        int index);
+  }
+  /**
+   * Protobuf type {@code protobuf.AvgContentGroup}
+   */
+  public static final class AvgContentGroup extends
+      com.google.protobuf.GeneratedMessage implements
+      // @@protoc_insertion_point(message_implements:protobuf.AvgContentGroup)
+      AvgContentGroupOrBuilder {
+  private static final long serialVersionUID = 0L;
+    static {
+      com.google.protobuf.RuntimeVersion.validateProtobufGencodeVersion(
+        com.google.protobuf.RuntimeVersion.RuntimeDomain.PUBLIC,
+        /* major= */ 4,
+        /* minor= */ 30,
+        /* patch= */ 2,
+        /* suffix= */ "",
+        AvgContentGroup.class.getName());
+    }
+    // Use AvgContentGroup.newBuilder() to construct.
+    private AvgContentGroup(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+    }
+    private AvgContentGroup() {
+      data_ = java.util.Collections.emptyList();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return plus.proto.lang.TableData.internal_static_protobuf_AvgContentGroup_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return plus.proto.lang.TableData.internal_static_protobuf_AvgContentGroup_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              plus.proto.lang.TableData.AvgContentGroup.class, plus.proto.lang.TableData.AvgContentGroup.Builder.class);
+    }
+
+    public static final int DATA_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private java.util.List<plus.proto.lang.TableData.AvgContent> data_;
+    /**
+     * <code>repeated .protobuf.AvgContent data = 1;</code>
+     */
+    @java.lang.Override
+    public java.util.List<plus.proto.lang.TableData.AvgContent> getDataList() {
+      return data_;
+    }
+    /**
+     * <code>repeated .protobuf.AvgContent data = 1;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends plus.proto.lang.TableData.AvgContentOrBuilder> 
+        getDataOrBuilderList() {
+      return data_;
+    }
+    /**
+     * <code>repeated .protobuf.AvgContent data = 1;</code>
+     */
+    @java.lang.Override
+    public int getDataCount() {
+      return data_.size();
+    }
+    /**
+     * <code>repeated .protobuf.AvgContent data = 1;</code>
+     */
+    @java.lang.Override
+    public plus.proto.lang.TableData.AvgContent getData(int index) {
+      return data_.get(index);
+    }
+    /**
+     * <code>repeated .protobuf.AvgContent data = 1;</code>
+     */
+    @java.lang.Override
+    public plus.proto.lang.TableData.AvgContentOrBuilder getDataOrBuilder(
+        int index) {
+      return data_.get(index);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      for (int i = 0; i < getDataCount(); i++) {
+        if (!getData(i).isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      for (int i = 0; i < data_.size(); i++) {
+        output.writeMessage(1, data_.get(i));
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      for (int i = 0; i < data_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, data_.get(i));
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof plus.proto.lang.TableData.AvgContentGroup)) {
+        return super.equals(obj);
+      }
+      plus.proto.lang.TableData.AvgContentGroup other = (plus.proto.lang.TableData.AvgContentGroup) obj;
+
+      if (!getDataList()
+          .equals(other.getDataList())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (getDataCount() > 0) {
+        hash = (37 * hash) + DATA_FIELD_NUMBER;
+        hash = (53 * hash) + getDataList().hashCode();
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static plus.proto.lang.TableData.AvgContentGroup parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static plus.proto.lang.TableData.AvgContentGroup parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static plus.proto.lang.TableData.AvgContentGroup parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static plus.proto.lang.TableData.AvgContentGroup parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static plus.proto.lang.TableData.AvgContentGroup parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static plus.proto.lang.TableData.AvgContentGroup parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static plus.proto.lang.TableData.AvgContentGroup parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input);
+    }
+    public static plus.proto.lang.TableData.AvgContentGroup parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static plus.proto.lang.TableData.AvgContentGroup parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static plus.proto.lang.TableData.AvgContentGroup parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static plus.proto.lang.TableData.AvgContentGroup parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input);
+    }
+    public static plus.proto.lang.TableData.AvgContentGroup parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessage
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(plus.proto.lang.TableData.AvgContentGroup prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code protobuf.AvgContentGroup}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:protobuf.AvgContentGroup)
+        plus.proto.lang.TableData.AvgContentGroupOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return plus.proto.lang.TableData.internal_static_protobuf_AvgContentGroup_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return plus.proto.lang.TableData.internal_static_protobuf_AvgContentGroup_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                plus.proto.lang.TableData.AvgContentGroup.class, plus.proto.lang.TableData.AvgContentGroup.Builder.class);
+      }
+
+      // Construct using plus.proto.lang.TableData.AvgContentGroup.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        if (dataBuilder_ == null) {
+          data_ = java.util.Collections.emptyList();
+        } else {
+          data_ = null;
+          dataBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000001);
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return plus.proto.lang.TableData.internal_static_protobuf_AvgContentGroup_descriptor;
+      }
+
+      @java.lang.Override
+      public plus.proto.lang.TableData.AvgContentGroup getDefaultInstanceForType() {
+        return plus.proto.lang.TableData.AvgContentGroup.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public plus.proto.lang.TableData.AvgContentGroup build() {
+        plus.proto.lang.TableData.AvgContentGroup result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public plus.proto.lang.TableData.AvgContentGroup buildPartial() {
+        plus.proto.lang.TableData.AvgContentGroup result = new plus.proto.lang.TableData.AvgContentGroup(this);
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(plus.proto.lang.TableData.AvgContentGroup result) {
+        if (dataBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0)) {
+            data_ = java.util.Collections.unmodifiableList(data_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.data_ = data_;
+        } else {
+          result.data_ = dataBuilder_.build();
+        }
+      }
+
+      private void buildPartial0(plus.proto.lang.TableData.AvgContentGroup result) {
+        int from_bitField0_ = bitField0_;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof plus.proto.lang.TableData.AvgContentGroup) {
+          return mergeFrom((plus.proto.lang.TableData.AvgContentGroup)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(plus.proto.lang.TableData.AvgContentGroup other) {
+        if (other == plus.proto.lang.TableData.AvgContentGroup.getDefaultInstance()) return this;
+        if (dataBuilder_ == null) {
+          if (!other.data_.isEmpty()) {
+            if (data_.isEmpty()) {
+              data_ = other.data_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureDataIsMutable();
+              data_.addAll(other.data_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.data_.isEmpty()) {
+            if (dataBuilder_.isEmpty()) {
+              dataBuilder_.dispose();
+              dataBuilder_ = null;
+              data_ = other.data_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              dataBuilder_ = 
+                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                   internalGetDataFieldBuilder() : null;
+            } else {
+              dataBuilder_.addAllMessages(other.data_);
+            }
+          }
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        for (int i = 0; i < getDataCount(); i++) {
+          if (!getData(i).isInitialized()) {
+            return false;
+          }
+        }
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                plus.proto.lang.TableData.AvgContent m =
+                    input.readMessage(
+                        plus.proto.lang.TableData.AvgContent.parser(),
+                        extensionRegistry);
+                if (dataBuilder_ == null) {
+                  ensureDataIsMutable();
+                  data_.add(m);
+                } else {
+                  dataBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.util.List<plus.proto.lang.TableData.AvgContent> data_ =
+        java.util.Collections.emptyList();
+      private void ensureDataIsMutable() {
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          data_ = new java.util.ArrayList<plus.proto.lang.TableData.AvgContent>(data_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilder<
+          plus.proto.lang.TableData.AvgContent, plus.proto.lang.TableData.AvgContent.Builder, plus.proto.lang.TableData.AvgContentOrBuilder> dataBuilder_;
+
+      /**
+       * <code>repeated .protobuf.AvgContent data = 1;</code>
+       */
+      public java.util.List<plus.proto.lang.TableData.AvgContent> getDataList() {
+        if (dataBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(data_);
+        } else {
+          return dataBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .protobuf.AvgContent data = 1;</code>
+       */
+      public int getDataCount() {
+        if (dataBuilder_ == null) {
+          return data_.size();
+        } else {
+          return dataBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .protobuf.AvgContent data = 1;</code>
+       */
+      public plus.proto.lang.TableData.AvgContent getData(int index) {
+        if (dataBuilder_ == null) {
+          return data_.get(index);
+        } else {
+          return dataBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .protobuf.AvgContent data = 1;</code>
+       */
+      public Builder setData(
+          int index, plus.proto.lang.TableData.AvgContent value) {
+        if (dataBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureDataIsMutable();
+          data_.set(index, value);
+          onChanged();
+        } else {
+          dataBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .protobuf.AvgContent data = 1;</code>
+       */
+      public Builder setData(
+          int index, plus.proto.lang.TableData.AvgContent.Builder builderForValue) {
+        if (dataBuilder_ == null) {
+          ensureDataIsMutable();
+          data_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          dataBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .protobuf.AvgContent data = 1;</code>
+       */
+      public Builder addData(plus.proto.lang.TableData.AvgContent value) {
+        if (dataBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureDataIsMutable();
+          data_.add(value);
+          onChanged();
+        } else {
+          dataBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .protobuf.AvgContent data = 1;</code>
+       */
+      public Builder addData(
+          int index, plus.proto.lang.TableData.AvgContent value) {
+        if (dataBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureDataIsMutable();
+          data_.add(index, value);
+          onChanged();
+        } else {
+          dataBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .protobuf.AvgContent data = 1;</code>
+       */
+      public Builder addData(
+          plus.proto.lang.TableData.AvgContent.Builder builderForValue) {
+        if (dataBuilder_ == null) {
+          ensureDataIsMutable();
+          data_.add(builderForValue.build());
+          onChanged();
+        } else {
+          dataBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .protobuf.AvgContent data = 1;</code>
+       */
+      public Builder addData(
+          int index, plus.proto.lang.TableData.AvgContent.Builder builderForValue) {
+        if (dataBuilder_ == null) {
+          ensureDataIsMutable();
+          data_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          dataBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .protobuf.AvgContent data = 1;</code>
+       */
+      public Builder addAllData(
+          java.lang.Iterable<? extends plus.proto.lang.TableData.AvgContent> values) {
+        if (dataBuilder_ == null) {
+          ensureDataIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, data_);
+          onChanged();
+        } else {
+          dataBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .protobuf.AvgContent data = 1;</code>
+       */
+      public Builder clearData() {
+        if (dataBuilder_ == null) {
+          data_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          dataBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .protobuf.AvgContent data = 1;</code>
+       */
+      public Builder removeData(int index) {
+        if (dataBuilder_ == null) {
+          ensureDataIsMutable();
+          data_.remove(index);
+          onChanged();
+        } else {
+          dataBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .protobuf.AvgContent data = 1;</code>
+       */
+      public plus.proto.lang.TableData.AvgContent.Builder getDataBuilder(
+          int index) {
+        return internalGetDataFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .protobuf.AvgContent data = 1;</code>
+       */
+      public plus.proto.lang.TableData.AvgContentOrBuilder getDataOrBuilder(
+          int index) {
+        if (dataBuilder_ == null) {
+          return data_.get(index);  } else {
+          return dataBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .protobuf.AvgContent data = 1;</code>
+       */
+      public java.util.List<? extends plus.proto.lang.TableData.AvgContentOrBuilder> 
+           getDataOrBuilderList() {
+        if (dataBuilder_ != null) {
+          return dataBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(data_);
+        }
+      }
+      /**
+       * <code>repeated .protobuf.AvgContent data = 1;</code>
+       */
+      public plus.proto.lang.TableData.AvgContent.Builder addDataBuilder() {
+        return internalGetDataFieldBuilder().addBuilder(
+            plus.proto.lang.TableData.AvgContent.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .protobuf.AvgContent data = 1;</code>
+       */
+      public plus.proto.lang.TableData.AvgContent.Builder addDataBuilder(
+          int index) {
+        return internalGetDataFieldBuilder().addBuilder(
+            index, plus.proto.lang.TableData.AvgContent.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .protobuf.AvgContent data = 1;</code>
+       */
+      public java.util.List<plus.proto.lang.TableData.AvgContent.Builder> 
+           getDataBuilderList() {
+        return internalGetDataFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilder<
+          plus.proto.lang.TableData.AvgContent, plus.proto.lang.TableData.AvgContent.Builder, plus.proto.lang.TableData.AvgContentOrBuilder> 
+          internalGetDataFieldBuilder() {
+        if (dataBuilder_ == null) {
+          dataBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+              plus.proto.lang.TableData.AvgContent, plus.proto.lang.TableData.AvgContent.Builder, plus.proto.lang.TableData.AvgContentOrBuilder>(
+                  data_,
+                  ((bitField0_ & 0x00000001) != 0),
+                  getParentForChildren(),
+                  isClean());
+          data_ = null;
+        }
+        return dataBuilder_;
+      }
+
+      // @@protoc_insertion_point(builder_scope:protobuf.AvgContentGroup)
+    }
+
+    // @@protoc_insertion_point(class_scope:protobuf.AvgContentGroup)
+    private static final plus.proto.lang.TableData.AvgContentGroup DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new plus.proto.lang.TableData.AvgContentGroup();
+    }
+
+    public static plus.proto.lang.TableData.AvgContentGroup getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<AvgContentGroup>
+        PARSER = new com.google.protobuf.AbstractParser<AvgContentGroup>() {
+      @java.lang.Override
+      public AvgContentGroup parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<AvgContentGroup> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<AvgContentGroup> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public plus.proto.lang.TableData.AvgContentGroup getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_protobuf_Item_descriptor;
   private static final 
@@ -6465,6 +8107,16 @@ plus.proto.lang.TableData.IndexItem defaultValue) {
   private static final 
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_protobuf_ItemGetListGroup_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_protobuf_AvgContent_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_protobuf_AvgContent_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_protobuf_AvgContentGroup_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_protobuf_AvgContentGroup_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -6487,8 +8139,12 @@ plus.proto.lang.TableData.IndexItem defaultValue) {
       " \001(\r\022\014\n\004type\030\002 \001(\r\022\035\n\005title\030\003 \001(\0132\016.prot" +
       "obuf.TRef\022\017\n\007canJump\030\004 \001(\010\022\r\n\005jumpC\030\005 \001(" +
       "\t\022\020\n\010quickBye\030\006 \001(\r\"7\n\020ItemGetListGroup\022" +
-      "#\n\004data\030\001 \003(\0132\025.protobuf.ItemGetListB\034\n\017" +
-      "plus.proto.langB\tTableData"
+      "#\n\004data\030\001 \003(\0132\025.protobuf.ItemGetList\"V\n\n" +
+      "AvgContent\022\n\n\002id\030\001 \001(\r\022\035\n\005data1\030\002 \001(\0132\016." +
+      "protobuf.TRef\022\035\n\005data2\030\003 \001(\0132\016.protobuf." +
+      "TRef\"5\n\017AvgContentGroup\022\"\n\004data\030\001 \003(\0132\024." +
+      "protobuf.AvgContentB\034\n\017plus.proto.langB\t" +
+      "TableData"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -6553,6 +8209,18 @@ plus.proto.lang.TableData.IndexItem defaultValue) {
     internal_static_protobuf_ItemGetListGroup_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_protobuf_ItemGetListGroup_descriptor,
+        new java.lang.String[] { "Data", });
+    internal_static_protobuf_AvgContent_descriptor =
+      getDescriptor().getMessageTypes().get(9);
+    internal_static_protobuf_AvgContent_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_protobuf_AvgContent_descriptor,
+        new java.lang.String[] { "Id", "Data1", "Data2", });
+    internal_static_protobuf_AvgContentGroup_descriptor =
+      getDescriptor().getMessageTypes().get(10);
+    internal_static_protobuf_AvgContentGroup_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_protobuf_AvgContentGroup_descriptor,
         new java.lang.String[] { "Data", });
     descriptor.resolveAllFeaturesImmutable();
   }
