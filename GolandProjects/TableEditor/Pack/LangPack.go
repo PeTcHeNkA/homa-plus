@@ -27,8 +27,13 @@ type LangMapping struct {
 }
 
 func (inst *LangMapping) ReadFrom(data []byte) error {
-	mappings := make(map[string]string)
-	inst.mappings = mappings
+	var mappings map[string]string
+	if inst.mappings == nil {
+		mappings = make(map[string]string)
+		inst.mappings = mappings
+	} else {
+		mappings = inst.mappings
+	}
 
 	err := json.Unmarshal(data, &mappings)
 	if err != nil {
@@ -146,7 +151,7 @@ func readId(str string) uint32 {
 	}
 	if str[0:4] == "#ID:" {
 		id := uint32(0)
-		for i := 3; i < max1; i++ {
+		for i := 4; i < max1; i++ {
 			chr := str[i]
 			if chr >= '0' && chr <= '9' {
 				id *= 10

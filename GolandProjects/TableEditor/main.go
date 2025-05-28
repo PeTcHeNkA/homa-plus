@@ -29,11 +29,70 @@ func main() {
 
 	if args["-map"] != nil {
 		buildMappings(args)
+	} else if (args["-merge"]) != nil {
+		mergeMappings(args)
 	} else {
 		buildPack(args)
 	}
 	println("Success")
 	os.Exit(0)
+}
+
+func mergeMappings(args map[string]*string) {
+	indir := args["-merge"]
+	out := args["-o"]
+
+	if out == nil || indir == nil {
+		println("Illegal usage! Use '-merge dir, -o mappings.json'")
+		os.Exit(1)
+		return
+	}
+
+	mappngs := Pack.LangMapping{}
+	var wg sync.WaitGroup
+
+	files, err := getFileTree(*indir)
+	if err != nil {
+		println(illegalMappings, err.Error())
+		return
+	}
+
+	wg.Add(len(files))
+
+	for _, fileName := range files {
+		loadMappingsFromFile(&wg, &mappngs, fileName)
+	}
+
+	outB, err := mappngs.Write()
+	if err != nil {
+		println(illegalMappings, err.Error())
+		return
+	}
+	writeOut(*out, outB)
+}
+
+func getFileTree(path string) ([]string, error) {
+	entries, err := os.ReadDir(path)
+	if err != nil {
+		return nil, err
+	}
+	files := make([]string, 0)
+
+	for _, e := range entries {
+		fPath := path + "/" + e.Name()
+		if e.IsDir() {
+			res, err2 := getFileTree(fPath)
+			if err2 != nil {
+				return nil, err2
+			}
+			files = append(files, res...)
+		} else {
+			if strings.HasSuffix(fPath, ".json") {
+				files = append(files, fPath)
+			}
+		}
+	}
+	return files, nil
 }
 
 func buildMappings(args map[string]*string) {
@@ -96,6 +155,9 @@ func buildMappings(args map[string]*string) {
 func buildPack(args map[string]*string) {
 	if args["-p"] == nil || args["-m"] == nil || args["-o"] == nil {
 		println(invalidMsg)
+		for k, v := range args {
+			print(k, " ", v)
+		}
 		os.Exit(1)
 		return
 	}
@@ -192,6 +254,7 @@ func parseSysArgs() map[string]*string {
 			}
 		}
 	}
+
 	return args
 }
 
