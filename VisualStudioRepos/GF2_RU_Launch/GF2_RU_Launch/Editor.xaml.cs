@@ -218,12 +218,6 @@ namespace GF2_RU_Launch
                     table1 = new LangEditAPI.Table(1);
                     table1.load(dataBytes);
 
-                    if (table1 == null)
-                    {
-                        locked = false;
-                        return;
-                    }
-
                     var jData = table1.exportMappings(table2, 0xf);
 
                     locked = false;

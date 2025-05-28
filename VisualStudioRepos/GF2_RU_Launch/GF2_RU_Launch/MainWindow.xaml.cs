@@ -6,7 +6,6 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Markup;
 using System.Windows.Media.Imaging;
 using LangEditAPI;
 using SourceChord.FluentWPF;
@@ -391,7 +390,13 @@ public partial class MainWindow : AcrylicWindow{
                     try
                     {
                         jBytes = File.ReadAllBytes(GF2_RU_PACK_JSON);
-                        pBytes = File.ReadAllBytes(getLangPackPath());
+                        if (HasBackup())
+                        {
+                            pBytes = File.ReadAllBytes(GF2_LANG_BACKUP);
+                        } else
+                        {
+                            pBytes = File.ReadAllBytes(getLangPackPath());
+                        }
                     } catch
                     {
                         Dispatcher.Invoke(() => {
@@ -576,9 +581,26 @@ public partial class MainWindow : AcrylicWindow{
     }
 
 
-    private bool hasBackup()
+    private bool HasBackup()
     {
         return File.Exists(GF2_LANG_BACKUP);
+    }
+
+
+    private bool RemoveBackup()
+    {
+        if (HasBackup())
+        {
+            try
+            {
+                File.Delete(GF2_LANG_BACKUP);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
 
@@ -600,10 +622,11 @@ public partial class MainWindow : AcrylicWindow{
                 if (checkSha)
                 {
                     result = IsPackInstalled();
+                    if(result) RemoveBackup();
                 }
                 else
                 {
-                    result = hasBackup();
+                    result = HasBackup();
                 }
                 if (result)
                 {
@@ -630,10 +653,11 @@ public partial class MainWindow : AcrylicWindow{
                 if (checkSha)
                 {
                     result = IsPackInstalled();
+                    if (result) RemoveBackup();
                 }
                 else
                 {
-                    result = hasBackup();
+                    result = HasBackup();
                 }
                 if (result)
                 {
