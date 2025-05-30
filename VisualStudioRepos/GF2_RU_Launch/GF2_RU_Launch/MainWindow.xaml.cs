@@ -18,6 +18,9 @@ namespace GF2_RU_Launch;
 
 
 public partial class MainWindow : AcrylicWindow{
+    public static string LAUNCH_VERSION_URL = "https://gitlab.com/homaplus/girls-frontline-2-exilium-ru-launcher/-/raw/natives/launcversion.info?ref_type=heads&inline=false";
+    public static string LAUNCH_VERSION = "2.0-pre7";
+
     public static string GF2_DATA_TABLE    = "GF2_Exilium_Data/LocalCache/Data/Table";
     public static string GF2_LANG_PACK     = "/LangPackageTableEnusData.bytes";
     public static string GF2_LANG_BACKUP   = "./data/BACKUP_LangPackageTableEnusData.bytes";
@@ -26,7 +29,6 @@ public partial class MainWindow : AcrylicWindow{
     public static string GF2_LOAD_URL      = "https://gitlab.com/homaplus/grils-frontline-team-translate/-/raw/%__BRANCH%__%/translations_release.json?ref_type=heads&inline=false";
     public static string GF2_CHANGELOG_URL = "https://gitlab.com/homaplus/grils-frontline-team-translate/-/raw/%__BRANCH%__%/Changelog.md?ref_type=heads&inline=false";
     public static string NATIVES_LOAD_URL  = "https://gitlab.com/homaplus/girls-frontline-2-exilium-ru-launcher/-/raw/natives/%__FILE__%?ref_type=heads&inline=false";
-    
     //private static string GF2_MASTER_URL;
 
     private string GF2_Path = null;
@@ -34,6 +36,7 @@ public partial class MainWindow : AcrylicWindow{
     private Editor editor;
     private bool needLoadPack = true;
     private bool locked = false;
+    private bool launchUpdatesChecked = false;
 
     public MainWindow() 
     {
@@ -288,7 +291,37 @@ public partial class MainWindow : AcrylicWindow{
 
     public void onBtnLoadClick(object sender, RoutedEventArgs e)
     {
+        if (!launchUpdatesChecked)
+        {
+            launchUpdatesChecked = true;
+            Task.Run(() => {
+                var flag = IsActualLaunchVersion();
+
+                if (flag)
+                {
+                    Dispatcher.Invoke(() => {
+                        onBtnLoadClick2();
+                    });
+                } 
+                else
+                {
+                    Dispatcher.Invoke(() => {
+                        MessageBox.Show("Вышла новая версия лаунчера!");
+                        UpdateLauncher();
+                    });
+                    return;
+                }
+            });
+            return;
+        }
+        onBtnLoadClick2();
+    }
+
+
+    public void onBtnLoadClick2()
+    {
         if (locked) return;
+
         if (!needLoadPack)
         {
             var isShift = (Keyboard.Modifiers & ModifierKeys.Shift) > 0;
@@ -673,6 +706,32 @@ public partial class MainWindow : AcrylicWindow{
         }
         
         BTnPlayInstall.Content = msg;
+    }
+
+
+    public static bool IsActualLaunchVersion()
+    {
+        var remoteVersion = loadStr(LAUNCH_VERSION_URL);
+        if (remoteVersion == null || remoteVersion.Length == 0) return true;
+        remoteVersion = remoteVersion.Trim();
+
+        return remoteVersion == LAUNCH_VERSION;
+    }
+
+
+    public void UpdateLauncher()
+    {
+        try
+        {
+            Process.Start("LUpdater.exe");
+            Environment.Exit(0);
+        }
+        catch
+        {
+            Dispatcher.Invoke(() => {
+                MessageBox.Show("Инструмент автоматического обновления не найден. Автоматическая переустановка невозможна.");
+            });
+        }
     }
 
 

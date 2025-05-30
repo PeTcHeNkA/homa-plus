@@ -20,10 +20,22 @@
     <None Remove="Images\minimize_ico.png" />
     <None Remove="Images\settings_ico.png" />
     <None Remove="langedit.dll" />
+    <None Remove="LUpdater.dll" />
+    <None Remove="LUpdater.exe" />
+    <None Remove="LUpdater.runtimeconfig.json" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Include="GF2RU_ICO.ico" />
+    <Content Include="LUpdater.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="LUpdater.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="LUpdater.runtimeconfig.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Resource Include="Images\edit_ico.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
