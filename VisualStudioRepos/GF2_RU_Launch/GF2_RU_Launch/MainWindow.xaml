@@ -32,6 +32,7 @@
             </TextBlock>
         </Grid>
 
+        <TextBlock Opacity="0.5" Text="{x:Static local:MainWindow.LAUNCH_VERSION}" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,35,10,0" Panel.ZIndex="1000"/>
 
         <!-- Background -->
         <Border BorderThickness="0,0,0,3" VerticalAlignment="Top" Margin="0,0,0,75" BorderBrush="{StaticResource Background}">
@@ -39,7 +40,7 @@
                VerticalAlignment="Center" Stretch="UniformToFill"/>
         </Border>
 
-        
+
         <!-- Open Editor -->
         <Button x:Name="BTNEditor" Click="OnClickOpenEditor" Width="95" Height="95" 
                 Margin="0,30,0,0" VerticalAlignment="Top" HorizontalAlignment="Left">
@@ -83,7 +84,7 @@
                     </Style.Triggers>
                 </Style>
             </Button.Style>
-            
+
             <Grid Width="95" Height="95">
                 <Image Height="30" Width="30" VerticalAlignment="Top" HorizontalAlignment="Left" 
                        Source="/Images/edit_ico.png" Margin="8,8,0,0" />
