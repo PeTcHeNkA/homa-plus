@@ -19,7 +19,7 @@ namespace GF2_RU_Launch;
 
 public partial class MainWindow : AcrylicWindow{
     public static string LAUNCH_VERSION_URL = "https://gitlab.com/homaplus/girls-frontline-2-exilium-ru-launcher/-/raw/natives/launcversion.info?ref_type=heads&inline=false";
-    public static string LAUNCH_VERSION = "2.0-pre7";
+    public static string LAUNCH_VERSION = "2.0-pre8";
 
     public static string GF2_DATA_TABLE    = "GF2_Exilium_Data/LocalCache/Data/Table";
     public static string GF2_LANG_PACK     = "/LangPackageTableEnusData.bytes";
@@ -59,6 +59,13 @@ public partial class MainWindow : AcrylicWindow{
 
         }
     }
+
+
+    public static void CallInDedictedThread(Action action)
+    {
+        new Thread(new ThreadStart(action)).Start();
+    }
+
 
     private void ChooseRandomBg()
     {
@@ -439,7 +446,7 @@ public partial class MainWindow : AcrylicWindow{
                         return;
                     }
 
-                    Dispatcher.Invoke(() =>
+                    CallInDedictedThread(() =>
                     {
                         Table table = new Table(101);
                         table.load(pBytes);
@@ -447,24 +454,22 @@ public partial class MainWindow : AcrylicWindow{
 
                         var eData = table.save();
 
-                        Task.Run(() => {
-                            try
-                            {
-                                File.WriteAllBytes(GF2_RU_PACK, eData);
-                                onPostLoad(true, ref completed);
-                            }
-                            catch
-                            {
-                                onPostLoad(false, ref completed);
-                                Dispatcher.Invoke(() => {
-                                    MessageBox.Show("Ошибка сборки пакета!");
-                                });
-                            }
-                            finally
-                            {
-                                table.free();
-                            }
-                        });
+                        try
+                        {
+                            File.WriteAllBytes(GF2_RU_PACK, eData);
+                            onPostLoad(true, ref completed);
+                        }
+                        catch
+                        {
+                            onPostLoad(false, ref completed);
+                            Dispatcher.Invoke(() => {
+                                MessageBox.Show("Ошибка сборки пакета!");
+                            });
+                        }
+                        finally
+                        {
+                            table.free();
+                        }
                     });
                 }
             } 

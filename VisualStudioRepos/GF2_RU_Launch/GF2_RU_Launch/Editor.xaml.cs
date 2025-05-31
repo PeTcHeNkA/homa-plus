@@ -239,7 +239,7 @@ namespace GF2_RU_Launch
             locked = true;
             onClickClose(null, null);
 
-            Task.Run(() =>
+            MainWindow.CallInDedictedThread(() =>
             {
                 try
                 {
@@ -654,6 +654,7 @@ namespace GF2_RU_Launch
 
         private void onClickExportLangBytes(object sender, RoutedEventArgs e)
         {
+            if (locked) return;
             if (table1 == null)
             {
                 wanEmptyTable();
@@ -666,20 +667,26 @@ namespace GF2_RU_Launch
             {
                 return;
             }
+            locked = true;
+            MainWindow.CallInDedictedThread(() => {
+                var bData = exportTableBytes(showId);
+                table1.applyMappngs(bData);
 
-            var bData = exportTableBytes(showId);
-            table1.applyMappngs(bData);
+                bData = table1.save();
 
-            bData = table1.save();
-
-            try
-            {
-                File.WriteAllBytes(res, bData);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Ошибка сохранения!");
-            }
+                try
+                {
+                    File.WriteAllBytes(res, bData);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Ошибка сохранения!");
+                }
+                finally 
+                { 
+                    locked = false;
+                }
+            });
         }
 
 

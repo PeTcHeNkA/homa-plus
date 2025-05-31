@@ -7,8 +7,13 @@
         xmlns:fw="clr-namespace:SourceChord.FluentWPF;assembly=FluentWPF"
         mc:Ignorable="d"
         Title="Girls Frontline 2: Exilium RU Launcher | Changelog" Height="350" Width="650" MinHeight="300" MinWidth="610"
-        TintColor="#90FFFFFF" TintOpacity="0.5"
-        FallbackColor="#90FFFFFF"
+        
+        TintColor="{DynamicResource L_Background_Main_Color}" 
+        FallbackColor="{DynamicResource L_Background_Main_Color}"
+    
+        NoiseOpacity="0" 
+        TintOpacity="0.65"   
+                  
         AcrylicWindowStyle="NoIcon"
         fw:AcrylicWindow.AcrylicAccentState="BlurBehind" Background="#26FFFFFF" FontFamily="Arial" RenderTransformOrigin="0.5,0.5">
     <fw:AcrylicWindow.BorderBrush>
@@ -18,9 +23,7 @@
         </LinearGradientBrush>
     </fw:AcrylicWindow.BorderBrush>
 
-
     <Grid>
-
         <Border Background="#4C6F6F6F" VerticalAlignment="Top" Height="44" BorderThickness="0,1,0,1">
             <Border.BorderBrush>
                 <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">

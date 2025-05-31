@@ -7,8 +7,13 @@
         xmlns:fw="clr-namespace:SourceChord.FluentWPF;assembly=FluentWPF" xmlns:col="clr-namespace:System.Collections;assembly=mscorlib"
                   mc:Ignorable="d"
         Title="Girls Frontline 2: Translation table editor" Height="350" Width="650" MinHeight="300" MinWidth="610"
-        TintColor="{DynamicResource L_Background_Main_Color}" TintOpacity="0.5"
+        
+        TintColor="{DynamicResource L_Background_Main_Color}" 
         FallbackColor="{DynamicResource L_Background_Main_Color}"
+
+        NoiseOpacity="0" 
+        TintOpacity="0.65"       
+                  
         AcrylicWindowStyle="NoIcon"
         fw:AcrylicWindow.AcrylicAccentState="BlurBehind" Background="{StaticResource L_Background_Second}" 
         FontFamily="Arial" RenderTransformOrigin="0.5,0.5" BorderBrush="{StaticResource L_Border}">
