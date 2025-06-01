@@ -7,6 +7,7 @@ using System.Text;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
+using DiscordRPC;
 using LangEditAPI;
 using SourceChord.FluentWPF;
 
@@ -19,7 +20,7 @@ namespace GF2_RU_Launch;
 
 public partial class MainWindow : AcrylicWindow{
     public static string LAUNCH_VERSION_URL = "https://gitlab.com/homaplus/girls-frontline-2-exilium-ru-launcher/-/raw/natives/launcversion.info?ref_type=heads&inline=false";
-    public static string LAUNCH_VERSION = "2.0-pre8";
+    public static string LAUNCH_VERSION = "2.1";
 
     public static string GF2_DATA_TABLE    = "GF2_Exilium_Data/LocalCache/Data/Table";
     public static string GF2_LANG_PACK     = "/LangPackageTableEnusData.bytes";
@@ -49,6 +50,7 @@ public partial class MainWindow : AcrylicWindow{
         UpdatePlayButton();
         editBtnStatus(false, true);
 
+        SetupDiscordRPC();
         //OnClickOpenEditor(null, null);
 
         try
@@ -819,6 +821,66 @@ public partial class MainWindow : AcrylicWindow{
         SHA256 sha = SHA256.Create();
         byte[] hash = sha.ComputeHash(src);
         return Convert.ToBase64String(hash);
+    }
+
+
+    private void SetupDiscordRPC()
+    {
+        var status = getCfgValue("GFT_Discord");
+        bool enableDs = false;
+
+        if (status == null || status.Length == 0)
+        {
+            var res = MessageBox.Show("Включить ли отображение игры в Discord?", "Girls Frontline 2: Exilium RU Launcher | Discord RPC", MessageBoxButton.YesNo);
+
+            if (res == MessageBoxResult.Yes)
+            {
+                setCfgValue("GFT_Discord", "true");
+                enableDs = true;
+            }
+            else
+            {
+                setCfgValue("GFT_Discord", "false");
+            }
+        }
+        else
+        {
+            enableDs = status == "true";
+        }
+
+        if (!enableDs) return;
+
+        var i1 = ensureNativeInstalled("DiscordRPC.dll");
+        var i2 = ensureNativeInstalled("Newtonsoft.Json.dll");
+
+        if(i1 && i2)
+        {
+            EnableDs0();
+        }
+    }
+
+
+    private void EnableDs0()
+    {
+        try
+        {
+            var rpcClient = new DiscordRpcClient("1378747345121841272");
+
+            rpcClient.Initialize();
+
+            rpcClient.SetPresence(new RichPresence()
+            {
+                Buttons = new Button[]
+                {
+                    new Button() { Label = "Скачать", Url = "https://gitlab.com/homaplus/girls-frontline-2-exilium-ru-launcher" }
+                }
+            });
+
+        }
+        catch
+        {
+
+        }
     }
 
     private void SetupAnalitics()
