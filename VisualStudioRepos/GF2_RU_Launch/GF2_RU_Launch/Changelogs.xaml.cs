@@ -26,5 +26,11 @@ namespace GF2_RU_Launch
 
             ChangeLText.Text = text;
         }
+
+        public void EditHeader(string title, string header)
+        {
+            this.Title = title;
+            ChangeLHead.Text = header;
+        }
     }
 }

@@ -29,11 +29,13 @@ public partial class MainWindow : AcrylicWindow{
     public static string GF2_RU_PACK_JSON  = "./data/translation_ru.json";
     public static string GF2_LOAD_URL      = "https://gitlab.com/homaplus/grils-frontline-team-translate/-/raw/%__BRANCH%__%/translations_release.json?ref_type=heads&inline=false";
     public static string GF2_CHANGELOG_URL = "https://gitlab.com/homaplus/grils-frontline-team-translate/-/raw/%__BRANCH%__%/Changelog.md?ref_type=heads&inline=false";
+    public static string GF2_NOTIFICATIONS_URL = "https://gitlab.com/homaplus/grils-frontline-team-translate/-/raw/%__BRANCH%__%/Notifiations.md?ref_type=heads&inline=false";
     public static string NATIVES_LOAD_URL  = "https://gitlab.com/homaplus/girls-frontline-2-exilium-ru-launcher/-/raw/natives/%__FILE__%?ref_type=heads&inline=false";
     //private static string GF2_MASTER_URL;
 
     private string GF2_Path = null;
     private Changelogs subWindow;
+    private Changelogs subWindow2;
     private Editor editor;
     private bool needLoadPack = true;
     private bool locked = false;
@@ -105,6 +107,10 @@ public partial class MainWindow : AcrylicWindow{
         if(subWindow != null)
         {
             subWindow.Close();
+        }
+        if(subWindow2 != null)
+        {
+            subWindow2.Close();
         }
         if(editor != null)
         {
@@ -290,10 +296,24 @@ public partial class MainWindow : AcrylicWindow{
             branch = "master";
         }
 
-        //if (branch == "master")
-        //{
-        //    return GF2_MASTER_URL;
-        //}
+        return loadUrl.Replace("%__BRANCH%__%", branch);
+    }
+
+
+    public string getNotifyUrl()
+    {
+        string loadUrl = getCfgValue("GFT_NotifyUrl");
+        if (loadUrl == null || loadUrl.Length == 0)
+        {
+            loadUrl = GF2_NOTIFICATIONS_URL;
+        }
+
+        string branch = getCfgValue("GFT_Branch");
+        if (branch == null || branch.Length == 0)
+        {
+            branch = "master";
+        }
+
         return loadUrl.Replace("%__BRANCH%__%", branch);
     }
 
@@ -356,26 +376,31 @@ public partial class MainWindow : AcrylicWindow{
         locked = true;
         BTnPlayInstall.Content = "Проверка версии...";
 
-        Task.Run(() => {
+        CallInDedictedThread(() =>
+        {
             var resultT = checkVersion();
-            bool result = resultT.Item1;
-            bool completed = false;
-            bool building  = false;
 
-            Dispatcher.Invoke(() => {
+            bool completed = false;
+            bool building = false;
+
+            Dispatcher.Invoke(() =>
+            {
                 BTnPlayInstall.Content = "Загрузка обновлений.";
-                
-                Task.Run(() => {
+
+                Task.Run(() =>
+                {
                     int points = 0;
-                    while (!completed) {
+                    while (!completed)
+                    {
                         Thread.Sleep(750);
 
-                        if(points++ >= 3)
+                        if (points++ >= 3)
                         {
                             points = 0;
                         }
 
-                        Dispatcher.Invoke(() => {
+                        Dispatcher.Invoke(() =>
+                        {
                             var add = "";
                             int i = 0;
                             for (i = 0; i < points; i++)
@@ -386,7 +411,7 @@ public partial class MainWindow : AcrylicWindow{
                             {
                                 add += " ";
                             }
-                            if (completed)return;
+                            if (completed) return;
                             if (building)
                             {
                                 BTnPlayInstall.Content = "Сборка пакета ." + add;
@@ -399,15 +424,34 @@ public partial class MainWindow : AcrylicWindow{
                     }
                 });
 
-                if (resultT.Item2 != null && resultT.Item2.Length > 0)
+                if (resultT.log != null && resultT.log.Length > 0)
                 {
-                    subWindow = new Changelogs(this, resultT.Item2);
+                    subWindow = new Changelogs(this, resultT.log);
                     subWindow.Show();
+                }
+
+                if (resultT.hasNityfy)
+                {
+                    var notify = loadStr(getNotifyUrl());
+                    if (notify != null) {
+                        var seen = getCfgValue("GFT_SeenNotify");
+                        var cur  = getCfgValue("GFT_Version");
+
+                        if(seen == null || seen != cur)
+                        {
+                            subWindow2 = new Changelogs(this, notify);
+                            subWindow2.EditHeader(
+                                "Girls Frontline 2: Exilium RU Launcher | Notify",
+                                "Объявления"
+                                );
+                            subWindow2.Show();
+                        }
+                    }
                 }
             });
 
             var loaded = false;
-            if (result)
+            if (resultT.needUpdate)
             {
                 try
                 {
@@ -415,71 +459,73 @@ public partial class MainWindow : AcrylicWindow{
                 }
                 catch (Exception e)
                 {
-                    Dispatcher.Invoke(() => {
+                    Dispatcher.Invoke(() =>
+                    {
                         MessageBox.Show("Ошибка загрузки обновления!");
                     });
                 }
-                if (loaded)
-                {
-                    if (!Editor.EnsureEditorLoaded())
-                    {
-                        onPostLoad(false, ref completed);
-                        return;
-                    }
-                    building = true;
-
-                    byte[]? jBytes, pBytes;
-                    try
-                    {
-                        jBytes = File.ReadAllBytes(GF2_RU_PACK_JSON);
-                        if (HasBackup())
-                        {
-                            pBytes = File.ReadAllBytes(GF2_LANG_BACKUP);
-                        } else
-                        {
-                            pBytes = File.ReadAllBytes(getLangPackPath());
-                        }
-                    } catch
-                    {
-                        Dispatcher.Invoke(() => {
-                            MessageBox.Show("Ошибка загрузки обновления!");
-                        });
-                        onPostLoad(false, ref completed);
-                        return;
-                    }
-
-                    CallInDedictedThread(() =>
-                    {
-                        Table table = new Table(101);
-                        table.load(pBytes);
-                        table.applyMappngs(jBytes);
-
-                        var eData = table.save();
-
-                        try
-                        {
-                            File.WriteAllBytes(GF2_RU_PACK, eData);
-                            onPostLoad(true, ref completed);
-                        }
-                        catch
-                        {
-                            onPostLoad(false, ref completed);
-                            Dispatcher.Invoke(() => {
-                                MessageBox.Show("Ошибка сборки пакета!");
-                            });
-                        }
-                        finally
-                        {
-                            table.free();
-                        }
-                    });
-                }
-            } 
+            }
             else
             {
-                loaded = true;
+                onPostLoad(true, ref completed);
+                return;
+            }
+
+            if (!Editor.EnsureEditorLoaded())
+            {
+                onPostLoad(false, ref completed);
+                return;
+            }
+            building = true;
+
+            byte[]? jBytes, pBytes;
+            try
+            {
+                jBytes = File.ReadAllBytes(GF2_RU_PACK_JSON);
+                if (HasBackup())
+                {
+                    pBytes = File.ReadAllBytes(GF2_LANG_BACKUP);
+                }
+                else
+                {
+                    pBytes = File.ReadAllBytes(getLangPackPath());
+                }
+            }
+            catch
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    MessageBox.Show("Ошибка загрузки обновления!");
+                });
+                onPostLoad(false, ref completed);
+                return;
+            }
+
+            Table table = new Table(101);
+            table.load(pBytes);
+            table.applyMappngs(jBytes);
+
+            var eData = table.save();
+
+            try
+            {
+                File.WriteAllBytes(GF2_RU_PACK, eData);
                 onPostLoad(true, ref completed);
             }
+            catch
+            {
+                onPostLoad(false, ref completed);
+                Dispatcher.Invoke(() =>
+                {
+                    MessageBox.Show("Ошибка сборки пакета!");
+                });
+            }
+            finally
+            {
+                table.free();
+            }
+
+            //onPostLoad(true, ref completed);
         });
     }
 
@@ -502,8 +548,24 @@ public partial class MainWindow : AcrylicWindow{
     }
 
 
-    private Tuple<bool, string?> checkVersion()
+    private class VersionResult
     {
+        public bool needUpdate = true;
+        public bool hasNityfy = false;
+        public string? log = null;
+
+        //private VersionResult(bool update, bool notyfy, string vers)
+        //{
+        //    needUpdate = update;
+        //    hasNityfy = notyfy;
+        //    version = vers;
+        //}
+    }
+
+
+    private VersionResult checkVersion()
+    {
+        VersionResult result = new VersionResult();
         string logResult = null;
         if (needLoadPack)
         {
@@ -512,6 +574,14 @@ public partial class MainWindow : AcrylicWindow{
             {
                 string firstLine = log.Split("\n")[0];
                 string curVersion = getCfgValue("GFT_Version");
+
+                firstLine = firstLine.Trim();
+                if (firstLine.StartsWith("!"))
+                {
+                    result.hasNityfy = true;
+                    firstLine = firstLine.Substring(1);
+                    log = log.Substring(1);
+                }
 
                 if(firstLine != null && curVersion != null && curVersion.Length != 0)
                 {
@@ -530,7 +600,12 @@ public partial class MainWindow : AcrylicWindow{
                 }
             }
         }
-        return Tuple.Create(needLoadPack, logResult);
+
+        result.needUpdate = needLoadPack;
+        result.log = logResult;
+
+        return result;
+        //return Tuple.Create(needLoadPack, logResult);
     }
 
 
@@ -662,7 +737,10 @@ public partial class MainWindow : AcrylicWindow{
                 if (checkSha)
                 {
                     result = IsPackInstalled();
-                    if(result) RemoveBackup();
+                    if (!result)
+                    {
+                        RemoveBackup();
+                    }
                 }
                 else
                 {
