@@ -622,10 +622,9 @@ namespace GF2_RU_Launch
 
 
             List<ELine> nonTrs = new List<ELine>();
-            var regex = new Regex("^(?:[^a-zA-Z]*|[^a-zA-Z]*[a-zA-Z][^a-zA-Z]*)$", RegexOptions.Compiled);
             foreach (ELine line in lines)
             {
-                if (!isTranslatable(line.Original, regex))
+                if (!isTranslatable(line.Original))
                 {
                     nonTrs.Add(line);
                     continue;
@@ -849,7 +848,7 @@ namespace GF2_RU_Launch
                 {
                     if (item.Original != null && item.Original.Length != 0)
                     {
-                        if (item.Value == null || item.Value == item.Original)
+                        if ((item.Value == null || item.Value == "") || item.Value == item.Original)
                         {
                             if (exportNonTranslatable || isTranslatable(item.Original))
                             {
@@ -1107,21 +1106,24 @@ namespace GF2_RU_Launch
             return src;
         }
 
+        private static Regex trs1 = new Regex("^(?:[^a-zA-Z]*|[^a-zA-Z]*[a-zA-Z][^a-zA-Z]*)$", RegexOptions.Compiled);
+        private static Regex trs2 = new Regex("[A-Z][A-Z]-[1-9]-[1-9]", RegexOptions.Compiled);
+        
         public static bool isTranslatable(string? str)
-        {
-            return isTranslatable(str, new Regex("^(?:[^a-zA-Z]*|[^a-zA-Z]*[a-zA-Z][^a-zA-Z]*)$"));
-        }
-        public static bool isTranslatable(string? str, Regex regex)
         {
             if (String.IsNullOrWhiteSpace(str)) return false;
             if (str.Length == 1)
             {
                 return false;
             }
-            return !regex.IsMatch(str);;
+            if (trs2.IsMatch(str))
+            {
+                return false;
+            }
+            return !trs1.IsMatch(str);
         }
-    }
 
+    }
 
     public class ELine
     {
