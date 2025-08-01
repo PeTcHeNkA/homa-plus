@@ -27,34 +27,16 @@ import androidx.activity.ComponentActivity;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
-
-import com.google.android.gms.tasks.OnCanceledListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.mlkit.nl.translate.TranslateLanguage;
-import com.google.mlkit.nl.translate.Translation;
-import com.google.mlkit.nl.translate.Translator;
-import com.google.mlkit.nl.translate.TranslatorOptions;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Consumer;
-import java.util.regex.Pattern;
 import plus.proto.JsonTMap;
 import plus.proto.JsonUtils;
 import plus.proto.LangPackV2;
-import plus.tson.TJsonFile;
 import plus.tson.TsonFile;
 
 
@@ -129,6 +111,18 @@ public class MainActivity extends ComponentActivity {
         setContentView(R.layout.info);
         TextView text = findViewById(R.id.helpText);
         text.setMovementMethod(new ScrollingMovementMethod());
+    }
+
+
+    public void onClickClearCache(View v){
+        File file = new File(this.getFilesDir(), "translation_cache.jobj");
+        if(file.exists()){
+            file.delete();
+            info("Кеш был очищен");
+        } else {
+            info("Кеш уже очищен");
+        }
+        runLater(() -> info(null), 1000);
     }
 
 
@@ -243,6 +237,8 @@ public class MainActivity extends ComponentActivity {
                 };
                 int i = 0;
                 LangPackV2 pack = new LangPackV2();
+                info("Чтение таблицы локализации ...");
+                pack.read(enPack, true);
 
                 for (String repo:allReposes) {
                     if(repo == null)continue;
@@ -264,27 +260,39 @@ public class MainActivity extends ComponentActivity {
                     JsonUtils.readFrom(jPack, map);
                     JsonTMap jMap = new JsonTMap(map);
 
-                    info("Чтение таблицы локализации ["+i+"] ...");
-
-                    pack.read(enPack, true);
-
                     info("Применение переводов ["+i+"] ...");
                     jMap.apply(pack, false);
                 }
 
                 if(settings.enableTranslation){
-                    setupTranslator(success -> {
-                        if(success) try{
-                            translateNotTranslated(pack);
-                        } catch (Exception e) {
-                            info("Ошибка перевода: "+e.getMessage());
-                        }
-                        try {
-                            savePack(pack, wDir);
-                        } catch (Exception e){
-                            onErrorBuild(e);
-                        } finally {
-                            onComplete();
+                    info("Запуск перевода ML Kit");
+                    MlKitTranslator translator = new MlKitTranslator();
+                    translator.setPack(pack);
+                    translator.setupTranslator(success -> {
+                        if(success) {
+                            try {
+                                ITranslationCallback cb = translator.translateAll(this, () -> {
+                                    try {
+                                        savePack(pack, wDir);
+                                    } catch (Exception e) {
+                                        onErrorBuild(e);
+                                    } finally {
+                                        onComplete();
+                                    }
+                                });
+                                runTranslationProgressInfo(cb);
+                            } catch (Exception e) {
+                                info("Ошибка перевода: " + e.getMessage());
+                                onComplete();
+                            }
+                        } else {
+                            try {
+                                savePack(pack, wDir);
+                            } catch (Exception e) {
+                                onErrorBuild(e);
+                            } finally {
+                                onComplete();
+                            }
                         }
                     });
                     runOnComplete.set(false);
@@ -298,6 +306,21 @@ public class MainActivity extends ComponentActivity {
             }
         });
         thread.start();
+    }
+
+
+    private void runTranslationProgressInfo(ITranslationCallback cb){
+        if(cb.isCompleted())return;
+        Runnable infoDelayed = new Runnable() {
+            @Override
+            public void run() {
+                info("Переведено "+cb.getCurrent()+" / "+cb.getTotal());
+                if(!cb.isCompleted()){
+                    runLater(this, 250);
+                }
+            }
+        };
+        infoDelayed.run();
     }
 
 
@@ -319,79 +342,6 @@ public class MainActivity extends ComponentActivity {
             info(null);
         }, 2000);
     }
-
-
-//    private void translateNotTranslated(LangPackV2 pack) throws Exception {
-//        info("Перевод недостающих частей ...");
-//        int size = pack.size();
-//        TJsonFile cache = new TJsonFile(new File(this.getFilesDir(), "cache.jobj"), true);
-//        cache.load();
-//
-//        //long time = System.currentTimeMillis();
-//        for (int i = 0; i < size; i++){
-////            long time2 = System.currentTimeMillis();
-////            if(time + 150 > time2){
-////                time = time2;
-////                info("Переведено "+i+" / "+size);
-////            }
-//            LangPackV2.Line line = pack.getLineByIndex(i);
-//
-//            if(line.actual == null || line.actual.equals(line.src)){
-//                if(isTranslatable(line.src)){
-//                    String cached = cache.getStrSafe(line.src);
-//                    if(cached != null){
-//                        line.actual = cached;
-//                    } else {
-//                        translate(line.src, s -> {
-//                            if(!s.equals(line.src)) {
-//                                line.actual = s;
-//                                synchronized (cache) {
-//                                    cache.put(line.src, line.actual);
-//                                }
-//                            }
-//                        });
-//                    }
-//                }
-//            }
-//        }
-//
-//        cache.save();
-//    }
-
-
-    private void translate(String src, Consumer<String> future){
-        translator.translate(src)
-                .addOnSuccessListener(future::accept)
-                .addOnFailureListener(e -> future.accept(src))
-                .addOnCanceledListener(() -> future.accept(src));
-    }
-
-
-    private Translator translator;
-    private void setupTranslator(Consumer<Boolean> future){
-        info("Инициализация ML Kit ...");
-        TranslatorOptions options = new TranslatorOptions.Builder()
-                .setSourceLanguage(TranslateLanguage.ENGLISH)
-                .setTargetLanguage(TranslateLanguage.RUSSIAN)
-                .setExecutor(Executors.newFixedThreadPool(8))
-                .build();
-        translator = Translation.getClient(options);
-        info("Загрузка модели ...");
-        translator.downloadModelIfNeeded().addOnSuccessListener(unused -> {
-            info("Модель загружена");
-            future.accept(Boolean.TRUE);
-        }).addOnFailureListener(e -> {
-            info("Ошибка загрузки модели: "+e.getMessage());
-            future.accept(Boolean.FALSE);
-        });
-    }
-
-//    private String translate(String src){
-//        if(translator == null) return src;
-//        return translator.translate(src).
-//    }
-
-
 
 
     private void runLater(Runnable task, int delay){

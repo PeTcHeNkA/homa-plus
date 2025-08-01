@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    >
+
+    <LinearLayout
+        android:id="@+id/background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="false"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:visibility="visible">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ump45" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent"
+        >
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="84dp"
+            android:background="@color/btn_1"
+            android:gravity="center"
+            android:text="Настройки"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textSize="60px" />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:layout_marginTop="120dp"
+        android:layout_marginRight="7dp"
+        android:layout_marginLeft="7dp"
+        android:orientation="vertical"
+        >
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:theme="@style/Theme.LAunch.Input">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/settings_repo1"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@color/btn_1"
+                android:hint="Репозиторий 1"
+                android:inputType="text"
+                android:singleLine="true"
+                android:textSize="42px" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:theme="@style/Theme.LAunch.Input"
+            android:layout_marginTop="5dp"
+            >
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/settings_repo2"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@color/btn_1"
+                android:textSize="42px"
+                android:hint="Репозиторий 2"
+                android:inputType="text"
+                android:singleLine="true" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:theme="@style/Theme.LAunch.Input"
+            android:layout_marginTop="5dp"
+            >
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/settings_repo3"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@color/btn_1"
+                android:textSize="42px"
+                android:hint="Репозиторий 3"
+                android:inputType="text"
+                android:singleLine="true" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <Switch
+            android:id="@+id/settings_translate"
+            android:layout_width="match_parent"
+            android:layout_marginTop="5dp"
+            android:layout_height="48dp"
+            android:textSize="42px"
+            android:background="@color/btn_1"
+            android:textColor="@color/white"
+            android:paddingRight="20dp"
+            android:paddingLeft="5dp"
+            android:text="Включить до-перевод ML Kit"
+            />
+
+        <Button
+            android:id="@+id/buttonResetCache"
+            android:layout_width="match_parent"
+            android:layout_marginTop="5dp"
+            android:layout_height="48dp"
+            android:textSize="42px"
+            android:background="@color/btn_1"
+            android:textColor="@color/white"
+            android:paddingRight="20dp"
+            android:paddingLeft="5dp"
+            android:textAllCaps="false"
+            android:textAlignment="textStart"
+            android:text="Очистить кеш до-перевода"
+            android:onClick="onClickClearCache"
+            />
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="match_parent"
+        android:layout_height="84dp"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="60dp"
+        android:background="@color/btn_1"
+        android:onClick="onClickHelpBack"
+        android:text="Подтвердить"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:textSize="60px" />
+
+</FrameLayout>

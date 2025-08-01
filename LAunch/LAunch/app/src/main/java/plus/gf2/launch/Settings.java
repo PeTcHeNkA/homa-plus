@@ -66,13 +66,13 @@ public class Settings {
 
 
     public String getRepo2(){
-        if(repo2.isBlank())return null;
+        if(repo2 == null || repo2.isBlank())return null;
         return repo2;
     }
 
 
     public String getRepo3(){
-        if(repo3.isBlank())return null;
+        if(repo3 == null || repo3.isBlank())return null;
         return repo3;
     }
 
