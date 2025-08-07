@@ -24,13 +24,66 @@
     </fw:AcrylicWindow.BorderBrush>
 
     <Grid>
-        <Border Background="#4C6F6F6F" VerticalAlignment="Top" Height="44" BorderThickness="0,1,0,1" Margin="0,136,0,0">
-            <Border.BorderBrush>
-                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-                    <GradientStop Color="#00F1F1F1"/>
-                    <GradientStop Color="#7F383838" Offset="1"/>
-                </LinearGradientBrush>
-            </Border.BorderBrush>
+        <Grid VerticalAlignment="Top" Height="44">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="6*"/>
+                <RowDefinition Height="5*"/>
+            </Grid.RowDefinitions>
+            <Border VerticalAlignment="Top" Height="44"
+                    BorderThickness="1,1,1,1"
+                Background="{DynamicResource Bottons_Background}"
+                BorderBrush="{DynamicResource Bottons_Border}" HorizontalAlignment="Left" Width="370" Grid.RowSpan="2"
+                >
+                <Grid Margin="0,0,0,0">
+                    <TextBlock x:Name="ChangeLHead" 
+                   VerticalAlignment="Center"
+                   TextAlignment="Left"
+                   FontFamily="Microsoft YaHei" FontSize="24" 
+                   Text="Пакеты локализации" Margin="25,0,0,0" Height="32" 
+                   />
+                </Grid>
+            </Border>
+
+            <Button x:Name="ResetPacks" Height="44" 
+                    VerticalAlignment="Top" FontFamily="Microsoft YaHei" 
+                    FontSize="24" Margin="370,0,25,0" Grid.RowSpan="2"
+                    >
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource LBottons}">
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{StaticResource BtnDel_Hover}"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+                Сбросить
+            </Button>
+
+            <Border Width="25"
+                    HorizontalAlignment="Right"
+                    BorderThickness="1,1,1,1"
+                Background="{DynamicResource Bottons_Background}"
+                BorderBrush="{DynamicResource Bottons_Border}" Grid.RowSpan="2"
+                />
+        </Grid>
+
+        <DataGrid x:Name="Packs" IsEnabled="True" Margin="0,44,0,0" AutoGenerateColumns="False"
+                  Background="{DynamicResource Header}" CanUserAddRows="True" CanUserDeleteRows="True" Height="92" VerticalAlignment="Top"
+        >
+            <DataGrid.Columns>
+                <DataGridTextColumn x:Name="TT_ID" Header="Приоретет" Binding="{Binding Priority}" Width="70" CanUserResize="True"/>
+                <DataGridTextColumn x:Name="TT_ORG" Header="Название" Binding="{Binding Name}" Width="100" CanUserResize="True" />
+                <DataGridTextColumn x:Name="TT_RES" Header="Расположение" Binding="{Binding Source}" Width="450" CanUserResize="True" />
+            </DataGrid.Columns>
+
+        </DataGrid>
+
+        <Border VerticalAlignment="Top" Height="44" BorderThickness="0,1,0,1" Margin="0,136,0,0"
+                Background="{DynamicResource Bottons_Background}"
+                BorderBrush="{DynamicResource Bottons_Border}"
+                >
+
             <Grid>
                 <TextBlock x:Name="ChangeLHead1" 
                     VerticalAlignment="Center"
@@ -46,49 +99,7 @@
             </Grid>
         </Border>
 
-        <Border Background="#4C6F6F6F" VerticalAlignment="Top" Height="44" BorderThickness="0,1,0,1">
-            <Border.BorderBrush>
-                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-                    <GradientStop Color="#00F1F1F1"/>
-                    <GradientStop Color="#7F383838" Offset="1"/>
-                </LinearGradientBrush>
-            </Border.BorderBrush>
-            <Grid>
-                <TextBlock x:Name="ChangeLHead" 
-                   VerticalAlignment="Center"
-                   TextAlignment="Left"
-                   FontFamily="Microsoft YaHei" FontSize="24" 
-                   Text="Пакеты локализации" Margin="25,0,325,0" Height="32" 
-                   />
 
-                <Button x:Name="ResetPacks" Height="32" 
-                    VerticalAlignment="Center" FontFamily="Microsoft YaHei" 
-                    FontSize="24" Margin="440,0,25,0"
-                    >
-                    <Button.Style>
-                        <Style TargetType="Button" BasedOn="{StaticResource LBottons}">
-                            <Style.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="{StaticResource BtnDel_Hover}"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                    Сбросить
-                </Button>
-            </Grid>
 
-        </Border>
-
-        <DataGrid x:Name="Packs" IsEnabled="True" Margin="0,44,0,0" AutoGenerateColumns="False"
-                  Background="{DynamicResource Header}" CanUserAddRows="True" CanUserDeleteRows="True" Height="92" VerticalAlignment="Top"
-        >
-            <DataGrid.Columns>
-                <DataGridTextColumn x:Name="TT_ID" Header="Приоретет" Binding="{Binding Priority}" Width="70" CanUserResize="True"/>
-                <DataGridTextColumn x:Name="TT_ORG" Header="Название" Binding="{Binding Name}" Width="100" CanUserResize="True" />
-                <DataGridTextColumn x:Name="TT_RES" Header="Расположение" Binding="{Binding Source}" Width="450" CanUserResize="True" />
-            </DataGrid.Columns>
-
-        </DataGrid>
     </Grid>
 </fw:AcrylicWindow>

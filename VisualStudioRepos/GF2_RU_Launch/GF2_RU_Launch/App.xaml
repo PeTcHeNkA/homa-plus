@@ -84,6 +84,7 @@
             <Setter Property="Background" Value="{DynamicResource Bottons_Background}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource Bottons_Border}"/>
         </Style>
+
         
     </Application.Resources>
 </Application>
