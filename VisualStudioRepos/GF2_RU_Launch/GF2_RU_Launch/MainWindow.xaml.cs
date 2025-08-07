@@ -37,6 +37,8 @@ public partial class MainWindow : AcrylicWindow{
     private Changelogs subWindow;
     private Changelogs subWindow2;
     private Editor editor;
+    private Settings settings;
+
     private bool needLoadPack = true;
     private bool locked = false;
     private bool launchUpdatesChecked = false;
@@ -44,6 +46,7 @@ public partial class MainWindow : AcrylicWindow{
     public MainWindow() 
     {
         InitializeComponent();
+        InitUi();
         SetExtendViewIntoTitleBar(this, true);
         LoadConfig();
         ChooseRandomBg();
@@ -62,6 +65,57 @@ public partial class MainWindow : AcrylicWindow{
         catch { 
 
         }
+    }
+
+
+    public void InitUi()
+    {
+        new ClickProxy(BTNEditor, OnClickOpenEditor);
+        new ClickProxy(BTNSettings, OnClickOpenSettings);
+    }
+
+
+    private void OnEnterBtnsBg(object sender, MouseEventArgs e)
+    {
+        BGBtns.Opacity = 1;
+    }
+
+    private void OnLeaveBtnsBg(object sender, MouseEventArgs e)
+    {
+        BGBtns.Opacity = 0.55;
+    }
+
+
+    private class ClickProxy
+    {
+        private bool pressed = false;
+        private MouseEventHandler handler;
+
+        public ClickProxy(UIElement el, MouseEventHandler handler)
+        {
+            el.MouseLeftButtonDown += this.OnClick;
+            el.MouseLeftButtonUp += this.OnRelease;
+            this.handler = handler;
+        }
+
+        public void OnClick(object sender, RoutedEventArgs e)
+        {
+            if (pressed) return;
+            pressed = true;
+        }
+        public void OnRelease(object sender, RoutedEventArgs e)
+        {
+            if (!pressed) return;
+            pressed = false;
+            handler.Invoke(sender, null);
+        }
+    }
+
+
+    private void OnClickOpenSettings(object sender, RoutedEventArgs e)
+    {
+        settings = new Settings(this);
+        settings.Show();
     }
 
 
@@ -115,6 +169,10 @@ public partial class MainWindow : AcrylicWindow{
         if(editor != null)
         {
             editor.Close();
+        }
+        if(settings != null)
+        {
+            settings.Close();
         }
     }
 

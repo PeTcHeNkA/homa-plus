@@ -69,6 +69,9 @@
     <Resource Include="Images\groza1.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Images\settings_ico.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Content Include="langedit.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
