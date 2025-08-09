@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:GF2_RU_Launch"
         xmlns:fw="clr-namespace:SourceChord.FluentWPF;assembly=FluentWPF"
         mc:Ignorable="d"
-        Title="Girls Frontline 2: Exilium RU Launcher | Changelog" Height="350" Width="650" MinHeight="300" MinWidth="610"
+        Title="Girls Frontline 2: Exilium RU Launcher | Settings" Height="350" Width="650" MinHeight="300" MinWidth="610"
         
         TintColor="{DynamicResource L_Background_Main_Color}" 
         FallbackColor="{DynamicResource L_Background_Main_Color}"
@@ -49,7 +49,7 @@
         <ControlTemplate x:Key="ComboBoxTextBox" TargetType="{x:Type TextBox}">
             <Border x:Name="PART_ContentHost" Focusable="False" Background="{TemplateBinding Background}" />
         </ControlTemplate>
-        
+
         <Style x:Key="{x:Type ComboBox}" TargetType="{x:Type ComboBox}">
             <Setter Property="SnapsToDevicePixels" Value="true"/>
             <Setter Property="OverridesDefaultStyle" Value="true"/>
@@ -139,8 +139,9 @@
             </Style.Triggers>
         </Style>
     </Window.Resources>
-    
+
     <Grid>
+        <!-- Установленные пакеты (заголовок) -->
         <Grid VerticalAlignment="Top" Height="44">
             <Grid.RowDefinitions>
                 <RowDefinition Height="6*"/>
@@ -155,7 +156,7 @@
                     <TextBlock
                    VerticalAlignment="Center"
                    TextAlignment="Left"
-                   FontFamily="Microsoft YaHei" FontSize="24" 
+                   FontFamily="Microsoft YaHei" FontSize="22" 
                    Text="Пакеты локализации" Margin="25,0,0,0" Height="32" 
                    />
                 </Grid>
@@ -163,7 +164,7 @@
 
             <Button x:Name="ResetPacks" Height="44" 
                     VerticalAlignment="Top" FontFamily="Microsoft YaHei" 
-                    FontSize="24" Margin="370,0,25,0" Grid.RowSpan="2"
+                    FontSize="22" Margin="370,0,25,0" Grid.RowSpan="2"
                     >
                 <Button.Style>
                     <Style TargetType="Button" BasedOn="{StaticResource LBottons}">
@@ -185,6 +186,7 @@
                 />
         </Grid>
 
+        <!-- Установленные пакеты (таблица) -->
         <DataGrid x:Name="Packs" IsEnabled="True" Margin="0,44,0,0" AutoGenerateColumns="False"
                   Background="{DynamicResource Header}" CanUserAddRows="True" CanUserDeleteRows="True" Height="92" VerticalAlignment="Top"
         >
@@ -196,6 +198,7 @@
 
         </DataGrid>
 
+        <!-- До-перевод -->
         <Grid VerticalAlignment="Top" Height="44" Margin="0,136,0,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="6*"/>
@@ -210,7 +213,7 @@
                     <TextBlock
                    VerticalAlignment="Center"
                    TextAlignment="Left"
-                   FontFamily="Microsoft YaHei" FontSize="24" 
+                   FontFamily="Microsoft YaHei" FontSize="22" 
                    Text="До-перевод" Margin="25,0,0,0" Height="32" 
                    />
                 </Grid>
@@ -222,17 +225,146 @@
                       BorderThickness="1,1,1,1"
                       >
                 <ComboBoxItem Tag="1" IsSelected="True">
-                    <TextBlock Height="26" FontSize="24" Text="Отключено"/>
+                    <TextBlock Height="26" FontSize="22" Text="Отключено"/>
                 </ComboBoxItem>
 
                 <ComboBoxItem Tag="2">
-                    <TextBlock Height="26" FontSize="24" Text="Скоро ..."/>
+                    <TextBlock Height="26" FontSize="22" Text="Скоро ..."/>
                 </ComboBoxItem>
             </ComboBox>
 
             <Border Width="25"
                     HorizontalAlignment="Right"
                     BorderThickness="1,1,1,1"
+                Background="{DynamicResource Bottons_Background}"
+                BorderBrush="{DynamicResource Bottons_Border}" Grid.RowSpan="2"
+                />
+        </Grid>
+
+        <!-- Ветка лаунчера -->
+        <Grid VerticalAlignment="Bottom" Height="44" Margin="0,0,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="6*"/>
+                <RowDefinition Height="5*"/>
+            </Grid.RowDefinitions>
+            <Border VerticalAlignment="Top" Height="44"
+                BorderThickness="1,1,1,1"
+            Background="{DynamicResource Bottons_Background}"
+            BorderBrush="{DynamicResource Bottons_Border}" HorizontalAlignment="Left" Width="370" Grid.RowSpan="2"
+            >
+                <Grid Margin="0,0,0,0">
+                    <TextBlock
+               VerticalAlignment="Center"
+               TextAlignment="Left"
+               FontFamily="Microsoft YaHei" FontSize="22" 
+               Text="Ветка" Margin="25,0,0,0" Height="32" 
+               />
+                </Grid>
+            </Border>
+
+            <Border VerticalAlignment="Top" Height="44" Margin="370,0,25,0"
+                Grid.RowSpan="2"
+    BorderThickness="1,1,1,1"
+Background="{DynamicResource Bottons_Background}"
+BorderBrush="{DynamicResource Bottons_Border}"
+>
+                <TextBlock
+   VerticalAlignment="Center"
+   TextAlignment="Center"
+   FontFamily="Microsoft YaHei" FontSize="22" 
+   Text="{x:Static local:Settings.UN_BRANCH}" Height="32" 
+   />
+            </Border>
+
+            <Border Width="25"
+                HorizontalAlignment="Right"
+                BorderThickness="1,1,1,1"
+            Background="{DynamicResource Bottons_Background}"
+            BorderBrush="{DynamicResource Bottons_Border}" Grid.RowSpan="2"
+            />
+        </Grid>
+
+        <!-- Версия лаунчера -->
+        <Grid VerticalAlignment="Bottom" Height="44" Margin="0,0,0,44">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="6*"/>
+                <RowDefinition Height="5*"/>
+            </Grid.RowDefinitions>
+            <Border VerticalAlignment="Top" Height="44"
+                    BorderThickness="1,1,1,1"
+                Background="{DynamicResource Bottons_Background}"
+                BorderBrush="{DynamicResource Bottons_Border}" HorizontalAlignment="Left" Width="370" Grid.RowSpan="2"
+                >
+                <Grid Margin="0,0,0,0">
+                    <TextBlock
+                   VerticalAlignment="Center"
+                   TextAlignment="Left"
+                   FontFamily="Microsoft YaHei" FontSize="22" 
+                   Text="Версия лаунчера" Margin="25,0,0,0" Height="32" 
+                   />
+                </Grid>
+            </Border>
+
+            <Border VerticalAlignment="Top" Height="44" Margin="370,0,25,0"
+                    Grid.RowSpan="2"
+        BorderThickness="1,1,1,1"
+    Background="{DynamicResource Bottons_Background}"
+    BorderBrush="{DynamicResource Bottons_Border}"
+    >
+                <TextBlock
+       VerticalAlignment="Center"
+       TextAlignment="Center"
+       FontFamily="Microsoft YaHei" FontSize="22" 
+       Text="{x:Static local:MainWindow.LAUNCH_VERSION}" Height="32" 
+       />
+            </Border>
+
+            <Border Width="25"
+                    HorizontalAlignment="Right"
+                    BorderThickness="1,1,1,1"
+                Background="{DynamicResource Bottons_Background}"
+                BorderBrush="{DynamicResource Bottons_Border}" Grid.RowSpan="2"
+                />
+        </Grid>
+
+        <!-- Discord RPC -->
+        <Grid VerticalAlignment="Top" Height="44" Margin="0,180,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="6*"/>
+                <RowDefinition Height="5*"/>
+            </Grid.RowDefinitions>
+            <Border VerticalAlignment="Top" Height="44"
+                BorderThickness="1,1,1,1"
+                Background="{DynamicResource Bottons_Background}"
+                BorderBrush="{DynamicResource Bottons_Border}" HorizontalAlignment="Left" Width="370" Grid.RowSpan="2"
+                >
+                <Grid Margin="0,0,0,0">
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        TextAlignment="Left"
+                        FontFamily="Microsoft YaHei" FontSize="22" 
+                        Text="Discord RPC" Margin="25,0,0,0" Height="32" 
+                   />
+                </Grid>
+            </Border>
+
+            <ComboBox x:Name="CHSDiscordRPC" VerticalAlignment="Top" Height="44" Margin="370,0,25,0" Grid.RowSpan="2"
+                Background="{DynamicResource Bottons_Background}"
+                BorderBrush="{DynamicResource Bottons_Border}"
+                BorderThickness="1,1,1,1"
+                      >
+                <ComboBoxItem Tag="1" IsSelected="True">
+                    <TextBlock Height="26" FontSize="22" Text="Отключено"/>
+                </ComboBoxItem>
+
+                <ComboBoxItem Tag="2">
+                    <TextBlock Height="26" FontSize="22" Text="Включено"/>
+                </ComboBoxItem>
+            </ComboBox>
+
+            <Border Width="25"
+                HorizontalAlignment="Right"
+                BorderThickness="1,1,1,1"
                 Background="{DynamicResource Bottons_Background}"
                 BorderBrush="{DynamicResource Bottons_Border}" Grid.RowSpan="2"
                 />

@@ -5,10 +5,12 @@ namespace GF2_RU_Launch
 {
     public partial class Settings : AcrylicWindow
     {
+        public static string UN_BRANCH = "master";
         private MainWindow parent;
         public Settings(MainWindow main)
         {
             this.parent = main;
+            UN_BRANCH = main.getBranch();
             InitializeComponent();
 
             Packs.ItemsSource = new List<PackInf>();

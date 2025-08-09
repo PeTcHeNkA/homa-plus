@@ -330,13 +330,18 @@ public partial class MainWindow : AcrylicWindow{
             loadUrl = GF2_LOAD_URL;
         }
 
+        return loadUrl.Replace("%__BRANCH%__%", getBranch());
+    }
+
+
+    public string getBranch()
+    {
         string branch = getCfgValue("GFT_Branch");
-        if(branch == null || branch.Length == 0)
+        if (branch == null || branch.Length == 0)
         {
             branch = "master";
         }
-
-        return loadUrl.Replace("%__BRANCH%__%", branch);
+        return branch;
     }
 
 
@@ -348,13 +353,7 @@ public partial class MainWindow : AcrylicWindow{
             loadUrl = GF2_CHANGELOG_URL;
         }
 
-        string branch = getCfgValue("GFT_Branch");
-        if (branch == null || branch.Length == 0)
-        {
-            branch = "master";
-        }
-
-        return loadUrl.Replace("%__BRANCH%__%", branch);
+        return loadUrl.Replace("%__BRANCH%__%", getBranch());
     }
 
 
@@ -901,7 +900,7 @@ public partial class MainWindow : AcrylicWindow{
     }
 
 
-    private static bool load(string url, string filename)
+    public static bool load(string url, string filename)
     {
         CreatePathIfNeed(filename);
         using (WebClient webClient = new WebClient())
