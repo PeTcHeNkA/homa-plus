@@ -116,3 +116,128 @@ public partial class App : Application{
     }
 }
 
+
+public class AppConfig
+{
+    private System.Configuration.Configuration cfg;
+    private static AppConfig instance;
+
+    public static AppConfig Get()
+    {
+        if (instance == null)
+        {
+            instance = new AppConfig();
+        }
+        return instance;
+    }
+
+    public AppConfig()
+    {
+        cfg = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+    }
+
+
+    public string? getStr(string key)
+    {
+        return ConfigurationManager.AppSettings[key];
+    }
+
+
+    public int getInt(string key)
+    {
+        string? val = getStr(key);
+        if (val != null) {
+            try
+            {
+                return int.Parse(val);
+            }
+            catch (FormatException) {
+                return 0;
+            }
+        }
+        return 0;
+    }
+
+
+    public bool check(string key, bool def)
+    {
+        string? val = getStr(key);
+        if (val != null) {
+            return val.Equals("true");
+        }
+        return def;
+    }
+
+
+    public bool? getBool(string key)
+    {
+        string? val = getStr(key);
+        if (val != null)
+        {
+            return val.Equals("true");
+        }
+        return null;
+    }
+
+
+    public void del(string key)
+    {
+        var settings = cfg.AppSettings.Settings;
+        settings.Remove(key);
+    }
+
+
+    public void setInt(string key, int val)
+    {
+        setStr(key, val.ToString());
+    }
+
+
+    public void setBool(string key, bool val)
+    {
+        if (val)
+        {
+            setStr(key, "true");
+        } else
+        {
+            setStr(key, "false");
+        }
+    }
+
+
+    public void setStr(string key, string value)
+    {
+        var settings = cfg.AppSettings.Settings;
+        if (settings[key] == null)
+        {
+            settings.Add(key, value);
+        }
+        else
+        {
+            settings[key].Value = value;
+        }
+    }
+
+
+    public void rollbackChanges()
+    {
+        var settings = cfg.AppSettings.Settings;
+
+        foreach (string key in settings.AllKeys){
+            setStr(key, getStr(key));
+        }
+    }
+
+
+    public void confirmChanges()
+    {
+        ConfigurationManager.RefreshSection(cfg.AppSettings.SectionInformation.Name);
+    }
+
+
+    public void save()
+    {
+        confirmChanges();
+        cfg.Save(ConfigurationSaveMode.Modified);
+    }
+}

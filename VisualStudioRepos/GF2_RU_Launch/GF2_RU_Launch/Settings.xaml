@@ -9,7 +9,7 @@
                   xmlns:col="clr-namespace:System.Collections;assembly=mscorlib"
                   
         mc:Ignorable="d"
-        Title="Girls Frontline 2: Exilium RU Launcher | Settings" Height="350" Width="650" MinHeight="344" MinWidth="625"
+        Title="Girls Frontline 2: Exilium RU Launcher | Settings" Height="400" Width="650" MinHeight="388" MinWidth="625"
         
         TintColor="{DynamicResource L_Background_Main_Color}" 
         FallbackColor="{DynamicResource L_Background_Main_Color}"
@@ -167,7 +167,7 @@
 
             <Button x:Name="ResetPacks" Height="44" 
                     VerticalAlignment="Top" FontFamily="Microsoft YaHei" 
-                    FontSize="22" Margin="370,0,25,0" Grid.RowSpan="2"
+                    FontSize="22" Margin="370,0,25,0" Grid.RowSpan="2" Click="ResetPacks_Click"
                     >
                 <Button.Style>
                     <Style TargetType="Button" BasedOn="{StaticResource LBottons}">
@@ -216,9 +216,21 @@
             </DataGrid.RowStyle>
 
             <DataGrid.Columns>
-                <DataGridTextColumn x:Name="TT_ID" Header="Приоретет" Binding="{Binding Priority}" Width="70" CanUserResize="True"/>
-                <DataGridTextColumn x:Name="TT_ORG" Header="Название" Binding="{Binding Name}" Width="100" CanUserResize="True" />
-                <DataGridTextColumn x:Name="TT_RES" Header="Расположение" Binding="{Binding Source}" Width="450" CanUserResize="True" />
+                <DataGridTextColumn x:Name="TT_ID" Binding="{Binding Priority}" Width="75" CanUserResize="True">
+                    <DataGridTextColumn.Header>
+                        <TextBlock Margin="5,0,0,0" HorizontalAlignment="Center" Text="Приоретет"/>
+                    </DataGridTextColumn.Header>
+                </DataGridTextColumn>
+                <DataGridTextColumn x:Name="TT_ORG" Binding="{Binding Name}" Width="95" CanUserResize="True">
+                    <DataGridTextColumn.Header>
+                        <TextBlock Margin="5,0,0,0" HorizontalAlignment="Center" Text="Название"/>
+                    </DataGridTextColumn.Header>
+                </DataGridTextColumn>
+                <DataGridTextColumn x:Name="TT_RES" Binding="{Binding Source}" Width="450" CanUserResize="True">
+                    <DataGridTextColumn.Header>
+                        <TextBlock Margin="5,0,0,0" HorizontalAlignment="Center" Text="Расположение"/>
+                    </DataGridTextColumn.Header>
+                </DataGridTextColumn>
             </DataGrid.Columns>
 
         </DataGrid>
@@ -267,7 +279,7 @@
         </Grid>
 
         <!-- Ветка лаунчера -->
-        <Grid VerticalAlignment="Bottom" Height="44" Margin="0,0,0,0">
+        <Grid VerticalAlignment="Bottom" Height="44" Margin="0,0,0,44">
             <Grid.RowDefinitions>
                 <RowDefinition Height="6*"/>
                 <RowDefinition Height="5*"/>
@@ -310,7 +322,7 @@ BorderBrush="{DynamicResource Bottons_Border}"
         </Grid>
 
         <!-- Версия лаунчера -->
-        <Grid VerticalAlignment="Bottom" Height="44" Margin="0,0,0,44">
+        <Grid VerticalAlignment="Bottom" Height="44" Margin="0,0,0,88">
             <Grid.RowDefinitions>
                 <RowDefinition Height="6*"/>
                 <RowDefinition Height="5*"/>
@@ -376,19 +388,76 @@ BorderBrush="{DynamicResource Bottons_Border}"
             <ComboBox x:Name="CHSDiscordRPC" VerticalAlignment="Top" Height="44" Margin="370,0,25,0" Grid.RowSpan="2"
                 Background="{DynamicResource Bottons_Background}"
                 BorderBrush="{DynamicResource Bottons_Border}"
-                BorderThickness="1,1,1,1"
+                BorderThickness="1,1,1,1" SelectionChanged="CHSDiscordRPC_SelectionChanged"
                       >
-                <ComboBoxItem Tag="1" IsSelected="True">
+                <ComboBoxItem x:Uid="dsc1en" IsSelected="True">
                     <TextBlock Height="26" FontSize="22" Text="Отключено"/>
                 </ComboBoxItem>
 
-                <ComboBoxItem Tag="2">
+                <ComboBoxItem Uid="dsc1dis" Tag="2">
                     <TextBlock Height="26" FontSize="22" Text="Включено"/>
                 </ComboBoxItem>
             </ComboBox>
 
             <Border Width="25"
                 HorizontalAlignment="Right"
+                BorderThickness="1,1,1,1"
+                Background="{DynamicResource Bottons_Background}"
+                BorderBrush="{DynamicResource Bottons_Border}" Grid.RowSpan="2"
+                />
+        </Grid>
+
+        <!-- Сохранить изменения -->
+        <Grid VerticalAlignment="Bottom" Height="44" Margin="0,0,0,00">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="32*"/>
+                <ColumnDefinition Width="33*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="6*"/>
+                <RowDefinition Height="5*"/>
+            </Grid.RowDefinitions>
+
+            <Button Height="44" 
+                VerticalAlignment="Top" FontFamily="Microsoft YaHei" 
+                FontSize="22" Margin="55,0,0,0" Grid.RowSpan="2"
+                Content="Сбросить" Click="ResetSettinsClick"
+                    >
+                <Button.Style>
+                    <Style TargetType="{x:Type Button}" BasedOn="{StaticResource LBottons}">
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{StaticResource BtnDel_Hover}"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+
+            <Button Height="44" 
+                VerticalAlignment="Top" FontFamily="Microsoft YaHei" 
+                FontSize="22" Margin="0,0,55,0" Grid.RowSpan="2"
+                Content="Сохранить изменения" Grid.Column="1" Click="SaveSettinsClick"
+                    >
+                <Button.Style>
+                    <Style TargetType="{x:Type Button}" BasedOn="{StaticResource LBottons}">
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{StaticResource BtnPlay_Hover}"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+
+            <Border Width="55"
+                HorizontalAlignment="Right"
+                BorderThickness="1,1,1,1"
+                Background="{DynamicResource Bottons_Background}"
+                BorderBrush="{DynamicResource Bottons_Border}" Grid.RowSpan="2" Grid.Column="1"
+                />
+            <Border Width="55"
+                HorizontalAlignment="Left"
                 BorderThickness="1,1,1,1"
                 Background="{DynamicResource Bottons_Background}"
                 BorderBrush="{DynamicResource Bottons_Border}" Grid.RowSpan="2"

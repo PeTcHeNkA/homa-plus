@@ -322,7 +322,7 @@ public partial class MainWindow : AcrylicWindow{
     }
 
 
-    public string getLoadPackUrl()
+    public static string getLoadPackUrl()
     {
         string loadUrl = getCfgValue("GFT_LoadUrl");
         if (loadUrl == null || loadUrl.Length == 0)
@@ -330,11 +330,17 @@ public partial class MainWindow : AcrylicWindow{
             loadUrl = GF2_LOAD_URL;
         }
 
+        return prepareLoadUrl(loadUrl);
+    }
+
+
+    public static string prepareLoadUrl(string loadUrl)
+    {
         return loadUrl.Replace("%__BRANCH%__%", getBranch());
     }
 
 
-    public string getBranch()
+    public static string getBranch()
     {
         string branch = getCfgValue("GFT_Branch");
         if (branch == null || branch.Length == 0)
@@ -512,7 +518,8 @@ public partial class MainWindow : AcrylicWindow{
             {
                 try
                 {
-                    loaded = load(getLoadPackUrl(), GF2_RU_PACK_JSON);
+                    loaded = new PackLoader().loadAndMergeTo(GF2_RU_PACK_JSON);
+                    //loaded = load(getLoadPackUrl(), GF2_RU_PACK_JSON);
                 }
                 catch (Exception e)
                 {
@@ -931,12 +938,22 @@ public partial class MainWindow : AcrylicWindow{
     }
 
 
-    private static string loadStr(string url)
+    private static string? loadStr(string url)
+    {
+        byte[]? data = loadBytes(url);
+        if(data == null)
+        {
+            return null;
+        }
+        return Encoding.UTF8.GetString(data);
+    }
+
+
+    public static byte[]? loadBytes(string url)
     {
         using (WebClient webClient = new WebClient())
         {
-            byte[] data = webClient.DownloadData(url);
-            return Encoding.UTF8.GetString(data);
+            return webClient.DownloadData(url);
         }
         return null;
     }

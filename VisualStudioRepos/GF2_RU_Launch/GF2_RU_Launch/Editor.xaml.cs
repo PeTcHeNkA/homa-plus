@@ -1029,7 +1029,7 @@ namespace GF2_RU_Launch
         }
 
 
-        public List<ELine> fromJsonBytes(byte[] data)
+        public static List<ELine> fromJsonBytes(byte[] data)
         {
             List<ELine> list = new List<ELine>();
             var map = JsonSerializer.Deserialize<Dictionary<string, string>>(UTF8Encoding.UTF8.GetString(data));
