@@ -4,6 +4,7 @@ using System.IO;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
@@ -57,6 +58,8 @@ public partial class MainWindow : AcrylicWindow{
 
         SetupDiscordRPC();
         //OnClickOpenEditor(null, null);
+
+        //new Changelogs(this, "TEST!").Show();
 
         try
         {

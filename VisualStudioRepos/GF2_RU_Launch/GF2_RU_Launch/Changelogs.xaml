@@ -39,7 +39,19 @@
                 Список изменений
             </TextBlock>
         </Border>
-        <TextBlock x:Name="ChangeLText" Margin="10,59,10,10"></TextBlock>
+
+        <ListView x:Name="Content" Background="Transparent" BorderThickness="0"
+                 Padding="5" Focusable="False" 
+                 d:ItemsSource="{d:SampleData ItemCount=5}" 
+                 Margin="0,44,0,10">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="Background" Value="Transparent"></Setter>
+                    <Setter Property="Padding" Value="0,1,0,1"/>
+                    <Setter Property="IsHitTestVisible" Value="False"/>
+                </Style>
+            </ListView.ItemContainerStyle>
+        </ListView>
     </Grid>
 
 </fw:AcrylicWindow>
