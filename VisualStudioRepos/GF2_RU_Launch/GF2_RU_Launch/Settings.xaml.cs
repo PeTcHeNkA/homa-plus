@@ -14,15 +14,14 @@ namespace GF2_RU_Launch
             InitializeComponent();
 
             Packs.ItemsSource = new List<PackInf>();
-
         }
+    }
 
 
-        public class PackInf
-        {
-            public int Priority { get; set; }
-            public string Name{ get; set; }
-            public string Source{ get; set; }
-        }
+    public class PackInf
+    {
+        public int Priority { get; set; }
+        public string Name { get; set; }
+        public string Source { get; set; }
     }
 }

@@ -5,8 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GF2_RU_Launch"
         xmlns:fw="clr-namespace:SourceChord.FluentWPF;assembly=FluentWPF"
+                  
+                  xmlns:col="clr-namespace:System.Collections;assembly=mscorlib"
+                  
         mc:Ignorable="d"
-        Title="Girls Frontline 2: Exilium RU Launcher | Settings" Height="350" Width="650" MinHeight="300" MinWidth="610"
+        Title="Girls Frontline 2: Exilium RU Launcher | Settings" Height="350" Width="650" MinHeight="344" MinWidth="625"
         
         TintColor="{DynamicResource L_Background_Main_Color}" 
         FallbackColor="{DynamicResource L_Background_Main_Color}"
@@ -102,7 +105,7 @@
                                   MaxHeight="{TemplateBinding MaxDropDownHeight}">
                                     <Border 
                                     x:Name="DropDownBorder"
-                                    Background="{DynamicResource Bottons_Background}"
+                                    Background="{DynamicResource Bottons_Background2}"
                                      
                                     BorderThickness="1"
                                     BorderBrush="{DynamicResource Bottons_Border}"/>
@@ -188,8 +191,30 @@
 
         <!-- Установленные пакеты (таблица) -->
         <DataGrid x:Name="Packs" IsEnabled="True" Margin="0,44,0,0" AutoGenerateColumns="False"
-                  Background="{DynamicResource Header}" CanUserAddRows="True" CanUserDeleteRows="True" Height="92" VerticalAlignment="Top"
+                  Background="Transparent" BorderBrush="{DynamicResource Bottons_Background}" CanUserAddRows="True" CanUserDeleteRows="True" Height="92" VerticalAlignment="Top"
         >
+            <DataGrid.ColumnHeaderStyle>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="Background" Value="{DynamicResource Bottons_Background}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource Bottons_Border}"/>
+                    <Setter Property="BorderThickness" Value="1"/>
+                </Style>
+            </DataGrid.ColumnHeaderStyle>
+
+            <DataGrid.RowHeaderStyle>
+                <Style TargetType="DataGridRowHeader">
+                    <Setter Property="Background" Value="Transparent"/>
+                </Style>
+            </DataGrid.RowHeaderStyle>
+
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow">
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="BorderBrush" Value="Transparent"/>
+                    <Setter Property="BorderThickness" Value="0"/>
+                </Style>
+            </DataGrid.RowStyle>
+
             <DataGrid.Columns>
                 <DataGridTextColumn x:Name="TT_ID" Header="Приоретет" Binding="{Binding Priority}" Width="70" CanUserResize="True"/>
                 <DataGridTextColumn x:Name="TT_ORG" Header="Название" Binding="{Binding Name}" Width="100" CanUserResize="True" />

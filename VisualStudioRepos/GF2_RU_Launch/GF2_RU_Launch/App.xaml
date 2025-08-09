@@ -45,6 +45,7 @@
         <SolidColorBrush x:Key="Header"  Color="{DynamicResource Header_Color}"/>
         <SolidColorBrush x:Key="Header_Text"  Color="{DynamicResource Header_Text_Color}"/>
         <SolidColorBrush x:Key="Bottons_Background" Color="#4C6F6F6F"/>
+        <SolidColorBrush x:Key="Bottons_Background2" Color="#DFA7A7A7"/>
         <SolidColorBrush x:Key="BtnPlay_Hover" Color="{DynamicResource Green_Color}"/>
         <SolidColorBrush x:Key="BtnInst_Hover" Color="{DynamicResource Yellow_Color}"/>
         <SolidColorBrush x:Key="BtnDel_Hover" Color="{DynamicResource Red_Color}"/>
