@@ -12,6 +12,7 @@ public partial class App : Application{
     private bool enableDark = false;
     public App()
     {
+        //AppDomain.CurrentDomain.AppendPrivatePath(@"bin\DLLs");
     }
 
     protected override void OnStartup(StartupEventArgs e)
@@ -30,42 +31,42 @@ public partial class App : Application{
 
         base.OnStartup(e);
 
-        if (args.ContainsKey("-ed"))
-        {
-            var langPath = args["-src"];
-            var outPath  = args["-out"];
+        //if (args.ContainsKey("-ed"))
+        //{
+        //    var langPath = args["-src"];
+        //    var outPath  = args["-out"];
 
-            if (args.ContainsKey("-indir"))
-            {
-                var dir = args["-indir"];
+        //    if (args.ContainsKey("-indir"))
+        //    {
+        //        var dir = args["-indir"];
 
-                string? inPath = null;
-                if (args.ContainsKey("-inpath"))
-                {
-                    inPath = args["-inpath"];
-                }
+        //        string? inPath = null;
+        //        if (args.ContainsKey("-inpath"))
+        //        {
+        //            inPath = args["-inpath"];
+        //        }
 
-                Editor.BuildPackNogui(null, langPath, dir, inPath, outPath);
-            }
-            else
-            {
-                var files = new List<string>(args["-in"].Split(";"));
+        //        Editor.BuildPackNogui(null, langPath, dir, inPath, outPath);
+        //    }
+        //    else
+        //    {
+        //        var files = new List<string>(args["-in"].Split(";"));
 
-                List<string>? inPath = null;
-                if (args.ContainsKey("-inpath"))
-                {
-                    inPath = new List<string>(args["-inpath"].Split(";"));
-                }
+        //        List<string>? inPath = null;
+        //        if (args.ContainsKey("-inpath"))
+        //        {
+        //            inPath = new List<string>(args["-inpath"].Split(";"));
+        //        }
 
-                Editor.BuildPackNogui(null, langPath, files, inPath, outPath);
-            }
-            Console.WriteLine("Success");
-        }
-        else
-        {
+        //        Editor.BuildPackNogui(null, langPath, files, inPath, outPath);
+        //    }
+        //    Console.WriteLine("Success");
+        //}
+        //else
+        //{
             MainWindow main = new MainWindow();
             main.Show();
-        }
+        //}
     }
 
 

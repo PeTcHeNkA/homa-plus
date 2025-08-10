@@ -209,6 +209,7 @@ namespace GF2_RU_Launch
                 }
 
             }
+            if (line.Original == null) return;
             if (keyIndex.ContainsKey(line.Original))
             {
                 var list = keyIndex[line.Original];
@@ -236,6 +237,32 @@ namespace GF2_RU_Launch
         }
     
     
-        
+        public void modifyLine(ELine line)
+        {
+            if(line.Id != 0)
+            {
+                if (idIndex.ContainsKey(line.Id))
+                {
+                    idIndex[line.Id].Value = line.actualValue();
+                    return;
+                }
+            }
+            if (keyIndex.ContainsKey(line.Original))
+            {
+                foreach(ELine l in keyIndex[line.Original])
+                {
+                    l.Value = line.actualValue();
+                }
+            }
+        }
+
+
+        public void mergeAll(List<ELine> lines)
+        {
+            foreach (var line in lines)
+            {
+                modifyLine(line);
+            }
+        }
     }
 }

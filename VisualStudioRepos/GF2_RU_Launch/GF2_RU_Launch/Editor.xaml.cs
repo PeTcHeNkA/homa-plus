@@ -24,7 +24,10 @@ namespace GF2_RU_Launch
         private List<ELine> viewData = new List<ELine>();
         private MainWindow parent;
 
-        private LangEditAPI.Table? table1, table2;
+        private LangEditCS table1;
+
+        //private LangEditAPI.Table? table1, table2;
+
         private ELine? filter;
         private bool hideEmpty = false, hideNonTranslatable = false;
         private bool showId = true;
@@ -53,8 +56,10 @@ namespace GF2_RU_Launch
         {
             if (tableEditorFlag == 0)
             {
-                var i1 = MainWindow.ensureNativeInstalled("langedit.dll");
-                if (i1)
+                var i1 = MainWindow.ensureNativeInstalled("protobuf-net.Core.dll");
+                var i2 = MainWindow.ensureNativeInstalled("protobuf-net.dll");
+                var i3 = MainWindow.ensureNativeInstalled("System.Collections.Immutable.dll");
+                if (i1 && i2 && i3)
                 {
                     tableEditorFlag = 1;
                 }
@@ -73,46 +78,46 @@ namespace GF2_RU_Launch
         }
 
 
-        public static bool BuildPackNogui(MainWindow? w, string srcPackPath, string srcDir1, string? srcDir2, string outPath)
-        {
-            var src1 = ScanFileTreeForLangs(new DirectoryInfo(srcPackPath), ".json");
-            var src2 = ScanFileTreeForLangs(new DirectoryInfo(srcPackPath), ".json");
+        //public static bool BuildPackNogui(MainWindow? w, string srcPackPath, string srcDir1, string? srcDir2, string outPath)
+        //{
+        //    var src1 = ScanFileTreeForLangs(new DirectoryInfo(srcPackPath), ".json");
+        //    var src2 = ScanFileTreeForLangs(new DirectoryInfo(srcPackPath), ".json");
 
-            return BuildPackNogui(w, srcPackPath, src1, src2, outPath);
-        }
+        //    return BuildPackNogui(w, srcPackPath, src1, src2, outPath);
+        //}
 
 
-        public static bool BuildPackNogui(MainWindow? w, string srcPackPath, List<string> srcJson1, List<string>? srcJson2, string outPath)
-        {
-            if (!EnsureEditorLoaded())
-            {
-                return false;
-            }
-            Table table = new Table(101);
-            try
-            {
-                table.load(File.ReadAllBytes(srcPackPath));
+        //public static bool BuildPackNogui(MainWindow? w, string srcPackPath, List<string> srcJson1, List<string>? srcJson2, string outPath)
+        //{
+        //    if (!EnsureEditorLoaded())
+        //    {
+        //        return false;
+        //    }
+        //    Table table = new Table(101);
+        //    try
+        //    {
+        //        table.load(File.ReadAllBytes(srcPackPath));
 
-                LoadJsonTranslations(table, srcJson1);
-                if(srcJson2 != null)
-                {
-                    LoadJsonTranslations(table, srcJson2);
-                }
-                File.WriteAllBytes(outPath, table.save());
-            } catch
-            {
-                if(w != null)
-                {
-                    w.onError();
-                }
-                return false;
-            }
-            finally
-            {
-                table.free();
-            }
-            return true;
-        }
+        //        LoadJsonTranslations(table, srcJson1);
+        //        if(srcJson2 != null)
+        //        {
+        //            LoadJsonTranslations(table, srcJson2);
+        //        }
+        //        File.WriteAllBytes(outPath, table.save());
+        //    } catch
+        //    {
+        //        if(w != null)
+        //        {
+        //            w.onError();
+        //        }
+        //        return false;
+        //    }
+        //    finally
+        //    {
+        //        table.free();
+        //    }
+        //    return true;
+        //}
 
 
         protected override void OnClosed(EventArgs e)
@@ -212,16 +217,16 @@ namespace GF2_RU_Launch
                 var dataBytes = open("Выберите шаблон Lang.bytes", ".bytes", "Lang.bytes|*.bytes");
                 if (dataBytes == null)return;
                 
-                if (table1 != null)table1.free();
+                //if (table1 != null)table1.free();
 
                 Dispatcher.Invoke(() =>{
-                    table1 = new LangEditAPI.Table(1);
-                    table1.load(dataBytes);
+                    table1 = new LangEditCS();
+                    table1.Read(dataBytes);
 
-                    var jData = table1.exportMappings(table2, 0xf);
+                    //var jData = table1.exportMappings(table2, 0xf);
 
                     locked = false;
-                    onCompleteImportB(jData);
+                    onCompleteImportB();
                 });
             });
         }
@@ -244,12 +249,11 @@ namespace GF2_RU_Launch
                 try
                 {
                     onClickLoadActivePackB();
-                    var jData = table1.exportMappings(table2, 0xf);
 
                     Dispatcher.Invoke(() =>
                     {
                         locked = false;
-                        onCompleteImportB(jData);
+                        onCompleteImportB();
                     });
                 }
                 catch
@@ -266,7 +270,7 @@ namespace GF2_RU_Launch
 
         private void onClickLoadActivePackB()
         {
-            var cur = parent.getLangPackPath();
+            var cur   = parent.getLangPackPath();
             var backup = parent.getBackupPackPath();
 
             var hasBackup = File.Exists(backup);
@@ -289,19 +293,15 @@ namespace GF2_RU_Launch
                 }
             }
 
-            table1 = new LangEditAPI.Table(1);
-            table1.load(origBytes);
-
-            if (table2 != null)
-            {
-                table2.free();
-                table2 = null;
-            }
+            table1 = new LangEditCS();
+            table1.Read(origBytes);
 
             if (curBytes != null)
             {
-                table2 = new LangEditAPI.Table(2);
-                table2.load(curBytes);
+                var table2 = new LangEditCS();
+                table2.Read(curBytes);
+
+                table1.mergeAll(new List<ELine>(table2.lines));
             }
         }
 
@@ -357,27 +357,25 @@ namespace GF2_RU_Launch
         }
 
 
-        private void onCompleteImport()
+        //private void onCompleteImport()
+        //{
+        //    if (table1 == null)
+        //    {
+        //        wanEmptyTable();
+        //        return;
+        //    }
+        //    onCompleteImportB();
+        //}
+
+
+        private void onCompleteImportB()
         {
-            if (table1 == null)
-            {
-                wanEmptyTable();
-                return;
-            }
-
-            var jData = table1.exportMappings(table2, 0xf);
-            onCompleteImportB(jData);
-        }
-
-
-        private void onCompleteImportB(byte[] jData)
-        {
-            if (jData != null)
+            //jData = tabl1
+            if (table1 != null)
             {
                 try
                 {
-                    var arr = fromJsonBytes(jData);
-                    setMainData(arr);
+                    setMainData(new List<ELine>(table1.lines));
                 }
                 catch (Exception err)
                 {
@@ -385,28 +383,28 @@ namespace GF2_RU_Launch
                     return;
                 }
             }
-
-            if (table2 != null)
-            {
-                table2.free();
-                table2 = null;
-            }
         }
 
 
         private void onClickLoadSecond(object sender, RoutedEventArgs e)
         {
             if (locked) return;
+
+            if (table1 == null)
+            {
+                wanEmptyTable();
+                return;
+            }
+
             var dataBytes = open("Выберите релиз Lang.bytes", ".bytes", "Lang.bytes|*.bytes");
             if (dataBytes == null)
             {
                 return;
             }
 
-            table2 = new LangEditAPI.Table(2);
-            table2.load(dataBytes);
-
-            onCompleteImport();
+            var table2 = new LangEditCS();
+            table2.Read(dataBytes);
+            table1.mergeAll(new List<ELine>(table2.lines));
         }
 
 
@@ -446,10 +444,8 @@ namespace GF2_RU_Launch
         {
             if (table1 != null)
             {
-                table1.free();
                 table1 = null;
             }
-
             setMainData(new List<ELine>());
         }
 
@@ -469,7 +465,7 @@ namespace GF2_RU_Launch
             }
             LoadJsonTranslations(table1, result);
 
-            onCompleteImport();
+            onCompleteImportB();
         }
 
 
@@ -486,7 +482,7 @@ namespace GF2_RU_Launch
                 DirectoryInfo info = new DirectoryInfo(dir);
                 var paths = ScanFileTreeForLangs(info, ".json");
                 LoadJsonTranslations(table1, paths);
-                onCompleteImport();
+                onCompleteImportB();
             }
         }
 
@@ -528,13 +524,14 @@ namespace GF2_RU_Launch
         }
 
 
-        private static void LoadJsonTranslations(Table table, List<string> paths)
+        private static void LoadJsonTranslations(LangEditCS table, List<string> paths)
         {
             paths.AsParallel().Select(str => {
                 return File.ReadAllBytes(str);
 
             }).ForAll(data => {
-                table.applyMappngs(data);
+                var lines = fromJsonBytes(data);
+                table.mergeAll(lines);
             });
         }
 
@@ -668,10 +665,12 @@ namespace GF2_RU_Launch
             }
             locked = true;
             MainWindow.CallInDedictedThread(() => {
-                var bData = exportTableBytes(showId);
-                table1.applyMappngs(bData);
+                //var bData = exportTableBytes(showId);
 
-                bData = table1.save();
+                table1.mergeAll(data);
+                //table1.applyMappngs(bData);
+
+                var bData = table1.Write();
 
                 try
                 {
@@ -691,39 +690,41 @@ namespace GF2_RU_Launch
 
         private void onClickEnableMerge(object sender, RoutedEventArgs e)
         {
-            if (table1 == null)
-            {
-                wanEmptyTable();
-                return;
-            }
+            //TODO
+            //if (table1 == null)
+            //{
+            //    wanEmptyTable();
+            //    return;
+            //}
 
-            var bData = exportTableBytes(showId);
-            table1.applyMappngs(bData);
+            //var bData = exportTableBytes(showId);
+            //table1.applyMappngs(bData);
 
-            var jData = table1.exportMappings(null, 2);
+            //var jData = table1.exportMappings(null, 2);
 
-            var arr = fromJsonBytes(jData);
-            showId = false;
-            setMainData(arr);
+            //var arr = fromJsonBytes(jData);
+            //showId = false;
+            //setMainData(arr);
         }
 
 
         private void onClickDisableMerge(object sender, RoutedEventArgs e)
         {
-            if (table1 == null)
-            {
-                wanEmptyTable();
-                return;
-            }
+            //TODO
+            //if (table1 == null)
+            //{
+            //    wanEmptyTable();
+            //    return;
+            //}
 
-            var bData = exportTableBytes(showId);
-            table1.applyMappngs(bData);
+            //var bData = exportTableBytes(showId);
+            //table1.applyMappngs(bData);
 
-            var jData = table1.exportMappings(null, 15);
+            //var jData = table1.exportMappings(null, 15);
 
-            var arr = fromJsonBytes(jData);
-            showId = true;
-            setMainData(arr);
+            //var arr = fromJsonBytes(jData);
+            //showId = true;
+            //setMainData(arr);
         }
 
 
@@ -796,11 +797,11 @@ namespace GF2_RU_Launch
             }
         }
 
-        private byte[] exportTableBytes(bool useId)
-        {
-            gcom.MakeCache(data);
-            return toJsonBytes(data, useId, gcom);
-        }
+        //private byte[] exportTableBytes(bool useId)
+        //{
+        //    gcom.MakeCache(data);
+        //    return toJsonBytes(data, useId, gcom);
+        //}
 
         private void onClickExportNotTranslated(object sender, RoutedEventArgs e)
         {
@@ -917,7 +918,7 @@ namespace GF2_RU_Launch
                 return;
             }
 
-            var data2 = exportTableBytes(useId);
+            var data2 = toJsonBytes(data, useId, gcom);
 
             try
             {

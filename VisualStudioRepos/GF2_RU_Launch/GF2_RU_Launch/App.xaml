@@ -10,7 +10,7 @@
         <Color x:Key="L_Background_Second_Color">#26FFFFFF</Color>
         <Color x:Key="L_Border_Start_Color">#FF515254</Color>
         <Color x:Key="L_Border_End_Color">#FFC5DCE4</Color>
-        
+
         <!-- Main Colors -->
         <Color x:Key="Header_Color">#7FECECEC</Color>
         <Color x:Key="Header_Text_Color">#000000</Color>
@@ -20,11 +20,11 @@
         <Color x:Key="Red_Color">#E5FF2C2C</Color>
         <Color x:Key="Grad_Start_Color">#7F383838</Color>
         <Color x:Key="Grad_End_Color">#00F1F1F1</Color>
-        
+
         <!-- Editor Colors -->
         <Color x:Key="Editor_Green_color">#FF318C00</Color>
         <Color x:Key="Editor_Red_color">#FFD62323</Color>
-        
+
         <!-- Dark theme colors start-->
         <Color x:Key="L_Background_Main_Color_D">#90111111</Color>
         <Color x:Key="L_Background_Second_Color_D">#90010101</Color>
@@ -86,6 +86,6 @@
             <Setter Property="BorderBrush" Value="{DynamicResource Bottons_Border}"/>
         </Style>
 
-        
+
     </Application.Resources>
 </Application>

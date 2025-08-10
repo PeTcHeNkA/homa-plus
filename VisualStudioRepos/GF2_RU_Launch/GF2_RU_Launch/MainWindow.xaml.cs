@@ -4,12 +4,10 @@ using System.IO;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using DiscordRPC;
-using LangEditAPI;
 using SourceChord.FluentWPF;
 
 //using Google.Apis.Services;
@@ -569,11 +567,16 @@ public partial class MainWindow : AcrylicWindow{
                 return;
             }
 
-            Table table = new Table(101);
-            table.load(pBytes);
-            table.applyMappngs(jBytes);
+            LangEditCS table = new LangEditCS();
+            table.Read(pBytes);
 
-            var eData = table.save();
+            table.mergeAll(Editor.fromJsonBytes(jBytes));
+
+            //Table table = new Table(101);
+            //table.load(pBytes);
+            //table.applyMappngs(jBytes);
+
+            var eData = table.Write();
 
             try
             {
@@ -590,7 +593,7 @@ public partial class MainWindow : AcrylicWindow{
             }
             finally
             {
-                table.free();
+                //table.free();
             }
 
             //onPostLoad(true, ref completed);
@@ -876,13 +879,20 @@ public partial class MainWindow : AcrylicWindow{
     {
         try
         {
+            File.Delete("LUpdater.exe");
+            File.Delete("LUpdater.dll");
+
+            ensureNativeInstalled("LUpdater.exe");
+            ensureNativeInstalled("LUpdater.dll");
+            ensureNativeInstalled("LUpdater.runtimeconfig.json");
+
             Process.Start("LUpdater.exe");
             Environment.Exit(0);
         }
         catch
         {
             Dispatcher.Invoke(() => {
-                MessageBox.Show("Инструмент автоматического обновления не найден. Автоматическая переустановка невозможна.");
+                MessageBox.Show("Инструмент автоматического обновления недоступен. Автоматическая переустановка невозможна.");
             });
         }
     }
@@ -904,7 +914,6 @@ public partial class MainWindow : AcrylicWindow{
         {
             return true;
         }
-
         var url = NATIVES_LOAD_URL.Replace("%__FILE__%", name);
 
         return load(url, name);
