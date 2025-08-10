@@ -505,6 +505,7 @@ public partial class MainWindow : AcrylicWindow{
 
                         if(seen == null || seen != cur)
                         {
+                            setCfgValue("GFT_SeenNotify", cur);
                             subWindow2 = new Changelogs(this, notify);
                             subWindow2.EditHeader(
                                 "Girls Frontline 2: Exilium RU Launcher | Notify",

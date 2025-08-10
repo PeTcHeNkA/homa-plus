@@ -1039,7 +1039,7 @@ namespace GF2_RU_Launch
                 var id = getId(item.Key);
 
                 var orig = remId(item.Key);
-                ELine eLine = new ELine(id, orig);
+                ELine eLine = new ELine((int)id, orig);
                 eLine.Value = item.Value;
                 list.Add(eLine);
             }
@@ -1073,7 +1073,7 @@ namespace GF2_RU_Launch
         }
 
 
-        public static int getId(string str)
+        public static uint getId(string str)
         {
             if (str == null || str.Length <= 5) return 0;
             if (str.StartsWith("#ID:"))
@@ -1087,7 +1087,7 @@ namespace GF2_RU_Launch
                     num += (str[i] - '0');
                 }
 
-                return num;
+                return (uint)num;
             }
 
             return 0;
