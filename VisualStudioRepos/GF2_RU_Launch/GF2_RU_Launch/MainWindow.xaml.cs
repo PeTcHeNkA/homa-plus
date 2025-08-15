@@ -20,7 +20,7 @@ namespace GF2_RU_Launch;
 
 public partial class MainWindow : AcrylicWindow{
     public static string LAUNCH_VERSION_URL = "https://gitlab.com/homaplus/girls-frontline-2-exilium-ru-launcher/-/raw/natives/launcversion.info?ref_type=heads&inline=false";
-    public static string LAUNCH_VERSION = "3.1.1";
+    public static string LAUNCH_VERSION = "3.1.2";
 
     public static string GF2_DATA_TABLE    = "GF2_Exilium_Data/LocalCache/Data/Table";
     public static string GF2_LANG_PACK     = "/LangPackageTableEnusData.bytes";
@@ -546,7 +546,21 @@ public partial class MainWindow : AcrylicWindow{
                 {
                     Dispatcher.Invoke(() =>
                     {
-                        MessageBox.Show("Ошибка загрузки обновления!");
+                        var all = "Cause: " + e.Message;
+                        if(e.StackTrace != null)
+                        {
+                            all += "\n\nStack trace:\n";
+                            all += e.StackTrace;
+                        }
+                        try
+                        {
+                            File.WriteAllTextAsync("error.log", all);
+
+                            MessageBox.Show("Ошибка загрузки обновления!\nЛог ошибки сохранен в error.log");
+                        } catch
+                        {
+                            MessageBox.Show(e.StackTrace, "Ошибка загрузки обновления: "+e.Message);
+                        }
                     });
                 }
             }
@@ -937,8 +951,8 @@ public partial class MainWindow : AcrylicWindow{
 
         try
         {
-            var lv = Double.Parse(LAUNCH_VERSION);
-            var rv = Double.Parse(remoteVersion);
+            var lv = Double.Parse(LAUNCH_VERSION.Replace(".",""));
+            var rv = Double.Parse(remoteVersion.Replace(".", ""));
             if (lv > rv) return false;
         }
         catch {}

@@ -48,8 +48,7 @@ namespace GF2_RU_Launch
             if(piv == null || piv != PACKS_COMPABILITY)
             {
                 count = 0;
-                cfg.setStr("GFT_ResetPacks", PACKS_COMPABILITY);
-                cfg.save();
+                MainWindow.setCfgValue("GFT_ResetPacks", PACKS_COMPABILITY);
             }
 
             if (count > 0) {

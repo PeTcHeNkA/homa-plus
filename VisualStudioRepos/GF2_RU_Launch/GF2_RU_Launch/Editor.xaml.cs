@@ -16,8 +16,8 @@ namespace GF2_RU_Launch
 {
     public partial class Editor : AcrylicWindow
     {
-        private static byte tableEditorFlag = 0;
-        private static byte openDialogFlag = 0;
+        //private static byte tableEditorFlag = 0;
+        //private static byte openDialogFlag = 0;
 
         private List<ELine> data = new List<ELine>();
         private List<ELine> viewData = new List<ELine>();
@@ -53,26 +53,26 @@ namespace GF2_RU_Launch
 
         public static bool EnsureEditorLoaded()
         {
-            if (tableEditorFlag == 0)
-            {
-                var i1 = MainWindow.ensureNativeInstalled("protobuf-net.Core.dll");
-                var i2 = MainWindow.ensureNativeInstalled("protobuf-net.dll");
-                var i3 = MainWindow.ensureNativeInstalled("System.Collections.Immutable.dll");
-                if (i1 && i2 && i3)
-                {
-                    tableEditorFlag = 1;
-                }
-                else
-                {
-                    tableEditorFlag = 2;
-                }
-            }
+            //if (tableEditorFlag == 0)
+            //{
+            //    var i1 = MainWindow.ensureNativeInstalled("protobuf-net.Core.dll");
+            //    var i2 = MainWindow.ensureNativeInstalled("protobuf-net.dll");
+            //    var i3 = MainWindow.ensureNativeInstalled("System.Collections.Immutable.dll");
+            //    if (i1 && i2 && i3)
+            //    {
+            //        tableEditorFlag = 1;
+            //    }
+            //    else
+            //    {
+            //        tableEditorFlag = 2;
+            //    }
+            //}
 
-            if (tableEditorFlag == 2)
-            {
-                MessageBox.Show("Модуль редактора таблц не установлен!");
-                return false;
-            }
+            //if (tableEditorFlag == 2)
+            //{
+            //    MessageBox.Show("Модуль редактора таблц не установлен!");
+            //    return false;
+            //}
             return true;
         }
 
@@ -945,26 +945,26 @@ namespace GF2_RU_Launch
 
         private static bool EnsureDirModLoaded()
         {
-            if (openDialogFlag == 0)
-            {
-                var i1 = MainWindow.ensureNativeInstalled("Microsoft.WindowsAPICodePack.dll");
-                var i2 = MainWindow.ensureNativeInstalled("Microsoft.WindowsAPICodePack.Shell.dll");
+            //if (openDialogFlag == 0)
+            //{
+            //    var i1 = MainWindow.ensureNativeInstalled("Microsoft.WindowsAPICodePack.dll");
+            //    var i2 = MainWindow.ensureNativeInstalled("Microsoft.WindowsAPICodePack.Shell.dll");
 
-                if (i1 && i2)
-                {
-                    openDialogFlag = 1;
-                }
-                else
-                {
-                    openDialogFlag = 2;
-                }
-            }
+            //    if (i1 && i2)
+            //    {
+            //        openDialogFlag = 1;
+            //    }
+            //    else
+            //    {
+            //        openDialogFlag = 2;
+            //    }
+            //}
 
-            if (openDialogFlag == 2)
-            {
-                MessageBox.Show("Модуль выбора дериктории отсутствует.");
-                return false;
-            }
+            //if (openDialogFlag == 2)
+            //{
+            //    MessageBox.Show("Модуль выбора дериктории отсутствует.");
+            //    return false;
+            //}
             return true;
         }
 
@@ -984,7 +984,7 @@ namespace GF2_RU_Launch
             }
             catch
             {
-                openDialogFlag = 2;
+                //openDialogFlag = 2;
                 return null;
             }
         }
