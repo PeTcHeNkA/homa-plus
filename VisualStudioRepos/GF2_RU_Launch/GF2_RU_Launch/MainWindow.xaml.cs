@@ -9,6 +9,7 @@ using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using DiscordRPC;
 using SourceChord.FluentWPF;
+//using System.Management;
 
 //using Google.Apis.Services;
 //using Google.Apis.Analytics.v3;
@@ -19,7 +20,7 @@ namespace GF2_RU_Launch;
 
 public partial class MainWindow : AcrylicWindow{
     public static string LAUNCH_VERSION_URL = "https://gitlab.com/homaplus/girls-frontline-2-exilium-ru-launcher/-/raw/natives/launcversion.info?ref_type=heads&inline=false";
-    public static string LAUNCH_VERSION = "2.3";
+    public static string LAUNCH_VERSION = "3.1.1";
 
     public static string GF2_DATA_TABLE    = "GF2_Exilium_Data/LocalCache/Data/Table";
     public static string GF2_LANG_PACK     = "/LangPackageTableEnusData.bytes";
@@ -30,6 +31,8 @@ public partial class MainWindow : AcrylicWindow{
     public static string GF2_CHANGELOG_URL = "https://gitlab.com/homaplus/grils-frontline-team-translate/-/raw/%__BRANCH%__%/Changelog.md?ref_type=heads&inline=false";
     public static string GF2_NOTIFICATIONS_URL = "https://gitlab.com/homaplus/grils-frontline-team-translate/-/raw/%__BRANCH%__%/Notifiations.md?ref_type=heads&inline=false";
     public static string NATIVES_LOAD_URL  = "https://gitlab.com/homaplus/girls-frontline-2-exilium-ru-launcher/-/raw/natives/%__FILE__%?ref_type=heads&inline=false";
+    public static string STATISTIC_URL     = "https://vk.cc/cOtxNy";
+
     //private static string GF2_MASTER_URL;
 
     private string GF2_Path = null;
@@ -41,6 +44,7 @@ public partial class MainWindow : AcrylicWindow{
     private bool needLoadPack = true;
     private bool locked = false;
     private bool launchUpdatesChecked = false;
+
 
     public MainWindow() 
     {
@@ -55,9 +59,6 @@ public partial class MainWindow : AcrylicWindow{
         editBtnStatus(false, true);
 
         SetupDiscordRPC();
-        //OnClickOpenEditor(null, null);
-
-        //new Changelogs(this, "TEST!").Show();
 
         try
         {
@@ -66,6 +67,15 @@ public partial class MainWindow : AcrylicWindow{
         catch { 
 
         }
+
+        //try
+        //{
+        //    startLaunchKiller();
+        //}
+        //catch (Exception ex)
+        //{
+        //    Console.WriteLine(ex);
+        //}
     }
 
 
@@ -446,6 +456,8 @@ public partial class MainWindow : AcrylicWindow{
 
             bool completed = false;
             bool building = false;
+            TranslatorionPool.TCallback? cb = null;
+            var param = getCfgValue("GFT_DTranlation");
 
             Dispatcher.Invoke(() =>
             {
@@ -478,11 +490,18 @@ public partial class MainWindow : AcrylicWindow{
                             if (completed) return;
                             if (building)
                             {
-                                BTnPlayInstall.Content = "Сборка пакета ." + add;
+                                if (cb != null)
+                                {
+                                    BTnPlayInstall.Content = "Перевод " + cb.translated + "/" + cb.total;
+                                }
+                                else
+                                {
+                                    BTnPlayInstall.Content = "Сборка пакета ." + add;
+                                }               
                             }
                             else
                             {
-                                BTnPlayInstall.Content = "Загрузка обновлений ." + add;
+                                 BTnPlayInstall.Content = "Загрузка обновлений ." + add;
                             }
                         });
                     }
@@ -544,10 +563,10 @@ public partial class MainWindow : AcrylicWindow{
             }
             building = true;
 
-            byte[]? jBytes, pBytes;
+            byte[]? jBytes = null, pBytes;
+
             try
             {
-                jBytes = File.ReadAllBytes(GF2_RU_PACK_JSON);
                 if (HasBackup())
                 {
                     pBytes = File.ReadAllBytes(GF2_LANG_BACKUP);
@@ -557,24 +576,60 @@ public partial class MainWindow : AcrylicWindow{
                     pBytes = File.ReadAllBytes(getLangPackPath());
                 }
             }
-            catch
-            {
+            catch (Exception e) {
                 Dispatcher.Invoke(() =>
                 {
-                    MessageBox.Show("Ошибка загрузки обновления!");
+                    MessageBox.Show("Что-то пошло не так ... \nИгра установлена некорректно, либо какой-то процесс блокирует доступ к файлам переводов");
                 });
                 onPostLoad(false, ref completed);
                 return;
             }
+            try
+            {
+                jBytes = File.ReadAllBytes(GF2_RU_PACK_JSON);
+            }
+            catch
+            {
+                if (param != null && param != "disabled")
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        MessageBox.Show("Ошибка загрузки обновления!\n Будет использован до-перевод");
+                    });
+                } else
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        MessageBox.Show("Ошибка загрузки обновления!");
+                    });
+                    onPostLoad(false, ref completed);
+                    return;
+                }
+            }
 
             LangEditCS table = new LangEditCS();
+            
             table.Read(pBytes);
+            if(jBytes != null)
+            {
+                table.mergeAll(Editor.fromJsonBytes(jBytes));
+            }
+            
+            if(param != null && param != "disabled")
+            {
+                List<ELine> notTranslated = table.getNotTranslated(true);
+                if (notTranslated.Count > 0) {
+                    TranslatorionPool pool = new TranslatorionPool();
 
-            table.mergeAll(Editor.fromJsonBytes(jBytes));
-
-            //Table table = new Table(101);
-            //table.load(pBytes);
-            //table.applyMappngs(jBytes);
+                    if (pool.Setup("en", "ru", param))
+                    {
+                        pool.setCache("data/translation_cache.json");
+                        cb = new();
+                        pool.TranslateAll(notTranslated, cb);
+                        cb = null;
+                    }
+                }
+            }
 
             var eData = table.Write();
 
@@ -761,6 +816,7 @@ public partial class MainWindow : AcrylicWindow{
         }
     }
 
+
     public void onError()
     {
         MessageBox.Show("Произошла непредвиденная ошибка\nПопробуйте запустить лаунчер от имени Администратора", "Ошибка");
@@ -867,9 +923,25 @@ public partial class MainWindow : AcrylicWindow{
 
     public static bool IsActualLaunchVersion()
     {
+        if (LAUNCH_VERSION.Contains("dev"))
+        {
+            return true;
+        }
+        if(getCfgValue("GFT_DisableUpdated") == "true")
+        {
+            return true;
+        }
         var remoteVersion = loadStr(LAUNCH_VERSION_URL);
         if (remoteVersion == null || remoteVersion.Length == 0) return true;
         remoteVersion = remoteVersion.Trim();
+
+        try
+        {
+            var lv = Double.Parse(LAUNCH_VERSION);
+            var rv = Double.Parse(remoteVersion);
+            if (lv > rv) return false;
+        }
+        catch {}
 
         return remoteVersion == LAUNCH_VERSION;
     }
@@ -879,12 +951,12 @@ public partial class MainWindow : AcrylicWindow{
     {
         try
         {
-            File.Delete("LUpdater.exe");
-            File.Delete("LUpdater.dll");
+            //File.Delete("LUpdater.exe");
+            //File.Delete("LUpdater.dll");
 
-            ensureNativeInstalled("LUpdater.exe");
-            ensureNativeInstalled("LUpdater.dll");
-            ensureNativeInstalled("LUpdater.runtimeconfig.json");
+            //ensureNativeInstalled("LUpdater.exe");
+            //ensureNativeInstalled("LUpdater.dll");
+            //ensureNativeInstalled("LUpdater.runtimeconfig.json");
 
             Process.Start("LUpdater.exe");
             Environment.Exit(0);
@@ -892,7 +964,7 @@ public partial class MainWindow : AcrylicWindow{
         catch
         {
             Dispatcher.Invoke(() => {
-                MessageBox.Show("Инструмент автоматического обновления недоступен. Автоматическая переустановка невозможна.");
+                MessageBox.Show("Инструмент автоматического обновления не установлен. Автоматическая переустановка невозможна.");
             });
         }
     }
@@ -1050,6 +1122,26 @@ public partial class MainWindow : AcrylicWindow{
 
     private void SetupAnalitics()
     {
-        //todo
+        var res = getCfgValue("GF2_HasFirstLaunch");
+        if (res != null) return;
+        setCfgValue("GF2_HasFirstLaunch", "true");
+        var sInfo = new System.Diagnostics.ProcessStartInfo(STATISTIC_URL)
+        {
+            UseShellExecute = true,
+        };
+        System.Diagnostics.Process.Start(sInfo);
     }
+
+
+    //public void startLaunchKiller()
+    //{
+    //    ManagementEventWatcher startWatch = new ManagementEventWatcher(
+    //            new WqlEventQuery("SELECT * FROM Win32_ProcessStartTrace")); //WHERE ProcessName = \"PCLauncher.exe\"
+
+    //    startWatch.EventArrived += (e, e2) => {
+    //        MessageBox.Show("NEN");
+    //    };
+
+    //    startWatch.Start();
+    //}
 }

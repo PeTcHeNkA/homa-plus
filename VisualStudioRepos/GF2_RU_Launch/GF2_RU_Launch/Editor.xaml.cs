@@ -10,7 +10,6 @@ using System.Windows.Data;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System.Text.RegularExpressions;
 using Group = SortJsonUtils.Group;
-using LangEditAPI;
 
 
 namespace GF2_RU_Launch

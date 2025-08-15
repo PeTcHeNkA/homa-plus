@@ -1,24 +1,21 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
 using System.IO;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
-using System.Threading.Tasks;
-using System.Windows.Shapes;
+using GTranslate.Results;
 using GTranslate.Translators;
 
 namespace GF2_RU_Launch
 {
     public class TranslatorionPool
     {
-        private string from, to;
+        private string from = "en", to = "ru";
         private List<TNode> nodes = new List<TNode>();
         private int nextNode = 0;
         private bool enableFixes = true;
+        private TCache cache = new TCache(null);
 
         public TranslatorionPool()
         {
@@ -26,6 +23,13 @@ namespace GF2_RU_Launch
             {
                 throw new Exception("Natives dont loaded!");
             }
+        }
+
+
+        public void setCache(string path)
+        {
+            cache = new TCache(path);
+            cache.Read();
         }
 
 
@@ -41,10 +45,11 @@ namespace GF2_RU_Launch
         }
 
 
-        public void Setup(string from, string to, string param)
+        public bool Setup(string from, string to, string param)
         {
             this.from = from;
             this.to = to;
+            nodes.Clear();
 
             foreach (string pm in param.Split(";")) {
                 var inf = pm.Split(':');
@@ -64,6 +69,7 @@ namespace GF2_RU_Launch
                 }
                 nodes.Add(new TNode(this, translator, maxRate));
             }
+            return nodes.Count > 0;
         }
 
 
@@ -108,7 +114,6 @@ namespace GF2_RU_Launch
 
             if (enableFixes)
             {
-                ConcurrentDictionary<string, string> cache = new ConcurrentDictionary<string, string>();
                 
                 TranslateFunc func = (src, future) => {
                     if (!Editor.isTranslatable(src))
@@ -118,11 +123,11 @@ namespace GF2_RU_Launch
                     }
                     if (cache.ContainsKey(src))
                     {
-                        future.Invoke(cache[src]);
+                        future.Invoke(cache.Get(src));
                         return;
                     }
                     string result = Task.Run(() => TranslateInPool(src)).GetAwaiter().GetResult();
-                    cache[src] = result;
+                    cache.Set(src, result);
                     future.Invoke(result);
                 };
                 lines.AsParallel().ForAll(async line => {
@@ -137,6 +142,7 @@ namespace GF2_RU_Launch
                 });
             }
             cb.completed = true;
+            cache.Write();
             return true;
         }
 
@@ -188,9 +194,10 @@ namespace GF2_RU_Launch
 
         private class TCache
         {
-            public ConcurrentDictionary<string, string> cache { get; private set } = new ConcurrentDictionary<string, string>();
+            public ConcurrentDictionary<string, string> cache { get; private set; } = new ConcurrentDictionary<string, string>();
             private string path;
             private int modifications = 0;
+            private long lastSaveTime = CurTime();
 
             public TCache(string path)
             {
@@ -199,15 +206,21 @@ namespace GF2_RU_Launch
 
             public void Read()
             {
-                byte[] data = File.ReadAllBytes(path);
-                cache = JsonSerializer.Deserialize<ConcurrentDictionary<string, string>>(UTF8Encoding.UTF8.GetString(data));
+                if (path == null) return;
+                if (File.Exists(path))
+                {
+                    byte[] data = File.ReadAllBytes(path);
+                    cache = JsonSerializer.Deserialize<ConcurrentDictionary<string, string>>(UTF8Encoding.UTF8.GetString(data));
+                }
             }
 
             public void Write()
             {
-                lock (path)
+                if (path == null) return;
+                Task.Run(() =>
                 {
-                    Task.Run(() => {
+                    lock (path)
+                    {
                         var options = new JsonSerializerOptions
                         {
                             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
@@ -215,9 +228,11 @@ namespace GF2_RU_Launch
                         };
 
                         var result = JsonSerializer.Serialize(cache, options);
+                        MainWindow.CreatePathIfNeed(path);
                         File.WriteAllBytes(path, UTF8Encoding.UTF8.GetBytes(result));
-                    });
-                }
+                        lastSaveTime = CurTime();
+                    }
+                });
             }
 
             public void Set(string key, string value)
@@ -226,9 +241,12 @@ namespace GF2_RU_Launch
                 lock (this)
                 {
                     ++modifications;
-                    if (modifications >= 500)
+                    if (modifications >= 100)
                     {
                         modifications = 0;
+                        if (lastSaveTime + 15_000 < CurTime()) {
+                            Write();
+                        }
                     }
                 }
             }
@@ -252,10 +270,10 @@ namespace GF2_RU_Launch
             public int maxRate;
             public bool isAlive = true;
             private ITranslator engine;
-            private int curRate;
-            private long cuTime;
+            private long cuTime = CurTime()-1000;
             private long delayTime;
             public bool isFree { get; private set; }
+            private int countErrors = 0;
 
             public TNode(TranslatorionPool parent, ITranslator engine, int rate)
             {
@@ -279,27 +297,24 @@ namespace GF2_RU_Launch
             {
 
                 long cur = CurTime();
-                long delta = cur - cuTime;
-                long delays = delta / delayTime;
+                long delta = cuTime - cur; ;
 
-                curRate -= ((int)delays);
-                if (curRate < 0)
+                if(cuTime < cur)
                 {
-                    curRate = 0;
                     cuTime = cur;
                 }
+                cuTime += delayTime;
 
-                if (curRate < maxRate)
+                long delays = delta / delayTime;
+                if(delays >= maxRate)
                 {
-                    cuTime += delayTime;
-                    curRate += 1;
-                    return;
+                    long toNext = (delta % delayTime) + 1;
+                    if(delays > maxRate)
+                    {
+                        toNext += delayTime;
+                    }
+                    Thread.Sleep((int)toNext);
                 }
-
-                long toNext = delta % delayTime;
-                Thread.Sleep((int)toNext);
-                cuTime += toNext;
-
             }
 
 
@@ -309,11 +324,28 @@ namespace GF2_RU_Launch
                     isFree = false;
                     awaitToNextRequest();
                 }
-                var result = await engine.TransliterateAsync(src, parent.to, parent.from);
+                ITranslationResult result;
+                try
+                {
+                    result = await engine.TranslateAsync(src, parent.to, parent.from);
+                    countErrors = 0;
+                }
+                catch (Exception e) {
+                    countErrors += 1;
+                    cuTime += (delayTime * maxRate);
+
+                    var result2 = await parent.TranslateInPool(src);
+
+                    lock (this)
+                    {
+                        isFree = true;
+                    }
+                    return result2;
+                }
                 lock (this) {
                     isFree = true;
                 }
-                return result.Transliteration;
+                return result.Translation;
             }
         }
 
@@ -381,14 +413,16 @@ namespace GF2_RU_Launch
                     else
                     {
                         builder.Append(" ");
-                        func.Invoke(chunks.First.Value, future1);
+                        var first = chunks.First.Value;
                         chunks.RemoveFirst();
+                        func.Invoke(first, future1);
                     }
                 };
                 future1 = temp;
 
-                func.Invoke(chunks.First.Value, future1);
+                var first = chunks.First.Value;
                 chunks.RemoveFirst();
+                func.Invoke(first, future1);
             }
             else
             {
@@ -460,14 +494,14 @@ namespace GF2_RU_Launch
 
                 if (chr == '<')
                 {
-                    items.Add(new Item(0, text.Substring(prev, i - 1)));
+                    items.Add(new Item(0, text.Substring(prev, i - 1 - prev)));
                     for (int j = i; j < len1; j++)
                     {
                         char chr2 = text[j];
 
                         if (chr2 == '>')
                         {
-                            items.Add(new Item(1, text.Substring(i - 1, j + 1)));
+                            items.Add(new Item(1, text.Substring(i - 1, j + 2 - i)));
                             prev = j + 1;
                             i = j + 1;
                             break;
@@ -476,7 +510,7 @@ namespace GF2_RU_Launch
                 }
             }
             if (prev != len1)
-                items.Add(new Item(0, text.Substring(prev, len1)));
+                items.Add(new Item(0, text.Substring(prev)));
             return items;
         }
     }

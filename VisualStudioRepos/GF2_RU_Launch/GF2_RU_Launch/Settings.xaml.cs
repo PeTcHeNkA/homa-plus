@@ -20,10 +20,12 @@ namespace GF2_RU_Launch
             LoadConfigValues();
         }
 
+
         public void LoadConfigValues()
         {
             Packs.ItemsSource = getPacks();
-            displayDS();
+            DisplayDS();
+            DisplayTranslationMode();
         }
 
 
@@ -34,12 +36,21 @@ namespace GF2_RU_Launch
             writePacks(infs);
         }
 
+        private static String PACKS_COMPABILITY = "3.1";
 
         public static List<PackInf> getPacks()
         {
             var cfg = AppConfig.Get();
             int count = cfg.getInt("GFT_Packs_Count");
             List<PackInf> list = new List<PackInf> (count);
+
+            var piv = cfg.getStr("GFT_Compability");
+            if(piv == null || piv != PACKS_COMPABILITY)
+            {
+                count = 0;
+                cfg.setStr("GFT_ResetPacks", PACKS_COMPABILITY);
+                cfg.save();
+            }
 
             if (count > 0) {
                 int cursor = 0;
@@ -55,19 +66,27 @@ namespace GF2_RU_Launch
                 }
             } else
             {
-                list.Add(getDefaultPack());
+                getDefaultPack(list);
             }
             return list;
         }
 
 
-        public static PackInf getDefaultPack()
+        public static void getDefaultPack(List<PackInf> list)
         {
+            PackInf inf0 = new PackInf();
+            inf0.Priority = 0;
+            inf0.Name = "RuTeam";
+            inf0.Source = "https://gitlab.com/gf2ruteam/grils-frontline-team-translate/-/raw/master/translations_release.json?ref_type=heads&inline=false";
+
+
             PackInf inf = new PackInf();
-            inf.Priority = 0;
+            inf.Priority = 1;
             inf.Name = "Homa";
             inf.Source = MainWindow.GF2_LOAD_URL;
-            return inf;
+
+            list.Add(inf0);
+            list.Add(inf);
         }
 
 
@@ -122,7 +141,7 @@ namespace GF2_RU_Launch
         }
 
 
-        private void displayDS()
+        private void DisplayDS()
         {
             if(AppConfig.Get().check("GFT_Discord", false))
             {
@@ -145,8 +164,42 @@ namespace GF2_RU_Launch
         private void ResetPacks_Click(object sender, RoutedEventArgs e)
         {
             List<PackInf> packs = new List<PackInf>();
-            packs.Add(getDefaultPack());
+            getDefaultPack(packs);
             Packs.ItemsSource = packs;
+        }
+
+        private void DisplayTranslationMode()
+        {
+            var tag0 = AppConfig.Get().getStr("GFT_DTranlation");
+            if (tag0 == null || tag0 == "disabled") return;
+            foreach (var item in CHSTranslateMode.Items)
+            {
+                ComboBoxItem ci = item as ComboBoxItem;
+                if(ci.Tag != null)
+                {
+                    var tag = ci.Tag.ToString();
+                    if(tag == tag0)
+                    {
+                        ci.IsSelected = true;
+                        return;
+                    }
+                }
+            }
+        }
+
+        private void CHSTranslateMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var tag = ((sender as ComboBox).SelectedItem as ComboBoxItem).Tag;
+            string param;
+            if(tag == null)
+            {
+                param = "disabled";
+            }
+            else
+            {
+                param = tag.ToString();
+            }
+            AppConfig.Get().setStr("GFT_DTranlation", param);
         }
     }
 
@@ -194,7 +247,9 @@ namespace GF2_RU_Launch
             {
                 PackResult res = new PackResult();
                 res.inf = inf;
-                if (!string.IsNullOrEmpty(inf.Source)) try
+                if (!string.IsNullOrEmpty(inf.Source))
+                {
+                    try
                     {
                         if (inf.Source.StartsWith("http"))
                         {
@@ -215,9 +270,15 @@ namespace GF2_RU_Launch
                             res.lines = Editor.fromJsonBytes(res.data);
                         }
                     }
-                    catch (Exception ex) {
+                    catch (Exception ex)
+                    {
                         //
                     }
+                }
+                if (res.lines == null)
+                {
+                    res.lines = new List<ELine>();
+                }
                 return res;
             }).ToList().FindAll(inf => inf.lines != null)
                 .OrderBy(inf => inf.inf.Priority).ToList();
@@ -241,6 +302,7 @@ namespace GF2_RU_Launch
             public List<ELine> merge(List<PackResult> packs)
             {
                 List<ELine> result = new List<ELine>();
+                if (packs.Count == 0) return result;
                 result.AddRange(packs[0].lines.Select(line => line.copy()));
 
                 foreach (ELine line in result)

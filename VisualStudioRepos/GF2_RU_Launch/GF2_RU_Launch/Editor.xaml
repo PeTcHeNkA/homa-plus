@@ -71,11 +71,12 @@
                     <MenuItem Header="Показать" Click="onClickShowNonTranslatable" Foreground="{DynamicResource Editor_Add}"></MenuItem>
                     <MenuItem Header="Скрыть" Click="onClickHideNonTranslatable" Foreground="{DynamicResource Editor_Del}"></MenuItem>
                 </MenuItem>
+                <!--
                 <MenuItem Header="Слияние по значению">
                     <MenuItem Header="Включить" Click="onClickEnableMerge" Foreground="#FF318C00"></MenuItem>
                     <MenuItem Header="Выключить" Click="onClickDisableMerge" Foreground="{DynamicResource Editor_Del}"></MenuItem>
-                </MenuItem>
-                <Separator/>
+                </MenuItem> 
+                <Separator/> -->
                 <MenuItem Header="Сбросить" Click="clickResetFilter" Foreground="{DynamicResource Editor_Del}"></MenuItem>
             </MenuItem>
             <MenuItem Header="Сортировка">

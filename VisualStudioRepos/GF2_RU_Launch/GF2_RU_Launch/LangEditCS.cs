@@ -78,7 +78,9 @@ namespace GF2_RU_Launch
             {
                 var trs0 = data.ElementAt(i);
                 ELine line = new ELine();
-                lines[i] = new ELine((int)trs0.id, trs0.name);
+                line.Id = (int)trs0.id;
+                line.Original = trs0.name;
+                lines[i] = line;
             }
         }
 
@@ -263,6 +265,26 @@ namespace GF2_RU_Launch
             {
                 modifyLine(line);
             }
+        }
+
+
+        public List<ELine> getNotTranslated(bool onlyNotExists)
+        {
+            List<ELine> lines1 = new List<ELine>();
+
+            foreach(ELine line in lines)
+            {
+                if(line.Original != null)
+                {
+                    if (((line.Value == line.Original && !onlyNotExists) || line.Value == null) 
+                        && Editor.isTranslatable(line.Original))
+                    {
+                        lines1.Add(line);
+                    }
+
+                }
+            }
+            return lines1;
         }
     }
 }
