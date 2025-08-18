@@ -10,18 +10,19 @@ import java.util.List;
 
 public class CloTest {
     public static void main(String[] args) throws Exception {
-        File file = new File("ClothesData.bytes");
+        File file = new File("ClothesDataMOD.bytes");
         CloData clo = new CloData();
 
         clo.readFrom(file);
 
         //System.out.println(clo.scanNames());
 
-        for (String name:clo.scanNames()){
-            System.out.println(clo.search(name));
-        }
+//        for (String name:clo.scanNames()){
+//            System.out.println(clo.search(name));
+//        }
 
-//        CloData.CharacterSkinData items = clo.search("Tololo");
+        //CloData.CharacterSkinData items = clo.search("Tololo");
+        //System.out.println(items.getSkin(0));
 //        CloData.CharacterSkinData flo2  = clo.search("Flo");
 //
 //        System.out.println(items);

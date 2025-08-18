@@ -10,9 +10,9 @@ public class Main {
     private static String path4 = "result";
 
     public static void main(String[] args) throws Exception {
-        if(args.length > 1 && args[0].equals("skin")){
+        if(args.length >= 1 && args[0].equals("skin")){
             String[] args2 = new String[args.length-1];
-            System.arraycopy(args, 0, args2, 0, args2.length);
+            System.arraycopy(args, 1, args2, 0, args2.length);
             SkinMain.main(args2);
             return;
         }

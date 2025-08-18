@@ -94,8 +94,8 @@ message ClotheUItem{
   optional int32 l12 = 12;
   optional int32 l13 = 13;
 
-  optional bytes l14 = 14;
-  optional bytes l15 = 15; // ??
+  repeated int32 l14 = 14;
+  repeated int32 l15 = 15; // ??
 
   optional TRef l16 = 16;
   optional string flag = 17;
