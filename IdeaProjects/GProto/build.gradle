@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
 group = 'plus.proto'
@@ -22,6 +23,18 @@ sourceSets {
             srcDir 'C:/Users/Te4hnoPlus/IdeaProjects/TsonConfigurations/extensions/src/main/java'
         }
     }
+}
+
+jar {
+    manifest {
+        attributes (
+                'Main-Class': 'plus.proto.app.Main'
+        )
+    }
+}
+
+shadowJar{
+    archiveFileName = 'Classificator.jar'
 }
 
 test {

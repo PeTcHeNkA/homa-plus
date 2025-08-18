@@ -100,10 +100,10 @@ public class LangPackV2<T extends LangPackV2.Line> {
 
 
     public static class WriteCallback{
-        int index;
-        int count    = 0;
-        int bLen = 0;
-        int startOff = 0;
+        public int index;
+        public int count    = 0;
+        public int bLen = 0;
+        public int startOff = 0;
     }
 
 

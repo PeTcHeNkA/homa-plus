@@ -16,6 +16,9 @@ public class GroupScanner {
 
     public GroupScanner(String root){
         this.root = root;
+
+        addExclude("actionnpc");
+        addExclude("aiconfig");
     }
 
 
@@ -68,6 +71,8 @@ public class GroupScanner {
         String groupName = file.getName().toLowerCase();
         String finalGroupName = groupName.substring(0, groupName.length()-10);
 
+        if(exclude.contains(finalGroupName))return;
+
         IntConsumer func = new IntConsumer() {
             int index = 0;
             public void setIndex(int index) {
@@ -92,10 +97,6 @@ public class GroupScanner {
         IntFuncExecutor readFunc = ReadFuncRegistry.create(finalGroupName);
         readFunc.readFrom(file);
         readFunc.apply(func);
-//
-//        if(finalGroupName.equals("videosubtitle")){
-//            System.out.println("NEN");
-//        }
     }
 
 
@@ -105,10 +106,11 @@ public class GroupScanner {
             "unlock", "weekly", "stsp", "sim", "rogue", "rich", "player", "shortcut", "store", "warmup",
             "nrt", "love", "handmode", "enemy", "event", "festival", "information", "language", "rouge",
             "supply", "bp", "element", "difficulty", "tutorial", "stage", "amoactivity", "back", "candycatch",
-            "character", "combat", "command"
+            "character", "combat", "command", "mod", "chapter", "idcard"
     };
     private static final String[] shortSubGroups = new String[]{
-        "monopoly", "sandbox", "repository", "handmade", "highpvp", "squad", "story"
+            "monopoly", "sandbox", "repository", "handmade", "highpvp", "squad", "story",
+            "mngame", "mnshoot",
     };
 
     public String getClazzName(ELine line){
@@ -185,9 +187,9 @@ public class GroupScanner {
         @Override
         public String getKey() {
             if(writeId){
-                LangPackV2.Line[] lines = pack.getLines(current.src);
-                if(lines != null && lines.length != 1)
-                    return "ID#"+current.id+"|"+current.src;
+//                LangPackV2.Line[] lines = pack.getLines(current.src);
+//                if(lines != null && lines.length != 1)
+                    return "#ID:"+current.id+"|"+current.src;
             }
             return current.src;
         }

@@ -17,7 +17,7 @@ public class VideoSubtitleProc implements IntFuncExecutor{
         for (int i = 0; i < count; i++){
             TableData.VideoSubtitle data = this.data.getData(i);
             consumer.setIndex(data.getId());
-            consumer.apply(consumer.gefGroup(), data.getId());
+            consumer.apply(consumer.gefGroup(), (int)data.getData().getId());
         }
     }
 }
