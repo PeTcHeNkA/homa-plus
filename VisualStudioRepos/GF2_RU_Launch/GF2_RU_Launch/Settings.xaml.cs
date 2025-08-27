@@ -17,26 +17,27 @@ namespace GF2_RU_Launch
             UN_BRANCH = MainWindow.getBranch();
             InitializeComponent();
 
+            AppConfig.Get().Reinit();
             LoadConfigValues();
         }
 
 
         public void LoadConfigValues()
         {
+            //AppConfig.Get().Reinit();
             Packs.ItemsSource = getPacks();
             DisplayDS();
+            DisplayLSPR();
             DisplayTranslationMode();
         }
 
 
         public void SaveConfigValues()
         {
-            AppConfig.Get().confirmChanges();
+            AppConfig.Get().ConfirmChanges();
             List<PackInf> infs = Packs.ItemsSource as List<PackInf>;
-            writePacks(infs);
+            WritePacks(infs);
         }
-
-        private static String PACKS_COMPABILITY = "3.1";
 
         public static List<PackInf> getPacks()
         {
@@ -45,10 +46,11 @@ namespace GF2_RU_Launch
             List<PackInf> list = new List<PackInf> (count);
 
             var piv = cfg.getStr("GFT_Compability");
-            if(piv == null || piv != PACKS_COMPABILITY)
+            if(piv == null || piv != MainWindow.PACKS_COMPABILITY)
             {
                 count = 0;
-                MainWindow.setCfgValue("GFT_ResetPacks", PACKS_COMPABILITY);
+                AppConfig.Get().setStr("GFT_Compability", MainWindow.PACKS_COMPABILITY);
+                AppConfig.Get().Save();
             }
 
             if (count > 0) {
@@ -89,7 +91,7 @@ namespace GF2_RU_Launch
         }
 
 
-        public static void writePacks(List<PackInf> list)
+        public static void WritePacks(List<PackInf> list)
         {
             var cfg = AppConfig.Get();
             int count = cfg.getInt("GFT_Packs_Count");
@@ -123,7 +125,7 @@ namespace GF2_RU_Launch
                     ++cursor;
                 }
             }
-            cfg.save();
+            cfg.Save();
         }
 
 
@@ -150,7 +152,20 @@ namespace GF2_RU_Launch
             {
                 CHSDiscordRPC.SelectedIndex = 1;
             }
-        } 
+        }
+
+
+        private void DisplayLSPR()
+        {
+            if(AppConfig.Get().check("GFT_LaunchSuppression", false))
+            {
+                CHSprs.SelectedIndex = 1;
+            }
+            else
+            {
+                CHSprs.SelectedIndex = 0;
+            }
+        }
 
 
         private void CHSDiscordRPC_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -166,6 +181,7 @@ namespace GF2_RU_Launch
             getDefaultPack(packs);
             Packs.ItemsSource = packs;
         }
+
 
         private void DisplayTranslationMode()
         {
@@ -186,6 +202,7 @@ namespace GF2_RU_Launch
             }
         }
 
+
         private void CHSTranslateMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var tag = ((sender as ComboBox).SelectedItem as ComboBoxItem).Tag;
@@ -199,6 +216,13 @@ namespace GF2_RU_Launch
                 param = tag.ToString();
             }
             AppConfig.Get().setStr("GFT_DTranlation", param);
+        }
+
+
+        private void CHSDiscordRPC1_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            bool enable = ((sender as ComboBox).SelectedItem as ComboBoxItem).Tag.ToString() == "1";
+            AppConfig.Get().setBool("GFT_LaunchSuppression", enable);
         }
     }
 
@@ -300,6 +324,10 @@ namespace GF2_RU_Launch
 
             public List<ELine> merge(List<PackResult> packs)
             {
+                packs.Sort((r, r2) => {
+                    if (r.inf.Priority > r2.inf.Priority) return 1;
+                    return -1;
+                });
                 List<ELine> result = new List<ELine>();
                 if (packs.Count == 0) return result;
                 result.AddRange(packs[0].lines.Select(line => line.copy()));

@@ -20,7 +20,7 @@ namespace GF2_RU_Launch;
 
 public partial class MainWindow : AcrylicWindow{
     public static string LAUNCH_VERSION_URL = "https://gitlab.com/homaplus/girls-frontline-2-exilium-ru-launcher/-/raw/natives/launcversion.info?ref_type=heads&inline=false";
-    public static string LAUNCH_VERSION = "3.1.2";
+    public static string LAUNCH_VERSION = "3.2.4";
 
     public static string GF2_DATA_TABLE    = "GF2_Exilium_Data/LocalCache/Data/Table";
     public static string GF2_LANG_PACK     = "/LangPackageTableEnusData.bytes";
@@ -32,6 +32,7 @@ public partial class MainWindow : AcrylicWindow{
     public static string GF2_NOTIFICATIONS_URL = "https://gitlab.com/homaplus/grils-frontline-team-translate/-/raw/%__BRANCH%__%/Notifiations.md?ref_type=heads&inline=false";
     public static string NATIVES_LOAD_URL  = "https://gitlab.com/homaplus/girls-frontline-2-exilium-ru-launcher/-/raw/natives/%__FILE__%?ref_type=heads&inline=false";
     public static string STATISTIC_URL     = "https://vk.cc/cOtxNy";
+    public static string PACKS_COMPABILITY = "3.1";
 
     //private static string GF2_MASTER_URL;
 
@@ -43,6 +44,7 @@ public partial class MainWindow : AcrylicWindow{
 
     private bool needLoadPack = true;
     private bool locked = false;
+    private bool isGameRunning = false;
     private bool launchUpdatesChecked = false;
 
 
@@ -203,14 +205,46 @@ public partial class MainWindow : AcrylicWindow{
 
     private void OnClickPlay(object sender, RoutedEventArgs e)
     {
-        if (locked) return;
+        if (locked || isGameRunning) return;
         if (IsValidGamePath())
         {
-            Process.Start(GF2_Path + "GF2_Exilium.exe");
+            Process proc = Process.Start(GF2_Path + "GF2_Exilium.exe");
+            isGameRunning = true;
             this.WindowState = WindowState.Minimized;
-            return;
-        }
 
+            if (getCfgValue("GFT_LaunchSuppression") == "true")
+            {
+                CallInDedictedThread(() =>
+                {
+                    proc.WaitForExit();
+                    isGameRunning = false;
+                    KillLaunch(3, 0, 75);
+                    Dispatcher.Invoke(() =>
+                    {
+                        editBtnStatus(needLoadPack, true);
+                        this.Focus();
+                    });
+                });
+                KillLaunch(2, 5000, 2500);
+            }
+            else if (IsPackInstalled())
+            {
+                {
+                    CallInDedictedThread(() =>
+                    {
+                        proc.WaitForExit();
+                        isGameRunning = false;
+
+                        Dispatcher.Invoke(() =>
+                        {
+                            editBtnStatus(needLoadPack, true);
+                            this.Focus();
+                        });
+                    });
+                }
+                return;
+            }
+        }
 
 
         Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
@@ -546,21 +580,7 @@ public partial class MainWindow : AcrylicWindow{
                 {
                     Dispatcher.Invoke(() =>
                     {
-                        var all = "Cause: " + e.Message;
-                        if(e.StackTrace != null)
-                        {
-                            all += "\n\nStack trace:\n";
-                            all += e.StackTrace;
-                        }
-                        try
-                        {
-                            File.WriteAllTextAsync("error.log", all);
-
-                            MessageBox.Show("Ошибка загрузки обновления!\nЛог ошибки сохранен в error.log");
-                        } catch
-                        {
-                            MessageBox.Show(e.StackTrace, "Ошибка загрузки обновления: "+e.Message);
-                        }
+                        onError(e, "Ошибка загрузки обновления");
                     });
                 }
             }
@@ -602,19 +622,19 @@ public partial class MainWindow : AcrylicWindow{
             {
                 jBytes = File.ReadAllBytes(GF2_RU_PACK_JSON);
             }
-            catch
+            catch (Exception e)
             {
                 if (param != null && param != "disabled")
                 {
                     Dispatcher.Invoke(() =>
                     {
-                        MessageBox.Show("Ошибка загрузки обновления!\n Будет использован до-перевод");
+                        onError(e, "Ошибка загрузки обновления!\n Будет использован до-перевод");
                     });
                 } else
                 {
                     Dispatcher.Invoke(() =>
                     {
-                        MessageBox.Show("Ошибка загрузки обновления!");
+                        onError(e, "Ошибка загрузки обновления");
                     });
                     onPostLoad(false, ref completed);
                     return;
@@ -652,21 +672,36 @@ public partial class MainWindow : AcrylicWindow{
                 File.WriteAllBytes(GF2_RU_PACK, eData);
                 onPostLoad(true, ref completed);
             }
-            catch
+            catch (Exception err)
             {
                 onPostLoad(false, ref completed);
                 Dispatcher.Invoke(() =>
                 {
-                    MessageBox.Show("Ошибка сборки пакета!");
+                    onError(err, "Ошибка сборки пакета");
                 });
             }
-            finally
-            {
-                //table.free();
-            }
-
-            //onPostLoad(true, ref completed);
         });
+    }
+
+
+    private void onError(Exception err, string msg1)
+    {
+        var all = "Error: " + msg1 + "\n";
+        all += "Cause: " + err.Message;
+        if (err.StackTrace != null)
+        {
+            all += "\n\nStack trace:\n";
+            all += err.StackTrace;
+        }
+        try
+        {
+            File.WriteAllTextAsync("error.log", all);
+            MessageBox.Show(msg1+"!\nЛог ошибки сохранен в error.log");
+        }
+        catch
+        {
+            MessageBox.Show(all, msg1+": " + err.Message);
+        }
     }
 
 
@@ -1147,15 +1182,55 @@ public partial class MainWindow : AcrylicWindow{
     }
 
 
-    //public void startLaunchKiller()
-    //{
-    //    ManagementEventWatcher startWatch = new ManagementEventWatcher(
-    //            new WqlEventQuery("SELECT * FROM Win32_ProcessStartTrace")); //WHERE ProcessName = \"PCLauncher.exe\"
+    public void KillLaunch(int attempts, int startDelay, int delay)
+    {
+        if (attempts <= 0) attempts = 1;
+        CallInDedictedThread(() => {
+            if(startDelay > 0)
+            {
+                Thread.Sleep(startDelay);
+            }
+            while (attempts > 0)
+            {
+                attempts -= 1;
+                if (KillLaunch0())
+                {
+                    return;
+                }
+                Thread.Sleep(delay);
+            }
+        });
+    }
 
-    //    startWatch.EventArrived += (e, e2) => {
-    //        MessageBox.Show("NEN");
-    //    };
 
-    //    startWatch.Start();
-    //}
+    private bool KillLaunch0()
+    {
+        Process[] procList = Process.GetProcesses();
+
+        var dirName = Directory.GetCurrentDirectory();
+        int count = 0;
+
+        foreach (var proc1 in procList)
+        {
+
+            if (proc1.ProcessName == "PCLauncher")
+            {
+
+                ProcessStartInfo psi = new ProcessStartInfo();
+                psi.FileName = "CMD.exe";
+                psi.Arguments = "/C taskkill /F /PID " + proc1.Id;
+                psi.UseShellExecute = false;
+                psi.CreateNoWindow = true;
+                psi.WindowStyle = ProcessWindowStyle.Hidden;
+
+                var proc = new Process();
+                proc.StartInfo = psi;
+                proc.Start();
+                proc.WaitForExit();
+
+                count += 1;
+            }
+        }
+        return count > 0;
+    }
 }

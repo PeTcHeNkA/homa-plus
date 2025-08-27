@@ -134,7 +134,13 @@ public class AppConfig
 
     public AppConfig()
     {
+        Reinit();
+    }
+
+    public AppConfig Reinit()
+    {
         cfg = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+        return this;
     }
 
 
@@ -230,15 +236,16 @@ public class AppConfig
     }
 
 
-    public void confirmChanges()
+    public void ConfirmChanges()
     {
         ConfigurationManager.RefreshSection(cfg.AppSettings.SectionInformation.Name);
     }
 
 
-    public void save()
+    public void Save()
     {
-        confirmChanges();
+        ConfirmChanges();
         cfg.Save(ConfigurationSaveMode.Modified);
+        Reinit();
     }
 }

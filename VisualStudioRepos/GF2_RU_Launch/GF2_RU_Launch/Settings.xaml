@@ -9,7 +9,7 @@
         xmlns:col="clr-namespace:System.Collections;assembly=mscorlib"
                   
         mc:Ignorable="d"
-        Title="Girls Frontline 2: Exilium RU Launcher | Settings" Height="400" Width="650" MinHeight="388" MinWidth="625"
+        Title="Girls Frontline 2: Exilium RU Launcher | Settings" Height="444" Width="650" MinHeight="432" MinWidth="625"
         
         TintColor="{DynamicResource L_Background_Main_Color}" 
         FallbackColor="{DynamicResource L_Background_Main_Color}"
@@ -480,8 +480,8 @@ BorderBrush="{DynamicResource Bottons_Border}"
                 BorderBrush="{DynamicResource Bottons_Border}" Grid.RowSpan="2"
                 />
         </Grid>
-        
-        <!-- Подавление лаунчера?
+
+        <!-- Подавление лаунчера -->
         <Grid VerticalAlignment="Top" Height="44" Margin="0,224,0,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="6*"/>
@@ -502,10 +502,10 @@ BorderBrush="{DynamicResource Bottons_Border}"
                 </Grid>
             </Border>
 
-            <ComboBox x:Name="CHSDiscordRPC1" VerticalAlignment="Top" Height="44" Margin="370,0,25,0" Grid.RowSpan="2"
+            <ComboBox x:Name="CHSprs" VerticalAlignment="Top" Height="44" Margin="370,0,25,0" Grid.RowSpan="2"
                 Background="{DynamicResource Bottons_Background}"
                 BorderBrush="{DynamicResource Bottons_Border}"
-                BorderThickness="1,1,1,1" SelectionChanged="CHSDiscordRPC_SelectionChanged"
+                BorderThickness="1,1,1,1" SelectionChanged="CHSDiscordRPC1_SelectionChanged"
                       >
                 <ComboBoxItem Tag="0" IsSelected="True">
                     <TextBlock Height="26" FontSize="22" Text="Отключено"/>
@@ -524,7 +524,5 @@ BorderBrush="{DynamicResource Bottons_Border}"
                 />
         </Grid>
         
-        -->
-
     </Grid>
 </fw:AcrylicWindow>
