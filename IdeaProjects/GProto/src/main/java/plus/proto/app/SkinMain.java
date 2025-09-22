@@ -80,6 +80,7 @@ public class SkinMain {
         //CloData.LItem s2 = clo.search(src.name).getSkin(src.skin);
 
         t2.copySkinOf(s2);
+        //t2.copyAllOf(s2);
 
         clo.write(out);
         System.out.println("Success");

@@ -84,20 +84,20 @@ message ClotheUItem{
   optional int32 modelId = 5;
 
   optional bytes l6 = 6;
-  optional string ski1 = 7;
-  optional string ski2 = 8;
+  optional string gunCode = 7;
+  optional string name = 8;
 
-  optional TRef l9 = 9;
-  optional TRef l10 = 10;
+  optional TRef text1 = 9;  //from old
+  optional TRef text2 = 10; //from old
 
-  optional int32 l11 = 11;
-  optional int32 l12 = 12;
-  optional int32 l13 = 13;
+  optional int32 unlockType = 11; //from old
+  optional int32 unlockArg  = 12; //from old
+  optional int32 unlockDesc = 13; //from old
 
   repeated int32 l14 = 14;
   repeated int32 l15 = 15; // ??
 
-  optional TRef l16 = 16;
+  optional TRef text3 = 16;  //from old
   optional string flag = 17;
 
   optional int32 l19 = 19;

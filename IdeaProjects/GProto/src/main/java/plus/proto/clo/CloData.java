@@ -86,7 +86,7 @@ public class CloData implements IntFuncExecutor {
         int count = dataB.getItemCount();
         for (int i = 0; i < count; i++){
             TableData.ClotheUItem item = dataB.getItem(i);
-            if(item.getSki1().startsWith(key)){
+            if(item.getGunCode().startsWith(key)){
                 if(list == null){
                     list = new LinkedList<>();
                 }
@@ -103,7 +103,7 @@ public class CloData implements IntFuncExecutor {
         int count = dataB.getItemCount();
         for (int i = 0; i < count; i++){
             TableData.ClotheUItem item = dataB.getItem(i);
-            String rawName = item.getSki1();
+            String rawName = item.getGunCode();
 
             if(rawName.endsWith("R")){
                 if(rawName.endsWith("SSR")){
@@ -139,14 +139,29 @@ public class CloData implements IntFuncExecutor {
             dataB.setItem(index, item);
         }
 
+        public void copyAllOf(LItem item0){
+            TableData.ClotheUItem.Builder item = item0.item.toBuilder();
+            item.setId(this.item.getId());
+
+            item.setText1(this.item.getText1());
+            item.setText1(this.item.getText2());
+            item.setText1(this.item.getText3());
+
+            item.setUnlockType(this.item.getUnlockType());
+            item.setUnlockArg(this.item.getUnlockArg());
+            item.setUnlockDesc(this.item.getUnlockDesc());
+
+            set(item.build());
+        }
+
         public void copySkinOf(LItem item0){
             TableData.ClotheUItem input = item0.item;
 
             TableData.ClotheUItem.Builder item = this.item.toBuilder();
 
             item.setModelId(input.getModelId());
-            item.setSki1(input.getSki1());
-            item.setSki2(input.getSki2());
+            item.setGunCode(input.getGunCode());
+            item.setName(input.getName());
             item.setSki3(input.getSki3());
             item.setSki4(input.getSki4());
             item.setSki5(input.getSki5());
@@ -187,7 +202,7 @@ public class CloData implements IntFuncExecutor {
             if (num == 0)return getMain();
             String tos = Integer.toString(num);
             for (LItem item: items){
-                if(item.item.getSki1().endsWith(tos)){
+                if(item.item.getGunCode().endsWith(tos)){
                     return item;
                 }
             }
@@ -200,7 +215,7 @@ public class CloData implements IntFuncExecutor {
 
         public LItem getMain(){
             for (LItem item: items){
-                if(item.item.getSki1().endsWith("R")){
+                if(item.item.getGunCode().endsWith("R")){
                     return item;
                 }
             }
@@ -216,7 +231,7 @@ public class CloData implements IntFuncExecutor {
         public String toString(boolean trimName) {
             LItem main = getMain();
             if(main == null)return "UNKNOWN DATA";
-            String name = main.item.getSki1();
+            String name = main.item.getGunCode();
             if(trimName){
                 if(name.endsWith("R")){
                     if(name.endsWith("SSR")){
@@ -252,7 +267,7 @@ public class CloData implements IntFuncExecutor {
     public static IntList getOptions(List<LItem> items){
         IntList list = new IntArrayList();
         for (LItem item: items){
-            String str = item.item.getSki1();
+            String str = item.item.getGunCode();
             if(str.endsWith("R")){
                 continue;
             }
@@ -272,10 +287,10 @@ public class CloData implements IntFuncExecutor {
         String tos = Integer.toString(to);
         LItem main = null, src = null;
         for (LItem item: items){
-            if(item.item.getSki1().endsWith("R")){
+            if(item.item.getGunCode().endsWith("R")){
                 main = item;
             }
-            if(item.item.getSki1().endsWith(tos)){
+            if(item.item.getGunCode().endsWith(tos)){
                 src = item;
             }
         }
