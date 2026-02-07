@@ -11,7 +11,7 @@ public final class TextAlignerPlaceholder extends PlaceholderExpansion {
 
     @Override
     public @NotNull String getIdentifier() {
-        return "spacer";
+        return "textaligner";
     }
 
     @Override
@@ -31,8 +31,8 @@ public final class TextAlignerPlaceholder extends PlaceholderExpansion {
 
 
     /*
-     * %spacer_center;<length>;<Text with {placeholder}>%
-     * %spacer_right;<length>;<Text with {placeholder}>%
+     * %textaligner_center;<length>;<Text with {placeholder}>%
+     * %textaligner_right;<length>;<Text with {placeholder}>%
      */
     @Override
     public @Nullable String onRequest(OfflinePlayer player, @NotNull String paramsString) {
@@ -44,7 +44,6 @@ public final class TextAlignerPlaceholder extends PlaceholderExpansion {
             case "right" -> handleTextAlign(player, params, SpaceStyle.RIGHT);
             default -> null;
         };
-
     }
 
 
