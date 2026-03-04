@@ -291,7 +291,7 @@ public class ConcurrentCasAllocator extends CasSegment implements Allocator{
     public final void freeObj(Object obj){
         CasSegment last;
         if((last = this.last) == null)last = this;
-        if(last.freeObj0(this, obj))return;
+        if(last.freeObj0(this, obj)) return;
         CasSegment next = last.next;
         while (next != last){
             if(next.freeObj0(this, obj))return;
@@ -309,7 +309,7 @@ public class ConcurrentCasAllocator extends CasSegment implements Allocator{
             newArr.prev = next;
             this.prev = newArr;
         }
-        if(!next.freeObj0(this, obj))freeObj(obj);
+        if(!next.freeObj0(this, obj)) freeObj(obj);
     }
 }
 

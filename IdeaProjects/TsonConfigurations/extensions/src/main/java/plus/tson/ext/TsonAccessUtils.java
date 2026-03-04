@@ -20,7 +20,7 @@ public class TsonAccessUtils {
         if(end == -1){
             if(src.isMap())return src.getMap().get(path);
             if(src.isList())return getByList(src.getList(), path);
-            return null;
+            return def;
         }
         int start = 0;
 
