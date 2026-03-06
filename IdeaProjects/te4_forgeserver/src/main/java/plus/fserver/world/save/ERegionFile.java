@@ -16,12 +16,19 @@ public class ERegionFile {
     }
 
 
-    public synchronized void close() throws IOException {
-        this.raf.close();
+    public RandomAccessFile file(){
+        return raf;
     }
 
 
-    private synchronized void rescanSectors() throws IOException {
+    public void close() throws IOException {
+        synchronized (this){
+            this.raf.close();
+        }
+    }
+
+
+    private void rescanSectors() throws IOException {
         long cursor = 0;
         RandomAccessFile raf = this.raf;
         VarIntBuf free = this.free;
@@ -39,29 +46,33 @@ public class ERegionFile {
     }
 
 
-    public synchronized void write(int x, int z, byte[] bytes) throws IOException {
+    public void write(int x, int z, byte[] bytes) throws IOException {
         write(x, z, bytes, bytes.length);
     }
 
 
-    public synchronized void write(int x, int z, byte[] bytes, int length) throws IOException {
-        int pos, newPos;
+    public void write(int x, int z, byte[] bytes, int length) throws IOException {
+        synchronized (this) {
+            int pos, newPos;
 
-        if((pos = getPos(x, z)) != -1)
-            invalidate(pos);
-        if(bytes == null){
-            if(pos != -1) setPos(x, z, -1);
-            return;
+            if ((pos = getPos(x, z)) != -1)
+                invalidate(pos);
+            if (bytes == null) {
+                if (pos != -1) setPos(x, z, -1);
+                return;
+            }
+            if ((newPos = write(new IOChunkBuf(bytes, length, x, z))) != pos)
+                setPos(x, z, newPos);
         }
-        if((newPos = write(new IOChunkBuf(bytes, length, x, z))) != pos)
-            setPos(x, z, newPos);
     }
 
 
-    public synchronized byte[] read(int x, int z) throws IOException {
-        int pos;
-        if((pos = getPos(x, z)) == -1)return null;
-        return read(pos).bytes;
+    public byte[] read(int x, int z) throws IOException {
+        synchronized (this){
+            int pos;
+            if((pos = getPos(x, z)) == -1)return null;
+            return read(pos).bytes;
+        }
     }
 
 
@@ -83,8 +94,8 @@ public class ERegionFile {
         ++value;
         int bPos = bPos(x, z);
         offsets1[bPos] = (byte) (value & 255);
+        byte[] off;
         if(value > 255){
-            byte[] off;
             if((off = offsets2) == null)
                 off = offsets2 = new byte[1024];
 
@@ -95,13 +106,32 @@ public class ERegionFile {
                     off = offsets3 = new byte[1024];
 
                 off[bPos] = (byte) ((value >> 8) & 255);
+            } else {
+                if((off = offsets3) != null)
+                    off[bPos] = 0;
             }
+        } else {
+            if((off = offsets2) != null)
+                off[bPos] = 0;
+            if((off = offsets3) != null)
+                off[bPos] = 0;
         }
     }
 
 
     private static int bPos(int x, int z){
         return (x & 0x1F) << 5 | (z & 0x1F);
+    }
+
+
+    public void invalidate(int x, int z) throws IOException {
+        int pos;
+        if ((pos = getPos(x, z)) != -1) {
+            synchronized (this){
+                setPos(x, z, -1);
+                invalidate(pos);
+            }
+        }
     }
 
 
@@ -146,7 +176,8 @@ public class ERegionFile {
             int pre = MM_nonMeta2Buf(buf, bufCursor);
             bufCursor += pre;
             if(MM_isLastChunk()){
-                raf.read(buf, bufCursor, MM_getNextOffset()-pre);
+                if(pre >= 0)
+                    raf.read(buf, bufCursor, MM_getNextOffset() - pre);
                 break;
             } else {
                 raf.read(buf, bufCursor, 502);
@@ -294,11 +325,18 @@ public class ERegionFile {
         if(MM_isStartChunk()){
             return 0;
         } else {
+            int flag = buf.length - cursor;
+            if(--flag < 0)return -1;
             buf[cursor  ] = m[4];
+            if(--flag < 0)return -2;
             buf[cursor+1] = m[5];
+            if(--flag < 0)return -3;
             buf[cursor+2] = m[6];
+            if(--flag < 0)return -4;
             buf[cursor+3] = m[7];
+            if(--flag < 0)return -5;
             buf[cursor+4] = m[8];
+            if(--flag < 0)return -6;
             buf[cursor+5] = m[9];
             return 6;
         }

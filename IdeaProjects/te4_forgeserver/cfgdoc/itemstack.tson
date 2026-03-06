@@ -25,7 +25,7 @@
 			color = "???",
 			//Описание
 			Lore = [
-				"§1Lore 1",
+				"§1Lore 1 §cThis is picture §bTrue §6colors",
 				"§2Lore 2",
 				"§3Lore 2"
 			]
@@ -34,7 +34,6 @@
 		HideFlags = 0,
 	}
 }}
-
 
 
 {[

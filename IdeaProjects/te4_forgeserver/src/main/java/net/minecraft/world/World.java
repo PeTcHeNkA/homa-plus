@@ -167,8 +167,8 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
     public final LightingEngine lightingEngine;
     public final ActionResult<?> pooledAction = new ActionResult<>(null,null);
 
-    final SyncListCache.AABB bbCache;
-    final SyncListCache.EList eeCache;
+    public SyncListCache.AABB bbCache;
+    public SyncListCache.EList eeCache;
     protected IBlockEAccess effectiveAcces;
     //ONLY SERVER SIDE NOT NULL!
     public final ChunkSelector localSelector;
@@ -217,10 +217,8 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
         if(ElcaCV.MORE_MOBS_OPTIMIZER) {
             eeCache = new SyncListCache.EList(10, 60);
-            bbCache = new SyncListCache.AABB(10, 180);
         } else {
             eeCache = null;
-            bbCache = null;
         }
         localSelector = initSelector(); //init
         effectiveAcces = this;
@@ -2478,9 +2476,9 @@ public abstract class World implements IBlockEAccess, net.minecraftforge.common.
 
         this.updateWeather();
         if(ElcaCV.ENABLE_COLLISION_EVENTS) collisionEvent.reset();
+
         if(ElcaCV.MORE_MOBS_OPTIMIZER){
             eeCache.tick();
-            bbCache.tick();
         }
 
         worldBMinx = this.worldBorder.minX();

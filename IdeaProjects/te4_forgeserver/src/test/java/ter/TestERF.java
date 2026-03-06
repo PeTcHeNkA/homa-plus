@@ -1,6 +1,9 @@
 package ter;
 
 import plus.fserver.world.save.ERegionFile;
+
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Arrays;
@@ -10,17 +13,17 @@ import static col.TestLists.testTime;
 
 public class TestERF {
     public static void main(String[] args) throws Throwable {
-        //testPoss();
+        testPoss();
 //        testIO();
 //
-//        for (int i = 0; i < 20; i++){
-//            testIO();
-//        }
+        for (int i = 0; i < 20; i++){
+            testIO2(i);
+        }
 //        testPerf();
 //        testPerf();
         //testPerf();
 //        testPerf();
-        testPerf();
+//        testPerf();
     }
 
 
@@ -56,6 +59,71 @@ public class TestERF {
             }
         });
         file.close();
+    }
+
+
+    public static void testIO2(int s) throws IOException {
+        new File("testdata1.bin").delete();
+        ERegionFile file = new ERegionFile(new RandomAccessFile("testdata1.bin", "rw"));
+
+        Random rand = new Random();
+
+        rand.setSeed(s);
+
+        byte[][] data = new byte[64*64][];
+        for (int x = 0; x < 31; x++){
+            for(int z = 0; z < 31; z++){
+                byte[] data1 = new byte[rand.nextInt(3000)];
+                rand.nextBytes(data1);
+                data[(x * 32) + z] = data1;
+
+                file.write(x, z, data1);
+
+                byte[] check;
+                try {
+                    check = file.read(x, z);
+                } catch (Throwable e){
+                    file.close();
+                    throw new RuntimeException("X: " + x + " Z: " + z + " S: " + data1.length, e);
+                }
+
+                int res = equals1(data1, check);
+
+                if(res != -1)
+                    throw new RuntimeException(
+                            "X: " + x + " Z: " + z + " S: " + data1.length + " != " + check.length
+                    );
+            }
+        }
+
+        file.close();
+
+        file = new ERegionFile(new RandomAccessFile("testdata1.bin", "rw"));
+
+
+        for (int x = 0; x < 31; x++){
+            for(int z = 0; z < 31; z++){
+                byte[] data1 = data[(x * 32) + z];
+
+                if(x == 0 && z == 1){
+                    System.out.println("NEN!");
+                }
+
+                byte[] check;
+                try {
+                    check = file.read(x, z);
+                } catch (Throwable e){
+                    throw new RuntimeException("X: " + x + " Z: " + z, e);
+                }
+
+                int res = equals1(data1, check);
+
+                if(res != -1)
+                    throw new RuntimeException(
+                        "X: " + x + " Z: " + z + " S: " + data1.length + " != " + check.length
+                );
+            }
+        }
     }
 
 
@@ -138,16 +206,16 @@ public class TestERF {
 
 
     public static void testPoss() throws IOException {
-        ERegionFile file = new ERegionFile(new RandomAccessFile("testdata.bin", "rw"));
+        ERegionFile file = new ERegionFile(new RandomAccessFile("testdata1.bin", "rw"));
         file.close();
 
         Random rand = new Random(1);
         int max = (1<<15)-1;
-        int off = 1200;
+        int off = 119;
 
-        file.setPos(0, 0, off);
+        file.setPos(9, 2, off);
 
-        int nPos = file.getPos(0, 0);
+        int nPos = file.getPos(9, 2);
 
         if(off != nPos){
             throw new RuntimeException(off+" != "+nPos+" !");
@@ -163,7 +231,7 @@ public class TestERF {
                 nPos = file.getPos(x, z);
 
                 if(off != nPos){
-                    throw new RuntimeException(off+" != "+nPos+" !");
+                    throw new RuntimeException("x:"+x+" z:"+z+" off "+off+" != "+nPos+" !");
                 }
             }
         }

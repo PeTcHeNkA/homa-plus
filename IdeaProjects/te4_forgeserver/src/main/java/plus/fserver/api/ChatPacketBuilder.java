@@ -186,17 +186,23 @@ public class ChatPacketBuilder implements ITextSender{
     @Override
     public void send(IPlayerDataModel model){
         EntityPlayerMP player = model.getSelfPlayer();
+        // И как же оно работает?
         if(ElcaCV2.LIBBUILD){
+            //Если билдить в режиме либы для разработки - то оно будет использовать в качестве заглушки
+            //стандартные методы - сборка чатового пакета, форматирование, подстановки - синхронно
             player.connection.sendPacket(build(player));
             return;
         }
+        //Однако, в "боевом" режиме ...
         NetHandlerPlayServer con;
         if((con = player.connection) == null)return;
         if(asyncRender){
+            //Создаю задачу, и помещаю в NEP (после чего сборка и отправка пакета будет выполнена там)
             con.netManager.exec(
                     () -> player.connection.netManager.sendPacketSync(build(player))
             );
         } else {
+            //Синхронно собираю пакет и только потом ложу в NEP для отправки
             con.netManager.sendPacketE(build(player));
         }
     }
