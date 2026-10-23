@@ -1,0 +1,434 @@
+main:
+    powerartifact:  "Параметры артефакта: "
+    powerartifacts: "           &8Сила артефактов: "
+    attackboost:    "           &8Урон: +%.2f"
+    attackboost_pr: "           &8Урон: +%.2f%%"
+    shieldboost:    "           &8Щит: +%.2f"
+    shieldboost_pr: "           &8Щит: +%.2f%%"
+    critdamage:     "           &8Крит. урон: +%.2f%%"
+    critrate:       "           &8Шанс крит: +%.2f%%"
+    energyboost:    "           &8Энергия +%.2f"
+
+    v_level:        "           &8Уровень: %s / 90, %s"
+    v_experience:   "           &8Опыт: %s / %s"
+    v_damage:       "           &8Сила атаки: %.2f"
+    v_critpw:       "           &8Крит. урон: %.2f%%"
+    v_critrt:       "           &8Шанс крит: %.3f%%"
+    v_energy:       "           &8Запас энергии: %.2f/%.2f"
+    v_shield:       "           &8Размер щита: %.2f/%.2f"
+
+    v_powerartifacts: " &8Сила артефактов: "
+    v_attackboost: " &8Урон: +%.2f"
+    v_attackboost_pr: " &8Урон: +%.2f%%"
+    v_shieldboost: " &8Щит: +%.2f"
+    v_shieldboost_pr: " &8Щит: +%.2f%%"
+    v_critdamage: " &8Крит. урон: +%.2f%%"
+    v_critrate: " &8Шанс крит: +%.2f%%"
+    v_energyboost: " &8Энергия +%.2f"
+
+    adventureitemformat: "           &8%s"
+    adventureitemformat4: "&f%s&8%s"
+    adventureitemformat56: "&8%s"
+
+    spawnBoxFormat: "%s %.2f %.1f %.2f"
+    findBoxFormat: "Box was founded!"
+
+chat:
+    nickformat: "&%s<%s>&f:" #2
+    #аватарка, класс,цвет, ник
+    #
+    icoformat:  "%s &6[%s] &%s%s+         Уровень: %s, Опыт:%s/%s+           "  #7
+
+    globalchat:
+        - "&c[G]&f"
+        - "@H[&4Это сообщение видно всем.]"
+        - "@S!Привет всем!"
+    loacalchat:
+        - "&c[L]&f"
+        - "@H[&4Это сообщение видно игрокам в радиусе 100 блоков.]"
+        - "@S!Привет всем!"
+    senderprivateprefix:
+        - "&8[P] Я -->"
+        - "@H[&4Это сообщение видит только ваш собеседник]"
+    targetprivateprefix:
+        - "&8[P] Я <--"
+        - "@H[&4Это сообщение видит только ваш собеседник]"
+    nextpage:
+        - "[next]"
+        - "@HНажмите чтобы перейти на следующую страницу"
+    prewpage:
+        - "[prew]"
+        - "@HНажмите чтобы перейти на предедущую страницу"
+    lastpage:
+        - "."
+        - "@H[Это последняя страница]"
+    pageformat1: "%s/%s"
+    pageformat2: "==="
+
+avatarsets:
+    setlist:
+        - "default"
+        - "adventure"
+    startavatar:
+        char: "㑤"
+        cmd: 1020001
+
+    default:
+        chars: "㑤㑥㑦㑧㑨㑩㑪㑫"
+        cmd: "1020001;1020002;1020003;1020004;1020005;1020006;1020007;1020009"
+        premission: "none"
+    adventure:
+        chars: "defghjk"
+        cmd: "1234567;1234567;1234567;1234567;1234567;1234567;1234567;1234567"
+        premission: "none"
+
+
+
+classes:
+    #ValkiriaShooter: "Стрелок"
+    #ValkiriaSword:   "Самурай"
+
+    ValkiriaShooter:
+        name: "Стрелок"
+        big_ico:
+            cmd: 1009101
+        small_ico:
+            cmd: 1009103
+        lore_item:
+            cmd: 1009105
+        weapon: "0;1;2;0;0;0;0;4;0;0;f"
+        skill_normal:
+            cmd: 1009002
+            lore:
+            - "Ловкий прием"
+            - "Стрелок бросает под ноги гранату и резко отпрыгивает назад,"
+            - "нанеся всем целям в радиусе 3-х блоков 225% урона"
+        skill_hight:
+            cmd: 1009001
+            lore:
+            - "Контратака"
+            - "Стрелок переходит в наступление и выпускает мощный энергетический импульс,"
+            - "который наносит 375% урона всем целям в радиусе 4-х блоков"
+    ValkiriaSword:
+        name: "Самурай"
+        big_ico:
+            cmd: 1009102
+        small_ico:
+            cmd: 1009104
+        lore_item:
+            cmd: 1009106
+        weapon: "0;1;1;0;0;0;0;4;0;0;f"
+        skill_normal:
+            cmd: 1009002
+            lore:
+            - "Решительный натиск"
+            - "Самурай собирается с мыслями и получает 5 очков стремительности. Максимум 7"
+            - "При нанесении обычных атак расходуется 1 очко стремительности и повышается урон на 75%"
+            - "При использовании заряженных атак расходуется 3 очка стремительности и урон повышается на 30%"
+            - "Время отката: 4 секунды"
+            - "Затраты энергии: 250"
+        skill_hight:
+            cmd: 1009001
+            lore:
+            - "Мастерство клинка"
+            - "Самурай наносит серию решительных ударов в всем целям, в радиусе 3-х с половиной блоков и"
+            - "Наносит им 375% урона"
+
+menus:
+    valkirias_getartifact: "...kirias -> Получение предметов"
+    valkirias_upgradearts: "...irias -> Улучшение артефактов"
+    valkirias_weapons:     "Valkirias -> Оружие"
+    valkirias_backpack:    "Valkirias -> Рюкзак"
+    valkirias_artifacts:   "...irias -> Профиль -> Артефакты"
+    valkirias_points:      "... Распределение очков навыков"
+    valkirias_info:        "Valkirias -> Профиль"
+
+    classlist: "Выбор класса"
+    classconfirm: "Подтвердить выбор"
+    crafts: "Создание предметов"
+
+    artifacts_button_cmd: 1010003
+    stats_bg: "&f㟪"
+    stats_bg_main: "&f㟗"
+
+    nullobject:
+        cmd: 1008999
+
+    valkirias_bg:
+        cmd: 1009000
+        lore:
+            - "Профиль"
+    valkirias_weapons_bg:
+        cmd: 1009001
+        lore:
+            - "Оружие"
+    attack_points:
+        cmd: 1019003
+        lore:
+            - "Очки атаки"
+    crit_points:
+        cmd: 1019002
+        lore:
+            - "Очки крита"
+    shield_points:
+        cmd: 1019010
+        lore:
+            - "Очки щита"
+    energy_points:
+        cmd: 1019008
+        lore:
+            - "Очки энергии"
+    free_points:
+        cmd: 1019009
+        lore:
+            - "Свободные очки"
+    floader_button:
+        cmd: 1009002
+        lore:
+            - "Открыть хранилище"
+    classlist_bg:
+        cmd: 1009003
+    oneclass_bg:
+        cmd: 1009004
+    upgradearts_bg:
+        cmd: 1009005
+    bettercraft_null:
+        cmd: 1009006
+    bettercraft_recept:
+        cmd: 1009007
+    points_bg:
+        cmd: 1009008
+    artifacts_gui:
+        cmd: 1009009
+
+weapons:
+
+    types:
+        unknown:
+            cmd: "1344567"
+            icon: "Icon  ??? , S:%s"
+            lore1: " ??? "
+            lore2: " "
+
+        1:
+            clases:
+                1:
+                    name: "Резак"
+                    cmd: 1020005
+                    view: "&f㟨 &8Резак, S:%s"
+                2:
+                    name: "Винтовка"
+                    cmd: 1030005
+                    view: "&f㟩 &8Винтовка, S:%s"
+            random:
+                - 1
+                - 2
+            #name: ""
+            lore1: "  &8Собран очень давно"
+            lore2: "  &8Proton, Type-8A"
+        2:
+            clases:
+                1:
+                    name: "Резак"
+                    cmd: 1020001
+                    view: "&f㟫 Резак, S:%s"
+                2:
+                    name: "Винтовка"
+                    cmd: 1030001
+                    view: "&f㟯 Винтовка, S:%s"
+                3:
+                    cmd: "1234567"
+                    view: "Icon Парные клинки, S:%s"
+                4:
+                    cmd: "1234567"
+                    view: "Icon Парные бластеры, S:%s"
+            random:
+                - 1
+                - 2
+            booststat: 2
+            lore1: "  &8Made in Chia"
+            lore2: "  &8Улучшенная версия CH-23"
+
+
+artifacts:
+
+    type_unknown: " ??? "
+    quality_normal: "&f㟽"
+    quality_rare: "&f㟾"
+    quality_epic: "&f㟿"
+    quality_legendary: "&f㠀"
+
+    types:
+        unknown:
+            cmd: "1344567"
+            icon: "&fIcon &8 ??? , S:%s"
+            lore1: " ??? "
+            lore2: " "
+
+        1:
+            slot:
+                0:
+                    cmd: 1010003
+                    view: "&f㟳     &8Процессор, &0S:%s"
+                1:
+                    cmd: 1010001
+                    view: "&f㟷    &8Ускоритель, &0S:%s"
+                2:
+                    cmd: 1010004
+                    view: "&f㟶     &8Генератор, &0S:%s"
+                3:
+                    cmd: 1010002
+                    view: "&f㟵   &8Конденсатор, &0S:%s"
+                4:
+                    cmd: 1010005
+                    view: "&f㟴     &8Релокатор, &0S:%s"
+            random:
+                - 0
+                - 1
+                - 2
+                - 3
+                - 4
+            booststat: 4
+            lore1: "  &8Made in Chia"
+            lore2: "  &8Улучшенная версия CH-23"
+        2:
+            slot:
+                0:
+                    cmd: 1010008
+                    view: "&f㟸     &8Процессор, &0S:%s"
+                1:
+                    cmd: 1010006
+                    view: "&f㟼    &8Ускоритель, &0S:%s"
+                2:
+                    cmd: 1010009
+                    view: "&f㟻     &8Генератор, &0S:%s"
+                3:
+                    cmd: 1010007
+                    view: "&f㟺   &8Конденсатор, &0S:%s"
+                4:
+                    cmd: 1010010
+                    view: "&f㟹     &8Релокатор, &0S:%s"
+            random:
+                - 0
+                - 1
+                - 2
+                - 3
+                - 4
+            booststat: 2
+            lore1: "  &8Собран очень давно"
+            lore2: "  &8Proton, Type-8A"
+
+message_formats:
+    regenshield: "Вы зарядили свой щит на %s единиц. В хранилище осталось %s/%s единиц."
+    empetystation: "В этом хранилище не осталось энергии! 0/%s единиц."
+    fullshield: "Вы уже зарядили свой щит до предела! В хранилище осталось %s/%s единиц."
+
+messages:
+    helpadmin:
+        - "===========[ Valkirias ]============+"
+        - " - &c[Перезагрузить конфиг] "
+        - "@С/valkirias init"
+        - "&f/valkirias init+"
+        - " - Получить рандомный артефакт /valkirias getrandomitem (сила) (тип) (слот)"
+        - "@S/valkirias getrandomitem 10 1 5"
+        - " &c[A]+"
+        - "@C/valkirias getrandomitem 10 1 5"
+        - " - Получить рандомное оружие /valkirias getrandomweapon (сила) (тип) (валькирия)"
+        - "@S/valkirias getrandomweapon 10 2 0"
+        - " &c[A]+"
+        - "@C/valkirias getrandomweapon 10 2 0"
+        - " - Получить noninit артефакт /valkirias getnoninititem (сила) (тип) (слот)"
+        - "@S/valkirias getnoninititem 10 1 5"
+        - " &c[A]+"
+        - "@C/valkirias getnoninititem 10 1 5"
+        - " - Получить noninit оружие /valkirias getnoninitweapon (сила) (тип) (валькирия)"
+        - "@S/valkirias getnoninitweapon 10 1 5"
+        - " &c[A]+"
+        - "@C/valkirias getnoninitweapon 10 1 5"
+        - "&cСоздать э.станцию"
+        - "@S/valkirias cr_station"
+        - " &f/ "
+        - "&cСоздать лутбокс"
+        - "@S/valkirias cr_chest"
+        - " &f/ "
+        - "&cСоздать связку"
+        - "@S/valkirias cr_alias"
+    helpavatar:
+        - "helpavatar"
+    exsistweapon:
+        - "Вы не можете войти в режим боя без оружия! "
+    disablecombat:
+        - "В режиме боя запрещено открывать это! "
+        - "[Отключить]"
+        - "@C/valkirias combat"
+    playerofline:
+        - "Данного игрока сейчас нет в сети!"
+    youmoted:
+        - "Данного игрока сейчас нет в сети!"
+    noperms:
+        - "У вас нет разрешения чтобы сделать это!"
+    notenergy:
+        - "Вам не хватает энергии! Следующее использование навыка может убить вас! "
+        - "@S/valkirias combat"
+        - "&c[Отключить]"
+        - "@C/valkirias combat"
+    empetychest:
+        - "Здесь ничего нет."
+
+#Устарело !!!
+items:
+    accept: "AdUDAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\r\
+    \nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\r\
+    \nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\r\
+    \nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\r\
+    \nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==\r\n"
+    back: "AW0BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\r\
+    \nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\r\
+    \nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\r\
+    \nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\r\
+    \nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==\r\n"
+    attack: "AfUCAQoAAAoAB2Rpc3BsYXkIAAROYW1lAB57InRleHQiOiLQntGH0LrQuCDQkNGC0LDQutC4In0A\r\
+    \nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\r\
+    \nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\r\
+    \nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\r\
+    \nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==\r\n"
+    crit: "AfUCAQoAAAoAB2Rpc3BsYXkIAAROYW1lAB57InRleHQiOiLQntGH0LrQuCDQmtGA0LjRgtCwIn0A\r\
+    \nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\r\
+    \nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\r\
+    \nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\r\
+    \nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==\r\n"
+    energy: "AfUCAQoAAAoAB2Rpc3BsYXkIAAROYW1lACJ7InRleHQiOiLQntGH0LrQuCDQrdC90LXRgNCz0LjQ\r\
+    \nuCJ9AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\r\
+    \nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\r\
+    \nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\r\
+    \nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==\r\n"
+    shield: "AfUCAQoAAAoAB2Rpc3BsYXkIAAROYW1lABx7InRleHQiOiLQntGH0LrQuCDQqdC40YLQsCJ9AAAA\r\
+    \nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\r\
+    \nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\r\
+    \nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\r\
+    \nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==\r\n"
+    freepoints: "AcQEAQoAAAoAB2Rpc3BsYXkIAAROYW1lACZ7InRleHQiOiLQodCy0L7QsdC+0LTQvdGL0LUg0L7R\r\
+    \nh9C60LgifQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\r\
+    \nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\r\
+    \nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\r\
+    \nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==\r\n"
+    backpack: "AcQEAQoAAAoAB2Rpc3BsYXkIAAROYW1lACZ7InRleHQiOiLQodCy0L7QsdC+0LTQvdGL0LUg0L7R\r\
+    \nh9C60LgifQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\r\
+    \nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\r\
+    \nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\r\
+    \nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==\r\n"
+    nullslotait: "AcQEAQoAAAoAB2Rpc3BsYXkIAAROYW1lACZ7InRleHQiOiLQodCy0L7QsdC+0LTQvdGL0LUg0L7R\r\
+    \nh9C60LgifQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\r\
+    \nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\r\
+    \nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\r\
+    \nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==\r\n"
+    nullslotgui: "AcQEAQoAAAoAB2Rpc3BsYXkIAAROYW1lACZ7InRleHQiOiLQodCy0L7QsdC+0LTQvdGL0LUg0L7R\r\
+    \nh9C60LgifQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\r\
+    \nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\r\
+    \nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\r\
+    \nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==\r\n"
+    artifactpower: "AcQEAQoAAAoAB2Rpc3BsYXkIAAROYW1lACZ7InRleHQiOiLQodCy0L7QsdC+0LTQvdGL0LUg0L7R\r\
+    \nh9C60LgifQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\r\
+    \nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\r\
+    \nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\r\
+    \nAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==\r\n"

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "group": "plate_metall",
+  "pattern": [
+    "   ",
+    "LLL",
+    "   "
+  ],
+  "key": {
+    "L": {"item": "minecraft:gold_ingot"}
+  },
+  "result": {
+    "item": "te4_spships:plate_gold",
+    "count": 1
+  }
+}

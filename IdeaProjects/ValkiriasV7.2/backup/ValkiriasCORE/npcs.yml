@@ -1,0 +1,8 @@
+sys:
+  format:
+    avatar: '%s  %s'
+    message: '         |%s'
+npc:
+  opka:
+    name: '&6&OpKa'
+    avatar: valkirias:14

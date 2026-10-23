@@ -1,0 +1,23 @@
+
+starmap.oxygen.true=Есть кислород
+starmap.oxygen.false=Кислород отсутствует
+
+starmap.water.true=Есть вода
+starmap.water.false=Вода отсутствует
+
+starmap.orbit=Кол-во орбит: %s
+
+starmap.square=Площадь: %sКв.Б
+
+
+starmap.fract.neytral=Фракция: §bСоюз
+starmap.fract.imperia=Фракция: §aИмперия
+starmap.fract.voids=Фракция: §dВойды
+starmap.fract.piracy=Фракция: §cПираты
+
+starmap.range_pc=Расстояние: §e%sPC
+starmap.range_pc_near=Расстояние: §a%sPC
+
+starmap.goto=Перемещение
+starmap.you_here=Вы находитесь здесь
+starmap.open_map=Раскрыть

@@ -1,0 +1,174 @@
+buildscript {
+    repositories {
+        maven {
+            name = "github"
+            url = uri("https://github.com/juanmuscaria/maven/raw/master")
+        }
+        mavenCentral()
+        maven { url = "https://plugins.gradle.org/m2" }
+        maven { url = "https://repo.spongepowered.org/maven" }
+        maven { url = "https://maven.minecraftforge.net/" }
+
+        flatDir {
+            dirs 'lib'
+            dirs "C:/Users/HomaPlus/IdeaProjects/REPO/"
+            dirs "C:/Users/HomaPlus/IdeaProjects/te4_forgeserver/lib3/"
+        }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:4.+'
+        classpath "org.spongepowered:mixingradle:0.7-SNAPSHOT"
+        classpath 'com.github.gmazzo:gradle-buildconfig-plugin:3.0.0'
+    }
+}
+
+apply plugin: 'net.minecraftforge.gradle'
+apply plugin: "org.spongepowered.mixin"
+apply plugin: 'com.github.gmazzo.buildconfig'
+apply plugin: 'eclipse'
+apply plugin: 'maven-publish'
+
+def name = 'elca_server'
+
+version = "3.0.7.4"
+group = "plus"
+archivesBaseName = name
+sourceCompatibility = targetCompatibility = 1.8
+compileJava.options.encoding = compileTestJava.options.encoding = "UTF-8"
+
+minecraft {
+    //mappings channel: 'snapshot', version: '20171003-1.12'
+    mappings channel: 'stable', version: "39-1.12"
+
+    //accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+
+    runs {
+        client {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+
+            args "--tweakClass", "org.spongepowered.asm.launch.MixinTweaker",
+                    '--tweakClass', 'plus.fserver.plugin.SSPatchLoader'
+//                    '--mixin', 'mixins.fserver.json'
+        }
+
+        server {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+
+            args "--tweakClass", "org.spongepowered.asm.launch.MixinTweaker",
+                    '--tweakClass', 'plus.fserver.plugin.SSPatchLoader'
+
+        }
+    }
+}
+
+mixin {
+    add sourceSets.main, "mixins.fserver.refmap.json"
+}
+
+task prepareAssets(type: Copy) {
+    group = 'build'
+    from project.file('src/main/resources')
+    into project.file('build/classes/java/main')
+}
+
+dependencies {
+    implementation 'plus:mergetoolfixed:0.2.3.3'
+
+    minecraft "net.minecraftforge:forge:1.12.2-14.23.5.2859"
+    //minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2864'
+    implementation 'org.jetbrains:annotations:16.0.2'
+
+    implementation "org.spongepowered:mixin:0.8.3-SNAPSHOT"
+    annotationProcessor 'org.spongepowered:mixin:0.8.3-SNAPSHOT:processor'
+
+    implementation fileTree("lib")
+}
+
+buildConfig{
+    className("ElcaCV2")
+    packageName("plus.fserver")
+    if(project.gradle.startParameter.taskNames.contains("buildLib")){
+        buildConfigField('boolean', 'LIBBUILD', 'true')
+    } else {
+        buildConfigField('boolean', 'LIBBUILD', 'false')
+    }
+}
+
+jar {
+    exclude("org/intellij/**")
+    exclude("org/jetbrains/**")
+    exclude("com/google/errorprone/annotations/**")
+
+    if(project.gradle.startParameter.taskNames.contains("buildLib")){
+        archivesBaseName = "elca_lib"
+        exclude("net/**")
+        exclude("com/**")
+        //exclude("plus/**")
+        exclude("linux_aarch64/**")
+        exclude("linux_x86_64/**")
+
+        include("plus/fserver/api/**")
+        include("plus/fserver/block/**")
+        include("plus/fserver/event/**")
+
+        include("plus/fserver/utls/collections/ArrayListE6.class")
+        include("plus/fserver/utls/collections/ArrayListEV.class")
+        include("plus/fserver/utls/collections/FixedItemList.class")
+        include("plus.fserver.utls.collections.AABBList.class")
+
+        include("plus/fserver/utls/WorldConstructor.class")
+        include("plus/fserver/utls/McTsonUtils.class")
+        include("plus/fserver/utls/TsonThreeRegistry.class")
+    } else{
+        manifest {
+            attributes([
+                    "Implementation-Title"    : "elca_fserver",
+                    "Implementation-Version"  : project.version,
+                    //"TweakClass": "org.spongepowered.asm.launch.MixinTweaker",
+                    "TweakClass": "plus.fserver.plugin.SSPatchLoader",
+//                "MixinConfigs": "mixins.te4_fserver.json",
+                    "TweakOrder": "100",
+                    "FMLCorePluginContainsFMLMod": "true",
+                    "ForceLoadAsMod": "true",
+                    "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+            ])
+        }
+
+        from {
+            configurations.runtimeClasspath.collect {
+                if(it.name.equalsIgnoreCase("zstd-jni-1.5.5-9-universal.jar")) {
+                    zipTree(it)
+                }
+            }
+        }
+    }
+}
+
+task buildLib{
+    dependsOn jar
+}
+
+jar.finalizedBy('reobfJar')
+
+def srcPath = 'C:/Users/HomaPlus/IdeaProjects'
+
+sourceSets {
+    main {
+        java {
+            srcDir srcPath + '/TsonConfigurations/core/src/main/java'
+            srcDir srcPath + '/TsonConfigurations/extensions/src/main/java'
+            srcDir srcPath + '/FormateX/src/main/java'
+            srcDir srcPath + '/te4_async_utls/src/main/java'
+        }
+    }
+}
+
+sourceSets.each {
+    def dir = layout.buildDirectory.file("sourcesSets/$it.name").get().asFile
+    it.output.resourcesDir = dir
+    it.java.outputDir = dir
+}

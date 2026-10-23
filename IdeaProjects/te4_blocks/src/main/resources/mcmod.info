@@ -1,0 +1,17 @@
+[
+    {
+        "modid": "te4blocks",
+        "name": "Te4blocks",
+        "description": "",
+        "version": "${version}",
+        "mcversion": "${mcversion}",
+        "url": "https://vk.com/te4hnoplus",
+        "updateUrl": "",
+        "authorList": ["Te4hnoPlus"],
+        "credits": "",
+        "logoFile": "",
+        "screenshots": [],
+        "dependencies": ["worldedit"],
+        "useDependencyInformation": true
+    }
+]

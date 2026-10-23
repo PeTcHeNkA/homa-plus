@@ -1,0 +1,19 @@
+@font-face {
+    font-family: "Bufscated";
+    src: url(font?cap4a-mtd=font) format("truetype");
+}
+.a{
+    font-family: "Bufscated";
+    display: inline-block;
+    user-select: none;
+}
+.cap-cont{
+    height: 22px;
+    max-height: 22px;
+    overflow: hidden;
+    width: 84;
+    font-size: 16px;
+}
+.a, .o, .v, .f{
+    position: absolute;
+}

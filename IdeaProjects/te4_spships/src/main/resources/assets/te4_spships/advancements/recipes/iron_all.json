@@ -1,0 +1,15 @@
+{"parent": "minecraft:recipes/root",
+  "requirements": [["has_item"]],
+  "rewards": {"recipes": [
+    "te4_spships:ms_module",
+    "te4_spships:iron_gear",
+    "te4_spships:iron_plate",
+    "te4_spships:ms_module"
+  ]},
+  "criteria": {
+    "has_item": {"trigger": "minecraft:inventory_changed",
+      "conditions": {"items": [{
+        "item": "minecraft:iron_ingot"
+      }]}
+    }
+}}

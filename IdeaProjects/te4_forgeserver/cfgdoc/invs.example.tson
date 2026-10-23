@@ -1,0 +1,32 @@
+{
+    // Размер инвентаря в слотах
+    size = 54,
+    
+    // Кастомное название с поддержкой цветовых кодов (§e = жёлтый, §r = сброс цвета)
+    name = "§eCustom name",
+    
+    // Действие по умолчанию при закрытии GUI:
+    // - canselAllSmart — отменять все действия только в открытом инвентаре
+    // - canselAll — отменять все действия, включая инвентарь игрока
+    default-action = plus.fserver.api.vanillagui.ChestGui::canselAllSmart,
+    
+    // Массив действий для каждого слота при клике
+    actions = [
+        {slot=0, func = new plus.fserver.api.vanillagui.ClickCommand("hello world!")}
+    ],
+    
+    // Статический контент
+    items = [
+        {damage=3,id="stone",slot=0},
+        {damage=3,id="stone",slot=1},
+        {damage=3,id="stone",slot=2},
+        {damage=3,id="stone",slot=3},
+        {damage=3,id="stone",slot=4}
+    ],
+
+    // Динамически генерируемый контент
+    uitems = [
+        {damage=3,id="stone",slot=0},
+        {damage=3,id="stone",slot=8}
+    ]
+}

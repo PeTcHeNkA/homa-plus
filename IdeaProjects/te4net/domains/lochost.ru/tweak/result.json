@@ -1,0 +1,487 @@
+{
+    "is_student": false,
+    "is_own": true,
+    "birthdate": "14.07.2003",
+    "avatar_link": "/img/no_avatar.svg",
+    "avatar_link30": "/img/no_avatar.svg",
+    "avatar_link50": "/img/no_avatar.svg",
+    "student_id": "e517c512-b014-466d-ab5f-0ec9ea5f4fcd",
+    "booknumber": "ПИНб-2212-2021",
+    "faculty_name": "Факультет экономики и информационных технологий",
+    "direction": "09.03.04 Программная инженерия/бакалавриат академический (очное)",
+    "course": 3,
+    "group_name": "ПИНб-31",
+    "curators": "Зорин Олег Александрович",
+    "practices": [
+        {
+            "controlform_id": "03bd519c-7200-4c5d-8df9-ec97784684c6",
+            "controlform_name": "Зачет",
+            "discipline_name_short": "Проектно-технологическая практика",
+            "id": "659e25d3-c13f-49bd-8668-8f9e24efa09a",
+            "is_in_time": true,
+            "is_positive": true,
+            "is_practice": true,
+            "mark": 1,
+            "practice_data": {
+                "practice_length": "2 недели",
+                "practice_place": "ФГБОУ ВО Пермский ГАТУ, кафедра информационных технологий и программной инженерии, г. Пермь",
+                "practicetype_id": "1"
+            },
+            "practice_mark": "зачтено",
+            "practice_name": "Проектно-технологическая практика",
+            "practice_place": "ФГБОУ ВО Пермский ГАТУ, кафедра информационных технологий и программной инженерии, г. Пермь",
+            "practice_type_name": "Учебная практика",
+            "session_id": "13da4f5f-50e1-48fc-b7a5-5731354ded4c",
+            "session_name_full": "Практики и НИР (2022-2023 уч.год)",
+            "session_startdate": "2022-09-01T00:00:00Z",
+            "studyyear_name": "2022-2023",
+            "teacher": "Беляков А.Ю."
+        },
+        {
+            "controlform_id": "03bd519c-7200-4c5d-8df9-ec97784684c6",
+            "controlform_name": "Зачет",
+            "discipline_name_short": "Учебная ознакомительная практика",
+            "id": "35df2d1f-29e6-428c-a837-79faef81ebf0",
+            "is_in_time": true,
+            "is_positive": true,
+            "is_practice": true,
+            "mark": 1,
+            "practice_data": {
+                "practice_length": "2 недели",
+                "practice_place": "кафедра информационных технологий и программной инженерии ФГБОУ ВО Пермский ГАТУ",
+                "practicetype_id": "1"
+            },
+            "practice_mark": "зачтено",
+            "practice_name": "Учебная ознакомительная практика",
+            "practice_place": "кафедра информационных технологий и программной инженерии ФГБОУ ВО Пермский ГАТУ",
+            "practice_type_name": "Учебная практика",
+            "session_id": "c3e12abc-4a57-4d78-8c65-ab1e7166a6a5",
+            "session_name_full": "Практики и НИР (2021-2022 уч.год)",
+            "session_startdate": "2021-09-01T00:00:00Z",
+            "studyyear_name": "2021-2022",
+            "teacher": "Казаченко Т.А."
+        }
+    ],
+    "marks": [
+        {
+            "id": "698b2442-f895-47e3-974b-f74453c4bab0",
+            "session_name": "Зимняя сессия (2023-2024 уч.год)",
+            "start_date": "2023-09-04T00:00:00Z",
+            "marks": [
+                {
+                    "id": "ab09a94e-4092-4ab7-a3aa-8a1be098df84",
+                    "discipline_name": "Программная инженерия объектно-ориентированного программирования ",
+                    "is_offset": true,
+                    "positive": 2,
+                    "mark": 1,
+                    "mark_verb": "зачтено",
+                    "controlform_name": "Зачет",
+                    "teacher": "Беляков А.Ю."
+                }
+            ]
+        },
+        {
+            "id": "badf61c6-83cd-4d79-b5b3-cfad1c374a80",
+            "session_name": "Летняя сессия (2022-2023 уч.год)",
+            "start_date": "2023-01-01T00:00:00Z",
+            "marks": [
+                {
+                    "id": "30909024-61e8-4b97-81ec-bd1dab5fc2ad",
+                    "discipline_name": "Алгоритмы и структуры данных",
+                    "is_offset": false,
+                    "positive": 2,
+                    "mark": 5,
+                    "mark_verb": "отлично",
+                    "controlform_name": "Экзамен",
+                    "teacher": "Беляков А.Ю."
+                },
+                {
+                    "id": "1cf82d22-1dd4-4829-8e62-5125a7d355d2",
+                    "discipline_name": "Вычислительные системы, сети и телекоммуникации",
+                    "is_offset": false,
+                    "positive": 1,
+                    "mark": 3,
+                    "mark_verb": "удовлетворительно",
+                    "controlform_name": "Дифф.зачет",
+                    "teacher": "Бочкарев А.М."
+                },
+                {
+                    "id": "6d8a8145-f895-4247-adb1-9f41592fee9a",
+                    "discipline_name": "Конструирование программного обеспечения",
+                    "is_offset": false,
+                    "positive": 0,
+                    "mark": 2,
+                    "mark_verb": "неудовлетворительно",
+                    "controlform_name": "Экзамен",
+                    "teacher": "Зорин А.А."
+                },
+                {
+                    "id": "7d6df799-c07d-4842-876e-32038ddfd39e",
+                    "discipline_name": "Конструирование программного обеспечения",
+                    "is_offset": false,
+                    "positive": 0,
+                    "mark": 2,
+                    "mark_verb": "неудовлетворительно",
+                    "controlform_name": "Курсовой проект",
+                    "teacher": "Зорин А.А."
+                },
+                {
+                    "id": "4efb3cd8-a845-4d6b-9a9d-48c23f6c164c",
+                    "discipline_name": "Методы и средства проектирования информационных систем и технологий",
+                    "is_offset": true,
+                    "positive": 0,
+                    "mark": 0,
+                    "mark_verb": "не зачтено",
+                    "controlform_name": "Зачет",
+                    "teacher": "Шевчук И.С."
+                },
+                {
+                    "id": "0d9897da-9830-4333-8ca3-f6b46b83d54e",
+                    "discipline_name": "Моделирование процессов и систем",
+                    "is_offset": false,
+                    "positive": 0,
+                    "mark": 2,
+                    "mark_verb": "неудовлетворительно",
+                    "controlform_name": "Дифф.зачет",
+                    "teacher": "Ильин В.В."
+                },
+                {
+                    "id": "6e0f0fe3-eef7-426c-bb33-8ce8ef463e95",
+                    "discipline_name": "Теория систем и системный анализ",
+                    "is_offset": false,
+                    "positive": 1,
+                    "mark": 3,
+                    "mark_verb": "удовлетворительно",
+                    "controlform_name": "Дифф.зачет",
+                    "teacher": "Муратова Е.А."
+                },
+                {
+                    "id": "9e224b51-16ee-46c4-a7c3-c1c8ee65a63a",
+                    "discipline_name": "Элективные дисциплины по физической культуре и спорту: прикладная физическая культура и спорт",
+                    "is_offset": true,
+                    "positive": 0,
+                    "mark": 0,
+                    "mark_verb": "не зачтено",
+                    "controlform_name": "Зачет",
+                    "teacher": "Вшивцева Е.А."
+                }
+            ]
+        },
+        {
+            "id": "f30ee189-cb84-4389-93ed-e8f755530152",
+            "session_name": "Зимняя сессия (2022-2023 уч.год)",
+            "start_date": "2022-09-01T00:00:00Z",
+            "marks": [
+                {
+                    "id": "9c345b9c-67e7-46ed-b4f5-80c2ac10fa8e",
+                    "discipline_name": "Алгоритмы и структуры данных",
+                    "is_offset": true,
+                    "positive": 2,
+                    "mark": 1,
+                    "mark_verb": "зачтено",
+                    "controlform_name": "Зачет",
+                    "teacher": "Беляков А.Ю."
+                },
+                {
+                    "id": "4fe5374f-afa8-4efc-a46c-6ee3d2a8208c",
+                    "discipline_name": "Архитектура ЭВМ",
+                    "is_offset": false,
+                    "positive": 2,
+                    "mark": 5,
+                    "mark_verb": "отлично",
+                    "controlform_name": "Экзамен",
+                    "teacher": "Сергеев Р.Р."
+                },
+                {
+                    "id": "d5949395-5c2c-4407-a922-27cce77f981d",
+                    "discipline_name": "Вычислительные системы, сети и телекоммуникации",
+                    "is_offset": true,
+                    "positive": 2,
+                    "mark": 1,
+                    "mark_verb": "зачтено",
+                    "controlform_name": "Зачет",
+                    "teacher": "Бочкарев А.М."
+                },
+                {
+                    "id": "7e06f485-c9e9-4ef5-9222-63d123eb6b55",
+                    "discipline_name": "Дискретная математика",
+                    "is_offset": false,
+                    "positive": 2,
+                    "mark": 3,
+                    "mark_verb": "удовлетворительно",
+                    "controlform_name": "Дифф.зачет",
+                    "teacher": "Глотина И.М."
+                },
+                {
+                    "id": "8b408969-1d6c-471b-a7ec-6425c9cee220",
+                    "discipline_name": "Разработка программных приложений",
+                    "is_offset": false,
+                    "positive": 2,
+                    "mark": 5,
+                    "mark_verb": "отлично",
+                    "controlform_name": "Экзамен",
+                    "teacher": "Шимановская М.В."
+                },
+                {
+                    "id": "c916793a-63dc-4ca8-aa0b-b41e53103453",
+                    "discipline_name": "Разработка программных приложений",
+                    "is_offset": false,
+                    "positive": 2,
+                    "mark": 5,
+                    "mark_verb": "отлично",
+                    "controlform_name": "Курсовой проект",
+                    "teacher": "Шимановская М.В."
+                },
+                {
+                    "id": "fa087821-40f7-4ad5-b889-63d403128a4b",
+                    "discipline_name": "Философия",
+                    "is_offset": false,
+                    "positive": 2,
+                    "mark": 4,
+                    "mark_verb": "хорошо",
+                    "controlform_name": "Экзамен",
+                    "teacher": "Коромыслов В.В."
+                },
+                {
+                    "id": "4804a244-736a-4748-8d25-e91005e93b74",
+                    "discipline_name": "Численные методы",
+                    "is_offset": false,
+                    "positive": 2,
+                    "mark": 4,
+                    "mark_verb": "хорошо",
+                    "controlform_name": "Дифф.зачет",
+                    "teacher": "Платонова Н.Н."
+                },
+                {
+                    "id": "b23c8b36-6459-4b2e-9030-82ca7fc6a06c",
+                    "discipline_name": "Элективные дисциплины по физической культуре и спорту: прикладная физическая культура и спорт",
+                    "is_offset": true,
+                    "positive": 2,
+                    "mark": 1,
+                    "mark_verb": "зачтено",
+                    "controlform_name": "Зачет",
+                    "teacher": "Вшивцева Е.А."
+                }
+            ]
+        },
+        {
+            "id": "ae895a4a-86f9-4f11-aeb5-cdc11bca4c7d",
+            "session_name": "Летняя сессия (2021-2022 уч.год)",
+            "start_date": "2022-03-01T00:00:00Z",
+            "marks": [
+                {
+                    "id": "25b1c776-d9ab-4d66-8a16-f07151eecdfc",
+                    "discipline_name": "Безопасность жизнедеятельности",
+                    "is_offset": true,
+                    "positive": 0,
+                    "mark": 0,
+                    "mark_verb": "не зачтено",
+                    "controlform_name": "Зачет",
+                    "teacher": "Пискунова В.В."
+                },
+                {
+                    "id": "7ef946c7-9547-4f97-ab0d-d593388e3b05",
+                    "discipline_name": "Иностранный язык",
+                    "is_offset": false,
+                    "positive": 0,
+                    "mark": 2,
+                    "mark_verb": "неудовлетворительно",
+                    "controlform_name": "Экзамен",
+                    "teacher": "Старатович Е.В.,Фотина О.В."
+                },
+                {
+                    "id": "9dfb8ef2-f578-4417-be9e-fa6bca8893c6",
+                    "discipline_name": "Информатика с основами программирования",
+                    "is_offset": false,
+                    "positive": 2,
+                    "mark": 5,
+                    "mark_verb": "отлично",
+                    "controlform_name": "Экзамен",
+                    "teacher": "Беляков А.Ю."
+                },
+                {
+                    "id": "ea068bda-3b31-4169-abde-1059fc0a933d",
+                    "discipline_name": "Информационные технологии",
+                    "is_offset": false,
+                    "positive": 0,
+                    "mark": 2,
+                    "mark_verb": "неудовлетворительно",
+                    "controlform_name": "Экзамен",
+                    "teacher": "Зорин А.А."
+                },
+                {
+                    "id": "5d58e43f-f6d9-4497-9b17-689d0822204c",
+                    "discipline_name": "Математика",
+                    "is_offset": false,
+                    "positive": 0,
+                    "mark": 2,
+                    "mark_verb": "неудовлетворительно",
+                    "controlform_name": "Экзамен",
+                    "teacher": "Деменева Н.В."
+                },
+                {
+                    "id": "ddf8a62b-72bc-4b5b-bfff-4843250892d7",
+                    "discipline_name": "Русский язык и культура деловой речи",
+                    "is_offset": true,
+                    "positive": 2,
+                    "mark": 1,
+                    "mark_verb": "зачтено",
+                    "controlform_name": "Зачет",
+                    "teacher": "Попова Т.В."
+                },
+                {
+                    "id": "265cde76-e56a-4718-bff3-42e26ceb2fc1",
+                    "discipline_name": "Теория вероятностей и математическая статистика",
+                    "is_offset": true,
+                    "positive": 2,
+                    "mark": 3,
+                    "mark_verb": "зачтено",
+                    "controlform_name": "Зачет",
+                    "teacher": "Деменева Н.В."
+                },
+                {
+                    "id": "80d421eb-4e6c-43e5-b3a6-f3994dbda164",
+                    "discipline_name": "Физическая культура и спорт",
+                    "is_offset": true,
+                    "positive": 2,
+                    "mark": 1,
+                    "mark_verb": "зачтено",
+                    "controlform_name": "Зачет",
+                    "teacher": "Вшивцева Е.А.,Московченко А.Е."
+                },
+                {
+                    "id": "82b07c4c-835e-4ad0-bee7-5333f3dfe90c",
+                    "discipline_name": "Элективные дисциплины по физической культуре и спорту: прикладная физическая культура и спорт",
+                    "is_offset": true,
+                    "positive": 2,
+                    "mark": 1,
+                    "mark_verb": "зачтено",
+                    "controlform_name": "Зачет",
+                    "teacher": "Вшивцева Е.А.,Московченко А.Е."
+                }
+            ]
+        },
+        {
+            "id": "31c14326-6902-4114-907f-e3be16512e20",
+            "session_name": "Зимняя сессия (2021-2022 уч.год)",
+            "start_date": "2021-09-01T00:00:00Z",
+            "marks": [
+                {
+                    "id": "4836654d-4ce8-45bd-acab-76569f236363",
+                    "discipline_name": "Введение в программную инженерию",
+                    "is_offset": false,
+                    "positive": 2,
+                    "mark": 5,
+                    "mark_verb": "отлично",
+                    "controlform_name": "Экзамен",
+                    "teacher": "Щелудяков А.М."
+                },
+                {
+                    "id": "14f8ea2e-e73f-45e7-9c31-a53ec5bdbc53",
+                    "discipline_name": "Иностранный язык",
+                    "is_offset": true,
+                    "positive": 2,
+                    "mark": 1,
+                    "mark_verb": "зачтено",
+                    "controlform_name": "Зачет",
+                    "teacher": "Старатович Е.В.,Фотина О.В."
+                },
+                {
+                    "id": "a692eff0-7131-42fb-8254-934590fcfae9",
+                    "discipline_name": "Информатика с основами программирования",
+                    "is_offset": true,
+                    "positive": 2,
+                    "mark": 1,
+                    "mark_verb": "зачтено",
+                    "controlform_name": "Зачет",
+                    "teacher": "Беляков А.Ю."
+                },
+                {
+                    "id": "9f518265-f890-4008-9eb2-32cfc08f6b23",
+                    "discipline_name": "История (история России, всеобщая история)",
+                    "is_offset": false,
+                    "positive": 2,
+                    "mark": 3,
+                    "mark_verb": "удовлетворительно",
+                    "controlform_name": "Экзамен",
+                    "teacher": "Волкова Т.С."
+                },
+                {
+                    "id": "75332cf9-f75a-47b7-81d6-1691344f6045",
+                    "discipline_name": "Основы правовых знаний программной инженерии",
+                    "is_offset": true,
+                    "positive": 2,
+                    "mark": 1,
+                    "mark_verb": "зачтено",
+                    "controlform_name": "Зачет",
+                    "teacher": "Хованская А.В."
+                },
+                {
+                    "id": "f6c23c71-925c-464f-8bb6-eb848972411a",
+                    "discipline_name": "Правоведение",
+                    "is_offset": true,
+                    "positive": 2,
+                    "mark": 1,
+                    "mark_verb": "зачтено",
+                    "controlform_name": "Зачет",
+                    "teacher": "Хованская А.В."
+                },
+                {
+                    "id": "84221bb2-cc04-448b-9d21-772ecc86bcb2",
+                    "discipline_name": "Психология",
+                    "is_offset": true,
+                    "positive": 2,
+                    "mark": 1,
+                    "mark_verb": "зачтено",
+                    "controlform_name": "Зачет",
+                    "teacher": "Шувалова Ю.Б."
+                },
+                {
+                    "id": "3c80f4e8-1a6f-4feb-9df2-69216a053386",
+                    "discipline_name": "Физика ",
+                    "is_offset": true,
+                    "positive": 0,
+                    "mark": 0,
+                    "mark_verb": "не зачтено",
+                    "controlform_name": "Зачет",
+                    "teacher": "Мазунина Е.С."
+                },
+                {
+                    "id": "0ef0fd8a-8caa-4410-811c-1264d2383787",
+                    "discipline_name": "Физическая культура и спорт",
+                    "is_offset": true,
+                    "positive": 2,
+                    "mark": 1,
+                    "mark_verb": "зачтено",
+                    "controlform_name": "Зачет",
+                    "teacher": "Вшивцева Е.А.,Московченко А.Е."
+                },
+                {
+                    "id": "9e10c836-0791-4026-96da-f32ddacca064",
+                    "discipline_name": "Экономика",
+                    "is_offset": true,
+                    "positive": 0,
+                    "mark": 0,
+                    "mark_verb": "не зачтено",
+                    "controlform_name": "Зачет",
+                    "teacher": "Тупицына О.В."
+                },
+                {
+                    "id": "42ad9e9a-a7a0-4d1d-bc19-9812f0d90df6",
+                    "discipline_name": "Элективные дисциплины по физической культуре и спорту: прикладная физическая культура и спорт",
+                    "is_offset": true,
+                    "positive": 2,
+                    "mark": 1,
+                    "mark_verb": "зачтено",
+                    "controlform_name": "Зачет",
+                    "teacher": "Вшивцева Е.А.,Московченко А.Е."
+                }
+            ]
+        }
+    ],
+    "name_full": "Боржов Иван Сергеевич ",
+    "email": "te4hnopublic@yandex.ru",
+    "phone": "",
+    "cabinet": "",
+    "shortinfo": "Обучающийся ПИНб-31"
+}

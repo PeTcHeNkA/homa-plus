@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="ProtocolLib">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/dependencies/ProtocolLib.jar!/" />
+      <root url="jar://$PROJECT_DIR$/dependencies/spigot1164.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/dependencies/spigot1164.jar!/" />
+      <root url="file://$PROJECT_DIR$/src/main/java" />
+    </SOURCES>
+  </library>
+</component>

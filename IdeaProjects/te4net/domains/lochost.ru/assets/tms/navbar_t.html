@@ -1,0 +1,42 @@
+<nav class="navbar navbar-expand-sm navbar-light bg-light shadow-sm">
+    <div class="container">
+        <a class="navbar-brand" href="#">ReaNet</a>
+        <button class="navbar-toggler d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#collapsibleNavId" aria-controls="collapsibleNavId"
+            aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="collapsibleNavId">
+            <ul class="navbar-nav me-auto mt-2 mt-lg-0 text-nowrap">
+                <li class="nav-item">
+                    <a class="nav-link {curpage.0}" href="#" aria-current="page">{lang.main}</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {curpage.1}" href="#" aria-current="page">{lang.about}</a>
+                </li>
+                <div for="item:navitems">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{item.href}">{item.text}</a>
+                    </li>
+                </div>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="dropdownId" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{lang.prod}</a>
+                    <div for="act:actions" class="dropdown-menu" aria-labelledby="dropdownId">
+                        <a class="dropdown-item" href="{act.href}">{act.text}</a>
+                    </div>
+                </li>
+            </ul>
+            <ul class="navbar-nav me-auto mt-2 mt-lg-0">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="dropdownId" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{lang.lang}/{lang.nm}</a>
+                    <div for="lg:lang.list" class="dropdown-menu" aria-labelledby="dropdownId">
+                        <button class="dropdown-item" onclick="selLang('{lg}')">{lg}</button>
+                    </div>
+                </li>
+            </ul>
+            <form class="d-flex my-2 my-lg-0">
+                <input id="td" class="form-control me-sm-2" type="text" placeholder="{lang.search}">
+                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">{lang.search}</button>
+            </form>
+        </div>
+    </div>
+</nav>

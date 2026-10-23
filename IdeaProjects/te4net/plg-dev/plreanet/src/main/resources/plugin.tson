@@ -1,0 +1,6 @@
+{
+    class=[
+        "plus.reanet.ReaNet",
+        "plus.reanet.REvents"
+    ]
+}

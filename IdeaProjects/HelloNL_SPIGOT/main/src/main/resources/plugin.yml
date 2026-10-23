@@ -1,0 +1,4 @@
+name: ExampleNL
+version: '${version}'
+main: plus.hellonl.Main
+api-version: '1.17'

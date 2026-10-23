@@ -1,0 +1,12 @@
+{commands = [
+	{
+		name = "example",
+		task = {
+			msg = {
+				style = {hover = "HOV! §2%arg:0%"},
+				text  = "Example! §2123"
+			}
+		},
+		completer = ["§2Цветная подстановка", "2", "3"]
+	}
+]}

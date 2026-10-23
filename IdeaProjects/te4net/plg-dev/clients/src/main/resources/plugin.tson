@@ -1,0 +1,9 @@
+{
+    class=[
+        "plus.clients.ClientsAPI",
+        "plus.clients.BGImg"
+    ],
+	htmls=[
+		"clients.html#/clients",
+	]
+}

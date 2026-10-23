@@ -1,0 +1,18 @@
+[
+  {
+    "modid": "te4_dungeons",
+    "name": "Te4_dungeons",
+    "description": "",
+    "version": "${version}",
+    "mcversion": "${mcversion}",
+    "url": "",
+    "updateUrl": "",
+    "authorList": [
+      "Te4hnoPlus"
+    ],
+    "credits": "",
+    "logoFile": "",
+    "screenshots": [],
+    "dependencies": []
+  }
+]

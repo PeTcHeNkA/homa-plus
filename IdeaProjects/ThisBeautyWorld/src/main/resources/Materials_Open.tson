@@ -1,0 +1,13 @@
+{materials=[
+
+{range="1:2", material={
+    texture={diffuse="sand.png"},
+    float={shininess=(5)}
+}},
+
+{height="5", material={
+    texture={diffuse="stone.png"},
+    float={shininess=(78)}
+}}
+
+]}

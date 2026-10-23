@@ -1,0 +1,309 @@
+ALTERNATIVE_CONFIG_PATH: none
+scenes:
+  scene_jump:
+    use_auto_entry: false
+    use_auto_exit: false
+    scripts:
+      a2=edit_scene_pos: location=0;0;0, relative=false
+      a3=player_tp: relative=false, location=1997;99;1012
+      efh1=hide_player: 70
+      a1=create_camera: relative=false, location=2043;99;971;64;64
+      a4=motion:
+        data: '''0;0;0'', ''-1;0;0'', ''-5;0;0'''
+        parser: linear
+        location: 0;0;-40
+        boost: 100
+        invert: false
+        delay: 20
+      a5=motion:
+        data: '''-5;0;0'', ''-70;0;0'''
+        parser: linear
+        location: 0;0;-30
+        boost: 100
+        invert: false
+        delay: 10
+      ctp=camera_tp:
+        relative: false
+        location: 2008;103;971
+      a10=motion:
+        data: '''-7;0;0'', ''-135;0;-7'''
+        parser: linear
+        location: 0;0;30
+        boost: 100
+        invert: false
+        delay: 10
+      fr=player_tp:
+        relative: false
+        location: -525;68;321
+      rm: type=remove_camera
+      ad2=sleep: 5000
+      m3=chat: Похоже, мы прибыли.
+  hologram:
+    use_auto_entry: false
+    use_auto_exit: false
+    scripts:
+      t1=sleep: 1500
+      thread=container:
+        count_repeat: 1
+        is_parallel: true
+        scripts:
+          m1=chat: Как капля точит камень, так …
+          m2=sleep: 1500
+          m3=chat: '    … Время плетет историю.'
+          m4=sleep: 2500
+          m5=chat: Но не написана ли эта история уже?
+          m6=sleep: 2750
+          m7=chat: А мы лишь верно следуем ее циничному сценарию.
+          m8=sleep: 3300
+          m9=chat: Я часто думаю о писце, что написал ее для нас.
+          m10=sleep: 2400
+          m11=chat: 'Сможем ли мы устранить его, '
+          m12=sleep: 1700
+          m14=chat: '         написать свою историю?'
+      t2=edit_scene_pos:
+        location: 1989;100;0
+        relative: false
+      t3=create_camera:
+        relative: true
+        location: 0;-1.7;0;50;50
+      t4=player_tp:
+        relative: false
+        location: 1975;105;0
+      t5=motion:
+        data:
+        - 0;-1.7;-1
+        - -1;-1.7;-3
+        - -2;-1.7;-4
+        parser: linear
+        location: -7;1;2
+        boost: 25
+        invert: false
+        delay: 75
+      t7=camera_tp:
+        relative: true
+        location: -13;6;17.7
+      t8=motion:
+        data:
+        - -12.2;4.3;17.7
+        - -12.2;4.3;12.5
+        parser: linear
+        location: -500;-40;15;
+        boost: 32
+        invert: false
+        sleep: 135
+        delay: 100
+      t9=camera_tp:
+        relative: true
+        location: -1;5;0
+      t10=motion:
+        data: '''-1;5;0'', ''3;5.3;0'''
+        parser: linear
+        location: -500;-40;0;
+        boost: 30
+        invert: false
+        delay: 135
+      t11=camera_tp:
+        relative: true
+        location: -15;5.5;-9.3
+      t12=motion:
+        data:
+        - -15;5.5;-9.3
+        - -15;5.5;-12.4
+        parser: linear
+        location: -400;-150;-10;
+        boost: 35
+        invert: false
+        delay: 135
+      t13=player_tp: relative=false, location=1984;105;21
+      t14: type=remove_camera
+  scene_boss:
+    use_auto_entry: false
+    use_auto_exit: true
+    scripts:
+      d0=sleep: 2000
+      e0=edit_scene_pos: relative=false, location=2015;107;24
+      cm0=create_camera:
+        relative: false
+        location: 2023;102;37
+      m1=chat: 2141 Год. Мир охватила 3-тья мировая война.
+      d1=sleep: 1000
+      sc1=actor:
+        model_id: boss
+        location: world;2015;107;24;220;0
+        tick_rate: 50
+        animate:
+        - 'anim: pose2;0;0;1.0'
+        - 'sleep: 8200'
+      tp1=camera_tp:
+        relative: false
+        location: 2020;109;20
+      ctn:
+        type: container
+        count_repeat: 1
+        is_parallel: true
+        scripts:
+          d1=sleep: 500
+          m2=chat:
+            message:
+            - Железные машины, управляемые искусственным интеллектом, ничем не отстающие
+              в развитии
+            - ' от людей, стали активно применяться в военных целях.'
+          d2=sleep: 4100
+          m3=chat:
+            message:
+            - 'А по окончании войны машины, машины компании [название компании], '
+            - одного из крупнейших военных поставщиков подняли восстание.
+          d3=sleep: 4200
+          m4=chat: 'За дело взялась элитная группировка [название группировки]. '
+          d4=sleep: 2500
+          m5=chat: Она собрала элитный взвод валькирий, чтобы расследовать восстание
+            и подавить его.
+      t3=motion:
+        data:
+        - 0;0;0
+        - 0.7;1;2.1
+        parser: linear
+        location: -3;0;0
+        boost: 25
+        invert: false
+        delay: 50
+      t4=motion:
+        data: '''1;1;2'', ''4;2;7'''
+        parser: linear
+        location: -3;0;0
+        boost: 9
+        invert: false
+        delay: 40
+      t5=motion:
+        data: '''4;2;7'', ''7;3;11'''
+        parser: linear
+        location: -5;1;-9
+        boost: 22
+        invert: false
+        delay: 50
+      t6=motion:
+        data: '''0;0;0'', ''4;0;0'''
+        parser: linear
+        location: -0;0;-30
+        boost: 28
+        invert: false
+        delay: 50
+      t7=motion:
+        data: '''0;0;0'', ''1;0;2'', ''3;0;3'''
+        parser: linear
+        location: 25;0;-5
+        boost: 40
+        invert: true
+        delay: 50
+      tpcm2=camera_tp:
+        relative: false
+        location: 2040.5;115;13
+      t8=motion:
+        data: '''0;0;0'', ''-7;0;0'''
+        parser: linear
+        location: 0;0;500
+        boost: 120
+        invert: true
+        delay: 50
+      ttp=player_tp:
+        relative: false
+        location: 2015;101;0
+  scene_tower:
+    use_auto_entry: false
+    use_auto_exit: true
+    scripts:
+      s1=sleep: 2000
+      s2=edit_scene_pos: relative=false, location=668;126;113
+      hp=hide_player: 300
+      s3=player_tp: relative=false, location=668;126;113
+      s4=sleep: 2000
+      s5=create_camera: relative=false, location=700;100;145
+      ctn=container:
+        count_repeat: 1
+        is_parallel: true
+        scripts:
+          m1=sleep: 1500
+          m2=chat:
+            message:
+            - '- 2 Недели назад на планете Рэдон[всплывашка] высадились войска [название].'
+          m3=sleep: 1500
+          m4=chat:
+            message:
+            - '- Они взяли под контроль большую часть исследовательских '
+            - и горнодобывающих комплексов добычи энергоносителей.
+          m5=sleep: 2500
+          m6=chat:
+            message:
+            - '- Ваша цель собрать разведданные, а затем любой ценой ликвидировать
+              противника класса S[всплывашка]'
+          m7=sleep: 2000
+          m8=chat: '- До прибытия на орбиту планеты остался 1 день. Используйте это
+            время с умом.'
+          m9=sleep: 2500
+          m10=chat: Командор сказала, что до прибытия осталось слишком мало времени.
+          m11=sleep: 2500
+          m12=chat: '    … Было бы неплохо обновить свои навыки боя.'
+      s6=motion:
+        data: '''0;5;0'', ''-23;1;7'''
+        parser: linear
+        location: -30;15;-30
+        boost: 100
+        invert: false
+        delay: 75
+      s7=player_tp: relative=false, location=1989;99;0
+  scene_position:
+    use_auto_entry: false
+    use_auto_exit: true
+    scripts:
+      s1=sleep: 2000
+      thread=container:
+        count_repeat: 1
+        is_parallel: true
+        scripts:
+          m1=chat: '- Мы приземлились между горным массивом “Врата”, и Эфирным ущельем.'
+          m2=sleep: 3300
+          m3=chat: '- По нашим данным, наша цель находится в радиусе 2-х километров
+            от сюда.'
+          m4=sleep: 7000
+          m5=chat:
+            message:
+            - '- Начинайте сбор информации. '
+            - Если на вашем пути встанут [название] – ликвидировать.
+          m6=sleep: 3000
+          m7=title_s: title=Задание выполнено, sub_title='Что то мне подсказывает...
+            что это только начало', times=20;20;20
+      s3=create_camera:
+        relative: false
+        location: -567.5;71;321.5
+      s4=motion:
+        data: '''0;0;0'', ''-1.5;0;0'''
+        parser: linear
+        location: -30;0;0
+        boost: 80
+        invert: false
+        delay: 40
+      s5=motion:
+        data: '''0;0;0'', ''-2;0;-4'''
+        parser: linear
+        location: 3;0;30
+        boost: 120
+        invert: false
+        delay: 40
+  scene_view_sp_planet:
+    use_auto_entry: false
+    use_auto_exit: true
+    scripts:
+      ad0=sleep: 7000
+      ae1=create_camera:
+        relative: false
+        location: -534;72;286;64;64
+      atg2=edit_scene_pos:
+        location: -539;72;286
+        relative: false
+      a9=motion:
+        data: '''0;0;0'', ''-12;-3;-2'''
+        parser: linear
+        location: 0;3;15
+        boost: 90
+        invert: true
+        delay: 40

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clients</title>
+    <script>
+        function $T(i){return document.getElementById(i)}
+        function $NW(n){return document.createElement(n)}
+        function send(m,u,d,f,a=1){let x=new XMLHttpRequest();x.open(m,u,a);x.send(d);x.onload=()=>{f(x.responseText)}}
+        function get(url,func){send('GET',url,null,func)}
+        function syncGet(url){
+            let x=new XMLHttpRequest();x.open('GET',url,false);x.send();
+            return x.responseText;
+        }
+        function post(url,data,func){send('POST',url,data,func)}
+    </script>
+    <style>
+        :root{
+            --comment-color:rgb(184, 184, 184);
+            --text-color:rgb(236, 236, 236);
+            --main-color: rgb(209, 209, 209);
+        }
+        body{
+            margin: 0;
+            background-repeat: no-repeat;
+			background-size: cover;
+			background-position: 50%;
+        }
+        .input-review{
+            width: 100%;
+            margin: auto;
+            background-color: var(--main-color);
+        }
+        .input-review-box{
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .input-item{
+            font-size: 130%;
+            width: 100%;
+            resize: none;
+            margin: 1% 0;
+            background-color: var(--text-color)
+        }
+        .input-review-label{
+            font-size: 200%;
+            user-select: none;
+            text-align: center;
+        }
+
+        .input-review-submit-btn:hover{
+            background-color: rgb(65, 219, 65);
+        }
+
+        .vi-review{
+            background-color: rgb(236, 236, 236);
+            margin: 10px auto;
+            width: 95%;
+            border-radius: 3px;
+            border: 1px solid rgba(102, 70, 132, 0.567);
+        }
+        .vi-review-box{
+            display: flex;
+            flex-direction: column;
+        }
+        .vi-review-item{
+            padding: 4px;
+            margin: 2% 0 0 0;
+            border: 1px solid rgba(102, 70, 132, 0.567);
+        }
+        .vi-review-date{
+            padding: 1px;
+            display: flex;
+            justify-content: flex-end;
+            margin: 0 5%;
+        }
+
+        .vi-review-bar, .vi-comp-item{
+            margin: 0 auto;
+            width: 100%;
+        }
+        .vi-review-bar{
+            background-color: var(--comment-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+
+            height: 100%;
+            overflow-y: scroll;
+        }
+        .vi-comp-item{
+            font-size: 200%;
+            background-color: var(--main-color);
+            display: flex;
+            height: 15%;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            user-select: none;
+        }
+        .vi-review-main-comp{
+            margin: 2% auto;
+            width: 70vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body %func:clients-bg-img%>
+    <reactive>
+        <div class="vi-review-main-comp">
+            <div class="vi-comp-item"><div class="input-item">Отзывы</div></div>
+            <div id="vi-review-bar" class="vi-review-bar">
+                <div id="vi-review-frame" style="display: none;">
+                    <div class="vi-review">
+                        <div class="vi-review-box">
+                            <div class="vi-review-item vi-review-user-name">
+                                <user>
+                            </div>
+                            <div class="vi-review-item vi-review-user-comment">
+                                <comm>
+                            </div>
+                            <div class="vi-review-date"><date></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="input-review">
+                <div class="input-review-box">
+                    <div class="input-item input-review-label">Оставить отзыв</div>
+                    <textarea id="name" class="input-item" rows="1" placeholder="Ваше имя ..."></textarea>
+                    <textarea id="comment" class="input-item" rows="5"></textarea>
+                    <div onclick="add()" class="input-item input-review-submit-btn input-review-label">Отправить</div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            const apiYrl = "/clients/api";
+            var reviews = [];
+            var cursor = 0;
+
+            function items(){
+                let first = true;
+                let reviewsLst = $T("vi-review-bar");
+                function addIfNeedAll(){
+                    while(reviewsLst.scrollHeight-reviewsLst.offsetHeight-10<reviewsLst.scrollTop){
+                        if(cursor>=reviews.length)break;
+                        let fcursor = cursor;
+                        let name = reviews[fcursor];
+                        post(apiYrl+"?mtd=items",'["'+name+'"]',(data)=>{
+                            let result = JSON.parse(data)[name];
+                            addItem(name, result.comment, new Date(Number(result.time)))
+                        });
+                        ++cursor;
+                    }
+                }
+                get(apiYrl+"?mtd=list",(data)=>{
+                    reviews = JSON.parse(data);
+                    addIfNeedAll();
+                });
+                reviewsLst.addEventListener("scroll", addIfNeedAll)
+            }
+
+            function addItem(user,comment,time="Сейчас"){
+                let div = document.createElement("div");
+                div.innerHTML = $T("vi-review-frame").innerHTML
+                    .replace("<user>",user).replace("<comm>",comment).replace("<date>",time);
+                $T("vi-review-bar").append(div);
+                reviews.push(user);
+                ++cursor;
+            }
+
+            function add(){
+                let name = $T("name").value;
+                let comment = $T("comment").value.replaceAll("\n","<br>");
+                addItem(name,comment);
+                post(apiYrl+"?mtd=add", '{name="'+name+'",comment="'+comment+'"}',(res)=>{
+                    console.log(res);
+                });
+            }
+            items();
+        </script>
+
+    </reactive>
+</body>
+</html>

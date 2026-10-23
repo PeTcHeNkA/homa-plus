@@ -1,0 +1,129 @@
+package net.minecraft.advancements.critereon;
+
+import com.google.common.collect.Lists;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonObject;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import net.minecraft.advancements.ICriterionTrigger;
+import net.minecraft.advancements.PlayerAdvancements;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
+import plus.tson.utl.Te4HashSet;
+
+
+public class UsedEnderEyeTrigger extends ConcurrentHashMap<PlayerAdvancements, UsedEnderEyeTrigger.Listeners> implements ICriterionTrigger<UsedEnderEyeTrigger.Instance> {
+    private static final ResourceLocation ID = new ResourceLocation("used_ender_eye");
+
+    public UsedEnderEyeTrigger() {
+        super(7);
+    }
+
+
+    @Override
+    public ResourceLocation getId() {
+        return ID;
+    }
+
+
+    @Override
+    public void addListener(PlayerAdvancements advancements, ICriterionTrigger.Listener<Instance> listener) {
+        Listeners listeners = super.get(advancements);
+        if (listeners == null) {
+            listeners = new Listeners();
+            super.put(advancements, listeners);
+        }
+        listeners.add(listener);
+    }
+
+
+    @Override
+    public void removeListener(PlayerAdvancements advancements, ICriterionTrigger.Listener<Instance> p_192164_2_) {
+        Listeners listeners = super.get(advancements);
+        if (listeners != null) {
+            listeners.remove(p_192164_2_);
+            if (listeners.isEmpty()) {
+                super.remove(advancements);
+            }
+        }
+    }
+
+
+    @Override
+    public void removeAllListeners(PlayerAdvancements advancements) {
+        super.remove(advancements);
+    }
+
+
+    @Override
+    public Instance deserializeInstance(JsonObject jObj, JsonDeserializationContext ctx) {
+        MinMaxBounds lvt_3_1_ = MinMaxBounds.deserialize(jObj.get("distance"));
+        return new Instance(lvt_3_1_);
+    }
+
+
+    public void trigger(EntityPlayerMP player, BlockPos pos) {
+        PlayerAdvancements adv;
+        Listeners listeners = super.get(adv = player.getAdvancements());
+        if (listeners != null) {
+            double dx = player.posX - (double)pos.getX();
+            double dz = player.posZ - (double)pos.getZ();
+            listeners.trigger(adv, dx * dx + dz * dz);
+        }
+    }
+
+
+    static class Listeners extends Te4HashSet<ICriterionTrigger.Listener<Instance>> {
+        public Listeners() {
+            super(3);
+        }
+
+
+        @Override //fix no-search field
+        public boolean isEmpty(){return super.isEmpty();}
+
+
+        public void trigger(PlayerAdvancements adv, double rangeSq) {
+            List<ICriterionTrigger.Listener<Instance>> listeners = null;
+            Iterator var4 = super.iterator();
+
+            ICriterionTrigger.Listener listener;
+            while(var4.hasNext()) {
+                listener = (ICriterionTrigger.Listener)var4.next();
+                if (((Instance)listener.getCriterionInstance()).test(rangeSq)) {
+                    if (listeners == null) {
+                        listeners = Lists.newArrayList();
+                    }
+
+                    listeners.add(listener);
+                }
+            }
+
+            if (listeners != null) {
+                var4 = listeners.iterator();
+
+                while(var4.hasNext()) {
+                    listener = (ICriterionTrigger.Listener)var4.next();
+                    listener.grantCriterion(adv);
+                }
+            }
+
+        }
+    }
+
+
+    public static class Instance extends AbstractCriterionInstance {
+        private final MinMaxBounds distance;
+
+        public Instance(MinMaxBounds distance) {
+            super(UsedEnderEyeTrigger.ID);
+            this.distance = distance;
+        }
+
+        public boolean test(double distanceSq) {
+            return this.distance.testSquare(distanceSq);
+        }
+    }
+}

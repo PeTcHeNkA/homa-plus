@@ -1,0 +1,146 @@
+crafts:
+  weaponLvl3:
+    result: W:chiaw&13&1&2=1&0&0&4&0&0&3 #W:3;1;0;0;2;0;0;3;0;3;f
+    items:
+    - air
+    - I:metall_1
+    - air
+    - I:gears
+    - I:plate_1
+    - I:gears
+    - I:gears
+    - I:hladogent
+    - I:gears
+  weaponLvl5:
+    result: W:chiaw&15&1&2=1&0&0&5&0&0&3
+    items:
+    - I:blick_b1
+    - I:metall_1
+    - I:blick_b2
+    - I:blick_b3
+    - I:black_box
+    - I:blick_b4
+    - I:plate_2
+    - I:hladogent
+    - I:plate_2
+  blick_b1:
+    result: I:blick_b1
+    items:
+    - I:blick_1
+    - I:blick_1
+    - I:blick_1
+    - I:blick_1
+    - I:blick_1
+    - I:blick_1
+    - I:blick_1
+    - I:blick_1
+    - I:blick_1
+  blick_b2:
+    result: I:blick_b2
+    items:
+    - I:blick_2
+    - I:blick_2
+    - I:blick_2
+    - I:blick_2
+    - I:blick_2
+    - I:blick_2
+    - I:blick_2
+    - I:blick_2
+    - I:blick_2
+  blick_b3:
+    result: I:blick_b3
+    items:
+    - I:blick_3
+    - I:blick_3
+    - I:blick_3
+    - I:blick_3
+    - I:blick_3
+    - I:blick_3
+    - I:blick_3
+    - I:blick_3
+    - I:blick_3
+  blick_b4:
+    result: I:blick_b4
+    items:
+    - I:blick_4
+    - I:blick_4
+    - I:blick_4
+    - I:blick_4
+    - I:blick_4
+    - I:blick_4
+    - I:blick_4
+    - I:blick_4
+    - I:blick_4
+  energetic:
+    result: I:energetic
+    items:
+    - air
+    - I:blick_1
+    - air
+    - I:blick_2
+    - I:electronick
+    - I:blick_3
+    - air
+    - I:blick_4
+    - air
+  energetic_l2:
+    result: I:energetic_l2
+    items:
+    - I:blick_1
+    - I:blick_1
+    - I:blick_2
+    - I:blick_2
+    - I:electronick
+    - I:blick_3
+    - I:blick_3
+    - I:blick_4
+    - I:blick_4
+  artifactL3:
+    result: A:chiaw&4&2&-1=
+    items:
+    - I:blick_4
+    - I:blick_4
+    - I:blick_4
+    - I:blick_4
+    - I:blick_4
+    - I:blick_4
+    - I:blick_4
+    - I:blick_4
+    - I:blick_4
+  gears_l2:
+    result: I:gears_2
+    items:
+    - I:gears
+    - I:gears
+    - I:gears
+    - I:gears
+    - I:plate_2
+    - I:gears
+    - I:gears
+    - I:gears
+    - I:gears
+  plate_a24:
+    result: I:plate_2
+    items:
+    - I:gears
+    - I:plate_1
+    - I:gears
+    - I:metall_1
+    - I:plate_1
+    - I:metall_1
+    - I:gears
+    - I:plate_1
+    - I:gears
+  black_box_craft:
+    result: I:black_box
+    items:
+    - I:gears_2
+    - I:plate_2
+    - I:gears_2
+    - I:plate_2
+    - I:hladogent
+    - I:plate_2
+    - I:gears_2
+    - I:plate_2
+    - I:gears_2
+  hladogent_craft:

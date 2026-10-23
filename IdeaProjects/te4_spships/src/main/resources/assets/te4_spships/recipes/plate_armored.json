@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {"item": "te4_spships:plate_machine", "count": 4},
+    {"item": "minecraft:obsidian", "count": 2}
+  ],
+  "result": {
+    "item": "te4_spships:plate_armored",
+    "count": 3
+  }
+}

@@ -1,0 +1,14 @@
+{
+    "required": true,
+    "minVersion": "0.7.11",
+    "compatibilityLevel": "JAVA_8",
+    "package": "plus.fserver.mixins",
+    "refmap": "mixins.fserver.refmap.json",
+    "target": "@env(DEFAULT)",
+    "mixins": [
+      "pf.EntityXPOrbPatch",
+      "pf.GameDataPatch"
+    ],
+	"server": [],
+	"client": []
+}

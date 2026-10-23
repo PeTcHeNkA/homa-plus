@@ -1,0 +1,25 @@
+plugins {
+    id 'java'
+    id "me.champeau.jmh" version "0.7.2"
+}
+
+group = 'plus'
+version = '1.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'it.unimi.dsi:fastutil:8.5.12'
+    implementation 'org.rocksdb:rocksdbjni:9.1.1'
+
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+
+    jmhAnnotationProcessor 'org.openjdk.jmh:jmh-generator-annprocess:1.36'
+}
+
+test {
+    useJUnitPlatform()
+}

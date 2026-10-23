@@ -1,0 +1,16 @@
+[
+    {
+        "modid": "mc_invlib",
+        "name": "Mc_invlib",
+        "description": "",
+        "version": "${version}",
+        "mcversion": "${mcversion}",
+        "url": "",
+        "updateUrl": "",
+        "authorList": [],
+        "credits": "",
+        "logoFile": "",
+        "screenshots": [],
+        "dependencies": []
+    }
+]

@@ -1,0 +1,70 @@
+plugins {
+    id 'java'
+}
+
+group = 'plus'
+version = '1.2.0-paper'
+
+repositories {
+    mavenCentral()
+    maven {
+        name = "papermc-repo"
+        url = "https://repo.papermc.io/repository/maven-public/"
+    }
+    maven {
+        name = "sonatype"
+        url = "https://oss.sonatype.org/content/groups/public/"
+    }
+}
+
+dependencies {
+    compileOnly "com.destroystokyo.paper:paper-api:1.16.5-R0.1-SNAPSHOT"
+    implementation "com.alphacephei:vosk:0.3.45"
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir "../AudioLib/src/main/java"
+            srcDir 'C:/Users/HomaPlus/IdeaProjects/TsonConfigurations/core/src/main/java'
+            srcDir 'C:/Users/HomaPlus/IdeaProjects/TsonConfigurations/extensions/src/main/java'
+        }
+    }
+}
+
+jar {
+    from {
+        configurations.runtimeClasspath.collect {
+            if(it.name.contains('vosk') || it.name.contains("jna")) {
+                zipTree(it)
+            }
+        }
+    }
+}
+
+def targetJavaVersion = 8
+java {
+    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
+    if (JavaVersion.current() < javaVersion) {
+        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+
+    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
+        options.release.set(targetJavaVersion)
+    }
+}
+
+processResources {
+    def props = [version: version]
+    inputs.properties props
+    filteringCharset 'UTF-8'
+    filesMatching('plugin.yml') {
+        expand props
+    }
+}

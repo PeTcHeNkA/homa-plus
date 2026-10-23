@@ -1,0 +1,17 @@
+[
+  {
+    "modid": "tson_messages",
+    "name": "TsonMessages",
+    "description": "",
+    "version": "${version}",
+    "mcversion": "${mcversion}",
+    "url": "https://vk.com/te4hnoplus",
+    "updateUrl": "",
+    "authorList": ["Te4hnoPlus"],
+    "credits": "",
+    "logoFile": "",
+    "screenshots": [],
+    "dependencies": [],
+    "useDependencyInformation": true
+  }
+]

@@ -1,0 +1,283 @@
+Subject: [PATCH] Оптимизации от HomaPlus
+---
+Index: src/main/java/plus/tson/utl/uns/UnsafeUtils.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/plus/tson/utl/uns/UnsafeUtils.java b/src/main/java/plus/tson/utl/uns/UnsafeUtils.java
+new file mode 100644
+--- /dev/null	(revision 893b5cab64ef64f8233174b29c939f65e3c6f2d1)
++++ b/src/main/java/plus/tson/utl/uns/UnsafeUtils.java	(revision 893b5cab64ef64f8233174b29c939f65e3c6f2d1)
+@@ -0,0 +1,137 @@
++package plus.tson.utl.uns;
++
++import sun.misc.Unsafe;
++import java.lang.reflect.Field;
++import java.lang.reflect.Modifier;
++
++
++/**
++ * Legacy unsafe utils, used when jdk.internal.misc.Unsafe is not available
++ */
++public class UnsafeUtils {
++    //object reference size
++    public static final int REF_SIZE;
++    public static final int REF_SIZE_D2;
++    public static final int REF_SIZE_M2;
++    public static final Unsafe UNSAFE;
++    //string `bytes` offset
++    public static final long STR_OFFSET;
++
++    static {
++        try {
++            Field field = Unsafe.class.getDeclaredField("theUnsafe");field.setAccessible(true);
++            UNSAFE = (Unsafe) field.get(null);
++            REF_SIZE = UNSAFE.addressSize();
++            REF_SIZE_D2 = REF_SIZE>>1;
++            REF_SIZE_M2 = REF_SIZE<<1;
++            STR_OFFSET = offset(String.class, "value");
++        } catch (Throwable e) {
++            throw new RuntimeException(e);
++        }
++    }
++
++
++    /**
++     * Atomically updates Java variable to {@code cur} if it is currently
++     * holding {@code expected}.
++     *
++     * <p>This operation has memory semantics of a {@code volatile} read
++     * and write.  Corresponds to C11 atomic_compare_exchange_strong. See {@link Unsafe#compareAndSwapObject}
++     *
++     * @return {@code true} if successful
++     */
++    public static boolean compareAndSwap(Object ref, long offset, Object prev, Object cur){
++        return UNSAFE.compareAndSwapObject(ref, offset, prev, cur);
++    }
++
++
++    /**
++     * Atomically updates Java variable to {@code cur} if it is currently
++     * holding {@code expected}.
++     *
++     * <p>This operation has memory semantics of a {@code volatile} read
++     * and write.  Corresponds to C11 atomic_compare_exchange_strong. See {@link Unsafe#compareAndSwapInt}
++     *
++     * @return {@code true} if successful
++     */
++    public static boolean compareAndSwap(Object ref, long offset, int prev, int cur){
++        return UNSAFE.compareAndSwapInt(ref, offset, prev, cur);
++    }
++
++
++    /**
++     * @return Offset of object field {@code name} in {@code clazz}
++     */
++    public static long offset(Class<?> clazz, String name){
++        try {
++            return UNSAFE.objectFieldOffset(clazz.getDeclaredField(name));
++        } catch (NoSuchFieldException e) {
++            throw new RuntimeException(e);
++        }
++    }
++
++
++    /**
++     * @return Offset of object/static field {@code name} in {@code clazz}
++     */
++    public static long offsetS(Class<?> clazz, String name){
++        try {
++            Field field = clazz.getDeclaredField(name);
++            if(Modifier.isStatic(field.getModifiers()))
++                return UNSAFE.staticFieldOffset(field);
++            return UNSAFE.objectFieldOffset(field);
++        } catch (NoSuchFieldException e) {
++            throw new RuntimeException(e);
++        }
++    }
++
++
++    /**
++     * Unsafe create string without copy bytes
++     */
++    public static String stringOf(byte[] bytes) {
++        try {
++            String str = (String) UNSAFE.allocateInstance(String.class);
++            UNSAFE.putObject(str, STR_OFFSET, bytes);
++            return str;
++        } catch (InstantiationException e) {
++            throw new RuntimeException(e);
++        }
++    }
++
++
++    /**
++     * @return reference to string bytes, {@link String#value}
++     */
++    public static byte[] getBytes(String str){
++        return (byte[]) UNSAFE.getObject(str, STR_OFFSET);
++    }
++
++
++    /**
++     * Unsafe get object field value
++     */
++    public static <T> T get(Object src, long offSet){
++        return (T) UNSAFE.getObject(src, offSet);
++    }
++
++
++    /**
++     * Unsafe set object field value
++     */
++    public static void set(Object src, long offSet, Object value){
++        UNSAFE.putObject(src, offSet, value);
++    }
++
++
++    /**
++     * Unsafe allocate instance
++     */
++    public static <T> T newObj(Class<T> clazz){
++        try {
++            return (T) UNSAFE.allocateInstance(clazz);
++        } catch (InstantiationException e) {
++            throw new RuntimeException(e);
++        }
++    }
++}
+\ No newline at end of file
+Index: src/main/java/zxc/mrdrag0nxyt/TextAlignerPlaceholder.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/zxc/mrdrag0nxyt/TextAlignerPlaceholder.java b/src/main/java/zxc/mrdrag0nxyt/TextAlignerPlaceholder.java
+--- a/src/main/java/zxc/mrdrag0nxyt/TextAlignerPlaceholder.java	(revision 75246872a10866082ee2a674dbf793cc12b732e3)
++++ b/src/main/java/zxc/mrdrag0nxyt/TextAlignerPlaceholder.java	(revision 893b5cab64ef64f8233174b29c939f65e3c6f2d1)
+@@ -5,24 +5,27 @@
+ import org.bukkit.OfflinePlayer;
+ import org.jetbrains.annotations.NotNull;
+ import org.jetbrains.annotations.Nullable;
++import plus.tson.utl.uns.UnsafeUtils;
++
+ 
+ public final class TextAlignerPlaceholder extends PlaceholderExpansion {
+-    private static final String SPACE = " ";
+-
+     @Override
+     public @NotNull String getIdentifier() {
+         return "textaligner";
+     }
+ 
++
+     @Override
+     public @NotNull String getAuthor() {
+-        return "MrDrag0nXYT (drakoshaslv)";
++        return "MrDrag0nXYT, HomaPlus";
+     }
++
+ 
+     @Override
+     public @NotNull String getVersion() {
+-        return "1.0.0";
++        return "1.1.0";
+     }
++
+ 
+     @Override
+     public boolean persist() {
+@@ -30,44 +33,67 @@
+     }
+ 
+ 
+-    /*
+-     * %textaligner_center;<length>;<Text with {placeholder}>%
+-     * %textaligner_right;<length>;<Text with {placeholder}>%
++    /**
++     * %textaligner_center;length;Text with {placeholder}%
++     * <br>
++     * %textaligner_right;length;Text with {placeholder}%
+      */
+     @Override
+     public @Nullable String onRequest(OfflinePlayer player, @NotNull String paramsString) {
+-        String[] params = paramsString.split(";", 3);
+-        if (params.length < 3) return null;
++        String[] params;
++        if ((params = paramsString.split(";", 3)).length < 3) return null;
+ 
+         return switch (params[0]) {
+-            case "center" -> handleTextAlign(player, params, SpaceStyle.CENTER);
+-            case "right" -> handleTextAlign(player, params, SpaceStyle.RIGHT);
++            case "center" -> handleTextAlign(player, params, true);
++            case "right" -> handleTextAlign(player, params, false);
+             default -> null;
+         };
+     }
+ 
+ 
+-    private @Nullable String handleTextAlign(OfflinePlayer player, String @NotNull [] params, SpaceStyle spaceStyle) {
+-        try {
+-            int maxLength = Integer.parseInt(params[1]);
+-            String parsed = PlaceholderAPI.setBracketPlaceholders(player, params[2]);
++    /**
++     * @return указанную длину строки, либо длину самой строки
++     * <br>
++     * Позволяет использовать заглушки типа `#####` для указания длины.
++     * <br>
++     * Так же данный способ будет работать значительно быстрее, тк не выделяет память в куче + нет исключений
++     */
++    private static int getMaxLen(String str) {
++        byte[] bytes;
++        int sum = 0;
++        for (byte b : bytes = UnsafeUtils.getBytes(str)) {
++            if (b >= '0' && b <= '9')
++                sum = sum * 10 + b - '0';
++            else
++                return bytes.length;
++        }
++        return bytes.length;
++    }
+ 
+-            int diff = maxLength - parsed.length();
+-            if (diff <= 0) return parsed;
+ 
+-            int spaces = switch (spaceStyle) {
+-                case CENTER -> diff / 2;
+-                case RIGHT -> diff;
+-            };
++    private static String handleTextAlign(OfflinePlayer player, String @NotNull [] params, boolean center) {
++        String result = PlaceholderAPI.setBracketPlaceholders(player, params[2]);
+ 
+-            return SPACE.repeat(spaces) + parsed;
++        int spaces;
++        if ((spaces = getMaxLen(params[1]) - result.length()) <= 0) return result;
+ 
+-        } catch (NumberFormatException ignored) {
+-        }
+-        return null;
+-    }
++        if(center) spaces >>= 1;
++
++        byte[] bResultPre = UnsafeUtils.getBytes(result),
++               bResult    = new byte[bResultPre.length + spaces];
++
++        //заполняю пробелами
++        for (int i = 0; i < bResultPre.length; i++)
++            bResult[i] = ' ';
++
++        //Переиспользую экземпляр строки из параметров
++        //строку-результат PAPI использовать небезопасно, тк может быть константой
++        result = params[0];
+ 
+-    private enum SpaceStyle {
+-        CENTER, RIGHT
++        //Собираю результирующую строку
++        System.arraycopy(bResultPre, 0, bResult, spaces, bResultPre.length);
++        UnsafeUtils.set(result, UnsafeUtils.STR_OFFSET, bResult);
++
++        return result;
+     }
+ }
+\ No newline at end of file

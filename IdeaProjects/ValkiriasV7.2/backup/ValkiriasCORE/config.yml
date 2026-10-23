@@ -1,0 +1,277 @@
+main:
+  powerartifact: 'Параметры артефакта: '
+  powerartifacts: '           &8Сила артефактов: '
+  attackboost: '           &8Урон: +%.2f'
+  attackboost_pr: '           &8Урон: +%.2f%%'
+  shieldboost: '           &8Щит: +%.2f'
+  shieldboost_pr: '           &8Щит: +%.2f%%'
+  critdamage: '           &8Крит. урон: +%.2f%%'
+  critrate: '           &8Шанс крит: +%.2f%%'
+  energyboost: '           &8Энергия +%.2f'
+  v_level: '           &8Уровень: %s / 90, %s'
+  v_experience: '           &8Опыт: %s / %s'
+  v_damage: '           &8Сила атаки: %.2f'
+  v_critpw: '           &8Крит. урон: %.2f%%'
+  v_critrt: '           &8Шанс крит: %.3f%%'
+  v_energy: '           &8Запас энергии: %.2f/%.2f'
+  v_shield: '           &8Размер щита: %.2f/%.2f'
+  v_powerartifacts: ' &8Сила артефактов: '
+  v_attackboost: ' &8Урон: +%.2f'
+  v_attackboost_pr: ' &8Урон: +%.2f%%'
+  v_shieldboost: ' &8Щит: +%.2f'
+  v_shieldboost_pr: ' &8Щит: +%.2f%%'
+  v_critdamage: ' &8Крит. урон: +%.2f%%'
+  v_critrate: ' &8Шанс крит: +%.2f%%'
+  v_energyboost: ' &8Энергия +%.2f'
+  adventureitemformat: '           &8%s'
+  adventureitemformat4: '&f%s&8%s'
+  adventureitemformat56: '&8%s'
+  spawnBoxFormat: '%s %.2f %.1f %.2f'
+  findBoxFormat: Box was founded!
+chat:
+  nickformat: '&%s<%s>&f:'
+  icoformat: '%s &6[%s] &%s%s+          Уровень: %s, Опыт: %s/%s+           '
+  globalchat:
+  - '&c[G]&f'
+  - '@H[&4Это сообщение видно всем.]'
+  - '@S!Привет всем!'
+  loacalchat:
+  - '&c[L]&f'
+  - '@H[&4Это сообщение видно игрокам в радиусе 100 блоков.]'
+  - '@S!Привет всем!'
+  senderprivateprefix:
+  - '&8[P] Я -->'
+  - '@H[&4Это сообщение видит только ваш собеседник]'
+  targetprivateprefix:
+  - '&8[P] Я <--'
+  - '@H[&4Это сообщение видит только ваш собеседник]'
+  nextpage:
+  - '[next]'
+  - '@HНажмите чтобы перейти на следующую страницу'
+  prewpage:
+  - '[prew]'
+  - '@HНажмите чтобы перейти на предедущую страницу'
+  lastpage:
+  - .
+  - '@H[Это последняя страница]'
+  pageformat1: '%s/%s'
+  pageformat2: ===
+avatarsets:
+  setlist:
+  - genshin
+  - valkirias
+  - prime
+  startavatar:
+    char: 㑤
+    cmd: 1020001
+  genshin:
+    chars: 㑤㑥㑦㑧㑨㑩㑪㑫㑬㑭㑮㑯㑰㑱㑲㑳㑴㑵㑶㑷㑸㑹㑺㑻㑼㑽㑾㑿㒀㒁㒂㒃㒅㒆㒇㒈㒉㒊㒋㒌㒍㒎㒏㒐㒑㒽㒾
+    cmd: 1020001;1020002;1020003;1020004;1020005;1020006;1020007;1020008;1020009;1020010;1020011;1020012;1020013;1020014;1020015;1020016;1020017;1020018;1020019;1020020;1020021;1020022;1020023;1020024;1020025;1020026;1020027;1020028;1020029;1020030;1020032;1020032;1020033;1020034;1020035;1020036;1020037;1020038;1020039;1020040;1020041;1020042;1020043;1020044;1020045;1020089;1020090
+    premission: none
+  valkirias:
+    chars: 㒒㒓㒔㒕㒖㒗㒘㒙㒚㒛㒜㒝㒞㒟㒠㒱㒲㒳㒴㒵㒶㒷㒸㒹㒡㒢㒣㒤㒥㒦㒧㒨㒩㒪㒫㒬㒭㒮㒯㒰
+    cmd: 1020046;1020047;1020048;1020049;1020050;1020051;1020052;1020053;1020054;1020055;1020056;1020057;1020058;1020059;1020060;1020061;1020062;1020063;1020064;1020065;1020066;1020067;1020068;1020069;1020070;1020071;1020072;1020073;1020074;1020075;1020076;1020077;1020078;1020079;1020080;1020081;1020082;1020083;1020084;1020085
+    premission: none
+  prime:
+    chars: 㒺㒻㒼
+    cmd: 1020086;1020087;1020088;
+    premission: none
+menus:
+  valkirias_getartifact: '...kirias -> Получение предметов'
+  valkirias_upgradearts: '...irias -> Улучшение артефактов'
+  valkirias_weapons: Valkirias -> Оружие
+  valkirias_backpack: Valkirias -> Рюкзак
+  valkirias_artifacts: '...irias -> Профиль -> Артефакты'
+  valkirias_points: '... Распределение очков навыков'
+  valkirias_info: Valkirias -> Профиль
+  classlist: Выбор класса
+  classconfirm: Подтвердить выбор
+  crafts: Создание предметов
+  artifacts_button_cmd: 1010003
+  stats_bg: '&f㟪'
+  stats_bg_main: '&f㟗'
+  nullobject:
+    cmd: 1008999
+  valkirias_bg:
+    cmd: 1009000
+    lore:
+    - Профиль
+  valkirias_weapons_bg:
+    cmd: 1009001
+    lore:
+    - Оружие
+  attack_points:
+    cmd: 1019003
+    lore:
+    - Очки атаки
+  crit_points:
+    cmd: 1019002
+    lore:
+    - Очки крита
+  shield_points:
+    cmd: 1019010
+    lore:
+    - Очки щита
+  energy_points:
+    cmd: 1019008
+    lore:
+    - Очки энергии
+  free_points:
+    cmd: 1019009
+    lore:
+    - Свободные очки
+  floader_button:
+    cmd: 1009002
+    lore:
+    - Открыть хранилище
+  classlist_bg:
+    cmd: 1009003
+  oneclass_bg:
+    cmd: 1009004
+  upgradearts_bg:
+    cmd: 1009005
+  bettercraft_null:
+    cmd: 1009006
+  bettercraft_recept:
+    cmd: 1009007
+  points_bg:
+    cmd: 1009008
+  artifacts_gui:
+    cmd: 1009009
+weapons:
+  types:
+    unknown:
+      cmd: 1008998
+      icon: '&f㟌   &8???  , S:%s'
+      lore1: ' &8Нажмите клавишу &cF  '
+      lore2: ' &8для индитификации'
+    '1':
+      clases:
+        '1':
+          name: Резак
+          cmd: 1020005
+          view: '&f㟨 &8Резак, S:%s'
+        '2':
+          name: Винтовка
+          cmd: 1030005
+          view: '&f㟩 &8Винтовка, S:%s'
+      random:
+      - 1
+      - 2
+      lore1: '  &8Собран очень давно'
+      lore2: '  &8Proton, Type-8A'
+    '2':
+      clases:
+        '1':
+          name: Резак
+          cmd: 1020001
+          view: '&f㟫 &8Резак, S:%s'
+        '2':
+          name: Винтовка
+          cmd: 1030001
+          view: '&f㟯 &8Винтовка, S:%s'
+        '3':
+          cmd: '1234567'
+          view: '&fIcon &8Парные клинки, S:%s'
+        '4':
+          cmd: '1234567'
+          view: '&fIcon &8Парные бластеры, S:%s'
+      random:
+      - 1
+      - 2
+      booststat: 2
+      lore1: '  &8Made in Chia'
+      lore2: '  &8Улучшенная версия CH-23'
+artifacts:
+  type_unknown: ' ??? '
+  quality_normal: '&f㟽'
+  quality_rare: '&f㟾'
+  quality_epic: '&f㟿'
+  quality_legendary: '&f㠀'
+  types:
+    unknown:
+      cmd: 1008998
+      icon: '&f㟌   &8???  , S:%s'
+      lore1: ' &8Нажмите клавишу &cF  '
+      lore2: ' &8для индитификации'
+    '1':
+      slot:
+        '0':
+          cmd: 1010003
+          view: '&f㟳     &8Процессор, S:%s'
+        '1':
+          cmd: 1010001
+          view: '&f㟷    &8Ускоритель, S:%s'
+        '2':
+          cmd: 1010004
+          view: '&f㟶     &8Генератор, S:%s'
+        '3':
+          cmd: 1010002
+          view: '&f㟵   &8Конденсатор, S:%s'
+        '4':
+          cmd: 1010005
+          view: '&f㟴     &8Релокатор, S:%s'
+      random:
+      - 0
+      - 1
+      - 2
+      - 3
+      - 4
+      booststat: 4
+      lore1: '  &8Made in Chia'
+      lore2: '  &8Улучшенная версия CH-23'
+    '2':
+      slot:
+        '0':
+          cmd: 1010008
+          view: '&f㟸     &8Процессор, S:%s'
+        '1':
+          cmd: 1010006
+          view: '&f㟼    &8Ускоритель, S:%s'
+        '2':
+          cmd: 1010009
+          view: '&f㟻     &8Генератор, S:%s'
+        '3':
+          cmd: 1010007
+          view: '&f㟺   &8Конденсатор, S:%s'
+        '4':
+          cmd: 1010010
+          view: '&f㟹     &8Релокатор, S:%s'
+      random:
+      - 0
+      - 1
+      - 2
+      - 3
+      - 4
+      booststat: 2
+      lore1: '  &8Собран очень давно'
+      lore2: '  &8Proton, Type-8A'
+message_formats:
+  regenshield: Вы зарядили свой щит на %s единиц. В хранилище осталось %s/%s единиц.
+  empetystation: В этом хранилище не осталось энергии! 0/%s единиц.
+  fullshield: Вы уже зарядили свой щит до предела! В хранилище осталось %s/%s единиц.
+messages:
+  exsistweapon:
+  - 'Вы не можете войти в режим боя без оружия! '
+  disablecombat:
+  - 'В режиме боя запрещено открывать это! '
+  - '[Отключить]'
+  - '@C/valkirias combat'
+  playerofline:
+  - Данного игрока сейчас нет в сети!
+  youmoted:
+  - Данного игрока сейчас нет в сети!
+  noperms:
+  - У вас нет разрешения чтобы сделать это!
+  notenergy:
+  - 'Вам не хватает энергии! Следующее использование навыка может убить вас! '
+  - '@S/valkirias combat'
+  - '&c[Отключить]'
+  - '@C/valkirias combat'
+  empetychest:
+  - Здесь ничего нет.
+  helpavatar:
+  - helpavatar
+  only_premium:
+  - allowed only for premium!
+ALTERNATIVE_CONFIG_PATH: none

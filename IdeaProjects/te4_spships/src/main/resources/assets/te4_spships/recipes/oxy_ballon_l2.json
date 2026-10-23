@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "GAG",
+    " B ",
+    " M "
+  ],
+  "key": {
+    "B": {"item": "te4_spships:oxy_ballon_l1"},
+    "M": {"item": "te4_spships:plate_mefril"},
+    "G": {"item": "te4_spships:iron_gear"},
+    "A": {"item": "te4_spships:plate_alumine"}
+  },
+  "result": {
+    "item": "te4_spships:oxy_ballon_l2",
+    "count": 1
+  }
+}

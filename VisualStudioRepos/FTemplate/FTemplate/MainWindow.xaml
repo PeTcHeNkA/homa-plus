@@ -1,0 +1,38 @@
+﻿<fw:AcrylicWindow x:Class="$safeprojectname$.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:fw="clr-namespace:SourceChord.FluentWPF;assembly=FluentWPF"
+        xmlns:local="clr-namespace:$safeprojectname$"
+        mc:Ignorable="d"  
+                  
+        Height="350" Width="650" MinHeight="300" MinWidth="610"
+                  
+        AcrylicWindowStyle="NoIcon"
+        fw:AcrylicWindow.AcrylicAccentState="BlurBehind"       
+        TintOpacity="0.5" NoiseOpacity="0"
+                  
+        TintColor="{StaticResource ArcMain}"
+        FallbackColor="{StaticResource ArcMain}"
+                  
+        Title="$safeprojectname$"
+    >
+
+    <Grid>
+        <Grid Background="{StaticResource ArcHeader}" Panel.ZIndex="1000" Height="30" VerticalAlignment="Top">
+            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Margin="-67,0,0,0" Width="249" FontSize="14"
+                       Foreground="{StaticResource ArcHeaderDark}">
+                $safeprojectname$
+            </TextBlock>
+        </Grid>
+
+        <!-- Content here -->
+
+        <Button Style="{StaticResource ArcBotton}" Margin="250,254,0,0" HorizontalAlignment="Left" Width="350" Height="40" VerticalAlignment="Top"
+                Click="ShowChangelog"
+                >
+            Show changelog
+        </Button>
+    </Grid>
+</fw:AcrylicWindow>

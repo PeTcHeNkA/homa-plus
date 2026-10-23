@@ -1,0 +1,33 @@
+package plus.space.mixins.client;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiOptions;
+import net.minecraft.client.gui.GuiScreen;
+import org.spongepowered.asm.mixin.Mixin;
+import plus.space.client.lscreen.LGuiMainMenu;
+
+
+@Mixin(GuiOptions.class)
+public class GuiOptionsPatch extends GuiScreen {
+    private final LGuiMainMenu lGuiScreen = LGuiMainMenu.get();
+
+    @Override
+    public void setWorldAndResolution(Minecraft mc, int width, int height) {
+        LGuiMainMenu.open("options_bg");
+        super.setWorldAndResolution(mc, width, height);
+        lGuiScreen.setSize(width, height);
+    }
+
+
+    @Override
+    public void setGuiSize(int w, int h) {
+        super.setGuiSize(w, h);
+        lGuiScreen.setSize(w, h);
+    }
+
+
+    @Override
+    public void drawBackground(int tint) {
+        lGuiScreen.drawImageSafe();
+    }
+}

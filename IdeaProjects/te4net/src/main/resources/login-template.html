@@ -1,0 +1,528 @@
+
+<html>
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta property='og:url' content='%host%'>
+		<meta property='og:title' content='%q:title/"Архив техника"%'>
+		<meta property='og:description' content='Авторизация'>
+		<meta property='og:image' content='/assets/img/auth/auth.png'>
+		<meta property='twitter:image' content='/assets/img/auth/auth.png'>
+		<meta property='og:site_name' content='te4hnoplus'>
+        <style>
+            .login{
+                --color-0: rgba(255, 255, 255, 0.536);
+                --color-1: rgb(186, 186, 186);
+                --color-2: rgb(204, 204, 204);
+                --color-3: rgb(217, 217, 217);
+                --color-4: rgb(131, 131, 131);
+                --color-5: rgba(119, 119, 119, 0.428);
+                --color-6: rgb(230, 230, 230);
+                --color-7: rgb(108, 252, 108);
+                --color-8: rgb(60, 145, 255);
+                --color-c: rgb(153, 63, 63);
+                --color-e: rgb(207, 9, 9);
+                font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+            }
+            input{
+                all: unset;
+            }
+            /* input:auto-fill { 
+                outline: 5px solid rgb(0 0 0 / .5);
+            } */
+
+
+            .ns{
+                user-select: none;
+            }
+            .br1p{
+                border-radius: 1px;
+            }
+            .login_container{
+                margin: auto;
+                width: 250px;
+                font-size: 25px;
+            }
+            .login{
+                padding: 10px 0 10px 0;
+                width: 100%;
+                height: 100%;
+                background-color: var(--color-1);
+                border-radius: 3px;
+                border: 2px solid var(--color-5);
+                height: min-content;
+            }
+            .login_label{
+                margin: 0 auto;
+                width: 88%;
+                text-align: center;
+                display: inline-block;
+                margin: 5px 5% 0px;
+                background-color: var(--color-2);
+                border-bottom: 3px solid var(--color-4);
+                font-size: 15px;
+                height: 20px;
+                padding: 4px 1% 4px 1%;
+                scale: 1;
+            }
+            .login_label:focus, .cap4a_answer:focus{
+                background-color: var(--color-3);
+                border-bottom: 3px solid var(--color-8);
+                font-size: 17px;
+                scale: 1.03;
+            }
+
+            .login_info_label, .login_bottom, .__d1{
+                width: 88%;
+                padding: 2px 1% 2px 1%;
+                margin: 0px 5% 0px;
+                background-color: var(--color-0)
+            }
+            .__d1{
+                text-align: center;
+                border-radius: 1px;
+                user-select: none;
+            }
+
+            .login_header, .login_bottom{
+                text-align: center;
+            }
+            .__d1{
+                margin-top: 3px;
+                font-size: 50%;
+                transition: 0.1s;
+            }
+            .cap4a_module{
+                width: 90%;
+                margin: 15px 5% 15px;
+            }
+            .cap4a_container{
+                width: 100%;
+                height: 50px;
+                background-color: var(--color-c);
+                font-size: 15px;
+                overflow: hidden;
+            }
+            .cap4a_cap4a{
+                margin-top: 10px;
+                margin-left: 70px;
+                scale: 1.5;
+            }
+            .cap4a_answer, .cap4a_header, .cap4a_confirm_btn, .cap4a_success{
+                width: 100%;
+                background-color: var(--color-0);
+                text-align: center;
+                font-size: 72%;
+                padding: 3px 0 2px 0;
+            }
+            
+            .cap4a_header{
+                margin-bottom: 4px;
+            }
+
+            .cap4a_answer{
+                margin-top: 4px;
+                margin-bottom: 4px;
+                background-color: var(--color-2);
+                border-bottom: 3px solid var(--color-5);
+                height: 17px;
+                font-size: 15px;
+            }
+
+            .login_bottom{
+                margin-top: 10px;
+                transition: 0.1s;
+            }
+
+            .login_bottom:hover, .cap4a_confirm_btn:hover, .__d1:hover{
+                background-color: var(--color-6);
+            }
+
+            .login_bottom:active, .cap4a_confirm_btn:active, .__d1:active{
+                background-color: var(--color-7);
+                transition: 0.3s;
+            }
+
+            .cap4a_success{
+                background-color: var(--color-7);
+                display: none;
+            }
+
+            .min_msg{
+                font-size: 14px;
+                width: 82%;
+                padding: 0px 4% 1px 4%;
+                margin: 0px 5% 2px;
+                color: var(--color-e);
+            }   
+        </style>
+    </head>
+    
+    <body>
+        <script>var login='%q:login%';var cryptokey='%q:key%';</script>
+
+        <reactive name="login_form" onload="updateForm()">
+            <div class="login_container" style="margin-top: 10px;">
+                <div id="login_form" class="login">
+                    <div id="login_header" class="login_info_label login_header ns br1p">Авторизация</div>
+                    <input id="login" class="login_label br1p" type="email" placeholder="почта" autocomplete="email">
+                    <div id="login_msg" class="min_msg"></div>
+                    <input id="password" class="login_label br1p" type="password" 
+                        placeholder="пароль" autocomplete="new-password" onblur="showCap4a()">
+                    <div id="password_msg" class="min_msg"></div>
+                    <div id="login_info"></div>
+                    <div id="cap4a_module" class="cap4a_module">
+                        <div id="cap4a_view" style="display: none">
+                            <div class="cap4a_header ns br1p">Проверка на бота</div>
+                            <div id="cap4a_content">
+                                <div class="cap4a_container br1p"><div id="cap4a" class="cap4a_cap4a"></div></div>
+                                <input id="cap4a_answer" class="cap4a_answer br1p" type="text" placeholder="Перепечатайте код выше" autocomplete="off">
+                                <div class="cap4a_confirm_btn ns br1p" onclick="checkCap4a()">Проверить код</div>
+                            </div>
+                        </div>
+                        <div id="cap4a_view_success" class="cap4a_success ns br1p">Проверка пройдена</div>
+                    </div>
+                    <input id="login_btn_code" class="login_label br1p" style="display: none;" type="email" placeholder="код подтверждения из почты" autocomplete="off">
+                    <div id="login_btn" class="login_bottom ns br1p" onclick="onLoginClick()">Войти</div>
+                </div>
+                
+            </div>
+
+            <script>
+                var curMode = 1;
+                const $D=document;
+                function $T(i){return $D.getElementById(i)}
+                function $NW(n){return $D.createElement(n)}
+                function send(m,u,d,f,a=1){let x=new XMLHttpRequest();x.open(m,u,a);x.send(d);x.onload=()=>{f(x.responseText)}}
+                function get(url,func){send('GET',url,null,func)}
+                function syncGet(url){
+                    let x=new XMLHttpRequest();x.open('GET',url,false);x.send();
+                    return x.responseText;
+                }
+                function post(url,data,func){send('POST',url,data,func)}
+    
+
+                if(login!="")$T("login").value = login;
+
+                function isValidLogin(login){
+                    return /[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(login);
+                }
+                function isValidPsw(psw){
+                    return /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!#$%?@-_+=^:;.<>*])(?=\S+$).{8,24}$/.test(psw);
+                }
+                let V=(a,e)=>{$T(a).style.display=e?"none":"block"};
+
+
+                function getCap4a(login=$T("login").value){
+                    get("/auth/?cap4a-mtd=html&login="+login, (data)=>{
+                        $T("cap4a").innerHTML = data;
+                    });
+                    $T("cap4a_answer").value = "";
+                    $T("cap4a_module").style.visibility="visible";
+                    V("cap4a_view",false);V("cap4a_view_success",true);
+                }
+
+
+                function checkCap4a(){
+                    let answer = $T("cap4a_answer").value;
+                    let cap4aid = $T("cap4aid").innerHTML;
+                    get("/auth/?cap4a-mtd=answer&login="+$T("login").value+"&cap4a-id="+cap4aid+"&cap4a-answer="+answer,(data)=>{
+                        if(data.startsWith("ERROR")){
+                            let code = data.split(" ")[1];
+                            if(code=="NO_CAP4A"){
+                                getCap4a();
+                            }
+                            return;
+                        }
+                        cryptokey = data;
+                        console.log("KEY: "+cryptokey);
+                        V("cap4a_view",true);V("cap4a_view_success",false);
+                        if(curMode==2){
+                            $T("password").style.display="inline-block";
+                        }
+                    });
+                }
+    
+                
+                var flag = false;
+
+                function getLogin(){
+                    let login = $T("login").value.trim();
+                    return isValidLogin(login)?login:null;
+                }
+
+
+                function getPassword(){
+                    let psw = $T("password").value;
+                    return isValidPsw(psw)?psw:null;
+                } 
+
+
+                function showCap4a(s=false){
+                    if(flag)return;
+                    if(cryptokey == ""){
+                        let login = getLoginM();
+                        if(!login)return;
+                        flag = true;
+                        getCap4a(login);
+                        V("cap4a_view",s);V("cap4a_view_success",!s);
+                    } else{
+                        flag = true;
+                        V("cap4a_view",!s);V("cap4a_view_success",!s);
+                    }
+                }
+
+
+                function setMsg(msg,l=true){
+                    $T(l?"login_msg":"password_msg").innerText=msg;
+                }
+
+
+                var prevLogin = null;
+                var prevResult = null;
+                function existLogin(login){
+                    if(prevLogin==login && prevResult){
+                        return prevResult;
+                    }
+                    prevLogin = login;
+                    let res = syncGet("/auth/check_mail?login="+login+"&crypt-key="+cryptokey);
+                    if(res=="TRUE")prevResult = true;
+                    else if(res=="FALSE")prevResult = false;
+                    else{ 
+                        prevResult = null;
+                        console.log(res);
+                    }
+                    return prevResult;
+                }
+
+
+                function getGoTo(){
+                    let urlParams = new URLSearchParams(window.location.search);
+                    let goto = urlParams.get('goto');
+                    if(goto==""||goto==null)return "/";
+                    
+                    function ofMini(link){
+                        console.log(link);
+                        if(link==null || link=="")return null;
+                        function ofMin0(raw){
+                            return raw.replaceAll("->","/").replaceAll("-e>","=")
+                                    .replaceAll("-q>","?").replaceAll("-n>","&");
+                        }
+                        switch (link.charAt(0)) {
+                            case 'H':return "https://" + ofMin0(link.substring(1));
+                            case 'S':return "/";
+                            case 'I':return '/'+ ofMin0(link.substring(1));
+                            default:return "http://" + ofMin0(link);
+                        };
+                    }
+                    return ofMini(goto);
+                };
+
+
+                function getLoginM(exist=true){
+                    let lgn = getLogin();
+                    if(!lgn){
+                        setMsg("Некорректный адрес почты!");
+                    } else{
+                        if(cryptokey!=""){
+                            if(existLogin(lgn)){
+                                if(!exist){
+                                    setMsg("Эта почта уже используется!");
+                                    return null;
+                                } else setMsg("");
+                            } else {
+                                if(exist){
+                                    setMsg("Пользователь не найден");
+                                    return null;
+                                } else setMsg("");
+                            }
+                        } else{
+                            setMsg("");
+                        }
+                    }
+                    return lgn;
+                }
+
+
+                function getPasswordM(){
+                    let psw = $T("password").value;
+                    if(isValidPsw(psw)){
+                        setMsg("",false);
+                        return psw;
+                    } else{
+                        if(length<8){
+                            setMsg("Минимальная длинна - 8 символов!",false);
+                        } else if(length>24){
+                            setMsg("Минимальная длинна - 24 символа!",false);
+                        } else if(!/(?=.*[0-9])/.test(psw)){
+                            setMsg("Пароль должен содержать не менее 1 цифры!",false);
+                        } else if(!/(?=.*[a-z])/.test(psw)){
+                            setMsg("Пароль должен содержать не менее 1 прописной буквы!",false);
+                        } else if(!/(?=.*[A-Z])/.test(psw)){
+                            setMsg("Пароль должен содержать не менее 1 заглавной буквы!",false);
+                        } else {
+                            setMsg("Пароль содержит недопустимые символы! ");
+                        }
+                    }
+                    return null;
+                }
+    
+
+                var cfmMode = false;
+                function onLoginClick(){
+                    if(cfmMode){
+                        if(curMode==0 || curMode==2){
+                            let login = getLogin();
+                            let key = $T("login_btn_code").value;
+                            get("/auth/confirm_"+(curMode==0?"create":"update")+"?api=1&login="+login+"&crypt-key="+key,(res)=>{
+                                if(res.startsWith("SUCCESS")){
+                                    window.location = getGoTo();
+                                }
+                            })
+                        }
+                    } else {
+                        if(cryptokey == ""){
+                            if(!flag){
+                                showCap4a();
+                            } else{
+                                let login = getLoginM();
+                                if(login)getCap4a(login);
+                            }
+                            return;
+                        } else{
+                            if(curMode==0 || curMode==2){
+                                sendMail();
+                            }
+                            if(curMode==1){
+                                auth();
+                            }
+                        }
+                    }
+                }
+
+
+                function auth(){
+                    let login = getLoginM(true);
+                    if(!login)return;
+                    let password = getPasswordM();
+                    if(!password)return; 
+                    post("/auth/api/login", login+";"+password+";"+cryptokey,(answ)=>{
+                        if(answ.startsWith("ERROR")){
+                            let code = answ.split(" ")[1];
+                            if(code == "NO_CAP4A"){
+                                cryptokey = "";
+                                showCap4a();
+                            } else {
+                                setMsg("Неправильный пароль",false);
+                            }
+                            console.log(answ);
+                        } else{
+                            setTimeout(()=>{window.location = getGoTo();},200);
+                        }
+                    });
+                }
+
+
+                function inputMailCode(){
+                    cfmMode = true;
+                    V("login_btn_code",false);
+                    $T("login_btn").textContent = curMode==2?"Обновить":"Создать аккаунт";
+                }
+                
+    
+                function sendMail(){
+                    let login = getLoginM(curMode==2);
+                    if(!login)return;
+                    let password = getPasswordM();
+                    if(!password)return;                    
+                    post("/auth/api/mail-"+(curMode==2?"restore":"newuser"), login+";"+password+";"+cryptokey,(answ)=>{
+                        if(answ.startsWith("ERROR")){
+                            let code = answ.split(" ")[1];
+                            if(code == "NO_CAP4A"){
+                                cryptokey = "";
+                                showCap4a();
+                            }
+                            console.log(code);
+                        } else{
+                            inputMailCode();
+                        }
+                    });
+                }
+            </script>
+            
+            <script>
+
+                function updateForm(mode=1){
+                    curMode = mode;
+
+                    var li = $T("login_info");
+                    li.innerHTML = "";
+                    function addInf(txt, func){
+                        let el1 = $NW("div");
+                        el1.textContent = txt;
+                        el1.className = "__d1";
+                        el1.onclick = func;
+                        li.append(el1);
+                    }
+                    function ins(a,b,p,s=true){
+                        $T("login_header").textContent=a;
+                        $T("login_btn").textContent=b;
+                        $T("password").style.display=s?"inline-block":"none";
+                        $T("password").placeholder=p;
+                    }
+                    V("login_btn_code",true);
+                    let m1 = "Отправить код подтверждения";
+                    let m2 = "Создать аккаунт";
+                    let m3 = "пароль";
+                    if(mode==0){
+                        addInf("У меня уже есть учетная запись", ()=>{updateForm(1)});
+                        ins("Регистрация", m1, m3, true);
+                    } else if(mode==1){
+                        addInf("Не помню пароль", ()=>{updateForm(2)});
+                        addInf(m2, ()=>{updateForm(0)});
+                        ins("Авторизация", "Войти", m3, true)
+                    } else if(mode==2){
+                        addInf("Войти в учетную запись", ()=>{updateForm(1)});
+                        addInf(m2, ()=>{updateForm(0)});
+                        ins("Обновить пароль", m1, "новый пароль", false);
+                    }
+                }
+            </script>
+
+            <script dev>updateForm()</script>
+
+        </reactive>
+
+
+        <script async>
+            const start = new Date();
+            var bufer = "";
+
+            function addVec(dX=0, dY=0){
+                function normal(d){
+                    if(d>15)d = 15;
+                    if(d<-16)d = -16;
+                    return d;
+                }
+                num = ((((new Date() - start)<<5) | normal(dX))<<5) | normal(dY);
+                bufer+=String.fromCharCode(num>>24 & 255,num>>16 & 255,num>>8 & 255,num & 255);
+            }
+
+            function scanMouse(){
+                const mmListener=e=>addVec(e.movementX, e.movementY);
+                document.addEventListener("mousemove",mmListener);
+                setTimeout(()=>{
+                    document.removeEventListener("mousemove",mmListener);
+                    console.log(bufer);
+                }, 15000);
+            }
+            
+            /*scanMouse();*/
+        </script>
+    </body>
+
+</html>
+
+
+
+

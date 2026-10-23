@@ -1,0 +1,9 @@
+ {
+    "type": "minecraft:crafting_shapeless",
+    "ingredients": [
+      {"item": "te4_spships:plate_armored", "count": 4}
+    ],
+    "result": {
+      "item": "te4_spships:armored_block"
+    }
+}

@@ -1,0 +1,36 @@
+plugins {
+    id 'java'
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'C:/Users/Te4hnoPlus/IdeaProjects/TsonConfigurations/src/main/java'
+            srcDir 'C:/Users/Te4hnoPlus/IdeaProjects/te4_async_utls/src/main/java'
+        }
+    }
+}
+jar {
+    manifest {
+        attributes(
+                'Class-Path': 'plus.app',
+                'Main-Class': 'plus.app.Main'
+        )
+    }
+}

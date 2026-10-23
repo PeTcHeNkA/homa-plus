@@ -1,0 +1,94 @@
+ALTERNATIVE_CONFIG_PATH: none
+system:
+  bg:
+    cmd: 1009010
+  msg_no_enegry:
+  - No energy!
+  msg_on_teleport:
+  - Teleported!
+tpguis:
+  alcor:
+    connections:
+    - orbit
+    - alcor
+  network:
+    connections:
+    - neartp
+    - plato
+    - lab18x
+labels:
+  orbit:
+    price: 50
+    lore:
+    - lore1
+    - lore2
+    big_cmd: 1009012
+    small_cmd: 1009016
+    loc:
+      ==: org.bukkit.Location
+      world: world
+      x: 1991.5
+      y: 99.1
+      z: 0.5
+      pitch: 2.1
+      yaw: 90.0
+  alcor:
+    price: 0
+    lore:
+    - lore1
+    - lore2
+    big_cmd: 1009011
+    small_cmd: 1009015
+    loc:
+      ==: org.bukkit.Location
+      world: world
+      x: -553.5
+      y: 65.1
+      z: 321.5
+      pitch: 2.1
+      yaw: 90.0
+  plato:
+    price: 200
+    lore:
+    - lore1
+    - lore2
+    big_cmd: 1009013
+    small_cmd: 1009017
+    loc:
+      ==: org.bukkit.Location
+      world: world
+      x: 153.5
+      y: 65.1
+      z: 121.5
+      pitch: 2.1
+      yaw: -180.0
+  lab18x:
+    price: 200
+    lore:
+    - lore1
+    - lore2
+    big_cmd: 1009014
+    small_cmd: 1009018
+    loc:
+      ==: org.bukkit.Location
+      world: world
+      x: 762.5
+      y: 76.1
+      z: -429.5
+      pitch: 2.1
+      yaw: 90.0
+  neartp:
+    price: 150
+    lore:
+    - lore1
+    - lore2
+    big_cmd: 1009011
+    small_cmd: 1009015
+    loc:
+      ==: org.bukkit.Location
+      world: world
+      x: -443.5
+      y: 66.1
+      z: 166.5
+      pitch: 2.1
+      yaw: 0.0

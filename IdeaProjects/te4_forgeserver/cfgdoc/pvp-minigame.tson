@@ -1,0 +1,52 @@
+//Шаблон конфига мини-игры PVP
+{
+	map = {
+		//Список позиций, смотри lobby-teleporer
+		positions = [],
+		//Запретить игрокам ломать блоки?
+		immutable = true
+	},
+	msg = {
+		//Используется адаптивное сообщение
+		on-add = "§eИгрок %entity.name% присоединился",
+
+		on-kill = {
+			winner = "§aПобеда",
+			other  = "§cПоражение"
+		},
+
+		game = {
+			first-round = "§eПоединок скоро начнется",
+			new-round   = "§e Раунд %arg:rounds.cur% / %arg:rounds.max%",
+			timeout = {
+				common = "§eОсталось мало времени!",
+				game   = "§eВремя вышло!",
+				preparation "§eБой начался",
+			}
+		},
+
+		end = {
+			win = "§aПобеда",
+			lose = "§cПоражение",
+			mid  = "§3Ничья",
+		}
+	},
+
+	game = {
+		preparation-ticks = 200,  //20 * 10 (10 сек)
+		common-ticks      = 1800, //20 * 90 (1.5 мин)
+		timeout-ticks     = 600,  //20 * 30 (30 сек)
+		win-delay-ticks   = 200,
+		next-round-delay  = 200,
+		def-rounds        = 3,
+
+		//Используется KitMap
+		kits = {}
+
+		rewards = {
+			win  = {},
+			lose = {},
+			mid  = {}
+		}
+	}
+}

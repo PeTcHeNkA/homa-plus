@@ -1,0 +1,138 @@
+﻿<fw:AcrylicWindow x:Class="GF2_RU_Launch.Editor"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:GF2_RU_Launch"
+        xmlns:fw="clr-namespace:SourceChord.FluentWPF;assembly=FluentWPF" xmlns:col="clr-namespace:System.Collections;assembly=mscorlib"
+                  mc:Ignorable="d"
+        Title="Girls Frontline 2: Translation table editor" Height="350" Width="650" MinHeight="300" MinWidth="610"
+        
+        TintColor="{DynamicResource L_Background_Main_Color}" 
+        FallbackColor="{DynamicResource L_Background_Main_Color}"
+
+        NoiseOpacity="0" 
+        TintOpacity="0.65"       
+                  
+        AcrylicWindowStyle="NoIcon"
+        fw:AcrylicWindow.AcrylicAccentState="BlurBehind" Background="{StaticResource L_Background_Second}" 
+        FontFamily="Arial" RenderTransformOrigin="0.5,0.5" BorderBrush="{StaticResource L_Border}">
+    <Grid>
+        <!-- Header -->
+
+        <Grid Background="{StaticResource Header}" Panel.ZIndex="1000" Height="30" VerticalAlignment="Top">
+            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Margin="-67,0,0,0" Width="249" FontSize="14"
+                       Foreground="{StaticResource Header_Text}"
+                       >
+                Girls Frontline 2: Translation table editor
+            </TextBlock>
+        </Grid>
+
+        <!-- Menu -->
+
+        <Menu x:Name="MENU" Height="18" VerticalAlignment="Top" Margin="0,30,0,0" Background="{StaticResource Header}">
+            <MenuItem Header="Файл" >
+                <MenuItem Header="Импорт">
+                    <MenuItem Header="Шаблон .bytes" Click="onClickLoad"></MenuItem>
+                    <MenuItem Header="Релиз .bytes" Click="onClickLoadSecond"></MenuItem>
+                    <MenuItem Header="Карта переводов .json" Click="onClickLoadLang"></MenuItem>
+                    <MenuItem Header="Папка с переводами" Click="onClickLoadLandDir"></MenuItem>
+                    <MenuItem Header="Установленный пакет локализации" Click="onClickLoadActivePack"></MenuItem>
+                    <MenuItem Header="Правила сортировки .txt" Click="onClicImportSortTable"></MenuItem>
+                </MenuItem>
+                <MenuItem Header="Экспорт" >
+                    <MenuItem Header="Релиз .bytes" Click="onClickExportLangBytes"></MenuItem>
+                    <MenuItem Header="Карта переводов .json">
+                        <MenuItem Header="Текущая открытая таблица" Click="exportCurrentView"></MenuItem>
+                        <MenuItem Header="Полная, упрощенная" Click="onClickExportLangJson"></MenuItem>
+                        <MenuItem Header="Полная, С ID" Click="onClickExportLangJsonID"></MenuItem>
+                        <MenuItem Header="Не переведенная часть">
+                            <MenuItem Header="Упрощенная" Click="onClickExportNotTranslated"></MenuItem>
+                            <MenuItem Header="С ID" Click="onClickExportNotTranslatedID"></MenuItem>
+                            <MenuItem Header="Упрощенная, включая не переводимое" Click="onClickExportNotTranslatedALL"></MenuItem>
+                            <MenuItem Header="С ID, включая не переводимое" Click="onClickExportNotTranslatedIDALL"></MenuItem>
+                        </MenuItem>
+                        <MenuItem Header="Разделенная по группам" Click="onClickExportByGroups">
+
+                        </MenuItem>
+                    </MenuItem>
+                </MenuItem>
+                <Separator/>
+                <MenuItem Header="Закрыть таблицу" Click="onClickClose" Foreground="{DynamicResource Editor_Del}"></MenuItem>
+            </MenuItem>
+            <MenuItem Header="Фильтр">
+                <MenuItem Header="По ключам" Click="clickKeyFilter"></MenuItem>
+                <MenuItem Header="По значениям" Click="clickValueFilter"></MenuItem>
+                <MenuItem Header="Пустые" >
+                    <MenuItem Header="Показать" Click="onClickShowEmpty" Foreground="{DynamicResource Editor_Add}"></MenuItem>
+                    <MenuItem Header="Скрыть" Click="onClickHideEmpty" Foreground="{DynamicResource Editor_Del}"></MenuItem>
+                </MenuItem>
+                <MenuItem Header="Непереводимое" >
+                    <MenuItem Header="Показать" Click="onClickShowNonTranslatable" Foreground="{DynamicResource Editor_Add}"></MenuItem>
+                    <MenuItem Header="Скрыть" Click="onClickHideNonTranslatable" Foreground="{DynamicResource Editor_Del}"></MenuItem>
+                </MenuItem>
+                <!--
+                <MenuItem Header="Слияние по значению">
+                    <MenuItem Header="Включить" Click="onClickEnableMerge" Foreground="#FF318C00"></MenuItem>
+                    <MenuItem Header="Выключить" Click="onClickDisableMerge" Foreground="{DynamicResource Editor_Del}"></MenuItem>
+                </MenuItem> 
+                <Separator/> -->
+                <MenuItem Header="Сбросить" Click="clickResetFilter" Foreground="{DynamicResource Editor_Del}"></MenuItem>
+            </MenuItem>
+            <MenuItem Header="Сортировка">
+                <MenuItem Header="По умолчанию" Click="onClicSortByDefRules"></MenuItem>
+                <MenuItem Header="По правилам" Click="onClicSortByRules"></MenuItem>
+                <Separator/>
+                <MenuItem Header="Сбросить правила по умолчанию" Click="onClicResetSortTable" Foreground="{DynamicResource Editor_Del}"></MenuItem>
+            </MenuItem>
+        </Menu>
+
+        <!-- Table -->
+        <DataGrid x:Name="TTable" AutoGenerateColumns="False" IsEnabled="True" Margin="0,48,0,0" 
+                  Background="{DynamicResource Header}" BorderThickness="0"
+        >
+            <DataGrid.ColumnHeaderStyle>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource Bottons_Border}"/>
+                    <Setter Property="BorderThickness" Value="1"/>
+                </Style>
+            </DataGrid.ColumnHeaderStyle>
+
+            <DataGrid.RowHeaderStyle>
+                <Style TargetType="DataGridRowHeader">
+                    <Setter Property="Background" Value="Transparent"/>
+                </Style>
+            </DataGrid.RowHeaderStyle>
+
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow">
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="BorderBrush" Value="Transparent"/>
+                    <Setter Property="BorderThickness" Value="0"/>
+                </Style>
+            </DataGrid.RowStyle>
+
+            <DataGrid.Columns>
+                <DataGridTextColumn x:Name="TT_ID" Binding="{Binding Id}" Width="50" CanUserResize="True" IsReadOnly="True">
+                    <DataGridTextColumn.Header>
+                        <TextBlock Margin="5,0,0,0" HorizontalAlignment="Center" Text="ID"/>
+                    </DataGridTextColumn.Header>
+                </DataGridTextColumn>
+                <DataGridTextColumn x:Name="TT_ORG" Binding="{Binding Original}" Width="290" CanUserResize="True">
+                    <DataGridTextColumn.Header>
+                        <TextBlock Margin="5,0,0,0" HorizontalAlignment="Center" Text="Оригинал"/>
+                    </DataGridTextColumn.Header>
+                </DataGridTextColumn>
+                <DataGridTextColumn x:Name="TT_RES" Binding="{Binding Value}" Width="300" CanUserResize="True">
+                    <DataGridTextColumn.Header>
+                        <TextBlock Margin="5,0,0,0" HorizontalAlignment="Center" Text="Перевод"/>
+                    </DataGridTextColumn.Header>
+                </DataGridTextColumn>
+            </DataGrid.Columns>
+
+
+        </DataGrid>
+
+    </Grid>
+</fw:AcrylicWindow>

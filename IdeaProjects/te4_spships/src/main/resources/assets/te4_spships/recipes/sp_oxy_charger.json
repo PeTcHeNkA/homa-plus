@@ -1,0 +1,20 @@
+ {
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+      "ABA",
+      "GSG",
+      "PMP"
+    ],
+    "key": {
+      "S": {"item": "te4_spships:sp_machine_module"},
+      "B": {"item": "te4_spships:oxy_ballon_l1"},
+      "P": {"item": "te4_spships:plate_machine"},
+      "G": {"item": "te4_spships:iron_gear"},
+      "M": {"item": "te4_spships:plate_mefril"},
+      "A": {"item": "te4_spships:plate_alumine"}
+    },
+    "result": {
+      "item": "te4_spships:sp_oxy_charger",
+      "count": 1
+    }
+}

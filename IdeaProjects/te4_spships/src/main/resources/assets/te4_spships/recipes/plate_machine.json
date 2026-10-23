@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " A ",
+    "ICI",
+    " A "
+  ],
+  "key": {
+    "A": {"item": "te4_spships:alumine_ingot"},
+    "C": {"item": "te4_spships:copper_ingot"},
+    "I": {"item": "te4_spships:plate_iron"}
+
+  },
+  "result": {
+    "item": "te4_spships:sp_craft_table",
+    "count": 1
+  }
+}

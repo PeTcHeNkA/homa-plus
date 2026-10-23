@@ -1,0 +1,8 @@
+name: MPCKit
+version: '1.1a'
+main: plus.mpck.MPCKit
+api-version: '1.16'
+authors:
+  - 'HomaPlus'
+softdepend:
+  - 'PlaceholderAPI'

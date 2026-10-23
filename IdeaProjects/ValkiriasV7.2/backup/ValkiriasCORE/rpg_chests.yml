@@ -1,0 +1,179 @@
+ALTERNATIVE_CONFIG_PATH: none
+chests:
+  test:
+    display: Name of chest
+    size: 45
+    items:
+    - I:1.0:1:test
+    - I:1.0:1:black_box
+    - I:1.0:1:coil
+    - I:1.0:1:electronick
+    - I:1.0:1:gears
+    - I:1.0:1:hladogent
+    - I:1.0:1:metall_1
+    - I:1.0:1:plate_1
+    - I:1.0:1:plate_2
+    - I:1.0:1:blick_1
+    - I:1.0:1:blick_2
+    - I:1.0:1:blick_3
+    - I:1.0:1:blick_4
+    - I:1.0:1:blick_b1
+    - I:1.0:1:blick_b2
+    - I:1.0:1:blick_b3
+    - I:1.0:1:blick_b4
+    count: e
+  spawn_1:
+    display: Припасы
+    size: 18
+    items:
+    - I:0.3:1:gears
+    - I:0.3:1:coil
+    - I:0.3:1:coil
+    - I:0.3:1:metall_1
+    - W:0.5:1:chiaw&0&1&-1=2&0&0&0&0&0&0
+    - W:0.5:1:chiaw&0&2&-1=2&0&0&0&0&0&0
+    - I:1.00:1:paiok
+    count: e
+  small_fixbox:
+    display: Малый ящик инструемнтов
+    size: 18
+    items:
+    - I:0.05:1:black_box
+    - I:0.34:1:coil
+    - I:0.25:1:electronick
+    - I:0.50:2:gears
+    - I:0.25:2:gears
+    - I:0.25:1:metall_1
+    - I:0.20:1:plate_1
+    - I:0.15:1:plate_2
+    - I:0.50:1:paiok
+    - I:0.35:1:konserva
+    - I:0.25:1:energetic
+    count: e
+  big_fixbox:
+    display: Большой ящик инструемнтов
+    size: 27
+    items:
+    - I:0.15:1:black_box
+    - I:0.5:1:coil
+    - I:0.45:1:electronick
+    - I:0.75:3:gears
+    - I:0.25:2:gears
+    - I:0.25:1:gears
+    - I:0.35:1:metall_1
+    - I:0.35:1:plate_1
+    - I:0.25:1:plate_2
+    - I:0.25:1:gears_2
+    - I:0.50:1:paiok
+    - I:1.00:1:paiok
+    - I:0.25:1:buter
+    - I:0.50:1:konserva
+    - I:0.25:1:energetic
+    - I:0.25:1:energetic_l2
+    count: e
+  sclad_1:
+    display: Склад
+    size: 54
+    items:
+    - I:1.0:1:black_box
+    - I:0.7:1:coil
+    - I:0.5:1:electronick
+    - I:0.75:3:gears
+    - I:0.25:2:gears
+    - I:0.25:2:gears
+    - I:0.25:1:gears
+    - I:0.75:1:metall_1
+    - I:0.5:1:plate_1
+    - I:0.5:1:plate_1
+    - I:0.35:1:plate_2
+    - I:0.35:1:gears_2
+    - I:0.2:1:hladogent
+    - I:0.50:1:paiok
+    - I:0.50:1:paiok
+    - I:1.00:2:paiok
+    - I:1.0:1:konserva
+    - I:0.50:1:konserva
+    - I:0.50:1:energetic
+    - I:0.25:1:energetic
+    - I:0.25:1:energetic_l2
+    count: e
+  crystalls:
+    display: Ящик с эфиром
+    size: 18
+    items:
+    - I:0.15:2:blick_1
+    - I:0.15:2:blick_2
+    - I:0.15:2:blick_3
+    - I:0.15:2:blick_4
+    - I:0.34:1:blick_1
+    - I:0.34:1:blick_2
+    - I:0.34:1:blick_3
+    - I:0.34:1:blick_4
+    - I:0.075:1:blick_b1
+    - I:0.075:1:blick_b2
+    - I:0.075:1:blick_b3
+    - I:0.075:1:blick_b4
+    - I:0.50:1:mint_stick
+    - I:1.00:2:mint_stick
+    count: e
+  crystalls_b:
+    display: Большой ящик эфира
+    size: 36
+    items:
+    - I:0.55:2:blick_1
+    - I:0.55:2:blick_2
+    - I:0.55:2:blick_3
+    - I:0.55:2:blick_4
+    - I:0.27:1:blick_1
+    - I:0.27:1:blick_2
+    - I:0.27:1:blick_3
+    - I:0.27:1:blick_4
+    - I:0.34:1:blick_b1
+    - I:0.34:1:blick_b2
+    - I:0.34:1:blick_b3
+    - I:0.34:1:blick_b4
+    - I:0.1:1:blick_b1
+    - I:0.1:1:blick_b2
+    - I:0.1:1:blick_b3
+    - I:0.1:1:blick_b4
+    - I:0.50:1:mint_stick
+    - I:0.50:2:mint_stick
+    - I:0.50:2:mint_stick
+    - I:1.00:3:mint_stick
+    count: e
+  food_box:
+    display: Коробка с провизией
+    size: 18
+    items:
+    - I:0.25:1:gears
+    - I:0.25:1:metall_1
+    - I:0.25:1:coil
+    - I:0.35:1:pizza
+    - I:0.35:1:pizza
+    - I:0.35:1:konserva
+    - I:1.00:2:paiok
+    - I:0.50:1:paiok
+    - I:0.25:1:tofu
+    - I:0.35:1:buter
+    - I:0.15:1:crevet_ball
+    - I:0.35:1:mint_stick
+    - I:0.35:1:mint_stick
+    - I:1.00:1:mint_stick
+    count: e
+  big_food_box:
+    display: Коробка с провизией
+    size: 36
+    items:
+    - I:0.25:1:gears
+    - I:0.25:1:metall_1
+    - I:0.25:1:coil
+    - I:0.45:1-2:pizza
+    - I:0.35:1:pizza
+    - I:0.35:1:konserva
+    - I:1.00:2:paiok
+    - I:0.50:1-2:paiok
+    - I:0.25:1:tofu
+    - I:0.35:1:buter
+    - I:0.25:1:crevet_ball
+    - I:1.0:1-3:mint_stick
+    count: e

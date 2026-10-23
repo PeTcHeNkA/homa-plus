@@ -1,0 +1,4 @@
+name: MythicMobs_Patched
+version: '${version}'
+main: mythicmobs_patched.mythicmobs_patched.MythicMobs_Patched
+api-version: 1.16

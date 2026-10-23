@@ -1,0 +1,12 @@
+name: CameraPlus
+version: 5.0
+main: plus.Camera
+api-version: 1.17
+depend: [ProtocolLib]
+commands:
+  cam:
+    description: cam
+    usage: /cam
+  c_test:
+    description: test
+    usage: /c_test

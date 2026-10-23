@@ -1,0 +1,3 @@
+name: TJoinControl
+version: '${version}'
+main: plus.tjo.TJoMain

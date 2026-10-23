@@ -1,0 +1,47 @@
+quests:
+  start:
+    type: DIALOG
+    uid: 1 #если нет, то не будет сохраняться в истории
+    #depend_uid: 1 #если нет, не будет требований к квесту
+    take:
+      ==: org.bukkit.Location
+      world: world
+      x: 0.0
+      y: 0.0
+      z: 0.0
+      pitch: 0.0
+      yaw: 0.0
+    take_range: 10
+    interact_location:
+      ==: org.bukkit.Location
+      world: world
+      x: 0.0
+      y: 0.0
+      z: 0.0
+      pitch: 0.0
+      yaw: 0.0
+    interact_distance: 10
+    dialogs:
+      main:         #главный диалог. Обязателен!
+        message:
+          - "string_1"
+          - "string_2"
+      info:
+        final: true #иначе false,
+        message:
+          - "string_1"
+          - "string_2"
+    lore:
+      - "string_1"
+      - "string_2"
+    complate:
+      - "string_1"
+      - "string_2"
+    exp: 10
+    get_items:
+      - "I:1.0:1:test"
+    choises:                    #только для типа CHOICE
+      - "help:start"
+    need_item_in_hand: "I:test" #только для типа ITEM
+    need_item_in_hand_amount: 1
+    next_quest: start

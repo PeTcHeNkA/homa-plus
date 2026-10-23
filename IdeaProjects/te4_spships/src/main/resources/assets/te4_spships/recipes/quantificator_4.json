@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "PCC",
+    "AFB",
+    "PCC"
+  ],
+  "key": {
+    "C": {"item": "te4_spships:copper_coil"},
+    "P": {"item": "te4_spships:plate_machine"},
+    "A": {"item": "te4_spships:aether_crystal"},
+    "B": {"item": "te4_spships:plate_armored"},
+    "F": {"item": "te4_spships:sp_furnace"}
+  },
+  "result": {
+    "item": "te4_spships:quantificator",
+    "data": 2,
+    "count": 1
+  }
+}

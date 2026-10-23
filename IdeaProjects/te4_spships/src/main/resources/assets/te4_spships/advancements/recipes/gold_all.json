@@ -1,0 +1,12 @@
+{"parent": "minecraft:recipes/root",
+  "requirements": [["has_item"]],
+  "rewards": {"recipes": [
+    "te4_spships:gold_plate"
+  ]},
+  "criteria": {
+    "has_item": {"trigger": "minecraft:inventory_changed",
+      "conditions": {"items": [{
+        "item": "minecraft:gold_ingot"
+      }]}
+    }
+}}

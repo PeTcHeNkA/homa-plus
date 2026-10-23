@@ -1,0 +1,31 @@
+plugins {
+    id 'java'
+}
+
+group = 'plus.bika'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    maven {
+        url = uri("https://oss.sonatype.org/content/repositories/snapshots")
+    }
+}
+
+dependencies {
+//    testImplementation platform('org.junit:junit-bom:5.10.0')
+//    testImplementation 'org.junit.jupiter:junit-jupiter'
+//    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    def tfVersion = '1.1.0'
+    implementation "org.tensorflow:tensorflow-core-api:$tfVersion"
+    implementation "org.tensorflow:tensorflow-framework:$tfVersion"
+    //implementation "org.tensorflow:tensorflow-core-native:$tfVersion:linux-x86_64-gpu"
+//    implementation "org.tensorflow:tensorflow-core-native:$tfVersion:macosx-arm64"
+    implementation "org.tensorflow:tensorflow-core-native:$tfVersion:windows-x86_64"
+    //implementation "org.tensorflow:tensorflow-core-native:$tfVersion:windows-x86_64-gpu"
+}
+
+test {
+    useJUnitPlatform()
+}

@@ -1,0 +1,16 @@
+ {
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+      "LLL",
+      "LAL",
+      "LLL"
+    ],
+    "key": {
+      "L": {"item": "te4_spships:copper_ingot"},
+      "A": {"item": "minecraft:iron_ingot"}
+    },
+    "result": {
+      "item": "te4_spships:copper_coil",
+      "count": 3
+    }
+}

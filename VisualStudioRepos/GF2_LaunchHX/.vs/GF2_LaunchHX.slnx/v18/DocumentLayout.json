@@ -1,0 +1,92 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\HomaPlus\\source\\repos\\GF2_LaunchHX\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{15BE3015-7D68-E368-29EB-A14651A9450C}|GF2_LaunchHX\\GF2_LaunchHX.csproj|c:\\users\\homaplus\\source\\repos\\gf2_launchhx\\gf2_launchhx\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{15BE3015-7D68-E368-29EB-A14651A9450C}|GF2_LaunchHX\\GF2_LaunchHX.csproj|solutionrelative:gf2_launchhx\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{15BE3015-7D68-E368-29EB-A14651A9450C}|GF2_LaunchHX\\GF2_LaunchHX.csproj|c:\\users\\homaplus\\source\\repos\\gf2_launchhx\\gf2_launchhx\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{15BE3015-7D68-E368-29EB-A14651A9450C}|GF2_LaunchHX\\GF2_LaunchHX.csproj|solutionrelative:gf2_launchhx\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{15BE3015-7D68-E368-29EB-A14651A9450C}|GF2_LaunchHX\\GF2_LaunchHX.csproj|c:\\users\\homaplus\\source\\repos\\gf2_launchhx\\gf2_launchhx\\settings.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{15BE3015-7D68-E368-29EB-A14651A9450C}|GF2_LaunchHX\\GF2_LaunchHX.csproj|solutionrelative:gf2_launchhx\\settings.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{15BE3015-7D68-E368-29EB-A14651A9450C}|GF2_LaunchHX\\GF2_LaunchHX.csproj|c:\\users\\homaplus\\source\\repos\\gf2_launchhx\\gf2_launchhx\\app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{15BE3015-7D68-E368-29EB-A14651A9450C}|GF2_LaunchHX\\GF2_LaunchHX.csproj|solutionrelative:gf2_launchhx\\app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 120,
+          "SelectedChildIndex": 3,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{e5c86464-96be-4d7c-9a8b-abcb3bbf5f92}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "App.xaml",
+              "DocumentMoniker": "C:\\Users\\HomaPlus\\source\\repos\\GF2_LaunchHX\\GF2_LaunchHX\\App.xaml",
+              "RelativeDocumentMoniker": "GF2_LaunchHX\\App.xaml",
+              "ToolTip": "C:\\Users\\HomaPlus\\source\\repos\\GF2_LaunchHX\\GF2_LaunchHX\\App.xaml",
+              "RelativeToolTip": "GF2_LaunchHX\\App.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-07-23T10:28:14.463Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "MainWindow.xaml",
+              "DocumentMoniker": "C:\\Users\\HomaPlus\\source\\repos\\GF2_LaunchHX\\GF2_LaunchHX\\MainWindow.xaml",
+              "RelativeDocumentMoniker": "GF2_LaunchHX\\MainWindow.xaml",
+              "ToolTip": "C:\\Users\\HomaPlus\\source\\repos\\GF2_LaunchHX\\GF2_LaunchHX\\MainWindow.xaml",
+              "RelativeToolTip": "GF2_LaunchHX\\MainWindow.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-07-23T10:20:35.717Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Settings.xaml",
+              "DocumentMoniker": "C:\\Users\\HomaPlus\\source\\repos\\GF2_LaunchHX\\GF2_LaunchHX\\Settings.xaml",
+              "RelativeDocumentMoniker": "GF2_LaunchHX\\Settings.xaml",
+              "ToolTip": "C:\\Users\\HomaPlus\\source\\repos\\GF2_LaunchHX\\GF2_LaunchHX\\Settings.xaml",
+              "RelativeToolTip": "GF2_LaunchHX\\Settings.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-07-23T10:23:25.287Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "MainWindow.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\HomaPlus\\source\\repos\\GF2_LaunchHX\\GF2_LaunchHX\\MainWindow.xaml.cs",
+              "RelativeDocumentMoniker": "GF2_LaunchHX\\MainWindow.xaml.cs",
+              "ToolTip": "C:\\Users\\HomaPlus\\source\\repos\\GF2_LaunchHX\\GF2_LaunchHX\\MainWindow.xaml.cs",
+              "RelativeToolTip": "GF2_LaunchHX\\MainWindow.xaml.cs",
+              "ViewState": "AgIAADEAAAAAAAAAAAAYwEUAAAAOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-22T18:59:03.621Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

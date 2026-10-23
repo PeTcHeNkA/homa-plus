@@ -1,0 +1,15 @@
+plugins {
+    id 'java'
+}
+
+group = 'plus'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "com.alphacephei:vosk:0.3.45"
+    compileOnly "com.google.code.gson:gson:2.11.0"
+}

@@ -1,0 +1,43 @@
+plugins {
+    id 'java'
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+def jme3 = [v:'3.6.1-stable', g:'org.jmonkeyengine']
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+
+    implementation 'it.unimi.dsi:fastutil:8.5.12'
+
+
+    implementation "${jme3.g}:jme3-core:${jme3.v}"
+    implementation "${jme3.g}:jme3-effects:${jme3.v}"
+
+    //test
+    implementation "${jme3.g}:jme3-examples:${jme3.v}"
+
+    implementation "${jme3.g}:jme3-desktop:${jme3.v}"
+
+}
+
+
+test {
+    useJUnitPlatform()
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'C:/Users/HomaPlus/IdeaProjects/TsonConfigurations/core/src/main/java'
+            srcDir 'C:/Users/HomaPlus/IdeaProjects/TsonConfigurations/extensions/src/main/java'
+        }
+    }
+}

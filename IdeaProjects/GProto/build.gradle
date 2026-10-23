@@ -1,0 +1,42 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
+}
+
+group = 'plus.proto'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.google.protobuf:protobuf-java:4.30.2'
+    implementation 'com.google.code.gson:gson:2.13.1'
+    implementation 'it.unimi.dsi:fastutil:8.3.1'
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'C:/Users/HomaPlus/IdeaProjects/TsonConfigurations/core/src/main/java'
+            srcDir 'C:/Users/HomaPlus/IdeaProjects/TsonConfigurations/extensions/src/main/java'
+        }
+    }
+}
+
+jar {
+    manifest {
+        attributes (
+                'Main-Class': 'plus.proto.app.Main'
+        )
+    }
+}
+
+shadowJar{
+    archiveFileName = 'Classificator.jar'
+}
+
+test {
+    useJUnitPlatform()
+}

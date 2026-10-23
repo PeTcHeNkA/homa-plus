@@ -1,0 +1,1074 @@
+package plus.fserver.server;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
+import net.minecraft.command.CommandException;
+import net.minecraft.command.ICommandSender;
+import net.minecraft.command.NumberInvalidException;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.NetworkSystem;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.PlayerChunkMapEntry;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityChest;
+import net.minecraft.util.ClassInheritanceMultiMap;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.DimensionType;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.gen.ChunkProviderServer;
+import net.minecraftforge.common.DimensionManager;
+import net.minecraftforge.common.ForgeVersion;
+import net.minecraftforge.fml.common.registry.EntityEntry;
+import net.minecraftforge.fml.common.registry.EntityRegistry;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import net.minecraftforge.server.command.TextComponentHelper;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import plus.fserver.ElcaConfig;
+import plus.fserver.api.ChatPacketBuilder;
+import plus.fserver.api.ServerCommand;
+import plus.fserver.api.WorldConstructor;
+import plus.fserver.api.anim.CameraAnimEngine;
+import plus.fserver.api.bind.ItemBind;
+import plus.fserver.api.inject.VarOnly;
+import plus.fserver.api.vanillagui.ChestGuiTemplate;
+import plus.fserver.plugin.SSPatchLoader;
+import plus.fserver.server.network.packet.SRawPacketPlayerListHeaderFooter;
+import plus.fserver.utls.EntityLodFunc;
+import plus.fserver.api.shoot.ShootRTX;
+import plus.fserver.utls.collections.ArrayListE6;
+import plus.fserver.utls.collections.ArrayListEV;
+import plus.fserver.world.addon.DumpChunkLoader;
+import plus.fserver.world.addon.EmptyConstructor;
+import plus.fserver.world.addon.MemoryWorld;
+import plus.tson.*;
+import plus.tson.utl.ByteStrBuilder;
+import plus.tson.utl.Te4HashSet;
+import java.io.File;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.text.DecimalFormat;
+import java.util.*;
+
+
+public class ElcaCommands extends ServerCommand {
+    private static final String primary  = "&b";
+    private static final String critical = "&4";
+    private static final String danger   = "&c";
+    private static final String warning  = "&e";
+    private static final String normal   = "&a";
+
+    private final List<String> completions = ImmutableList.copyOf(
+        new String[]{"version", "info", "tps", "mobs", "spawn", "hotpoints", "send", "setvar", "save", "world", "cgui", "planim", "bind"}
+    );
+    private final List<String> allVars = ImmutableList.copyOf(new String[]{
+            "time-packet-rate"            , "mean-balance-mob"            ,
+            "chunk-tick-radius-m"         , "goal-tick-rate"              ,
+            "chunk-tick-radius-s"         , "recheck-spawner-rate"        ,
+            "balance-block-tick"          , "recheck-chunks-spawner-rate" ,
+            "balance-block-critical"      , "check-to-unload-rate"        ,
+            "mean-balance-block"          , "save-world-rate"             ,
+            "navigation-cache-clean-rate" , "max-entity-collisions"       ,
+            "std-update-navigation-rate"  , "max-entity-collisions-move"  ,
+            "max-update-navigation-rate"  , "min-changed-blocks-buf"      ,
+            "navigate-reset-rate"         , "reset-low-level-mobs"        ,
+            "network-compression-lvl"     , "max-world-spawner-range"     ,
+            "max-sponge-power"            , "slow-temp-check"             ,
+            "max-piston-power"            , "slow-wander"                 ,
+            "beacon-tick-rate"            , "disable-session-lock"        ,
+            "immediate-update-limit"      , "ignore-errors"               ,
+            "slow-swim-ai"                , "remove-error-entities"       ,
+            "overworld-async-population"  , "max-connections-time"        ,
+            "skip-check-network"          , "init-palette-linear-bits"    ,
+            "print-case-stop"             , "cache-chunk-data"            ,
+            "endable-def-join-msg"        , "pcm-max-load-per-tick"       ,
+            "max-connections-per"         , "pcm-max-send-per-tick"       ,
+            "use-async-tracker-def"       , "unimportant-packet-queue"    ,
+            "max-sponge-radius"           , "max-player-exp-drop"         ,
+    });
+
+
+    private final DecimalFormat TIME_FORMATTER = new DecimalFormat("########0.00");
+
+    public ElcaCommands() {
+        super("elca", "/elca <args>", 4);
+    }
+
+
+    @Override
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
+        if(!sender.canUseCommand(4, "elca"))return;
+        if(args.length==0){
+            version(server, sender);
+            return;
+        }
+        String arg0 = args[0];
+        if(arg0 == null || arg0.isEmpty()){
+            version(server, sender);
+            return;
+        } else {
+            arg0 = arg0.toLowerCase(Locale.ROOT);
+        }
+        switch (arg0){
+            case "tps":{
+                tps(server, sender, args.length>1 && "true".equals(args[1]));return;
+            }
+            case "info":{
+                info(server, sender, args);return;
+            }
+            case "cvi":{
+                chunkViTxt(server, sender);return;
+            }
+            case "mobs":{
+                if(args.length>1){
+                    int dim = Integer.parseInt(args[1].trim());
+                    mobs(server, sender, dim);
+                } else {
+                    mobs(server, sender);
+                }
+                return;
+            }
+            case "soft":{
+                soft(server, sender, args);return;
+            }
+            case "spawn":{
+                spawn(sender, args);return;
+            }
+            case "hotpoints":{
+                hotPoints(server, sender, args);return;
+            }
+            case "send":{
+                send(server, sender, args);return;
+            }
+            case "setvar":{
+                setVar(server, sender, args);return;
+            }
+            case "save":{
+                save(server, sender, args);return;
+            }
+            case "world":{
+                switch (args[1]){
+                    case "mk":
+                        mkWorld(server, sender, args);return;
+                    case "dump":
+                        dumpWorld(server, sender, args);return;
+                    case "loadvr":
+                        loadVr(server, sender, args);return;
+                }
+            }
+            case "cgui":{
+                cGui(server, sender, args);return;
+            }
+            case "planim":{
+                playAnim(server, sender, args);return;
+            }
+            case "bind":{
+                bind(server, sender, args);return;
+            }
+            case "debug":{
+                onDeubgCmd(server, sender, args);return;
+            }
+        }
+    }
+
+
+    @VarOnly(var = "SIDE_SERVER", code = true)
+    public void onDeubgCmd(MinecraftServer server, ICommandSender sender, String[] args){
+        ShootRTX.debugShoot(server, sender, args);
+    }
+
+
+    public void bind(MinecraftServer server, ICommandSender sender, String[] args) throws NumberInvalidException {
+        if(!ElcaConfig.ENABLE_ITEM_BIND){
+            reply(sender, "&cItem bind is disabled!");
+            return;
+        }
+        String name = args[1];
+        switch (name){
+            case "load":{
+                ItemBind.load();
+                return;
+            }
+            case "set":{
+                int id = parseInt(args[2]);
+                if(ItemBind.isRegistred(id)){
+                    EntityPlayerMP player = (EntityPlayerMP) sender;
+                    ItemStack stack = player.getHeldItemMainhand();
+                    if(stack.isEmpty()){
+                        reply(sender, "&cCant bind func to AIR");
+                        return;
+                    }
+                    ItemBind.bindFunc(id, stack);
+                    reply(sender, "&aSuccess bind func [&e"+id+"&a] to [&e"+stack.getDisplayName()+"&a]");
+                } else {
+                    reply(sender, "&cCant find func by id ["+id+"]");
+                    return;
+                }
+            }
+        }
+    }
+
+
+    public void playAnim(MinecraftServer server, ICommandSender sender, String[] args){
+        String name = args[1];
+
+        EntityPlayerMP target;
+
+        if(args.length >= 3){
+            target = server.getPlayerList().getPlayerByUsername(args[2]);
+            if(target == null){
+                reply(sender, "&cPlayer ["+args[2]+"] not founded!");
+                return;
+            }
+        } else {
+            target = (EntityPlayerMP) sender;
+        }
+
+        String data = TsonFile.read("anims/"+name+".tson");
+        data = TsonFile.remBadChars(data);
+        STsonParser parser = new STsonParser(data);
+
+        CameraAnimEngine.Animation anim = CameraAnimEngine.readAnim(parser.getMap());
+        if(anim.getName() != null){
+            reply(target, "&eStart playing anim: "+anim.getName());
+        }
+        anim.forPlayer(target).start();
+    }
+
+
+    private void cGui(MinecraftServer server, ICommandSender sender, String[] args) throws NumberInvalidException {
+        String sub = args[1];
+        String id  = args[2];
+        EntityPlayerMP player = (EntityPlayerMP) sender;
+
+        switch (sub){
+            case "make":{
+                BlockPos pos = parseBlockPos(sender, args, 3, true);
+
+                TileEntity te = player.world.getTileEntity(pos);
+
+                if(te == null || !(te instanceof TileEntityChest)){
+                    reply(sender, "Chest in "+pos+" not founded");
+                    return;
+                }
+
+                TsonMap map = ChestGuiTemplate.of((TileEntityChest) te).toTson();
+
+                STsonWriter writer = new STsonWriter(map);
+
+                File file = new File("invs/"+id+".tson");
+
+                TsonFile.createPathIfNeed(file);
+                TsonFile.write(file, writer.toString());
+
+                reply(sender, "Success!");
+                return;
+            }
+            case "open":{
+                String data = TsonFile.read("invs/"+id+".tson");
+                data = TsonFile.remBadChars(data);
+                STsonParser parser = new STsonParser(data).with(TsonFunc.COMPILER);
+
+                ChestGuiTemplate.of(parser.getMap()).open(player);
+
+                return;
+            }
+        }
+    }
+
+
+    private void loadVr(MinecraftServer server, ICommandSender sender, String[] args) throws NumberInvalidException {
+        String path = args[2];
+        int dimId = parseInt(args[3]);
+
+        DimensionType dimType = DimensionType.OVERWORLD;
+        if(args.length >= 5) {
+            try {
+                dimType = DimensionType.byName(args[4]);
+            } catch (Exception e) {
+                reply(sender, "Unknown dimension type: ", args[4]);
+                return;
+            }
+        }
+
+        DimensionType dType = dimType;
+        DumpChunkLoader.readDumpFrom(path, dump -> {
+            WorldConstructor.Constructor ctor = MemoryWorld.makeCtor(dump);
+            WorldConstructor.register(dimId, ctor, dType);
+
+            if(DimensionManager.isDimensionRegistered(dimId)){
+                DimensionManager.unregisterDimension(dimId);
+            }
+            DimensionManager.registerDimension(dimId, dType);
+            reply(sender, "&aSuccess");
+        });
+    }
+
+
+    private void dumpWorld(MinecraftServer server, ICommandSender sender, String[] args) throws NumberInvalidException {
+        String path = args[2];
+        int fromX = parseInt(args[3]), fromZ = parseInt(args[4]), toX = parseInt(args[5]), toZ = parseInt(args[6]);
+
+        World world = sender.getEntityWorld();
+
+        NBTTagCompound nbt = DumpChunkLoader.dumpToNbt(world.chunkProviderServer, fromX, fromZ, toX, toZ);
+
+        server.ticker().runAsync(() -> {
+            DumpChunkLoader.saveDumpTo(nbt, path, null);
+            reply(sender, "&aDump created.");
+        });
+    }
+
+
+    private void mkWorld(MinecraftServer server, ICommandSender sender, String[] args) throws NumberInvalidException {
+        String type = args[2];
+        int dimId = parseInt(args[3]);
+        DimensionType dimType = DimensionType.OVERWORLD;
+        if(args.length >= 5) {
+            try {
+                dimType = DimensionType.byName(args[4]);
+            } catch (Exception e) {
+                reply(sender, "Unknown dimension type: ", args[4]);
+                return;
+            }
+        }
+        WorldConstructor.Constructor ctor = null;
+        switch (type){
+            case "empty":{
+                ctor = EmptyConstructor.get();
+                break;
+            }
+        }
+        if(ctor != null)
+            WorldConstructor.register(dimId, ctor, dimType);
+        if(DimensionManager.isDimensionRegistered(dimId)){
+            DimensionManager.unregisterDimension(dimId);
+        }
+        DimensionManager.registerDimension(dimId, dimType);
+        reply(sender, "&aSuccess");
+    }
+
+
+    private void save(MinecraftServer server, ICommandSender sender, String[] args){
+        server.ticker().markNeedSave();
+        reply(sender, "&eThe time until the next save has been reset.");
+    }
+
+
+    private void setVar(MinecraftServer server, ICommandSender sender, String[] args){
+        if(args.length < 3){
+            reply(sender, "&cUsage: &e/setvar [var] [value]");
+        } else {
+            String var = args[1];
+            String val = args[2];
+
+            if(!allVars.contains(var)){
+                reply(server, "&eVar [&b%s&e] is unknown, maybe error?", var);
+            }
+
+            TsonMap map = new TsonMap();
+            map.put(var, val);
+
+            ElcaConfig.init(map);
+
+            reply(sender, "&eVar [&b%s&e] assigned [&b%s&e]", var, val);
+        }
+    }
+
+
+    private void send(MinecraftServer server, ICommandSender sender, String[] args){
+        String target = args[1];
+        String msg = String.join(" ", Arrays.copyOfRange(args, 2, args.length))
+                .replace("&", "§");
+
+        ChatPacketBuilder format = ChatPacketBuilder.of(msg);
+
+        if(target.equals("self") || target.equals("me") || target.equals(".")){
+            format.send(sender);
+        }
+        else if(target.equals("*") || target.equals("all")){
+            for(EntityPlayerMP player : server.getPlayerList().getPlayers()) format.send(player);
+        } else {
+            EntityPlayerMP player = server.getPlayerList().getPlayerByUsername(target);
+            if(player != null) format.send(player);
+            else reply(sender,  critical+"Player "+target+" not found!", target);
+        }
+    }
+
+
+    private void hotPoints(MinecraftServer server, ICommandSender sender, String[] args){
+        Te4HashSet<EntityPlayerMP> playerSet = new Te4HashSet<>();
+        class Part implements Comparable<Part>{
+            final Chunk chunk;
+            final byte shift;
+            final short count;
+
+            Part(Chunk chunk, byte shift, int count){
+                this.chunk = chunk;
+                this.shift = shift;
+                this.count = (short) count;
+            }
+            @Override
+            public int compareTo(@NotNull Part o) {
+                return Short.compare(o.count, count);
+            }
+            public List<EntityPlayerMP> findCauses(){
+                WorldServer world = (WorldServer) chunk.getWorld();
+                PlayerChunkMapEntry entry = world.getPlayerChunkMap().getEntry(chunk.x, chunk.z);
+                if(entry == null)return Collections.emptyList();
+                return entry.getWatchingPlayers();
+            }
+            public void display(){
+                Chunk chunk = this.chunk;
+                int x = chunk.x * 16 + 8;
+                int y = shift * 16 + 8;
+                int z = chunk.z * 16 + 8;
+
+                List<EntityPlayerMP> causes = findCauses();
+
+                MobInfoList mobs = new MobInfoList();
+
+                ClassInheritanceMultiMap<Entity> list = chunk.getEntityLists()[shift];
+                if(list != null) {
+                    for (Entity entity : list) {
+                        mobs.add(entity);
+                    }
+                }
+
+                String inf = "  &ePos: x:"+x+", y:"+y+", z: "+z+ ", count:"+count;
+
+                if(!causes.isEmpty()){
+                    for (EntityPlayerMP player:causes){
+                        if(!playerSet.add(player)){
+                            inf += ", "+player.getName();
+                        } else {
+                            BlockPos pos = player.getPosition();
+                            inf += ", "+player.getName()
+                                    + "["+pos.getX()+", "+pos.getY()+", "+pos.getZ()+"]";
+                        }
+                    }
+                }
+                reply(sender, inf);
+                mobs.display(sender, "    ");
+            }
+        }
+        World defWorld = sender.getEntityWorld();
+
+        class WorldInfo implements Comparable<WorldInfo>{
+            final ArrayListEV<Part> parts = new ArrayListEV<>(32);
+            int sumParts = 0;
+            final WorldServer world;
+            boolean sorted = false;
+
+            WorldInfo(WorldServer world) {
+                this.world = world;
+            }
+
+            public void compute(){
+                Chunk[] arr = world.getChunkProvider().getLoadedChunks().toArray(new Chunk[0]);
+                for (Chunk chunk:arr){
+                    add(chunk);
+                }
+            }
+
+            public void add(Chunk chunk){
+                sorted = false;
+                byte index = 0;
+                for (ClassInheritanceMultiMap<Entity> part:chunk.getEntityLists()){
+                    if(part != null) {
+                        int count = part.sizeC();
+                        if (count > 3) {
+                            parts.addF(new Part(chunk, index, count));
+                        }
+                        ++index;
+                    }
+                }
+            }
+
+            private void sortIfNeed(){
+                if(!sorted){
+                    parts.sort(Part::compareTo);
+                    sumParts = 0;
+                    for (Part part:parts){
+                        sumParts += part.count;
+                    }
+                    sorted = true;
+                }
+            }
+
+            @Override
+            public int compareTo(@NotNull WorldInfo o) {
+                sortIfNeed();
+                o.sortIfNeed();
+                if(o.world == defWorld)return 1;
+                return Integer.compare(o.sumParts, sumParts);
+            }
+
+            public boolean display(int lim){
+                if(parts.isEmptyC())return false;
+                sortIfNeed();
+                boolean flag = true;
+                for (Part part:parts){
+                    if(lim-- == 0)break;
+                    if(flag){
+                        sendWorldInfo(world, sender);
+                        flag = false;
+                    }
+                    part.display();
+                }
+                return !flag;
+            }
+        }
+
+        boolean onlyOne = true;
+        int limit = 10;
+        if(args.length > 1){
+            if(args[1].equals("all")){
+                onlyOne = false;
+                if(args.length > 2){
+                    limit = Integer.parseInt(args[2]);
+                }
+            }
+            else if(args[1].equals("one")){
+                if(args.length > 2){
+                    limit = Integer.parseInt(args[2]);
+                }
+            }
+        }
+
+        if(onlyOne){
+            WorldInfo inf = new WorldInfo((WorldServer) defWorld);
+            inf.compute();
+            if(!inf.display(limit)){
+                reply(sender, normal + "World ["+defWorld.provider.getDimension()+"] has`nt slow entity sectors");
+            }
+        } else {
+
+            ArrayListE6<WorldInfo> infs = new ArrayListE6<>();
+
+            for (Integer dimId : DimensionManager.getIDs()) {
+                WorldServer world = DimensionManager.getWorld(dimId);
+                WorldInfo inf = new WorldInfo(world);
+                infs.addF(inf);
+
+                inf.compute();
+            }
+
+            infs.sort(WorldInfo::compareTo);
+            boolean flag = false;
+
+            for (WorldInfo inf : infs) {
+                if(inf.display(limit))flag = true;
+            }
+
+            if (!flag) {
+                reply(sender, normal + "Server has`nt slow entity sectors");
+            }
+        }
+    }
+
+
+    private void spawn(ICommandSender sender, String[] args) throws NumberInvalidException {
+        if(args.length < 8){
+            //   /elca spawn zombie ~ ~ ~ ~50 ~ ~50 0.7
+            //   /elca spawn villager_golem ~ ~ ~ ~50 ~ ~50 1.5
+            reply(sender, "&e/spawn [ID] [X] [Y] [Z] [X2] [Y2] [Z2] [STEP]");
+            return;
+        }
+
+        ResourceLocation loc = new ResourceLocation(args[1]);
+        EntityEntry entry = ForgeRegistries.ENTITIES.getValue(loc);
+
+        if(entry == null){
+            reply(sender, "&dEntity ID ["+args[1]+"] is invalid");
+            return;
+        }
+        Vec3d from = posOf(sender, args, 2);
+        Vec3d to   = posOf(sender, args, 5);
+        double step = args.length > 8? parseDouble(args[8]):1;
+
+        double xMin = Math.min(from.x, to.x);
+        double xMax = Math.max(from.x, to.x);
+        double yMin = Math.min(from.y, to.y);
+        double yMax = Math.max(from.y, to.y);
+        double zMin = Math.min(from.z, to.z);
+        double zMax = Math.max(from.z, to.z);
+
+        World world = sender.getEntityWorld();
+        DifficultyInstance diff = world.getDifficultyForLocation(new BlockPos(xMin, yMin, zMin));
+
+        boolean init = EntityLiving.class.isAssignableFrom(entry.getEntityClass());
+
+        int count = 0;
+
+        if(yMin >= yMax){
+            yMax += step*0.5;
+        }
+
+        for(double x = xMin; x <= xMax; x += step){
+            for (double z = zMin; z <= zMax; z += step) {
+                for (double y = yMin; y <= yMax; y += step) {
+                    Entity entity = entry.newInstance(world);
+                    entity.setLocationAndAngles(x, y, z, entity.rotationYaw, entity.rotationPitch);
+                    if(world.spawnEntity(entity)){
+                        if(init) {
+                            ((EntityLiving) entity).onInitialSpawn(diff, null);
+                        }
+                        ++count;
+                    }
+                }
+            }
+        }
+        reply(sender,  normal+"Successful spawned " + count + " entities");
+    }
+
+
+    private Vec3d posOf(ICommandSender sender, String[] args, int index) throws NumberInvalidException {
+        Vec3d vec = sender.getPositionVector();
+
+        double x = parseDouble(vec.x, args[index+0],  true);
+        double y = parseDouble(vec.y, args[index+1], false);
+        double z = parseDouble(vec.z, args[index+2], true);
+
+        return new Vec3d(x, y, z);
+    }
+
+
+    private void soft(MinecraftServer server, ICommandSender sender, String[] args){
+        NetworkSystem networkSystem = server.getNetworkSystem();
+        if(args.length > 1){
+            if(!networkSystem.hasFirewall()){
+                reply(sender, "Firewall not exists");
+                return;
+            }
+            boolean flag = false;
+            String sub = args[1];
+            switch (sub){
+                case "enable":
+                    networkSystem.setFireWallEnabled(true);
+                    networkSystem.fireWall().softSetAll(server, ElcaConfig.DEFAULT_SOFT_TIME, true);
+                    break;
+                case "disable":
+                    networkSystem.setFireWallEnabled(false);
+                    break;
+                case "log":{
+                    if(args.length > 2){
+                        String sub2 = args[2];
+                        switch (sub2){
+                            case "e":
+                            case "enable":
+                                networkSystem.fireWall().setLog(true);
+                                break;
+                            case "d":
+                            case "disable":
+                                networkSystem.fireWall().setLog(false);
+                                break;
+                        }
+                    }
+                    reply(sender, "Invalid args. Use /elca soft log 'enable/disable'");
+                    return;
+                }
+                case "uset":
+                    flag = true;
+                case "set":{
+                    boolean allow;
+                    InetAddress addr = null;
+                    long time;
+                    l1: if(args.length > 3){
+                        String arg2 = args[2];
+                        String arg3 = args[3];
+                        switch (arg3){
+                            case "a":
+                            case "allow":
+                                allow = true;
+                                break;
+                            case "d":
+                            case "deny":
+                                allow = false;
+                                break;
+                            default:
+                                break l1;
+                        }
+                        try {
+                            if(args.length > 4){
+                                time = Long.parseLong(args[4]);
+                            } else {
+                                time = ElcaConfig.DEFAULT_SOFT_TIME;
+                            }
+                            l2: if(flag){
+                                ArrayList<EntityPlayerMP> players = new ArrayList<>(server.getPlayerList().getPlayers());
+                                for (EntityPlayerMP player : players) {
+                                    if(player.getName().equalsIgnoreCase(arg2)){
+                                        SocketAddress sock = player.connection.netManager.channel().remoteAddress();
+                                        addr = ((InetSocketAddress)sock).getAddress();
+                                        break l2;
+                                    }
+                                }
+                                reply(sender, "Player [%s] not founded", arg2);
+                            } else {
+                                addr = InetAddress.getByName(arg2);
+                            }
+                        } catch (Exception e){
+                            reply(sender, "Critical error, see console");
+                            e.printStackTrace();
+                            return;
+                        }
+
+                        networkSystem.fireWall().softSet(addr, allow);
+
+                        reply(sender, "Set [%s] to [%s] on [%s]"
+                                , addr, allow ? "allow" : "deny",
+                                new Date(System.currentTimeMillis() + time)
+                        );
+                    }
+                    reply(sender, "Invalid args. Use /elca soft set 'ip' 'allow/deny' 'time'");
+                    return;
+                }
+            }
+        } else {
+            reply(sender, "Firewall: %s, enabled: %s",
+                    networkSystem.hasFirewall(), networkSystem.fireWallEnabled()
+            );
+        }
+    }
+
+
+    private void chunkViTxt(MinecraftServer server, ICommandSender sender){
+        ChunkProviderServer ch = (ChunkProviderServer) sender.getEntityWorld().getChunkProvider();
+        int minX = 0, minZ = 0;
+        int maxX = 0, maxZ = 0;
+        for (Chunk c:ch.values()){
+            if(c.x < minX)minX = c.x;
+            if(c.z < minZ)minZ = c.z;
+
+            if(c.x > maxX)maxX = c.x;
+            if(c.z > maxZ)maxZ = c.z;
+        }
+        byte[][] table = new byte[maxX-minX+1][maxZ-minZ+1];
+
+        for (Chunk c:ch.values()){
+            table[c.x-minX][c.z-minZ] = (byte) (c.maybeUnload()?1:2);
+        }
+
+        ByteStrBuilder builder = new ByteStrBuilder(((table.length+1)*table[0].length)+1);
+        for (byte[] line:table){
+            for (byte pos:line){
+                builder.append(pos==0?' ':pos==1?'_':'#');
+            }
+            builder.append('\n');
+        }
+        String name = "CVI_"+minX+"_"+minZ+".txt";
+        TsonFile.write(new File(name), builder.toString());
+        reply(sender, "Saved to ["+name+"]");
+    }
+
+
+    @Override
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
+        return getListOfStringsMatchingLastWord(args, getTabCompletionsRaw(server, sender, args, targetPos));
+    }
+
+
+    private List<String> getTabCompletionsRaw(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
+        if(args.length == 2){
+            switch (args[0]){
+                case "send":{
+                    List<String> list = new ArrayList<>();
+                    server.getPlayerList().getPlayers().forEach(p -> list.add(p.getName()));
+                    list.addAll(Arrays.asList("all", ".", "*", "me", "self"));
+                    return list;
+                }
+                case "spawn":
+                    return Lists.newArrayList(
+                            "zombie ~ ~ ~ ~50 ~ ~50 0.7",
+                            "villager_golem ~ ~ ~ ~50 ~ ~50 1.5"
+                    );
+                case "info":
+                    return Collections.singletonList("track");
+                case "setvar":
+                    return allVars;
+                case "world":{
+                    String name = sender.getName()+"_w.nbt";
+                    int rId = (sender.getName().hashCode()&1023);
+                    return Lists.newArrayList("mk empty "+rId+" overworld", "dump "+name+" -16 -16 16 16", "loadvr "+name+" "+rId+" overworld");
+                }
+                case "cgui":{
+                    return Arrays.asList("make example ~ ~-1 ~", "open example");
+                }
+                case "bind":{
+                    return Arrays.asList("load", "set");
+                }
+            }
+        }
+        if(args.length < 2) return completions;
+        return Collections.emptyList();
+    }
+
+
+    public void version(MinecraftServer server, ICommandSender sender){
+        reply(sender, String.format("&eVersion: &d%s-%s (v%s-%s)",
+                SSPatchLoader.ELCA_RELEASE, SSPatchLoader.ELCA_VERSION,
+                ForgeVersion.mcVersion, ForgeVersion.buildVersion
+        ));
+    }
+
+
+    public void mobs(MinecraftServer server, ICommandSender sender){
+        if(sender instanceof Entity){
+            mobs(server, sender, ((Entity) sender).dimension);
+        } else {
+            reply(sender, danger+"It is`nt possible to specify the dimension automatically!");
+        }
+    }
+
+
+    private static class MobInfo implements Comparable<MobInfo>{
+        final String name;
+        int count;
+        int lod0, lod1, lod2, lod3;
+
+        public MobInfo(Class<? extends Entity> clazz){
+            EntityEntry entry0 = EntityRegistry.getEntry(clazz);
+            String name = entry0==null?clazz.getSimpleName():entry0.getName();
+            if(name==null) name = clazz.getSimpleName();
+            this.name = name;
+        }
+        public void add(int lodLvl){
+            count++;
+            if(lodLvl== EntityLodFunc.NEAR_MASK)lod0++;
+            if(lodLvl==EntityLodFunc.LOW1_MASK) lod1++;
+            if(lodLvl==EntityLodFunc.LOW2_MASK) lod2++;
+            if(lodLvl==EntityLodFunc.LOW3_MASK) lod3++;
+        }
+        private String getName(int nameLen){
+            StringBuilder buffer = new StringBuilder(nameLen);
+            buffer.append(name);
+            int curName = name.length();
+            while(curName++ < nameLen){
+                buffer.append(' ');
+            }
+            return buffer.toString();
+        }
+        public void send(ICommandSender sender, int maxName, String prefix){
+            reply(sender, primary+"%s&8|&a%s %s &e(%s, N:%s, M: %s, L: %s)", prefix,
+                    getName(maxName+1), count, lod0, lod1, lod2, lod3
+            );
+        }
+        @Override
+        public int compareTo(@NotNull MobInfo o) {
+            return Integer.compare(o.count, count);
+        }
+    }
+
+
+    private static class MobInfoList extends IdentityHashMap<Class<?>, MobInfo>{
+        private boolean dirty = true;
+        private List<MobInfo> result;
+        private int numLength, nameLength;
+        public void add(Entity entity){
+            if(entity == null || entity.isDead)return;
+            dirty = true;
+            Class<? extends Entity> clazz = entity.getClass();
+            MobInfo info = get(clazz);
+            if(info==null){
+                put(clazz, info = new MobInfo(clazz));
+            }
+            info.add(entity.lodLvl());
+        }
+
+        private void updateResult(){
+            if(!dirty)return;
+            result = new ArrayList<>(values());
+            int maxName = 0;
+            for (MobInfo info:result){
+                int curLen = info.name.length();
+                if(curLen > maxName)maxName = curLen;
+            }
+            result.sort(MobInfo::compareTo);
+            nameLength = maxName;
+            numLength = String.valueOf(result.size()).length();
+        }
+
+        public List<MobInfo> result(){
+            updateResult();
+            return result;
+        }
+
+        public int numLength(){
+            updateResult();
+            return numLength;
+        }
+
+        protected int nameLength(){
+            updateResult();
+            return nameLength;
+        }
+
+        public void display(ICommandSender sender, String prefix){
+            List<MobInfo> result = result();
+
+            int nameLength = nameLength();
+            int numLength = numLength();
+            int num = 0;
+
+            for (MobInfo info:result){
+                info.send(sender, nameLength+1, prefix+formatNum(++num, numLength));
+            }
+        }
+    }
+
+
+    public void mobs(MinecraftServer server, ICommandSender sender, int dim){
+        WorldServer worldServer = DimensionManager.getWorld(dim);
+        List<Entity> list = new ArrayList<>(worldServer.loadedEntityList);
+        MobInfoList mobs = new MobInfoList();
+
+        for (Entity entity:list){
+            mobs.add(entity);
+        }
+
+        mobs.display(sender, "");
+    }
+
+
+    private static String formatNum(int num, int max){
+        String str = String.valueOf(num);
+        while (str.length() < max)str = str + ' ';
+        return str;
+    }
+
+
+    public void info(MinecraftServer server, ICommandSender sender, String[] args){
+        if(args.length > 1 && args[1].equals("track")){
+            EntityPlayerMP playerMP = (EntityPlayerMP) sender;
+            WorldServer world = playerMP.getServerWorld();
+
+            ChannelFutureListener future = new ChannelFutureListener() {
+                @Override
+                public void operationComplete(ChannelFuture channelFuture) {
+                    if(playerMP.world != world || playerMP.isDead)return;
+                    world.addSyncTask(() -> playerMP.connection.netManager.sendPacket(
+                            new SRawPacketPlayerListHeaderFooter(null,
+                                    ChatPacketBuilder.toJsonMsg(getWorldInfo(world))), this
+                    ));
+                }
+            };
+            try {
+                future.operationComplete(null);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            return;
+        }
+        reply(sender, warning+"Loaded worlds: "+primary+server.worlds.length);
+
+        for (Integer dimId : DimensionManager.getIDs()) {
+            sendWorldInfo(DimensionManager.getWorld(dimId), sender);
+        }
+    }
+
+
+    private void sendWorldInfo(WorldServer world, ICommandSender sender){
+        reply(sender, getWorldInfo(world));
+    }
+
+
+    private String getWorldInfo(WorldServer world){
+        int curMobs, curChunks;
+        int lod0 = 0, lod1 = 0, lod2 = 0, lod3 = 0;
+        curMobs = world.loadedEntityList.size();
+
+        for (Entity entity:world.loadedEntityList){
+            if(entity == null)continue;
+            int lodLvl = entity.lodLvl();
+            if(lodLvl == EntityLodFunc.NEAR_MASK) lod0++;
+            if(lodLvl == EntityLodFunc.LOW1_MASK) lod1++;
+            if(lodLvl == EntityLodFunc.LOW2_MASK) lod2++;
+            if(lodLvl == EntityLodFunc.LOW3_MASK) lod3++;
+        }
+
+        int dimId = world.provider.getDimension();
+
+        curChunks = world.getChunkProvider().getLoadedChunkCount();
+        double worldTickTime = mean(world.getMinecraftServer().worldTickTimes.get(dimId));
+        double worldTPS = Math.min(1000.0/worldTickTime, 20);
+
+        return String.format(primary+"[%s]: tt: %s, tps %s, chunk: %s, mob: %s (%s, N:%s, M: %s, L: %s)",
+                getDimensionPrefix(dimId),
+                formatTickTime(worldTickTime),
+                formatTps(worldTPS),
+                curChunks, curMobs, lod0, lod1, lod2, lod3);
+    }
+
+
+    private String formatTickTime(double tt){
+        String time = TIME_FORMATTER.format(tt);
+        if(tt>=50)return critical +time+primary;
+        if(tt>=45)return danger   +time+primary;
+        if(tt>=30)return warning  +time+primary;
+        else      return normal   +time+primary;
+    }
+
+
+    private String formatTps(double wtps){
+        String tps = TIME_FORMATTER.format(wtps);
+        if(wtps<=15)  return critical +tps+primary;
+        if(wtps<=17)  return danger   +tps+primary;
+        if(wtps<=19.9)return warning  +tps+primary;
+        else          return normal   +tps+primary;
+    }
+
+
+    public void tps(MinecraftServer server, ICommandSender sender, boolean summary) throws CommandException {
+        int dim = 0;
+        if (summary) {
+            for (Integer dimId : DimensionManager.getIDs()) {
+                double worldTickTime = mean(server.worldTickTimes.get(dimId)) * 1.0E-6D;
+                double worldTPS = Math.min(1000.0/worldTickTime, 20);
+                reply(sender, "[%s][%s]: %s",
+                        getDimensionPrefix(dimId),
+                        TIME_FORMATTER.format(worldTickTime),
+                        TIME_FORMATTER.format(worldTPS)
+                );
+            }
+            double meanTickTime = mean(server.tickTimeArray);
+            double meanTPS = Math.min(1000.0/meanTickTime, 20);
+            sender.sendMessage(TextComponentHelper.createComponentTranslation(sender, "commands.forge.tps.summary","Overall", TIME_FORMATTER.format(meanTickTime), TIME_FORMATTER.format(meanTPS)));
+        } else {
+            double worldTickTime = mean(server.worldTickTimes.get(dim));
+            double worldTPS = Math.min(1000.0/worldTickTime, 20);
+            sender.sendMessage(TextComponentHelper.createComponentTranslation(sender, "commands.forge.tps.summary", getDimensionPrefix(dim), TIME_FORMATTER.format(worldTickTime), TIME_FORMATTER.format(worldTPS)));
+        }
+    }
+
+
+    private static String getDimensionPrefix(int dimId) {
+        DimensionType providerType = DimensionManager.getProviderType(dimId);
+        if (providerType == null) {
+            return String.format("%2d", dimId);
+        } else {
+            return String.format("%s-%2d", providerType.getName(), dimId);
+        }
+    }
+
+
+    private static double mean(long[] values) {
+        long sum = 0L;
+        for (long v : values) {
+            sum += v;
+        }
+        return ((double) sum / values.length) * 1.0E-6D;
+    }
+}

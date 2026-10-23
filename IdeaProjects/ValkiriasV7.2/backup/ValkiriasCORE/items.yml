@@ -1,0 +1,201 @@
+crafts:
+  test:
+    result: I:test
+    items:
+    - air
+    - I:test
+    - air
+    - I:test
+    - I:test
+    - I:test
+    - air
+    - I:test
+    - air
+  plus:
+    test2:
+      result: W:0;1;1;0;0;0;0;4;0;0;f
+      items:
+      - air
+      - I:test
+      - air
+      - air
+      - I:test
+      - air
+      - air
+      - I:test
+      - air
+chests:
+  test:
+    display: Name of chest
+    size: 45
+    items:
+    - I:1.0:1:test
+    - I:1.0:1:black_box
+    - I:1.0:1:coil
+    - I:1.0:1:electronick
+    - I:1.0:1:gears
+    - I:1.0:1:hladogent
+    - I:1.0:1:metall_1
+    - I:1.0:1:plate_1
+    - I:1.0:1:plate_2
+    - I:1.0:1:blick_1
+    - I:1.0:1:blick_2
+    - I:1.0:1:blick_3
+    - I:1.0:1:blick_4
+    - I:1.0:1:blick_b1
+    - I:1.0:1:blick_b2
+    - I:1.0:1:blick_b3
+    - I:1.0:1:blick_b4
+food:
+  buter:
+    rare: 3
+    icon: 㟍
+    cmd: 1001001
+    saturation: 8
+    lore:
+    - Большой бутерброд
+  crevet_ball:
+    rare: 4
+    icon: 㟎
+    cmd: 1001002
+    saturation: 10
+    lore:
+    - 'Шарики с '
+    - Креветкой
+  mint_stick:
+    rare: 1
+    icon: 㟏
+    cmd: 1001003
+    saturation: 2
+    lore:
+    - Мятные палочки
+  paiok:
+    rare: 1
+    icon: 㟐
+    cmd: 1001004
+    saturation: 3
+    lore:
+    - Сухпаек
+  pizza:
+    rare: 2
+    icon: 㟑
+    cmd: 1001005
+    saturation: 4
+    lore:
+    - Кусок Пиццы
+  tofu:
+    rare: 3
+    icon: 㟒
+    cmd: 1001006
+    saturation: 5
+    lore:
+    - Тофу
+airBoxes:
+  standartKit:
+    key: test
+    cords: 300;-300;300;-300
+items:
+  black_box:
+    rare: 2
+    icon: 㟠
+    cmd: 1031001
+    lore:
+    - Черный ящик
+  coil:
+    rare: 1
+    icon: 㟡
+    cmd: 1031002
+    lore:
+    - Катушка
+  electronick:
+    rare: 1
+    icon: 㟢
+    cmd: 1031003
+    lore:
+    - Микросхема
+  gears:
+    rare: 1
+    icon: 㟣
+    cmd: 1031004
+    lore:
+    - Механизм
+  hladogent:
+    rare: 2
+    icon: 㟤
+    cmd: 1031005
+    lore:
+    - Хладогент
+  metall_1:
+    rare: 1
+    icon: 㟥
+    cmd: 1031006
+    lore:
+    - Сталь
+  plate_1:
+    rare: 2
+    icon: 㟦
+    cmd: 1031007
+    lore:
+    - Бронепластина A-24
+  plate_2:
+    rare: 1
+    icon: 㟧
+    cmd: 1031008
+    lore:
+    - Бронепластина E-18
+  blick_1:
+    rare: 1
+    icon: 㟘
+    cmd: 1030001
+    lore:
+    - Осколок
+  blick_2:
+    rare: 1
+    icon: 㟙
+    cmd: 1030002
+    lore:
+    - Осколок
+  blick_3:
+    rare: 1
+    icon: 㟚
+    cmd: 1030003
+    lore:
+    - Осколок
+  blick_4:
+    rare: 1
+    icon: 㟛
+    cmd: 1030004
+    lore:
+    - Осколок
+  blick_b1:
+    rare: 2
+    icon: 㟜
+    cmd: 1030005
+    lore:
+    - Кристалл
+  blick_b2:
+    rare: 2
+    icon: 㟝
+    cmd: 1030006
+    lore:
+    - Кристалл
+  blick_b3:
+    rare: 2
+    icon: 㟞
+    cmd: 1030007
+    lore:
+    - Кристалл
+  blick_b4:
+    rare: 2
+    icon: 㟟
+    cmd: 1030008
+    lore:
+    - Кристалл
+  test:
+    uid: test
+    rare: 0
+    icon: a
+    cmd: 0
+    lore:
+    - lore1
+    - lore2

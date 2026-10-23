@@ -1,0 +1,48 @@
+//Шаблон адаптивного сообщения
+
+//Упрощенный вариант
+{msg = "§aСообщение"}
+
+{msg = {
+	//Поддерживает гибридную запись
+	//msg = ["Text",{text="Text"},...]
+	
+	//Поддерживает "chat", "title"
+	type = "chat", 
+	msg = {
+		//Отправлять асинхронно?
+		async = true, 
+		//Поддерживает "text", "key", "keybind", "score", "scoreboard", "translation"
+		type = "text", 
+		//То что внутри компонента
+		text = "Your text",
+		//Аргументы перевода, если тип - "translation"
+		//Есть поддержка json-сообщений
+		args = ["Arg1", "Arg2"],
+		//Возможна короткая запись типа 'args = "Arg"'
+
+		//Стили
+		style = {
+			bold = false,
+			strikethrough = false,
+			underlined = false,
+			color  = "4", //цветовой код майна
+			insert = "insertion", //todo Не помню за что отвечает
+
+			//Всплывающая подсказка - адаптивное сообщение
+			hover = {
+				//Поддерживает "show_text", "show_item", "show_entity"
+				action = "show_text", 
+				//Все прочее что может быть у адаптивного сообщения
+			},
+
+			//Действие при клике
+			click = {
+				//Поддерживает "suggest_command", "run_command", "change_page", "open_file", "open_url"
+				action = "suggest_command",
+				value  = "Value"
+			}
+			//Возможна короткая запись типа 'click = "Value"'
+		}
+	}
+}}

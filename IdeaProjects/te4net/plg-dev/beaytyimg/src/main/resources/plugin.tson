@@ -1,0 +1,15 @@
+{
+    class=[
+        "plus.tehnet.bimg.BImgIncludeVidFunc",
+        "plus.tehnet.bimg.BImgCheckArgs"
+    ],
+	htmls=[
+		"img.html#/img",
+		"beauty-img-build.html#/img-build"
+	],
+	assets={
+		img=[
+    		{name="get_url_bg.png",path="/assets/img/get_url_bg.png"}
+    	]
+	}
+}

@@ -1,0 +1,670 @@
+﻿<fw:AcrylicWindow x:Name="window" x:Class="GF2_LaunchHX.Settings"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:fw="clr-namespace:SourceChord.FluentWPF;assembly=FluentWPF"
+        xmlns:local="clr-namespace:GF2_LaunchHX"
+        mc:Ignorable="d"  
+                  
+        Height="430" Width="650" MinHeight="430" MinWidth="650"
+                  
+        AcrylicWindowStyle="NoIcon"
+        fw:AcrylicWindow.AcrylicAccentState="BlurBehind"       
+        TintOpacity="0.5" NoiseOpacity="0"
+                  
+        TintColor="{StaticResource ArcMain}"
+        FallbackColor="{StaticResource ArcMain}"
+                  
+                  
+                  
+        Title="Settings" BorderBrush="{StaticResource ArcHeaderDark}" Foreground="{StaticResource ArcHeaderDark}"
+    >
+    <Window.Resources>
+        <Style x:Key="{x:Type ComboBox}" TargetType="{x:Type ComboBox}">
+            <Setter Property="SnapsToDevicePixels" Value="true"/>
+            <Setter Property="OverridesDefaultStyle" Value="true"/>
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="ScrollViewer.CanContentScroll" Value="true"/>
+            <Setter Property="MinWidth" Value="120"/>
+            <Setter Property="MinHeight" Value="20"/>
+            <Setter Property="Foreground" Value="{StaticResource ArcBorder}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ComboBox}">
+                        <Grid>
+                            <ToggleButton 
+                                Name="ToggleButton" 
+                                
+                                Grid.Column="2" 
+                                Focusable="false"
+                                IsChecked="{Binding Path=IsDropDownOpen,Mode=TwoWay,RelativeSource={RelativeSource TemplatedParent}}"
+                                ClickMode="Press">
+                                <ToggleButton.Template>
+                                    <ControlTemplate>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition />
+                                                <ColumnDefinition Width="20" />
+                                            </Grid.ColumnDefinitions>
+                                            <Border x:Name="Border" 
+            Grid.ColumnSpan="2"
+            CornerRadius="0"
+            Background="{DynamicResource ArcHeader}"
+            BorderBrush="{DynamicResource ArcBorder}"
+            BorderThickness="1" />
+                                            <Path x:Name="Arrow"
+          Grid.Column="1"     
+          Fill="{DynamicResource ArcSecondText}"
+          HorizontalAlignment="Center"
+          VerticalAlignment="Center"
+          Data="M0,0 L0,2 L4,6 L8,2 L8,0 L4,4 z"
+        />
+                                        </Grid>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+                            <ContentPresenter Name="ContentSite" IsHitTestVisible="False"  Content="{TemplateBinding SelectionBoxItem}"
+                                ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                Margin="3,3,23,3"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Center" />
+                            <TextBox x:Name="PART_EditableTextBox"
+                                Style="{x:Null}" 
+                                HorizontalAlignment="Center" 
+                                VerticalAlignment="Center" 
+                                Margin="3,3,23,3"
+                                Focusable="True" 
+                                Background="{DynamicResource ArcHeader}"
+                                Foreground="Green"
+                                Visibility="Hidden"
+                                IsReadOnly="{TemplateBinding IsReadOnly}">
+                                <TextBox.Template>
+                                    <ControlTemplate>
+                                        <Border x:Name="PART_ContentHost" Focusable="False" Background="{TemplateBinding Background}" />
+                                    </ControlTemplate>
+                                </TextBox.Template>
+                            </TextBox>
+                            <Popup 
+                                Name="Popup"
+                                Placement="Bottom"
+                                IsOpen="{TemplateBinding IsDropDownOpen}"
+                                AllowsTransparency="True" 
+                                Focusable="False"
+                                PopupAnimation="Slide">
+
+                                <Grid Name="DropDown"
+                                  SnapsToDevicePixels="True"                
+                                  MinWidth="{TemplateBinding ActualWidth}"
+                                  MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                    <Border 
+                                    x:Name="DropDownBorder"
+                                    Background="{DynamicResource ArcHeader}"
+                                     
+                                    BorderThickness="1"
+                                    BorderBrush="{DynamicResource ArcBorder}"/>
+                                    <ScrollViewer Margin="4,6,4,6" SnapsToDevicePixels="True">
+                                        <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
+                                    </ScrollViewer>
+                                </Grid>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="HasItems" Value="false">
+                                <Setter TargetName="DropDownBorder" Property="MinHeight" Value="95"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Foreground" Value="#888888"/>
+                            </Trigger>
+                            <Trigger Property="IsGrouping" Value="true">
+                                <Setter Property="ScrollViewer.CanContentScroll" Value="false"/>
+                            </Trigger>
+                            <Trigger SourceName="Popup" Property="Popup.AllowsTransparency" Value="true">
+                                <Setter TargetName="DropDownBorder" Property="CornerRadius" Value="0"/>
+                                <Setter TargetName="DropDownBorder" Property="Margin" Value="0,2,0,0"/>
+                            </Trigger>
+                            <Trigger Property="IsEditable"  Value="true">
+                                <Setter Property="IsTabStop" Value="false"/>
+                                <Setter TargetName="PART_EditableTextBox" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="ContentSite" Property="Visibility" Value="Hidden"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="SettingsTableCBStyle" TargetType="{x:Type ComboBox}">
+            <Setter Property="SnapsToDevicePixels" Value="true"/>
+            <Setter Property="OverridesDefaultStyle" Value="true"/>
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="ScrollViewer.CanContentScroll" Value="true"/>
+            <Setter Property="MinHeight" Value="20"/>
+
+            <Setter Property="Width" Value= "62"/>
+            <Setter Property="MinWidth" Value= "62"/>
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ComboBox}">
+                        <Grid>
+                            <ToggleButton 
+                        Name="ToggleButton" 
+                        
+                        Grid.Column="2" 
+                        Focusable="false"
+                        IsChecked="{Binding Path=IsDropDownOpen,Mode=TwoWay,RelativeSource={RelativeSource TemplatedParent}}"
+                        ClickMode="Press">
+                                <ToggleButton.Template>
+                                    <ControlTemplate>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition />
+                                                <ColumnDefinition Width="20" />
+                                            </Grid.ColumnDefinitions>
+                                            <Border x:Name="Border" 
+    Grid.ColumnSpan="2"
+    CornerRadius="0"
+    Background="Transparent"
+    BorderBrush="Transparent"
+    BorderThickness="0" />
+                                            <Path x:Name="Arrow"
+  Grid.Column="1"     
+  Fill="{DynamicResource ArcSecondText}"
+  HorizontalAlignment="Center"
+  VerticalAlignment="Center"
+  Data="M0,0 L0,2 L4,6 L8,2 L8,0 L4,4 z"
+/>
+                                        </Grid>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+                            <ContentPresenter Name="ContentSite" IsHitTestVisible="False"  Content="{TemplateBinding SelectionBoxItem}"
+                        ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                        ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                        Margin="3,3,23,3"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center" />
+                            <TextBox x:Name="PART_EditableTextBox"
+                        Style="{x:Null}" 
+                        HorizontalAlignment="Center" 
+                        VerticalAlignment="Center" 
+                        Margin="3,3,23,3"
+                        Focusable="True" 
+                        Background="{DynamicResource ArcHeader}"
+                        Foreground="Green"
+                        Visibility="Hidden"
+                        IsReadOnly="{TemplateBinding IsReadOnly}">
+                                <TextBox.Template>
+                                    <ControlTemplate>
+                                        <Border x:Name="PART_ContentHost" Focusable="False" Background="{TemplateBinding Background}" />
+                                    </ControlTemplate>
+                                </TextBox.Template>
+                            </TextBox>
+                            <Popup 
+                        Name="Popup"
+                        Placement="Bottom"
+                        IsOpen="{TemplateBinding IsDropDownOpen}"
+                        AllowsTransparency="True" 
+                        Focusable="False"
+                        PopupAnimation="Slide">
+
+                                <Grid Name="DropDown"
+                          SnapsToDevicePixels="True"                
+                          MinWidth="{TemplateBinding ActualWidth}"
+                          MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                    <Border 
+                            x:Name="DropDownBorder"
+                            Background="{DynamicResource ArcHeaderHover}"
+                             
+                            BorderThickness="1"
+                            BorderBrush="{DynamicResource ArcBorder}"/>
+                                    <ScrollViewer Margin="4,6,4,6" SnapsToDevicePixels="True">
+                                        <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
+                                    </ScrollViewer>
+                                </Grid>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="HasItems" Value="false">
+                                <Setter TargetName="DropDownBorder" Property="MinHeight" Value="0"/>
+                                <Setter TargetName="DropDownBorder" Property="Height" Value="0"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                            <Trigger Property="IsGrouping" Value="true">
+                                <Setter Property="ScrollViewer.CanContentScroll" Value="false"/>
+                            </Trigger>
+                            <Trigger SourceName="Popup" Property="Popup.AllowsTransparency" Value="true">
+                                <Setter TargetName="DropDownBorder" Property="CornerRadius" Value="0"/>
+                                <Setter TargetName="DropDownBorder" Property="Margin" Value="0,2,0,0"/>
+                            </Trigger>
+                            <Trigger Property="IsEditable"  Value="true">
+                                <Setter Property="IsTabStop" Value="false"/>
+                                <Setter TargetName="PART_EditableTextBox" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="ContentSite" Property="Visibility" Value="Hidden"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <ContentControl ContentTemplate="{StaticResource ArcHeaderTPL}" Panel.ZIndex="1000"/>
+        <!-- Установленные пакеты (заголовок) -->
+        <Grid VerticalAlignment="Top" Height="44" Margin="0,30,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="6*"/>
+                <RowDefinition Height="5*"/>
+            </Grid.RowDefinitions>
+            <Border VerticalAlignment="Top" Height="44"
+                    BorderThickness="1,1,1,1"
+                Background="{DynamicResource ArcHeader}"
+                BorderBrush="{DynamicResource ArcBorder}" HorizontalAlignment="Left" Width="370" Grid.RowSpan="2"
+                >
+                <Grid Margin="0,0,0,0">
+                    <TextBlock
+                   VerticalAlignment="Center"
+                   TextAlignment="Left"
+                   FontFamily="Microsoft YaHei" FontSize="22" 
+                   Text="Пакеты локализации" Margin="25,0,0,0" Height="32" Foreground="{DynamicResource ArcSecondText}"
+                   />
+                </Grid>
+            </Border>
+
+            <Button x:Name="ResetPacks" Height="44" 
+                    VerticalAlignment="Top" FontFamily="Microsoft YaHei" 
+                    FontSize="22" Margin="370,0,25,0" Grid.RowSpan="2" Click="ResetPacks_Click"
+                    >
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource ArcBotton}">
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{StaticResource ArcRedHover}"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+                Сбросить
+            </Button>
+
+            <Border Width="25"
+                    HorizontalAlignment="Right"
+                    BorderThickness="1,1,1,1"
+                Background="{DynamicResource ArcHeader}"
+                BorderBrush="{DynamicResource ArcBorder}" Grid.RowSpan="2"
+                />
+        </Grid>
+
+        <!-- Установленные пакеты (таблица) -->
+        <DataGrid x:Name="Packs" IsEnabled="True" Margin="0,74,0,0" AutoGenerateColumns="False"
+                  Background="Transparent" BorderBrush="{DynamicResource ArcHeader}" CanUserAddRows="True" CanUserDeleteRows="True" Height="92" VerticalAlignment="Top"
+                    Foreground="{DynamicResource ArcSecondText}"
+                  >
+            <DataGrid.ColumnHeaderStyle>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="Background" Value="{DynamicResource ArcHeader}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource ArcBorder}"/>
+                    <Setter Property="BorderThickness" Value="1"/>
+                    <Setter Property="Foreground" Value="{DynamicResource ArcSecondText}"/>
+                </Style>
+            </DataGrid.ColumnHeaderStyle>
+
+            <DataGrid.RowHeaderStyle>
+                <Style TargetType="DataGridRowHeader">
+                    <Setter Property="Background" Value="Transparent"/>
+                </Style>
+            </DataGrid.RowHeaderStyle>
+
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow">
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="BorderBrush" Value="Transparent"/>
+                    <Setter Property="BorderThickness" Value="0"/>
+                    <Setter Property="Padding" Value="0"/>
+                </Style>
+            </DataGrid.RowStyle>
+
+
+
+            <DataGrid.Columns>
+
+
+
+                <DataGridTextColumn x:Name="TT_ID" Binding="{Binding Priority}" Width="70" CanUserResize="True" >
+                    <DataGridTextColumn.Header>
+                        <TextBlock Margin="4,0,0,0" HorizontalAlignment="Center" Text="Приоретет"/>
+                    </DataGridTextColumn.Header>
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Margin" Value="4,0,0,0"/>
+                            <Setter Property="VerticalAlignment" Value="Center" />
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn x:Name="TT_ORG" Binding="{Binding Name}" Width="75" CanUserResize="True">
+                    <DataGridTextColumn.Header>
+                        <TextBlock Margin="4,0,0,0" HorizontalAlignment="Center" Text="Название"/>
+                    </DataGridTextColumn.Header>
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Margin" Value="4,0,0,0"/>
+                            <Setter Property="VerticalAlignment" Value="Center" />
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+
+                <DataGridTemplateColumn x:Name="TT_BRN" Width="62" CanUserResize="False">
+                    <DataGridTemplateColumn.Header>
+                        <TextBlock Margin="4,0,0,0" HorizontalAlignment="Center" Text="Ветка"/>
+                    </DataGridTemplateColumn.Header>
+
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <ComboBox
+                                ItemsSource="{Binding Branches}"
+                                SelectedItem="{Binding Branch}"
+                                SelectionChanged="ComboBox_SelectionChanged"
+                                Style="{DynamicResource SettingsTableCBStyle}">
+                            </ComboBox>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTextColumn x:Name="TT_RES" Binding="{Binding Source}" Width="439" CanUserResize="True">
+                    <DataGridTextColumn.Header>
+                        <TextBlock Margin="4,0,0,0" HorizontalAlignment="Center" Text="Расположение"/>
+                    </DataGridTextColumn.Header>
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Margin" Value="4,0,0,0"/>
+                            <Setter Property="VerticalAlignment" Value="Center" />
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+            </DataGrid.Columns>
+
+        </DataGrid>
+
+        <!-- До-перевод -->
+        <Grid VerticalAlignment="Top" Height="44" Margin="0,166,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="6*"/>
+                <RowDefinition Height="5*"/>
+            </Grid.RowDefinitions>
+            <Border VerticalAlignment="Top" Height="44"
+                    BorderThickness="1,1,1,1"
+                Background="{DynamicResource ArcHeader}"
+                BorderBrush="{DynamicResource ArcBorder}" HorizontalAlignment="Left" Width="370" Grid.RowSpan="2"
+                >
+                <Grid Margin="0,0,0,0">
+                    <TextBlock
+                   VerticalAlignment="Center"
+                   TextAlignment="Left"
+                   FontFamily="Microsoft YaHei" FontSize="22" 
+                   Text="До-перевод" Margin="25,0,0,0" Height="32" Foreground="{DynamicResource ArcSecondText}"
+                   />
+                </Grid>
+            </Border>
+
+            <ComboBox x:Name="CHSTranslateMode" VerticalAlignment="Top" Height="44" Margin="370,0,25,0" Grid.RowSpan="2"
+                      Background="{DynamicResource ArcHeader}"
+                      BorderBrush="{DynamicResource ArcBorder}"
+                      BorderThickness="1,1,1,1" SelectionChanged="CHSTranslateMode_SelectionChanged"
+                      >
+                <ComboBoxItem Uid="tr0dis" IsSelected="True">
+                    <TextBlock Height="26" FontSize="22" Text="Отключено" Foreground="{DynamicResource ArcSecondText}"/>
+                </ComboBoxItem>
+                <ComboBoxItem Uid="tr0onl">
+                    <TextBlock Height="26" FontSize="22" Text="Онлайн-переводчики" Foreground="{DynamicResource ArcSecondText}"/>
+                </ComboBoxItem>
+                <ComboBoxItem Uid="tr0neir">
+                    <TextBlock Height="26" FontSize="22" Text="Нейро-перевод" Foreground="{DynamicResource ArcSecondText}"/>
+                </ComboBoxItem>
+            </ComboBox>
+
+            <Border Width="25"
+                    HorizontalAlignment="Right"
+                    BorderThickness="1,1,1,1"
+                Background="{DynamicResource ArcHeader}"
+                BorderBrush="{DynamicResource ArcBorder}" Grid.RowSpan="2"
+                />
+        </Grid>
+
+        <!-- Версия лаунчера -->
+        <Grid VerticalAlignment="Bottom" Height="44" Margin="0,0,0,44">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="6*"/>
+                <RowDefinition Height="5*"/>
+            </Grid.RowDefinitions>
+            <Border VerticalAlignment="Top" Height="44"
+                    BorderThickness="1,1,1,1"
+                Background="{DynamicResource ArcHeader}"
+                BorderBrush="{DynamicResource ArcBorder}" HorizontalAlignment="Left" Width="370" Grid.RowSpan="2"
+                >
+                <Grid Margin="0,0,0,0">
+                    <TextBlock
+                   VerticalAlignment="Center"
+                   TextAlignment="Left"
+                   FontFamily="Microsoft YaHei" FontSize="22" 
+                   Text="Версия лаунчера" Margin="25,0,0,0" Height="32" Foreground="{DynamicResource ArcSecondText}"
+                   />
+                </Grid>
+            </Border>
+
+            <Border VerticalAlignment="Top" Height="44" Margin="370,0,25,0"
+                    Grid.RowSpan="2"
+        BorderThickness="1,1,1,1"
+    Background="{DynamicResource ArcHeader}"
+    BorderBrush="{DynamicResource ArcBorder}"
+    >
+                <TextBlock
+       VerticalAlignment="Center"
+       TextAlignment="Center"
+       FontFamily="Microsoft YaHei" FontSize="22" 
+       Text="{x:Static local:MainWindow.APP_VERSION}" Height="32" Foreground="{DynamicResource ArcSecondText}"
+       />
+            </Border>
+
+            <Border Width="25"
+                    HorizontalAlignment="Right"
+                    BorderThickness="1,1,1,1"
+                Background="{DynamicResource ArcHeader}"
+                BorderBrush="{DynamicResource ArcBorder}" Grid.RowSpan="2"
+                />
+        </Grid>
+
+        <!-- Тип игры -->
+        <Grid VerticalAlignment="Bottom" Height="44" Margin="0,0,0,88">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="6*"/>
+                <RowDefinition Height="5*"/>
+            </Grid.RowDefinitions>
+            <Border VerticalAlignment="Top" Height="44"
+            BorderThickness="1,1,1,1"
+        Background="{DynamicResource ArcHeader}"
+        BorderBrush="{DynamicResource ArcBorder}" HorizontalAlignment="Left" Width="370" Grid.RowSpan="2"
+        >
+                <Grid Margin="0,0,0,0">
+                    <TextBlock
+           VerticalAlignment="Center"
+           TextAlignment="Left"
+           FontFamily="Microsoft YaHei" FontSize="22" 
+           Text="Тип игры" Margin="25,0,0,0" Height="32" Foreground="{DynamicResource ArcSecondText}"
+           />
+                </Grid>
+            </Border>
+
+            <ComboBox x:Name="CHSGameType" VerticalAlignment="Top" Height="44" Margin="370,0,25,0" Grid.RowSpan="2"
+              Background="{DynamicResource ArcHeader}"
+              BorderBrush="{DynamicResource ArcBorder}"
+              BorderThickness="1,1,1,1" SelectionChanged="CHSGameType_SelectionChanged"
+
+              >
+            </ComboBox>
+
+            <Border Width="25"
+            HorizontalAlignment="Right"
+            BorderThickness="1,1,1,1"
+        Background="{DynamicResource ArcHeader}"
+        BorderBrush="{DynamicResource ArcBorder}" Grid.RowSpan="2"
+        />
+        </Grid>
+
+
+        <!-- Discord RPC -->
+        <Grid VerticalAlignment="Top" Height="44" Margin="0,210,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="6*"/>
+                <RowDefinition Height="5*"/>
+            </Grid.RowDefinitions>
+            <Border VerticalAlignment="Top" Height="44"
+                BorderThickness="1,1,1,1"
+                Background="{DynamicResource ArcHeader}"
+                BorderBrush="{DynamicResource ArcBorder}" HorizontalAlignment="Left" Width="370" Grid.RowSpan="2"
+                >
+                <Grid Margin="0,0,0,0">
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        TextAlignment="Left"
+                        FontFamily="Microsoft YaHei" FontSize="22" 
+                        Text="Discord RPC" Margin="25,0,0,0" Height="32" Foreground="{DynamicResource ArcSecondText}"
+                   />
+                </Grid>
+            </Border>
+
+            <ComboBox x:Name="CHSDiscordRPC" VerticalAlignment="Top" Height="44" Margin="370,0,25,0" Grid.RowSpan="2"
+                Background="{DynamicResource ArcHeader}"
+                BorderBrush="{DynamicResource ArcBorder}"
+                BorderThickness="1,1,1,1" SelectionChanged="CHSDiscordRPC1_SelectionChanged"
+                      >
+                <ComboBoxItem x:Uid="dsc1en" IsSelected="True">
+                    <TextBlock Height="26" FontSize="22" Text="Отключено" Foreground="{DynamicResource ArcSecondText}"/>
+                </ComboBoxItem>
+
+                <ComboBoxItem Uid="dsc1dis">
+                    <TextBlock Height="26" FontSize="22" Text="Включено" Foreground="{DynamicResource ArcSecondText}"/>
+                </ComboBoxItem>
+            </ComboBox>
+
+            <Border Width="25"
+                HorizontalAlignment="Right"
+                BorderThickness="1,1,1,1"
+                Background="{DynamicResource ArcHeader}"
+                BorderBrush="{DynamicResource ArcBorder}" Grid.RowSpan="2"
+                />
+        </Grid>
+
+        <!-- Сохранить изменения -->
+        <Grid VerticalAlignment="Bottom" Height="44" Margin="0,0,0,00">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="32*"/>
+                <ColumnDefinition Width="33*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="6*"/>
+                <RowDefinition Height="5*"/>
+            </Grid.RowDefinitions>
+
+            <Button Height="44" 
+                VerticalAlignment="Top" FontFamily="Microsoft YaHei" 
+                FontSize="22" Margin="55,0,0,0" Grid.RowSpan="2"
+                Content="Сбросить" Click="ResetPacks_Click"
+                    >
+                <Button.Style>
+                    <Style TargetType="{x:Type Button}" BasedOn="{StaticResource ArcBotton}">
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{StaticResource ArcRedHover}"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+
+            <Button Height="44" 
+                VerticalAlignment="Top" FontFamily="Microsoft YaHei" 
+                FontSize="22" Margin="0,0,55,0" Grid.RowSpan="2"
+                Content="Сохранить изменения" Grid.Column="1" Click="SaveSettinsClick"
+                    >
+                <Button.Style>
+                    <Style TargetType="{x:Type Button}" BasedOn="{StaticResource ArcBotton}">
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{StaticResource ArcGreenHover}"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+
+            <Border Width="55"
+                HorizontalAlignment="Right"
+                BorderThickness="1,1,1,1"
+                Background="{DynamicResource ArcHeader}"
+                BorderBrush="{DynamicResource ArcBorder}" Grid.RowSpan="2" Grid.Column="1"
+                />
+            <Border Width="55"
+                HorizontalAlignment="Left"
+                BorderThickness="1,1,1,1"
+                Background="{DynamicResource ArcHeader}"
+                BorderBrush="{DynamicResource ArcBorder}" Grid.RowSpan="2"
+                />
+        </Grid>
+
+        <!-- Подавление лаунчера -->
+        <Grid VerticalAlignment="Top" Height="44" Margin="0,254,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="6*"/>
+                <RowDefinition Height="5*"/>
+            </Grid.RowDefinitions>
+            <Border VerticalAlignment="Top" Height="44"
+                BorderThickness="1,1,1,1"
+                Background="{DynamicResource ArcHeader}"
+                BorderBrush="{DynamicResource ArcBorder}" HorizontalAlignment="Left" Width="370" Grid.RowSpan="2"
+                >
+                <Grid Margin="0,0,0,0">
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        TextAlignment="Left"
+                        FontFamily="Microsoft YaHei" FontSize="22" 
+                        Text="Подавление лаунчера" Margin="25,0,0,0" Height="32" Foreground="{DynamicResource ArcSecondText}"
+                   />
+                </Grid>
+            </Border>
+
+            <ComboBox x:Name="CHSprsLaunch" VerticalAlignment="Top" Height="44" Margin="370,0,25,0" Grid.RowSpan="2"
+                Background="{DynamicResource ArcHeader}"
+                BorderBrush="{DynamicResource ArcBorder}"
+                BorderThickness="1,1,1,1" SelectionChanged="CHSprsLaunch_SelectionChanged"
+                      >
+                <ComboBoxItem Uid="sps0dis" IsSelected="True">
+                    <TextBlock Height="26" FontSize="22" Text="Отключено" Foreground="{DynamicResource ArcSecondText}"/>
+                </ComboBoxItem>
+
+                <ComboBoxItem Uid="sps0en">
+                    <TextBlock Height="26" FontSize="22" Text="Включено" Foreground="{DynamicResource ArcSecondText}"/>
+                </ComboBoxItem>
+            </ComboBox>
+
+            <Border Width="25"
+                HorizontalAlignment="Right"
+                BorderThickness="1,1,1,1"
+                Background="{DynamicResource ArcHeader}"
+                BorderBrush="{DynamicResource ArcBorder}" Grid.RowSpan="2"
+                />
+        </Grid>
+
+    </Grid>
+
+</fw:AcrylicWindow>

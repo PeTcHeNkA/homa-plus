@@ -1,0 +1,53 @@
+:root{
+    --btn-sz: 2.1em;
+    line-height: var(--btn-sz);
+    /* font-size: calc(var(--btn-sz)*0.4) */
+}
+.w-100w{
+    width: 100vw;
+}
+.h-100h{
+    height: 100vh;
+}
+.w-50{
+    width: 50%;
+}
+.flex{
+    display: flex;
+    align-items: center;
+}
+.flex-end{
+    display: flex;
+    align-items: flex-end;
+}
+.flex-c-end{
+    flex-direction: column;
+    display: flex;
+    align-items: flex-end;
+}
+.flex-between{
+    display: flex;
+    justify-content: space-between;
+}
+.flex-cen{
+    display: flex;
+    justify-content: center
+}
+.mg-1{
+    margin-left: 1em;
+    margin-right: 1em;
+}
+.pd-1{
+    padding-left: 1em;
+    padding-right: 1em;
+}
+
+.text-white{
+    color: white;
+}
+.justify-end{
+    justify-content: flex-end;
+}
+.no-select{
+    user-select: none;
+}

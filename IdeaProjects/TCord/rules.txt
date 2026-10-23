@@ -1,0 +1,284 @@
+s|-33|Makiatto|
+s|-32|Andoris|
+s|-31|Lotta|
+s|-30|Belka|
+s|-29|Helena|
+s|-28|Lenna|
+s|-27|Lumi|
+s|-26|Ksenia|
+s|-25|Mayling|
+s|-24|Mosin-Nagant|
+s|-23|Dushevnaya|
+s|-22|Suomi|
+s|-21|Vector|
+s|-20|Krolik|
+s|-19|Nemesis|
+s|-18|Tololo|
+s|-17|Yoohee|
+s|-16|Daiyan|
+s|-15|Vepley|
+s|-14|Klukai|
+s|-13|Cheeta|
+s|-12|Nagant|
+s|-11|Mechty|
+s|-10|Colphne|
+s|-9|Groza|
+s|-8|Commander|
+s|-7|Commander, |
+s|-6|Leader|
+c|7|How can|
+s|7|Everyone,|
+c|7|I mean|
+c|7|Could you|
+c|7|Big Sis|
+s|7|Sure.|
+c|7|Well,|
+s|7|Why |
+s|7|Once you|
+s|7|I believe|
+s|7|I could|
+s|7|It was|
+s|7|Perhaps|
+s|7|Anyway,|
+s|7|Hello|
+c|7|I heard|
+s|7|Some |
+c|7|However,|
+c|7|Of course|
+c|7|Okay,|
+c|7|Speaking of|
+c|7|Look, |
+c|7|Looks |
+c|7|Ha,|
+c|7|Hehe|
+c|7|you to|
+c|7|I just|
+s|7|There's|
+s|7|Don't |
+c|7|In any case|
+s|7|Is that|
+s|7|Miss |
+s|7|My |
+s|7|No,|
+s|7|Mmm|
+s|7|Did |
+s|7|I've|
+s|7|Their|
+s|7|Our |
+c|7|So |
+s|7|Sure, |
+c|7|This is |
+s|7|Who |
+s|7|Also|
+s|7|But |
+s|7|A new |
+s|7|After all|
+s|7|Good |
+s|7|Will|
+s|7|Thank|
+c|7|...|
+s|7|And |
+s|7|We're|
+s|7|Well |
+c|7|See?|
+s|7|See|
+s|7|See,|
+s|7|Yup|
+s|7|Yes|
+s|7|Yeah|
+s|7|Although|
+c|7|You|
+c|7|I'm|
+s|7|They're|
+s|7|I was|
+s|7|Hm|
+s|7|Not |
+s|7|A Doll|
+s|7|I will|
+s|7|Hah|
+s|7|That|
+s|7|They |
+c|7|Sorry|
+s|7|Hey|
+c|7|I know|
+c|7|I see|
+s|7|Wait|
+c|7|Understood.|
+s|7|We |
+s|7|What|
+s|7|Ah|
+s|7|Then|
+s|7|I can|
+s|7|Indeed|
+c|7|Boss, |
+s|7|Oh|
+s|7|Alright|
+s|7|Do you |
+s|7|I did|
+s|7|Huh? |
+s|7|I think|
+c|7|I'll|
+s|7|It's|
+c|7|So, |
+s|7|Just |
+s|7|Let's|
+s|8|(|
+s|9|Active /|
+s|10|Passive /|
+s|11|Ultimate /|
+s|13|Level |
+s|14|Cognitive Configuration - |
+s|19|Badge - |
+s|20|Common Key - |
+s|21|Fixed Key - |
+s|22|Expansion Key - |
+s|30|Complete |
+s|31|Story Campaign|
+s|40|Eliminate |
+s|50|AR Advanced Attachment|
+s|51|SMG Advanced Attachment Box|
+s|52|RF Advanced Attachment Box|
+s|55|Trilogy |
+s|69|Neural Helix - |
+s|60|Imaginary Friend -|
+s|70|Imprinted Skill -|
+s|71|Weapon Blueprint - |
+s|72|Portrait - |
+s|73|Outfit - |
+s|74|Trial - |
+s|75|Skin - |
+s|76|Target - |
+s|77|Affinity Gift - |
+s|80|Icon: |
+s|90|Icon Frame: |
+s|91|Portrait Frame -|
+s|100|An epic weapon|
+s|110|Attachment skin|
+s|120|Reinforced Frontal Hunter|
+s|121|Total Siege|
+s|122|Extreme |
+s|123|A weapon skin|
+s|130|Achieve Excellent|
+s|131|Activate |
+s|132|Expand |
+s|140|Phase 1|
+s|141|Phase 2|
+s|142|Phase 3|
+s|143|Dark Zone |
+s|144|Hazard Zone |
+s|145|Season Scene |
+s|146|Projection |
+s|147|Score Reward|
+s|148|Description |
+s|149|Increase basic |
+s|150|When there are|
+s|151|At the start|
+s|152|At the end|
+s|153|Regular Bullet|
+s|154|Damage is increased by|
+s|155|Damage dealt |
+s|156|Enemy units take |
+s|157|Enemy units evacuated|
+s|158|Defense |
+s|159|Attack |
+s|160|Select |
+s|161|Increases damage dealt|
+s|162|Increase attack |
+s|163|Increase mobility |
+s|164|Active skill damage|
+s|165|Selects 1|
+s|165|Selects an|
+s|166|Place <|
+s|166|Places <|
+s|167|After killing|
+s|168|Increase <|
+s|169|Increases damage |
+s|170|Increase damage |
+s|171|Reduces damage |
+s|172|Reduce damage |
+s|173|Deals <|
+s|174|Burn damage |
+s|175|Active healing |
+s|176|Stability damage taken|
+s|177|Phase damage is|
+s|178|Critical damage |
+s|179|Mobility increased by|
+s|180|Before attacking, there|
+s|181|Deals AoE|
+s|182|For every <|
+s|183|Increase targeted |
+s|184|Increase healing |
+s|185|When attacking|
+s|186|If no movement has been made|
+s|187|After dealing damage|
+s|188|Ultimate skill damage|
+s|189|Damage is increased|
+s|190|Restores 1 HP immediately|
+s|191|Increase AoE |
+s|192|Increase critical |
+s|193|Increase defense |
+s|194|Increases attack |
+s|195|For each <|
+s|196|When using |
+s|197|After entering battle|
+s|208|Daily |
+s|209|Raise any |
+s|210|Unlocked after completing|
+s|211|Unlocked after Overall|
+s|212|Unlock by completing |
+s|213|Unlocked after obtaining|
+s|194|Unlocked when |
+s|215|Unlocked |
+s|216|Unlock by |
+s|217|Use |
+s|218|Clear Story |
+s|219|Clear Supply |
+s|220|Clear stage |
+s|290|Deal |
+s|291|Deal a total |
+s|292|Accumulate |
+s|293|Obtain |
+s|294|Win |
+s|295|Kill |
+s|296|Deployment |
+s|297|Click anywhere|
+s|298|Please click|
+s|299|Inflict |
+s|300|Max-level |
+s|301|Combat Exercise|
+s|302|[Beginner] |
+s|303|Reach Commander Level |
+s|304|Clear any |
+s|305|Clear Simulation |
+s|306|A Neural Stock Boost Bar|
+s|307|Exploration Supplies|
+s|308|A common weapon blueprint|
+s|309|Test description|
+s|310|Military Simulation Season: |
+s|311|Perform |
+s|312|Neural Survey|
+s|313|Mysterious Gear|
+s|314|SMG Advanced|
+s|315|AR Advanced|
+s|316|SG Advanced|
+s|317|RF Advanced|
+s|319|Blade Advanced|
+s|320|Total level |
+s|321|Season |
+s|322|Fixed Keys: |
+s|323|Equipment Analysis|
+s|324|Exploration sup|
+s|325|Platoon |
+s|474|Capture the |
+s|475|Capture all|
+s|476|Protect the allied |
+s|477|[Draft Copy]|
+s|478|Lose no more than |
+s|479|Destroy |
+s|481|[MG] |
+s|482|[RF] |
+s|483|[AR] |
+s|484|[SMG] |
+s|485|[HG] |
+s|486|[SG] |
+s|487|[Blade] |

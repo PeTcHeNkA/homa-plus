@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "testfsx",
+  "version": "${version}",
+  "name": "TestFSX",
+  "description": "",
+  "authors": [],
+  "contact": {
+    "repo": "https://github.com/Te4hnoPlus/TestFSX"
+  },
+  "license": "All-Rights-Reserved",
+  "icon": "assets/testfsx/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "plus.fsx.testfsx.client.TestFSXClient"
+    ],
+    "main": [
+      "plus.fsx.testfsx.TestFSX"
+    ]
+  },
+  "mixins": [
+    "testfsx.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}

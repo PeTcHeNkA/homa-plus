@@ -1,0 +1,18 @@
+plugins {
+    id 'java'
+}
+
+group 'plus.util'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'C:/Users/Te4hnoPlus/IdeaProjects/TsonConfigurations/core/src/main/java'
+        }
+    }
+}

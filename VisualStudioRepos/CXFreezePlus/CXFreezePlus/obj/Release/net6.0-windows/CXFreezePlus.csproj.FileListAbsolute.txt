@@ -1,0 +1,17 @@
+C:\Users\Te4hnoPlus\source\repos\CXFreezePlus\CXFreezePlus\obj\Release\net6.0-windows\CXFreezePlus.csproj.AssemblyReference.cache
+C:\Users\Te4hnoPlus\source\repos\CXFreezePlus\CXFreezePlus\obj\Release\net6.0-windows\CXFreezePlus.Form1.resources
+C:\Users\Te4hnoPlus\source\repos\CXFreezePlus\CXFreezePlus\obj\Release\net6.0-windows\CXFreezePlus.Form2.resources
+C:\Users\Te4hnoPlus\source\repos\CXFreezePlus\CXFreezePlus\obj\Release\net6.0-windows\CXFreezePlus.Form3.resources
+C:\Users\Te4hnoPlus\source\repos\CXFreezePlus\CXFreezePlus\obj\Release\net6.0-windows\CXFreezePlus.csproj.GenerateResource.cache
+C:\Users\Te4hnoPlus\source\repos\CXFreezePlus\CXFreezePlus\obj\Release\net6.0-windows\CXFreezePlus.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Te4hnoPlus\source\repos\CXFreezePlus\CXFreezePlus\obj\Release\net6.0-windows\CXFreezePlus.AssemblyInfoInputs.cache
+C:\Users\Te4hnoPlus\source\repos\CXFreezePlus\CXFreezePlus\obj\Release\net6.0-windows\CXFreezePlus.AssemblyInfo.cs
+C:\Users\Te4hnoPlus\source\repos\CXFreezePlus\CXFreezePlus\obj\Release\net6.0-windows\CXFreezePlus.csproj.CoreCompileInputs.cache
+C:\Users\Te4hnoPlus\source\repos\CXFreezePlus\CXFreezePlus\obj\Release\net6.0-windows\CXFreezePlus.genruntimeconfig.cache
+C:\Users\Te4hnoPlus\source\repos\CXFreezePlus\CXFreezePlus\bin\Release\net6.0-windows\javaw.exe
+C:\Users\Te4hnoPlus\source\repos\CXFreezePlus\CXFreezePlus\bin\Release\net6.0-windows\javaw.deps.json
+C:\Users\Te4hnoPlus\source\repos\CXFreezePlus\CXFreezePlus\bin\Release\net6.0-windows\javaw.runtimeconfig.json
+C:\Users\Te4hnoPlus\source\repos\CXFreezePlus\CXFreezePlus\bin\Release\net6.0-windows\javaw.dll
+C:\Users\Te4hnoPlus\source\repos\CXFreezePlus\CXFreezePlus\bin\Release\net6.0-windows\javaw.pdb
+C:\Users\Te4hnoPlus\source\repos\CXFreezePlus\CXFreezePlus\obj\Release\net6.0-windows\javaw.dll
+C:\Users\Te4hnoPlus\source\repos\CXFreezePlus\CXFreezePlus\obj\Release\net6.0-windows\javaw.pdb

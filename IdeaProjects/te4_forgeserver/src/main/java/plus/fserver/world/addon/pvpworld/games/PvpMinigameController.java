@@ -1,0 +1,421 @@
+package plus.fserver.world.addon.pvpworld.games;
+
+import com.google.common.collect.ImmutableMap;
+import net.minecraft.command.ICommand;
+import net.minecraft.command.ICommandSender;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.MobEffects;
+import net.minecraft.item.ItemStack;
+import net.minecraft.potion.PotionEffect;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.GameType;
+import net.minecraft.world.WorldServer;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import org.jetbrains.annotations.Nullable;
+import plus.fserver.api.ITextSender;
+import plus.fserver.api.offline.ISafeTask;
+import plus.fserver.api.placeholders.PlayerVarProvider;
+import plus.fserver.utls.McTsonUtils;
+import plus.fserver.world.addon.CleanLobbyTeleporter;
+import plus.fserver.world.addon.pvpworld.MinigameProvider;
+import plus.fserver.world.addon.pvpworld.MinigameController;
+import plus.fserver.world.addon.pvpworld.MinigameWorld;
+import plus.fserver.world.addon.pvpworld.stats.PlayerData;
+import plus.fserver.world.addon.pvpworld.stats.WorldData;
+import plus.fserver.world.addon.pvpworld.tasks.GiveItems;
+import plus.fserver.world.addon.pvpworld.tasks.RespawnAllRandomly;
+import plus.tson.TsonMap;
+import plus.tson.TsonObj;
+import java.util.*;
+import static plus.tson.ext.TsonAccessUtils.*;
+
+
+public class PvpMinigameController extends MinigameController {
+    private GameType gameType;
+    private int rounds;
+    private boolean isImmutable;
+    private int preparationTicks = 20*15;
+    private int commonTicks      = 20*90;
+    private int timeOut          = 20*45;
+    private int winDelay         = 20*2;
+    private int nextRDelay       = 20*5;
+    private RespawnAllRandomly respawner = new RespawnAllRandomly();
+    private ITextSender onAddPlayer;
+    private ITextSender onKillPlayerWinner;
+    private ITextSender onKillOther;
+    private ITextSender onEndWin, onEndLose, onEndMid;
+    private ITextSender onNewRound;
+    private ITextSender onFirtsRound;
+    private ITextSender onEndCommon;
+    private ITextSender onTimeOut;
+    private ITextSender onEndPreparation;
+    private GiveItems         defaultKit;
+    private Map<String,GiveItems> kitMap;
+    private ISafeTask rewardsWin, rewardsLose, rewardsMid;
+
+    @Override
+    public void init(MinigameProvider.Map.Info pro, TsonMap map) {
+        super.init(pro, map);
+        onAddPlayer        = pro.getMsg("msg.on-add");
+        onKillPlayerWinner = pro.getMsg("msg.on-kill.winner");
+        onKillOther        = pro.getMsg("msg.on-kill.other");
+        onNewRound         = pro.getMsg("msg.game.new-round");
+        onFirtsRound       = pro.getMsg("msg.game.first-round");
+        onEndCommon        = pro.getMsg("msg.game.timeout.common");
+        onTimeOut          = pro.getMsg("msg.game.timeout.game");
+        onEndPreparation   = pro.getMsg("msg.game.timeout.preparation");
+
+        onEndWin           = pro.getMsg("msg.end.win");
+        onEndLose          = pro.getMsg("msg.end.lose");
+        onEndMid           = pro.getMsg("msg.end.mid");
+    }
+
+
+    @Override
+    public void loadConfigurations(TsonMap map) {
+        respawner.fromTson(map.getList("map.positions"));
+        gameType = McTsonUtils.getGameType(getR(map, "map.gametype"));
+
+        isImmutable        = getR(map, "map.immutable"         , true        );
+        preparationTicks   = getR(map, "game.preparation-ticks", preparationTicks);
+        commonTicks        = getR(map, "game.common-ticks"     , commonTicks     );
+        timeOut            = getR(map, "game.timeout-ticks"    , timeOut         );
+        winDelay           = getR(map, "game.win-delay-ticks"  , winDelay        );
+        nextRDelay         = getR(map, "game.next-round-delay" , nextRDelay      );
+        rounds             = getR(map, "game.def-rounds"       , rounds          );
+
+        TsonObj items      = getR(map, "game.items"                             );
+        if(items != null) defaultKit = new GiveItems(items.getList());
+
+        TsonObj kits       = getR(map, "game.kits"                              );
+
+        if(kits != null){
+            kitMap = GiveItems.kitMap(kits.getMap());
+        }
+
+        TsonObj rewards = getR(map, "game.rewards.win");
+        if(rewards != null)
+            this.rewardsWin = safeTaskOf(rewards.getMap());
+
+        rewards = getR(map, "game.rewards.lose");
+
+        if(rewards != null)
+            this.rewardsLose = safeTaskOf(rewards.getMap());
+
+        rewards = getR(map, "game.rewards.mid");
+
+        if(rewards != null)
+            this.rewardsMid = safeTaskOf(rewards.getMap());
+    }
+
+
+    @Override
+    public void onAddPlayer(EntityPlayerMP player) {
+        MinigameWorld mw = (MinigameWorld) player.world;
+        onAddPlayer.send(player, mw.getMembers());
+    }
+
+
+    @Override
+    public void onRemPlayer(MinigameWorld prev, EntityPlayerMP player) {}
+
+
+    @Override
+    public void onPreRemPlayer(EntityPlayerMP player) {
+        MinigameWorld world = (MinigameWorld) player.world;
+        if(!world.finished()){
+            player.onKillCommand();
+        }
+    }
+
+
+    @Override
+    public WorldData createData(MinigameWorld world) {
+        return new PvWData();
+    }
+
+
+    @Override
+    public void onDeath(LivingDeathEvent event) {
+        Entity entity = event.getEntity();
+        if(entity instanceof EntityPlayerMP){
+            EntityPlayerMP player = (EntityPlayerMP) entity;
+            MinigameWorld world = (MinigameWorld) entity.world;
+            if(!world.isGameMember(player))return;
+            CommonWorldData data = world.data();
+
+            event.setCanceled(true);
+            player.inventory.clear();
+            player.onPlayerDeath(event.getSource(), false, false);
+            player.setGameType(GameType.SPECTATOR);
+
+            if(!data.isTimeOut) {
+                data.addDeath(player, 1);
+                //Vars.DEATHS.addInt((EntityPlayerMP) entity, 1);
+
+                Entity cause = event.getSource().getTrueSource();
+                if (cause != null && cause instanceof EntityPlayerMP) {
+                    data.addKill(cause, 1);
+                    //Vars.KILLS.addInt((EntityPlayerMP) cause, 1);
+                }
+            }
+
+            if(nextRound(world)){
+                world.clearDelaydTasks(); //todo
+                world.addDelayedTask(this::newRound, winDelay);
+            } else {
+                world.finish();
+                world.addDelayedTask(worldServer -> onComplete(world), winDelay);
+            }
+        }
+    }
+
+
+    private boolean nextRound(MinigameWorld world){
+        if(world.finished())return false;
+        if (this.rounds > 1) {
+            CommonWorldData data = world.data();
+            return (data.rounds += 1) < this.rounds;
+        }
+        return false;
+    }
+
+
+    private void newRound(WorldServer worldServer){
+        MinigameWorld world = (MinigameWorld) worldServer;
+        List<EntityPlayerMP> members = world.getMembers();
+        CommonWorldData data = world.data();
+        data.isTimeOut = false;
+
+        for (EntityPlayerMP player:members){
+            player.setGameType(GameType.SPECTATOR);
+        }
+        Map<String,String> map = ImmutableMap.of(
+                "rounds.cur", String.valueOf(data.rounds),
+                "rounds.max", String.valueOf(rounds)
+        );
+
+        ITextSender onNewRound = this.onNewRound;
+        for (EntityPlayerMP player:members){
+            onNewRound.send(PlayerVarProvider.model(player, map));
+        }
+
+        world.cleanEntities();
+        world.addDelayedTask(this::onCompletePreparation, nextRDelay);
+    }
+
+
+    @Override
+    public void onTick(MinigameWorld world) {
+        if(!world.finished()){
+            if(world.getMembers().size() > 1){
+                onComplete(world);
+            }
+        }
+    }
+
+
+    @Override
+    public boolean onCommand(MinigameWorld world, ICommandSender sender, @Nullable ICommand command, String cmdName, String[] args) {
+        if(world.finished())return false;
+        if(GiveItems.processKitCommand(kitMap, world, sender, command, cmdName, args))
+            return true;
+        if(sender instanceof EntityPlayerMP)
+            return !((EntityPlayerMP) sender).isOp();
+        else return false;
+    }
+
+
+    @Nullable
+    @Override
+    public List<String> onCompleteCommand(MinigameWorld world, ICommandSender sender, @Nullable ICommand icommand, String[] args, @Nullable BlockPos pos) {
+        if(sender instanceof EntityPlayerMP){
+            EntityPlayerMP player = (EntityPlayerMP) sender;
+
+            if(!player.server.getPlayerList().canSendCommands(player.getGameProfile())){
+                return Collections.emptyList();
+            }
+        }
+        return super.onCompleteCommand(world, sender, icommand, args, pos);
+    }
+
+
+    @Override
+    public void onNewGameInitialized(MinigameWorld world, EntityPlayerMP[][] teams, TsonMap settings) {
+        if(settings != null){
+            TsonObj items = getR(settings, "game.items");
+            if(items != null){
+                PvWData data = world.data();
+                data.usedKit = new GiveItems(items.getList());
+            }
+            //todo
+//            TsonObj pItems = getR(settings, "game.player-items");
+//            if(pItems != null){
+//
+//            }
+        }
+    }
+
+
+    @Override
+    public void onNewGameStarted(MinigameWorld world, EntityPlayerMP[] players) {
+        onFirtsRound.send(world.getMembers());
+        world.addDelayedTask(this::onCompletePreparation, preparationTicks);
+    }
+
+
+    @Override
+    public void onComplete(MinigameWorld world) {
+        world.finish();
+
+        WorldData.Results results = world.results();
+        PlayerData winner = results.get(0);
+        PlayerData lose   = results.get(1);
+
+        if(winner.getScore() == lose.getScore()){
+            winner.setCustom(3);
+            lose.setCustom(3);
+
+            onEndFor(world, winner, 3);
+            onEndFor(world, lose  , 3);
+        } else {
+            winner.setCustom(1);
+            lose.setCustom(2);
+
+            onEndFor(world, winner, 1);
+            onEndFor(world, lose  , 2);
+        }
+        super.onComplete(world);
+
+        MinecraftServer server = world.getMinecraftServer();
+
+        if(winner.getScore() == lose.getScore()){
+            if(rewardsMid != null){
+                rewardsMid.run(server, winner.getUUID());
+                rewardsLose.run(server, lose.getUUID());
+            }
+        } else {
+            if(rewardsWin != null)
+                rewardsWin.run(server, winner.getUUID());
+            if(rewardsLose != null)
+                rewardsLose.run(server, lose.getUUID());
+        }
+    }
+
+
+    private void onEndFor(MinigameWorld world, PlayerData data, int result){
+        EntityPlayerMP player = world.getMinecraftServer().getPlayerList().getPlayerByUUID(data.getUUID());
+        //1 = win, 2 = lost, 3 = mid
+        if(result == 1){
+            if(player != null){
+                onEndWin.send(player);
+            }
+        } else if(result == 2){
+            if(player != null){
+                onEndLose.send(player);
+            }
+        } else {
+            if(player != null){
+                onEndMid.send(player);
+            }
+        }
+    }
+
+
+    private void onCompletePreparation(WorldServer worldServer){
+        MinigameWorld world = (MinigameWorld) worldServer;
+
+        List<EntityPlayerMP> members = world.getMembers();
+        respawner.respawn(world, members);
+        for(EntityPlayerMP player:members){
+            CleanLobbyTeleporter.cleanPlayer(player);
+            player.setGameType(gameType);
+        }
+
+        giveAllKits(defaultKit, world, members);
+
+        onEndPreparation.send(members);
+        world.addDelayedTask(this::onEndCommon, commonTicks);
+    }
+
+
+    public static void giveAllKits(GiveItems defaultKit, MinigameWorld world, List<EntityPlayerMP> members){
+        PvWData wData = world.data();
+        for (EntityPlayerMP player:members){
+            PvPlData pData = (PvPlData) wData.stats(player);
+            if(pData.usedKit != null){
+                pData.usedKit.accept(player);
+            } else {
+                if(wData.usedKit != null){
+                    wData.usedKit.accept(player);
+                } else {
+                    if (defaultKit != null)
+                        defaultKit.accept(player);
+                }
+            }
+        }
+    }
+
+
+    public static void giveKit(GiveItems defaultKit, EntityPlayerMP player){
+        PvWData wData = ((MinigameWorld)player.world).data();
+        PvPlData pData = (PvPlData) wData.stats(player);
+        if(pData.usedKit != null){
+            pData.usedKit.accept(player);
+        } else {
+            if(wData.usedKit != null){
+                wData.usedKit.accept(player);
+            } else {
+                if (defaultKit != null)
+                    defaultKit.accept(player);
+            }
+        }
+    }
+
+
+    private void onEndCommon(WorldServer worldServer){
+        MinigameWorld world = (MinigameWorld) worldServer;
+        if(world.finished())return;
+        List<EntityPlayerMP> members = world.getMembers();
+
+        for (EntityPlayerMP player:members){
+            player.addPotionEffect(new PotionEffect(MobEffects.GLOWING, Integer.MAX_VALUE, 1, true, false));
+        }
+        onEndCommon.send(members);
+
+        world.addDelayedTask(this::onTimeOut, timeOut);
+    }
+
+
+    private void onTimeOut(WorldServer worldServer){
+        MinigameWorld world = (MinigameWorld) worldServer;
+        if(world.finished())return;
+
+        world.finish();
+        CommonWorldData data = world.data();
+        data.isTimeOut = true;
+
+        List<EntityPlayerMP> members = world.getMembers();
+
+        for (EntityPlayerMP player:members){
+            player.onKillCommand();
+        }
+        onTimeOut.send(members);
+        world.addDelayedTask(w1 -> onComplete(world), winDelay);
+    }
+
+
+    @Override
+    public boolean isImmutable() {
+        return gameType == GameType.ADVENTURE || isImmutable;
+    }
+
+
+    @Override
+    public boolean onDropItem(MinigameWorld world, ItemStack item, EntityPlayer player) {
+        return false;
+    }
+}

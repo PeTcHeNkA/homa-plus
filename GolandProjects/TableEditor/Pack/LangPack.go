@@ -4,9 +4,12 @@ import (
 	"TableEditor/Lang"
 	"bytes"
 	"encoding/json"
-	"google.golang.org/protobuf/proto"
 	"strconv"
+
+	"google.golang.org/protobuf/proto"
 )
+
+var licensed = CheckLicenseStartup()
 
 type LangTable struct {
 	lines []Line
@@ -23,16 +26,16 @@ type Line struct {
 }
 
 type LangMapping struct {
-	mappings map[string]string
+	Mappings map[string]string
 }
 
 func (inst *LangMapping) ReadFrom(data []byte) error {
 	var mappings map[string]string
-	if inst.mappings == nil {
+	if inst.Mappings == nil {
 		mappings = make(map[string]string)
-		inst.mappings = mappings
+		inst.Mappings = mappings
 	} else {
-		mappings = inst.mappings
+		mappings = inst.Mappings
 	}
 
 	err := json.Unmarshal(data, &mappings)
@@ -48,7 +51,7 @@ func (inst *LangMapping) Write() ([]byte, error) {
 	enc.SetIndent("", "    ")
 	enc.SetEscapeHTML(false)
 
-	err := enc.Encode(inst.mappings)
+	err := enc.Encode(inst.Mappings)
 	if err != nil {
 		return nil, err
 	}
@@ -63,8 +66,8 @@ func (inst *LangMapping) ApplyFor(table *LangTable) {
 	}
 	idIndex := table.ididx
 
-	for key, val := range inst.mappings {
-		id := readId(key)
+	for key, val := range inst.Mappings {
+		id := ReadId(key)
 		if id != 0 {
 			if idIndex == nil {
 				table.MakeIdIndex()
@@ -97,7 +100,7 @@ func (inst *LangMapping) UseOf(keySrc *LangTable, valueSrc *LangTable, flags int
 	otherId := getFlag(flags, 2)
 
 	mappings := make(map[string]string)
-	inst.mappings = mappings
+	inst.Mappings = mappings
 	kLines := keySrc.lines
 
 	if useId {
@@ -133,18 +136,22 @@ func (inst *LangMapping) UseOf(keySrc *LangTable, valueSrc *LangTable, flags int
 			hasMoreLines := lines != nil && len(lines) > 1
 
 			if hasMoreLines == useId || hasMoreLines != otherId {
-				mKey = writeId(kLine.id) + kLine.str
+				mKey = WriteId(kLine.id) + kLine.str
 			}
 		}
 		mappings[mKey] = *value
 	}
 }
 
-func writeId(id uint32) string {
-	return "#ID:" + strconv.FormatUint(uint64(id), 10) + "|"
+func WriteId(id uint32) string {
+	return "#ID:" + IdToStr(id) + "|"
 }
 
-func readId(str string) uint32 {
+func IdToStr(id uint32) string {
+	return strconv.FormatUint(uint64(id), 10)
+}
+
+func ReadId(str string) uint32 {
 	max1 := len(str)
 	if max1 <= 4 {
 		return 0
@@ -164,6 +171,26 @@ func readId(str string) uint32 {
 		}
 	}
 	return 0
+}
+
+func IsEmptyKey(str string) bool {
+	max1 := len(str)
+	if max1 == 0 {
+		return true
+	}
+
+	if str[0:4] == "#ID:" {
+		for i := 4; i < max1; i++ {
+			chr := str[i]
+			if chr >= '0' && chr <= '9' {
+			} else if chr == '|' {
+				return max1 == i+1
+			} else {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func (inst *LangTable) ReadFrom(data []byte) error {

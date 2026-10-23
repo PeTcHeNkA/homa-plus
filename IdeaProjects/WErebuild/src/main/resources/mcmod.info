@@ -1,0 +1,21 @@
+[{
+  "modid": "worldedit",
+  "name": "WorldEdit",
+  "description": "WorldEdit is an easy-to-use in-game world editor for Minecraft, supporting both single player and multiplayer.",
+  "version": "6.1.10-SNAPSHOT;e6b38e8",
+  "mcversion": "1.12.2",
+  "url": "http://wiki.sk89q.com/wiki/WorldEdit",
+  "updateUrl": "",
+  "authors": [ "sk89q", "wizjany", "TomyLobo", "kenzierocks" , "Te4hnoPlus"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "requiredMods": [
+    "Forge@[14.23.5.2768,)"
+  ],
+  "dependencies": [
+    "Forge@[14.23.5.2768,)",
+    "sponge"
+  ],
+  "dependants": []
+}]

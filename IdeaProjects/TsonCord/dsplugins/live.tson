@@ -1,0 +1,15 @@
+{listeners=[
+	<(msg), {
+		cansel=(false), priority=(10),
+		filter={
+			type="stw", msg="!deb"
+		},
+		msg={
+			layouts={type="menu",id="56789067893",plc="choose_ts2",options={
+				o1={text="текст1",msg="клик1",reply=(true)},
+				o2={text="текст2",msg="клик2",reply=(true),hide=(true)}
+			}}
+		}
+	}>,
+	<(script-cfg), <(iris)>, {}>
+]}

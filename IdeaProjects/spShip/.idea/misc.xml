@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="EntryPointsManager">
+    <list size="1">
+      <item index="0" class="java.lang.String" itemvalue="org.bukkit.event.EventHandler" />
+    </list>
+    <pattern value="plus.main.SpaseShip" />
+    <pattern value="plus.main.SpaseShip" method="test" />
+    <pattern value="plus.main.EEboat" method="addPassanger" />
+    <pattern value="plus.main.EEboat" />
+    <pattern value="plus.main.EEboat" method="EEboat" />
+    <pattern value="plus.main.EEntityBoat" method="addPassanger" />
+    <pattern value="plus.main.EEntityBoat" />
+  </component>
+  <component name="ExternalStorageConfigurationManager" enabled="true" />
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_17" default="true" project-jdk-name="graalvm-17" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/out" />
+  </component>
+</project>

@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <link rel="stylesheet" href="stdboost.css">
+    <script src="./reanet.js"></script>
+        
+    <style>
+        :root{
+            --color1: rgb(255, 69, 94);
+            --color2: black;
+            
+            /* normal */
+            --color3: rgba(35, 35, 35, 0.392);
+
+            /* hover */
+            --color5: rgba(213, 77, 99, 0.752);
+
+            /* active */
+            --color4: rgba(255, 85, 113, 0.859);
+
+
+            --color-bg: rgb(231, 231, 231);
+            --color-7: rgba(39, 43, 45, 0.495);
+            --color-f: #FFFFE0;
+            --glob-trs: 0.33s;
+
+            font-family: 'Exo', sans-serif;
+            cursor: default;
+        }
+        a{
+            all: unset;
+        }
+
+        .bg-ico-std{
+            ---img: url(/favicon.ico);
+            background-repeat: no-repeat;
+			background-size: cover;
+			background-position: 50%;
+            background-image: var(---img);
+            will-change: transform;
+        }
+        body{
+            margin: 0;
+            padding: 0;
+        }
+        .all-pages::-webkit-scrollbar {
+            width: 0px;
+            height: 0px;
+        }
+        .page{
+            width: 100%;
+            height: 100vh;
+            
+            opacity: 0;
+            transition: var(--glob-trs);
+        }
+        .all-pages{
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            overflow-y: scroll;
+        }
+        .menu{
+            position: absolute;
+            display: flex;
+            height: 100%;
+            align-items: center;
+            margin-left: calc(max(10px,1.8%));
+            user-select: none;
+        }
+        .menu-cel-cursor{
+            height: 30px;
+            width: 100%;
+            background-color: var(--color4);
+            transition: 0.3s;
+        }
+        .menu-inn{
+            z-index: 500;
+            transition: 0.5s;
+            transform-origin: left;
+        }
+        .menu-itm{
+            height: 48px;
+            display: flex;
+            flex-direction: column;
+        }
+        .menu-item-inn{
+            display: flex;
+            width: 90px;
+            font-size: 125%;
+            color: var(--color-f);
+            padding: 2px 0 2px 3px;
+            background-color: var(--color3);
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .menu-item-inn:hover{
+            background-color: var(--color5);
+        }
+        .menu-item-inn:active{
+            transition: 0.07s;
+            background-color: var(--color4);
+        }
+
+        .menu-line{
+            background-color: var(--color2);
+            height: 2px;
+            width: 0%;
+            transition: 0.3s;
+        }
+        .menu-cellector{
+            z-index: 500;
+            width: 2px;
+            height: 65%;
+            background-color: var(--color1);
+        }
+        .menu-cellector-inn{
+            height: 100%;
+            width: 100%;
+            display: flex;
+            align-items: center;
+        }
+        .menu-toggle-b-outher{
+            height: 0;
+        }
+        .menu-toggle-b{
+            position: absolute;
+            z-index: 500;
+            width: 40px;
+            height: 40px;
+            margin-top: 30%;
+            margin-left: 10%;
+            transition: 0.5s;
+            cursor: pointer;
+            /* ---img: url(/assets/svg/arrow-menu.svg); */
+        }
+        @media (max-height: 500px) {
+            .menu-toggle-b{
+                margin-top: 0;
+            }
+        }
+        @media (max-height: 450px){
+            .menu-cellector{
+                height: 75%;
+            }
+        }
+        @media (max-height: 400px){
+            .menu-cellector{
+                height: 100%;
+            }
+            .menu-toggle-b{
+                margin-top: 30%;
+            }
+        }
+        @media (max-height: 300px){
+            .menu-toggle-b{
+                margin-top: 0;
+            }
+        }
+    </style>
+    <style>
+        .logo-m-img{
+            position: absolute;
+            margin: 5px 20px;
+            height: 100px;
+        }
+        .mmenu-all{
+            position: absolute;
+            width: 70%;
+            height: 70px;
+            margin: 5px 0 0 30%;
+            user-select: none;
+            transition: 0.3s;
+        }
+        .mmenu-line{
+            height: 2px;
+            width: 100%;
+            background-color: var(--color1);
+        }
+        .mmenu-items{
+            font-size: 170%;
+            display: flex;
+            justify-content: flex-end;
+            height: 100%;
+        }
+        .mmenu-item{
+            overflow: hidden;
+            --varsize: 100%;
+            --varsize2: 0%;
+            background-color: var(--color3);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            flex-direction: column;
+            min-width: 15%;
+            padding: 0 2%;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .mmenu-item:hover{
+            --varsize: 110%;
+            --varsize2: 130%;
+            background-color: var(--color5);
+        }
+        .mmenu-item:active{
+            transition: 0.07s;
+            background-color: var(--color4)
+        }
+
+        .mmenu-item-inn{
+            height: 100%;
+            align-items: center;
+            display: flex;
+            transition: inherit;
+            color: var(--color-f);
+            transform: scale(var(--varsize));
+        }
+        .mmenu-item-line{
+            height: 2px;
+            width: var(--varsize2);
+            transition: inherit;
+            background-color: var(--color2);
+        }
+        .servers-online-all{
+            position: absolute;
+            right: 0;
+            margin-top: 100px;
+            width: 32%;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            transition: 0.3s;
+        }
+        .servers-online{
+            font-size: 120%;
+            width: 75%;
+            background-color: var(--color3);
+            height: 40px;
+        }
+        .servers-online-inn{
+            margin-right: 10%;
+        }
+        .comunity-lst-all{
+            position: absolute;
+            right: 0;
+            bottom: 8%;
+            width: max-content;
+            height: 65px;
+        }
+        .comunity-lst{
+            display: flex;
+            justify-content: flex-end;
+        }
+        .comunity-frs{
+            height: 67px;
+            background-color: var(--color3);
+        }
+        .ico-comunity{
+            margin: 5px;
+            width: 55px;
+            height: 55px;
+        }
+    </style>
+
+
+    <style>
+        .page-ctn-frame{
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .page-ctn-frame-inn{
+            width: 80%;
+            height: 85%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .page-content-ctn{
+            width: 95%;
+            height: 95%;
+            display: flex;
+            flex-direction: column;
+        }
+        .page-news-header{
+            padding: 10px;
+            padding-left: 30px;
+            font-size: 200%;
+            background-color: var(--color3);
+            color: var(--color-f);
+        }
+        .page-news-down{
+            padding: 7px;
+            font-size: 150%;
+            padding-right: 30px;
+            background-color: var(--color3);
+            display: flex;
+            justify-content: flex-end;
+            color: var(--color-f);
+        }
+        .wh100{
+            height: 100%;
+            width: 100%;
+        }
+        .page-news-txt{
+            padding: 14px;
+            font-size: 130%;
+            color: var(--color-f);
+            height: 100%;
+            background-color: var(--color3);
+        }
+        .page-news-tab{
+            padding: 7px 20px;
+            font-size: 140%;
+        }
+        .page-news-tab-outher{
+            width: 40%;
+        }
+
+        .page-ctn-frame-mn{
+            z-index: 1000;
+            position: absolute;
+            top: 92.5%;
+            width: 80%;
+            right: 10%;
+            transition: 0.3s;
+        }
+        .page-ctn-frame-mnup{
+            z-index: 1000;
+            width: 100%;
+            height: 10%;
+            position: absolute;
+            transition: 0.3s;
+            display: flex;
+        }
+    </style>
+
+</head>
+<body>
+    <reactive>
+        <div class="menu">
+            <div class="menu-cellector">
+                <div class="menu-toggle-b-outher">
+                    <div id="tgbtn" class="bg-ico-std menu-toggle-b">
+                        <svg fill="var(--color-f)" height="44" width="44" viewBox="0 -960 960 960"><path d="M148.078-268.078v-55.96h476.844v55.96H148.078ZM773-305.347 595.155-480 773-654.268l38.922 38.922L673.807-480l138.115 135.231L773-305.347ZM148.078-452.424v-55.96h361.844v55.96H148.078Zm0-183.538v-55.96h476.844v55.96H148.078Z"/></svg>
+                    </div>
+                </div>
+                <div class="menu-cellector-inn"><div id="mn-cursor" class="menu-cel-cursor"></div></div>
+            </div>
+            <div class="menu-inn" id="menu-itms">
+                <div class="menu-itm" onclick="goToPage()">
+                    <div class="menu-item-inn">%item%
+                        
+                    </div>
+                    <div id="lid" class="menu-line"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="mna1" no-slim class="mmenu-all" style="position: absolute;z-index: 1000">
+            <div class="mmenu-line"></div>
+            <div class="mmenu-items">
+                <div class="mmenu-item">
+                    <div class="mmenu-item-inn">Информация</div>
+                    <div class="mmenu-item-line"></div>
+                </div>
+                <div class="mmenu-item">
+                    <div class="mmenu-item-inn">Правила</div>
+                    <div class="mmenu-item-line"></div>
+                </div>
+                <div class="mmenu-item">
+                    <div onclick="goToPage(2)" class="mmenu-item-inn">Обновления</div>
+                    <div class="mmenu-item-line"></div>
+                </div>
+                <div class="mmenu-item">
+                    <a class="mmenu-item-inn" href="./auth">Войти</a>
+                    <div class="mmenu-item-line"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="mna2" class="page" style="opacity: 1;position: absolute;z-index: 100">
+            <img class="logo-m-img" src="/assets/img/pages/vw_logo_a.png" alt="">
+            <div class="servers-online-all">
+                <div class="mmenu-line"></div>
+                <div class="servers-online mmenu-item">
+                    <div class="mmenu-item-inn servers-online-inn">Онлайн: Скоро...</div>
+                    <div class="mmenu-item-line"></div>
+                </div>
+            </div>
+            <div class="comunity-lst-all">
+                <div class="mmenu-line"></div>
+                <div class="comunity-lst">
+                    <div style="width: 10px"></div>
+                    <div class="comunity-frs" style="width: 8px"></div>
+                    <div class="mmenu-item">
+                        <div class="mmenu-item-inn ico-comunity">
+                            <svg fill="var(--color-f)" width="800px" height="800px" viewBox="0 0 24 24" xml:space="preserve"><path d="M18.942 5.556a16.299 16.299 0 0 0-4.126-1.297c-.178.321-.385.754-.529 1.097a15.175 15.175 0 0 0-4.573 0 11.583 11.583 0 0 0-.535-1.097 16.274 16.274 0 0 0-4.129 1.3c-2.611 3.946-3.319 7.794-2.965 11.587a16.494 16.494 0 0 0 5.061 2.593 12.65 12.65 0 0 0 1.084-1.785 10.689 10.689 0 0 1-1.707-.831c.143-.106.283-.217.418-.331 3.291 1.539 6.866 1.539 10.118 0 .137.114.277.225.418.331-.541.326-1.114.606-1.71.832a12.52 12.52 0 0 0 1.084 1.785 16.46 16.46 0 0 0 5.064-2.595c.415-4.396-.709-8.209-2.973-11.589zM8.678 14.813c-.988 0-1.798-.922-1.798-2.045s.793-2.047 1.798-2.047 1.815.922 1.798 2.047c.001 1.123-.793 2.045-1.798 2.045zm6.644 0c-.988 0-1.798-.922-1.798-2.045s.793-2.047 1.798-2.047 1.815.922 1.798 2.047c0 1.123-.793 2.045-1.798 2.045z"/></svg>
+                        </div>
+                        <div class="mmenu-item-line"></div>
+                    </div>
+                    <div class="mmenu-item">
+                        <div class="mmenu-item-inn ico-comunity">
+                            <svg fill="var(--color-f)" width="800px" height="800px" viewBox="0 0 20 20"><path d="M17.802 12.298s1.617 1.597 2.017 2.336a.127.127 0 0 1 .018.035c.163.273.203.487.123.645-.135.261-.592.392-.747.403h-2.858c-.199 0-.613-.052-1.117-.4-.385-.269-.768-.712-1.139-1.145-.554-.643-1.033-1.201-1.518-1.201a.548.548 0 0 0-.18.03c-.367.116-.833.639-.833 2.032 0 .436-.344.684-.585.684H9.674c-.446 0-2.768-.156-4.827-2.327C2.324 10.732.058 5.4.036 5.353c-.141-.345.155-.533.475-.533h2.886c.387 0 .513.234.601.444.102.241.48 1.205 1.1 2.288 1.004 1.762 1.621 2.479 2.114 2.479a.527.527 0 0 0 .264-.07c.644-.354.524-2.654.494-3.128 0-.092-.001-1.027-.331-1.479-.236-.324-.638-.45-.881-.496.065-.094.203-.238.38-.323.441-.22 1.238-.252 2.029-.252h.439c.858.012 1.08.067 1.392.146.628.15.64.557.585 1.943-.016.396-.033.842-.033 1.367 0 .112-.005.237-.005.364-.019.711-.044 1.512.458 1.841a.41.41 0 0 0 .217.062c.174 0 .695 0 2.108-2.425.62-1.071 1.1-2.334 1.133-2.429.028-.053.112-.202.214-.262a.479.479 0 0 1 .236-.056h3.395c.37 0 .621.056.67.196.082.227-.016.92-1.566 3.016-.261.349-.49.651-.691.915-1.405 1.844-1.405 1.937.083 3.337z"/></svg>
+                        </div>
+                        <div class="mmenu-item-line"></div>
+                    </div>
+                    <div class="comunity-frs" style="width: 8px"></div>
+                </div>
+            </div>
+
+            <style>
+                .sen-gray{
+                    --bwgt: 50vw;
+                    position: absolute;
+                    margin-left: calc((100vw - var(--bwgt))/2);
+                    width: var(--bwgt);
+                    bottom: 18%;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                }
+                .load-launch{
+                    display: flex;
+                    width: 35vw;
+                    font-size: 250%;
+                }
+                .fpg-info{
+                    --bwgt: 50vw;
+                    bottom: 33%;
+                    background-color: var(--color3);
+                    color: var(--color-f);
+                    text-align: center;
+                }
+            </style>
+
+            <div class="sen-gray">
+                <div class="fpg-info p3 m2">
+                    Valcirias Warfare - комплекс модифицированных серверов Minecraft
+                    с уклоном на научную фантастику. Технологическое развитие, исследование 
+                    бескрайних миров, PVP/PVE на космических кораблях, и многое другое ждет тебя!
+                </div>
+                <div class="mmenu-item load-launch noselect">
+                    <div class="mmenu-item-inn p3">Скачать</div>
+                    <div class="mmenu-item-line"></div>
+                </div>
+            </div>
+            
+        </div>
+
+        <div id="mna3" class="mmenu-line page-ctn-frame-mn" style="opacity: 0"></div>
+        
+        <script>
+            var curPage = 1;
+            const delta = [-160,-80,0,80,160];
+            const handlers = [[()=>{},()=>{}],[()=>{},()=>{}],[()=>{},()=>{}],[()=>{},()=>{}],[()=>{},()=>{}]];
+
+            (()=>{
+                let elm = getEl("menu-itms");
+                let template = elm.innerHTML;
+                let cursor = 1;
+                elm.innerHTML = "";
+                for(item of ["главная","новое","галерея","фракции","item5"]){
+                    elm.innerHTML+=(template.replace("%item%",item)
+                        .replace("goToPage()","goToPage("+cursor+")").replace("lid", "ml"+cursor)
+                    );
+                    ++cursor;
+                }
+            })();
+            (()=>{
+                let isDown = true;
+                let isScrooling = false;
+                let count = 0;
+                document.addEventListener('wheel', (event)=>{
+                    event.preventDefault();
+                    if(event.deltaY==0)return;
+                    if(isScrooling)return;
+                    if(isDown){
+                        if(event.deltaY<0){
+                            count = 0;
+                            isDown = false;
+                        }
+                    } else {
+                        if(event.deltaY>0){
+                            count = 0;
+                            isDown = true;
+                        }
+                    }
+                    if(count>1){
+                        count = 0;
+                        if(isDown){
+                            if(curPage<delta.length) goToPage(curPage+1); 
+                        } else{
+                            if(curPage>1) goToPage(curPage-1);
+                        }
+                    } else{
+                        count +=1
+                    }
+                },{passive: false});
+                window.onresize = e=> {
+                    document.body.style="--glob-trs: 0";
+                    goToPage(curPage,false,10,()=>{document.body.style=""});
+                }
+            })();
+            (()=>{
+                let elm = getEl("menu-itms");
+                let elm1 = getEl("tgbtn");
+                //elm1.style.transform = "rotateY(180deg)";
+                let nowVis = true;
+                elm1.onclick=()=>{
+                    if(nowVis=!nowVis){
+                        elm.style.transform = "unset";
+                        elm1.style.transform = "rotateY(0deg)";
+                    } else{
+                        elm.style.transform = "rotateY(90deg)";
+                        elm1.style.transform = "rotateY(180deg)";
+                    }
+                }
+            })();
+
+            getEl("mn-cursor").style.marginTop=delta[curPage-1]+"px";
+            getEl("ml"+curPage).style.width='100%';
+
+            function updateMenu(small=true){
+                let elm = getEl("mna1");
+                let elm2 = getEl("mna2");
+                let elm3 = getEl("mna3");
+                if(small){
+                    elm.style.height='48px';
+                    elm.style.margin='0 0 0 30%';
+                    elm2.style.opacity='0';
+                    elm2.style.zIndex='0';
+                    elm3.style.opacity='1';
+                } else {
+                    elm.style.height='';
+                    elm.style.margin='';
+                    elm2.style.opacity='1';
+                    elm2.style.zIndex='100';
+                    elm3.style.opacity='0';
+                }
+            }
+
+
+            function goToPage(page,flag=true, dur=210, ci=()=>{}){
+                if(curPage==page && flag)return;
+                smScrool("pg"+page,"main",dur,ci);
+                getEl("mn-cursor").style.marginTop=delta[page-1]+"px";
+                getEl("pg"+curPage).style.opacity='0';
+                getEl("pg"+page).style.opacity='1';
+                getEl("ml"+curPage).style.width='0';
+                getEl("ml"+page).style.width='110%';
+
+                if(page>1 && curPage==1){
+                    updateMenu(true)
+                } else if(page==1 && curPage>1){
+                    updateMenu(false)
+                }
+
+                handlers[curPage-1][1]();
+                handlers[page-1][0]();
+                
+                curPage = page;
+            }
+
+
+            function smScrool(elem, marker, duration, ci=()=>{}) {
+                let item = getEl(marker);
+                let goTo = getEl(elem).getBoundingClientRect().top;
+                let from = item.scrollTop;
+                let start;
+                window.requestAnimationFrame(function step(time) {
+                    if (!start) start = time;
+                    time = time - start;
+                    item.scrollTo(0, from + goTo * Math.min(time / duration, 1));
+                    if (time < duration)window.requestAnimationFrame(step);
+                    else ci();
+                })
+            }
+
+
+
+        </script>
+    </reactive>
+    <reactive>
+        <div class="all-pages" id="gbbg">
+            <div style="background-image: url(./assets/img/bgparts/coridor-f.png); z-index: -100;" 
+                class="bg-ico-std preview_mn_sps" id="2mbg1">
+            </div>
+        </div>
+        <div id="main" class="all-pages">
+            <style>
+                .preview_mn_pls{
+                    position: absolute;
+                    z-index: 50;
+                    ---img: url(/assets/img/pages/poloso4ki.png);
+                    width: 100%;
+                    height: 100%;
+                }
+                .preview_mp_portal{
+                    z-index: 49;
+                    position: absolute;
+                    ---img: url(/assets/img/pages/portal-mn.png);
+                    width: 150px;
+                    height: 121px;
+                    right: 3%;
+                    bottom: 8%;
+                }
+                .preview_mn_sps{
+                    position: absolute;
+                    z-index: 45;
+                    /* ---img: url(assets/img/pages/about-bg.jpg); */
+                    width: 118%;
+                    height: 100%;
+                    left: -8%;
+                    transition: 16ms;
+                }
+            </style>
+            <div class="page" id="pg1" style="opacity: 1;">
+                <div class="bg-ico-std preview_mp_portal"></div>
+                <div class="bg-ico-std preview_mn_pls"></div>
+
+                <div style="background-image: url(./assets/img/bgparts/space1-3.png)" 
+                    class="bg-ico-std preview_mn_sps" id="mbg1"></div>
+                <div style="background-image: url(./assets/img/bgparts/space1-2.png)" 
+                    class="bg-ico-std preview_mn_sps" id="mbg2"></div>
+                <div style="background-image: url(./assets/img/bgparts/space1-1.png)" 
+                    class="bg-ico-std preview_mn_sps" id="mbg3"></div>
+
+                <script>
+                    {
+                        let flag;
+                        let bg1 = getEl("mbg1"), bg2 = getEl("mbg2"), bg3 = getEl("mbg3");
+                        let shifty = 0;
+                        let mark = {stop:false};
+
+                        handlers[0] = [()=>{
+                            stop();run();setTimeout(()=>{vi(false)},1000)
+                        }, ()=>{stop();vi(true)}];
+
+                        function vi(t=true){
+                            if(curPage!=1 && !t)return
+                            getEl("gbbg").style.display=t?"block":"none";
+                        }
+
+                        function stop(){
+                            mark.stop = true;
+                            mark = {stop:false};
+                        }
+                        function run(mark0=mark){
+                            if(mark0.stop)return;
+                            if(flag)flag = --shifty>-900;
+                            else flag = shifty++>0;
+                            bg1.style.transform = "translateX("+(shifty/60)+"%)"
+                            bg2.style.transform = "translateX("+(shifty/110)+"%)"
+                            bg3.style.transform = "translateX("+(shifty/150)+"%)"
+
+                            setTimeout(()=>{run(mark0)}, 64.3);
+                        }
+                        if(curPage==1)run();
+                    }
+                </script>
+            </div>
+            <style>
+                .galery-all{
+                    margin: 0 auto;
+                    width: 95%;
+                    height: 90%;
+                    display: flex;
+                    align-items: center;
+                }
+                .gelery-img-ctn{
+                    margin: 0 1%;
+                }
+                .gelery-btn{
+                    height: 100%;
+                    width: 50px;
+                    background-position: 50%;
+                    background-size: contain;
+                    background-repeat: no-repeat;
+                    background-image: url(/assets/svg/arrow_right1.svg);;
+                }
+                .gelery-btn-outher{
+                    height: 70%;
+                    padding: 0;
+                    min-width: unset;
+                    display: flex;
+                    justify-content: center;
+                }
+                .galery-down{
+                    height: 8%;
+                    font-size: 150%;
+                    padding-right: 30px;
+                    background-color: var(--color3);
+                    user-select: none;
+                }
+                .galery-img{
+                    position: absolute;
+                    transition: 0.2s;
+                }
+            </style>
+
+            <div class="page" id="pg2">
+                <template name="page2">
+                    <script>
+                        window.setUpdPage = (p)=>{
+                            reanet.model.updates.current = reanet.model.updates.items[p]
+                            reanet.update()
+                        }
+                    </script>
+                    <div class="page-ctn-frame">
+                        <div class="page-ctn-frame-inn">
+                            <div class="page-content-ctn">
+                                <div class="page-news-header m2h noselect">Обновления</div>
+                                <div class="flex wh100">
+                                    <div class="flex p2" style="width: 35%;background-color:var(--color3)">
+                                        <div class="flex bg-ico-std wh100" 
+                                            style="---img: url(/assets/img/mila.jpg);">
+                                        </div>
+                                    </div>
+                                    <div class="flex-cm" style="width: 65%;">
+                                        <div class="page-news-txt">
+                                            <div style="font-size: 130%;" class="m1">
+                                                {updates.current.label}
+                                            </div>
+                                            {updates.current.text}
+                                        </div>
+                                        <div class="mmenu-line"></div>
+                                        <div class="flex noselect">
+                                            <div class="mmenu-item page-news-tab-outher">
+                                                <div onclick="setUpdPage(0)" class="mmenu-item-inn page-news-tab">{updates.items.0.label}</div>
+                                                <div class="mmenu-item-line"></div>
+                                            </div>
+                                            <div class="mmenu-item page-news-tab-outher">
+                                                <div onclick="setUpdPage(1)" class="mmenu-item-inn page-news-tab">{updates.items.0.label}</div>
+                                                <div class="mmenu-item-line"></div>
+                                            </div>
+                                            <div class="mmenu-item">
+                                                <div class="mmenu-item-inn page-news-tab">еще...</div>
+                                                <div class="mmenu-item-line"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="page-news-down m2h">{updates.current.data}</div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+                <script>
+                    reanet.model["updates"] = {
+                        items:[
+                            {label: "item 1", text:"text1", data:"data1"},
+                            {label: "item 2", text:"text2", data:"data2"}
+                        ]
+                    }
+                    //reanet.load("page2", getEl("_page2").innerHTML)
+                    setUpdPage(0)
+                    reanet.placeTo("pg2", "page2")
+                </script>
+            </div>
+
+            <style>
+                .sp-all{
+                    margin: 0 auto;
+                    width: 95%;
+                    height: 100%;
+                }
+                .sp-image-big{
+                    width: 45%;
+                    height: 100%;
+                }
+                .sp-line-up{
+                    height: 80%;
+                    width: 100%;
+                    display: flex;
+                }
+                .sp-stats-ctn-all{
+                    width: 65%;
+                    display: flex;
+                    flex-direction: column;
+                }
+                .sp-stats-ctn, .sp-stats-ctn-txt{
+                    background-color: var(--color5);
+                    padding: 3px;
+                    margin: 1%;
+                }
+                .sp-stat-label{
+                    width: 100%;
+                    font-size: 150%;
+                    background-color: rgba(70, 70, 70, 0.706);
+                    margin: 1% 0 1% 0;
+                }
+                .sp-stat-label-inn{
+                    height: 100%;
+                    background-color: rgba(146, 247, 91, 0.786);
+                    padding: 2px 0 2px 0px;
+                    text-indent: 20px;
+                }
+                .sp-stats-ctn-txt{
+                    height: 100%;
+                    font-size: 130%;
+                }
+                .sp-line-dn{
+                    width: 100%;
+                    height: 20%;
+                    display: flex;
+                    align-items: center;
+                    background-color: var(--color5);
+                }
+                .sp-line-dn-inn{
+                    width: 100%;
+                    height: 90%;
+                    display: flex;
+                }
+                .sp-image-small{
+                    width: 250px;
+                    height: 100%;
+                    margin: 0 4px;
+                }
+            </style>
+
+            <div class="page" id="pg3">
+                <div class="page-ctn-frame">
+                    <div class="page-ctn-frame-inn">
+                        <div class="page-content-ctn">
+                            <div class="page-news-header m2h">Галерея</div>
+                            <div class="galery-all noselect">
+                                <div onclick="nextImg(false)" class="mmenu-item gelery-btn-outher">
+                                    <svg class="mmenu-item-inn" fill="var(--color-f)" width="44" height="44" viewBox="0 -960 960 960"><path d="M560-240 320-480l240-240 56 56-184 184 184 184-56 56Z"/></svg>
+                                </div>
+                                
+                                <div class="wh100 flex m2" style="background-color: var(--color3)">
+                                    <div id="galctn" class="w-100 flex m2" style="position: relative">
+                                        <div class="bg-ico-std wh100 galery-img"></div>
+                                    </div>
+                                </div>
+                                
+                                <div onclick="nextImg(true)" class="mmenu-item gelery-btn-outher">
+                                    <svg class="mmenu-item-inn" fill="var(--color-f)" width="44" height="44" viewBox="0 -960 960 960"><path d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z"/></svg>
+                                </div>
+
+                                <script>
+                                    const galCtn = getEl("galctn")
+                                    const galframe = (()=>{
+                                        for(let node of galCtn.childNodes){
+                                            if(node.tagName=='DIV'){
+                                                galCtn.innerHTML = ""
+                                                return node
+                                            }
+                                        }
+                                    })()
+                                    function newGalImg(url){
+                                        let el = galframe.cloneNode()
+                                        el.style.backgroundImage="url("+url+")"
+                                        return el
+                                    }
+                                    var cur = newGalImg("./assets/img/mila.jpg")
+                                    galCtn.appendChild(cur)
+                                    
+                                    function nextImg(inv){
+                                        let prev = cur
+                                        cur = newGalImg("./assets/img/mila.jpg")
+                                        let ts = inv?12:-12
+
+                                        prev.style.transform="translateX("+ts+"%) scale(0.9)"
+                                        cur.style.transform ="translateX("+(-ts)+"%) scale(0.9)"
+
+                                        prev.style.opacity="0"
+                                        prev.style.zIndex="-50"
+                                        cur.style.opacity='0'
+                                        cur.style.zIndex="-50"
+                                        setTimeout(()=>{
+                                            prev.remove()
+                                        },500)
+                                        
+                                        galCtn.appendChild(cur)
+                                        setTimeout(()=>{
+                                            cur.style.transform=''
+                                            cur.style.opacity='1'
+                                            cur.style.zIndex=''
+                                        }, 50)
+                                    }
+                                </script>
+                            </div>
+                            <div class="galery-down mmenu-item m2h">
+                                <a class="mmenu-item-inn" href="/">Исследовать дальше</a>
+                                <div class="mmenu-item-line"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page" id="pg4">
+                <div class="page-ctn-frame">
+                    <div class="page-ctn-frame-inn">
+                        <div class="page-content-ctn">
+                            <div class="page-news-header">заголовок</div>
+
+                            <div class="sp-all">
+                                <div class="sp-line-up">
+                                    <div class="bg-ico-std sp-image-big" style="---img: url(/assets/img/mila.jpg);"></div>
+                                    <div class="sp-stats-ctn-all">
+                                        <div class="page-news-header">заголовок</div>
+                                        <div class="sp-stats-ctn">
+                                            <div class="sp-stat-label"><div style="width: 100\%;" class="sp-stat-label-inn">HP</div></div>
+                                            <div class="sp-stat-label"><div style="width: 75\%;" class="sp-stat-label-inn">EN</div></div>
+                                            <div class="sp-stat-label"><div style="width: 50\%;" class="sp-stat-label-inn">DM</div></div>
+                                        </div>
+                                        <div class="sp-stats-ctn-txt">
+                                            текст текст текст
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="sp-line-dn">
+                                    <div class="sp-line-dn-inn">
+                                        <div class="bg-ico-std sp-image-small" style="---img: url(/assets/img/mila.jpg);"></div>
+                                        <div class="bg-ico-std sp-image-small" style="---img: url(/assets/img/mila.jpg);"></div>
+                                        <div class="bg-ico-std sp-image-small" style="---img: url(/assets/img/mila.jpg);"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="page-news-down galery-down">дата</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page" id="pg5">5</div>
+        </div>
+    </reactive>
+
+    <!-- <script>goToPage(3)</script> -->
+
+</body>
+</html>

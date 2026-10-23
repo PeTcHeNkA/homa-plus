@@ -1,0 +1,97 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url = "https://plugins.gradle.org/m2" }
+        maven { url = "https://repo.spongepowered.org/maven" }
+        maven { url = "https://maven.minecraftforge.net/" }
+    }
+    dependencies {
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '4.1.+', changing: true
+        classpath "org.spongepowered:mixingradle:0.7-SNAPSHOT"
+    }
+}
+
+apply plugin: 'net.minecraftforge.gradle'
+apply plugin: "org.spongepowered.mixin"
+
+version = "1.0"
+group = "plus"
+archivesBaseName = 'te4_dungeons'
+
+sourceCompatibility = targetCompatibility = 1.8
+compileJava.options.encoding = compileTestJava.options.encoding = "UTF-8"
+
+minecraft {
+    mappings channel: 'stable', version: "39-1.12"
+
+    runs {
+        client {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+
+            // Нужно для работы миксинов в DEV среде
+            // Program arguments to setup and run MIXINS
+            args '--tweakClass', 'org.spongepowered.asm.launch.MixinTweaker', '--mixin', 'mixins.te4_dungeons.json'
+        }
+
+        server {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+
+            // Нужно для работы миксинов в DEV среде
+            // Program arguments to setup and run MIXINS
+            args '--tweakClass', 'org.spongepowered.asm.launch.MixinTweaker', '--mixin', 'mixins.te4_dungeons.json'
+        }
+    }
+}
+
+mixin {
+    add sourceSets.main, "mixins.te4_dungeons.refmap.json"
+}
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+repositories {
+    mavenCentral()
+    maven { url = "https://repo.spongepowered.org/maven" }
+}
+
+dependencies {
+    // Specify the version of Minecraft to use, If this is any group other then 'net.minecraft' it is assumed
+    // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
+    // The userdev artifact is a special name and will get all sorts of transformations applied to it.
+    //minecraft '@FORGE_GROUP@:@FORGE_NAME@:@FORGE_VERSION@'
+    minecraft "net.minecraftforge:forge:1.12.2-14.23.5.2855"
+
+    implementation "org.spongepowered:mixin:0.8.3-SNAPSHOT"
+    annotationProcessor 'org.spongepowered:mixin:0.8.3-SNAPSHOT:processor'
+}
+
+// Example for how to get properties into the manifest for reading by the runtime..
+jar {
+    manifest {
+        attributes([
+                "Implementation-Title"    : project.name,
+                "Implementation-Version"  : project.version,
+                "TweakClass": "org.spongepowered.asm.launch.MixinTweaker",
+                "MixinConfigs": "mixins.te4_dungeons.json",
+                "FMLCorePluginContainsFMLMod": "true", // Не забываем указать эти два флага,
+                "ForceLoadAsMod": "true",              // чтобы Forge нормально загрузил и мод, и миксины
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+}
+
+// Example configuration to allow publishing using the maven-publish task
+// This is the preferred method to reobfuscate your jar file
+jar.finalizedBy('reobfJar')
+
+sourceSets {
+    main {
+        java {
+            srcDir 'C:/Users/Te4hnoPlus/IdeaProjects/TsonConfigurations/src/main/java'
+        }
+    }
+}

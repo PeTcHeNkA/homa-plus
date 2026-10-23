@@ -1,0 +1,218 @@
+itemGroup.sp_tab=Техношмотик
+
+item.battery_l1.name=§bКонденсатор
+item.battery_l2.name=§aКонденсатор
+item.battery_l3.name=§3Конденсатор
+item.battery_l4.name=§dКонденсатор
+item.massive_l1.name=§bЭнергетический массив
+item.massive_l2.name=§aЭнергетический массив
+item.massive_l3.name=§3Энергетический массив
+item.massive_l4.name=§dЭнергетический массив
+item.react_core_l1.name=§bЯдро эфирного реактора
+item.react_core_l2.name=§aЯдро эфирного реактора
+item.react_core_l3.name=§3Ядро эфирного реактора
+item.react_core_l4.name=§dЯдро эфирного реактора
+item.react_boost_l1.name=§bРеакторный ускоритель
+item.react_boost_l2.name=§aРеакторный ускоритель
+item.massive_frame_l1.name=§bРамка эн. массива
+item.massive_frame_l2.name=§bУл. рамка эн. массива
+item.react_energy_l1.name=§bСтержень эфирного реактора
+item.react_energy_l2.name=§aСтержень эфирного реактора
+item.react_energy_l3.name=§3Стержень эфирного реактора
+item.react_energy_l4.name=§dСтержень эфирного реактора
+
+tile.copper_ore.name=§bМедная руда
+tile.aether_ore.name=§dЭфирная руда
+tile.mefril_ore.name=§dМефриловая руда
+tile.alumine_ore.name=§bАлюминиевая руда
+
+tile.stone_met.name=$bМетеоритный камень
+tile.copper_ore_met.name=§bМедная руда
+tile.mefril_ore_met.name=§dМефриловая руда
+tile.alumine_ore_met.name=§bАлюминиевая руда
+tile.gold_ore_met.name=§bЗолотая руда
+tile.iron_ore_met.name=§bЖелезная руда
+
+tile.copper_block.name=§bМедный блок
+tile.mefril_block.name=§dМефриловый блок
+tile.alumine_block.name=§bАлюминиевый блок
+tile.armored_block.name=§3Бронированный блок
+
+item.copper_ingot.name=§bМедный слиток
+item.mefril_ingot.name=§dМефриловый слиток
+item.alumine_ingot.name=§bАлюминиевый слиток
+item.aether_crystal.name=§bЭфирный кристалл
+
+
+item.plate_iron.name=§bЖелезная пластина
+item.plate_gold.name=§bЗолотая пластина
+item.plate_alumine.name=§bАлюминиевая пластина
+item.plate_copper.name=§bМедная пластина
+item.plate_mefril.name=§dМефриловая пластина
+item.plate_machine.name=§aУкрепленная пластина
+item.plate_armored.name=§3Бронированная пластина
+
+item.circuit.name=§aЭлектросхема
+item.iron_gear.name=§bЖелезная шестерня
+item.copper_coil.name=§bКатушка
+item.circuit_cpu.name=§aВычислитель
+item.circuit_addon.name=§aПлата расширения
+item.sp_armor.name=§aКорабельная обшивка
+item.oxy_ballon_l1.name=§bКислородные баллоны
+item.oxy_ballon_l2.name=§aКислородные баллоны
+item.oxy_filter_l1.name=§bКислородный фильтр
+item.oxy_filter_l2.name=§aУл. Кислородный фильтр
+
+item.canister.air.name=§bПустая канистра
+item.canister.water.name=§bКанистра с водой
+item.canister.lava.name=§bКанистра с лавой
+
+item.spship_model.name=§dЛичный корабль
+
+item.sp_module_shield_l1.name=§bГенератор щита
+item.sp_module_shield_l2.name=§aГенератор щита
+item.sp_module_shield_l3.name=§3Генератор щита
+item.sp_module_shield_l4.name=§dГенератор щита
+
+item.sp_module_accelerator_l1.name=§bУскоритель
+item.sp_module_accelerator_l2.name=§aУскоритель
+item.sp_module_accelerator_l3.name=§3Ускоритель
+item.sp_module_accelerator_l4.name=§dУскоритель
+
+item.sp_module_protect_l1.name=§bКомпенсатор щита
+item.sp_module_protect_l2.name=§aКомпенсатор щита
+item.sp_module_protect_l3.name=§3Компенсатор щита
+item.sp_module_protect_l4.name=§dКомпенсатор щита
+
+item.quantificator.shock.name=§aКвантификатор §3Шок
+item.quantificator.physic.name=§aКвантификатор §7Физ
+item.quantificator.plasm.name=§aКвантификатор §dПлазм
+item.quantificator.energy.name=§aКвантификатор §eЭлектрон
+
+item.sp_module_gun_l1.physic.name=§bОсколочный резонатор
+item.sp_module_gun_l2.physic.name=§aОсколочный резонатор
+item.sp_module_gun_l3.physic.name=§3Осколочный резонатор
+item.sp_module_gun_l4.physic.name=§dОсколочный резонатор
+
+item.sp_module_gun_l1.energy.name=§bЛазерный резак
+item.sp_module_gun_l2.energy.name=§aЛазерный резак
+item.sp_module_gun_l3.energy.name=§3Лазерный резак
+item.sp_module_gun_l4.energy.name=§dЛазерный резак
+
+item.sp_module_gun_l1.plasm.name=§bПлазенный ускоритель
+item.sp_module_gun_l2.plasm.name=§aПлазенный ускоритель
+item.sp_module_gun_l3.plasm.name=§3Плазенный ускоритель
+item.sp_module_gun_l4.plasm.name=§dПлазенный ускоритель
+
+item.sp_module_gun_l1.shock.name=§bШоковая установка
+item.sp_module_gun_l2.shock.name=§aШоковая установка
+item.sp_module_gun_l3.shock.name=§3Шоковая установка
+item.sp_module_gun_l4.shock.name=§dШоковая установка
+
+sp_lore.gun_type_physic=Вариация: §7Физ
+sp_lore.gun_type_shock=Вариация: §3Шок
+sp_lore.gun_type_plasm=Вариация: §dПлазм
+sp_lore.gun_type_energy=Вариация: §eЭлектрон
+
+
+sp_lore.quant_lore_base=§eОружейный модификатор
+
+sp_lore.quant_lore_1_shock=Добавляет урон эл. системе
+sp_lore.quant_lore_2_shock=и дает шанс обездвижить противника
+sp_lore.quant_lore_1_energy=Значительно повышает
+sp_lore.quant_lore_2_energy=энергетический урон
+sp_lore.quant_lore_1_physic=Значительно повышает
+sp_lore.quant_lore_2_physic=физический урон
+sp_lore.quant_lore_1_plasm=Умеренно повышает физический
+sp_lore.quant_lore_2_plasm=и энергетический урон
+
+sp_lore.module_help_a0=Универсальная плата
+sp_lore.module_help_b0=расширения корабля
+
+sp_lore.module_help_a1=Оружие для установки
+sp_lore.module_help_b1=на космический корабль
+
+sp_lore.module_help_a2=Восстанавливает прочность
+sp_lore.module_help_b2=щита корабля расходуя энергию
+sp_lore.module_help_a3=Придает ускарение кораблю
+sp_lore.module_help_b3=расходуя энергию
+
+sp_lore.module_help_a4=Поглощает часть
+sp_lore.module_help_b4=входящего урона
+
+sp_lore.protector_phys=Поглощение физ: §c%s%%/%sE
+sp_lore.protector_enrg=Поглощение эн: §c%s%%/%sE
+sp_lore.cur_oxy=Запас кислорода: §c%s/%sC
+
+sp_lore.canister_lvl=Вместимость: %s/4
+sp_lore.more_inf=§eБольше информации...
+sp_lore.teh_prc=Техпроцесс: §c%s
+sp_lore.teh_pow=Мощность:   §c%s
+sp_lore.sp_dur=Прочность:  §c%s/%s
+sp_lore.teh_lvl=Уровень:    §c%s
+sp_lore.teh_cur_cap=Заряд: §c%s/%s
+sp_lore.teh_dur_per=Износ: §c%s%%
+sp_lore.teh_dur_max=Долговечность: §c%s
+sp_lore.damage=Урон §c+%s
+sp_lore.damage_pr=Урон §c+%s%%
+sp_lore.max_shield=Макс. щит §c+%s
+sp_lore.max_shield_pr=Макс. щит §c+%s%%
+sp_lore.speed=Бонус ускорения: §c+%sB/S
+sp_lore.speed_pr=Бонус ускорения: §c+%s%%
+sp_lore.crit_rate=Крит. шанс: §c+%s%%
+sp_lore.crit_dmg=Крит. урон: §c+%s%%
+sp_lore.regen_shield=Бонус реген. щит: §c+%s%%
+sp_lore.mass=Вес: §c+%s
+sp_lore.a_color=Цвет: %s
+sp_lore.accelerator_speed=Ускорение: §c+%s%%
+sp_lore.energy_cast=Расход энергии: §c%s/t
+sp_lore.shield_gen_speed=Регенерация щита: §c%s/t
+
+sp_lore.phys_dmg=Физический урон: §c%s
+sp_lore.enrg_dmg=Энергетический урон: §c%s
+
+sp_lore.spship_model_a0=Облегченный истребитель
+sp_lore.spship_model_b0=2-го поколения
+sp_lore.spship_model_a1=Тяжелый истребитель
+sp_lore.spship_model_b1=2-го поколения
+
+tile.sp_machine_module.name=§bМашинный корпус
+tile.sp_machine_module.lore_1=Основа сложной машины
+tile.sp_machine_module.lore_2=Поставьте рядом для повышения техпроцесса
+
+tile.sp_capacitor.name=§aБлок конденсатора
+tile.sp_capacitor.lore_1=Позволяет накапливать
+tile.sp_capacitor.lore_2=и высвобождать энергию
+
+tile.sp_press.name=§aКомпрессор
+tile.sp_press.lore_1=Использует электричество
+tile.sp_press.lore_2=для сжатия предметов
+
+tile.sp_react.name=§aЭфирный реактор
+tile.sp_react.lore_1=Использует эфир для
+tile.sp_react.lore_2=генерации электричества
+
+tile.sp_furnace.name=§aПлавильня
+tile.sp_furnace.lore_1=Использует электричество
+tile.sp_furnace.lore_2=для переплавки предметов
+
+tile.sp_craft_table.name=§aСборщик
+tile.sp_craft_table.lore_1=Рабочий стол для
+tile.sp_craft_table.lore_2=создания сложных компонентов
+
+tile.sp_oxy_charger.name=§aОчиститель
+tile.sp_oxy_charger.lore_1=Использует электричество
+tile.sp_oxy_charger.lore_2=для очистки и сжатия кислорода
+
+gui.sp_shield_a=Прочность щита: §a%s/%s
+gui.sp_shield_b=Щит: §a%s/%s §c+%s/%sE
+
+gui.sp_shield_c=Щит: §a%s/%s§7|§f%sF§7|§e%s
+gui.sp_shield_d=Щит: §a%s/%s§7|§f%sF§7|§e%s §c+%s/%sE
+
+gui.sp_accelerator=Ускоритель: §a+%s%%/%sE
+
+gui.sp_power_system_a=Энергия: §e%s§7/§a%s
+gui.sp_power_system_b=Энергия: §e%s§7/§a%s §c+%s
+gui.sp_power_system_c=Энер: §e%s§7/§a%s §c+%s
+

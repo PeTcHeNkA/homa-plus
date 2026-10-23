@@ -15,6 +15,7 @@ const illegalSave = "Illegal save path"
 const illegalReadPack = "Illegal read pack"
 const illegalReadMappings = "Illegal read mappings"
 const illegalPackFormat = "Illegal pack format"
+const illegalMappingsDir = "Illegal mappings input path"
 const illegalMappings = "Illegal mappings format"
 
 func main() {
@@ -41,6 +42,8 @@ func main() {
 func mergeMappings(args map[string]*string) {
 	indir := args["-merge"]
 	out := args["-o"]
+	debug := boolOf(args, "-debug", false)
+	empty := boolOf(args, "-e", false)
 
 	if out == nil || indir == nil {
 		println("Illegal usage! Use '-merge dir, -o mappings.json'")
@@ -53,7 +56,7 @@ func mergeMappings(args map[string]*string) {
 
 	files, err := getFileTree(*indir)
 	if err != nil {
-		println(illegalMappings, err.Error())
+		println(illegalMappingsDir, err.Error())
 		return
 	}
 
@@ -61,6 +64,22 @@ func mergeMappings(args map[string]*string) {
 
 	for _, fileName := range files {
 		loadMappingsFromFile(&wg, &mappngs, fileName)
+	}
+
+	if !empty {
+		mps0 := mappngs.Mappings
+		for key := range mps0 {
+			if Pack.IsEmptyKey(key) {
+				delete(mps0, key)
+			}
+		}
+	}
+
+	if debug {
+		mps0 := mappngs.Mappings
+		for key, value := range mps0 {
+			mps0[key] = Pack.IdToStr(Pack.ReadId(key)) + "|" + value
+		}
 	}
 
 	outB, err := mappngs.Write()

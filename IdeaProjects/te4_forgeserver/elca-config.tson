@@ -1,0 +1,16 @@
+Пример новой конфигурации
+* Можно использовать относительные числа в конфигурациях
+* +10, -15.5 и.т.д
+* True,  T, Yes, Y, V, 1, +  -> true
+* False, F, No,  N, X, 0, -  -> false
+
+{
+time-packet-rate        = "+10",
+chunk-tick-radius-s     = "-16",
+chunk-tick-radius-m     = "+8",
+max-world-spawner-range = "-1",
+
+remove-error-entities = "V",
+skip-check-network    = "True"
+
+}

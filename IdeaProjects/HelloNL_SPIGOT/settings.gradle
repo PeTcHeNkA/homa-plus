@@ -1,0 +1,4 @@
+rootProject.name = 'HelloNL_SPIGOT'
+include 'protected'
+include 'main'
+

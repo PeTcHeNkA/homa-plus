@@ -1,0 +1,62 @@
+{{
+    // Название анимации
+    name = "Test §dAnimation",
+    
+    // relative = true — координаты относительные к позиции камеры
+    // relative = false — абсолютные координаты мира
+    relative = true,
+    
+    // Начальная точка (позиция и направление)
+    head = "piston",  // Название блока для начальной точки
+    
+    // Массив точек анимации
+    points = [
+        {
+            // Позиция в блоках
+            x = 0, y = 0, z = 0,
+            
+            // Направление взгляда (в блоках)
+            look = [0, 0, 0],
+            
+            // Время в тиках (1 тик = 50 мс)
+            time = 70
+        },
+        {
+            x = 10, y = 0, z = 0,
+            look = [10, -10, 10],
+            
+            // Функции, выполняемые в этой точке анимации
+            func = [
+                // Разрушение блоков
+                new plus.fserver.api.anim.RelBlockBreakFunc([
+                    [10, 0, 0, "diamond_block"],
+                    [10, 0, 10, "emerald_block"]
+                ]),
+                
+                // Частицы
+                new plus.fserver.api.anim.ParticlesFunc({
+                    type = "explode", x = 0, y = 0, z = 10,
+                    count = 400, long = true
+                }),
+                
+                // Звук
+                new plus.fserver.api.anim.SoundFunc({
+                    name = "block.anvil.use",
+                    volume = 300, y = 10
+                }),
+                
+                // Отображение предмета с именем
+                new plus.fserver.api.anim.DisplayItem({
+                    x = 7, y = 0, z = 10,
+                    name = "Меч §dправосудия",
+                    item = "diamond_sword"
+                })
+            ]
+        },
+        {
+            // Простая точка без функций
+            x = "10", y = 0, z = 10,
+            look = [0, 0, 10]
+        }
+    ]
+}}

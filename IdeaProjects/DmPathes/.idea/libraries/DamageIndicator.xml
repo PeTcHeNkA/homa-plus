@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="DamageIndicator">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/deps/DamageIndicator.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

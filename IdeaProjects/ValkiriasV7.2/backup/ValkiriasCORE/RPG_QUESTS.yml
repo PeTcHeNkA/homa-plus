@@ -1,0 +1,154 @@
+ALTERNATIVE_CONFIG_PATH: none
+quests:
+  start:
+    quest_id: 0
+    repeat_time: 0
+    triggers:
+      main:
+        type: load
+        can_repeat: true
+        activation_key: none
+        on_load:
+          type: container
+          synchronous: false
+          scripts:
+            s2=exec_scene: scene=hologram
+            s3=sleep: 15000
+            s4: type=break_if_offline
+            s5=load_trigger:
+              load: room=region
+              unload: main
+      room=region:
+        region_id: 21
+        can_repeat: true
+        on_load:
+          type: container
+          synchronous: false
+          scripts:
+            m0=sleep: 10000
+            m1=chat: '- На Связи Командор. Прием. '
+            m2=sleep: 2500
+            m3=chat: '- Проследуйте на мостик для получения информации о предстоящей
+              миссии.'
+            m4=sleep: 2500
+            m5=title_s: title='Новая цель:', sub_title='Следуйте на капитанский мостик.',
+              times=20;20;20
+        scripts:
+          s2=exec_scene: scene_boss
+          s3=sleep: 8000
+          s4: type=break_if_offline
+          s5=load_trigger:
+            load:
+            - learn=region
+            - learn=cmd
+            - learn=block
+            unload:
+            - room=region
+        synchronous: false
+      learn=region:
+        region_id: 22
+        can_repeat: true
+        synchronous: false
+        on_load:
+          type: container
+          synchronous: false
+          scripts:
+            m0=sleep: 10000
+            m1=title_s: title='Цель:', sub_title='Следуйте на капитанский мостик.',times='10;10;10'
+        scripts:
+          m1=chat:
+            message:
+            - '- Вы уже прибыли. &e[Начнем].'
+            - '@C/quests int start'
+          s2=sleep: 10000
+      learn=cmd:
+        can_repeat: true
+        activation_key: start
+        scripts: quests.start.triggers.learn=block
+        synchronous: false
+      learn=block:
+        synchronous: false
+        world: world
+        locations: 1986,100,0;1986,99,0
+        can_repeat: true
+        scripts:
+          s1=exec_scene: scene=scene_tower
+          s2=sleep: 8000
+          s3:
+            type: load_trigger
+            unload:
+            - learn=region
+            - learn=cmd
+            - learn=block
+            load: combat=region
+      combat=region:
+        region_id: 23
+        can_repeat: false
+        synchronous: false
+        on_load: 'type=title_s, title='' '', sub_title=''Цель: Следуйте в зал тренировок.'',
+          times=20;20;20'
+        scripts:
+          s2=sleep: 2000
+          s3=load_trigger:
+            load: combat=mm_kill
+      combat=mm_kill:
+        mob_type: edu_bot
+        count: 3
+        memory_section: edubot_kills
+        synchronous: false
+        can_repeat: false
+        on_load: 'type=title_s, title='' '', sub_title=''Цель: Победите несколько
+          противников в зале тренировок.'', times=20;20;20'
+        scripts:
+          s1=exec_scene: scene_jump
+          s2=sleep: 8000
+          s3=load_trigger:
+            load: '''planetinfo=region'', ''planetinfo=cmd'', ''planetinfo=block'''
+      planetinfo=region:
+        region_id: 22
+        can_repeat: false
+        scripts: quests.start.triggers.planetinfo=block
+        synchronous: false
+      planetinfo=cmd:
+        can_repeat: true
+        activation_key: info
+        scripts: quests.start.triggers.planetinfo=block
+        synchronous: false
+      planetinfo=block:
+        can_repeat: true
+        world: world
+        locations: -560,66,324;-560,65,324
+        on_load:
+          type: container
+          synchronous: false
+          scripts:
+            m0=sleep: 20000
+            m1=chat: '- На Связи Командор. Прием. '
+            m2=sleep: 2700
+            m3=chat: '- Проследуйте на мостик для получения точных инструкций.'
+            m4=sleep: 3000
+            m5=title_s: title_s='Новая цель', sub_title='Вернитесь на капитанский
+              мостик.', times=20;20;20,title='Hello world!'
+        scripts:
+          s1=exec_scene: scene=scene_position
+          s2=sleep: time=12000
+          s3=load_trigger:
+            unload: '''planetinfo=region'', ''planetinfo=cmd'', ''planetinfo=block'''
+            load: '''sp_view=region'''
+        synchronous: false
+      sp_view=region:
+        region_id: 25
+        can_repeat: false
+        scripts:
+          m0: type=complete,time='1000'
+          m1=sleep: 10000
+          s2=exec_scene: scene_view_sp_planet
+        synchronous: false
+    need_complete: none
+type: cmd
+scripts:
+  example:
+    type: chat
+synchronous: false
+can_repeat: true
+activation_key: example

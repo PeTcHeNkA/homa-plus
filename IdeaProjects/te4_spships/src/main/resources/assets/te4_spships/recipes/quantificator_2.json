@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "MCG",
+    "AFG",
+    "MCG"
+  ],
+  "key": {
+    "C": {"item": "te4_spships:plate_gold"},
+    "M": {"item": "te4_spships:plate_mefril"},
+    "A": {"item": "te4_spships:aether_crystal"},
+    "F": {"item": "te4_spships:massive_frame_l2"},
+    "G": {"item": "te4_spships:iron_gear"}
+  },
+  "result": {
+    "item": "te4_spships:quantificator",
+    "data": 1,
+    "count": 1
+  }
+}

@@ -1,0 +1,16 @@
+{"parent": "minecraft:recipes/root",
+  "requirements": [["has_item"]],
+  "rewards": {"recipes": [
+    "te4_spships:ms_module_2",
+    "te4_spships:oxy_ballon_l1",
+    "te4_spships:oxy_ballon_l2",
+    "te4_spships:plate_armored",
+    "te4_spships:armored_block"
+  ]},
+  "criteria": {
+    "has_item": {"trigger": "minecraft:inventory_changed",
+      "conditions": {"items": [{
+        "item": "te4_spships:plate_machine"
+      }]}
+    }
+}}

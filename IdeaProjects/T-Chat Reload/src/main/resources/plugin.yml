@@ -1,0 +1,43 @@
+name: Te4hnoChatReload
+version: @version@
+main: main.TChatReload
+api-version: 1.16
+softdepend: [PlaceholderAPI]
+commands:
+  profile:
+    description: Control your profile.
+    usage: /profile <args>
+    aliases: [prof, chat, profil]
+  msg:
+    description: Send private message.
+    usage: /profile <args>
+    aliases: [m, tell, t]
+  r:
+    description: Send private message.
+    usage: /profile <args>
+    aliases: [resend]
+  savechatuserdata:
+    description: Save ChatUser data
+    usage: /profile <args>
+  achat:
+    description: Advanture chat parser
+    usage: /profile <args>
+  me:
+    description: Send RP message
+    usage: /profile <args>
+
+permissions:
+  TChat.prefix:
+    default: "op"
+  TChat.color:
+    default: "op"
+  TChat.avatar:
+    default: "op"
+  TChat.parser:
+    default: "op"
+  TChat.savedata:
+    default: "op"
+  TChat.mention:
+    default: "op"
+  TChat.linc:
+    default: "op"

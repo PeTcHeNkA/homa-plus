@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "timidblocks",
+  "version": "${version}",
+  "name": "TimidBlocks",
+  "description": "",
+  "authors": [],
+  "contact": {},
+  "license": "All-Rights-Reserved",
+  "icon": "assets/timidblocks/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "plus.timidblocks.client.MainClient"
+    ],
+    "main": [
+      "plus.timidblocks.Main"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}

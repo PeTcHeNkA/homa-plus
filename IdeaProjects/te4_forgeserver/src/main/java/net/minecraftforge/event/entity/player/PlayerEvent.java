@@ -1,0 +1,482 @@
+package net.minecraftforge.event.entity.player;
+
+import java.io.File;
+
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.world.ChunkWatchEvent;
+import net.minecraftforge.fml.common.eventhandler.Cancelable;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.event.entity.living.LivingEvent;
+import net.minecraftforge.fml.common.eventhandler.EventBus;
+import net.minecraftforge.fml.common.eventhandler.IEventListener;
+import net.minecraftforge.fml.common.eventhandler.ListenerList;
+
+
+public class PlayerEvent extends LivingEvent {
+    public PlayerEvent(EntityPlayer player) {
+        super(player);
+    }
+
+
+    public PlayerEvent(){super();}
+
+
+    public EntityPlayer getEntityPlayer() {
+        return (EntityPlayer) getEntity();
+    }
+
+
+    public static class HarvestCheck extends PlayerEvent {
+        private IEventListener[] listeners;
+        private IBlockState state;
+        private boolean success;
+
+        public HarvestCheck(){super();}
+
+        public HarvestCheck(EntityPlayer player, IBlockState state, boolean success) {
+            super(player);
+            this.state = state;
+            this.success = success;
+        }
+
+        public boolean post(EntityPlayer player, IBlockState state, boolean success) {
+            initLiving(player);
+            this.state = state;
+            this.success = success;
+
+            for (IEventListener listener:listeners)listener.invoke(this);
+
+            return success;
+        }
+
+
+        public HarvestCheck forBus(EventBus bus){
+            listeners = getListenerList().getListeners(bus.id());
+            return this;
+        }
+
+
+        public IBlockState getTargetBlock() {
+            return this.state;
+        }
+
+
+        public boolean canHarvest() {
+            return this.success;
+        }
+
+
+        public void setCanHarvest(boolean success){
+            this.success = success;
+        }
+
+
+        //Elca-Forge event system
+        //Start generated code
+        private static ListenerList LISTENER_LIST;
+        protected void setup() {
+            super.setup();
+            if (LISTENER_LIST == null)
+                LISTENER_LIST = new ListenerList(super.getListenerList());
+        }
+        public ListenerList getListenerList() {
+            return LISTENER_LIST;
+        }
+        //End generated code
+    }
+
+
+    @Cancelable
+    public static class BreakSpeed extends PlayerEvent {
+        private IEventListener[] listeners;
+
+        private IBlockState state;
+        private float originalSpeed;
+        private float newSpeed = 0.0f;
+        private BlockPos pos;
+
+        public BreakSpeed(){super();}
+
+        public BreakSpeed(EntityPlayer player, IBlockState state, float original, BlockPos pos) {
+            super(player);
+            this.state = state;
+            this.originalSpeed = original;
+            this.setNewSpeed(original);
+            this.pos = pos;
+        }
+
+
+        public BreakSpeed forBus(EventBus bus){
+            listeners = getListenerList().getListeners(bus.id());
+            return this;
+        }
+
+
+        public boolean post(EntityPlayer player, IBlockState state, float original, BlockPos pos) {
+            initLivingCancelable(player);
+            this.state = state;
+            this.originalSpeed = original;
+            this.setNewSpeed(original);
+            this.pos = pos;
+
+            for (IEventListener listener:listeners)listener.invoke(this);
+            return isCanceled();
+        }
+
+
+        public IBlockState getState() {
+            return state;
+        }
+
+
+        public float getOriginalSpeed() {
+            return originalSpeed;
+        }
+
+
+        public float getNewSpeed() {
+            return newSpeed;
+        }
+
+
+        public void setNewSpeed(float newSpeed) {
+            this.newSpeed = newSpeed;
+        }
+
+
+        public BlockPos getPos() {
+            return pos;
+        }
+
+
+        @Override
+        public boolean isCancelable() {
+            return true;
+        }
+
+
+        //Elca-Forge event system
+        //Start generated code
+        private static ListenerList LISTENER_LIST;
+        protected void setup() {
+            super.setup();
+            if (LISTENER_LIST == null)
+                LISTENER_LIST = new ListenerList(super.getListenerList());
+        }
+        public ListenerList getListenerList() {
+            return LISTENER_LIST;
+        }
+        //End generated code
+    }
+
+
+    public static class NameFormat extends PlayerEvent {
+        private final String username;
+        private String displayname;
+
+        public NameFormat(){super();this.username=null;}
+
+        public NameFormat(EntityPlayer player, String username) {
+            super(player);
+            this.username = username;
+            this.setDisplayname(username);
+        }
+
+
+        public String getUsername() {
+            return username;
+        }
+
+
+        public String getDisplayname() {
+            return displayname;
+        }
+
+
+        public void setDisplayname(String displayname) {
+            this.displayname = displayname;
+        }
+
+
+        //Elca-Forge event system
+        //Start generated code
+        private static ListenerList LISTENER_LIST;
+        protected void setup() {
+            super.setup();
+            if (LISTENER_LIST == null)
+                LISTENER_LIST = new ListenerList(super.getListenerList());
+        }
+        public ListenerList getListenerList() {
+            return LISTENER_LIST;
+        }
+        //End generated code
+    }
+
+
+    public static class Clone extends PlayerEvent {
+        private final EntityPlayer original;
+        private final boolean wasDeath;
+
+        public Clone(){this(null,null,false);}
+
+        public Clone(EntityPlayer _new, EntityPlayer oldPlayer, boolean wasDeath) {
+            super(_new);
+            this.original = oldPlayer;
+            this.wasDeath = wasDeath;
+        }
+
+
+        public EntityPlayer getOriginal() {
+            return original;
+        }
+
+
+        public boolean isWasDeath() {
+            return wasDeath;
+        }
+
+
+        //Elca-Forge event system
+        //Start generated code
+        private static ListenerList LISTENER_LIST;
+        protected void setup() {
+            super.setup();
+            if (LISTENER_LIST == null)
+                LISTENER_LIST = new ListenerList(super.getListenerList());
+        }
+        public ListenerList getListenerList() {
+            return LISTENER_LIST;
+        }
+        //End generated code
+    }
+
+
+    public static class StartTracking extends PlayerEvent {
+        private IEventListener[] listeners;
+        private Entity target;
+
+        public StartTracking(){super();}
+
+        public StartTracking(EntityPlayer player, Entity target) {
+            super(player);
+            this.target = target;
+        }
+
+
+        public StartTracking forBus(EventBus bus){
+            listeners = getListenerList().getListeners(bus.id());
+            return this;
+        }
+
+
+        public void post(EntityPlayer player, Entity target){
+            initLiving(player);
+            this.target = target;
+            for (IEventListener listener:listeners)listener.invoke(this);
+        }
+
+
+        public Entity getTarget() {
+            return target;
+        }
+
+
+        //Elca-Forge event system
+        //Start generated code
+        private static ListenerList LISTENER_LIST;
+        protected void setup() {
+            super.setup();
+            if (LISTENER_LIST == null)
+                LISTENER_LIST = new ListenerList(super.getListenerList());
+        }
+        public ListenerList getListenerList() {
+            return LISTENER_LIST;
+        }
+        //End generated code
+    }
+
+
+    public static class StopTracking extends PlayerEvent {
+        private IEventListener[] listeners;
+        private Entity target;
+
+        public StopTracking(){super();}
+
+        public StopTracking(EntityPlayer player, Entity target) {
+            super(player);
+            this.target = target;
+        }
+
+
+        public StopTracking forBus(EventBus bus){
+            listeners = getListenerList().getListeners(bus.id());
+            return this;
+        }
+
+
+        public void post(EntityPlayer player, Entity target){
+            initLiving(player);
+            this.target = target;
+            for (IEventListener listener:listeners)listener.invoke(this);
+        }
+
+
+        public Entity getTarget() {
+            return target;
+        }
+
+
+        //Elca-Forge event system
+        //Start generated code
+        private static ListenerList LISTENER_LIST;
+        protected void setup() {
+            super.setup();
+            if (LISTENER_LIST == null)
+                LISTENER_LIST = new ListenerList(super.getListenerList());
+        }
+        public ListenerList getListenerList() {
+            return LISTENER_LIST;
+        }
+        //End generated code
+    }
+
+
+    public static class LoadFromFile extends PlayerEvent {
+        private final File playerDirectory;
+        private final String playerUUID;
+
+        public LoadFromFile(){super();playerDirectory = null;playerUUID=null;}
+
+        public LoadFromFile(EntityPlayer player, File originDirectory, String playerUUID) {
+            super(player);
+            this.playerDirectory = originDirectory;
+            this.playerUUID = playerUUID;
+        }
+
+
+        public File getPlayerFile(String suffix) {
+            if ("dat".equals(suffix)) throw new IllegalArgumentException("The suffix 'dat' is reserved");
+            return new File(this.getPlayerDirectory(), this.getPlayerUUID() +"."+suffix);
+        }
+
+
+        public File getPlayerDirectory() {
+            return playerDirectory;
+        }
+
+
+        public String getPlayerUUID() {
+            return playerUUID;
+        }
+
+
+        //Elca-Forge event system
+        //Start generated code
+        private static ListenerList LISTENER_LIST;
+        protected void setup() {
+            super.setup();
+            if (LISTENER_LIST == null)
+                LISTENER_LIST = new ListenerList(super.getListenerList());
+        }
+        public ListenerList getListenerList() {
+            return LISTENER_LIST;
+        }
+        //End generated code
+    }
+
+
+    public static class SaveToFile extends PlayerEvent {
+        private final File playerDirectory;
+        private final String playerUUID;
+
+        public SaveToFile(){super();playerDirectory = null;playerUUID=null;}
+
+        public SaveToFile(EntityPlayer player, File originDirectory, String playerUUID) {
+            super(player);
+            this.playerDirectory = originDirectory;
+            this.playerUUID = playerUUID;
+        }
+
+
+        public File getPlayerFile(String suffix) {
+            if ("dat".equals(suffix)) throw new IllegalArgumentException("The suffix 'dat' is reserved");
+            return new File(this.getPlayerDirectory(), this.getPlayerUUID() +"."+suffix);
+        }
+
+
+        public File getPlayerDirectory() {
+            return playerDirectory;
+        }
+
+
+        public String getPlayerUUID() {
+            return playerUUID;
+        }
+
+
+        //Elca-Forge event system
+        //Start generated code
+        private static ListenerList LISTENER_LIST;
+        protected void setup() {
+            super.setup();
+            if (LISTENER_LIST == null)
+                LISTENER_LIST = new ListenerList(super.getListenerList());
+        }
+        public ListenerList getListenerList() {
+            return LISTENER_LIST;
+        }
+        //End generated code
+    }
+
+
+    public static class Visibility extends PlayerEvent {
+        private double visibilityModifier = 1D;
+
+        public Visibility(){super();}
+
+        public Visibility(EntityPlayer player) {
+            super(player);
+        }
+
+
+        public void modifyVisibility(double mod) {
+            visibilityModifier *= mod;
+        }
+
+
+        public double getVisibilityModifier() {
+            return visibilityModifier;
+        }
+
+
+        //Elca-Forge event system
+        //Start generated code
+        private static ListenerList LISTENER_LIST;
+        protected void setup() {
+            super.setup();
+            if (LISTENER_LIST == null)
+                LISTENER_LIST = new ListenerList(super.getListenerList());
+        }
+        public ListenerList getListenerList() {
+            return LISTENER_LIST;
+        }
+        //End generated code
+    }
+
+
+    //Elca-Forge event system
+    //Start generated code
+    private static ListenerList LISTENER_LIST;
+    protected void setup() {
+        super.setup();
+        if (LISTENER_LIST == null)
+            LISTENER_LIST = new ListenerList(super.getListenerList());
+    }
+    public ListenerList getListenerList() {
+        return LISTENER_LIST;
+    }
+    //End generated code
+}

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/main"
+    android:orientation="vertical"
+    >
+
+    <LinearLayout
+        android:id="@+id/background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="false"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:visibility="visible">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#101010"
+            android:backgroundTint="#050505"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ump45"></ImageView>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="291dp"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="120dp"
+        android:background="@android:color/transparent"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/button"
+            android:layout_width="match_parent"
+            android:layout_height="84dp"
+            android:layout_marginVertical="10dp"
+            android:background="@color/btn_1"
+            android:onClick="onClickPlay"
+            android:text="Играть"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="60px" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="84dp"
+            android:background="@color/btn_1"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/button2"
+                android:layout_width="273dp"
+                android:layout_height="match_parent"
+                android:layout_margin="0dp"
+                android:layout_marginVertical="0dp"
+                android:background="@android:color/transparent"
+                android:onClick="onClickCheck"
+                android:text="Собрать пакет"
+                android:textColor="@color/white"
+                android:textSize="50px" />
+
+            <Button
+                android:id="@+id/button4"
+                android:layout_width="128dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="right"
+                android:layout_margin="0dp"
+                android:layout_marginVertical="0dp"
+                android:background="@android:color/transparent"
+                android:onClick="onClickHelp"
+                android:text="Памятка"
+                android:textColor="@color/white"
+                android:textSize="50px" />
+        </FrameLayout>
+
+        <Button
+            android:id="@+id/button5"
+            android:layout_width="match_parent"
+            android:layout_height="84dp"
+            android:layout_marginVertical="10dp"
+            android:background="@color/btn_1"
+            android:onClick="onClickSettings"
+            android:text="Настройки"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="60px" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/info_view_main"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:background="@color/btn_2"
+        android:onClick="onClickPlay"
+        android:text="Info"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:textAlignment="center"
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:textSize="70px"
+        android:visibility="gone"
+        />
+
+</FrameLayout>

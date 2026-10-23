@@ -1,0 +1,665 @@
+package net.minecraft.entity;
+
+import java.util.*;
+import java.util.function.Consumer;
+
+import com.google.common.collect.Lists;
+import net.minecraft.block.Block;
+import net.minecraft.entity.ai.attributes.AttributeMap;
+import net.minecraft.entity.ai.attributes.IAttributeInstance;
+import net.minecraft.entity.item.EntityArmorStand;
+import net.minecraft.entity.item.EntityBoat;
+import net.minecraft.entity.item.EntityEnderCrystal;
+import net.minecraft.entity.item.EntityEnderEye;
+import net.minecraft.entity.item.EntityEnderPearl;
+import net.minecraft.entity.item.EntityExpBottle;
+import net.minecraft.entity.item.EntityFallingBlock;
+import net.minecraft.entity.item.EntityFireworkRocket;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.item.EntityItemFrame;
+import net.minecraft.entity.item.EntityMinecart;
+import net.minecraft.entity.item.EntityPainting;
+import net.minecraft.entity.item.EntityTNTPrimed;
+import net.minecraft.entity.item.EntityXPOrb;
+import net.minecraft.entity.passive.IAnimals;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.projectile.EntityArrow;
+import net.minecraft.entity.projectile.EntityDragonFireball;
+import net.minecraft.entity.projectile.EntityEgg;
+import net.minecraft.entity.projectile.EntityEvokerFangs;
+import net.minecraft.entity.projectile.EntityFireball;
+import net.minecraft.entity.projectile.EntityFishHook;
+import net.minecraft.entity.projectile.EntityLlamaSpit;
+import net.minecraft.entity.projectile.EntityPotion;
+import net.minecraft.entity.projectile.EntityShulkerBullet;
+import net.minecraft.entity.projectile.EntitySmallFireball;
+import net.minecraft.entity.projectile.EntitySnowball;
+import net.minecraft.entity.projectile.EntitySpectralArrow;
+import net.minecraft.entity.projectile.EntityTippedArrow;
+import net.minecraft.entity.projectile.EntityWitherSkull;
+import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.item.ItemMap;
+import net.minecraft.item.ItemStack;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.Packet;
+import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.network.play.server.SPacketEntity;
+import net.minecraft.network.play.server.SPacketEntityEffect;
+import net.minecraft.network.play.server.SPacketEntityHeadLook;
+import net.minecraft.network.play.server.SPacketEntityMetadata;
+import net.minecraft.network.play.server.SPacketEntityProperties;
+import net.minecraft.network.play.server.SPacketEntityTeleport;
+import net.minecraft.network.play.server.SPacketEntityVelocity;
+import net.minecraft.network.play.server.SPacketSetPassengers;
+import net.minecraft.network.play.server.SPacketSpawnExperienceOrb;
+import net.minecraft.network.play.server.SPacketSpawnMob;
+import net.minecraft.network.play.server.SPacketSpawnObject;
+import net.minecraft.network.play.server.SPacketSpawnPainting;
+import net.minecraft.network.play.server.SPacketSpawnPlayer;
+import net.minecraft.network.play.server.SPacketUseBed;
+import net.minecraft.potion.PotionEffect;
+import net.minecraft.server.management.PlayerChunkMapEntry;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.storage.MapData;
+import net.minecraftforge.fml.common.network.internal.FMLNetworkHandler;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import plus.fserver.ElcaConfig;
+import plus.fserver.server.network.packet.SElcaPacketEntityEquipment;
+import plus.fserver.server.network.packet.SEntityPacketPlayBase;
+import plus.tson.utl.Te4HashSet;
+import javax.annotation.Nullable;
+import static plus.fserver.utls.math.MathUtls.F_256_T_360;
+
+
+public class EntityTrackerEntry {
+    private static final Logger LOGGER = LogManager.getLogger();
+    private Entity trackedEntity;
+    private final short range;
+    private short maxRange;
+    private final int updateFrequency;
+    private long encodedPosX;
+    private long encodedPosY;
+    private long encodedPosZ;
+    private short encodedRotationYaw;
+    private short encodedRotationPitch;
+    private short lastHeadMotion;
+    private double lastTrackedEntityMotionX;
+    private double lastTrackedEntityMotionY;
+    private double motionZ;
+    public int updateCounter;
+    public double lastTrackedEntityPosX;
+    public double lastTrackedEntityPosY;
+    public double lastTrackedEntityPosZ;
+    private boolean updatedPlayerVisibility;
+    private final boolean sendVelocityUpdates;
+    private int ticksSinceLastForcedTeleport;
+    private List<Entity> passengers = Collections.emptyList();
+    private boolean ridingEntity;
+    private boolean onGround;
+    public boolean playerEntitiesUpdated;
+    public final Set<EntityPlayerMP> trackingPlayers = new Te4HashSet<EntityPlayerMP>(3){
+        @Override
+        public void forEach(Consumer<? super EntityPlayerMP> action) {
+            super.forEachIfCan(action);
+        }
+    };
+
+    public EntityTrackerEntry(Entity entityIn, int rangeIn, int maxRangeIn, int updateFrequencyIn, boolean sendVelocityUpdatesIn) {
+        this.trackedEntity = entityIn;
+        this.range = (short) rangeIn;
+        this.maxRange = (short) Math.min(rangeIn, maxRangeIn);
+        this.updateFrequency = updateFrequencyIn;
+        this.sendVelocityUpdates = sendVelocityUpdatesIn;
+        this.encodedPosX = EntityTracker.getPositionLong(entityIn.posX);
+        this.encodedPosY = EntityTracker.getPositionLong(entityIn.posY);
+        this.encodedPosZ = EntityTracker.getPositionLong(entityIn.posZ);
+        this.encodedRotationYaw   = (short) MathHelper.floor(entityIn.rotationYaw * F_256_T_360);
+        this.encodedRotationPitch = (short) MathHelper.floor(entityIn.rotationPitch * F_256_T_360);
+        this.lastHeadMotion = (short) MathHelper.floor(entityIn.getRotationYawHead() * F_256_T_360);
+        this.onGround = entityIn.onGround;
+    }
+
+
+    public void reInit(Entity entityIn){
+        this.trackedEntity = entityIn;
+    }
+
+
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof EntityTrackerEntry)
+            return ((EntityTrackerEntry)other).trackedEntity.getEntityId() == this.trackedEntity.getEntityId();
+        else
+            return false;
+
+    }
+
+
+    @Override
+    public int hashCode() {
+        return this.trackedEntity.getEntityId();
+    }
+
+
+    private void sendMetadata() {
+        EntityDataManager entitydatamanager = this.trackedEntity.getDataManager();
+        if (entitydatamanager.isDirty()) {
+            this.sendToTrackingAndSelf(new SPacketEntityMetadata(this.trackedEntity.getEntityId(), entitydatamanager, false));
+        }
+
+        if (this.trackedEntity instanceof EntityLivingBase) {
+            AttributeMap attributemap = (AttributeMap)((EntityLivingBase)this.trackedEntity).getAttributeMap();
+            Set<IAttributeInstance> set = attributemap.getDirtyInstances();
+            if (!set.isEmpty())
+                this.sendToTrackingAndSelf(new SPacketEntityProperties(this.trackedEntity.getEntityId(), set));
+
+            set.clear();
+        }
+    }
+
+
+    public void sendToTrackingAndSelf(Packet<?> packetIn) {
+        this.sendPacketToTrackedPlayers(packetIn);
+        if (this.trackedEntity instanceof EntityPlayerMP)
+            ((EntityPlayerMP)this.trackedEntity).connection.netManager.sendPacketE(packetIn);
+    }
+
+
+    public void sendDestroyEntityPacketToTrackedPlayers() {
+        for (EntityPlayerMP entityplayermp : this.trackingPlayers) {
+            this.trackedEntity.removeTrackingPlayer(entityplayermp);
+            entityplayermp.removeEntity(this.trackedEntity);
+        }
+    }
+
+
+    public void removeFromTrackedPlayers(EntityPlayerMP playerMP) {
+        if (this.trackingPlayers.remove(playerMP)) {
+            this.trackedEntity.removeTrackingPlayer(playerMP);
+            playerMP.removeEntity(this.trackedEntity);
+        }
+    }
+
+
+    public void updatePlayerEntity(EntityPlayerMP playerMP) {
+        Entity trackedEntity;
+        if (playerMP != (trackedEntity = this.trackedEntity)) {
+            if (this.isVisibleTo(playerMP)) {
+                if (!this.trackingPlayers.contains(playerMP) && (this.isPlayerWatchingThisChunk(playerMP) || this.trackedEntity.forceSpawn)) {
+                    this.trackingPlayers.add(playerMP);
+                    Packet<?> packet = this.createSpawnPacket();
+
+                    if (!trackedEntity.getDataManager().isEmpty()) {
+                        playerMP.connection.netManager.exec(() -> {
+                            SPacketEntityMetadata packet2 = new SPacketEntityMetadata(trackedEntity.getEntityId(), trackedEntity.getDataManager(), true);
+                            NetworkManager net = playerMP.connection.netManager;
+                            net.sendPacketSync(packet);
+                            net.sendPacketSync(packet2);
+                        });
+                    } else {
+                        playerMP.connection.netManager.sendPacketE(packet);
+                    }
+
+                    boolean flag = this.sendVelocityUpdates;
+
+                    if (trackedEntity.isLiving()) {
+                        AttributeMap attributemap = (AttributeMap)((EntityLivingBase)trackedEntity).getAttributeMap();
+                        Collection<IAttributeInstance> collection = attributemap.getWatchedAttributes();
+
+                        if (!collection.isEmpty()) {
+                            playerMP.connection.netManager.sendPacketE(new SPacketEntityProperties(trackedEntity.getEntityId(), collection));
+                        }
+
+                        if (((EntityLivingBase)trackedEntity).isElytraFlying()) {
+                            flag = true;
+                        }
+                    }
+
+                    this.lastTrackedEntityMotionX = trackedEntity.motionX;
+                    this.lastTrackedEntityMotionY = trackedEntity.motionY;
+                    this.motionZ = trackedEntity.motionZ;
+
+                    if (flag && !(packet instanceof SPacketSpawnMob)) {
+                        playerMP.connection.netManager.sendPacketE(new SPacketEntityVelocity(trackedEntity.getEntityId(), trackedEntity.motionX, trackedEntity.motionY, trackedEntity.motionZ));
+                    }
+
+                    if (trackedEntity.isLiving()) {
+                        SElcaPacketEntityEquipment equp = null, next = null;
+
+                        for (EntityEquipmentSlot slot : EntityEquipmentSlot.values()) {
+                            ItemStack itemstack = ((EntityLivingBase)trackedEntity).getItemStackFromSlot(slot);
+
+                            if (!itemstack.isEmpty()) {
+                                if(equp == null)equp = next = new SElcaPacketEntityEquipment(trackedEntity.getEntityId(), slot, itemstack);
+                                else next = next.with(trackedEntity.getEntityId(), slot, itemstack);
+                            }
+                        }
+                        //TODO UNCHECKED
+                        if(equp != null){
+                            if(equp == next){
+                                playerMP.connection.netManager.sendPacketE(equp);
+                            } else {
+                                SElcaPacketEntityEquipment finalEqup = equp;
+                                playerMP.connection.netManager.exec(() -> {
+                                    SElcaPacketEntityEquipment temp = finalEqup;
+                                    while (temp != null){
+                                        playerMP.connection.netManager.sendPacketSync(temp);
+                                        temp = temp.next();
+                                    }
+                                });
+                            }
+                        }
+
+                        if (trackedEntity instanceof EntityPlayer) {
+                            EntityPlayer entityplayer = (EntityPlayer)trackedEntity;
+
+                            if (entityplayer.isPlayerSleeping()) {
+                                playerMP.connection.netManager.sendPacketE(new SPacketUseBed(entityplayer, new BlockPos(trackedEntity)));
+                            }
+                        }
+
+                        EntityLivingBase entitylivingbase = (EntityLivingBase)trackedEntity;
+
+                        for (PotionEffect potioneffect : entitylivingbase.getActivePotionEffects()) {
+                            playerMP.connection.netManager.sendPacketE(new SPacketEntityEffect(trackedEntity.getEntityId(), potioneffect));
+                        }
+                    }
+
+                    if (!trackedEntity.getPassengers().isEmpty()) {
+                        playerMP.connection.netManager.sendPacketE(new SPacketSetPassengers(trackedEntity));
+                    }
+
+                    if (trackedEntity.isRiding()) {
+                        playerMP.connection.netManager.sendPacketE(new SPacketSetPassengers(trackedEntity.getRidingEntity()));
+                    }
+
+                    trackedEntity.addTrackingPlayer(playerMP);
+                    playerMP.addEntity(trackedEntity);
+                    trackedEntity.world.startTrackingEvent.post(playerMP, trackedEntity);
+                    //ForgeEventFactory.onStartEntityTracking(trackedEntity, playerMP);
+                }
+            } else if (this.trackingPlayers.remove(playerMP)) {
+                trackedEntity.removeTrackingPlayer(playerMP);
+                playerMP.removeEntity(trackedEntity);
+                trackedEntity.world.stopTrackingEvent.post(playerMP, trackedEntity);
+                //ForgeEventFactory.onStopEntityTracking(trackedEntity, playerMP);
+            }
+        }
+    }
+
+    public boolean isVisibleTo(EntityPlayerMP player) {
+        Entity trackedEntity;
+        double distance = (trackedEntity = this.trackedEntity).getDistanceSq(player.posX, player.posY, player.posZ);
+        if(distance < trackedEntity.elcaMinRange)trackedEntity.elcaMinRange = distance;
+        return distance >= -maxRange || distance <= -distance && trackedEntity.isSpectatedByPlayer(player);
+    }
+
+
+    private boolean isPlayerWatchingThisChunk(EntityPlayerMP player) {
+        Chunk chunk;
+        Entity trackedEntity = this.trackedEntity;
+        if((chunk = player.getServerWorld().chunkProviderServer.getLoadedChunk(trackedEntity.chunkCoordX, trackedEntity.chunkCoordZ)) == null)return false;
+        PlayerChunkMapEntry entry;
+        if((entry = chunk.chunkMapEntry) == null)return false;
+        return entry.containsRef(player) && entry.isSentToPlayers();
+    }
+
+
+    public void updatePlayerEntities(List<? extends EntityPlayer> players) {
+        this.trackedEntity.elcaMinRange = 1073741824d;
+        for (int i = 0, s = players.size(); i < s; ++i)
+            updatePlayerEntity((EntityPlayerMP)players.get(i));
+    }
+
+
+    private Packet<?> createSpawnPacket() {
+        Entity tEntity = this.trackedEntity;
+        if (tEntity.isDead) {
+            LOGGER.warn("Fetching addPacket for removed entity");
+        }
+
+        Packet pkt = tEntity.createCustomSpawnPacket();
+        if (pkt != null) return pkt;
+
+        if (tEntity instanceof EntityPlayerMP) {
+            return new SPacketSpawnPlayer((EntityPlayer)tEntity);
+        } else if (tEntity instanceof IAnimals) {
+            this.lastHeadMotion = (short) MathHelper.floor(tEntity.getRotationYawHead() * 256.0F / 360.0F);
+            return new SPacketSpawnMob((EntityLivingBase)tEntity);
+        } else if (tEntity instanceof EntityPainting) {
+            return new SPacketSpawnPainting((EntityPainting)tEntity);
+        } else if (tEntity instanceof EntityItem) {
+            return new SPacketSpawnObject(tEntity, 2, 1);
+        } else if (tEntity instanceof EntityMinecart) {
+            EntityMinecart entityminecart = (EntityMinecart)tEntity;
+            return new SPacketSpawnObject(tEntity, 10, entityminecart.getType().getId());
+        } else if (tEntity instanceof EntityBoat) {
+            return new SPacketSpawnObject(tEntity, 1);
+        } else if (tEntity instanceof EntityXPOrb) {
+            return new SPacketSpawnExperienceOrb((EntityXPOrb)tEntity);
+        } else if (tEntity instanceof EntityFishHook) {
+            Entity entity2 = ((EntityFishHook)tEntity).getAngler();
+            return new SPacketSpawnObject(tEntity, 90, entity2 == null ? tEntity.getEntityId() : entity2.getEntityId());
+        } else if (tEntity instanceof EntitySpectralArrow) {
+            Entity entity1 = ((EntitySpectralArrow)tEntity).shootingEntity;
+            return new SPacketSpawnObject(tEntity, 91, 1 + (entity1 == null ? tEntity.getEntityId() : entity1.getEntityId()));
+        } else if (tEntity instanceof EntityTippedArrow) {
+            Entity entity = ((EntityArrow)tEntity).shootingEntity;
+            return new SPacketSpawnObject(tEntity, 60, 1 + (entity == null ? tEntity.getEntityId() : entity.getEntityId()));
+        } else if (tEntity instanceof EntitySnowball) {
+            return new SPacketSpawnObject(tEntity, 61);
+        } else if (tEntity instanceof EntityLlamaSpit) {
+            return new SPacketSpawnObject(tEntity, 68);
+        } else if (tEntity instanceof EntityPotion) {
+            return new SPacketSpawnObject(tEntity, 73);
+        }
+        else if (tEntity instanceof EntityExpBottle) {
+            return new SPacketSpawnObject(tEntity, 75);
+        } else if (tEntity instanceof EntityEnderPearl) {
+            return new SPacketSpawnObject(tEntity, 65);
+        } else if (tEntity instanceof EntityEnderEye) {
+            return new SPacketSpawnObject(tEntity, 72);
+        } else if (tEntity instanceof EntityFireworkRocket) {
+            return new SPacketSpawnObject(tEntity, 76);
+        } else if (tEntity instanceof EntityFireball) {
+            EntityFireball fireball = (EntityFireball)tEntity;
+            SPacketSpawnObject packet = null;
+            int i = 63;
+
+            if (tEntity instanceof EntitySmallFireball) {
+                i = 64;
+            }
+            else if (tEntity instanceof EntityDragonFireball) {
+                i = 93;
+            }
+            else if (tEntity instanceof EntityWitherSkull) {
+                i = 66;
+            }
+
+            if (fireball.shootingEntity != null) {
+                packet = new SPacketSpawnObject(tEntity, i, ((EntityFireball)tEntity).shootingEntity.getEntityId());
+            } else {
+                packet = new SPacketSpawnObject(tEntity, i, 0);
+            }
+
+            packet.setSpeedX((int)(fireball.accelerationX * 8000.0D));
+            packet.setSpeedY((int)(fireball.accelerationY * 8000.0D));
+            packet.setSpeedZ((int)(fireball.accelerationZ * 8000.0D));
+            return packet;
+        }
+        else if (tEntity instanceof EntityShulkerBullet) {
+            SPacketSpawnObject packet = new SPacketSpawnObject(tEntity, 67, 0);
+            packet.setSpeedX((int)(tEntity.motionX * 8000.0D));
+            packet.setSpeedY((int)(tEntity.motionY * 8000.0D));
+            packet.setSpeedZ((int)(tEntity.motionZ * 8000.0D));
+            return packet;
+        } else if (tEntity instanceof EntityEgg) {
+            return new SPacketSpawnObject(tEntity, 62);
+        } else if (tEntity instanceof EntityEvokerFangs) {
+            return new SPacketSpawnObject(tEntity, 79);
+        } else if (tEntity instanceof EntityTNTPrimed) {
+            return new SPacketSpawnObject(tEntity, 50);
+        } else if (tEntity instanceof EntityEnderCrystal) {
+            return new SPacketSpawnObject(tEntity, 51);
+        } else if (tEntity instanceof EntityFallingBlock) {
+            EntityFallingBlock entityfallingblock = (EntityFallingBlock)tEntity;
+            return new SPacketSpawnObject(
+                    tEntity, 70, Block.getStateId(entityfallingblock.getBlock())
+            );
+        } else if (tEntity instanceof EntityArmorStand) {
+            return new SPacketSpawnObject(tEntity, 78);
+        } else if (tEntity instanceof EntityItemFrame) {
+            EntityItemFrame entityitemframe = (EntityItemFrame)tEntity;
+            return new SPacketSpawnObject(tEntity, 71, entityitemframe.facingDirection.getHorizontalIndex(), entityitemframe.getHangingPosition());
+        } else if (tEntity instanceof EntityLeashKnot) {
+            EntityLeashKnot entityleashknot = (EntityLeashKnot)tEntity;
+            return new SPacketSpawnObject(tEntity, 77, 0, entityleashknot.getHangingPosition());
+        } else if (tEntity instanceof EntityAreaEffectCloud) {
+            return new SPacketSpawnObject(tEntity, 3);
+        } else {
+            throw new IllegalArgumentException("Don't know how to add " + tEntity.getClass() + "!");
+        }
+    }
+
+
+    public void removeTrackedPlayerSymmetric(EntityPlayerMP playerMP) {
+        if (this.trackingPlayers.remove(playerMP)) {
+            this.trackedEntity.removeTrackingPlayer(playerMP);
+            playerMP.removeEntity(this.trackedEntity);
+        }
+    }
+
+
+    public Entity getTrackedEntity() {
+        return this.trackedEntity;
+    }
+
+
+    public void setMaxRange(int maxRangeIn) {
+        this.maxRange = (short) Math.min(range, maxRangeIn);
+    }
+
+
+    public void resetPlayerVisibility() {
+        this.updatedPlayerVisibility = false;
+    }
+
+
+    private void updateDistancesFor(EntityPlayer player) {
+        Entity trackedEntity;
+        double distance = (trackedEntity = this.trackedEntity).getDistanceSq(player.posX, player.posY, player.posZ);
+        if (distance < trackedEntity.elcaMinRange) trackedEntity.elcaMinRange = distance;
+    }
+
+
+    public void updatePlayerList(List<EntityPlayer> players) {
+        Entity entity = this.trackedEntity;
+        if (this.playerEntitiesUpdated = (!this.updatedPlayerVisibility ||
+                entity.getDistanceSq(this.lastTrackedEntityPosX, this.lastTrackedEntityPosY, this.lastTrackedEntityPosZ) > 16.0D)) {
+            this.lastTrackedEntityPosX = entity.posX;
+            this.lastTrackedEntityPosY = entity.posY;
+            this.lastTrackedEntityPosZ = entity.posZ;
+            this.updatedPlayerVisibility = true;
+            this.updatePlayerEntities(players);
+        } else if(this.updateCounter % ElcaConfig.RESET_LOW_LEVEL_MOBS == 0) {
+            entity.elcaMinRange = 1073741824d;
+            trackingPlayers.forEach(this::updateDistancesFor);
+        }
+
+        List<Entity> list = entity.getPassengersRaw();
+
+        if(!(list.isEmpty() && this.passengers.isEmpty()))
+            if (!list.equals(this.passengers)) {
+                if(list.isEmpty()){
+                    this.passengers = Collections.emptyList();
+                } else {
+                    this.passengers = Lists.newArrayList(list);
+                }
+                this.sendPacketToTrackedPlayers(new SPacketSetPassengers(entity, list));
+            }
+        NetworkManager selfManager = (entity instanceof EntityPlayerMP)?
+                ((EntityPlayerMP)entity).connection.netManager:null;
+
+        if (selfManager == null && this.updateCounter % 12 == 0 && entity instanceof EntityItemFrame) {
+            EntityItemFrame entityitemframe = (EntityItemFrame)entity;
+            ItemStack itemstack = entityitemframe.getDisplayedItem();
+
+            if (itemstack.getItem() instanceof ItemMap) {
+                MapData mapdata = ((ItemMap) itemstack.getItem()).getMapData(itemstack, entity.world);
+                if(mapdata != null) {
+                    this.trackingPlayers.forEach(player -> {
+                        mapdata.updateVisiblePlayers(player, itemstack);
+                        Packet<?> packet = ((ItemMap) itemstack.getItem()).createMapDataPacket(itemstack, entity.world, player);
+
+                        if (packet != null)
+                            player.connection.netManager.sendPacketE(packet);
+                    });
+                }
+            }
+            this.sendMetadata0( null);
+        }
+
+        if (this.updateCounter % this.updateFrequency == 0 || entity.isAirBorne || entity.getDataManager().isDirty()) {
+            if (entity.isRiding()) {
+                int j1 = MathHelper.floor(entity.rotationYaw * F_256_T_360);
+                int l1 = MathHelper.floor(entity.rotationPitch * F_256_T_360);
+
+                if (Math.abs(j1 - this.encodedRotationYaw) >= 1 || Math.abs(l1 - this.encodedRotationPitch) >= 1) {
+                    this.sendPacketToTrackedPlayers(new SPacketEntity.S16PacketEntityLook(entity.getEntityId(), (byte)j1, (byte)l1, entity.onGround));
+                    this.encodedRotationYaw = (short) j1;
+                    this.encodedRotationPitch = (short) l1;
+                }
+
+                this.encodedPosX = EntityTracker.getPositionLong(entity.posX);
+                this.encodedPosY = EntityTracker.getPositionLong(entity.posY);
+                this.encodedPosZ = EntityTracker.getPositionLong(entity.posZ);
+                this.sendMetadata0(selfManager);
+                this.ridingEntity = true;
+            } else {
+                ++this.ticksSinceLastForcedTeleport;
+                long i1 = EntityTracker.getPositionLong(entity.posX);
+                long i2 = EntityTracker.getPositionLong(entity.posY);
+                long j2 = EntityTracker.getPositionLong(entity.posZ);
+                int k2 = MathHelper.floor(entity.rotationYaw * F_256_T_360);
+                int i = MathHelper.floor(entity.rotationPitch * F_256_T_360);
+                long j = i1 - this.encodedPosX;
+                long k = i2 - this.encodedPosY;
+                long l = j2 - this.encodedPosZ;
+                SEntityPacketPlayBase packet1 = null;
+                boolean flag = j * j + k * k + l * l >= 128L || this.updateCounter % 60 == 0;
+                boolean flag1 = Math.abs(k2 - this.encodedRotationYaw) >= 1 || Math.abs(i - this.encodedRotationPitch) >= 1;
+
+                if (this.updateCounter > 0 || entity instanceof EntityArrow) {
+                    if (j >= -32768L && j < 32768L && k >= -32768L && k < 32768L && l >= -32768L && l < 32768L && this.ticksSinceLastForcedTeleport <= 400
+                            && !this.ridingEntity && this.onGround == entity.onGround) {
+
+                        if ((!flag || !flag1) && !(entity instanceof EntityArrow)) {
+                            if (flag) {
+                                packet1 = new SPacketEntity.S15PacketEntityRelMove(entity.getEntityId(), j, k, l, entity.onGround);
+                            } else if (flag1) {
+                                packet1 = new SPacketEntity.S16PacketEntityLook(entity.getEntityId(), (byte)k2, (byte)i, entity.onGround);
+                            }
+                        } else {
+                            packet1 = new SPacketEntity.S17PacketEntityLookMove(entity.getEntityId(), j, k, l, (byte)k2, (byte)i, entity.onGround);
+                        }
+                    } else {
+                        this.onGround = entity.onGround;
+                        this.ticksSinceLastForcedTeleport = 0;
+                        this.resetPlayerVisibility();
+                        packet1 = new SPacketEntityTeleport(entity);
+                    }
+                }
+
+                boolean flag2 = this.sendVelocityUpdates || (entity.isLiving() && ((EntityLivingBase)entity).isElytraFlying());
+
+
+                if (flag2 && this.updateCounter > 0) {
+                    double d0 = entity.motionX - this.lastTrackedEntityMotionX;
+                    double d1 = entity.motionY - this.lastTrackedEntityMotionY;
+                    double d2 = entity.motionZ - this.motionZ;
+                    double d4 = d0 * d0 + d1 * d1 + d2 * d2;
+
+                    if (d4 > 4.0E-4D || d4 > 0.0D && entity.motionX == 0.0D && entity.motionY == 0.0D && entity.motionZ == 0.0D) {
+                        this.sendPacketToTrackedPlayers(new SPacketEntityVelocity(
+                                entity.getEntityId(),
+                                this.lastTrackedEntityMotionX = entity.motionX,
+                                this.lastTrackedEntityMotionY = entity.motionY,
+                                this.motionZ = entity.motionZ
+                        ));
+                    }
+                }
+                if (packet1 != null) {
+                    this.sendPacketToTrackedPlayers(packet1);
+                }
+
+                this.sendMetadata0(selfManager);
+
+                if (flag) {
+                    this.encodedPosX = i1;
+                    this.encodedPosY = i2;
+                    this.encodedPosZ = j2;
+                }
+
+                if (flag1) {
+                    this.encodedRotationYaw = (short) k2;
+                    this.encodedRotationPitch = (short) i;
+                }
+                this.ridingEntity = false;
+            }
+
+            int k1 = MathHelper.floor(entity.getRotationYawHead() * F_256_T_360);
+
+            int amount; //5832 = 18*18*18
+            if(entity.elcaMinRange > 5832D){
+                amount = 5;
+            } else {
+                amount = 1;
+            }
+            if (Math.abs(k1 - this.lastHeadMotion) >= amount) {
+                this.sendPacketToTrackedPlayers(new SPacketEntityHeadLook(entity, (byte)k1));
+                this.lastHeadMotion = (short) k1;
+            }
+            entity.isAirBorne = false;
+        }
+
+        ++this.updateCounter;
+
+        if (entity.velocityChanged) {
+            Packet<?> packet = new SPacketEntityVelocity(entity);
+            if(selfManager != null){
+                sendPacketToTrackedPlayersAndSelf(selfManager, packet);
+            } else {
+                sendPacketToTrackedPlayers(packet);
+            }
+            entity.velocityChanged = false;
+        }
+    }
+
+
+    public void sendPacketToTrackedPlayersAndSelf(NetworkManager manager, Packet<?> packetIn){
+        manager.addToQueueE(packetIn);
+        sendPacketToTrackedPlayers(packetIn);
+    }
+
+
+    public void sendPacketToTrackedPlayers(Packet<?> packetIn){
+        trackingPlayers.forEach(playerMP -> playerMP.connection.netManager.addToQueueE(packetIn));
+    }
+
+
+    protected void sendPacketToTrackedPlayers(SEntityPacketPlayBase packetIn){
+        trackingPlayers.forEach(packetIn);
+    }
+
+
+    private void sendMetadata0(@Nullable NetworkManager manager) {
+        Entity trackedEntity;
+        EntityDataManager entitydatamanager = (trackedEntity = this.trackedEntity).getDataManager();
+        SEntityPacketPlayBase packet;
+        if (entitydatamanager.isDirty()) {
+            packet = new SPacketEntityMetadata(trackedEntity.getEntityId(), entitydatamanager, false);
+
+            if (manager != null) manager.addToQueueN(packet);
+            sendPacketToTrackedPlayers(packet);
+        }
+        if (manager != null || trackedEntity.isLiving()) {
+            AttributeMap attributemap = (AttributeMap)((EntityLivingBase)trackedEntity).getAttributeMapOrNull();
+            if (attributemap != null) {
+                Set<IAttributeInstance> set = attributemap.getDirtyInstances();
+
+                if (!set.isEmpty()) {
+                    packet = new SPacketEntityProperties(trackedEntity.getEntityId(), set);
+
+                    if (manager != null) manager.addToQueueN(packet);
+                    sendPacketToTrackedPlayers(packet);
+
+                    set.clear();
+                }
+            }
+        }
+    }
+}

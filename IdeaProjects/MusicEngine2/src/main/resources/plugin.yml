@@ -1,0 +1,5 @@
+name: MusicEngine
+version: 1.0
+main: plus.Main
+api-version: 1.16
+depend: [WorldGuard, WorldEdit]

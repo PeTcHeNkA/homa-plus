@@ -1,0 +1,353 @@
+﻿<fw:AcrylicWindow x:Name="window" x:Class="GF2_LaunchHX.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:fw="clr-namespace:SourceChord.FluentWPF;assembly=FluentWPF"
+        xmlns:local="clr-namespace:GF2_LaunchHX"
+        mc:Ignorable="d"  
+                  
+        Height="350" Width="670" MinHeight="300" MinWidth="670"
+                  
+
+        AcrylicWindowStyle="NoIcon"
+        fw:AcrylicWindow.AcrylicAccentState="BlurBehind"       
+        TintOpacity="0.5" NoiseOpacity="0"
+                  
+        TintColor="{StaticResource ArcMain}"
+        FallbackColor="{StaticResource ArcMain}"
+                  
+        Title="GF2_LaunchHX" BorderBrush="{StaticResource ArcHeaderDark}" Foreground="{StaticResource ArcHeaderDark}"
+    >
+
+    <Window.Resources>
+        <DrawingImage x:Key="PlayImage">
+            <DrawingImage.Drawing>
+                <DrawingGroup>
+                    <DrawingGroup.Children>
+                        <GeometryDrawing Brush="Gray" Geometry="M34-212v-536h136v536H34Zm612 12-97-95 118-117H250v-136h417L551-665l95-95 280 280-280 280Z"/>
+                    </DrawingGroup.Children>
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+
+        <DrawingImage x:Key="SettingsImage">
+            <DrawingImage.Drawing>
+                <DrawingGroup>
+                    <DrawingGroup.Children>
+                        <GeometryDrawing Brush="Gray" Geometry="m332-34-19-141q-3-2-6.31-4.05-3.31-2.04-6.69-3.95l-133 56L19-388l112-85q0-1.93.5-4 .5-2.07.5-4.5 0-1.91-.5-3t-.5-3.5L19-573l148-258 133 54q3.89-1.45 7.44-3.23Q311-782 314-784l18-143h296l18 143 8 4 8 4 131-55 148 258-114 85v8q0 1.56-.5 4t-.5 4l114 84-150 261-132-56q-3 1-6 3.5t-5 3.5L628-34H332Zm119-136h56l15-104q33-9 62.35-25 29.36-16 51.65-42l97 41 28-50-83-63q6-16 9-32.99 3-16.99 3-34.5T687-515q-3-17-8-33l84-63-29-50-96.82 42q-22.18-27-51.57-44.29-29.4-17.3-63.61-23.71l-13-104h-59l-11 102q-35 8-65.5 25.5T320-620l-95-41-28 50 81 61q-6 19-8.5 35.5t-2.5 33.98q0 16.52 2.5 33.52 2.5 17 8.5 36l-81 61 28 50 95-41q25 26 55.5 43.5T439-273l12 103Zm27-160q62.56 0 106.78-43.82Q629-417.65 629-480.32q0-62.68-44.22-107.18Q540.56-632 478-632q-63 0-107 44.5t-44 107.18q0 62.67 44 106.5Q415-330 478-330Zm2-150Z"/>
+                    </DrawingGroup.Children>
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+
+        <DrawingImage x:Key="UpdateImage">
+            <DrawingImage.Drawing>
+                <DrawingGroup>
+                    <DrawingGroup.Children>
+                        <GeometryDrawing Brush="Gray" Geometry="M475-74q-83.08 0-156.9-31.9-73.82-31.9-128.67-86.93-54.85-55.03-86.64-129.1T71-480q0-84 31.79-158.07t86.64-129.1q54.85-55.03 128.67-86.93Q391.92-886 475-886q87.74 0 166.37 34.5Q720-817 777-751v-79h104v284H595v-107h86q-37-47-91.54-72-54.54-25-114.46-25-111.84 0-190.42 79Q206-592 206-479.5t78.92 191Q363.84-210 476-210q100.61 0 176.3-65Q728-340 742-440h138q-13 157-129.63 261.5Q633.75-74 475-74Zm107-222L423-454v-232h105v187.51L656-371l-74 75Z"/>
+                    </DrawingGroup.Children>
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+
+        <DrawingImage x:Key="DiscordImage">
+            <DrawingImage.Drawing>
+                <DrawingGroup>
+                    <DrawingGroup.Children>
+                        <GeometryDrawing Brush="Gray" Geometry="M23.6361 9.33998C22.212 8.71399 20.6892 8.25903 19.0973 8C18.9018 8.33209 18.6734 8.77875 18.5159 9.13408C16.8236 8.89498 15.1469 8.89498 13.4857 9.13408C13.3283 8.77875 13.0946 8.33209 12.8974 8C11.3037 8.25903 9.77927 8.71565 8.35518 9.3433C5.48276 13.4213 4.70409 17.3981 5.09342 21.3184C6.99856 22.6551 8.84487 23.467 10.66 23.9983C11.1082 23.4189 11.5079 22.8029 11.8523 22.1536C11.1964 21.9195 10.5683 21.6306 9.9748 21.2951C10.1323 21.1856 10.2863 21.071 10.4351 20.9531C14.0551 22.5438 17.9881 22.5438 21.5649 20.9531C21.7154 21.071 21.8694 21.1856 22.0251 21.2951C21.4299 21.6322 20.8 21.9211 20.1442 22.1553C20.4885 22.8029 20.8865 23.4205 21.3364 24C23.1533 23.4687 25.0013 22.6567 26.9065 21.3184C27.3633 16.7738 26.1261 12.8335 23.6361 9.33998ZM12.3454 18.9075C11.2587 18.9075 10.3676 17.9543 10.3676 16.7937C10.3676 15.6331 11.2397 14.6783 12.3454 14.6783C13.4511 14.6783 14.3422 15.6314 14.3232 16.7937C14.325 17.9543 13.4511 18.9075 12.3454 18.9075ZM19.6545 18.9075C18.5678 18.9075 17.6767 17.9543 17.6767 16.7937C17.6767 15.6331 18.5488 14.6783 19.6545 14.6783C20.7602 14.6783 21.6514 15.6314 21.6323 16.7937C21.6323 17.9543 20.7602 18.9075 19.6545 18.9075Z"/>
+                    </DrawingGroup.Children>
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+
+        <Style x:Key="{x:Type ComboBox}" TargetType="{x:Type ComboBox}" BasedOn="{x:Null}">
+            <Setter Property="SnapsToDevicePixels" Value="true"/>
+            <Setter Property="OverridesDefaultStyle" Value="true"/>
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="ScrollViewer.CanContentScroll" Value="true"/>
+            <Setter Property="MinWidth" Value="10"/>
+            <Setter Property="Width" Value="60"/>
+            <Setter Property="MinHeight" Value="20"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ComboBox}">
+                        <Grid>
+                            <ToggleButton 
+                                Name="ToggleButton" 
+                                
+                                Grid.Column="2" 
+                                Focusable="false"
+                                IsChecked="{Binding Path=IsDropDownOpen,Mode=TwoWay,RelativeSource={RelativeSource TemplatedParent}}"
+                                ClickMode="Press">
+                                <ToggleButton.Template>
+                                    <ControlTemplate>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition />
+                                                <ColumnDefinition Width="20" />
+                                            </Grid.ColumnDefinitions>
+                                            <Border
+            Grid.ColumnSpan="2"
+            CornerRadius="0"
+            
+            Background="Transparent"
+            BorderBrush="Transparent"
+            BorderThickness="0,1,0,1" />
+                                            <Path x:Name="Arrow"
+          Grid.Column="1"     
+          Fill="{Binding Foreground,ElementName=BTNInstall}"
+          HorizontalAlignment="Center"
+          VerticalAlignment="Center"
+          Data="M0,0 L0,2 L4,6 L8,2 L8,0 L4,4 z"
+        />
+                                        </Grid>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+                            <ContentPresenter Name="ContentSite" IsHitTestVisible="False"  Content="{TemplateBinding SelectionBoxItem}"
+                                ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                Margin="3,3,23,3"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Center" />
+                            <TextBox x:Name="PART_EditableTextBox"
+                                Style="{x:Null}" 
+                                HorizontalAlignment="Center" 
+                                VerticalAlignment="Center" 
+                                Margin="3,3,23,3"
+                                Focusable="True" 
+                                
+                                Foreground="Green"
+                                Visibility="Hidden"
+                                IsReadOnly="{TemplateBinding IsReadOnly}">
+                                <TextBox.Template>
+                                    <ControlTemplate>
+                                        <Border x:Name="PART_ContentHost" Focusable="False" Background="{TemplateBinding Background}" />
+                                    </ControlTemplate>
+                                </TextBox.Template>
+                            </TextBox>
+                            <Popup 
+                                Name="Popup"
+                                Placement="Bottom"
+                                IsOpen="{TemplateBinding IsDropDownOpen}"
+                                AllowsTransparency="True" 
+                                Focusable="False"
+                                PopupAnimation="Slide">
+
+                                <Grid Name="DropDown"
+                                  SnapsToDevicePixels="True"                
+                                  MinWidth="{TemplateBinding ActualWidth}"
+                                  MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                    <Border 
+                                    x:Name="DropDownBorder"
+                                    
+                                    Background="{DynamicResource ArcHeaderHover}"
+                                    BorderThickness="1"
+                                    BorderBrush="{DynamicResource ArcBorder}"/>
+                                    <ScrollViewer Margin="4,6,4,6" SnapsToDevicePixels="True">
+                                        <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
+                                    </ScrollViewer>
+                                </Grid>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="HasItems" Value="false">
+                                <Setter TargetName="DropDownBorder" Property="MinHeight" Value="0"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Foreground" Value="#888888"/>
+                            </Trigger>
+                            <Trigger Property="IsGrouping" Value="true">
+                                <Setter Property="ScrollViewer.CanContentScroll" Value="false"/>
+                            </Trigger>
+                            <Trigger SourceName="Popup" Property="Popup.AllowsTransparency" Value="true">
+                                <Setter TargetName="DropDownBorder" Property="CornerRadius" Value="0"/>
+                                <Setter TargetName="DropDownBorder" Property="Margin" Value="0,2,0,0"/>
+                            </Trigger>
+                            <Trigger Property="IsEditable"  Value="true">
+                                <Setter Property="IsTabStop" Value="false"/>
+                                <Setter TargetName="PART_EditableTextBox" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="ContentSite" Property="Visibility" Value="Hidden"/>
+                            </Trigger>
+
+
+
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="ComboBox.IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#CCFFD16C"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+    </Window.Resources>
+
+    <Window.CommandBindings>
+        <CommandBinding Command="MediaCommands.Play"
+                        Executed="CommandBinding_Execute"
+                        CanExecute="CommandBinding_CanExecute"/>
+    </Window.CommandBindings>
+
+    <Window.TaskbarItemInfo>
+        <TaskbarItemInfo x:Name="taskBarItemInfo1" 
+                         ThumbnailClipMargin="0,40,0,110">
+            <TaskbarItemInfo.ThumbButtonInfos>
+                <ThumbButtonInfoCollection>
+                    <ThumbButtonInfo 
+                        DismissWhenClicked="False"
+                        Command="MediaCommands.Play"
+                        CommandTarget="{Binding ElementName=BtnSettings}"
+                        Description="Настройки"
+                        ImageSource="{StaticResource ResourceKey=SettingsImage}"/>
+                    <ThumbButtonInfo 
+                        DismissWhenClicked="False"
+                        Command="MediaCommands.Play"
+                        CommandTarget="{Binding ElementName=BTNDiscord}"
+                        Description="Переключить Discord RPC"
+                        ImageSource="{StaticResource ResourceKey=DiscordImage}"/>
+                    <ThumbButtonInfo
+                        DismissWhenClicked="True"
+                        Command="MediaCommands.Play"
+                        CommandTarget="{Binding ElementName=BTNInstall}"
+                        Description="Проверить обновления"
+                        ImageSource="{StaticResource ResourceKey=UpdateImage}"/>
+                    <ThumbButtonInfo 
+                        DismissWhenClicked="True"
+                        Command="MediaCommands.Play"
+                        CommandTarget="{Binding ElementName=BTNPlay}"
+                        Description="Запустить"
+                        ImageSource="{StaticResource ResourceKey=PlayImage}"/>
+                </ThumbButtonInfoCollection>
+            </TaskbarItemInfo.ThumbButtonInfos>
+        </TaskbarItemInfo>
+    </Window.TaskbarItemInfo>
+
+    <Grid x:Name="MainGroup">
+        <ContentControl ContentTemplate="{StaticResource ArcHeaderTPL}" Panel.ZIndex="1000"/>
+
+        <Grid Margin="0,0,0,55">
+            <Grid>
+                <Grid.OpacityMask>
+                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0" >
+                        <GradientStop Color="Black" Offset="0.85"/>
+                        <GradientStop Color="Transparent" Offset="1"/>
+                    </LinearGradientBrush>
+                </Grid.OpacityMask>
+
+                <Image x:Name="BGImgTemp" Stretch="UniformToFill" Visibility="Hidden"/>
+                <Image x:Name="BGImg" Stretch="UniformToFill" Source="/assets/default_bg.jpg"/>
+            </Grid>
+            <Grid.OpacityMask>
+                <LinearGradientBrush EndPoint="0.35,1" StartPoint="0.2,0" >
+                    <GradientStop Color="Black" Offset="0.33"/>
+                    <GradientStop Color="Transparent" Offset="0"/>
+                </LinearGradientBrush>
+            </Grid.OpacityMask>
+        </Grid>
+
+        <!-- Settings -->
+        <Button Name="BtnSettings" Click="OnOppenSettings" Style="{StaticResource ArcBotton2}" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="7,34,0,0" >
+            <Path Width="30" Height="30" Fill="Black" Data="m393-100-16-119q-15-5-36.78-16.45Q318.44-246.91 305-260l-112 47-86-156 92-71q-1-9.93-2.5-21t-1.5-21q0-8.41 1.5-18.5T199-524l-92-69 86-152 107 44q17-14 38-25.5t39-18.5l16-117h174l15 119q21 9 38.5 18.5T656-700l111-45 86 152-98 74q3 11 3.5 21t.5 18q0 7-1 17t-2 24l94 70-86 156-113-48q-17 14-33.5 24T583-221l-16 121H393Zm46-54h78.85L533-264q31-8 55.91-22.08Q613.83-300.17 641-326l98 42 41-68-86-66q5-18 7-33.23 2-15.23 2-30.5 0-16.27-1.5-29.27t-6.5-33l87-66-39-68-102 41q-17-20-49.39-38.79-32.4-18.8-59.61-24.21l-11-108h-83l-10 106q-34 7-61 22.5T314-637l-97-41-41 68 84 65q-5 17-7 33t-2 30.42q0 12.58 2 28.58 2 16 6 36l-83 65 41 68 97-41q28 26 54.5 40.5T427-262l12 108Zm36-212q48.6 0 82.3-33.5Q591-433 591-482t-33.7-82.5Q523.6-598 475-598q-48 0-82 33.5T359-482q0 49 34 82.5t82 33.5Zm4-115Z" Stretch="Fill"/>
+        </Button>
+        <!-- Table editor -->
+        <Button x:Name="BtnEditor" Click="BtnEditor_Click" Style="{StaticResource ArcBotton2}" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="45,34,0,0" >
+            <Path Margin="1.5 4.5 1.5 4.5" Width="27" Height="21" Fill="Black"  Data="M100-182v-80h80v80h-80Zm200 0v-80h560v80H300ZM100-440v-80h80v80h-80Zm200 0v-80h560v80H300ZM100-698v-80h80v80h-80Zm200 0v-80h560v80H300Z" Stretch="Fill"/>
+        </Button>
+        <!-- Help -->
+        <Button Style="{StaticResource ArcBotton2}" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,34,7,0">
+            <Path Width="30" Height="30" Fill="Black"  Data="M505.5-273.5Q516-284 516-299t-10.5-25.5Q495-335 480-335t-25.5 10.5Q444-314 444-299t10.5 25.5Q465-263 480-263t25.5-10.5ZM452-403h52q2-26 9-46t45-56q18-16 32-39t14-55q0-54-41.5-81T477-707q-50 0-80 28.5T354-621l48 20q6-13 19.5-35.5T479-659q43 0 59 24t16 45q0 24-13 38.5T518-528q-49 45-57.5 61.5T452-403ZM232-146q-37 0-61.5-24.5T146-232v-496q0-37 24.5-61.5T232-814h496q37 0 61.5 24.5T814-728v496q0 37-24.5 61.5T728-146H232Zm0-54h496q12 0 22-10t10-22v-496q0-12-10-22t-22-10H232q-12 0-22 10t-10 22v496q0 12 10 22t22 10Zm-32-560v560-560Z" Stretch="Fill"/>
+        </Button>
+        <!-- Heart -->
+        <Button Style="{StaticResource ArcBotton2}" Margin="0,34,39,0" VerticalAlignment="Top" HorizontalAlignment="Right">
+            <Path Width="10" Height="9" Margin="2 3 2 2" Fill="Black"  Data="m480-110.93-60.15-55.69q-108.46-100.23-177-169.57-68.54-69.35-107.58-121.43-39.04-52.07-53.15-95.27Q68-596.08 68-642q0-96.15 66.42-162.08Q200.85-870 298-870q48.38 0 96 22t86 62.77Q518.38-826 566-848t96-22q97.15 0 163.58 65.92Q892-738.15 892-642q0 45.92-14.12 89.11-14.11 43.2-53.15 95.27-39.04 52.08-107.39 121.43Q649-266.85 540.15-166.62L480-110.93ZM480-228q98-89.38 161-152.08 63-62.69 100-109.19t51-81.81q14-35.3 14-70.92 0-61-40.5-101.5T662-784q-45.38 0-86.58 27.38-41.19 27.39-54.65 66.31h-81.54q-13.85-39.31-54.85-66.5Q343.38-784 298-784q-62.62 0-103.31 40.5Q154-703 154-642q0 35.62 14 70.92 14 35.31 51 81.81t100 109q63 62.5 161 152.27Zm0-278Z" Stretch="Fill"/>
+        </Button>
+        <!-- Version -->
+        <Button Style="{StaticResource ArcBotton2}" Margin="0,34,52,0" Padding="0 0 6 0" Width="57" Height="16" HorizontalContentAlignment="Right" VerticalContentAlignment="Top" HorizontalAlignment="Right" VerticalAlignment="Top">
+            <TextBlock Foreground="Black" TextAlignment="Right" Text="{x:Static local:MainWindow.APP_VERSION}" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+        </Button>
+
+        <!-- Content here -->
+        <Button x:Name="BTNDiscord" Visibility="Hidden"/>
+        <Button x:Name="BTNPlay" Margin="0,0,10,21" Height="45" Click="BTNPlay_Click"
+                VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="230" 
+                FontFamily="Microsoft YaHei" FontSize="24">
+            <Grid>
+                <TextBlock x:Name="BTNPlayT" Foreground="{Binding Foreground, ElementName=BTNPlay}" TextAlignment="Center" FontSize="30" Text="Играть" VerticalAlignment="Top"/>
+            </Grid>
+            <Button.Style>
+                <Style TargetType="Button" BasedOn="{StaticResource ArcBotton}">
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="#CC7AFF4C"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Button.Style>
+        </Button>
+
+        <Button x:Name="BTNInstall" Margin="55,0,240,21" Height="45" 
+                VerticalAlignment="Bottom" FontFamily="Microsoft YaHei"
+                Click="BTNInstall_Click"
+                >
+
+            <TextBlock x:Name="BTNInstallT" Foreground="{Binding Foreground, ElementName=BTNInstall}" 
+                       TextAlignment="Center" FontSize="30" Text="Установить" VerticalAlignment="Top"/>
+            <Button.Style>
+                <Style TargetType="Button" BasedOn="{StaticResource ArcBotton}">
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="#CCFFD16C"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Button.Style>
+        </Button>
+
+        <ComboBox x:Name="InstallModeBX" Visibility="Hidden" Margin="0,0,240,21"  HorizontalAlignment="Right" Foreground="{Binding Foreground, ElementName=BTNInstall}"
+                VerticalAlignment="Bottom" FontFamily="Microsoft YaHei" RenderTransformOrigin="0.5,0.5"
+                      >
+            <ComboBox.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform ScaleX="1"/>
+                    <SkewTransform/>
+                    <RotateTransform/>
+                    <TranslateTransform/>
+                </TransformGroup>
+            </ComboBox.RenderTransform>
+            <ComboBoxItem >
+                <Grid>
+                    <Path HorizontalAlignment="Left" Width="30" Height="19" Margin="0,6,0,0" Fill="{Binding Foreground, ElementName=BTNInstall}" Stretch="Fill" Data="M-9-206Q.5-321.5 62.75-417.25T221-570.5l-88-144q-8.5-16-5-32t19.5-26q16-8.5 31.5-4.25t25.5 20.25l90 151Q339-622 385.25-632T480-642q48.5 0 94.75 10t90.75 26.5l90-151q10-16 25.5-20.25t31.5 4.25q16 10 20.25 26t-5.75 32l-88 144q96 58.5 158.25 153.75T969-206H-9Zm757.75-173.25Q750.5-401 739-420.5T707.5-446q-20-6-35.5 3.5t-16.25 32q-.75 22.5 10.75 42t30.5 24.75q19 5.25 34.5-4.25t17.25-31.25Zm-486.25 34.5q20-6.25 31.5-24.75t9.75-40.75Q302-432.5 286.5-442t-34.5-4.5q-19 5-30.5 24.5-11.5 18.5-10.75 41.5T227-348q15.5 9.5 35.5 3.25Z"/>
+                    <TextBlock Margin="40,10,0,0" Height="30" FontSize="20" x:Name="AndroidDVName" Text="Установить на Android"/>
+                </Grid>
+            </ComboBoxItem>
+            <ComboBoxItem IsSelected="True">
+                <Grid>
+                    <Path HorizontalAlignment="Left" Width="30" Height="22" Margin="0,4,0,0"  Fill="{Binding Foreground, ElementName=BTNInstall}" Stretch="Fill" Data="M11-120v-90h166v-39q-51 0-86-35.03T56-370v-370q0-50.94 35.03-85.97T177-861h606q50.94 0 85.97 35.03T904-740v370q0 50.94-35.03 85.97T783-249v39h166v90H11Zm166-250h606v-370H177v370Zm0 0v-370 370Z"/>
+                    <TextBlock Margin="40,10,0,0" Height="30" FontSize="20" Text="Установить на этот ПК"/>
+                </Grid>
+            </ComboBoxItem>
+        </ComboBox>
+
+        <Button x:Name="BTNDel" Margin="10,0,0,21" Height="45" 
+                VerticalAlignment="Bottom" FontFamily="Microsoft YaHei" FontSize="24"
+                HorizontalAlignment="Left" Width="45"
+                >
+            <Path Height="30" Width="30" Fill="{Binding Foreground, ElementName=BTNDel}" Stretch="Fill" Data="M308-140q-37 0-61.5-24.5T222-226v-498h-40v-54h176v-36h246v36h176v54h-40v498q0 36.73-24.64 61.36Q690.72-140 654-140H308Zm378-584H276v498q0 14 9 23t23 9h346q12 0 22-10t10-22v-498ZM381-275h54v-368h-54v368Zm146 0h54v-368h-54v368ZM276-724v530-530Z"/>
+            <Button.Style>
+                <Style TargetType="Button" BasedOn="{StaticResource ArcBotton}">
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{StaticResource ArcRedHover}"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Button.Style>
+        </Button>
+
+    </Grid>
+</fw:AcrylicWindow>

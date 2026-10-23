@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ETE",
+    "PAP",
+    "GMG"
+  ],
+  "key": {
+    "E": {"item": "te4_spships:circuit"},
+    "T": {"item": "te4_spships:circuit_cpu"},
+    "P": {"item": "te4_spships:plate_machine"},
+    "G": {"item": "te4_spships:iron_gear"},
+    "A": {"item": "te4_spships:massive_frame_l1"},
+    "M": {"item": "te4_spships:plate_mefril"}
+  },
+  "result": {
+    "item": "te4_spships:sp_react",
+    "count": 1
+  }
+}

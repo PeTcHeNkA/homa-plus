@@ -1,0 +1,9 @@
+name: Te4hnoLootBox
+version: 5.0
+main: plus.main
+api-version: 1.16
+depend: [ProtocolLib]
+commands:
+  te4hno:
+    description: this plugin createt Te4hnoPlus
+    usage: /te4hno

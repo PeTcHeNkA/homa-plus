@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Аккаунт</title>
+    <script src="./reanet.js"></script>
+    <link rel="stylesheet" href="./stdboost.css">
+</head>
+<body>
+    <style>
+        :root{
+            --color1: rgb(255, 69, 94);
+            --color2: black;
+            /* normal */
+            --color3: rgba(35, 35, 35, 0.392);
+
+            /* hover */
+            --color5: rgba(213, 77, 99, 0.752);
+
+            /* active */
+            --color4: rgba(255, 85, 113, 0.859);
+            --color-bg: rgb(231, 231, 231);
+            --color-7: rgba(39, 43, 45, 0.495);
+            --color-f: #FFFFE0;
+
+            font-family: 'Exo', sans-serif;
+            cursor: default;
+            color: var(--color-f);
+        }
+    </style>
+    <style>
+        .mmenu-item{
+            overflow: hidden;
+            --varsize: 100%;
+            --varsize2: 0%;
+            background-color: var(--color3);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            flex-direction: column;
+            min-width: 15%;
+            padding: 0 2%;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .mmenu-item:hover{
+            --varsize: 110%;
+            --varsize2: 130%;
+            background-color: var(--color5);
+        }
+        .mmenu-item:active{
+            transition: 0.07s;
+            background-color: var(--color4)
+        }
+        .mmenu-item-inn{
+            height: 100%;
+            align-items: center;
+            display: flex;
+            transition: inherit;
+            color: var(--color-f);
+            transform: scale(var(--varsize));
+        }
+        .mmenu-item-line{
+            height: 2px;
+            width: var(--varsize2);
+            transition: inherit;
+            background-color: var(--color2);
+        }
+        .mmenu-line{
+            height: 2px;
+            width: 100%;
+            background-color: var(--color1);
+        }
+    </style>
+
+    <div class="w-100 bg-ico" style="height: 100vh;overflow-y: auto;">
+        <div class="flex-cm nav f3">
+            <style>
+                .bg-ico{
+                    height: 100vh;
+                    background-repeat: no-repeat;
+                    background-size: cover;
+                    background-position: 50%;
+                    will-change: transform;
+                    position: absolute;
+                    background-image: url(./assets/img/bgparts/coridor-f.png);
+                }
+                .m2-0{
+                    margin: 0 calc(var(--fct)*8);
+                }
+                .p2-0{
+                    padding: 0 calc(var(--fct)*8);
+                }
+            </style>
+            <div class="mmenu-line"></div>
+            <div class="flex-start noselect">
+                <div class="mmenu-item">
+                    <div class="mmenu-item-inn">Valcirias Warfare</div>
+                    <div class="mmenu-item-line"></div>
+                </div>
+
+                <div class="mmenu-item">
+                    <div class="mmenu-item-inn">Главная</div>
+                    <div class="mmenu-item-line"></div>
+                </div>
+
+                <div class="mmenu-item">
+                    <div class="mmenu-item-inn">Скин</div>
+                    <div class="mmenu-item-line"></div>
+                </div>
+            </div>
+        </div>
+        
+        <style>
+            .w-75a{
+                width: 75%;
+            }
+            .w-50a{
+                width: 50%;
+            }
+            @media (max-width: 720px) {
+                .w-75a{
+                    width: 100%;
+                }
+                .w-50a{
+                    width: 75%;
+                }
+            }
+            @media (max-width: 540px) {
+                .w-50a{
+                    width: 100%;
+                }
+            }
+            .skinImg{
+                min-height: 256px;
+                height: max-content;
+                background-repeat: no-repeat;
+                background-size: auto 100%;
+                image-rendering: pixelated;
+                background-position: center;
+                background-color: url(steve.png);
+
+                backdrop-filter: blur(3px);
+            }
+            .skinDel{
+                --skcolor: var(--color-f)
+            }
+            .skinDel:hover{
+                --skcolor: var(--color1)
+            }
+
+            .skinType{
+                height: 12%;
+            }
+            .skinsel{
+                background-color: var(--color4)
+            }
+            .skinsel:hover{
+                background-color: var(--color4)
+            }
+            #skinInput {
+                position: absolute;
+                z-index: -1;
+                opacity: 0;
+                display: block;
+                width: 0;
+                height: 0;
+            }
+            .gray-label{
+                background-color: var(--color3);
+            }
+        </style>
+
+        <template name="skinset">
+            <div class="w-100 flex">
+                <script on="init">
+                    var skin, slim = false, skUrl = null
+                    reanet.model["_curSkin"] = null
+                    reanet.model["_curType"] = false
+
+                    window._onUpdSkin =(event)=>{
+                        let files = event.target.files;
+                        if(files.length>0){
+                            skUrl = 'url(' +URL.createObjectURL(files[0])+')'
+                            skin.style.backgroundImage = skUrl;
+                        } else {
+                            skUrl = null
+                        }
+                        reanet.update()
+                    }
+                    window._clearSkin =(ignore=true)=>{
+                        if(ignore || !skUrl){
+                            skin.style.backgroundImage = 
+                                'url('+(slim?'alex.png':'steve.png')+')';
+                            skUrl = null
+                            getEl("skinInput").value = ""
+                        }
+                    }
+                    window._setSknType = (type)=>{
+                        slim = type;
+                        _clearSkin(false)
+                        reanet.update()
+                    }
+                    reanet.model["_sksel"] = reanet.label((a)=>{
+                        let type = slim
+                        if(a!="clasic")type = (!type)
+                        return type?"":"skinsel"
+                    })
+
+                    window._canUpdSkin =()=>{
+                        return reanet.model["_curSkin"] != skUrl ||
+                            reanet.model["_curType"] != slim
+                    }
+                    window._hasSkin = ()=>{
+                        return skUrl != null
+                    }
+
+
+                    window._sendSkin = ()=>{
+                        let formData;
+                        let files = getEl("skinInput").files
+                        if(reanet.model["_curSkin"] != skUrl && files.length > 0){
+                            formData = files[0]
+                        }
+                        console.log("NENs");
+                        post("mcapi/skins/set?slim="+slim, formData, (res)=>{
+                            reanet.model["_curSkin"] = skUrl
+                            reanet.model["_curType"] = slim
+                            console.log("RES:");
+                            console.log(res);
+                        })
+                    }
+                </script>
+                
+                <div class="w-50a p2-0">
+                    <div class="flex-around br2 m2h">
+                        <div class="w-100 m2">
+                            <input id="skinInput" onchange="_onUpdSkin(event)" type="file" accept="image/png">
+                            <div class="mmenu-line"></div>
+                            <div class="flex f3 p2 gray-label">Скин</div>
+                            <div class="m2h">
+                                <div class="mmenu-line"></div>
+
+                                <div id="skin" class="w-100 skinImg flex-end">
+                                    <div r:if="_hasSkin()" class="f2 p2 skinDel" onclick="_clearSkin();reanet.update()">
+                                    
+                                        <svg fill="var(--skcolor)" width="30" height="30" viewBox="0 -960 960 960"><path d="m376-313.847 104-104 104 104L626.153-356l-104-104 104-104L584-606.153l-104 104-104-104L333.847-564l104 104-104 104L376-313.847Zm-83.691 173.846q-30.308 0-51.308-21t-21-51.308V-720h-40v-59.999H360v-35.384h240v35.384h179.999V-720h-40v507.691q0 30.308-21 51.308t-51.308 21H292.309ZM680-720H280v507.691q0 4.616 3.846 8.463 3.847 3.846 8.463 3.846h375.382q4.616 0 8.463-3.846 3.846-3.847 3.846-8.463V-720Zm-400 0v520-520Z"/></svg>
+                                    
+                                    </div>
+                                </div>
+                                <div class="mmenu-line"></div>
+                                <div class="skinType flex-start noselect w-100">
+                                    <div class="mmenu-item" style="min-width: 5em;" onclick='getEl("skinInput").click()'>
+                                        <div class="mmenu-item-inn p2">Загрузить</div>
+                                        <div class="mmenu-item-line"></div>
+                                    </div>
+
+                                    <div onclick="_setSknType(false)"class="mmenu-item {_sksel.clasic}">
+                                        <div class="mmenu-item-inn p2">classic</div>
+                                        <div class="mmenu-item-line"></div>
+                                    </div>
+                                    <div onclick="_setSknType(true)" class="mmenu-item {_sksel.slim}">
+                                        <div class="mmenu-item-inn p2">slim</div>
+                                        <div class="mmenu-item-line"></div>
+                                    </div>
+                                    
+                                    <div class="gray-label w-100"></div>
+                                </div>
+                            </div>
+
+                            <div onclick="_sendSkin()" r:if="_canUpdSkin()" class="mmenu-item">
+                                <div class="mmenu-item-inn p2">Сохранить изминения</div>
+                                <div class="mmenu-item-line"></div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <script on="place">
+                        skin = getEl("skin")
+                        _clearSkin()
+                    </script>
+                </div>
+            </div>
+        </template>
+
+        <script src="./modules/sl_rloader.js"></script>
+        <div id="frame0"></div>
+    </div>
+
+    <script>
+        reanet.placeTo("frame0","skinset")
+    </script>
+
+
+</body>
+</html>

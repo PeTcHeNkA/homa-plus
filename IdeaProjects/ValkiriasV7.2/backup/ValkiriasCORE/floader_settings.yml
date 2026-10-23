@@ -1,0 +1,28 @@
+ALTERNATIVE_CONFIG_PATH: none
+main:
+  use_client: false
+  enable_sql_server: true
+  dungeon_mode: false
+  small_coder: false
+  use_lowloader: false
+  velocity_port: 4418
+  port: 4971
+  enable_loot_chests: true
+  enable_quest_engine: false
+  enable_mythic_exp: true
+  enable_air_boxes: false
+  enable_craft_module: true
+  enable_class_gui: true
+  enable_system_commands: true
+  enable_teleport_server: false
+  lobby_name: re_hub
+combat:
+  enable_regions: false
+  enable_pvp: true
+network:
+  enable_tp_server: false
+  enable_tp_sender: true
+  tp_servers:
+    dung: 7118
+  tp_server_name: dung
+  tp_sender_port: 7118

@@ -1,0 +1,72 @@
+package plus.te4net.mds.html;
+
+import io.netty.handler.codec.http.cookie.Cookie;
+import io.netty.handler.codec.http.cookie.DefaultCookie;
+import plus.te4net.core.api.*;
+import plus.te4net.mds.html.vr.VrHtmlFormat;
+import plus.te4net.core.node.HEWorker;
+import plus.te4net.mds.util.IpUtls;
+import plus.tson.TsonFile;
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+
+
+@PublicUsage
+public class HtmlRoute implements PluginBase, IRequestProcessor, PluginRoute {
+    private final IRequestProcessor formatter;
+    private final String routeName;
+
+    public HtmlRoute(HEWorker worker, File file){
+        this.routeName = file.getName();
+        this.formatter = VrHtmlFormat.ofHtml(worker, TsonFile.read(file,""));
+    }
+
+
+    public HtmlRoute(HEWorker worker, String path, String routeName) {
+        this.routeName = routeName;
+        byte[] data = getSrc(path);
+        this.formatter = VrHtmlFormat.ofHtml(worker, data==null?"":new String(data, StandardCharsets.UTF_8));
+    }
+
+
+    public HtmlRoute(HEWorker worker, byte[] data, String routeName) {
+        this.routeName = routeName;
+        this.formatter = VrHtmlFormat.ofHtml(worker, new String(data, StandardCharsets.UTF_8));
+    }
+
+
+    @Override
+    public void handle(RequestSession session) {
+        checkIp(session);
+        formatter.handle(session);
+    }
+
+
+    protected void checkIp(RequestSession session){
+        Cookie rCookie = session.getCookie("uia");
+        String rIp = session.context().channel().remoteAddress().toString();
+        rIp = rIp.substring(1,rIp.indexOf(':'));
+        if(rCookie!=null){
+            int prevIp = Integer.parseInt(rCookie.value());
+            int curIp = IpUtls.intIpFromStr(rIp);
+            if(prevIp == curIp){
+                return;
+            }
+            HEWorker.getLogger().info("IP "+IpUtls.strIpFromInt(prevIp)+" -> "+rIp);
+        }
+        DefaultCookie cookie = new DefaultCookie("uia", String.valueOf(IpUtls.intIpFromStr(rIp)));
+        cookie.setDomain(session.getDomain());
+        cookie.setPath("/");
+        cookie.setMaxAge(2147483647);
+        cookie.setSecure(true);
+        cookie.setHttpOnly(true);
+        session.setCookie(cookie);
+        HEWorker.getLogger().info("New user IP: "+rIp);
+    }
+
+
+    @Override
+    public String get() {
+        return routeName;
+    }
+}

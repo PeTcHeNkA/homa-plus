@@ -1,0 +1,9 @@
+name: GuiEngineV2
+version: @version@
+main: guienginev2.guienginev2.GuiEngineV2
+api-version: 1.16
+authors: [ Te4hnoPlus ]
+description: Helpful gui engine
+commands:
+  helpgui:
+    description: Open helpgui

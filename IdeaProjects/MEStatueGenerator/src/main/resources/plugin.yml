@@ -1,0 +1,5 @@
+name: MESG
+version: 1.0
+main: plus.main
+api-version: 1.16
+depend: [ModelEngine]

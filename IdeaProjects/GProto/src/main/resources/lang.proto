@@ -1,0 +1,179 @@
+package protobuf;
+
+option java_package = "plus.proto.lang";
+option java_outer_classname = "TableData";
+
+message Item {
+  optional int64 id  = 1;
+  optional string name = 2;
+}
+
+message IndexItem {
+  optional uint32 beginOff = 1;
+  optional uint32 length   = 2;
+}
+
+message Index {
+  optional uint32 dist = 1;
+  optional bool  sect = 2;
+  map<int64, IndexItem> index = 3;
+//  repeated IndexItem item = 3;
+}
+
+message Translations {
+  repeated Item data = 1;
+}
+
+message TRef{
+  required int64 id = 1;
+}
+
+message UnknownGroup{
+  repeated Unknown data = 1;
+}
+
+message Unknown{
+
+}
+
+message ItemGetList{
+  optional uint32 id = 1;
+  optional uint32 type = 2;
+  optional TRef title = 3;
+  optional bool canJump = 4;
+  optional string jumpC = 5;
+  optional uint32 quickBye = 6;
+}
+
+message ItemGetListGroup{
+  repeated ItemGetList data = 1;
+}
+
+message AvgContent{
+  optional uint32 id = 1;
+  optional TRef data1 = 2;
+  optional TRef data2 = 3;
+}
+
+message AvgContentGroup{
+  repeated AvgContent data = 1;
+}
+
+message VideoSubtitle{
+  optional uint32 id = 1;
+  optional TRef data = 2;
+}
+
+message VideoSubtitleGroup{
+  repeated VideoSubtitle data = 1;
+}
+
+message ClothesU2{
+  repeated ClotheUItem item = 1;
+}
+
+message IntList{
+  repeated int32 num = 1;
+}
+
+message ClotheUItem{
+  optional int32 id = 1;
+  optional int32 l2 = 2;
+  optional int32 l3 = 3;
+  optional int32 l4 = 4;
+  optional int32 modelId = 5;
+
+  optional bytes l6 = 6;
+  optional string gunCode = 7;
+  optional string name = 8;
+
+  optional TRef text1 = 9;  //from old
+  optional TRef text2 = 10; //from old
+
+  optional int32 unlockType = 11; //from old
+  optional int32 unlockArg  = 12; //from old
+  optional int32 unlockDesc = 13; //from old
+
+  repeated int32 l14 = 14;
+  repeated int32 l15 = 15; // ??
+
+  optional TRef text3 = 16;  //from old
+  optional string flag = 17;
+
+  optional int32 l19 = 19;
+  optional int32 l21 = 21;
+  optional int32 l22 = 22;
+  optional int32 l23 = 23;
+
+  optional string ski3 = 24;
+  optional string ski4 = 25;
+  optional string ski5 = 26;
+  optional string ski6 = 27;
+  optional string ski7 = 28;
+  optional string ski8 = 29;
+
+  repeated bytes l31 = 31;
+
+  optional int32 b31 = 32;
+  optional int32 b32 = 33;
+
+//
+//  required int32 id = 1;
+//  //  id = proto.Field(proto.UINT32, number=1)
+//  optional int32 order = 2;
+//  //  order = proto.Field(proto.INT32, number=2)
+//  optional int32 cType = 3;
+//  //  clothesType = proto.Field(proto.UINT32, number=3)
+//  optional int32 cType2 = 4;
+//  //  type = proto.Field(proto.INT32, number=4)
+//  optional int32 modelId = 5;
+//  //  modelId = proto.Field(proto.UINT32, number=5)
+//  optional string code = 6;
+//  //  code = proto.Field(proto.STRING, number=6)
+//  optional string gunCode = 7;
+//  //  gunCode = proto.Field(proto.STRING, number=7)
+//  optional string name = 8;
+//  //  name = proto.Field(LanguageStringData, number=8)
+//  optional TRef description = 9;
+//  //  description = proto.Field(LanguageStringData, number=9)
+//  optional int32 rare = 10;
+//  //  rare = proto.Field(proto.UINT32, number=10)
+//  optional int32 unlockType = 11;
+//  //  unlockType = proto.Field(proto.UINT32, number=11)
+//  optional int32 unlockArg = 12;
+//  //  unlockArg = proto.Field(proto.UINT32, number=12)
+//  optional TRef unlockDescription = 13;
+//  //  unlockDescription = proto.Field(LanguageStringData, number=13)
+//  optional string switchAnim = 14;
+//  //  switchAnim = proto.Field(proto.STRING, number=14)
+//  optional string switchTimeline = 15;
+//  //  switchTimeline = proto.Field(proto.STRING, number=15)
+//  optional int32 displayConfig = 16;
+//  //  displayConfig = proto.Field(proto.UINT32, number=16)
+//  optional int32 displayArg = 17;
+//  //  displayArg = proto.Field(proto.UINT32, number=17)
+//  optional int32 gun = 18;
+//  //  gun = proto.Field(proto.UINT32, number=18)
+//  optional int32 audioClothes = 19;
+//  //  audioClothes = proto.Field(proto.UINT32, number=19)
+//  optional int32 audioFoot = 20;
+//  //  audioFoot = proto.Field(proto.UINT32, number=20)
+//  optional string timelineAssets = 21;
+//  //  timelineAssets = proto.Field(proto.STRING, number=21)
+//  optional string animAssets = 22;
+//  //  animAssets = proto.Field(proto.STRING, number=22)
+//  optional string skillSuffix = 23;
+//  //  skillSuffix = proto.Field(proto.STRING, number=23)
+//  optional int32 cameraReplaceId = 24;
+//  //  cameraReplaceId = proto.Field(proto.UINT32, number=24)
+//  optional string ultraskillAssets = 25;
+//  //  ultraskillAssets = proto.Field(proto.STRING, number=25)
+//  optional string dormanimAssets = 26;
+//  //  dormanimAssets = proto.Field(proto.STRING, number=26)
+//
+}
+
+//All file
+//0-4 bytes - int32, len of BData
+//Index
+//Translations

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/NLaunch.main.iml" filepath="$PROJECT_DIR$/.idea/modules/NLaunch.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/NLaunch.test.iml" filepath="$PROJECT_DIR$/.idea/modules/NLaunch.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/org.example.NLaunch.main.iml" filepath="$PROJECT_DIR$/.idea/modules/org.example.NLaunch.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/org.example.NLaunch.test.iml" filepath="$PROJECT_DIR$/.idea/modules/org.example.NLaunch.test.iml" />
+    </modules>
+  </component>
+</project>

@@ -1,0 +1,19 @@
+ {
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+      "ADA",
+      "CMC",
+      "APA"
+    ],
+    "key": {
+      "A": {"item": "te4_spships:alumine_ingot"},
+      "P": {"item": "te4_spships:plate_mefril"},
+      "C": {"item": "te4_spships:copper_coil"},
+      "D": {"item": "minecraft:diamond"},
+      "M": {"item": "te4_spships:massive_frame_l1"}
+    },
+    "result": {
+      "item": "te4_spships:massive_frame_l2",
+      "count": 1
+    }
+}

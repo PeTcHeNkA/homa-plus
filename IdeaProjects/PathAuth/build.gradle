@@ -1,0 +1,28 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compileOnly fileTree('deps') { include '*.jar' }
+    implementation fileTree('path') { include '*.jar' }
+}
+
+test {useJUnitPlatform()}
+
+jar {
+    baseName "AuthPlus"
+}
+
+shadowJar{
+    exclude 'deps/vel.jar'
+    exclude 'deps/l_api.jar'
+}

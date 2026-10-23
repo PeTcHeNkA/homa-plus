@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8"/>
+    <title>vlaunch</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="./src/main.js" type="module"></script>
+    <script src="./src/assets/js/reanet-min.js"></script>
+    <link rel="stylesheet" href="./src/assets/css/main.css">
+    <link rel="stylesheet" href="./src/assets/css/bs_port.css">
+    <style>
+        :root{
+            --color-blg: rgba(42, 42, 42, 0.876);
+
+            --menu-gray: rgba(149, 149, 149, 0.537);
+            --text-white: rgb(255, 255, 255);
+            --text-gray: rgba(228, 228, 228, 0.721);
+        }
+        div, body{
+            padding: 0; margin: 0; user-select: none;
+            touch-action: none;
+        }
+        .overflow-hide{
+            overflow: hidden
+        }
+        .v_frame{
+            width: 100vw;
+            height: var(--btn-sz);
+            background-color: var(--color-blg);
+            overflow: hidden;
+        }
+        .v_btn{
+            width: 3.5em;
+            height: 2.33em;
+            display: flex;
+            justify-content: center;
+            transition: 0.1s;
+            --col: var(--text-gray);
+            color: var(--text-gray)
+        }
+        .v_btn:hover{
+            --col: var(--text-white);
+            background-color: var(--menu-gray)
+        }
+        .v_close:hover{
+            --col: var(--text-white);
+            background-color: rgba(255, 0, 0);
+        }
+        .v_frame_nm{
+            font-size: calc(var(--btn-sz)*0.55);
+            width: unset;
+            height: unset;
+        }
+        @media screen and (max-width: 400px) {
+            .v_frame_nm_min{
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<!-- <template name="flsc-svg">
+    <svg fill="var(--col)" viewBox="0 -960 960 960" width="24"><path d="M200-200v-200h28v172h172v28H200Zm0-360v-200h200v28H228v172h-28Zm360 360v-28h172v-172h28v200H560Zm172-360v-172H560v-28h200v200h-28Z"/></svg>
+</template>
+
+<template name="fmin-svg">
+    <svg fill="var(--col)" viewBox="0 -960 960 960" width="24"><path d="M372-200v-172H200v-28h200v200h-28Zm188 0v-200h200v28H588v172h-28ZM200-560v-28h172v-172h28v200H200Zm360 0v-200h28v172h172v28H560Z"/></svg>
+</template>
+
+<template>
+    <svg fill="var(--col)" height="24" viewBox="0 -960 960 960" width="24"><path d="M232-172q-26 0-43-17t-17-43v-496q0-26 17-43t43-17h249v28H232q-12 0-22 10t-10 22v496q0 12 10 22t22 10h249v28H232Zm432-184-20-20 90-90H370v-28h364l-90-90 20-20 124 124-124 124Z"/></svg>
+</template> -->
+
+<script src="./src/assets/js/modules/sl_rloader-min.js"></script>
+
+<script>
+    const startParamsVw = {
+        cp: "nlib/nlaunch.jar",
+        nlib: "nlib/nlaunch.dll",
+        sysloader: "plus.nlaunch.NULaunch",
+        lars: "lar/worldedit-te4mc1-12-2-6-1-10-dist.lar",
+        ncp: "versions/ForgeOptiFine 1.12.2/ForgeOptiFine 1.12.2.jar;nlib/launchwrapper-1.12.jar;nlib/te4authlib.jar;libs/forge-1.12.2-14.23.5.2860.jar;libraries/org/ow2/asm/asm-debug-all/5.2/asm-debug-all-5.2.jar;libraries/org/jline/jline/3.5.1/jline-3.5.1.jar;libraries/com/typesafe/akka/akka-actor_2.11/2.3.3/akka-actor_2.11-2.3.3.jar;libraries/com/typesafe/config/1.2.1/config-1.2.1.jar;libraries/org/scala-lang/scala-actors-migration_2.11/1.1.0/scala-actors-migration_2.11-1.1.0.jar;libraries/org/scala-lang/scala-compiler/2.11.1/scala-compiler-2.11.1.jar;libraries/org/scala-lang/plugins/scala-continuations-library_2.11/1.0.2_mc/scala-continuations-library_2.11-1.0.2_mc.jar;libraries/org/scala-lang/plugins/scala-continuations-plugin_2.11.1/1.0.2_mc/scala-continuations-plugin_2.11.1-1.0.2_mc.jar;libraries/org/scala-lang/scala-library/2.11.1/scala-library-2.11.1.jar;libraries/org/scala-lang/scala-parser-combinators_2.11/1.0.1/scala-parser-combinators_2.11-1.0.1.jar;libraries/org/scala-lang/scala-reflect/2.11.1/scala-reflect-2.11.1.jar;libraries/org/scala-lang/scala-swing_2.11/1.0.1/scala-swing_2.11-1.0.1.jar;libraries/org/scala-lang/scala-xml_2.11/1.0.2/scala-xml_2.11-1.0.2.jar;libraries/lzma/lzma/0.0.1/lzma-0.0.1.jar;libraries/java3d/vecmath/1.5.2/vecmath-1.5.2.jar;libraries/net/sf/trove4j/trove4j/3.0.3/trove4j-3.0.3.jar;libraries/org/apache/maven/maven-artifact/3.5.3/maven-artifact-3.5.3.jar;libraries/net/sf/jopt-simple/jopt-simple/5.0.3/jopt-simple-5.0.3.jar;libraries/org/apache/logging/log4j/log4j-api/2.15.0/log4j-api-2.15.0.jar;libraries/org/apache/logging/log4j/log4j-core/2.15.0/log4j-core-2.15.0.jar;libraries/ru/tlauncher/patchy/1.0.0/patchy-1.0.0.jar;libraries/oshi-project/oshi-core/1.1/oshi-core-1.1.jar;libraries/net/java/dev/jna/jna/4.4.0/jna-4.4.0.jar;libraries/net/java/dev/jna/platform/3.4.0/platform-3.4.0.jar;libraries/com/ibm/icu/icu4j-core-mojang/51.2/icu4j-core-mojang-51.2.jar;libraries/com/paulscode/codecjorbis/20101023/codecjorbis-20101023.jar;libraries/com/paulscode/codecwav/20101023/codecwav-20101023.jar;libraries/com/paulscode/libraryjavasound/20101123/libraryjavasound-20101123.jar;libraries/com/paulscode/librarylwjglopenal/20100824/librarylwjglopenal-20100824.jar;libraries/com/paulscode/soundsystem/20120107/soundsystem-20120107.jar;libraries/io/netty/netty-all/4.1.9.Final/netty-all-4.1.9.Final.jar;libraries/com/google/guava/guava/21.0/guava-21.0.jar;libraries/org/apache/commons/commons-lang3/3.5/commons-lang3-3.5.jar;libraries/commons-io/commons-io/2.5/commons-io-2.5.jar;libraries/commons-codec/commons-codec/1.10/commons-codec-1.10.jar;libraries/net/java/jinput/jinput/2.0.5/jinput-2.0.5.jar;libraries/net/java/jutils/jutils/1.0.0/jutils-1.0.0.jar;libraries/com/google/code/gson/gson/2.8.0/gson-2.8.0.jar;libraries/com/mojang/realms/1.10.22/realms-1.10.22.jar;libraries/org/apache/commons/commons-compress/1.8.1/commons-compress-1.8.1.jar;libraries/org/apache/httpcomponents/httpclient/4.3.3/httpclient-4.3.3.jar;libraries/commons-logging/commons-logging/1.1.3/commons-logging-1.1.3.jar;libraries/org/apache/httpcomponents/httpcore/4.3.2/httpcore-4.3.2.jar;libraries/it/unimi/dsi/fastutil/7.1.0/fastutil-7.1.0.jar;libraries/org/apache/logging/log4j/log4j-api/2.8.1/log4j-api-2.8.1.jar;libraries/org/apache/logging/log4j/log4j-core/2.8.1/log4j-core-2.8.1.jar;libraries/org/lwjgl/lwjgl/lwjgl/2.9.4-nightly-20150209/lwjgl-2.9.4-nightly-20150209.jar;libraries/org/lwjgl/lwjgl/lwjgl_util/2.9.4-nightly-20150209/lwjgl_util-2.9.4-nightly-20150209.jar;libraries/com/mojang/text2speech/1.10.3/text2speech-1.10.3.jar",
+        natives: "versions/ForgeOptiFine 1.12.2/natives"
+    }
+</script>
+
+<!-- чтобы отключить пкм добавить oncontextmenu="return false;" -->
+<body>
+    <script>
+        function isValidLogin(login){
+            return /[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(login)?login:false;
+        }
+        function isValidPsw(psw){
+            return /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!#$%?@-_+=^:;.<>*])(?=\S+$).{8,24}$/.test(psw)?psw:false;
+        }
+        function validNick(nick){
+            return (nick.length>3 && nick.length < 16 && /^\w+$/.test(nick))?nick:false
+        }
+    </script>
+
+    <div class="w-100w h-100h bg_main" id="bg">
+        <div class="bg_main_inn" id="innBg">
+            <script>
+                {
+                const INNBG = getEl("innBg")
+                let SCP = 1
+                function mtcCrdX(x){
+                    return (x/window.innerWidth-0.5) * 2
+                }
+                function mtcCrdY(y){
+                    return (y/window.innerHeight-0.5)*2.5
+                }
+                document.addEventListener("mousemove", function (e) {
+                    if(SCP==16){
+                        SCP = 1;
+                    } else {
+                        SCP = SCP << 1;
+                        return;
+                    }
+                    INNBG.style.transform = `translate(${mtcCrdX(e.clientX)}%, ${mtcCrdY(e.clientY)}%)`;
+                });
+                }
+            </script>
+        </div>
+    </div>
+
+    <!-- ВЕРХНЯЯ РАМКА style="--wails-draggable:drag" -->
+    <div class="w-100w h-100h bg_main">
+        <div class="v_frame flex-between" style="--wails-draggable:drag">
+            <div class="flex v_frame_nm pd-1 text-white v_btn">
+                <p>Valkirias&nbsp;</p>
+                <p class="v_frame_nm_min">Warfare&nbsp;</p>
+                <p>Launcher</p>
+            </div>
+
+            <div class="flex">
+                <div id="mbtn" class="v_btn flex" onclick="Minimize()">
+                    <svg fill="var(--col)" viewBox="0 -960 960 960" width="24"><path d="M260-160v-40h440v40H260Z"/></svg>
+                
+                </div>
+                <div id="cbtn" class="v_btn v_close flex" onclick="Quit()">
+                    <svg fill="var(--col)" viewBox="0 -960 960 960" width="24"><path d="M256-227.692 227.692-256l224-224-224-224L256-732.308l224 224 224-224L732.308-704l-224 224 224 224L704-227.692l-224-224-224 224Z"/></svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- ВИДЖЕТ НАСТРОЕК -->
+        <div class="lestSerringsCtn" id="WIDGTSTNGS">
+            <style>
+                .lestSerringsCtn{
+                    position: absolute;
+                    width: 31vw;
+                    padding-bottom: 2%;
+                    margin-left: 5%;
+                    display: flex;
+                    
+                    right: 0;
+                    height: 100vh;
+                }
+                .lestSerringsCtnHeader{
+                    width: 100%;
+                    margin-top: 7.3vh;
+
+                    padding-top: 1.2%;
+                    padding-bottom: 1.2%;
+                    font-size: 5.5vh;
+                    /* text-align: center;
+                    background-color: rgba(137, 43, 226, 0.546); */
+                }
+                .lestSerringsCtnInn{
+                    width: 95%;
+                    margin-top: -0.7vh;
+                    margin-left: 2.5%;
+                }
+                .settingsPrelabel{
+                    width: 100%;
+                    padding-top: 1.2%;
+                    padding-bottom: 1.2%;
+                    font-size: 3vh;
+                    background-color: rgba(45, 45, 45, 0.32);
+                    text-align: center;
+                }
+                .settingLabelGroup{
+                    background-color: rgba(164, 161, 167, 0.537);
+                    margin-top: 3.8vh;
+                    width: 100%;
+                }
+                .mainSettingsCtnFrame, .mainSettingsCtnFrameExpanded{
+                    transform-origin: right center;
+                    width: 95%;
+                    background-color: var(--color-blg);
+                    transition: 0.4s;
+                    padding-bottom: 4vh;
+                }
+                .mainSettingsCtnFrame{
+                    transform: perspective(500px) rotateY(-90deg);
+                    z-index: 0;
+                }
+                .mainSettingsCtnFrameExpanded{
+                    transform: perspective(500px) rotateY(0deg);;
+                    z-index: 1000;
+                }
+                .controlSettingsCtnFrame{
+                    position: absolute;
+                    right: 0;
+                    width: 5%;
+                    height: 100vh;
+                }
+            </style>
+            <div class="mainSettingsCtnFrame" id="STNGSCTN">
+                <div class="lestSerringsCtnHeader whiteBlue">
+                    Настройки
+                </div>
+        
+                <div class="lestSerringsCtnInn">
+                    <!-- НАСТРОЙКИ ПАМЯТИ -->
+                    <div class="settingLabelGroup">
+                        <style>
+                            .settingsMem[type=range]{
+                                transform: scaleY(5);
+                                accent-color: coral;
+                                /* -webkit-appearance: none; */
+                                /* background-color: transparent; */
+                                width: 100%;
+                                /* height: 6vh; */
+                                margin: 0;
+                                /* border: 1px solid #000; */
+                            }
+                            .settingsMem[type=range]::-webkit-slider-runnable-track {
+
+                            }
+                            .settingsMem[type=range]::-webkit-slider-thumb {
+                                width: 25px;
+                                height: 25px;
+
+                                transform: scaleY(0.2);
+                                background: #ecf0f1;
+
+                                box-shadow: 5px 3px 0px -2px var(--color-e), -5px -3px 0px -2px var(--color-e);
+               
+                                margin-left: 1%;
+      
+                                cursor: pointer;
+                            }
+                            .settingsMem[type=range][type=range]::-webkit-slider-thumb:active{
+                                background-color: var(--color-w2);
+
+                                /* width: 25px;
+                                height: 25px; */
+                            }
+                            .settingsMem[type=range]:focus{
+                                outline: none;
+                            }
+                            .setLBMemCtn{
+                                width: 100%;
+                            }
+                            .setLBMemInf{
+                                padding: 2%;
+                                padding-right: 20%;
+                                text-align: right;
+                            }
+                        </style>
+                        <div class="settingsPrelabel">
+                            Выделение памяти
+                        </div>
+        
+                        <input id="MEMMAIN"  class="settingsMem whiteBlue" value="768" type="range" min="384" max="5623" step="128" oninput="updateMEM()">
+                        <div id="MEMVSVALUE" class="setLBMemInf">
+                            <script>
+                                const MEMVSVALUE = getEl("MEMVSVALUE")
+                                const MEMMAIN = getEl("MEMMAIN")
+                                let edictedMem = false;
+                                var memorySellected = 0
+
+                                function updateMEM(){
+                                    edictedMem = true
+                                    memorySellected = MEMMAIN.value
+                                    MEMVSVALUE.innerHTML = MEMMAIN.value+" MB"
+                                }
+                                getEl("MEMMAIN").addEventListener("mouseout",()=>{
+                                    if(edictedMem){
+                                        jcache["max-mem"] = memorySellected
+                                        edictedMem = false
+                                    }
+                                })
+                            </script>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        
+            <!-- ПРАВАЯ РАМКА РАСКРЫТЬ -->
+            <div class="controlSettingsCtnFrame whiteBlue" id="STNGSFRM"
+                style="border-radius: 0;">
+                <script>
+                    const STNGSCTN = getEl("STNGSCTN")
+                    const WIDGTSTNGS = getEl("WIDGTSTNGS")
+                    //const INPUT_ARGS = getEl("INPUT_ARGS")
+
+                    let onBigSTFrame = false
+                    getEl("WIDGTSTNGS").addEventListener("mouseover", (e)=>{
+                        if(!onBigSTFrame && e.target.id+""=="WIDGTSTNGS"){
+                            return
+                        } else {
+                            STNGSCTN.className = "mainSettingsCtnFrameExpanded"
+                            onBigSTFrame = true
+                            noScroolScreens = true
+                        }
+                    })
+                    getEl("WIDGTSTNGS").addEventListener("mouseout", ()=>{
+                        // return
+                        STNGSCTN.className = "mainSettingsCtnFrame"
+                        onBigSTFrame = false
+                        noScroolScreens = false
+                        saveCache()
+                    })
+                </script>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ВИДЖЕТ СКРИНОВ -->
+    <div id="SCRWID" class="screensWidget">
+        <style>
+            .screensWidget{
+                position: absolute;
+                background-color: var(--color-blg);
+                width: 35.7%;
+                height: 35vh;
+                margin-left: 4.5%;
+                /* margin-top: 20vh; */
+                transition: 0.7s;
+                margin-top: max(calc(var(--btn-sz)*2.5), 20vh);
+                /* will-change: opacity; */
+            }
+            .scrL{
+                
+                position: absolute;
+                z-index: 40;
+                width: 106%;
+                margin-left: -3%;
+                margin-top: calc(var(--btn-sz)*-1.4)
+            }
+            .scrOpenFolderBtn{
+                position: absolute;
+                height: 8vh;
+                width: 20%;
+                right: 0%;
+                top: 1.1vh;
+            }
+            .svgHovBtn{
+                filter: 
+                    drop-shadow(5px 5px 0px hsla(200, 51.4%, 13.7%, 0.8))
+                    opacity(0.5);
+            }
+            .svgHovBtn:hover{
+                filter: 
+                    drop-shadow(5px 5px 0px hsla(200, 51.4%, 13.7%, 0.8))
+                    opacity(0.87);
+            }
+            .scrHeader{
+                overflow: hidden;
+                justify-content: space-between;
+                font-size: calc(var(--btn-sz)*0.55);
+            }
+        </style>
+        <div class="scrL">
+
+            <div class="scrHeader flex whiteBlue">
+                <div class="flex v_frame_nm pd-1">
+                    Скриншоты
+                </div>
+<!--                TODO убрать дубляж-->
+                <div id="mbtn2" class="v_btn flex" onclick='ExplorerSelect(launchPatch+"/screenshots")'>
+                    <svg fill="var(--col)" viewBox="0 -960 960 960" width="24"><path d="M378.461-440h347.693L615.846-586.154l-98.154 123.077-63.538-75.385L378.461-440ZM144.615-169.23q-26.846 0-45.73-18.885Q80-207 80-233.846v-443.077h40v443.077q0 10.769 6.923 17.692t17.692 6.923H760v40.001H144.615Zm120-120.001q-26.846 0-45.73-18.884Q200-327 200-353.846v-421.539q0-26.846 18.885-45.731Q237.769-840 264.615-840h198.462l80 80h272.308q26.846 0 45.731 18.884Q880-722.231 880-695.385v341.539q0 26.846-18.884 45.731-18.885 18.884-45.731 18.884h-550.77Zm0-40h550.77q10.769 0 17.692-6.923T840-353.846v-341.539q0-10.769-6.923-17.692T815.385-720H527l-80-80H264.615q-10.769 0-17.692 6.923T240-775.385v421.539q0 10.769 6.923 17.692t17.692 6.923Zm-24.615 0V-800v470.769Z"/></svg>
+
+                </div>
+            </div>
+        </div>
+        <div id="FRM">
+            <style>
+                .screen{
+                    position: absolute;
+                    width: 68%;
+                    height: 68%;
+                    background-size: cover;
+                    border-radius: 5px;
+                    margin-top: 5%;
+                    margin-left: 11%;
+                    transition: 0.4s;
+                    /* will-change: transform, opacity; */
+                }
+                .screen:hover{
+                    margin-top: 4%;
+                    margin-left: 10%;
+                    width: 80%;
+                    height: 80%;
+                    z-index: 40;
+                    opacity: 1;
+                }
+                .pos1{
+                    transform: translate(15%, 10%);
+                    z-index: 22;
+                    /* border: 20px solid rgba(0, 0, 0, 0.413); */
+                }
+                .pos2{
+                    transform: translate(0%, 0%);
+                    z-index: 20;
+                    opacity: 0.7;
+                }
+                .pos3{
+                    transform: translate(-15%, -10%);
+                    z-index: 18;
+                    opacity: 0.4;
+                }
+                .posP{
+                    transform: translate(-30%, -20%);
+                    z-index: 16;
+                    opacity: 0;
+                }
+                .pos0{
+                    transform: translate(30%, 5%);
+                    z-index: 17;
+                    opacity: 0.8;
+                }
+                .posN{
+                    transform: translate(45%, 0%);
+                    z-index: 15;
+                    opacity: 0;
+                }
+            </style>
+            <script>
+                const frame ='<div id="SCR_%ID%" onclick='+"showBigScreen('%URL%')"+' class="screen %POS%" style="background-image: url(%URL%)"></div>'
+    
+                var ld = "."
+                var screens = []
+                var noScroolScreens = false
+
+                async function getScreens(){
+                    let lcp = await GetLaunchPatch()
+                    let data = await GetFiles(lcp+"/screenshots")
+                    return data.split(";")
+                }
+    
+                function getScreen(id){
+                    let num = id % screens.length
+                    if(num<0)num += screens.length
+                    return screens[num]
+                }
+    
+                var centerId = 0
+                var timeOut = 40
+                var timeRem = 40
+
+                function addEScreen(){
+                    let html = frame.replace("%ID%",centerId).replace("%POS%", "posP")
+                    str = getScreen(centerId+1)
+                    if(str=="NONE"){
+                        return
+                    }
+                    html = html.replace("%URL%",str).replace("%URL%",str)
+                    getEl("FRM").innerHTML+=html
+                    setTimeout(()=>{
+                        P0 = getEl("SCR_"+(centerId))
+                        if(P0 != null){
+                            P0.className="screen pos3"
+                        }
+    
+                        P1 = getEl("SCR_"+(centerId-1))
+                        if(P1 != null){
+                            P1.className="screen pos2"
+                        }
+                        P2 = getEl("SCR_"+(centerId-2))
+                        if(P2 != null){
+                            P2.className="screen pos1"
+                        }
+                        P3 = getEl("SCR_"+(centerId-3))
+                        if(P3 != null){
+                            P3.className="screen pos0"
+                        }
+                        const P4 = getEl("SCR_"+(centerId-4))
+                        if(P4 != null){
+                            P4.className="screen posN"
+                            setTimeout(()=>{P4.remove()}, timeRem)
+                        }
+                        centerId+=1
+                    },timeOut)
+                }
+    
+                function backScreen(){
+                    let html = frame.replace("%ID%",centerId-5).replace("%POS%", "posN")
+                    str = getScreen(centerId-5)
+                    if(str=="NONE"){
+                        return
+                    }
+                    html = html.replace("%URL%",str).replace("%URL%",str)
+                    getEl("FRM").innerHTML+=html
+                    setTimeout(()=>{
+                        getEl("SCR_"+(centerId-5)).className="screen pos0"
+                        P0 = getEl("SCR_"+(centerId-1))
+                        if(P0 != null){
+                            P0.className="screen posP"
+                            setTimeout(()=>{P0.remove()}, timeRem)
+                        }
+                        P1 = getEl("SCR_"+(centerId-2))
+                        if(P1 != null){
+                            P1.className="screen pos3"
+                        }
+                        P2 = getEl("SCR_"+(centerId-3))
+                        if(P2 != null){
+                            P2.className="screen pos2"
+                        }
+                        P3 = getEl("SCR_"+(centerId-4))
+                        if(P3 != null){
+                            P3.className="screen pos1"
+                        }
+                        centerId-=1
+                    }, timeOut)
+                }
+
+                function onScrool(e) {
+                    if(blocked || noScroolScreens)return;
+                    if(e.deltaY==0)return;
+                    setTimeout(()=>{blocked = false}, 40)
+                    blocked = true
+                    if(e.deltaY<0){
+                        addEScreen()
+                    } else {
+                        backScreen()
+                    }
+                }
+                
+            </script>
+            <script>
+                function onInitScreens(){
+                    setTimeout(addEScreen, 600)
+                    setTimeout(addEScreen, 900)
+                    setTimeout(addEScreen, 1200)
+                    setTimeout(addEScreen, 1500)
+                }
+
+                var blocked = false
+                setTimeout(()=>{
+                    if(window.GetLaunchPatch){
+                        getScreens().then((res)=>{
+                            screens = res
+                            onInitScreens()
+                        })
+                    } else {
+                        screens = ["./src/assets/img/bg.png"]
+                        onInitScreens()
+                    }
+                    document.addEventListener('wheel', onScrool)
+                },1800)
+            </script>
+        </div>
+    </div>
+
+
+    <!-- РАЗВЕРНУТЬ ОКНО ПРОСМОТРА СКРИНОВ -->
+    <div id="BGSCR" class="bgScreen">
+        <style>
+            .bgScreen, .bgScreenExpnded{
+                position: absolute;
+                z-index: 200;
+                overflow: hidden;
+                border-radius: 5px;
+                transition: 0.7s;
+                will-change: transform, opacity, z-index;
+            }
+            .bgScreen{
+                width: 35.7%;
+                height: 35vh;
+                margin-left: 4.5%;
+                margin-top: 20vh;
+                opacity: 0;
+                z-index: 0;
+            }
+            .bgScreenExpnded{
+                width: 94%;
+                height: 84%;
+                margin-left: 3%;
+                margin-top: calc(var(--btn-sz)*1.2);
+                opacity: 1;
+                z-index: 200;
+            }
+
+            .bgScreenHead{
+                background-color: var(--color-s);
+                width: 100%;
+                height: 4%;
+                z-index: 9170;
+                height: var(--btn-sz);
+                overflow: hidden;
+            }
+            .bgScreenCenter{
+                width: 100%;
+                background-color: var(--color-g1);
+                height: 86%;
+                z-index: 1;
+                box-shadow: 
+                    4px 48px 26px -42px var(--color-sd) inset,
+                    4px -48px 26px -42px var(--color-sd) inset;
+            }
+            .bgScreenInf{
+                background-color: var(--color-s);
+                width: 100%;
+                height: calc(var(--btn-sz)/6);
+            }
+            .bgScrCenterImg{
+                height: 90%;
+                width: 70%;
+                background-size: 100% auto;
+                background-repeat: no-repeat;
+                background-position: 50%;
+                border-radius: 3px;
+                /* will-change: transform; */
+            }
+        </style>
+        <div class="bgScreenHead whiteBlue flex ">
+            <div id="FLPTH" class="flex w-50 pd-1"></div>
+            <div class="flex w-50 justify-end">
+                <div class="v_btn flex" onclick='ExplorerSelect(launchPatch+"/screenshots")'>
+                    <svg fill="var(--col)" viewBox="0 -960 960 960" width="24"><path d="M184.615-200Q157-200 138.5-218.5 120-237 120-264.615v-430.77Q120-723 138.5-741.5 157-760 184.615-760h199.231l80 80h311.539Q803-680 821.5-661.5 840-643 840-615.385v350.77Q840-237 821.5-218.5 803-200 775.385-200h-590.77Zm0-40h590.77q10.769 0 17.692-6.923T800-264.615v-350.77q0-10.769-6.923-17.692T775.385-640H447.769l-80-80H184.615q-10.769 0-17.692 6.923T160-695.385v430.77q0 10.769 6.923 17.692T184.615-240ZM160-240v-480 480Z"/></svg>
+                </div>
+                <div id="cExt0" class="flex v_btn v_close" onclick="hideBigScreen()">
+                    <svg fill="var(--col)" viewBox="0 -960 960 960" width="24"><path d="M256-227.692 227.692-256l224-224-224-224L256-732.308l224 224 224-224L732.308-704l-224 224 224 224L704-227.692l-224-224-224 224Z"/></svg>
+                </div>
+            </div>
+        </div>
+        <div class="bgScreenCenter flex flex-cen">
+            <div id="BCIMG" class="bgScrCenterImg flex"></div>
+        </div>
+        <div class="bgScreenInf hovlightblue"></div>
+
+        <script>
+            // getEl("SLCTSCRN").addEventListener("click",()=>{
+            //     backend.openFloader("$"+currOpenScreen)
+            // })
+
+            var currOpenScreen = null
+            BGSCR = getEl("BGSCR")
+            SCRWID = getEl("SCRWID")
+            FLPTH = getEl("FLPTH")
+            BCIMG = getEl("BCIMG")
+
+            function showBigScreen(screen){
+                noScroolScreens = true
+                currOpenScreen = screen
+                BGSCR.className = "bgScreenExpnded"
+                SCRWID.style.opacity=0
+                FLPTH.innerHTML=screen
+                BCIMG.style.backgroundImage="url("+screen+")"
+            }
+            function hideBigScreen(){
+                noScroolScreens = false
+                BGSCR.className = "bgScreen"
+                SCRWID.style.opacity=1
+            }
+        </script>
+    </div>
+
+    <!-- НИК, СТАРТ, ВЕРСИЯ -->
+    <div class="controlMenu" id="CTRLMMENU">
+        <style>
+            .controlMenu{
+                position: absolute;
+                width: calc(min(50%, 25em));
+                right: 5%;
+                bottom: calc(max(90px, 27vh));
+            }
+        </style>
+
+        <div class="startSettingLine flex">
+            <!-- ВВОД НИКА -->
+            <input class="whiteBlue inputNuck hovlightblue flex" type="text" 
+                id="INPUT_NICK" placeholder="логин"
+                style="text-shadow: 4px 3px var(--color-e); width: 50%"
+            >
+
+            <div class="flex whiteBlue inputNuck hovlightblue flex" style="
+                width: 60%; margin-left: 1vh;display: flex;
+                justify-content: center; font-size: unset;" id="inpswctn"
+            >
+                <input class="inputNuck" type="password" 
+                    id="INPUT_PSW" placeholder="пароль"
+                    style="width: 100%;padding: unset; background-color: unset;text-shadow: 4px 3px var(--color-e)"
+                >
+
+                <div class="logout flex-cen" id="lgo-ico" style="display: none;" onclick="logout0()">
+                    <svg fill="var(--col)" height="24px" width="24" viewBox="0 -960 960 960"><path d="M823.692-460H366.154v-40h457.538l-83.538-83.538 28.308-28.77L900.77-480 768.462-347.692l-28.308-28.77L823.692-460ZM616.154-610.769v-124.616q0-10.769-6.923-17.692T591.539-760H224.615q-10.769 0-17.692 6.923T200-735.385v510.77q0 10.769 6.923 17.692T224.615-200h366.924q10.769 0 17.692-6.923t6.923-17.692v-124.616h40v124.616q0 26.846-18.885 45.731Q618.385-160 591.539-160H224.615q-26.846 0-45.731-18.884Q160-197.769 160-224.615v-510.77q0-26.846 18.884-45.731Q197.769-800 224.615-800h366.924q26.846 0 45.73 18.884 18.885 18.885 18.885 45.731v124.616h-40Z"/></svg>
+                </div>
+            </div>
+
+
+            <style>
+                .logout{
+                    --col: var(--text-gray);
+                }
+                .logout:hover{
+                    --col: var(--text-white);
+                }
+                .startSettingLine{
+                    width: 100%;
+                    justify-content: flex-end;
+                }
+                .inputNuck{
+                    color: rgba(240, 240, 240, 0.943);
+                    font-family: "Default SC";
+                    font-style: normal;
+                    border: 0;
+                    font-size: 1.2em;
+                    width: 42%;
+                    padding: 5px 0 5px 0;
+                    text-align: center;
+                    bottom: 0;
+                }
+                .inputNuck:focus{
+                    outline: none;
+                    caret-color: rgba(51, 51, 51, 0.7);
+                }
+                .inputNuck::-webkit-input-placeholder{
+                    /* font-size: 2em; */
+                    padding-bottom: 1.2vh;
+                    color: rgba(84, 84, 84, 0.801);
+                    text-shadow: none;
+                    text-align: center;
+                }
+                .inputNuck::selection{
+                    background-color: rgba(79, 110, 109, 0.756)
+                }
+            </style>
+        </div>
+        <!-- СТАРТ -->
+        <div class="btnPlay whiteBlue" id="btnPlay" onclick="clickPlay()">
+            <style>
+                .btnPlay{
+                    position: absolute;
+                    width: 100%;
+                    margin-top: 1vh;
+                    overflow: hidden;
+                    font-size: 3em;
+                    padding-top: 25px;
+                    padding-bottom: 25px;
+                    white-space: nowrap;
+
+                }
+                .progress{
+                    position: absolute;
+                    width: 100%;
+                    height: 5%;
+                    background-color: rgba(51, 51, 51, 0.7);
+                    bottom: 0;
+                }
+                .progress_prc{
+                    --defColor: rgba(91, 255, 37, 0.7);
+                    --errorColor: rgba(255, 37, 37, 0.7);
+                    position: absolute;
+                    background-color: var(--defColor);
+                    width: 0%;
+                    height: 100%;
+                    transition: 1s;
+                }
+            </style>
+
+            <div id="STEXT">Начать Игру</div>
+            <div id="PRG" class="progress" style="opacity: 0">
+                <div id="PRG_LN" class="progress_prc"></div>
+            </div>
+
+            <div id="STATUS"></div>
+
+            <script>
+                var nip = false, inStart = false, token = "", hasNet = false, userName = "User", uuid = "offline"
+                const INPUT_PSW = getEl("INPUT_PSW")
+                const INPUT_NICK = getEl("INPUT_NICK")
+                const RPF_LN = getEl("PRG_LN")
+                const STEXT = getEl("STEXT")
+                const STATUS = getEl("STATUS")
+
+                const authserv = "https://lochost.ru"
+
+                const a_msg = "Авторизация"
+                const stg_msg = "Начать Игру"
+
+                function inputMode(mode=true){
+                    nip = mode
+                    getEl("lgo-ico").style.display=mode?"":"none"
+                    getEl("inpswctn").style.width=mode?"11%":"100%"
+                    INPUT_PSW.style.width=mode?"0%":"100%"
+                    
+                    if(mode){
+                        INPUT_NICK.setAttribute("readonly", true)
+                    } else{
+                        token = ""
+                        INPUT_NICK.removeAttribute("readonly")
+                    }
+                    saveCache()
+                    STEXT.innerHTML=mode?stg_msg:a_msg
+                }
+                STEXT.innerHTML=nip?stg_msg:a_msg
+                function logout0(){
+                    if(!nip)return
+                    post(authserv+"/auth/api/logouthclient", token, (res)=>{
+                        if(!nip)return
+                        inputMode(false)
+                    })
+                }
+
+                function onLogin(login, password){
+                    get(authserv+"/auth/authclient?login="+login+"&psw="+password, (res)=>{
+                        if(res.startsWith("ERROR")){
+                            let code = res.split(" ")[1];
+                            if(code=="NULL_USER"){
+                                redStartBar0("Пользователь не найден!", a_msg, "2.5em")
+                            }
+                            if(code=="WRONG_PASSWORD"){
+                                redStartBar0("Неправильный пароль!", a_msg, "2.7em")
+                            }
+                            console.log(code);
+                            return;
+                        }
+                        token = res
+                        inputMode(true)
+                    })
+                }
+
+                //INPUT_PSW.addEventListener("click",()=>inputMode(true))
+
+                function showStartBar(msg="Запуск"){
+                    inStart = true
+                    $T("PRG").style.opacity=1
+                    RPF_LN.style.width=0
+                    RPF_LN.style.backgroundColor="var(--defColor)"
+                    STEXT.innerHTML=msg
+                }
+                function hideStartBar(msg="Начать Игру"){
+                    $T("PRG").style.opacity=0
+                    STEXT.innerHTML=msg
+                    setTimeout(()=>{inStart = false}, 1000)
+                }
+                function updateStatBar(i, msg=null){
+                    RPF_LN.style.width=(i+"%")
+                    RPF_LN.style.backgroundColor="var(--defColor)"
+                    if(msg != null){
+                        STEXT.innerHTML=msg
+                    }
+                }
+                function redStartBar(msg="Ошибка", msg2="Начать игру", fs="100%", fs2="100%"){
+                    RPF_LN.style.backgroundColor="var(--errorColor)"
+                    if(msg != null){
+                        STEXT.innerHTML=msg
+                        STEXT.style.fontSize=fs
+                    }
+                    setTimeout(()=>{
+                        inStart = false
+                        getEl("PRG").style.opacity=0
+                        STEXT.style.fontSize=fs2
+                        STEXT.innerHTML=msg2
+                        RPF_LN.style.width=0
+                    }, 2500)
+                }
+
+                function redStartBar0(msg, msg2, fs, fs2){
+                    RPF_LN.style.width="100%"
+                    getEl("PRG").style.opacity=1
+                    redStartBar(msg, msg2, fs, fs2)
+                }
+
+                function noNet(){
+                    redStartBar0("Подключение отсутствует!", a_msg, "65%")
+                }
+        
+                function clickPlay(){
+                    if(!hasNet){
+                        try{
+                            updateAuthIfNeed(()=>{
+                                if(!hasNet){
+                                    noNet()
+                                }
+                            })
+                        } catch (e){
+                            noNet()
+                            return
+                        }
+                    }
+                    if(!nip){
+                        let nick0 = INPUT_NICK.value
+                        if(isValidLogin(nick0)){
+                            let psw = INPUT_PSW.value
+                            if(isValidPsw(psw)){
+                                try{
+                                    onLogin(nick0, psw)
+                                } catch (e){
+                                    console.log(e);
+                                    noNet()
+                                }
+                            } else{
+                                redStartBar0("Недопустимый пароль!", a_msg, "65%")
+                            }
+                        } else{
+                            redStartBar0("Недопустимый логин!", a_msg, "70%")
+                        }
+                    } else{
+                        if(!inStart){
+                            ClickPlay("status", JSON.stringify(startParamsVw), userName, uuid, token)
+                        }
+                    }
+                }
+                function status(str) {
+                    if(str=="empty"){
+                        str=""
+                    }
+                    STATUS.innerHTML = str
+                }
+            </script>
+        </div>
+    </div>
+
+    <script>
+        var jcache = {}
+        
+        function loadCache(cb=()=>{}){
+            console.log("LOADING CACHE");
+            try{
+                GetCache("vwlaunch.cache").then((res)=>{
+                    jcache = JSON.parse(res)
+                    INPUT_NICK.value = jcache["login"]
+                    INPUT_PSW.value  = jcache["password"]
+                    token            = jcache["token"]
+                    MEMMAIN.value    = jcache["max-mem"]
+                    cb()
+                    updateMEM()
+                })
+            } catch(e){
+                console.log(e);
+            }
+        }
+
+        function saveCache(){
+            jcache["token"] = token
+            jcache["login"] = INPUT_NICK.value
+            jcache["password"] = INPUT_PSW.value
+            if(window.SetCache){
+                SetCache("vwlaunch.cache", JSON.stringify(jcache))
+            }
+        }
+
+        function updateAuthIfNeed(cb=()=>{}){
+            if(token != ""){
+                post(authserv+"/auth/api/username", token, (res)=>{
+                    hasNet = true
+                    if(res!="NULL"){
+                        inputMode(true)
+                        res = res.split(";")
+                        userName = res[0]
+                        uuid     = res[1]
+                    }
+                    cb()
+                })
+            }
+        }
+
+        window.onload = ()=>{
+            try{
+                loadCache(updateAuthIfNeed)
+            } catch (e){
+                console.log(e);
+            }
+        }
+    </script>
+
+</body>
+
+</html>

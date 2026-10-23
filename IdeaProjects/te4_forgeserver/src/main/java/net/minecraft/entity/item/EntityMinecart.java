@@ -1,0 +1,1248 @@
+package net.minecraft.entity.item;
+
+import javax.annotation.Nullable;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockRailBase;
+import net.minecraft.block.BlockRailPowered;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.MoverType;
+import net.minecraft.entity.monster.EntityIronGolem;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.*;
+import net.minecraft.util.datafix.DataFixer;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.IWorldNameable;
+import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.minecart.MinecartCollisionEvent;
+import net.minecraftforge.event.entity.minecart.MinecartUpdateEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+import plus.fserver.ElcaMobs;
+import plus.fserver.api.Keep;
+import plus.fserver.server.elca.ChunkSelector;
+import plus.fserver.utls.collections.ArrayListE6;
+import plus.fserver.utls.collections.EntityList;
+
+
+public abstract class EntityMinecart extends Entity implements IWorldNameable {
+    private static final DataParameter<Integer> ROLLING_AMPLITUDE = EntityDataManager.createKey(EntityMinecart.class, DataSerializers.VARINT);
+    private static final DataParameter<Integer> ROLLING_DIRECTION = EntityDataManager.createKey(EntityMinecart.class, DataSerializers.VARINT);
+    private static final DataParameter<Float> DAMAGE = EntityDataManager.createKey(EntityMinecart.class, DataSerializers.FLOAT);
+    private static final DataParameter<Integer> DISPLAY_TILE = EntityDataManager.createKey(EntityMinecart.class, DataSerializers.VARINT);
+    private static final DataParameter<Integer> DISPLAY_TILE_OFFSET = EntityDataManager.createKey(EntityMinecart.class, DataSerializers.VARINT);
+    private static final DataParameter<Boolean> SHOW_BLOCK = EntityDataManager.createKey(EntityMinecart.class, DataSerializers.BOOLEAN);
+    private boolean isInReverse;
+    private static final int[][][] MATRIX = new int[][][] {{{0, 0, -1}, {0, 0, 1}}, {{ -1, 0, 0}, {1, 0, 0}}, {{ -1, -1, 0}, {1, 0, 0}}, {{ -1, 0, 0}, {1, -1, 0}}, {{0, 0, -1}, {0, -1, 1}}, {{0, -1, -1}, {0, 0, 1}}, {{0, 0, 1}, {1, 0, 0}}, {{0, 0, 1}, { -1, 0, 0}}, {{0, 0, -1}, { -1, 0, 0}}, {{0, 0, -1}, {1, 0, 0}}};
+    private int turnProgress;
+    private double minecartX;
+    private double minecartY;
+    private double minecartZ;
+    private double minecartYaw;
+    private double minecartPitch;
+    @SideOnly(Side.CLIENT)
+    private double velocityX;
+    @SideOnly(Side.CLIENT)
+    private double velocityY;
+    @SideOnly(Side.CLIENT)
+    private double velocityZ;
+
+    /* Forge: Minecart Compatibility Layer Integration. */
+    @Keep
+    public static float defaultMaxSpeedAirLateral = 0.4f;
+    @Keep
+    public static float defaultMaxSpeedAirVertical = -1f;
+    @Keep
+    public static double defaultDragAir = 0.94999998807907104D;
+    @Keep
+    protected boolean canUseRail = true;
+    @Keep
+    protected boolean canBePushed = true;
+    private static net.minecraftforge.common.IMinecartCollisionHandler collisionHandler = null;
+
+    /* Instance versions of the above physics properties */
+    private float currentSpeedRail = getMaxCartSpeedOnRail();
+    @Keep
+    protected float maxSpeedAirLateral = defaultMaxSpeedAirLateral;
+    @Keep
+    protected float maxSpeedAirVertical = defaultMaxSpeedAirVertical;
+    @Keep
+    protected double dragAir = defaultDragAir;
+
+    public EntityMinecart(World worldIn) {
+        super(worldIn);
+        this.preventEntitySpawning = true;
+        this.setSize(0.98F, 0.7F);
+    }
+
+
+    public static EntityMinecart create(World worldIn, double x, double y, double z, EntityMinecart.Type typeIn) {
+        switch (typeIn) {
+            case CHEST:
+                return new EntityMinecartChest(worldIn, x, y, z);
+            case FURNACE:
+                return new EntityMinecartFurnace(worldIn, x, y, z);
+            case TNT:
+                return new EntityMinecartTNT(worldIn, x, y, z);
+            case SPAWNER:
+                return new EntityMinecartMobSpawner(worldIn, x, y, z);
+            case HOPPER:
+                return new EntityMinecartHopper(worldIn, x, y, z);
+            case COMMAND_BLOCK:
+                return new EntityMinecartCommandBlock(worldIn, x, y, z);
+            default:
+                return new EntityMinecartEmpty(worldIn, x, y, z);
+        }
+    }
+
+
+    @Override
+    protected boolean canTriggerWalking() {
+        return false;
+    }
+
+
+    @Override
+    protected void entityInit() {
+        EntityDataManager dataManager = this.dataManager;
+        dataManager.registerU(ROLLING_AMPLITUDE, 0);
+        dataManager.registerU(ROLLING_DIRECTION, 1);
+        dataManager.registerU(DAMAGE, 0.0F);
+        dataManager.registerU(DISPLAY_TILE, 0);
+        dataManager.registerU(DISPLAY_TILE_OFFSET, 6);
+        dataManager.registerU(SHOW_BLOCK, Boolean.FALSE);
+    }
+
+
+    @Nullable
+    public AxisAlignedBB getCollisionBox(Entity entityIn) {
+        if (getCollisionHandler() != null) return getCollisionHandler().getCollisionBox(this, entityIn);
+        return entityIn.canBePushed() ? entityIn.getEntityBoundingBox() : null;
+    }
+
+
+    @Nullable
+    public AxisAlignedBB getCollisionBoundingBox() {
+        if (getCollisionHandler() != null) return getCollisionHandler().getBoundingBox(this);
+        return null;
+    }
+
+
+    @Override
+    public boolean canBePushed() {
+        return canBePushed;
+    }
+
+
+    public EntityMinecart(World worldIn, double x, double y, double z) {
+        this(worldIn);
+        this.setPosition(x, y, z);
+        this.motionX = 0.0D;
+        this.motionY = 0.0D;
+        this.motionZ = 0.0D;
+        this.prevPosX = x;
+        this.prevPosY = y;
+        this.prevPosZ = z;
+    }
+
+
+    @Override
+    public double getMountedYOffset() {
+        return 0.0D;
+    }
+
+
+    @Override
+    public boolean attackEntityFrom(DamageSource source, float amount) {
+        if (!this.world.isRemote && !this.isDead) {
+            if (this.isEntityInvulnerable(source)) {
+                return false;
+            } else {
+                this.setRollingDirection(-this.getRollingDirection());
+                this.setRollingAmplitude(10);
+                this.markVelocityChanged();
+                this.setDamage(this.getDamage() + amount * 10.0F);
+                boolean flag = source.getTrueSource() instanceof EntityPlayer && ((EntityPlayer)source.getTrueSource()).capabilities.isCreativeMode;
+
+                if (flag || this.getDamage() > 40.0F) {
+                    this.removePassengers();
+                    if (flag && !this.hasCustomName()) {
+                        this.setDead();
+                    } else {
+                        this.killMinecart(source);
+                    }
+                }
+                return true;
+            }
+        } else {
+            return true;
+        }
+    }
+
+
+    public void killMinecart(DamageSource source) {
+        this.setDead();
+        if (this.world.getGameRules().doEntityDrops.getBoolean()) {
+            ItemStack itemstack = new ItemStack(Items.MINECART, 1);
+            if (this.hasCustomName()) {
+                itemstack.setStackDisplayName(this.getCustomNameTag());
+            }
+            this.entityDropItem(itemstack, 0.0F);
+        }
+    }
+
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void performHurtAnimation() {
+        this.setRollingDirection(-this.getRollingDirection());
+        this.setRollingAmplitude(10);
+        this.setDamage(this.getDamage() + this.getDamage() * 10.0F);
+    }
+
+
+    @Override
+    public boolean canBeCollidedWith() {
+        return !this.isDead;
+    }
+
+
+    @Override
+    public EnumFacing getAdjustedHorizontalFacing() {
+        return this.isInReverse ? this.getHorizontalFacing().getOpposite().rotateY() : this.getHorizontalFacing().rotateY();
+    }
+
+
+    @Override
+    public void onUpdate() {
+        if (this.getRollingAmplitude() > 0) {
+            this.setRollingAmplitude(this.getRollingAmplitude() - 1);
+        }
+
+        if (this.getDamage() > 0.0F) {
+            this.setDamage(this.getDamage() - 1.0F);
+        }
+
+        if (this.posY < -64.0D) {
+            this.outOfWorld();
+        }
+
+        if (!this.world.isRemote) {
+            if (this.inPortal) {
+                MinecraftServer server = this.world.getMinecraftServer();
+                if (server.getAllowNether()) {
+                    int maxTime = this.getMaxInPortalTime();
+                    if (!this.isRiding() && this.portalCounter++ >= maxTime) {
+                        this.portalCounter = (byte) maxTime;
+                        this.timeUntilPortal = this.getPortalCooldown();
+                        int j;
+
+                        if (this.world.provider.getDimensionType().getId() == -1) {
+                            j = 0;
+                        } else {
+                            j = -1;
+                        }
+
+                        this.changeDimension(j);
+                    }
+                    this.inPortal = false;
+                }
+            } else {
+                if (this.portalCounter > 0) {
+                    this.portalCounter -= 4;
+                }
+                if (this.portalCounter < 0) {
+                    this.portalCounter = 0;
+                }
+            }
+            if (this.timeUntilPortal > 0) {
+                --this.timeUntilPortal;
+            }
+        }
+        if (this.world.isRemote) {
+            if (this.turnProgress > 0) {
+                double d4 = this.posX + (this.minecartX - this.posX) / (double)this.turnProgress;
+                double d5 = this.posY + (this.minecartY - this.posY) / (double)this.turnProgress;
+                double d6 = this.posZ + (this.minecartZ - this.posZ) / (double)this.turnProgress;
+                double d1 = MathHelper.wrapDegrees(this.minecartYaw - (double)this.rotationYaw);
+                this.rotationYaw = (float)((double)this.rotationYaw + d1 / (double)this.turnProgress);
+                this.rotationPitch = (float)((double)this.rotationPitch + (this.minecartPitch - (double)this.rotationPitch) / (double)this.turnProgress);
+                --this.turnProgress;
+                this.mutPosition(d4, d5, d6);
+                this.setRotation(this.rotationYaw, this.rotationPitch);
+            } else {
+                this.mutPosition(this.posX, this.posY, this.posZ);
+                this.setRotation(this.rotationYaw, this.rotationPitch);
+            }
+        } else {
+            this.prevPosX = this.posX;
+            this.prevPosY = this.posY;
+            this.prevPosZ = this.posZ;
+
+            if (!this.hasNoGravity()) {
+                this.motionY -= 0.03999999910593033D;
+            }
+
+            int px = MathHelper.floor(this.posX);
+            int py = MathHelper.floor(this.posY);
+            int pz = MathHelper.floor(this.posZ);
+
+            ChunkSelector selector = world.localSelector; //safe
+
+            IBlockState state;
+            if (BlockRailBase.isRailBlock(state = selector.getState(px, py - 1, pz))) {
+                --py;
+            } else {
+                state = selector.getCurState(px, py, pz);
+            }
+
+            //BlockPos blockpos = new BlockPos(px, py, pz);
+            //IBlockState state = selector.getBlockState(px, py, pz);
+
+            if (canUseRail() && BlockRailBase.isRailBlock(state)) {
+                this.moveAlongTrack(world.localTempPos2.setPos(px, py, pz), state); //safe
+
+                if (state.getBlock() == Blocks.ACTIVATOR_RAIL) {
+                    this.onActivatorRailPass(px, py, pz, state.getValue(BlockRailPowered.POWERED));
+                }
+            } else {
+                this.moveDerailedMinecart();
+            }
+
+            this.doBlockCollisions();
+            this.rotationPitch = 0.0F;
+            double d0 = this.prevPosX - this.posX;
+            double d2 = this.prevPosZ - this.posZ;
+
+            int num = lodLvl();
+            if (d0 * d0 + d2 * d2 > 0.001D) {
+                this.rotationYaw = (float)(MathHelper.atan2(d2, d0) * 180.0D / Math.PI);
+
+                if (this.isInReverse) {
+                    this.rotationYaw += 180.0F;
+                }
+            } else {
+                if((ticksExisted & num) != 0)return;
+            }
+
+            double d3 = MathHelper.wrapDegrees(this.rotationYaw - this.prevRotationYaw);
+
+            if (d3 < -170.0D || d3 >= 170.0D) {
+                this.rotationYaw += 180.0F;
+                this.isInReverse = !this.isInReverse;
+            }
+
+            this.setRotation(this.rotationYaw, this.rotationPitch);
+
+            AxisAlignedBB box;
+            if (getCollisionHandler() != null) box = getCollisionHandler().getMinecartCollisionBox(this);
+            else                               box = this.getEntityBoundingBox().grow(0.20000000298023224D, 0.0D, 0.20000000298023224D);
+
+            if(num == 0){
+                num = 7;
+            } else {
+                num = 5-num;
+            }
+
+            if (canBeRidden() && this.motionX * this.motionX + this.motionZ * this.motionZ > 0.01D) {
+                EntityList<Entity> list = this.world.getEntitiesInAABBexcludingLimited(this, box, world.entityCP.forEntity(this), num);
+
+                if (!list.isEmptyC()) {
+                    for (int j1 = 0; j1 < list.sizeC(); ++j1) {
+                        Entity entity1 = list.getC(j1);
+
+                        if (!(entity1 instanceof EntityPlayer) && !(entity1 instanceof EntityIronGolem) && !(entity1 instanceof EntityMinecart) && !this.isBeingRidden() && !entity1.isRiding()) {
+                            entity1.startRiding(this);
+                        } else {
+                            entity1.applyEntityCollision(this);
+                        }
+                    }
+                }
+            } else {
+                for (Entity entity : this.world.getEntitiesInAABBexcludingLimited(this, box, null, num)) {
+                    if (!this.isPassenger(entity) && entity.canBePushed() && entity instanceof EntityMinecart) {
+                        entity.applyEntityCollision(this);
+                    }
+                }
+            }
+            this.handleWaterMovement();
+            MinecraftForge.EVENT_BUS.postF(new MinecartUpdateEvent(this, this.getCurrentRailPosition()));
+        }
+    }
+
+
+    @Keep
+    protected double getMaximumSpeed() {
+        return 0.4D;
+    }
+
+
+    @Keep
+    public void onActivatorRailPass(int x, int y, int z, boolean receivingPower) {}
+
+
+    @Keep
+    protected void moveDerailedMinecart() {
+        double d0 = onGround ? this.getMaximumSpeed() : getMaxSpeedAirLateral();
+        this.motionX = MathHelper.clamp(this.motionX, -d0, d0);
+        this.motionZ = MathHelper.clamp(this.motionZ, -d0, d0);
+
+        double moveY = motionY;
+        if(getMaxSpeedAirVertical() > 0 && motionY > getMaxSpeedAirVertical()) {
+            moveY = getMaxSpeedAirVertical();
+            if(Math.abs(motionX) < 0.3f && Math.abs(motionZ) < 0.3f) {
+                moveY = 0.15f;
+                motionY = moveY;
+            }
+        }
+
+        if (this.onGround) {
+            this.motionX *= 0.5D;
+            this.motionY *= 0.5D;
+            this.motionZ *= 0.5D;
+        }
+
+        this.move(MoverType.SELF, this.motionX, moveY, this.motionZ);
+
+        if (!this.onGround) {
+            this.motionX *= getDragAir();
+            this.motionY *= getDragAir();
+            this.motionZ *= getDragAir();
+        }
+    }
+
+
+    @Keep
+    @SuppressWarnings("incomplete-switch")
+    protected void moveAlongTrack(BlockPos pos, IBlockState state) {
+        this.fallDistance = 0.0F;
+        Vec3d vec3d = this.getPos(this.posX, this.posY, this.posZ);
+        this.posY = pos.getY();
+        boolean flag = false;
+        boolean flag1 = false;
+        BlockRailBase rail = (BlockRailBase)state.getBlock();
+
+        if (rail == Blocks.GOLDEN_RAIL) {
+            flag = state.getValue(BlockRailPowered.POWERED);
+            flag1 = !flag;
+        }
+
+        double slopeAdjustment = getSlopeAdjustment();
+        BlockRailBase.EnumRailDirection dir = rail.getRailDirection(world, pos, state, this);
+
+        switch (dir) {
+            case ASCENDING_EAST:
+                this.motionX -= slopeAdjustment;
+                ++this.posY;
+                break;
+            case ASCENDING_WEST:
+                this.motionX += slopeAdjustment;
+                ++this.posY;
+                break;
+            case ASCENDING_NORTH:
+                this.motionZ += slopeAdjustment;
+                ++this.posY;
+                break;
+            case ASCENDING_SOUTH:
+                this.motionZ -= slopeAdjustment;
+                ++this.posY;
+        }
+
+        int[][] aint = MATRIX[dir.getMetadata()];
+        double d1 = aint[1][0] - aint[0][0];
+        double d2 = aint[1][2] - aint[0][2];
+        double d3 = Math.sqrt(d1 * d1 + d2 * d2);
+        double d4 = this.motionX * d1 + this.motionZ * d2;
+
+        if (d4 < 0.0D) {
+            d1 = -d1;
+            d2 = -d2;
+        }
+
+        double d5 = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
+
+        if (d5 > 2.0D) {
+            d5 = 2.0D;
+        }
+
+        this.motionX = d5 * d1 / d3;
+        this.motionZ = d5 * d2 / d3;
+        Entity entity = this.getPassengers().isEmpty() ? null : this.getPassengers().get(0);
+
+        if (entity instanceof EntityLivingBase) {
+            double d6 = ((EntityLivingBase)entity).moveForward;
+
+            if (d6 > 0.0D) {
+                double d7 = -Math.sin(entity.rotationYaw * 0.017453292F);
+                double d8 = Math.cos(entity.rotationYaw * 0.017453292F);
+                double d9 = this.motionX * this.motionX + this.motionZ * this.motionZ;
+
+                if (d9 < 0.01D) {
+                    this.motionX += d7 * 0.1D;
+                    this.motionZ += d8 * 0.1D;
+                    flag1 = false;
+                }
+            }
+        }
+
+        if (flag1 && shouldDoRailFunctions()) {
+            double d17 = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
+
+            if (d17 < 0.03D) {
+                this.motionX *= 0.0D;
+                this.motionY *= 0.0D;
+                this.motionZ *= 0.0D;
+            } else {
+                this.motionX *= 0.5D;
+                this.motionY *= 0.0D;
+                this.motionZ *= 0.5D;
+            }
+        }
+
+        double d18 = (double)pos.getX() + 0.5D + (double)aint[0][0] * 0.5D;
+        double d19 = (double)pos.getZ() + 0.5D + (double)aint[0][2] * 0.5D;
+        double d20 = (double)pos.getX() + 0.5D + (double)aint[1][0] * 0.5D;
+        double d21 = (double)pos.getZ() + 0.5D + (double)aint[1][2] * 0.5D;
+        d1 = d20 - d18;
+        d2 = d21 - d19;
+        double d10;
+
+        if (d1 == 0.0D) {
+            this.posX = (double)pos.getX() + 0.5D;
+            d10 = this.posZ - (double)pos.getZ();
+        } else if (d2 == 0.0D) {
+            this.posZ = (double)pos.getZ() + 0.5D;
+            d10 = this.posX - (double)pos.getX();
+        } else {
+            double d11 = this.posX - d18;
+            double d12 = this.posZ - d19;
+            d10 = (d11 * d1 + d12 * d2) * 2.0D;
+        }
+
+        this.posX = d18 + d1 * d10;
+        this.posZ = d19 + d2 * d10;
+        this.mutPosition(this.posX, this.posY, this.posZ);
+        this.moveMinecartOnRail(pos);
+
+        if (aint[0][1] != 0 && MathHelper.floor(this.posX) - pos.getX() == aint[0][0] && MathHelper.floor(this.posZ) - pos.getZ() == aint[0][2]) {
+            this.mutPosition(this.posX, this.posY + (double)aint[0][1], this.posZ);
+        } else if (aint[1][1] != 0 && MathHelper.floor(this.posX) - pos.getX() == aint[1][0] && MathHelper.floor(this.posZ) - pos.getZ() == aint[1][2]) {
+            this.mutPosition(this.posX, this.posY + (double)aint[1][1], this.posZ);
+        }
+
+        this.applyDrag();
+        Vec3d vec3d1 = this.getPos(this.posX, this.posY, this.posZ);
+
+        if (vec3d1 != null && vec3d != null) {
+            double d14 = (vec3d.y - vec3d1.y) * 0.05D;
+            d5 = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
+
+            if (d5 > 0.0D) {
+                this.motionX = this.motionX / d5 * (d5 + d14);
+                this.motionZ = this.motionZ / d5 * (d5 + d14);
+            }
+            this.mutPosition(this.posX, vec3d1.y, this.posZ);
+        }
+
+        int j = MathHelper.floor(this.posX);
+        int i = MathHelper.floor(this.posZ);
+
+        if (j != pos.getX() || i != pos.getZ()) {
+            d5 = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
+            this.motionX = d5 * (double)(j - pos.getX());
+            this.motionZ = d5 * (double)(i - pos.getZ());
+        }
+
+        if(shouldDoRailFunctions()) {
+            ((BlockRailBase)state.getBlock()).onMinecartPass(world, this, pos);
+        }
+
+        if (flag && shouldDoRailFunctions()) {
+            double d15 = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
+
+            if (d15 > 0.01D) {
+                this.motionX += this.motionX / d15 * 0.06D;
+                this.motionZ += this.motionZ / d15 * 0.06D;
+            } else if (dir == BlockRailBase.EnumRailDirection.EAST_WEST) {
+                if (this.world.access().getBlockState(pos.getX()-1, pos.getY(), pos.getZ()).isNormalCube()) {
+                    this.motionX = 0.02D;
+                } else if (this.world.access().getBlockState(pos.getX()+1, pos.getY(), pos.getZ()).isNormalCube()) {
+                    this.motionX = -0.02D;
+                }
+            } else if (dir == BlockRailBase.EnumRailDirection.NORTH_SOUTH) {
+                if (this.world.access().getBlockState(pos.getX(), pos.getY(), pos.getZ()-1).isNormalCube()) {
+                    this.motionZ = 0.02D;
+                } else if (this.world.access().getBlockState(pos.getX(), pos.getY(), pos.getZ()+1).isNormalCube()) {
+                    this.motionZ = -0.02D;
+                }
+            }
+        }
+    }
+
+
+    @Keep
+    protected void applyDrag() {
+        if (this.isBeingRidden()) {
+            this.motionX *= 0.996999979019165D;
+            this.motionY *= 0.0D;
+            this.motionZ *= 0.996999979019165D;
+        } else {
+            this.motionX *= 0.9599999785423279D;
+            this.motionY *= 0.0D;
+            this.motionZ *= 0.9599999785423279D;
+        }
+    }
+
+
+    @Override
+    public void setPosition(double x, double y, double z) {
+        this.posX = x;
+        this.posY = y;
+        this.posZ = z;
+        float f = this.width / 2.0F;
+        float f1 = this.height;
+        this.setEntityBoundingBox(
+                new AxisAlignedBB(x - (double)f, y, z - (double)f, x + (double)f, y + (double)f1, z + (double)f));
+    }
+
+
+    @Nullable
+    @SideOnly(Side.CLIENT)
+    public Vec3d getPosOffset(double x, double y, double z, double offset) {
+        int sX = MathHelper.floor(x);
+        int sY = MathHelper.floor(y);
+        int sZ = MathHelper.floor(z);
+
+        if (BlockRailBase.isRailBlock(this.world, new BlockPos(sX, sY - 1, sZ))) {
+            --sY;
+        }
+
+        IBlockState state = this.world.getBlockState(sX, sY, sZ);
+
+        if (BlockRailBase.isRailBlock(state)) {
+            BlockRailBase.EnumRailDirection dir = ((BlockRailBase)state.getBlock()).getRailDirection(world, new BlockPos(sX, sY, sZ), state, this);
+            y = sY;
+
+            if (dir.isAscending()) {
+                y = sY + 1;
+            }
+
+            int[][] aint = MATRIX[dir.getMetadata()];
+            double d0 = aint[1][0] - aint[0][0];
+            double d1 = aint[1][2] - aint[0][2];
+            double d2 = Math.sqrt(d0 * d0 + d1 * d1);
+            d0 = d0 / d2;
+            d1 = d1 / d2;
+            x = x + d0 * offset;
+            z = z + d1 * offset;
+
+            if (aint[0][1] != 0 && MathHelper.floor(x) - sX == aint[0][0] && MathHelper.floor(z) - sZ == aint[0][2]) {
+                y += aint[0][1];
+            } else if (aint[1][1] != 0 && MathHelper.floor(x) - sX == aint[1][0] && MathHelper.floor(z) - sZ == aint[1][2]) {
+                y += aint[1][1];
+            }
+            return this.getPos(x, y, z);
+        } else {
+            return null;
+        }
+    }
+
+
+    @Nullable
+    public Vec3d getPos(double x, double y, double z) {
+        int sX = MathHelper.floor(x);
+        int sY = MathHelper.floor(y);
+        int sZ = MathHelper.floor(z);
+
+        IBlockState state;
+        if(world.isRemote){
+            if (BlockRailBase.isRailBlock(this.world, new BlockPos(sX, sY - 1, sZ))) {
+                --sY;
+            }
+
+            state = this.world.getBlockState(sX, sY, sZ);
+        } else {
+            ChunkSelector selector = world.localSelector; //safe
+
+            if (BlockRailBase.isRailBlock(state = selector.getState(sX, sY - 1, sZ))) {
+                --sY;
+            } else {
+                state = selector.getCurState(sX, sY, sZ);
+            }
+        }
+
+        if (BlockRailBase.isRailBlock(state)) {
+            BlockRailBase.EnumRailDirection direction = ((BlockRailBase)state.getBlock()).getRailDirection(
+                    world, world.localTempPos.setPos(sX, sY, sZ), state, this); //safe
+            int[][] aint = MATRIX[direction.getMetadata()];
+            double d0 = (double)sX + 0.5D + (double)aint[0][0] * 0.5D;
+            double d1 = (double)sY + 0.0625D + (double)aint[0][1] * 0.5D;
+            double d2 = (double)sZ + 0.5D + (double)aint[0][2] * 0.5D;
+            double d3 = (double)sX + 0.5D + (double)aint[1][0] * 0.5D;
+            double d4 = (double)sY + 0.0625D + (double)aint[1][1] * 0.5D;
+            double d5 = (double)sZ + 0.5D + (double)aint[1][2] * 0.5D;
+            double d6 = d3 - d0;
+            double d7 = (d4 - d1) * 2.0D;
+            double d8 = d5 - d2;
+            double d9;
+
+            if (d6 == 0.0D) {
+                d9 = z - (double)sZ;
+            }
+            else if (d8 == 0.0D) {
+                d9 = x - (double)sX;
+            } else {
+                double d10 = x - d0;
+                double d11 = z - d2;
+                d9 = (d10 * d6 + d11 * d8) * 2.0D;
+            }
+
+            x = d0 + d6 * d9;
+            y = d1 + d7 * d9;
+            z = d2 + d8 * d9;
+
+            if (d7 < 0.0D) {
+                ++y;
+            }
+
+            if (d7 > 0.0D) {
+                y += 0.5D;
+            }
+
+            return new Vec3d(x, y, z);
+        } else {
+            return null;
+        }
+    }
+
+
+    @SideOnly(Side.CLIENT)
+    public AxisAlignedBB getRenderBoundingBox() {
+        AxisAlignedBB axisalignedbb = this.getEntityBoundingBox();
+        return this.hasDisplayTile() ? axisalignedbb.grow((double)Math.abs(this.getDisplayTileOffset()) / 16.0D) : axisalignedbb;
+    }
+
+
+    @Keep
+    public static void registerFixesMinecart(DataFixer fixer, Class<?> name) {}
+
+
+    @Override
+    protected void readEntityFromNBT(NBTTagCompound nbt) {
+        if (nbt.getBoolean("CustomDisplayTile")) {
+            Block block;
+
+            if (nbt.hasKey("DisplayTile", 8)) {
+                block = Block.getBlockFromName(nbt.getString("DisplayTile"));
+            } else {
+                block = Block.getBlockById(nbt.getInteger("DisplayTile"));
+            }
+            int i = nbt.getInteger("DisplayData");
+            this.setDisplayTile(block == null ? Blocks.AIR.getDefaultState() : block.getStateFromMeta(i));
+            this.setDisplayTileOffset(nbt.getInteger("DisplayOffset"));
+        }
+    }
+
+
+    @Override
+    protected void writeEntityToNBT(NBTTagCompound nbt) {
+        if (this.hasDisplayTile()) {
+            nbt.setBoolean("CustomDisplayTile", true);
+            IBlockState iblockstate = this.getDisplayTile();
+            ResourceLocation resourcelocation = Block.REGISTRY.getNameForObject(iblockstate.getBlock());
+            nbt.setString("DisplayTile", resourcelocation == null ? "" : resourcelocation.toString());
+            nbt.setIntegerU("DisplayData", iblockstate.getBlock().getMetaFromState(iblockstate));
+            nbt.setIntegerU("DisplayOffset", this.getDisplayTileOffset());
+        }
+    }
+
+
+    @Override
+    public void applyEntityCollision(Entity entityIn) {
+        MinecraftForge.EVENT_BUS.postF(new MinecartCollisionEvent(this, entityIn));
+        if (getCollisionHandler() != null) {
+            getCollisionHandler().onEntityCollision(this, entityIn);
+            return;
+        }
+        if (!this.world.isRemote) {
+            if (!entityIn.noClip && !this.noClip) {
+                if (!this.isPassenger(entityIn)) {
+                    double d0 = entityIn.posX - this.posX;
+                    double d1 = entityIn.posZ - this.posZ;
+                    double d2 = d0 * d0 + d1 * d1;
+
+                    if (d2 >= 9.999999747378752E-5D) {
+                        d2 = MathHelper.sqrt(d2);
+                        d0 = d0 / d2;
+                        d1 = d1 / d2;
+                        double d3 = 1.0D / d2;
+
+                        if (d3 > 1.0D) {
+                            d3 = 1.0D;
+                        }
+
+                        d0 = d0 * d3;
+                        d1 = d1 * d3;
+                        d0 = d0 * 0.10000000149011612D;
+                        d1 = d1 * 0.10000000149011612D;
+                        d0 = d0 * (double)(1.0F - this.entityCollisionReduction);
+                        d1 = d1 * (double)(1.0F - this.entityCollisionReduction);
+                        d0 = d0 * 0.5D;
+                        d1 = d1 * 0.5D;
+
+                        if (entityIn instanceof EntityMinecart) {
+                            double d4 = entityIn.posX - this.posX;
+                            double d5 = entityIn.posZ - this.posZ;
+                            Vec3d vec3d = (new Vec3d(d4, 0.0D, d5)).normalize();
+                            Vec3d vec3d1 = (new Vec3d(MathHelper.cos(this.rotationYaw * 0.017453292F), 0.0D, MathHelper.sin(this.rotationYaw * 0.017453292F))).normalize();
+                            double d6 = Math.abs(vec3d.dotProduct(vec3d1));
+
+                            if (d6 < 0.800000011920929D) {
+                                return;
+                            }
+
+                            double d7 = entityIn.motionX + this.motionX;
+                            double d8 = entityIn.motionZ + this.motionZ;
+
+                            if (((EntityMinecart)entityIn).isPoweredCart() && !isPoweredCart()) {
+                                this.motionX *= 0.20000000298023224D;
+                                this.motionZ *= 0.20000000298023224D;
+                                this.addVelocity(entityIn.motionX - d0, 0.0D, entityIn.motionZ - d1);
+                                entityIn.motionX *= 0.949999988079071D;
+                                entityIn.motionZ *= 0.949999988079071D;
+                            }
+                            else if (!((EntityMinecart)entityIn).isPoweredCart() && isPoweredCart()) {
+                                entityIn.motionX *= 0.20000000298023224D;
+                                entityIn.motionZ *= 0.20000000298023224D;
+                                entityIn.addVelocity(this.motionX + d0, 0.0D, this.motionZ + d1);
+                                this.motionX *= 0.949999988079071D;
+                                this.motionZ *= 0.949999988079071D;
+                            } else {
+                                d7 = d7 / 2.0D;
+                                d8 = d8 / 2.0D;
+                                this.motionX *= 0.20000000298023224D;
+                                this.motionZ *= 0.20000000298023224D;
+                                this.addVelocity(d7 - d0, 0.0D, d8 - d1);
+                                entityIn.motionX *= 0.20000000298023224D;
+                                entityIn.motionZ *= 0.20000000298023224D;
+                                entityIn.addVelocity(d7 + d0, 0.0D, d8 + d1);
+                            }
+                        } else {
+                            this.addVelocity(-d0, 0.0D, -d1);
+                            entityIn.addVelocity(d0 / 4.0D, 0.0D, d1 / 4.0D);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+    @SideOnly(Side.CLIENT)
+    public void setPositionAndRotationDirect(double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport) {
+        this.minecartX = x;
+        this.minecartY = y;
+        this.minecartZ = z;
+        this.minecartYaw = yaw;
+        this.minecartPitch = pitch;
+        this.turnProgress = posRotationIncrements + 2;
+        this.motionX = this.velocityX;
+        this.motionY = this.velocityY;
+        this.motionZ = this.velocityZ;
+    }
+
+
+    @Keep
+    public void setDamage(float damage) {
+        this.dataManager.set(DAMAGE, damage);
+    }
+
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void setVelocity(double x, double y, double z) {
+        this.motionX = x;
+        this.motionY = y;
+        this.motionZ = z;
+        this.velocityX = this.motionX;
+        this.velocityY = this.motionY;
+        this.velocityZ = this.motionZ;
+    }
+
+
+    @Keep
+    public float getDamage() {
+        return this.dataManager.get(DAMAGE);
+    }
+
+
+    @Keep
+    public void setRollingAmplitude(int rollingAmplitude) {
+        this.dataManager.set(ROLLING_AMPLITUDE, rollingAmplitude);
+    }
+
+
+    @Keep
+    public int getRollingAmplitude() {
+        return this.dataManager.get(ROLLING_AMPLITUDE);
+    }
+
+
+    @Keep
+    public void setRollingDirection(int rollingDirection) {
+        this.dataManager.set(ROLLING_DIRECTION, rollingDirection);
+    }
+
+
+    @Keep
+    public int getRollingDirection() {
+        return this.dataManager.get(ROLLING_DIRECTION);
+    }
+
+
+    @Keep
+    public abstract EntityMinecart.Type getType();
+
+
+    @Keep
+    public IBlockState getDisplayTile() {
+        return !this.hasDisplayTile() ? this.getDefaultDisplayTile() : Block.getStateById(this.getDataManager().get(DISPLAY_TILE));
+    }
+
+
+    @Keep
+    public IBlockState getDefaultDisplayTile() {
+        return BlockIDIndexes.AIR_STATE;
+    }
+
+
+    @Keep
+    public int getDisplayTileOffset() {
+        return !this.hasDisplayTile() ? this.getDefaultDisplayTileOffset() : this.getDataManager().get(DISPLAY_TILE_OFFSET);
+    }
+
+
+    @Keep
+    public int getDefaultDisplayTileOffset() {
+        return 6;
+    }
+
+
+    @Keep
+    public void setDisplayTile(IBlockState displayTile) {
+        this.getDataManager().set(DISPLAY_TILE, Block.getStateId(displayTile));
+        this.setHasDisplayTile(true);
+    }
+
+
+    @Keep
+    public void setDisplayTileOffset(int displayTileOffset) {
+        this.getDataManager().set(DISPLAY_TILE_OFFSET, displayTileOffset);
+        this.setHasDisplayTile(true);
+    }
+
+
+    @Keep
+    public boolean hasDisplayTile() {
+        return this.getDataManager().get(SHOW_BLOCK);
+    }
+
+
+    @Keep
+    public void setHasDisplayTile(boolean showBlock) {
+        this.getDataManager().set(SHOW_BLOCK, showBlock);
+    }
+
+
+    @Override
+    public boolean processInitialInteract(EntityPlayer player, net.minecraft.util.EnumHand hand) {
+        return MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.minecart.MinecartInteractEvent(this, player, hand));
+    }
+
+
+    @Override
+    public int lodLvl() {
+        return ElcaMobs.MINECART.lodLvl(elcaMinRange);
+    }
+
+    /* =================================== FORGE START ===========================================*/
+    private BlockPos getCurrentRailPosition() {
+        int x = MathHelper.floor(this.posX);
+        int y = MathHelper.floor(this.posY);
+        int z = MathHelper.floor(this.posZ);
+
+        if (BlockRailBase.isRailBlock(this.world.access(), x, y - 1, z)) y--;
+        return new BlockPos(x, y, z);
+    }
+
+
+    @Keep
+    protected double getMaxSpeed() {
+        if (!canUseRail()) return getMaximumSpeed();
+        BlockPos pos = this.getCurrentRailPosition();
+        IBlockState state = this.world.access().getBlockState(pos);
+        if (!BlockRailBase.isRailBlock(state)) return getMaximumSpeed();
+
+        float railMaxSpeed = ((BlockRailBase)state.getBlock()).getRailMaxSpeed(world, this, pos);
+        return Math.min(railMaxSpeed, getCurrentCartSpeedCapOnRail());
+    }
+
+    /**
+     * Moved to allow overrides.
+     * This code handles minecart movement and speed capping when on a rail.
+     */
+    @Keep
+    public void moveMinecartOnRail(BlockPos pos) {
+        double mX = this.motionX;
+        double mZ = this.motionZ;
+
+        if (this.isBeingRidden()) {
+            mX *= 0.75D;
+            mZ *= 0.75D;
+        }
+
+        double max = this.getMaxSpeed();
+        mX = MathHelper.clamp(mX, -max, max);
+        mZ = MathHelper.clamp(mZ, -max, max);
+        this.move(MoverType.SELF, mX, 0.0D, mZ);
+    }
+
+    /**
+     * Gets the current global Minecart Collision handler if none
+     * is registered, returns null
+     * @return The collision handler or null
+     */
+    @Keep
+    @Nullable
+    public static net.minecraftforge.common.IMinecartCollisionHandler getCollisionHandler() {
+        return collisionHandler;
+    }
+
+    /**
+     * Sets the global Minecart Collision handler, overwrites any
+     * that is currently set.
+     * @param handler The new handler
+     */
+    @Keep
+    public static void setCollisionHandler(net.minecraftforge.common.IMinecartCollisionHandler handler) {
+        collisionHandler = handler;
+    }
+
+    /**
+     * This function returns an ItemStack that represents this cart.
+     * This should be an ItemStack that can be used by the player to place the cart,
+     * but is not necessary the item the cart drops when destroyed.
+     * @return An ItemStack that can be used to place the cart.
+     */
+    @Keep
+    public ItemStack getCartItem() {
+        if (this instanceof EntityMinecartFurnace) {
+            return new ItemStack(Items.FURNACE_MINECART);
+        } else if (this instanceof EntityMinecartChest) {
+            return new ItemStack(Items.CHEST_MINECART);
+        } else if (this instanceof EntityMinecartTNT) {
+            return new ItemStack(Items.TNT_MINECART);
+        } else if (this instanceof EntityMinecartHopper) {
+            return new ItemStack(Items.HOPPER_MINECART);
+        } else if (this instanceof EntityMinecartCommandBlock) {
+            return new ItemStack(Items.COMMAND_BLOCK_MINECART);
+        }
+        return new ItemStack(Items.MINECART);
+    }
+
+    /**
+     * Returns true if this cart can currently use rails.
+     * This function is mainly used to gracefully detach a minecart from a rail.
+     * @return True if the minecart can use rails.
+     */
+    @Keep
+    public boolean canUseRail() {
+        return canUseRail;
+    }
+
+    /**
+     * Set whether the minecart can use rails.
+     * This function is mainly used to gracefully detach a minecart from a rail.
+     * @param use Whether the minecart can currently use rails.
+     */
+    @Keep
+    public void setCanUseRail(boolean use) {
+        canUseRail = use;
+    }
+
+    /**
+     * Return false if this cart should not call onMinecartPass() and should ignore Powered Rails.
+     * @return True if this cart should call onMinecartPass().
+     */
+    @Keep
+    public boolean shouldDoRailFunctions() {
+        return true;
+    }
+
+    /**
+     * Returns true if this cart is self propelled.
+     * @return True if powered.
+     */
+    @Keep
+    public boolean isPoweredCart() {
+        return getType() == EntityMinecart.Type.FURNACE;
+    }
+
+    /**
+     * Returns true if this cart can be ridden by an Entity.
+     * @return True if this cart can be ridden.
+     */
+    @Keep
+    public boolean canBeRidden() {
+        return this.getType() == EntityMinecart.Type.RIDEABLE;
+    }
+
+    /**
+     * Getters/setters for physics variables
+     */
+
+    /**
+     * Returns the carts max speed when traveling on rails. Carts going faster
+     * than 1.1 cause issues with chunk loading. Carts cant traverse slopes or
+     * corners at greater than 0.5 - 0.6. This value is compared with the rails
+     * max speed and the carts current speed cap to determine the carts current
+     * max speed. A normal rail's max speed is 0.4.
+     *
+     * @return Carts max speed.
+     */
+    @Keep
+    public float getMaxCartSpeedOnRail() {
+        return 1.2f;
+    }
+
+    /**
+     * Returns the current speed cap for the cart when traveling on rails. This
+     * functions differs from getMaxCartSpeedOnRail() in that it controls
+     * current movement and cannot be overridden. The value however can never be
+     * higher than getMaxCartSpeedOnRail().
+     *
+     * @return
+     */
+    @Keep
+    public final float getCurrentCartSpeedCapOnRail() {
+        return currentSpeedRail;
+    }
+
+
+    @Keep
+    public final void setCurrentCartSpeedCapOnRail(float value) {
+        value = Math.min(value, getMaxCartSpeedOnRail());
+        currentSpeedRail = value;
+    }
+
+
+    @Keep
+    public float getMaxSpeedAirLateral() {
+        return maxSpeedAirLateral;
+    }
+
+
+    @Keep
+    public void setMaxSpeedAirLateral(float value) {
+        maxSpeedAirLateral = value;
+    }
+
+
+    @Keep
+    public float getMaxSpeedAirVertical() {
+        return maxSpeedAirVertical;
+    }
+
+
+    @Keep
+    public void setMaxSpeedAirVertical(float value) {
+        maxSpeedAirVertical = value;
+    }
+
+
+    @Keep
+    public double getDragAir() {
+        return dragAir;
+    }
+
+
+    @Keep
+    public void setDragAir(double value) {
+        dragAir = value;
+    }
+
+
+    @Keep
+    public double getSlopeAdjustment() {
+        return 0.0078125D;
+    }
+
+
+    /**
+     * Called from Detector Rails to retrieve a redstone power level for comparators.
+     */
+    @Keep
+    public int getComparatorLevel() {
+        return -1;
+    }
+
+    /* =================================== FORGE END ===========================================*/
+
+
+    @Keep
+    public static enum Type {
+        RIDEABLE(0, "MinecartRideable"),
+        CHEST(1, "MinecartChest"),
+        FURNACE(2, "MinecartFurnace"),
+        TNT(3, "MinecartTNT"),
+        SPAWNER(4, "MinecartSpawner"),
+        HOPPER(5, "MinecartHopper"),
+        COMMAND_BLOCK(6, "MinecartCommandBlock");
+
+        private static final Int2ObjectOpenHashMap<EntityMinecart.Type> BY_ID = new Int2ObjectOpenHashMap<>();
+        private final int id;
+        private final String name;
+
+        private Type(int idIn, String nameIn) {
+            this.id = idIn;
+            this.name = nameIn;
+        }
+
+        public int getId() {
+            return this.id;
+        }
+
+
+        public String getName() {
+            return this.name;
+        }
+
+
+        @SideOnly(Side.CLIENT)
+        public static EntityMinecart.Type getById(int idIn) {
+            EntityMinecart.Type entityminecart$type = BY_ID.get(Integer.valueOf(idIn));
+            return entityminecart$type == null ? RIDEABLE : entityminecart$type;
+        }
+
+
+        static {
+            for (EntityMinecart.Type entityminecart$type : values()) {
+                BY_ID.put(Integer.valueOf(entityminecart$type.getId()), entityminecart$type);
+            }
+        }
+    }
+}

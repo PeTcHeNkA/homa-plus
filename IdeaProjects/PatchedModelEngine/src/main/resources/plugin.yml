@@ -1,0 +1,4 @@
+name: PatchedModelEngine
+version: @version@
+main: com.ticxo.modelengine.PatchedModelEngine
+api-version: 1.16

@@ -1,0 +1,459 @@
+ALTERNATIVE_CONFIG_PATH: none
+format:
+  ico_string: '&f%s &8%s, S:%s'
+  ico_and_lore: '&f%s &8%s'
+  only_ico: '&f%s'
+  saturation_format: '           &8Насыщение: &c%s'
+  regeneration_format: '           &8Регенерация: &c%s'
+rare:
+  rare_llimit: 4
+  epyc_llimit: 9
+  legend_llimit: 14
+items:
+  black_box:
+    rare: 10
+    ico: 㟠
+    cmd: 1031001
+    lore:
+    - Черный ящик
+    - ''
+    - 'Последние минуты.. '
+    - '    ..жизни робота.'
+    - ' ....'
+    - ' Можно ли их посмотреть?'
+  coil:
+    rare: 2
+    ico: 㟡
+    cmd: 1031002
+    lore:
+    - Катушка
+    - ''
+    - Что-то из курса..
+    - ..начальной физики?
+    - ' Возможно, пригодиться для'
+    - ' разработки снаряжения.'
+  electronick:
+    rare: 1
+    ico: 㟢
+    cmd: 1031003
+    lore:
+    - Электросхема
+    - ''
+    - Сложная схема из
+    - Фабричных деталей
+    - ' Возможно, пригодиться для'
+    - ' разработки снаряжения.'
+  gears:
+    rare: 2
+    ico: 㟣
+    cmd: 1031004
+    lore:
+    - Гайка
+    - Cамая обычная гайка
+    - из обычного железа
+    - весом в 18.7 грамм.
+    - ' Возможно, пригодиться для'
+    - ' разработки снаряжения.'
+  gears_2:
+    rare: 5
+    ico: 㟋
+    cmd: 1031009
+    lore:
+    - Механизм
+    - 'Такую точно не '
+    - найдешь на обычной
+    - свалке.
+    - ' Возможно, пригодиться для'
+    - ' разработки снаряжения.'
+  hladogent:
+    rare: 10
+    ico: 㟤
+    cmd: 1031005
+    lore:
+    - Хладогент
+    - Совершенный модуль
+    - 'отвода лишнего '
+    - '   тепла от корпуса'
+    - ' Возможно, пригодиться для'
+    - ' разработки снаряжения.'
+  metall_1:
+    rare: 1
+    ico: 㟥
+    cmd: 1031006
+    lore:
+    - Сталь
+    - ' '
+    - Немного ржавая, но
+    - лишней не окажется.
+    - ' Возможно, пригодиться для'
+    - ' разработки снаряжения.'
+  plate_2:
+    rare: 5
+    ico: 㟦
+    cmd: 1031007
+    lore:
+    - Бронепластина А-24
+    - Невероятно прочный
+    - 'фрагмент корпуса '
+    - машин
+    - ' Возможно, пригодиться для'
+    - ' разработки снаряжения.'
+  plate_1:
+    rare: 2
+    ico: 㟧
+    cmd: 1031008
+    lore:
+    - Бронепластина E-18
+    - ' '
+    - Прочный кусочек
+    - '       брони робота'
+    - ' Возможно, пригодиться для'
+    - ' разработки снаряжения.'
+  blick_1:
+    rare: 5
+    ico: 㟚
+    cmd: 1030003
+    lore:
+    - Осколок афертума
+    - ' '
+    - Еще 1 материальная
+    - форма эфира
+    - ' Возможно, пригодиться для'
+    - ' разработки снаряжения.'
+  blick_2:
+    rare: 5
+    ico: 㟘
+    cmd: 1030001
+    lore:
+    - Осколок калориса
+    - ' '
+    - Еще 1 материальная
+    - форма эфира
+    - ' Возможно, пригодиться для'
+    - ' разработки снаряжения.'
+  blick_3:
+    rare: 5
+    ico: 㟛
+    cmd: 1030004
+    lore:
+    - Осколок пламинуса
+    - ' '
+    - Еще 1 материальная
+    - форма эфира
+    - ' Возможно, пригодиться для'
+    - ' разработки снаряжения.'
+  blick_4:
+    rare: 5
+    ico: 㟙
+    cmd: 1030002
+    lore:
+    - Осколок притихва
+    - ' '
+    - Еще 1 материальная
+    - форма эфира
+    - ' Возможно, пригодиться для'
+    - ' разработки снаряжения.'
+  blick_b1:
+    rare: 10
+    ico: 㟜
+    cmd: 1030005
+    lore:
+    - Кристалл калориса
+    - ' '
+    - Крупное скопление
+    - материального эфира
+    - ' Возможно, пригодиться для'
+    - ' разработки снаряжения.'
+  blick_b2:
+    rare: 10
+    ico: 㟝
+    cmd: 1030006
+    lore:
+    - Кристалл притихва
+    - ' '
+    - Крупное скопление
+    - материального эфира
+    - ' Возможно, пригодиться для'
+    - ' разработки снаряжения.'
+  blick_b3:
+    rare: 10
+    ico: 㟞
+    cmd: 1030007
+    lore:
+    - Кристалл афертума
+    - ' '
+    - Крупное скопление
+    - материального эфира
+    - ' Возможно, пригодиться для'
+    - ' разработки снаряжения.'
+  blick_b4:
+    rare: 10
+    ico: 㟟
+    cmd: 1030008
+    lore:
+    - Кристалл пламинуса
+    - ' '
+    - Крупное скопление
+    - материального эфира
+    - ' Возможно, пригодиться для'
+    - ' разработки снаряжения.'
+  test:
+    rare: 1
+    lore:
+    - lore1, lore2
+    ico: none
+    cmd: 0
+  rare:
+    rare: 1
+    lore:
+    - lore1, lore2
+    ico: none
+    cmd: 0
+  lore:
+    rare: 1
+    lore:
+    - lore1, lore2
+    ico: none
+    cmd: 0
+  ico:
+    rare: 1
+    lore:
+    - lore1, lore2
+    ico: none
+    cmd: 0
+  cmd:
+    rare: 1
+    lore:
+    - lore1, lore2
+    ico: none
+    cmd: 0
+  example:
+    rare: 1
+    lore:
+    - lore1, lore2
+    ico: none
+    cmd: 0
+weapons:
+  chiaw:
+    classes: 1;2
+    class_0:
+      stats: 0&0&0&0&0&0&0
+      cmd: 2000001
+      ico: 㟇
+      lore1: '  &8Made in Chia'
+      lore2: '  &8Улучшенная версия CH-23'
+    class_1:
+      stats: 0&0&0&0&0&0&0
+      cmd: 1020001
+      ico: 㟫
+      lore1: '  &8Made in Chia'
+      lore2: '  &8Улучшенная версия CH-23'
+    class_2:
+      stats: 0&0&0&0&0&0&0
+      cmd: 1030001
+      ico: 㟯
+      lore1: '  &8Made in Chia'
+      lore2: '  &8Улучшенная версия CH-23'
+  proton:
+    classes: 1;2
+    class_0:
+      stats: 0&0&0&0&0&0&0
+      cmd: 2000002
+      ico: 㟈
+      lore1: '  &8Собран очень давно'
+      lore2: '  &8Proton, Type-8A'
+    class_1:
+      stats: 0&0&0&0&0&0&0
+      cmd: 1020005
+      ico: 㟨
+      lore1: '  &8Собран очень давно'
+      lore2: '  &8Proton, Type-8A'
+    class_2:
+      stats: 0&0&0&0&0&0&0
+      cmd: 1030005
+      ico: 㟩
+      lore1: '  &8Собран очень давно'
+      lore2: '  &8Proton, Type-8A'
+  class_1_view: Резак
+  class_2_view: Винтовка
+  class_0_view: none
+  hiaw:
+    class_0:
+      cmd: 0
+      ico: none
+      lore1: ' '
+      lore2: ' '
+    classes: 0;1
+  id:
+    class_1:
+      cmd: 0
+      ico: none
+      lore1: ' '
+      lore2: ' '
+artifacts:
+  chiaw:
+    slots: 0;1;2;3;4
+    slot_0:
+      stats: 0&0&0&0&0&0&0
+      cmd: 1010003
+      ico: 㟳
+      lore1: '  &8Made in Chia'
+      lore2: '  &8Улучшенная версия CH-23'
+    slot_1:
+      stats: 0&0&0&0&0&0&0
+      cmd: 1010001
+      ico: 㟷
+      lore1: '  &8Made in Chia'
+      lore2: '  &8Улучшенная версия CH-23'
+    slot_2:
+      stats: 0&0&0&0&0&0&0
+      cmd: 1010004
+      ico: 㟶
+      lore1: '  &8Made in Chia'
+      lore2: '  &8Улучшенная версия CH-23'
+    slot_3:
+      stats: 0&0&0&0&0&0&0
+      cmd: 1010002
+      ico: 㟵
+      lore1: '  &8Made in Chia'
+      lore2: '  &8Улучшенная версия CH-23'
+    slot_4:
+      stats: 0&0&0&0&0&0&0
+      cmd: 1010005
+      ico: 㟴
+      lore1: '  &8Made in Chia'
+      lore2: '  &8Улучшенная версия CH-23'
+  proton:
+    slots: 0;1;2;3;4
+    slot_0:
+      stats: 0&0&0&0&0&0&0
+      cmd: 1010008
+      ico: 㟸
+      lore1: '  &8Собран очень давно'
+      lore2: '  &8Proton, Type-8A'
+    slot_1:
+      stats: 0&0&0&0&0&0&0
+      cmd: 1010006
+      ico: 㟼
+      lore1: '  &8Собран очень давно'
+      lore2: '  &8Proton, Type-8A'
+    slot_2:
+      stats: 0&0&0&0&0&0&0
+      cmd: 1010009
+      ico: 㟻
+      lore1: '  &8Собран очень давно'
+      lore2: '  &8Proton, Type-8A'
+    slot_3:
+      stats: 0&0&0&0&0&0&0
+      cmd: 1010007
+      ico: 㟺
+      lore1: '  &8Собран очень давно'
+      lore2: '  &8Proton, Type-8A'
+    slot_4:
+      stats: 0&0&0&0&0&0&0
+      cmd: 1010010
+      ico: 㟹
+      lore1: '  &8Собран очень давно'
+      lore2: '  &8Proton, Type-8A'
+  slot_0_view: Процессор
+  slot_1_view: Ускоритель
+  slot_2_view: Генератор
+  slot_3_view: Конденсатор
+  slot_4_view: Релокатор
+food:
+  buter:
+    rare: 10
+    ico: 㟍
+    cmd: 1001001
+    saturation: 8
+    view: Большой бутерброд
+    lore1: ' &8Не шедевр кулинарии, но'
+    lore2: ' &8на вкус вполне ничего'
+  crevet_ball:
+    rare: 15
+    ico: 㟎
+    cmd: 1001002
+    saturation: 12
+    view: Шарики с креветкой
+    lore1: ' &8Мои креветочки ...'
+    lore2: '                &8<KeQuing>'
+  mint_stick:
+    rare: 1
+    ico: 㟏
+    cmd: 1001003
+    saturation: 2
+    view: Мятные палочки
+    lore1: ' &8Зеленые ..'
+    lore2: ' &8..А это вообще сьедобно?'
+  paiok:
+    rare: 2
+    ico: 㟐
+    cmd: 1001004
+    saturation: 3
+    view: Сухпайок ГОСТ-1407
+    lore1: ' &8Сколько уже ему лет ..'
+    lore2: ' &8.. Надеюсь не испортился'
+  konserva:
+    rare: 5
+    ico: 㟊
+    cmd: 1001007
+    saturation: 5
+    view: Консерва
+    lore1: '&8Сделана из .. &mПаймон?&8'
+    lore2: '             &8.. Креветок?'
+  pizza:
+    rare: 10
+    ico: 㟑
+    cmd: 1001005
+    saturation: 4
+    view: Кусок пиццы
+    lore1: ' &8Такой маленький.. Однако'
+    lore2: ' &8вкусу ему не занимать.'
+  tofu:
+    rare: 10
+    ico: 㟒
+    cmd: 1001006
+    saturation: 7
+    view: Тоффу Классический
+    lore1: ' &8Небольшой кусочек белого'
+    lore2: ' &8сладко-сахарного счастья.'
+energetics:
+  energetic:
+    rare: 2
+    ico: 㟉
+    cmd: 1000999
+    saturation: 150
+    view: Энерготин
+    lore1: ' &8Поможет быстро зарядить'
+    lore2: ' &8ваши щиты.'
+  energetic_l2:
+    rare: 3
+    ico: 㟉
+    cmd: 1000999
+    saturation: 300
+    view: Энерготин
+    lore1: ' &8Поможет быстро зарядить'
+    lore2: ' &8ваши щиты.'
+system:
+  non_init:
+    ico: 㟌
+    cmd: 1008998
+    lore1: ' &8Нажмите клавишу &cF  '
+    lore2: ' &8для индитификации'
+  non_initclass_-1:
+    ico: none
+    view: ???
+    cmd: 1008998
+  non_initclass_0:
+    ico: none
+    view: ???
+    cmd: 1008998
+  non_initclass_1:
+    ico: none
+    view: ???
+    cmd: 1008998
+  non_initclass_2:
+    ico: none
+    view: ???
+    cmd: 1008998
+    rare: 1

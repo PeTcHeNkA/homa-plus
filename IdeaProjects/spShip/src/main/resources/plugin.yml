@@ -1,0 +1,5 @@
+name: vwSpaseShips
+version: 8.1
+main: plus.main.main
+api-version: 1.16
+#softdepend: [ProtocolLib, MythicMobs, ModelEngine]

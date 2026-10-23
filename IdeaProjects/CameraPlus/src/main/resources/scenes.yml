@@ -1,0 +1,23 @@
+scenes:
+  test:
+    world: world
+    character:
+      model: model
+      name: "Iris"
+      no_damage: True
+      rotation: 0;0
+    speed: 10
+    look_target: 100;70;100
+    motions:
+      a:
+        type: LINEAR
+        model_animation: "animation:1"
+        start_pos: 90;70;100
+        time: 2
+        dark: 10;0
+        messages:
+          time=2:
+            - "AChat message"
+        data:
+          - "90;70;100"
+          - "100;70;110"

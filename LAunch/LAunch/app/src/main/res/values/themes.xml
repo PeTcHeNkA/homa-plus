@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.LAunch" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:background">#505050</item>
+    </style>
+
+    <style name="Theme.LAunch.Input" parent="Theme.MaterialComponents.Light">
+        <item name="hintTextAppearance">@color/white</item>
+        <item name="backgroundColor">@color/btn_1</item>
+        <item name="colorBackgroundFloating">@color/btn_1</item>
+        <item name="android:colorForeground">@color/white</item>
+
+        <item name="android:editTextBackground">@android:color/transparent</item>
+        <item name="boxBackgroundColor">@color/btn_1</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="colorOnSurface">@color/white</item>
+        <item name="colorOnPrimary">@android:color/transparent</item>
+    </style>
+
+</resources>

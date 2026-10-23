@@ -1,0 +1,8 @@
+name: timidBlocks
+version: '${version}'
+main: plus.timidblocks.TimidBlocks
+api-version: '1.16'
+commands:
+  reload-words-data:
+    permission: 'timidblocks.admin'
+    description: 'reload words lists'

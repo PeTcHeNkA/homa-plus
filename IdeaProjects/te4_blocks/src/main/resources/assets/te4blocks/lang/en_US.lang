@@ -1,0 +1,8 @@
+itemGroup.te4hnoblocks=Техноблоки
+itemGroup.te4hnoitems=Технопредметы
+tile.te4block.name="Главный техноблок"
+tile.test_1.name=Техноблок1
+tile.test_2.name=Техноблок2
+tile.test_3.name=Техноблок3
+tile.test_4.name=Техноблок4
+tile.test_5.name=Техноблок5

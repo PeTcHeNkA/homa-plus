@@ -1,0 +1,41 @@
+ALTERNATIVE_CONFIG_PATH: none
+plato:
+  ==: org.bukkit.Location
+  world: world
+  x: 153.4897077414724
+  y: 65.0
+  z: 121.43678382775067
+  pitch: -0.5938257
+  yaw: -179.86324
+orbit:
+  ==: org.bukkit.Location
+  world: world
+  x: 1991.274472059858
+  y: 99.0
+  z: 0.4788521018566941
+  pitch: 2.102999
+  yaw: 89.84241
+alcor:
+  ==: org.bukkit.Location
+  world: world
+  x: -553.7019922529701
+  y: 65.0
+  z: 321.46397709613206
+  pitch: 2.0031176
+  yaw: 89.94235
+lab18x:
+  ==: org.bukkit.Location
+  world: world
+  x: 762.5269694308289
+  y: 76.0
+  z: -429.5291955325312
+  pitch: -1.1931373
+  yaw: 90.16507
+neartp:
+  ==: org.bukkit.Location
+  world: world
+  x: -443.5397466137549
+  y: 66.0
+  z: 166.56560996812365
+  pitch: -2.5915086
+  yaw: 0.34819832

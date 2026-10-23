@@ -1,0 +1,17 @@
+# Autor - Te4hnoPlus
+# vk.com/te4hnoplus
+# github.com/te4hnoplus
+#
+#Default config
+#trigger: "10:10" (hour, minute)
+#message: "LootBox was found!"
+#msg_spawnbox: "Lootbox spawned at %s %.2f %.1f %.2f"
+#cooldown: 100     <- understandably?
+#worlds:
+#  - "overworld;-1000;1000"  <- world; min X,Y; max X,Y
+
+trigger: "10:10;15:10"
+long: 10
+
+worlds:
+  - "overworld;-1000;1000"

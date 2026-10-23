@@ -1,0 +1,20 @@
+ {
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+      "EIE",
+      "PFP",
+      "CMC"
+    ],
+    "key": {
+      "C": {"item": "te4_spships:plate_copper"},
+      "M": {"item": "te4_spships:sp_machine_module"},
+      "F": {"item": "minecraft:furnace"},
+      "P": {"item": "te4_spships:plate_machine"},
+      "I": {"item": "te4_spships:plate_iron"},
+      "E": {"item": "te4_spships:copper_coil"}
+    },
+    "result": {
+      "item": "te4_spships:sp_furnace",
+      "count": 1
+    }
+}

@@ -1,0 +1,32 @@
+{
+  "required": true,
+  "minVersion": "0.7.11",
+  "compatibilityLevel": "JAVA_8",
+  "package": "plus.space.mixins",
+  "refmap": "mixins.te4_spships.refmap.json",
+  "mixins": [
+    "BlockSaplingPatch",
+    "WorldGenTreesPatch"
+  ],
+  "server": [],
+  "client": [
+    "client.GuiConnectingPatch",
+    "client.GuiControlsPatch",
+    "client.GuiCustomizeSkinPatch",
+    "client.GuiDisconnectedPatch",
+    "client.GuiLanguagePatch",
+    "client.GuiListExtendedPatch",
+    "client.GuiMultiplayerPatch",
+    "client.GuiOptionsPatch",
+    "client.GuiOptionsRowListPatch",
+    "client.GuiResourcePackListPatch",
+    "client.GuiScreenOptionsSoundsPatch",
+    "client.GuiScreenResourcePacksPatch",
+    "client.GuiScreenWorkingPatch",
+    "client.GuiSnooperPatch",
+    "client.GuiVideoSettingsPatch",
+    "client.GuiWorldSelectionPatch",
+    "client.LoadingScreenRendererPatch",
+    "client.ScreenChatOptionsPatch"
+  ]
+}

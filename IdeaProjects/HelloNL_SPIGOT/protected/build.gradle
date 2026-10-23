@@ -1,0 +1,37 @@
+plugins {
+    id 'java'
+}
+
+group = 'plus'
+version = '1.0'
+
+repositories {
+    mavenCentral()
+    maven {
+        name = "papermc-repo"
+        url = "https://repo.papermc.io/repository/maven-public/"
+    }
+    maven {
+        name = "sonatype"
+        url = "https://oss.sonatype.org/content/groups/public/"
+    }
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    compileOnly "io.papermc.paper:paper-api:1.17.1-R0.1-SNAPSHOT"
+
+}
+
+test {
+    useJUnitPlatform()
+}
+
+dependencies {
+    implementation project(':main')
+}
+
+jar{
+    archivesBaseName = "Protected"
+}

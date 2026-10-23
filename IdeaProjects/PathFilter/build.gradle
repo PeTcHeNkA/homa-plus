@@ -1,0 +1,33 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
+}
+
+group 'org.example'
+version '1.0.5'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+
+    compileOnly fileTree('deps') { include '*.jar' }
+    implementation fileTree('path') { include '*.jar' }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+jar {
+    baseName "FilterPlus"
+}
+
+shadowJar{
+    exclude 'deps/vel.jar'
+    exclude 'deps/l_api.jar'
+}

@@ -1,0 +1,4 @@
+name: Patches
+version: @version@
+main: plus.main
+api-version: 1.16

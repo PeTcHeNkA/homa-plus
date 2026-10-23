@@ -1,0 +1,11 @@
+*build
+*.gradle
+*.idea
+*gradle
+!.gitignore
+domains\
+plg-dev\
+tehnet-linux.jar
+tehnet.jar
+domains\
+plg-dev\

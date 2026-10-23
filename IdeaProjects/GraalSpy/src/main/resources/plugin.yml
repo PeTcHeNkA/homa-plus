@@ -1,0 +1,4 @@
+name: GraalSpy
+version: '${version}'
+main: plus.graalspy.Main
+api-version: '1.16'

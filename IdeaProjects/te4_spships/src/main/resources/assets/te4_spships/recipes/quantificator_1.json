@@ -1,0 +1,20 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+      "MCC",
+      "ADF",
+      "MCC"
+    ],
+    "key": {
+      "C": {"item": "te4_spships:copper_coil"},
+      "M": {"item": "te4_spships:plate_mefril"},
+      "A": {"item": "te4_spships:aether_crystal"},
+      "D": {"item": "minecraft:diamond"},
+      "F": {"item": "te4_spships:massive_frame_l1"}
+    },
+    "result": {
+      "item": "te4_spships:quantificator",
+      "data": 3,
+      "count": 1
+    }
+}

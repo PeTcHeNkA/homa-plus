@@ -1,0 +1,13 @@
+COMMENT: All supported classes in package plus.block: 
+Block, BlockDirectional, BlockPane, BlockDirectionalHitboxed, BlockHitboxed, BlockSlab, BlockList, BlockLoader.
+Also, BlockSlab, BlockPane, BlockDirectional, BlocktGlass has simple constructor <(obj), "material", "id", "name", (Bool)>
+Block has 2 additional constructors: <(obj), "material", "id"> and <(obj), "material", "id", "name">
+BlockGlass has additional constructor <(obj), "material", "id", "name", (Bool)>
+All supported classes in package plus.item:
+Item, ItemFood, ItemComplect
+Item has 2 additional constructors: <(obj), "id"> and <(obj), "id", "name">
+ItemFood has 2 additional constructors: <(obj), "id", (Int), (Float)> and <(obj), "id", "name", (Int), (Float)>
+Warning! All tags supported only BlockList! However, it ignores conflicting tags.
+
+
+[<(plus.block.BlockList),{add=["directional","stairs","slabs","wall","pane","translucent","strong-transparency","glass-render"],name="example_key",range=[(0),(1)],id="example"}>,<(plus.item.ItemComplect),{material={damage=(5.0),lvl=(2),enchant=(15),id="MATERIAL_ID",speed=(10.0)},patern="SPALHI",name="example_item_kit",id="example_item_kit"}>]

@@ -1,0 +1,103 @@
+﻿<Application x:Class="GF2_RU_Launch.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:GF2_RU_Launch"
+             ShutdownMode="OnLastWindowClose"
+             >
+    <Application.Resources>
+        <!-- Launcher Colors -->
+        <Color x:Key="L_Background_Main_Color">#90FFFFFF</Color>
+        <Color x:Key="L_Background_Second_Color">#26FFFFFF</Color>
+        <Color x:Key="L_Border_Start_Color">#FF515254</Color>
+        <Color x:Key="L_Border_End_Color">#FFC5DCE4</Color>
+
+        <!-- Main Colors -->
+        <Color x:Key="Header_Color">#7FECECEC</Color>
+        <Color x:Key="Header_Text_Color">#000000</Color>
+        <Color x:Key="Header_Light">#BFD8D8D8</Color>
+        <Color x:Key="Green_Color">#FF7AFF4C</Color>
+        <Color x:Key="Yellow_Color">#FFFFC84F</Color>
+        <Color x:Key="Red_Color">#E5FF2C2C</Color>
+        <Color x:Key="Blue_Color">#7C38BCE8</Color>
+        
+        <Color x:Key="Grad_Start_Color">#7F383838</Color>
+        <Color x:Key="Grad_End_Color">#00F1F1F1</Color>
+
+        <!-- Editor Colors -->
+        <Color x:Key="Editor_Green_color">#FF318C00</Color>
+        <Color x:Key="Editor_Red_color">#FFD62323</Color>
+
+        <!-- Dark theme colors start-->
+        <Color x:Key="L_Background_Main_Color_D">#90111111</Color>
+        <Color x:Key="L_Background_Second_Color_D">#90010101</Color>
+        <Color x:Key="Header_Color_D">#90111111</Color>
+        <Color x:Key="Header_Light_D">#90222222</Color>
+        <Color x:Key="Header_Text_Color_D">#cfcfcf</Color>
+        <!-- Dark theme colors end-->
+
+        <!-- Launcher Brushes -->
+        <SolidColorBrush x:Key="L_Background_Second"  Color="{DynamicResource L_Background_Second_Color}"/>
+
+        <LinearGradientBrush  x:Key="L_Border" EndPoint="0.5,1" StartPoint="0.5,0">
+            <GradientStop Color="{DynamicResource L_Border_Start_Color}" Offset="0.01"/>
+            <GradientStop Color="{DynamicResource L_Border_End_Color}" Offset="1"/>
+        </LinearGradientBrush>
+
+        <!-- Brushes -->
+        <SolidColorBrush x:Key="Header"  Color="{DynamicResource Header_Color}"/>
+        <SolidColorBrush x:Key="Header_Text"  Color="{DynamicResource Header_Text_Color}"/>
+        <SolidColorBrush x:Key="Bottons_Background" Color="#4C6F6F6F"/>
+        <SolidColorBrush x:Key="Bottons_Background2" Color="#DFA7A7A7"/>
+        <SolidColorBrush x:Key="BtnPlay_Hover" Color="{DynamicResource Green_Color}"/>
+        <SolidColorBrush x:Key="BtnInst_Hover" Color="{DynamicResource Yellow_Color}"/>
+        <SolidColorBrush x:Key="BtnDel_Hover" Color="{DynamicResource Red_Color}"/>
+        <SolidColorBrush x:Key="Common_Hover" Color="{DynamicResource Blue_Color}"/>
+
+        <LinearGradientBrush x:Key="Background" StartPoint="0.5,0.995" EndPoint="0.5,1" >
+            <GradientStop Color="{DynamicResource Grad_Start_Color}"/>
+            <GradientStop Color="{DynamicResource Grad_End_Color}"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="Bottons_Border" EndPoint="0.5,1" StartPoint="0.5,0">
+            <GradientStop Color="{DynamicResource Grad_End_Color}"/>
+            <GradientStop Color="{DynamicResource Grad_Start_Color}" Offset="1"/>
+        </LinearGradientBrush>
+
+        <!-- Editor Brushes -->
+        <SolidColorBrush x:Key="Editor_Del" Color="{DynamicResource Editor_Red_color}"/>
+        <SolidColorBrush x:Key="Editor_Add" Color="{DynamicResource Editor_Green_color}"/>
+
+        <!-- Styles -->
+        <Style TargetType="Button" x:Key="LBottons">
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}" >
+                        <Border 
+                                    Background="{TemplateBinding Background}" 
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    Padding="{TemplateBinding Padding}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    >
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+
+            <Setter Property="Background" Value="{DynamicResource Bottons_Background}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource Bottons_Border}"/>
+        </Style>
+
+        <Style TargetType="Button" x:Key="LBottonsA1" BasedOn="{StaticResource LBottons}">
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{StaticResource Common_Hover}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+    </Application.Resources>
+    
+    
+</Application>

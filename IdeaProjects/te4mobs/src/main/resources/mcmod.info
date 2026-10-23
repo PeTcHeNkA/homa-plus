@@ -1,0 +1,16 @@
+[
+  {
+    "modid": "te4mobs",
+    "name": "Te4mobs",
+    "description": "",
+    "version": "${version}",
+    "mcversion": "${mcversion}",
+    "url": "",
+    "updateUrl": "",
+    "authorList": [],
+    "credits": "",
+    "logoFile": "",
+    "screenshots": [],
+    "dependencies": []
+  }
+]
